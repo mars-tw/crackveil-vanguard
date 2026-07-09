@@ -1,0 +1,102 @@
+name: Deploy Web
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  GODOT_VERSION: "4.7"
+  GODOT_RELEASE: stable
+  GODOT_TAG: 4.7-stable
+
+jobs:
+  export-web:
+    name: Export and deploy Web build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Cache Godot export templates
+        id: cache-templates
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates/${{ env.GODOT_VERSION }}.${{ env.GODOT_RELEASE }}
+          key: godot-${{ env.GODOT_TAG }}-web-templates-v1
+
+      - name: Install Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_url="https://github.com/godotengine/godot/releases/download/${GODOT_TAG}"
+          mkdir -p "${RUNNER_TEMP}/godot"
+          curl -L --retry 8 --retry-delay 5 \
+            -o "${RUNNER_TEMP}/godot/godot.zip" \
+            "${base_url}/Godot_v${GODOT_TAG}_linux.x86_64.zip"
+          unzip -q "${RUNNER_TEMP}/godot/godot.zip" -d "${RUNNER_TEMP}/godot"
+          godot_bin="$(find "${RUNNER_TEMP}/godot" -type f -name "Godot_v${GODOT_TAG}_linux.x86_64" | head -n 1)"
+          chmod +x "${godot_bin}"
+          echo "GODOT_BIN=${godot_bin}" >> "${GITHUB_ENV}"
+          "${godot_bin}" --version
+
+      - name: Install Web export templates
+        if: steps.cache-templates.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          template_dir="${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_RELEASE}"
+          base_url="https://github.com/godotengine/godot/releases/download/${GODOT_TAG}"
+          mkdir -p "${template_dir}"
+          curl -L --retry 8 --retry-delay 5 \
+            -o "${RUNNER_TEMP}/godot/export_templates.tpz" \
+            "${base_url}/Godot_v${GODOT_TAG}_export_templates.tpz"
+          python3 - <<'PY'
+          import os
+          import zipfile
+          from pathlib import Path
+
+          tpz = Path(os.environ["RUNNER_TEMP"]) / "godot" / "export_templates.tpz"
+          template_dir = Path.home() / ".local" / "share" / "godot" / "export_templates" / f"{os.environ['GODOT_VERSION']}.{os.environ['GODOT_RELEASE']}"
+          with zipfile.ZipFile(tpz) as archive:
+              for entry in archive.infolist():
+                  if entry.filename.startswith("templates/web_") and not entry.is_dir():
+                      target = template_dir / Path(entry.filename).name
+                      target.write_bytes(archive.read(entry))
+          PY
+          ls -lh "${template_dir}"/web_*.zip
+
+      - name: Export Web build
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p public
+          "${GODOT_BIN}" --headless --export-release "Web" "public/index.html"
+          touch public/.nojekyll
+          find public -maxdepth 1 -type f -printf "%f %s bytes\n" | sort
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
