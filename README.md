@@ -78,6 +78,10 @@ scenes/       Arena、角色、敵人、投射物、UI、武器與測試場景
 scripts/      GDScript 遊戲邏輯、autoload、服務與 UI
 ```
 
+## 字型
+
+Web 版內嵌 `assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf`，由 Noto Sans CJK TC Regular 子集化產生，用於繁體中文 UI。Noto Sans CJK 採 SIL Open Font License 1.1，授權文字見 `assets/fonts/OFL.txt`。
+
 ## License
 
 MIT License. See [LICENSE](LICENSE).

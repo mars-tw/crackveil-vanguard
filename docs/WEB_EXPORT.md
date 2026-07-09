@@ -9,6 +9,51 @@
 - 部署方式：採用 A，GitHub Actions 匯出並部署 Pages artifact。repo 不 commit `.wasm`、`.pck`、`.js` 等匯出 binary。
 - 其他 Web preset 重點：`vram_texture_compression/for_mobile=false`。Godot 4.7 若啟用此項但專案未配置 ETC2/ASTC 匯入，Web preset validation 會失敗。
 
+## 繁體中文字型
+
+Web 匯出不會使用玩家作業系統的中文字型 fallback，因此專案內嵌 CJK 字型避免中文 UI 顯示成豆腐方塊。
+
+- 字型：Noto Sans CJK TC Regular，SIL Open Font License 1.1。
+- 專案字型：`assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf`。
+- 字型匯入 metadata：`assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf.import`，需與字型一併入版，讓 Godot 在初始化 custom Theme 時可載入 FontFile。
+- 授權檔：`assets/fonts/OFL.txt`。
+- 字集清單：`assets/fonts/NotoSansCJKtc-Regular-UI-Subset.chars.txt`。
+- Theme：`assets/fonts/default_theme.tres` 設定 `default_font`。
+- 專案綁定：`project.godot` 的 `gui/theme/custom="res://assets/fonts/default_theme.tres"`。
+
+子集策略：
+
+1. 掃描專案 runtime 資源：`*.gd`、`*.tscn`、`*.tres`、`*.godot`，排除 `.git`、`.godot`、`export`、`exports`、`build`、`dist`。
+2. 加入 ASCII `U+0020..U+007E`、CJK Symbols and Punctuation `U+3000..U+303F`、Fullwidth Forms `U+FF01..U+FF5E`。
+3. 使用 `pyftsubset` 產生 OTF 子集，並用 fontTools 檢查字集清單 460 個 codepoints 全部存在。
+
+重建子集範例：
+
+```powershell
+pyftsubset "$env:TEMP\crackveil-font-source\NotoSansCJKtc-Regular.otf" `
+  --output-file="assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf" `
+  --text-file="assets/fonts/NotoSansCJKtc-Regular-UI-Subset.chars.txt" `
+  --layout-features="*" `
+  --glyph-names `
+  --symbol-cmap `
+  --legacy-cmap `
+  --notdef-glyph `
+  --notdef-outline `
+  --recommended-glyphs `
+  --name-IDs="*" `
+  --name-legacy `
+  --name-languages="*" `
+  --no-hinting
+```
+
+本次大小：
+
+```text
+NotoSansCJKtc-Regular.otf                 16,435,884 bytes
+NotoSansCJKtc-Regular-UI-Subset.otf          161,612 bytes
+subset glyph input: 460 codepoints, 207 Han characters
+```
+
 ## 本機工具與範本
 
 - Godot console exe：`%LOCALAPPDATA%\Temp\codex-godot-4x\Godot_v4.7-stable_win64.exe\Godot_v4.7-stable_win64_console.exe`
@@ -48,8 +93,9 @@ index.audio.position.worklet.js     2,973 bytes
 index.audio.worklet.js              7,298 bytes
 index.html                          5,305 bytes
 index.js                          279,815 bytes
-index.pck                        1,602,176 bytes
+index.pck                        1,750,464 bytes
 index.png                          21,443 bytes
+index.png.import                      930 bytes
 index.wasm                      39,509,339 bytes
 ```
 
@@ -58,7 +104,7 @@ index.wasm                      39,509,339 bytes
 ```text
 GODOT_THREADS_ENABLED = false
 ensureCrossOriginIsolationHeaders = false
-fileSizes: index.pck=1602176, index.wasm=39509339
+fileSizes: index.pck=1750464, index.wasm=39509339
 ```
 
 ## 本機靜態伺服器驗證
@@ -82,7 +128,7 @@ HTTP HEAD 檢查結果：
 index.html                         200 text/html                5305
 index.js                           200 text/javascript          279815
 index.wasm                         200 application/wasm         39509339
-index.pck                          200 application/octet-stream 1602176
+index.pck                          200 application/octet-stream 1750464
 index.png                          200 image/png                21443
 index.audio.worklet.js             200 text/javascript          7298
 index.audio.position.worklet.js    200 text/javascript          2973
@@ -91,6 +137,7 @@ index.audio.position.worklet.js    200 text/javascript          2973
 其他本機檢查：
 
 - `node --check export/web/index.js`：通過，無語法錯誤輸出。
+- `rg -a "NotoSansCJKtc-Regular-UI-Subset|default_theme|fontdata" export/web/index.pck`：可找到 `default_theme.res`、字型匯入 `.fontdata` 與字型 resource path。
 - Chrome headless `--dump-dom http://127.0.0.1:8067/`：DOM 含 `<title>Crackveil Vanguard</title>`、`<canvas id="canvas">`、`GODOT_THREADS_ENABLED = false`，未匹配 `404`、`SharedArrayBuffer`、`Uncaught`、`wasm streaming compile failed` 等錯誤關鍵字。
 - Chrome headless screenshot：成功渲染 Godot boot/loading 畫面與進度條，不是空白頁。未做人工遊玩驗證。
 
