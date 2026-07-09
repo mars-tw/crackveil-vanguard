@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/hero_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = "rift_captain"
+display_name = "裂隙隊長"
+description = "小隊隊長，主控角色，使用穩定的直線能量武器。"
+body_color = Color(0.35, 0.78, 1, 1)
+core_color = Color(0.88, 0.98, 1, 1)
+sprite_path = "res://assets/sprites/hero_captain.png"
+sprite_scale = 1.0
+max_hp = 110.0
+move_speed = 230.0
+hit_radius = 13.0
+pickup_radius = 96.0
+starting_weapon_ids = PackedStringArray("riftline_emitter")
+passive_id = "leader"
+passive_value = 1.0
+passive_description = "隊伍以此英雄為相機與失敗判定中心。"

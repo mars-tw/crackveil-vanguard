@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/ExplosionWeapon.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_data")
+id = "pulse_bloom"
+display_name = "脈衝爆花"
+description = "週期性在最近敵人位置引爆裂隙脈衝，傷害範圍內敵人。"
+behavior_id = "explosion"
+weapon_scene = ExtResource("2_scene")
+damage = 18.0
+cooldown = 2.25
+range = 520.0
+color = Color(1, 0.58, 0.23, 1)
+explosion_sprite_path = "res://assets/sprites/fx_explosion.png"
+sprite_scale = 1.0
+area_radius = 82.0
+effect_lifetime = 0.38
+damage_upgrade = 5.0
+cooldown_upgrade_multiplier = 0.9
+range_upgrade = 28.0
+area_radius_upgrade = 20.0

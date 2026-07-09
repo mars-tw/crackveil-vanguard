@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/hero_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = "orbit_guard"
+display_name = "星環護衛"
+description = "近身護衛，使用繞身飛刀清理貼近敵人。"
+body_color = Color(0.72, 0.56, 1, 1)
+core_color = Color(0.96, 0.9, 1, 1)
+sprite_path = "res://assets/sprites/hero_guardian.png"
+sprite_scale = 1.0
+max_hp = 88.0
+move_speed = 218.0
+hit_radius = 12.0
+pickup_radius = 72.0
+starting_weapon_ids = PackedStringArray("orbit_blades")
+passive_id = "guard"
+passive_value = 0.08
+passive_description = "預留：提高近距離武器效率。"

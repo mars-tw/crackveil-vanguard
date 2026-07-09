@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/pickups/pickup.gd" id="1_xp"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_xp"]
+radius = 9.0
+
+[node name="XPGem" type="Area2D"]
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+monitorable = false
+script = ExtResource("1_xp")
+pickup_kind = "xp"
+sprite_path = "res://assets/sprites/gem_xp.png"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_xp")

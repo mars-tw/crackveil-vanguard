@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WeaponCatalog" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_catalog.gd" id="1_catalog"]
+[ext_resource type="Resource" path="res://resources/weapons/riftline_emitter.tres" id="2_linear"]
+[ext_resource type="Resource" path="res://resources/weapons/orbit_blades.tres" id="3_orbit"]
+[ext_resource type="Resource" path="res://resources/weapons/pulse_bloom.tres" id="4_explosion"]
+[ext_resource type="Resource" path="res://resources/weapons/arc_chain.tres" id="5_chain"]
+
+[resource]
+script = ExtResource("1_catalog")
+starting_weapons = Array[Resource]([ExtResource("2_linear")])
+available_weapons = Array[Resource]([ExtResource("2_linear"), ExtResource("3_orbit"), ExtResource("4_explosion"), ExtResource("5_chain")])

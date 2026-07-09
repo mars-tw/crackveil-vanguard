@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/ChainLightningWeapon.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_data")
+id = "arc_chain"
+display_name = "裂弧雷鏈"
+description = "鎖定最近敵人後，在鄰近敵人間跳躍連鎖電弧。"
+behavior_id = "chain_lightning"
+weapon_scene = ExtResource("2_scene")
+damage = 16.0
+cooldown = 1.75
+range = 560.0
+color = Color(0.56, 0.9, 1, 1)
+effect_lifetime = 0.24
+lightning_sprite_path = "res://assets/sprites/proj_lightning.png"
+sprite_scale = 1.0
+chain_count = 4
+chain_radius = 175.0
+chain_damage_falloff = 0.86
+damage_upgrade = 4.0
+cooldown_upgrade_multiplier = 0.9
+range_upgrade = 32.0
+chain_count_upgrade = 1

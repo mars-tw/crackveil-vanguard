@@ -1,0 +1,38 @@
+# Godot local/editor cache
+.godot/
+.import/
+
+# Export and build outputs
+export/
+exports/
+build/
+dist/
+*.pck
+*.exe
+*.apk
+*.aab
+*.ipa
+*.wasm
+*.html
+*.js
+*.worker.js
+*.zip
+
+# Temporary files and logs
+*.tmp
+*.temp
+*.bak
+*.log
+*.trace
+
+# Local secrets / machine-specific config
+.env
+.env.*
+!.env.example
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

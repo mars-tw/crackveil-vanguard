@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SquadData" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/squad_data.gd" id="1_data"]
+[ext_resource type="Resource" path="res://resources/heroes/rift_captain.tres" id="2_leader"]
+[ext_resource type="Resource" path="res://resources/heroes/orbit_guard.tres" id="3_orbit"]
+[ext_resource type="Resource" path="res://resources/heroes/arc_scout.tres" id="4_arc"]
+[ext_resource type="Resource" path="res://resources/heroes/pulse_artificer.tres" id="5_pulse"]
+[ext_resource type="Resource" path="res://resources/heroes/line_mender.tres" id="6_line"]
+
+[resource]
+script = ExtResource("1_data")
+max_members = 5
+starting_heroes = Array[Resource]([ExtResource("2_leader"), ExtResource("3_orbit"), ExtResource("4_arc")])
+available_heroes = Array[Resource]([ExtResource("2_leader"), ExtResource("3_orbit"), ExtResource("4_arc"), ExtResource("5_pulse"), ExtResource("6_line")])

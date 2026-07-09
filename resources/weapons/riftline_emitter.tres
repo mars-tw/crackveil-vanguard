@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/LinearBulletWeapon.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_data")
+id = "riftline_emitter"
+display_name = "裂線發射器"
+description = "鎖定最近敵人，發射高速直線能量彈。"
+behavior_id = "linear"
+weapon_scene = ExtResource("2_scene")
+damage = 12.0
+cooldown = 0.86
+range = 590.0
+color = Color(0.62, 0.93, 1, 1)
+projectile_sprite_path = "res://assets/sprites/proj_bullet.png"
+sprite_scale = 1.0
+projectile_count = 1
+projectile_speed = 590.0
+projectile_radius = 4.5
+pierce = 0
+spread_degrees = 26.0
+damage_upgrade = 4.0
+cooldown_upgrade_multiplier = 0.88
+range_upgrade = 36.0
+projectile_count_upgrade = 1
+pierce_upgrade = 1

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/OrbitWeapon.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_data")
+id = "orbit_blades"
+display_name = "星環飛刀"
+description = "數枚飛刀繞玩家旋轉，穿過敵群並反覆造成傷害。"
+behavior_id = "orbit"
+weapon_scene = ExtResource("2_scene")
+damage = 7.0
+cooldown = 0.0
+range = 0.0
+color = Color(0.7, 0.82, 1, 1)
+orbit_sprite_path = "res://assets/sprites/proj_blade.png"
+sprite_scale = 1.0
+projectile_count = 2
+projectile_radius = 8.0
+pierce = 3
+orbit_radius = 58.0
+orbit_angular_speed = 4.35
+hit_interval = 0.42
+damage_upgrade = 2.5
+cooldown_upgrade_multiplier = 1.0
+projectile_count_upgrade = 1
+pierce_upgrade = 1

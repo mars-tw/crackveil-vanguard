@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/hero_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = "pulse_artificer"
+display_name = "脈衝工匠"
+description = "可招募隊友，使用定點範圍爆炸壓制敵群。"
+body_color = Color(1, 0.64, 0.32, 1)
+core_color = Color(1, 0.95, 0.72, 1)
+sprite_path = "res://assets/sprites/hero_guardian.png"
+sprite_scale = 1.0
+max_hp = 86.0
+move_speed = 214.0
+hit_radius = 12.0
+pickup_radius = 72.0
+starting_weapon_ids = PackedStringArray("pulse_bloom")
+passive_id = "blast"
+passive_value = 0.1
+passive_description = "預留：提高範圍武器半徑。"

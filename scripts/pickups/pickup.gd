@@ -1,0 +1,163 @@
+extends Area2D
+
+const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
+
+@export var value: int = 1
+@export_enum("xp", "coin") var pickup_kind: String = "xp"
+@export var collect_distance: float = 14.0
+@export var magnet_speed: float = 280.0
+@export_file("*.png") var sprite_path: String = ""
+@export var sprite_scale: float = 1.0
+
+var drift_velocity: Vector2 = Vector2.ZERO
+var magnetized: bool = false
+var bob_phase: float = 0.0
+var is_active: bool = false
+var sprite: Sprite2D = null
+
+
+func _ready() -> void:
+	if sprite_path == "":
+		sprite_path = "res://assets/sprites/coin.png" if pickup_kind == "coin" else "res://assets/sprites/gem_xp.png"
+	_ensure_sprite()
+	_apply_sprite()
+
+
+func pool_on_acquire() -> void:
+	is_active = true
+	visible = true
+	set_process(true)
+	set_physics_process(true)
+	if not is_in_group("pickups"):
+		add_to_group("pickups")
+
+
+func pool_on_release() -> void:
+	is_active = false
+	visible = false
+	set_process(false)
+	set_physics_process(false)
+	remove_from_group("pickups")
+	value = 0
+	drift_velocity = Vector2.ZERO
+	magnetized = false
+	bob_phase = 0.0
+	rotation = 0.0
+	if sprite != null:
+		sprite.rotation = 0.0
+
+
+func pool_reset(args: Dictionary) -> void:
+	global_position = args.get("position", Vector2.ZERO)
+	setup(int(args.get("amount", 1)), args.get("velocity", Vector2.ZERO))
+
+
+func setup(amount: int, start_velocity: Vector2 = Vector2.ZERO) -> void:
+	value = amount
+	drift_velocity = start_velocity
+	magnetized = false
+	rotation = 0.0
+	_apply_sprite()
+
+
+func _physics_process(delta: float) -> void:
+	if not is_active:
+		return
+
+	bob_phase += delta * 5.0
+
+	var moved := false
+	if drift_velocity.length_squared() > 1.0:
+		global_position += drift_velocity * delta
+		drift_velocity = drift_velocity.move_toward(Vector2.ZERO, 320.0 * delta)
+		moved = true
+
+	var collector := _find_collector()
+	if collector == null:
+		if moved or magnetized:
+			_update_sprite_bob()
+		return
+
+	var pickup_radius: float = 90.0
+	if collector.has_method("get_pickup_radius"):
+		pickup_radius = float(collector.get_pickup_radius())
+
+	var to_collector: Vector2 = collector.global_position - global_position
+	var distance := to_collector.length()
+	if distance <= pickup_radius:
+		magnetized = true
+
+	if magnetized and distance > 0.001:
+		var pull_speed: float = magnet_speed + max(0.0, pickup_radius - distance) * 2.4
+		global_position += to_collector.normalized() * pull_speed * delta
+		moved = true
+
+	if global_position.distance_squared_to(collector.global_position) <= collect_distance * collect_distance:
+		collect(collector)
+
+	if moved or magnetized:
+		_update_sprite_bob()
+
+
+func collect(_player: Node) -> void:
+	match pickup_kind:
+		"coin":
+			GameManager.add_gold(value)
+			EntityFactory.release_gold_coin(self)
+		_:
+			GameManager.add_xp(value)
+			EntityFactory.release_xp_gem(self)
+
+
+func _find_collector() -> Node2D:
+	var nearest: Node2D = null
+	var best_distance_squared := INF
+	var members: Array = []
+	if GameManager.squad_manager != null and is_instance_valid(GameManager.squad_manager) and GameManager.squad_manager.has_method("get_members"):
+		members = GameManager.squad_manager.get_members()
+	elif GameManager.player != null and is_instance_valid(GameManager.player):
+		members = [GameManager.player]
+
+	for member in members:
+		if member == null or not is_instance_valid(member):
+			continue
+		if bool(member.get("is_alive")) == false:
+			continue
+		var pickup_radius: float = 90.0
+		if member.has_method("get_pickup_radius"):
+			pickup_radius = float(member.get_pickup_radius())
+		var distance_squared: float = global_position.distance_squared_to(member.global_position)
+		if distance_squared <= pickup_radius * pickup_radius and distance_squared < best_distance_squared:
+			best_distance_squared = distance_squared
+			nearest = member
+
+	return nearest
+
+
+func _ensure_sprite() -> void:
+	if sprite != null and is_instance_valid(sprite):
+		return
+	sprite = get_node_or_null("Sprite2D") as Sprite2D
+	if sprite == null:
+		sprite = Sprite2D.new()
+		sprite.name = "Sprite2D"
+		add_child(sprite)
+	sprite.centered = true
+
+
+func _apply_sprite() -> void:
+	_ensure_sprite()
+	var texture: Texture2D = SPRITE_LOADER.get_texture(sprite_path)
+	if texture == null:
+		sprite.visible = false
+		return
+	sprite.visible = true
+	var target_size: float = 20.0 + clamp(float(value) * 0.8, 0.0, 8.0)
+	SPRITE_LOADER.fit_sprite(sprite, texture, target_size, sprite_scale)
+	_update_sprite_bob()
+
+
+func _update_sprite_bob() -> void:
+	if sprite == null:
+		return
+	sprite.position.y = sin(bob_phase) * 1.5

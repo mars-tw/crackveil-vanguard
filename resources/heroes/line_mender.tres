@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/hero_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = "line_mender"
+display_name = "線紋修補者"
+description = "可招募隊友，使用第二組裂線射擊支援遠距火力。"
+body_color = Color(0.94, 0.78, 0.42, 1)
+core_color = Color(1, 0.98, 0.78, 1)
+sprite_path = "res://assets/sprites/hero_scout.png"
+sprite_scale = 1.0
+max_hp = 90.0
+move_speed = 220.0
+hit_radius = 12.0
+pickup_radius = 72.0
+starting_weapon_ids = PackedStringArray("riftline_emitter")
+passive_id = "support"
+passive_value = 0.05
+passive_description = "預留：提高隊伍拾取效率。"

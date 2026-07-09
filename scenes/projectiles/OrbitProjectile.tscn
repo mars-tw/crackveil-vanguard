@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/projectiles/orbit_projectile.gd" id="1_orbit_projectile"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_orbit"]
+radius = 8.0
+
+[node name="OrbitProjectile" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+monitorable = false
+script = ExtResource("1_orbit_projectile")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_orbit")

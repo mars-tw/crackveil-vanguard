@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/heroes/hero.gd" id="1_player"]
+[ext_resource type="Script" path="res://scripts/player/player_visual.gd" id="2_visual"]
+[ext_resource type="Resource" path="res://resources/weapons/weapon_catalog.tres" id="3_catalog"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_player"]
+radius = 13.0
+
+[node name="Player" type="CharacterBody2D"]
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_player")
+weapon_catalog = ExtResource("3_catalog")
+
+[node name="Visual" type="Node2D" parent="."]
+script = ExtResource("2_visual")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_player")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+enabled = false
+current = false
+position_smoothing_enabled = true
+position_smoothing_speed = 7.0
+
+[node name="Weapons" type="Node2D" parent="."]

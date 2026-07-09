@@ -1,0 +1,29 @@
+; Engine configuration file.
+; It is best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+
+config_version=5
+
+[application]
+
+config/name="Crackveil Vanguard"
+run/main_scene="res://scenes/arena/Arena.tscn"
+config/features=PackedStringArray("4.2")
+config/icon=""
+
+[autoload]
+
+GameManager="*res://scripts/autoload/game_manager.gd"
+EntityFactory="*res://scripts/autoload/entity_factory.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
