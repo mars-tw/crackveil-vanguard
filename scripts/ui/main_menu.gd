@@ -49,7 +49,6 @@ func _ready() -> void:
 		PlayerSettings.settings_changed.connect(_sync_settings_controls)
 	if AudioManager.has_signal("settings_changed") and not AudioManager.settings_changed.is_connected(_sync_audio_controls):
 		AudioManager.settings_changed.connect(_sync_audio_controls)
-	_show_panel("meta")
 
 
 func _build_background() -> void:
@@ -74,8 +73,9 @@ func _build_ui() -> void:
 	logo_glow_label = Label.new()
 	logo_glow_label.text = "CRACKVEIL VANGUARD"
 	logo_glow_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	logo_glow_label.add_theme_color_override("font_color", Color(0.18, 0.94, 1.0, 0.42))
-	logo_glow_label.add_theme_constant_override("outline_size", 5)
+	logo_glow_label.add_theme_color_override("font_color", Color(0.18, 0.94, 1.0, 0.2))
+	logo_glow_label.add_theme_color_override("font_outline_color", Color(0.08, 0.68, 0.98, 0.24))
+	logo_glow_label.add_theme_constant_override("outline_size", 10)
 	root.add_child(logo_glow_label)
 
 	logo_label = Label.new()
@@ -125,6 +125,7 @@ func _build_ui() -> void:
 
 	side_panel = Panel.new()
 	side_panel.name = "SidePanel"
+	side_panel.visible = false
 	root.add_child(side_panel)
 
 	side_title = Label.new()
@@ -389,15 +390,15 @@ func _apply_responsive_layout() -> void:
 
 	logo_glow_label.anchor_left = 0.0
 	logo_glow_label.anchor_right = 1.0
-	logo_glow_label.offset_top = 38.0 if not portrait else 24.0
-	logo_glow_label.offset_bottom = logo_glow_label.offset_top + 72.0
-	logo_glow_label.add_theme_font_size_override("font_size", 52 if not portrait else 34)
-
 	logo_label.anchor_left = 0.0
 	logo_label.anchor_right = 1.0
 	logo_label.offset_top = 44.0 if not portrait else 29.0
 	logo_label.offset_bottom = logo_label.offset_top + 66.0
 	logo_label.add_theme_font_size_override("font_size", 48 if not portrait else 32)
+
+	logo_glow_label.offset_top = logo_label.offset_top
+	logo_glow_label.offset_bottom = logo_label.offset_bottom
+	logo_glow_label.add_theme_font_size_override("font_size", 48 if not portrait else 32)
 
 	var menu_width: float = min(270.0, viewport_size.x - margin * 2.0)
 	menu_box.position = Vector2(margin, 164.0 if not portrait else 108.0)

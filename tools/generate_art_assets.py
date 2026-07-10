@@ -63,22 +63,35 @@ def particle_core(size: int = 48) -> np.ndarray:
     return img
 
 
+def tileable_value_noise(size: int, scale: int, rng: np.random.Generator) -> np.ndarray:
+    grid = rng.random((scale, scale), dtype=np.float32)
+    coords = np.arange(size, dtype=np.float32) * (float(scale) / float(size))
+    base = np.floor(coords).astype(np.int32)
+    frac = coords - base.astype(np.float32)
+    frac = frac * frac * (3.0 - 2.0 * frac)
+    x0 = base % scale
+    x1 = (x0 + 1) % scale
+    y0 = x0
+    y1 = x1
+
+    top = grid[y0[:, None], x0[None, :]] * (1.0 - frac[None, :]) + grid[y0[:, None], x1[None, :]] * frac[None, :]
+    bottom = grid[y1[:, None], x0[None, :]] * (1.0 - frac[None, :]) + grid[y1[:, None], x1[None, :]] * frac[None, :]
+    return top * (1.0 - frac[:, None]) + bottom * frac[:, None]
+
+
 def nebula(size: int = 512, seed: int = 77) -> np.ndarray:
     rng = np.random.default_rng(seed)
     base = np.zeros((size, size), dtype=np.float32)
-    for scale, weight in [(16, 0.38), (32, 0.28), (64, 0.2), (128, 0.14)]:
-        small = rng.random((scale, scale), dtype=np.float32)
-        img = Image.fromarray((small * 255).astype(np.uint8), "L").resize(
-            (size, size), Image.Resampling.BICUBIC
-        )
-        arr = np.asarray(img, dtype=np.float32) / 255.0
-        base += arr * weight
+    for scale, weight in [(12, 0.34), (24, 0.29), (48, 0.22), (96, 0.15)]:
+        base += tileable_value_noise(size, scale, rng) * weight
     base = np.clip((base - 0.32) / 0.68, 0.0, 1.0)
     yy, xx = np.mgrid[0:size, 0:size]
+    xn = xx / float(size)
+    yn = yy / float(size)
     waves = (
-        np.sin(xx * 0.021 + yy * 0.014)
-        + np.sin(xx * -0.011 + yy * 0.026 + 2.4)
-        + np.sin(np.sqrt((xx - 250) ** 2 + (yy - 190) ** 2) * 0.026)
+        np.sin(math.tau * (2.0 * xn + 1.0 * yn))
+        + np.sin(math.tau * (-1.0 * xn + 3.0 * yn) + 2.4)
+        + np.sin(math.tau * (3.0 * xn - 2.0 * yn) + 1.1)
     ) / 3.0
     field = np.clip(base * 0.72 + (waves + 1.0) * 0.18, 0.0, 1.0)
     img = np.zeros((size, size, 4), dtype=np.float32)
@@ -90,12 +103,17 @@ def nebula(size: int = 512, seed: int = 77) -> np.ndarray:
 
 
 def deep_space_gradient(size: int = 512) -> np.ndarray:
+    rng = np.random.default_rng(131)
     yy, xx = np.mgrid[0:size, 0:size]
-    nx = (xx / (size - 1)) * 2.0 - 1.0
-    ny = (yy / (size - 1)) * 2.0 - 1.0
-    r = np.sqrt(nx * nx + ny * ny)
-    diagonal = (nx * -0.35 + ny * 0.65 + 1.0) * 0.5
-    energy = np.clip(1.0 - r, 0.0, 1.0) ** 1.4
+    xn = xx / float(size)
+    yn = yy / float(size)
+    slow_cloud = tileable_value_noise(size, 8, rng)
+    fine_cloud = tileable_value_noise(size, 32, rng)
+    diagonal = (
+        np.sin(math.tau * (xn - yn) + 0.8)
+        + np.sin(math.tau * (2.0 * xn + yn) + 2.2) * 0.55
+    ) * 0.5 + 0.5
+    energy = np.clip(slow_cloud * 0.62 + fine_cloud * 0.18 + diagonal * 0.2, 0.0, 1.0) ** 1.35
     img = np.zeros((size, size, 4), dtype=np.float32)
     img[..., 0] = 5 + diagonal * 15 + energy * 18
     img[..., 1] = 9 + diagonal * 18 + energy * 24

@@ -2,6 +2,8 @@ class_name Hero
 extends CharacterBody2D
 
 const LEADER_CAMERA_ZOOM := Vector2(1.28, 1.28)
+const LEADER_THREAT_CAMERA_ZOOM := Vector2(1.12, 1.12)
+const LEADER_CAMERA_ZOOM_LERP_SPEED := 7.5
 const RIFT_PULSE_COOLDOWN := 3.2
 const RIFT_PULSE_RANGE := 195.0
 const RIFT_PULSE_HALF_ANGLE := deg_to_rad(38.0)
@@ -123,6 +125,8 @@ func reset_for_run() -> void:
 		visual.modulate = Color.WHITE
 	if camera != null:
 		camera.offset = Vector2.ZERO
+		if is_leader:
+			camera.zoom = LEADER_CAMERA_ZOOM
 	_clear_weapons()
 	_equip_starting_weapons()
 	set_physics_process(true)
@@ -192,6 +196,7 @@ func _physics_process(delta: float) -> void:
 func _process(delta: float) -> void:
 	_tick_active_ability_cooldown(delta)
 	_update_flash()
+	_update_camera_zoom(delta)
 	_update_camera_shake(delta)
 
 
@@ -407,6 +412,16 @@ func request_screen_shake(strength: float, duration: float) -> void:
 	screen_shake_strength = max(screen_shake_strength, strength)
 	screen_shake_duration = max(screen_shake_duration, duration)
 	screen_shake_timer = max(screen_shake_timer, duration)
+
+
+func _update_camera_zoom(delta: float) -> void:
+	if camera == null or not is_leader:
+		return
+	var target_zoom := LEADER_CAMERA_ZOOM
+	if GameManager.has_method("is_camera_threat_zoom_requested") and GameManager.is_camera_threat_zoom_requested():
+		target_zoom = LEADER_THREAT_CAMERA_ZOOM
+	var weight: float = 1.0 - exp(-delta * LEADER_CAMERA_ZOOM_LERP_SPEED)
+	camera.zoom = camera.zoom.lerp(target_zoom, clamp(weight, 0.0, 1.0))
 
 
 func _update_camera_shake(delta: float) -> void:

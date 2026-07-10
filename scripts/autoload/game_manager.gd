@@ -180,6 +180,7 @@ var seen_affix_toasts: Dictionary = {}
 var pending_toasts: Array[String] = []
 var run_token: int = 0
 var hit_stop_token: int = 0
+var camera_threat_zoom_timer: float = 0.0
 var combo_count: int = 0
 var combo_last_kill_time: float = -999.0
 
@@ -235,6 +236,7 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	echo_shards_awarded_this_run = 0
 	seen_affix_toasts.clear()
 	run_token += 1
+	camera_threat_zoom_timer = 0.0
 	combo_count = 0
 	combo_last_kill_time = -999.0
 	if AchievementProgress != null and AchievementProgress.has_method("start_run"):
@@ -259,6 +261,8 @@ func _process(delta: float) -> void:
 		elapsed_time += delta
 		if temporary_squad_damage_timer > 0.0:
 			temporary_squad_damage_timer = max(temporary_squad_damage_timer - delta, 0.0)
+		if camera_threat_zoom_timer > 0.0:
+			camera_threat_zoom_timer = max(camera_threat_zoom_timer - delta, 0.0)
 		stats_timer -= delta
 		if stats_timer <= 0.0:
 			stats_timer = 0.1
@@ -293,6 +297,14 @@ func request_combat_impact(shake_strength: float = 4.0, hit_stop_duration: float
 	await get_tree().create_timer(hit_stop_duration, true, false, true).timeout
 	if local_token == hit_stop_token:
 		Engine.time_scale = 1.0
+
+
+func request_camera_threat_zoom(duration: float = 1.4) -> void:
+	camera_threat_zoom_timer = max(camera_threat_zoom_timer, max(0.0, duration))
+
+
+func is_camera_threat_zoom_requested() -> bool:
+	return camera_threat_zoom_timer > 0.0
 
 
 func queue_toast(message: String) -> void:

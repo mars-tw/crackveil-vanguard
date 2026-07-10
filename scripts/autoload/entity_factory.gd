@@ -40,10 +40,12 @@ const DEATH_BURST_CAP := 20
 const LIGHTNING_ARC_CAP := 32
 const XP_GEM_CAP := 180
 const COIN_CAP := 180
+const ENEMY_GLOW_REFRESH_INTERVAL := 0.24
 
 var pools: Dictionary = {}
 var pool_root: Node = null
 var enemy_spatial_index: Node = null
+var enemy_glow_refresh_timer: float = 0.0
 var next_enemy_spawn_token: int = 1
 var enemy_group_scan_count: int = 0
 var active_damage_numbers: Array[Node] = []
@@ -67,6 +69,16 @@ func _ready() -> void:
 	add_child(enemy_spatial_index)
 
 
+func _process(delta: float) -> void:
+	if enemy_spatial_index == null or int(enemy_spatial_index.get("live_count")) <= 0:
+		return
+	enemy_glow_refresh_timer = max(enemy_glow_refresh_timer - delta, 0.0)
+	if enemy_glow_refresh_timer > 0.0:
+		return
+	enemy_glow_refresh_timer = ENEMY_GLOW_REFRESH_INTERVAL
+	_refresh_enemy_crowd_glows()
+
+
 func initialize_for_arena(arena: Node) -> void:
 	if enemy_spatial_index != null and enemy_spatial_index.has_method("reset"):
 		enemy_spatial_index.reset()
@@ -78,6 +90,7 @@ func initialize_for_arena(arena: Node) -> void:
 	active_hazard_zones.clear()
 	active_xp_gems.clear()
 	next_enemy_spawn_token = 1
+	enemy_glow_refresh_timer = 0.0
 	enemy_group_scan_count = 0
 	enemy_projectile_reclaims = 0
 	fork_projectile_cap_skips = 0
@@ -114,6 +127,8 @@ func spawn_enemy(enemy_id: String, config: Dictionary, world_position: Vector2) 
 		"spawn_token": _issue_enemy_spawn_token()
 	})
 	enemy_spatial_index.register(enemy)
+	if enemy.has_method("update_threat_glow_for_crowd_count"):
+		enemy.update_threat_glow_for_crowd_count(get_enemy_live_count())
 	return enemy
 
 
@@ -623,6 +638,21 @@ func _compact_active_xp_gems() -> void:
 			continue
 		compacted.append(gem)
 	active_xp_gems = compacted
+
+
+func _refresh_enemy_crowd_glows() -> void:
+	if enemy_spatial_index == null:
+		return
+	var enemy_count: int = int(enemy_spatial_index.get("live_count"))
+	var live_enemies: Array = enemy_spatial_index.get("live_enemies")
+	for enemy in live_enemies:
+		if enemy == null or not is_instance_valid(enemy):
+			continue
+		var active_value: Variant = enemy.get("is_active")
+		if active_value != null and not bool(active_value):
+			continue
+		if enemy.has_method("update_threat_glow_for_crowd_count"):
+			enemy.update_threat_glow_for_crowd_count(enemy_count)
 
 
 func _rebuild_active_xp_gems_from_pool() -> void:

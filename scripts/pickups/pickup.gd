@@ -162,6 +162,9 @@ func force_magnet_to(collector: Node2D) -> void:
 	forced_collector = collector
 	forced_magnet_timer = 1.45
 	magnetized = true
+	scatter_timer = 0.0
+	drift_velocity = Vector2.ZERO
+	arc_velocity = 0.0
 
 
 func add_value(amount: int) -> void:

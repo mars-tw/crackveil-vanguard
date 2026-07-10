@@ -3,6 +3,8 @@ extends CharacterBody2D
 
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
+const THREAT_GLOW_DENSITY_START := 80
+const THREAT_GLOW_DENSITY_FULL := 150
 
 @export var type_id: String = "normal"
 @export var max_hp: float = 18.0
@@ -63,6 +65,7 @@ var hp_bar_fg: Line2D = null
 var shadow: Sprite2D = null
 var threat_glow: Sprite2D = null
 var hit_flash_timer: float = 0.0
+var threat_glow_base_alpha: float = 0.18
 
 
 func _ready() -> void:
@@ -112,6 +115,7 @@ func pool_on_release() -> void:
 	if threat_glow != null:
 		threat_glow.visible = false
 	hit_flash_timer = 0.0
+	threat_glow_base_alpha = 0.18
 	if affix_ring != null:
 		affix_ring.visible = false
 	if affix_marker != null:
@@ -182,6 +186,7 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	_apply_affix_visuals()
 	_update_hp_bar()
 	_set_hp_bar_visible(false)
+	_request_camera_pressure_on_spawn()
 
 
 func get_hit_token() -> int:
@@ -345,6 +350,8 @@ func _fire_ring_projectiles(count: int) -> void:
 	var projectile_count: int = max(1, count)
 	var projectile_stats := _enemy_projectile_stats(0.82)
 	var priority := "boss" if is_boss else "normal"
+	if is_boss and GameManager.has_method("request_camera_threat_zoom"):
+		GameManager.request_camera_threat_zoom(1.55)
 	for index in range(projectile_count):
 		var direction := Vector2.RIGHT.rotated(TAU * float(index) / float(projectile_count))
 		EntityFactory.spawn_enemy_projectile(global_position + direction * (radius + 8.0), direction, projectile_stats, self, priority)
@@ -715,7 +722,39 @@ func _apply_shadow_and_glow() -> void:
 			glow_diameter = radius * 7.2
 			glow_alpha = 0.46
 		ART_RESOURCES.fit_sprite(threat_glow, ART_RESOURCES.get_radial_glow(), glow_diameter)
-		threat_glow.modulate = Color(body_color.r, body_color.g * 0.82 + 0.06, body_color.b * 0.85 + 0.1, glow_alpha)
+		threat_glow_base_alpha = glow_alpha
+		var enemy_count: int = EntityFactory.get_enemy_live_count() if EntityFactory != null and EntityFactory.has_method("get_enemy_live_count") else 0
+		update_threat_glow_for_crowd_count(enemy_count)
+
+
+func update_threat_glow_for_crowd_count(enemy_count: int) -> void:
+	if threat_glow == null:
+		return
+	var glow_alpha: float = _threat_glow_alpha_for_count(enemy_count)
+	threat_glow.modulate = Color(body_color.r, body_color.g * 0.82 + 0.06, body_color.b * 0.85 + 0.1, glow_alpha)
+
+
+func _threat_glow_alpha_for_count(enemy_count: int) -> float:
+	if is_boss or enemy_count <= THREAT_GLOW_DENSITY_START:
+		return threat_glow_base_alpha
+	var t: float = clamp(
+		float(enemy_count - THREAT_GLOW_DENSITY_START) / float(THREAT_GLOW_DENSITY_FULL - THREAT_GLOW_DENSITY_START),
+		0.0,
+		1.0
+	)
+	var crowded_alpha: float = maxf(0.07, threat_glow_base_alpha * 0.42)
+	if is_elite:
+		crowded_alpha = maxf(0.28, threat_glow_base_alpha * 0.86)
+	return lerpf(threat_glow_base_alpha, crowded_alpha, t)
+
+
+func _request_camera_pressure_on_spawn() -> void:
+	if not GameManager.has_method("request_camera_threat_zoom"):
+		return
+	if is_boss:
+		GameManager.request_camera_threat_zoom(3.0)
+	elif is_elite:
+		GameManager.request_camera_threat_zoom(1.25)
 
 
 func _tick_hit_flash(delta: float) -> void:

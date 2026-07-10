@@ -32,6 +32,9 @@ func _run_tests() -> void:
 	current_phase = "pickup_scatter"
 	if not await _test_pickup_scatter_then_magnet():
 		return
+	current_phase = "pickup_force_magnet"
+	if not await _test_force_magnet_interrupts_scatter():
+		return
 	current_phase = "main_menu_flow"
 	if not await _test_main_menu_and_return_wiring():
 		return
@@ -161,12 +164,53 @@ func _test_pickup_scatter_then_magnet() -> bool:
 	return true
 
 
+func _test_force_magnet_interrupts_scatter() -> bool:
+	await _setup_arena()
+	if leader == null or not is_instance_valid(leader):
+		_fail("leader missing for force magnet test")
+		return false
+	leader.set("pickup_radius", 8.0)
+	GameManager.xp = 0
+	var gem: Node = EntityFactory.spawn_xp_gem(leader.global_position + Vector2(72.0, 0.0), 7, 1.0)
+	if gem == null:
+		_fail("force magnet xp gem spawn failed")
+		return false
+	await get_tree().physics_frame
+	if float(gem.get("scatter_timer")) <= 0.0:
+		_fail("force magnet test gem had no scatter window")
+		return false
+	gem.call("force_magnet_to", leader)
+	await get_tree().physics_frame
+	if float(gem.get("scatter_timer")) > 0.0 or not bool(gem.get("magnetized")):
+		_fail("force magnet did not interrupt scatter")
+		return false
+	for _index in range(60):
+		if int(GameManager.xp) >= 7:
+			break
+		await get_tree().physics_frame
+	if int(GameManager.xp) < 7:
+		_fail("force magnet did not collect during scatter, xp=%d" % int(GameManager.xp))
+		return false
+	print("R10_5_FORCE_MAGNET_INTERRUPT xp=%d" % int(GameManager.xp))
+	return true
+
+
 func _test_main_menu_and_return_wiring() -> bool:
 	var menu: Node = MAIN_MENU_SCENE.instantiate()
 	add_child(menu)
 	await get_tree().process_frame
 	if menu.get("start_button") == null or menu.get("meta_button") == null or menu.get("achievements_button") == null or menu.get("settings_button") == null:
 		_fail("main menu missing required buttons")
+		return false
+	var side_panel: Panel = menu.get("side_panel")
+	if side_panel == null or side_panel.visible:
+		_fail("main menu side panel did not start collapsed")
+		return false
+	var meta_button: Button = menu.get("meta_button")
+	meta_button.pressed.emit()
+	await get_tree().process_frame
+	if not side_panel.visible:
+		_fail("main menu meta button did not open side panel")
 		return false
 	var meta_buttons: Dictionary = menu.get("meta_buttons")
 	if meta_buttons.size() != 3:
