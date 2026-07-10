@@ -19,6 +19,7 @@ var is_active: bool = false
 var target_group: String = "enemies"
 var riftline_fork_level: int = 0
 var fork_depth: int = 0
+var fork_stats_cache: Dictionary = {}
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
@@ -56,6 +57,7 @@ func pool_on_release() -> void:
 	target_group = "enemies"
 	riftline_fork_level = 0
 	fork_depth = 0
+	fork_stats_cache.clear()
 	traveled = 0.0
 	rotation = 0.0
 	if sprite != null:
@@ -85,6 +87,7 @@ func setup(world_position: Vector2, projectile_direction: Vector2, projectile_st
 	target_group = str(projectile_stats.get("target_group", "enemies"))
 	riftline_fork_level = int(projectile_stats.get("riftline_fork_level", 0))
 	fork_depth = int(projectile_stats.get("fork_depth", 0))
+	_rebuild_fork_stats_cache()
 	source = projectile_source
 	traveled = 0.0
 	hit_bodies.clear()
@@ -148,8 +151,22 @@ func _hit_key_for(body: Node) -> int:
 func _try_spawn_riftline_forks() -> void:
 	if target_group != "enemies" or riftline_fork_level <= 0 or fork_depth > 0:
 		return
+	if fork_stats_cache.is_empty():
+		return
 
-	var fork_stats := {
+	fork_stats_cache["pierce"] = max(0, min(pierce_left, riftline_fork_level - 1))
+	var fork_angle := deg_to_rad(20.0)
+	for angle in [-fork_angle, fork_angle]:
+		var fork_direction := direction.rotated(float(angle)).normalized()
+		EntityFactory.spawn_fork_projectile(global_position + fork_direction * (radius + 4.0), fork_direction, fork_stats_cache, source)
+
+
+func _rebuild_fork_stats_cache() -> void:
+	fork_stats_cache.clear()
+	if target_group != "enemies" or riftline_fork_level <= 0 or fork_depth > 0:
+		return
+
+	fork_stats_cache = {
 		"damage": damage * 0.5,
 		"range": max_range * (0.46 + 0.12 * float(min(riftline_fork_level, 2) - 1)),
 		"projectile_speed": speed,
@@ -162,10 +179,6 @@ func _try_spawn_riftline_forks() -> void:
 		"riftline_fork_level": 0,
 		"fork_depth": fork_depth + 1
 	}
-	var fork_angle := deg_to_rad(20.0)
-	for angle in [-fork_angle, fork_angle]:
-		var fork_direction := direction.rotated(float(angle)).normalized()
-		EntityFactory.spawn_projectile(global_position + fork_direction * (radius + 4.0), fork_direction, fork_stats, source)
 
 
 func _apply_shape() -> void:

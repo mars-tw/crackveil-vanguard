@@ -5,6 +5,8 @@ var source: Node = null
 var age: float = 0.0
 var tick_timer: float = 0.0
 var is_active: bool = false
+var redraw_request_count: int = 0
+var last_alpha: float = 1.0
 
 
 func pool_on_acquire() -> void:
@@ -21,6 +23,8 @@ func pool_on_release() -> void:
 	source = null
 	age = 0.0
 	tick_timer = 0.0
+	last_alpha = 1.0
+	modulate = Color.WHITE
 
 
 func pool_reset(args: Dictionary) -> void:
@@ -33,7 +37,9 @@ func setup(world_position: Vector2, hazard_stats: Dictionary, hazard_source: Nod
 	source = hazard_source
 	age = 0.0
 	tick_timer = 0.0
-	queue_redraw()
+	last_alpha = 1.0
+	modulate = Color.WHITE
+	_request_redraw()
 
 
 func _process(delta: float) -> void:
@@ -51,7 +57,16 @@ func _process(delta: float) -> void:
 		EntityFactory.release_hazard_zone(self)
 		return
 
-	queue_redraw()
+	_update_fade()
+
+
+func _update_fade() -> void:
+	var duration: float = max(0.001, float(stats.get("duration", 1.2)))
+	var next_alpha: float = clamp(1.0 - age / duration, 0.0, 1.0)
+	if abs(next_alpha - last_alpha) < 0.025:
+		return
+	last_alpha = next_alpha
+	modulate = Color(1.0, 1.0, 1.0, next_alpha)
 
 
 func _apply_tick_damage() -> void:
@@ -74,9 +89,12 @@ func _apply_tick_damage() -> void:
 func _draw() -> void:
 	if not is_active:
 		return
-	var duration: float = max(0.001, float(stats.get("duration", 1.2)))
-	var t: float = clamp(age / duration, 0.0, 1.0)
 	var radius: float = float(stats.get("area_radius", 56.0))
 	var color: Color = stats.get("color", Color(1.0, 0.42, 0.12, 1.0))
-	draw_circle(Vector2.ZERO, radius, Color(color.r, color.g, color.b, 0.2 * (1.0 - t)))
-	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 48, Color(color.r, color.g, color.b, 0.54 * (1.0 - t)), 2.0)
+	draw_circle(Vector2.ZERO, radius, Color(color.r, color.g, color.b, 0.2))
+	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 48, Color(color.r, color.g, color.b, 0.54), 2.0)
+
+
+func _request_redraw() -> void:
+	redraw_request_count += 1
+	queue_redraw()

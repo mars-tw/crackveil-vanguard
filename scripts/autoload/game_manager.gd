@@ -63,6 +63,7 @@ var boss_kill_time: float = -1.0
 var boss_phase_two_time: float = -1.0
 var next_shop_time: float = 90.0
 var forced_run_seed: int = 0
+var magnetic_reclaim_enabled: bool = false
 
 
 func _ready() -> void:
@@ -99,6 +100,7 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	boss_kill_time = -1.0
 	boss_phase_two_time = -1.0
 	next_shop_time = 90.0
+	magnetic_reclaim_enabled = false
 	get_tree().paused = false
 
 	if reset_player and player != null and player.has_method("reset_for_run"):
@@ -146,6 +148,7 @@ func get_stats() -> Dictionary:
 		"manual_paused": manual_paused,
 		"waiting_for_upgrade": waiting_for_upgrade,
 		"waiting_for_shop": waiting_for_shop,
+		"magnetic_reclaim_enabled": magnetic_reclaim_enabled,
 		"is_game_over": is_game_over
 	}
 
@@ -290,26 +293,53 @@ func _request_shop() -> void:
 
 
 func _build_shop_options() -> Array:
-	return [
-		{
+	var options := [
+		_shop_option({
 			"id": "heal_30",
 			"name": "裂隙急救",
 			"description": "花 8 金幣，回復全隊 30 HP",
 			"cost": 8
-		},
-		{
+		}),
+		_shop_option({
 			"id": "random_qualitative",
 			"name": "偏壓改裝",
 			"description": "花 18 金幣，隨機取得一張質變升級",
 			"cost": 18
-		},
-		{
+		}),
+		_shop_option({
 			"id": "temporary_shield",
 			"name": "帷幕護盾",
 			"description": "花 12 金幣，獲得 30 點暫時護盾",
 			"cost": 12
-		}
+		})
 	]
+	return options
+
+
+func _shop_option(option: Dictionary) -> Dictionary:
+	var option_id := str(option.get("id", ""))
+	var reason := _shop_option_disabled_reason(option_id)
+	option["enabled"] = reason == ""
+	option["disabled_reason"] = reason
+	return option
+
+
+func _shop_option_disabled_reason(option_id: String) -> String:
+	match option_id:
+		"heal_30":
+			if squad_manager == null or not is_instance_valid(squad_manager) or not squad_manager.has_method("can_heal_members") or not squad_manager.can_heal_members():
+				return "全隊已滿血"
+		"random_qualitative":
+			if squad_manager == null or not is_instance_valid(squad_manager) or not squad_manager.has_method("has_available_qualitative_upgrade") or not squad_manager.has_available_qualitative_upgrade():
+				return "沒有可套用的質變"
+		"temporary_shield":
+			if squad_manager == null or not is_instance_valid(squad_manager) or not squad_manager.has_method("get_member_count") or squad_manager.get_member_count() <= 0:
+				return "沒有存活隊員"
+	return ""
+
+
+func _is_shop_option_meaningful(option_id: String) -> bool:
+	return _shop_option_disabled_reason(option_id) == ""
 
 
 func apply_shop_purchase(option: Dictionary) -> void:
@@ -318,6 +348,10 @@ func apply_shop_purchase(option: Dictionary) -> void:
 	var option_id := str(option.get("id", ""))
 	if option_id == "skip":
 		_close_shop()
+		return
+
+	if not _is_shop_option_meaningful(option_id):
+		emit_stats()
 		return
 
 	var cost := int(option.get("cost", 0))
@@ -338,6 +372,14 @@ func apply_shop_purchase(option: Dictionary) -> void:
 		_close_shop()
 	elif not success:
 		emit_stats()
+
+
+func enable_magnetic_reclaim() -> void:
+	magnetic_reclaim_enabled = true
+
+
+func has_magnetic_reclaim() -> bool:
+	return magnetic_reclaim_enabled
 
 
 func _close_shop() -> void:

@@ -37,14 +37,19 @@ func get_display_name() -> String:
 	return str(data.get("display_name"))
 
 
-func apply_data_upgrade(upgrade_kind: String) -> void:
+func apply_data_upgrade(upgrade_kind: String) -> bool:
 	if data == null:
-		return
+		return false
+	if data.has_method("can_apply_upgrade") and not data.can_apply_upgrade(upgrade_kind):
+		return false
 	if data.has_method("apply_upgrade"):
 		data.apply_upgrade(upgrade_kind)
+	else:
+		return false
 	stats_cache_dirty = true
 	_rebuild_stats_cache()
 	_on_data_changed()
+	return true
 
 
 func _on_data_changed() -> void:

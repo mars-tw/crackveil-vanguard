@@ -335,8 +335,7 @@ func upgrade_weapon(weapon_id: String, upgrade_kind: String) -> bool:
 		return false
 
 	if weapon.has_method("apply_data_upgrade"):
-		weapon.apply_data_upgrade(upgrade_kind)
-		return true
+		return bool(weapon.apply_data_upgrade(upgrade_kind))
 	return false
 
 

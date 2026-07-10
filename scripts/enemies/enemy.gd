@@ -306,15 +306,16 @@ func _fire_ranged_projectile(target: Node2D) -> void:
 	var direction := (target.global_position - global_position).normalized()
 	if direction == Vector2.ZERO:
 		direction = Vector2.RIGHT
-	EntityFactory.spawn_enemy_projectile(global_position + direction * (radius + 8.0), direction, _enemy_projectile_stats(), self)
+	EntityFactory.spawn_enemy_projectile(global_position + direction * (radius + 8.0), direction, _enemy_projectile_stats(), self, "normal")
 
 
 func _fire_ring_projectiles(count: int) -> void:
 	var projectile_count: int = max(1, count)
 	var projectile_stats := _enemy_projectile_stats(0.82)
+	var priority := "boss" if is_boss else "normal"
 	for index in range(projectile_count):
 		var direction := Vector2.RIGHT.rotated(TAU * float(index) / float(projectile_count))
-		EntityFactory.spawn_enemy_projectile(global_position + direction * (radius + 8.0), direction, projectile_stats, self)
+		EntityFactory.spawn_enemy_projectile(global_position + direction * (radius + 8.0), direction, projectile_stats, self, priority)
 
 
 func _enemy_projectile_stats(damage_multiplier: float = 1.0) -> Dictionary:
@@ -471,9 +472,8 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 		EntityFactory.call_deferred("spawn_gold_coin", coin_position, gold_value)
 	if spawns_on_death:
 		_spawn_death_children()
-	if GameManager.squad_manager != null and is_instance_valid(GameManager.squad_manager) and GameManager.squad_manager.has_method("has_weapon_modifier"):
-		if GameManager.squad_manager.has_weapon_modifier("magnetic_reclaim"):
-			EntityFactory.call_deferred("magnetize_xp_near", global_position, 155.0)
+	if GameManager.has_method("has_magnetic_reclaim") and GameManager.has_magnetic_reclaim():
+		EntityFactory.call_deferred("magnetize_xp_near", global_position, 155.0)
 
 	EntityFactory.release_enemy_deferred(self)
 

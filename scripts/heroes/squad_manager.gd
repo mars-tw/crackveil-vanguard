@@ -222,8 +222,11 @@ func apply_upgrade(upgrade: Dictionary) -> void:
 			recruit_hero(str(upgrade.get("hero_id", "")))
 		"upgrade_hero_weapon":
 			var hero := get_member_by_id(str(upgrade.get("hero_id", "")))
+			var upgrade_kind := str(upgrade.get("upgrade_kind", "weapon_damage"))
 			if hero != null and hero.has_method("upgrade_weapon"):
-				hero.upgrade_weapon(str(upgrade.get("weapon_id", "")), str(upgrade.get("upgrade_kind", "weapon_damage")))
+				var applied: bool = hero.upgrade_weapon(str(upgrade.get("weapon_id", "")), upgrade_kind)
+				if applied and upgrade_kind == "magnetic_reclaim" and GameManager.has_method("enable_magnetic_reclaim"):
+					GameManager.enable_magnetic_reclaim()
 		_:
 			if leader != null and is_instance_valid(leader) and leader.has_method("apply_personal_upgrade"):
 				leader.apply_personal_upgrade(upgrade)
@@ -241,6 +244,17 @@ func heal_members(amount: float) -> bool:
 	return applied
 
 
+func can_heal_members() -> bool:
+	for member in get_members():
+		if member == null or not is_instance_valid(member):
+			continue
+		if bool(member.get("is_alive")) == false:
+			continue
+		if float(member.get("current_hp")) < float(member.get("max_hp")):
+			return true
+	return false
+
+
 func apply_temporary_shield(amount: float, duration: float) -> bool:
 	var applied := false
 	for member in get_members():
@@ -253,6 +267,25 @@ func apply_temporary_shield(amount: float, duration: float) -> bool:
 
 
 func apply_random_qualitative_upgrade() -> bool:
+	var options: Array = _collect_available_qualitative_options()
+	if options.is_empty():
+		return false
+	var option: Dictionary = options[randi() % options.size()]
+	var hero := get_member_by_id(str(option.get("hero_id", "")))
+	if hero == null or not hero.has_method("upgrade_weapon"):
+		return false
+	var upgrade_kind := str(option.get("upgrade_kind", ""))
+	var applied: bool = hero.upgrade_weapon(str(option.get("weapon_id", "")), upgrade_kind)
+	if applied and upgrade_kind == "magnetic_reclaim" and GameManager.has_method("enable_magnetic_reclaim"):
+		GameManager.enable_magnetic_reclaim()
+	return applied
+
+
+func has_available_qualitative_upgrade() -> bool:
+	return not _collect_available_qualitative_options().is_empty()
+
+
+func _collect_available_qualitative_options() -> Array:
 	var options: Array = []
 	for member in members:
 		if member == null or not is_instance_valid(member):
@@ -268,14 +301,7 @@ func apply_random_qualitative_upgrade() -> bool:
 			if weapon_data == null:
 				continue
 			_append_qualitative_upgrade_options(options, member, str(weapon_id), weapon_data, hero_name)
-
-	if options.is_empty():
-		return false
-	var option: Dictionary = options[randi() % options.size()]
-	var hero := get_member_by_id(str(option.get("hero_id", "")))
-	if hero == null or not hero.has_method("upgrade_weapon"):
-		return false
-	return hero.upgrade_weapon(str(option.get("weapon_id", "")), str(option.get("upgrade_kind", "")))
+	return options
 
 
 func has_weapon_modifier(modifier_id: String) -> bool:

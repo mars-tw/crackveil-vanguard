@@ -18,6 +18,7 @@ const LIGHTNING_ARC_SCENE: PackedScene = preload("res://scenes/vfx/LightningArc.
 const PREWARM_COUNTS: Dictionary = {
 	"enemy": 220,
 	"projectile": 240,
+	"fork_projectile": 56,
 	"orbit_projectile": 40,
 	"explosion": 80,
 	"hazard_zone": 8,
@@ -33,7 +34,8 @@ const DAMAGE_NUMBER_MERGE_RADIUS := 48.0
 const DAMAGE_NUMBER_MERGE_AGE := 0.24
 const EXPLOSION_CAP := 36
 const HAZARD_ZONE_CAP := 8
-const ENEMY_PROJECTILE_CAP := 48
+const FORK_PROJECTILE_CAP := 48
+const ENEMY_PROJECTILE_CAP := 72
 const DEATH_BURST_CAP := 20
 const LIGHTNING_ARC_CAP := 32
 const XP_GEM_CAP := 180
@@ -46,7 +48,12 @@ var next_enemy_spawn_token: int = 1
 var enemy_group_scan_count: int = 0
 var active_damage_numbers: Array[Node] = []
 var active_enemy_projectiles: Array[Node] = []
+var active_fork_projectiles: Array[Node] = []
+var active_hazard_zones: Array[Node] = []
 var active_xp_gems: Array[Node] = []
+var enemy_projectile_reclaims: int = 0
+var fork_projectile_cap_skips: int = 0
+var hazard_zone_reclaims: int = 0
 
 
 func _ready() -> void:
@@ -63,15 +70,21 @@ func initialize_for_arena(arena: Node) -> void:
 	pools.clear()
 	active_damage_numbers.clear()
 	active_enemy_projectiles.clear()
+	active_fork_projectiles.clear()
+	active_hazard_zones.clear()
 	active_xp_gems.clear()
 	next_enemy_spawn_token = 1
 	enemy_group_scan_count = 0
+	enemy_projectile_reclaims = 0
+	fork_projectile_cap_skips = 0
+	hazard_zone_reclaims = 0
 	pool_root = Node.new()
 	pool_root.name = "Pools"
 	arena.add_child(pool_root)
 
 	_create_pool("enemy", ENEMY_SCENE)
 	_create_pool("projectile", PROJECTILE_SCENE)
+	_create_pool("fork_projectile", PROJECTILE_SCENE)
 	_create_pool("orbit_projectile", ORBIT_PROJECTILE_SCENE)
 	_create_pool("explosion", EXPLOSION_AREA_SCENE)
 	_create_pool("hazard_zone", HAZARD_ZONE_SCENE)
@@ -118,13 +131,36 @@ func spawn_projectile(world_position: Vector2, direction: Vector2, stats: Dictio
 	return projectile
 
 
-func spawn_enemy_projectile(world_position: Vector2, direction: Vector2, stats: Dictionary, source: Node) -> Node:
+func spawn_fork_projectile(world_position: Vector2, direction: Vector2, stats: Dictionary, source: Node) -> Node:
+	_compact_active_fork_projectiles()
+	if active_fork_projectiles.size() >= FORK_PROJECTILE_CAP:
+		fork_projectile_cap_skips += 1
+		return null
+	var projectile := _acquire("fork_projectile")
+	if projectile == null:
+		return null
+	projectile.pool_reset({
+		"position": world_position,
+		"direction": direction,
+		"stats": stats,
+		"source": source
+	})
+	active_fork_projectiles.append(projectile)
+	return projectile
+
+
+func spawn_enemy_projectile(world_position: Vector2, direction: Vector2, stats: Dictionary, source: Node, priority: String = "normal") -> Node:
 	_compact_active_enemy_projectiles()
 	if active_enemy_projectiles.size() >= ENEMY_PROJECTILE_CAP:
-		return null
+		if priority == "boss":
+			if not _reclaim_oldest_normal_enemy_projectile():
+				return null
+		else:
+			return null
 	var projectile := spawn_projectile(world_position, direction, stats, source)
 	if projectile == null:
 		return null
+	projectile.set_meta("_enemy_projectile_priority", priority)
 	active_enemy_projectiles.append(projectile)
 	return projectile
 
@@ -159,8 +195,9 @@ func spawn_explosion(world_position: Vector2, stats: Dictionary, source: Node) -
 
 
 func spawn_hazard_zone(world_position: Vector2, stats: Dictionary, source: Node) -> Node:
-	if get_pool_live_count("hazard_zone") >= HAZARD_ZONE_CAP:
-		return null
+	_compact_active_hazard_zones()
+	if active_hazard_zones.size() >= HAZARD_ZONE_CAP:
+		_reclaim_oldest_hazard_zone()
 	var hazard := _acquire("hazard_zone")
 	if hazard == null:
 		return null
@@ -169,6 +206,7 @@ func spawn_hazard_zone(world_position: Vector2, stats: Dictionary, source: Node)
 		"stats": stats,
 		"source": source
 	})
+	active_hazard_zones.append(hazard)
 	return hazard
 
 
@@ -306,7 +344,11 @@ func release_enemy_deferred(enemy: Node) -> void:
 func release_projectile(projectile: Node) -> void:
 	_mark_inactive_for_release(projectile)
 	active_enemy_projectiles.erase(projectile)
-	call_deferred("_release", "projectile", projectile)
+	active_fork_projectiles.erase(projectile)
+	var pool_name := str(projectile.get_meta("_node_pool_name", "projectile")) if projectile != null and is_instance_valid(projectile) else "projectile"
+	if pool_name != "projectile" and pool_name != "fork_projectile":
+		pool_name = "projectile"
+	call_deferred("_release", pool_name, projectile)
 
 
 func release_orbit_projectile(projectile: Node) -> void:
@@ -321,6 +363,7 @@ func release_explosion(explosion: Node) -> void:
 
 func release_hazard_zone(hazard: Node) -> void:
 	_mark_inactive_for_release(hazard)
+	active_hazard_zones.erase(hazard)
 	_release("hazard_zone", hazard)
 
 
@@ -392,6 +435,9 @@ func get_pool_stats() -> Dictionary:
 	if enemy_spatial_index != null:
 		stats["enemy_queries"] = enemy_spatial_index.get("query_count")
 	stats["enemy_group_scans"] = enemy_group_scan_count
+	stats["enemy_projectile_reclaims"] = enemy_projectile_reclaims
+	stats["fork_projectile_cap_skips"] = fork_projectile_cap_skips
+	stats["hazard_zone_reclaims"] = hazard_zone_reclaims
 	return stats
 
 
@@ -449,6 +495,30 @@ func _compact_active_enemy_projectiles() -> void:
 	active_enemy_projectiles = compacted
 
 
+func _compact_active_fork_projectiles() -> void:
+	var compacted: Array[Node] = []
+	for projectile in active_fork_projectiles:
+		if projectile == null or not is_instance_valid(projectile):
+			continue
+		var active_value: Variant = projectile.get("is_active")
+		if active_value != null and not bool(active_value):
+			continue
+		compacted.append(projectile)
+	active_fork_projectiles = compacted
+
+
+func _compact_active_hazard_zones() -> void:
+	var compacted: Array[Node] = []
+	for hazard in active_hazard_zones:
+		if hazard == null or not is_instance_valid(hazard):
+			continue
+		var active_value: Variant = hazard.get("is_active")
+		if active_value != null and not bool(active_value):
+			continue
+		compacted.append(hazard)
+	active_hazard_zones = compacted
+
+
 func _compact_active_xp_gems() -> void:
 	var compacted: Array[Node] = []
 	for gem in active_xp_gems:
@@ -459,6 +529,31 @@ func _compact_active_xp_gems() -> void:
 			continue
 		compacted.append(gem)
 	active_xp_gems = compacted
+
+
+func _reclaim_oldest_normal_enemy_projectile() -> bool:
+	for projectile in active_enemy_projectiles.duplicate():
+		if projectile == null or not is_instance_valid(projectile):
+			continue
+		var active_value: Variant = projectile.get("is_active")
+		if active_value != null and not bool(active_value):
+			continue
+		if str(projectile.get_meta("_enemy_projectile_priority", "normal")) == "boss":
+			continue
+		enemy_projectile_reclaims += 1
+		release_projectile(projectile)
+		return true
+	return false
+
+
+func _reclaim_oldest_hazard_zone() -> bool:
+	_compact_active_hazard_zones()
+	if active_hazard_zones.is_empty():
+		return false
+	var hazard := active_hazard_zones[0]
+	hazard_zone_reclaims += 1
+	release_hazard_zone(hazard)
+	return true
 
 
 func _nearest_active_xp_gem(world_position: Vector2) -> Node:
@@ -568,6 +663,8 @@ func _scene_for_pool(pool_name: String) -> PackedScene:
 		"enemy":
 			return ENEMY_SCENE
 		"projectile":
+			return PROJECTILE_SCENE
+		"fork_projectile":
 			return PROJECTILE_SCENE
 		"orbit_projectile":
 			return ORBIT_PROJECTILE_SCENE

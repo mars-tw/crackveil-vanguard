@@ -75,11 +75,10 @@ func show_options(options: Array) -> void:
 	gold_label.text = "金幣 %d" % GameManager.gold
 
 	for option in options:
-		var cost := int(option.get("cost", 0))
 		var button := Button.new()
-		button.text = "%s\n%d 金幣\n\n%s" % [str(option.get("name", "商品")), cost, str(option.get("description", ""))]
+		button.text = _option_text(option, GameManager.gold)
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		button.disabled = GameManager.gold < cost
+		button.disabled = _option_disabled(option, GameManager.gold)
 		button.set_meta("shop_option", option)
 		button.add_theme_font_size_override("font_size", 19)
 		button.pressed.connect(_on_purchase_pressed.bind(option))
@@ -110,7 +109,8 @@ func _on_stats_changed(stats: Dictionary) -> void:
 		gold_label.text = "金幣 %d" % current_gold
 	for button in option_buttons:
 		var option: Dictionary = button.get_meta("shop_option", {})
-		button.disabled = current_gold < int(option.get("cost", 0))
+		button.text = _option_text(option, current_gold)
+		button.disabled = _option_disabled(option, current_gold)
 
 
 func _apply_responsive_layout() -> void:
@@ -156,3 +156,31 @@ func _apply_responsive_layout() -> void:
 	skip_button.offset_right = 86.0
 	skip_button.offset_top = panel_height - 64.0
 	skip_button.offset_bottom = panel_height - 24.0
+
+
+func _option_disabled(option: Dictionary, current_gold: int) -> bool:
+	if not bool(option.get("enabled", true)):
+		return true
+	return current_gold < int(option.get("cost", 0))
+
+
+func _option_text(option: Dictionary, current_gold: int) -> String:
+	var cost := int(option.get("cost", 0))
+	var suffix := ""
+	var disabled_reason := _disabled_reason(option, current_gold)
+	if disabled_reason != "":
+		suffix = "\n\n%s" % disabled_reason
+	return "%s\n%d 金幣\n\n%s%s" % [
+		str(option.get("name", "商品")),
+		cost,
+		str(option.get("description", "")),
+		suffix
+	]
+
+
+func _disabled_reason(option: Dictionary, current_gold: int) -> String:
+	if not bool(option.get("enabled", true)):
+		return str(option.get("disabled_reason", "暫時無法購買"))
+	if current_gold < int(option.get("cost", 0)):
+		return "金幣不足"
+	return ""
