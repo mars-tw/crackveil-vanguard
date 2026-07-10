@@ -12,7 +12,9 @@ const SFX_PATHS: Dictionary = {
 	"upgrade": "res://assets/audio/upgrade.wav",
 	"contract": "res://assets/audio/contract.wav",
 	"elite": "res://assets/audio/elite.wav",
-	"death": "res://assets/audio/death.wav"
+	"death": "res://assets/audio/death.wav",
+	"pulse": "res://assets/audio/pulse.wav",
+	"pickup": "res://assets/audio/pickup.wav"
 }
 const SFX_COOLDOWNS: Dictionary = {
 	"fire": 0.07,
@@ -20,7 +22,9 @@ const SFX_COOLDOWNS: Dictionary = {
 	"upgrade": 0.08,
 	"contract": 0.12,
 	"elite": 0.8,
-	"death": 1.0
+	"death": 1.0,
+	"pulse": 0.18,
+	"pickup": 0.025
 }
 
 var master_volume: float = 0.75

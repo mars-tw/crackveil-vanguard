@@ -1,12 +1,14 @@
 extends CanvasLayer
 
 signal continue_requested
+signal main_menu_requested
 
 var root: Control
 var panel: Panel
 var summary_label: Label
 var copy_seed_button: Button
 var continue_button: Button
+var main_menu_button: Button
 
 
 func _ready() -> void:
@@ -63,6 +65,11 @@ func _build_ui() -> void:
 	continue_button.text = "繼續無盡"
 	continue_button.pressed.connect(_on_continue_pressed)
 	panel.add_child(continue_button)
+
+	main_menu_button = Button.new()
+	main_menu_button.text = "回主選單"
+	main_menu_button.pressed.connect(_on_main_menu_pressed)
+	panel.add_child(main_menu_button)
 	_apply_responsive_layout()
 
 
@@ -87,6 +94,11 @@ func _on_continue_pressed() -> void:
 	continue_requested.emit()
 
 
+func _on_main_menu_pressed() -> void:
+	root.visible = false
+	main_menu_requested.emit()
+
+
 func _on_copy_seed_pressed() -> void:
 	GameManager.copy_current_run_seed_to_clipboard()
 
@@ -103,7 +115,7 @@ func _apply_responsive_layout() -> void:
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = Vector2(1280.0, 720.0)
 	var panel_width: float = min(viewport_size.x - 32.0, 460.0)
-	var panel_height: float = 360.0
+	var panel_height: float = 402.0
 
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5
@@ -123,15 +135,23 @@ func _apply_responsive_layout() -> void:
 	copy_seed_button.anchor_right = 0.5
 	copy_seed_button.offset_left = -98.0
 	copy_seed_button.offset_right = 98.0
-	copy_seed_button.offset_top = panel_height - 136.0
-	copy_seed_button.offset_bottom = panel_height - 94.0
+	copy_seed_button.offset_top = panel_height - 178.0
+	copy_seed_button.offset_bottom = panel_height - 136.0
 
 	continue_button.anchor_left = 0.5
 	continue_button.anchor_right = 0.5
 	continue_button.offset_left = -98.0
 	continue_button.offset_right = 98.0
-	continue_button.offset_top = panel_height - 88.0
-	continue_button.offset_bottom = panel_height - 42.0
+	continue_button.offset_top = panel_height - 126.0
+	continue_button.offset_bottom = panel_height - 84.0
+
+	if main_menu_button != null:
+		main_menu_button.anchor_left = 0.5
+		main_menu_button.anchor_right = 0.5
+		main_menu_button.offset_left = -98.0
+		main_menu_button.offset_right = 98.0
+		main_menu_button.offset_top = panel_height - 74.0
+		main_menu_button.offset_bottom = panel_height - 32.0
 
 
 func _new_achievement_text(summary: Dictionary) -> String:

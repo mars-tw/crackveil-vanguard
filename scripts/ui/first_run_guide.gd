@@ -47,7 +47,7 @@ func _build_ui() -> void:
 	panel.add_child(title_label)
 
 	body_label = Label.new()
-	body_label.text = "移動：WASD / 方向鍵 / 左下搖桿\n武器會自動攻擊最近敵人\n收集藍色寶石升級，從三張卡選一張"
+	body_label.text = "移動：WASD / 方向鍵 / 左下搖桿\n隊長技：空白鍵 / 右下按鈕釋放裂隙脈衝\n武器會自動攻擊最近敵人\n收集藍色寶石升級，從三張卡選一張"
 	body_label.anchor_left = 0.0
 	body_label.anchor_right = 1.0
 	body_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -104,7 +104,7 @@ func _apply_responsive_layout() -> void:
 		viewport_size = Vector2(1280.0, 720.0)
 	var portrait := viewport_size.y > viewport_size.x
 	var panel_width: float = min(viewport_size.x - 32.0, 560.0 if not portrait else 420.0)
-	var panel_height: float = 284.0 if not portrait else 332.0
+	var panel_height: float = 312.0 if not portrait else 356.0
 
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5

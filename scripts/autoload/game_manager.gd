@@ -9,6 +9,7 @@ signal stage_victory_requested(summary: Dictionary)
 signal contract_requested(options: Array)
 signal toast_requested(message: String)
 signal guide_replay_requested
+signal level_flash_requested
 
 const SHOP_FIRST_TIME := 75.0
 const SHOP_SECOND_TIME := 150.0
@@ -18,6 +19,7 @@ const SHOP_BOSS_WINDOW_BEFORE := 15.0
 const SHOP_BOSS_WINDOW_AFTER := 25.0
 const SHOP_BOSS_ACTIVE_RETRY := 5.0
 const SHOP_POST_VICTORY_GRACE := 12.0
+const COMBO_WINDOW := 1.15
 
 const CONTRACT_POOL: Array = [
 	{
@@ -178,6 +180,8 @@ var seen_affix_toasts: Dictionary = {}
 var pending_toasts: Array[String] = []
 var run_token: int = 0
 var hit_stop_token: int = 0
+var combo_count: int = 0
+var combo_last_kill_time: float = -999.0
 
 const META_HP_APPLIED_KEY := "_cv_meta_hp_multiplier_applied"
 const META_PICKUP_APPLIED_KEY := "_cv_meta_pickup_bonus_applied"
@@ -231,6 +235,8 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	echo_shards_awarded_this_run = 0
 	seen_affix_toasts.clear()
 	run_token += 1
+	combo_count = 0
+	combo_last_kill_time = -999.0
 	if AchievementProgress != null and AchievementProgress.has_method("start_run"):
 		AchievementProgress.start_run()
 	system_pause_owners.clear()
@@ -418,9 +424,26 @@ func add_kill(amount: int = 1) -> void:
 	if not game_running:
 		return
 	kills += amount
+	_record_combo_kill(amount)
 	if AchievementProgress != null and AchievementProgress.has_method("record_kills"):
 		AchievementProgress.record_kills(kills)
 	emit_stats()
+
+
+func _record_combo_kill(amount: int) -> void:
+	if amount <= 0:
+		return
+	if elapsed_time - combo_last_kill_time <= COMBO_WINDOW:
+		combo_count += amount
+	else:
+		combo_count = amount
+	combo_last_kill_time = elapsed_time
+	if combo_count < 3:
+		return
+	var combo_position := Vector2.ZERO
+	if player != null and is_instance_valid(player):
+		combo_position = player.global_position + Vector2(0.0, -72.0)
+	EntityFactory.spawn_combo_text(combo_count, combo_position)
 
 
 func add_gold(amount: int) -> void:
@@ -594,6 +617,7 @@ func _try_request_pending_level_up() -> bool:
 	xp -= xp_required
 	level += 1
 	xp_required = int(round(float(xp_required) * 1.25 + 5.0))
+	level_flash_requested.emit()
 	_request_level_up()
 	return true
 

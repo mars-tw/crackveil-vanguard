@@ -11,6 +11,7 @@ var orbit_angle: float = 0.0
 var stats: Dictionary = {}
 var hit_cooldowns: Dictionary = {}
 var is_active: bool = false
+var hit_flash_timer: float = 0.0
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
@@ -55,6 +56,7 @@ func pool_on_release() -> void:
 		glow.visible = false
 	if trail != null:
 		trail.visible = false
+	hit_flash_timer = 0.0
 	var shape_node := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape_node != null:
 		shape_node.disabled = true
@@ -100,6 +102,7 @@ func _physics_process(delta: float) -> void:
 
 	_tick_hit_cooldowns(delta)
 	_damage_overlapping_enemies()
+	_tick_hit_flash(delta)
 
 
 func _tick_hit_cooldowns(delta: float) -> void:
@@ -145,8 +148,23 @@ func _damage_overlapping_enemies() -> void:
 			body.take_damage(float(stats.get("damage", 8.0)) * GameManager.get_outgoing_damage_multiplier(owner_player), global_position)
 			hit_cooldowns[hit_key] = float(stats.get("hit_interval", 0.42))
 			damaged_count += 1
+			hit_flash_timer = 0.09
 			if weapon_node != null and is_instance_valid(weapon_node) and weapon_node.has_method("register_orbit_hit"):
 				weapon_node.register_orbit_hit()
+
+
+func _tick_hit_flash(delta: float) -> void:
+	if hit_flash_timer > 0.0:
+		hit_flash_timer = max(hit_flash_timer - delta, 0.0)
+	var color: Color = stats.get("color", Color(0.8, 0.9, 1.0))
+	var ratio := hit_flash_timer / 0.09 if hit_flash_timer > 0.0 else 0.0
+	var display_color := color
+	if ratio > 0.0:
+		display_color = color.lerp(Color.WHITE, ratio)
+	if sprite != null:
+		sprite.modulate = display_color
+	if glow != null:
+		glow.modulate = Color(display_color.r, display_color.g, display_color.b, 0.34 + ratio * 0.34)
 
 
 func _hit_key_for(body: Node) -> int:

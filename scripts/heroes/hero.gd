@@ -1,6 +1,16 @@
 class_name Hero
 extends CharacterBody2D
 
+const LEADER_CAMERA_ZOOM := Vector2(1.28, 1.28)
+const RIFT_PULSE_COOLDOWN := 3.2
+const RIFT_PULSE_RANGE := 195.0
+const RIFT_PULSE_HALF_ANGLE := deg_to_rad(38.0)
+const RIFT_PULSE_DAMAGE := 30.0
+const RIFT_PULSE_KNOCKBACK := 46.0
+const RIFT_PULSE_SLOW_DURATION := 0.55
+const RIFT_PULSE_SLOW_STRENGTH := 0.34
+const RIFT_PULSE_MAX_TARGETS := 28
+
 @export var weapon_catalog: Resource = preload("res://resources/weapons/weapon_catalog.tres")
 @export var invulnerability_time: float = 0.65
 
@@ -31,6 +41,8 @@ var cached_facing_token: int = 0
 var screen_shake_timer: float = 0.0
 var screen_shake_duration: float = 0.0
 var screen_shake_strength: float = 0.0
+var active_ability_cooldown_timer: float = 0.0
+var active_ability_cast_count: int = 0
 
 @onready var visual: Node2D = $Visual
 @onready var weapons_root: Node2D = $Weapons
@@ -80,7 +92,10 @@ func _apply_hero_data() -> void:
 	if camera != null:
 		camera.enabled = is_leader
 		if is_leader:
+			camera.zoom = LEADER_CAMERA_ZOOM
 			camera.make_current()
+		else:
+			camera.zoom = Vector2.ONE
 
 
 func reset_for_run() -> void:
@@ -94,6 +109,8 @@ func reset_for_run() -> void:
 	screen_shake_timer = 0.0
 	screen_shake_duration = 0.0
 	screen_shake_strength = 0.0
+	active_ability_cooldown_timer = 0.0
+	active_ability_cast_count = 0
 	movement_slow_timer = 0.0
 	movement_slow_strength = 0.0
 	is_alive = true
@@ -173,6 +190,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(delta: float) -> void:
+	_tick_active_ability_cooldown(delta)
 	_update_flash()
 	_update_camera_shake(delta)
 
@@ -209,6 +227,105 @@ func get_facing_direction() -> Vector2:
 	if last_move_direction == Vector2.ZERO:
 		return Vector2.RIGHT
 	return last_move_direction.normalized()
+
+
+func try_cast_active_ability() -> bool:
+	if not can_cast_active_ability():
+		return false
+
+	var forward := _active_ability_direction()
+	active_ability_cooldown_timer = RIFT_PULSE_COOLDOWN
+	active_ability_cast_count += 1
+	_cast_rift_pulse_damage(forward)
+	_spawn_rift_pulse_visuals(forward)
+	request_screen_shake(3.0, 0.12)
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("pulse")
+	GameManager.emit_stats()
+	return true
+
+
+func can_cast_active_ability() -> bool:
+	return (
+		is_leader
+		and hero_id == "rift_captain"
+		and is_alive
+		and active_ability_cooldown_timer <= 0.0
+		and GameManager.game_running
+		and not get_tree().paused
+	)
+
+
+func get_active_ability_cooldown_remaining() -> float:
+	return max(active_ability_cooldown_timer, 0.0)
+
+
+func get_active_ability_cooldown_duration() -> float:
+	return RIFT_PULSE_COOLDOWN
+
+
+func get_active_ability_cooldown_ratio() -> float:
+	return clamp(active_ability_cooldown_timer / RIFT_PULSE_COOLDOWN, 0.0, 1.0)
+
+
+func get_active_ability_cast_count() -> int:
+	return active_ability_cast_count
+
+
+func _tick_active_ability_cooldown(delta: float) -> void:
+	if active_ability_cooldown_timer <= 0.0:
+		return
+	active_ability_cooldown_timer = max(active_ability_cooldown_timer - delta, 0.0)
+
+
+func _active_ability_direction() -> Vector2:
+	var target := get_nearest_enemy(RIFT_PULSE_RANGE + 120.0)
+	if target != null and is_instance_valid(target):
+		var to_target := target.global_position - global_position
+		if to_target.length_squared() > 1.0:
+			return to_target.normalized()
+	return get_facing_direction()
+
+
+func _cast_rift_pulse_damage(forward: Vector2) -> void:
+	var damaged_count := 0
+	var pulse_damage := RIFT_PULSE_DAMAGE * GameManager.get_outgoing_damage_multiplier(self)
+	for enemy in EntityFactory.get_enemies_in_radius(global_position, RIFT_PULSE_RANGE + 42.0):
+		if damaged_count >= RIFT_PULSE_MAX_TARGETS:
+			return
+		if enemy == null or not is_instance_valid(enemy):
+			continue
+		var active_value: Variant = enemy.get("is_active")
+		if active_value != null and not bool(active_value):
+			continue
+		var to_enemy: Vector2 = enemy.global_position - global_position
+		var distance := to_enemy.length()
+		var enemy_radius: float = float(enemy.get("radius"))
+		if distance > RIFT_PULSE_RANGE + enemy_radius:
+			continue
+		if distance > 0.001 and abs(forward.angle_to(to_enemy.normalized())) > RIFT_PULSE_HALF_ANGLE:
+			continue
+		if enemy.has_method("take_damage"):
+			enemy.take_damage(pulse_damage, global_position)
+			damaged_count += 1
+		if enemy.has_method("apply_knockback"):
+			enemy.apply_knockback(global_position, RIFT_PULSE_KNOCKBACK)
+		if enemy.has_method("apply_status_effect"):
+			enemy.apply_status_effect("slow", RIFT_PULSE_SLOW_DURATION, RIFT_PULSE_SLOW_STRENGTH)
+
+
+func _spawn_rift_pulse_visuals(forward: Vector2) -> void:
+	var origin := global_position + forward * (hit_radius + 8.0)
+	var pulse_color := Color(0.48, 0.96, 1.0, 0.95)
+	var fan_steps := 5
+	for index in range(fan_steps):
+		var t := 0.0 if fan_steps <= 1 else float(index) / float(fan_steps - 1)
+		var angle: float = lerp(-RIFT_PULSE_HALF_ANGLE, RIFT_PULSE_HALF_ANGLE, t)
+		var direction := forward.rotated(angle).normalized()
+		var mid := origin + direction * (RIFT_PULSE_RANGE * 0.56) + direction.rotated(PI * 0.5) * sin(t * PI) * 8.0
+		var tip := origin + direction * RIFT_PULSE_RANGE
+		EntityFactory.spawn_lightning_arc([origin, mid, tip], pulse_color, 0.16)
+	EntityFactory.spawn_death_burst(origin + forward * 92.0, Color(0.42, 0.95, 1.0), 1.18)
 
 
 func _update_facing(delta: float) -> void:

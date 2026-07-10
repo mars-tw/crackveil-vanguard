@@ -15,6 +15,10 @@ var magnetized: bool = false
 var forced_collector: Node2D = null
 var forced_magnet_timer: float = 0.0
 var bob_phase: float = 0.0
+var scatter_timer: float = 0.0
+var arc_height: float = 0.0
+var arc_velocity: float = 0.0
+var magnet_time: float = 0.0
 var is_active: bool = false
 var sprite: Sprite2D = null
 var shadow: Sprite2D = null
@@ -49,6 +53,10 @@ func pool_on_release() -> void:
 	forced_collector = null
 	forced_magnet_timer = 0.0
 	bob_phase = 0.0
+	scatter_timer = 0.0
+	arc_height = 0.0
+	arc_velocity = 0.0
+	magnet_time = 0.0
 	rotation = 0.0
 	if sprite != null:
 		sprite.rotation = 0.0
@@ -60,15 +68,19 @@ func pool_on_release() -> void:
 
 func pool_reset(args: Dictionary) -> void:
 	global_position = args.get("position", Vector2.ZERO)
-	setup(int(args.get("amount", 1)), args.get("velocity", Vector2.ZERO))
+	setup(int(args.get("amount", 1)), args.get("velocity", Vector2.ZERO), float(args.get("scatter_time", 0.24)))
 
 
-func setup(amount: int, start_velocity: Vector2 = Vector2.ZERO) -> void:
+func setup(amount: int, start_velocity: Vector2 = Vector2.ZERO, start_scatter_time: float = 0.24) -> void:
 	value = amount
 	drift_velocity = start_velocity
 	magnetized = false
 	forced_collector = null
 	forced_magnet_timer = 0.0
+	scatter_timer = max(0.0, start_scatter_time)
+	arc_height = 0.0
+	arc_velocity = randf_range(82.0, 132.0)
+	magnet_time = 0.0
 	rotation = 0.0
 	_apply_sprite()
 
@@ -82,7 +94,18 @@ func _physics_process(delta: float) -> void:
 	var moved := false
 	if drift_velocity.length_squared() > 1.0:
 		global_position += drift_velocity * delta
-		drift_velocity = drift_velocity.move_toward(Vector2.ZERO, 320.0 * delta)
+		drift_velocity = drift_velocity.move_toward(Vector2.ZERO, 265.0 * delta)
+		moved = true
+
+	if scatter_timer > 0.0:
+		scatter_timer = max(scatter_timer - delta, 0.0)
+		arc_height = max(0.0, arc_height + arc_velocity * delta)
+		arc_velocity -= 520.0 * delta
+		if scatter_timer > 0.0:
+			_update_sprite_bob()
+			return
+	elif arc_height > 0.0:
+		arc_height = max(0.0, move_toward(arc_height, 0.0, 420.0 * delta))
 		moved = true
 
 	if forced_magnet_timer > 0.0:
@@ -106,8 +129,12 @@ func _physics_process(delta: float) -> void:
 		magnetized = true
 
 	if magnetized and distance > 0.001:
-		var pull_speed: float = magnet_speed + max(0.0, pickup_radius - distance) * 2.4
-		global_position += to_collector.normalized() * pull_speed * delta
+		magnet_time += delta
+		arc_height = max(0.0, move_toward(arc_height, 0.0, 420.0 * delta))
+		var acceleration: float = 1.0 + clamp(magnet_time * 2.8, 0.0, 2.4)
+		var pull_speed: float = (magnet_speed * 1.25 + max(0.0, pickup_radius - distance) * 4.2) * acceleration
+		var pull_step: float = min(distance, pull_speed * delta)
+		global_position += to_collector.normalized() * pull_step
 		moved = true
 
 	if global_position.distance_squared_to(collector.global_position) <= collect_distance * collect_distance:
@@ -121,9 +148,11 @@ func collect(_player: Node) -> void:
 	match pickup_kind:
 		"coin":
 			GameManager.add_gold(value)
+			_play_pickup_sfx()
 			EntityFactory.release_gold_coin(self)
 		_:
 			GameManager.add_xp(value)
+			_play_pickup_sfx()
 			EntityFactory.release_xp_gem(self)
 
 
@@ -231,6 +260,11 @@ func _update_sprite_bob() -> void:
 	if sprite == null:
 		return
 	var bob := sin(bob_phase) * 1.5
-	sprite.position.y = bob
+	sprite.position.y = bob - arc_height
 	if glow != null:
-		glow.position.y = bob * 0.55
+		glow.position.y = bob * 0.55 - arc_height * 0.52
+
+
+func _play_pickup_sfx() -> void:
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("pickup")

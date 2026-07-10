@@ -34,12 +34,9 @@ func pool_on_release() -> void:
 	text_value = "0"
 	numeric_total = 0.0
 	has_numeric_value = true
+	font_size = 18
 	rotation = 0.0
 	_set_labels_visible(false)
-
-
-func pool_reset(args: Dictionary) -> void:
-	setup(args.get("value", 0), args.get("position", Vector2.ZERO), args.get("color", Color.WHITE))
 
 
 func setup(value: Variant, world_position: Vector2, color_value: Color) -> void:
@@ -51,6 +48,13 @@ func setup(value: Variant, world_position: Vector2, color_value: Color) -> void:
 	velocity = Vector2(randf_range(-14.0, 14.0), -randf_range(34.0, 48.0))
 	_set_value(value)
 	_update_labels()
+
+
+func pool_reset(args: Dictionary) -> void:
+	var override_size := int(args.get("font_size", 0))
+	font_size = override_size if override_size > 0 else 18
+	setup(args.get("value", 0), args.get("position", Vector2.ZERO), args.get("color", Color.WHITE))
+	_apply_label_font_size()
 
 
 func can_merge(world_position: Vector2, merge_radius: float, max_age: float) -> bool:
@@ -110,13 +114,21 @@ func _ensure_labels() -> void:
 	for label in [shadow_label, value_label]:
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		label.size = Vector2(72.0, 24.0)
-		label.position = Vector2(-36.0, -12.0)
-		label.add_theme_font_size_override("font_size", font_size)
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		label.z_index = 100
+	_apply_label_font_size()
 
-	shadow_label.position += Vector2(1.0, 1.0)
+
+func _apply_label_font_size() -> void:
+	for label in [shadow_label, value_label]:
+		if label == null:
+			continue
+		label.add_theme_font_size_override("font_size", font_size)
+		var label_size := Vector2(128.0, 32.0) if font_size > 20 else Vector2(72.0, 24.0)
+		label.size = label_size
+		label.position = -label_size * 0.5
+	if shadow_label != null:
+		shadow_label.position += Vector2(1.0, 1.0)
 
 
 func _update_labels() -> void:

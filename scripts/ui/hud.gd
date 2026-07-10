@@ -17,8 +17,12 @@ var score_label: Label
 var pause_button: Button
 var version_label: Label
 var audio_prompt_button: Button
+var active_ability_button: Button
+var active_ability_cooldown: TextureProgressBar
+var active_ability_label: Label
 var toast_panel: Panel
 var toast_label: Label
+var level_flash_rect: ColorRect
 var pause_overlay: Panel
 var pause_scroll: ScrollContainer
 var pause_content: VBoxContainer
@@ -40,10 +44,12 @@ var toast_token: int = 0
 var toast_queue: Array[String] = []
 var toast_showing: bool = false
 var reset_meta_confirm_pending: bool = false
+var level_flash_tween: Tween = null
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	set_process(true)
 	_build_ui()
 	if not get_viewport().size_changed.is_connected(_apply_responsive_layout):
 		get_viewport().size_changed.connect(_apply_responsive_layout)
@@ -54,6 +60,8 @@ func _ready() -> void:
 		GameManager.pause_changed.connect(_on_pause_changed)
 	if GameManager.has_signal("toast_requested") and not GameManager.toast_requested.is_connected(_on_toast_requested):
 		GameManager.toast_requested.connect(_on_toast_requested)
+	if GameManager.has_signal("level_flash_requested") and not GameManager.level_flash_requested.is_connected(_on_level_flash_requested):
+		GameManager.level_flash_requested.connect(_on_level_flash_requested)
 	if AudioManager != null and AudioManager.has_signal("settings_changed") and not AudioManager.settings_changed.is_connected(_sync_audio_controls):
 		AudioManager.settings_changed.connect(_sync_audio_controls)
 	if AudioManager != null and AudioManager.has_signal("audio_unlocked") and not AudioManager.audio_unlocked.is_connected(_refresh_audio_prompt):
@@ -68,6 +76,10 @@ func _ready() -> void:
 	_sync_settings_controls()
 	_refresh_achievement_list()
 	_drain_pending_toasts()
+
+
+func _process(_delta: float) -> void:
+	_refresh_active_ability_button()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -171,6 +183,32 @@ func _build_ui() -> void:
 	audio_prompt_button.pressed.connect(_on_audio_prompt_pressed)
 	root.add_child(audio_prompt_button)
 
+	active_ability_button = Button.new()
+	active_ability_button.name = "ActiveAbilityButton"
+	active_ability_button.text = "裂"
+	active_ability_button.tooltip_text = "裂隙脈衝"
+	active_ability_button.pressed.connect(_on_active_ability_pressed)
+	root.add_child(active_ability_button)
+
+	active_ability_cooldown = TextureProgressBar.new()
+	active_ability_cooldown.name = "ActiveAbilityCooldown"
+	active_ability_cooldown.min_value = 0.0
+	active_ability_cooldown.max_value = 1.0
+	active_ability_cooldown.value = 0.0
+	active_ability_cooldown.fill_mode = TextureProgressBar.FILL_CLOCKWISE
+	active_ability_cooldown.texture_progress = ART_RESOURCES.get_radial_glow()
+	active_ability_cooldown.tint_progress = Color(0.26, 0.88, 1.0, 0.48)
+	active_ability_cooldown.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(active_ability_cooldown)
+
+	active_ability_label = Label.new()
+	active_ability_label.name = "ActiveAbilityLabel"
+	active_ability_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	active_ability_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	active_ability_label.add_theme_font_size_override("font_size", 16)
+	active_ability_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(active_ability_label)
+
 	toast_panel = Panel.new()
 	toast_panel.name = "ToastPanel"
 	toast_panel.visible = false
@@ -188,6 +226,13 @@ func _build_ui() -> void:
 	toast_label.add_theme_font_size_override("font_size", 18)
 	toast_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	toast_panel.add_child(toast_label)
+
+	level_flash_rect = ColorRect.new()
+	level_flash_rect.name = "LevelFlash"
+	level_flash_rect.color = Color(1.0, 1.0, 1.0, 0.0)
+	level_flash_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	level_flash_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(level_flash_rect)
 
 	_build_virtual_joystick()
 	_build_pause_overlay()
@@ -445,6 +490,24 @@ func _apply_responsive_layout() -> void:
 		audio_prompt_button.offset_top = -74.0
 		audio_prompt_button.offset_bottom = -34.0
 
+	if active_ability_button != null:
+		var ability_size := 68.0 if portrait else 62.0
+		var bottom_margin := 34.0 if portrait else 28.0
+		active_ability_button.anchor_left = 0.0
+		active_ability_button.anchor_right = 0.0
+		active_ability_button.anchor_top = 0.0
+		active_ability_button.anchor_bottom = 0.0
+		active_ability_button.position = Vector2(viewport_size.x - ability_size - 24.0, viewport_size.y - ability_size - bottom_margin)
+		active_ability_button.size = Vector2(ability_size, ability_size)
+		active_ability_button.custom_minimum_size = Vector2(ability_size, ability_size)
+		active_ability_button.add_theme_font_size_override("font_size", 22 if portrait else 20)
+	if active_ability_cooldown != null and active_ability_button != null:
+		active_ability_cooldown.position = active_ability_button.position
+		active_ability_cooldown.size = active_ability_button.size
+	if active_ability_label != null and active_ability_button != null:
+		active_ability_label.position = active_ability_button.position
+		active_ability_label.size = active_ability_button.size
+
 	if toast_panel != null:
 		var toast_width: float = min(viewport_size.x - 32.0, 520.0)
 		toast_panel.anchor_left = 0.5
@@ -525,6 +588,47 @@ func _on_audio_prompt_pressed() -> void:
 	if AudioManager != null and AudioManager.has_method("unlock_audio"):
 		AudioManager.unlock_audio()
 	_refresh_audio_prompt()
+
+
+func _on_active_ability_pressed() -> void:
+	var active_player := GameManager.player
+	if active_player != null and is_instance_valid(active_player) and active_player.has_method("try_cast_active_ability"):
+		active_player.try_cast_active_ability()
+
+
+func _refresh_active_ability_button() -> void:
+	if active_ability_button == null:
+		return
+	var active_player := GameManager.player
+	var visible_for_player := active_player != null and is_instance_valid(active_player) and active_player.has_method("get_active_ability_cooldown_remaining")
+	active_ability_button.visible = visible_for_player
+	if active_ability_cooldown != null:
+		active_ability_cooldown.visible = visible_for_player
+	if active_ability_label != null:
+		active_ability_label.visible = visible_for_player
+	if not visible_for_player:
+		return
+	var remaining: float = float(active_player.get_active_ability_cooldown_remaining())
+	var duration: float = max(0.001, float(active_player.get_active_ability_cooldown_duration()))
+	var ratio: float = clamp(remaining / duration, 0.0, 1.0)
+	active_ability_button.disabled = remaining > 0.01 or get_tree().paused or not GameManager.game_running
+	active_ability_button.text = "裂"
+	if active_ability_cooldown != null:
+		active_ability_cooldown.value = ratio
+		active_ability_cooldown.modulate = Color(1.0, 1.0, 1.0, 0.86 if ratio > 0.0 else 0.0)
+	if active_ability_label != null:
+		active_ability_label.text = "%.1f" % remaining if remaining > 0.05 else ""
+
+
+func _on_level_flash_requested() -> void:
+	if level_flash_rect == null:
+		return
+	if level_flash_tween != null and level_flash_tween.is_valid():
+		level_flash_tween.kill()
+	level_flash_rect.color = Color(1.0, 1.0, 1.0, 0.22)
+	level_flash_tween = create_tween()
+	level_flash_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	level_flash_tween.tween_property(level_flash_rect, "color", Color(1.0, 1.0, 1.0, 0.0), 0.24)
 
 
 func _refresh_audio_prompt() -> void:

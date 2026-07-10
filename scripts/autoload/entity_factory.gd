@@ -24,12 +24,12 @@ const PREWARM_COUNTS: Dictionary = {
 	"hazard_zone": 8,
 	"xp_gem": 220,
 	"coin": 220,
-	"damage_number": 80,
-	"death_burst": 28,
+	"damage_number": 96,
+	"death_burst": 32,
 	"lightning_arc": 80
 }
 
-const DAMAGE_NUMBER_CAP := 64
+const DAMAGE_NUMBER_CAP := 72
 const DAMAGE_NUMBER_MERGE_RADIUS := 48.0
 const DAMAGE_NUMBER_MERGE_AGE := 0.24
 const EXPLOSION_CAP := 36
@@ -250,7 +250,7 @@ func spawn_lightning_arc(points: Array[Vector2], arc_color: Color, lifetime: flo
 	return arc
 
 
-func spawn_xp_gem(world_position: Vector2, amount: int) -> Node:
+func spawn_xp_gem(world_position: Vector2, amount: int, scatter_scale: float = 1.0) -> Node:
 	if get_pool_live_count("xp_gem") >= XP_GEM_CAP:
 		_grant_xp_direct(amount)
 		return null
@@ -261,17 +261,18 @@ func spawn_xp_gem(world_position: Vector2, amount: int) -> Node:
 	gem.pool_reset({
 		"position": world_position,
 		"amount": amount,
-		"velocity": _random_scatter_velocity()
+		"velocity": _random_scatter_velocity(scatter_scale),
+		"scatter_time": 0.24
 	})
 	active_xp_gems.append(gem)
 	return gem
 
 
-func spawn_visible_xp_gem(world_position: Vector2, amount: int) -> Node:
+func spawn_visible_xp_gem(world_position: Vector2, amount: int, scatter_scale: float = 1.0) -> Node:
 	if amount <= 0:
 		return null
 	if get_pool_live_count("xp_gem") < XP_GEM_CAP:
-		return _spawn_visible_xp_gem_from_slot(world_position, amount)
+		return _spawn_visible_xp_gem_from_slot(world_position, amount, scatter_scale)
 
 	_compact_active_xp_gems()
 	var registry_has_target := not active_xp_gems.is_empty()
@@ -283,13 +284,27 @@ func spawn_visible_xp_gem(world_position: Vector2, amount: int) -> Node:
 			return merge_target
 
 	if _reclaim_xp_gem_for_visible(world_position):
-		return _spawn_visible_xp_gem_from_slot(world_position, amount)
+		return _spawn_visible_xp_gem_from_slot(world_position, amount, scatter_scale)
 	if get_pool_live_count("xp_gem") < XP_GEM_CAP:
-		return _spawn_visible_xp_gem_from_slot(world_position, amount)
+		return _spawn_visible_xp_gem_from_slot(world_position, amount, scatter_scale)
 	return null
 
 
-func spawn_gold_coin(world_position: Vector2, amount: int) -> Node:
+func spawn_xp_gem_burst(world_position: Vector2, total_amount: int, gem_count: int, scatter_scale: float = 1.0) -> void:
+	var pieces := _split_drop_amount(total_amount, gem_count)
+	for index in range(pieces.size()):
+		var offset := Vector2(randf_range(-9.0, 9.0), randf_range(-9.0, 9.0))
+		spawn_xp_gem(world_position + offset, int(pieces[index]), scatter_scale)
+
+
+func spawn_visible_xp_gem_burst(world_position: Vector2, total_amount: int, gem_count: int, scatter_scale: float = 1.0) -> void:
+	var pieces := _split_drop_amount(total_amount, gem_count)
+	for index in range(pieces.size()):
+		var offset := Vector2(randf_range(-12.0, 12.0), randf_range(-12.0, 12.0))
+		spawn_visible_xp_gem(world_position + offset, int(pieces[index]), scatter_scale)
+
+
+func spawn_gold_coin(world_position: Vector2, amount: int, scatter_scale: float = 1.0) -> Node:
 	if get_pool_live_count("coin") >= COIN_CAP:
 		_grant_gold_direct(amount)
 		return null
@@ -300,9 +315,17 @@ func spawn_gold_coin(world_position: Vector2, amount: int) -> Node:
 	coin.pool_reset({
 		"position": world_position,
 		"amount": amount,
-		"velocity": _random_scatter_velocity()
+		"velocity": _random_scatter_velocity(scatter_scale),
+		"scatter_time": 0.24
 	})
 	return coin
+
+
+func spawn_gold_coin_burst(world_position: Vector2, total_amount: int, coin_count: int, scatter_scale: float = 1.0) -> void:
+	var pieces := _split_drop_amount(total_amount, coin_count)
+	for index in range(pieces.size()):
+		var offset := Vector2(randf_range(-12.0, 12.0), randf_range(-12.0, 12.0))
+		spawn_gold_coin(world_position + offset, int(pieces[index]), scatter_scale)
 
 
 func magnetize_xp_near(world_position: Vector2, radius: float) -> int:
@@ -324,7 +347,7 @@ func magnetize_xp_near(world_position: Vector2, radius: float) -> int:
 	return magnetized_count
 
 
-func spawn_damage_number(value: Variant, world_position: Vector2, number_color: Color = Color.WHITE) -> Node:
+func spawn_damage_number(value: Variant, world_position: Vector2, number_color: Color = Color.WHITE, font_size_override: int = 0) -> Node:
 	if PlayerSettings != null and not bool(PlayerSettings.get("damage_numbers_enabled")):
 		return null
 	var merged := _try_merge_damage_number(value, world_position, number_color)
@@ -340,12 +363,19 @@ func spawn_damage_number(value: Variant, world_position: Vector2, number_color: 
 	number.pool_reset({
 		"value": value,
 		"position": world_position,
-		"color": number_color
+		"color": number_color,
+		"font_size": font_size_override
 	})
 	return number
 
 
-func spawn_death_burst(world_position: Vector2, burst_color: Color) -> Node:
+func spawn_combo_text(combo_count: int, world_position: Vector2) -> Node:
+	if combo_count < 2:
+		return null
+	return spawn_damage_number("COMBO ×%d" % combo_count, world_position, Color(0.72, 1.0, 0.92), 24)
+
+
+func spawn_death_burst(world_position: Vector2, burst_color: Color, burst_scale: float = 1.0) -> Node:
 	if get_pool_live_count("death_burst") >= DEATH_BURST_CAP:
 		return null
 	var burst := _acquire("death_burst")
@@ -353,7 +383,8 @@ func spawn_death_burst(world_position: Vector2, burst_color: Color) -> Node:
 		return null
 	burst.pool_reset({
 		"position": world_position,
-		"color": burst_color
+		"color": burst_color,
+		"scale": burst_scale
 	})
 	return burst
 
@@ -680,14 +711,15 @@ func _farthest_active_xp_gem(world_position: Vector2) -> Node:
 	return farthest
 
 
-func _spawn_visible_xp_gem_from_slot(world_position: Vector2, amount: int) -> Node:
+func _spawn_visible_xp_gem_from_slot(world_position: Vector2, amount: int, scatter_scale: float = 1.0) -> Node:
 	var gem := _acquire("xp_gem")
 	if gem == null:
 		return null
 	gem.pool_reset({
 		"position": world_position,
 		"amount": amount,
-		"velocity": _random_scatter_velocity()
+		"velocity": _random_scatter_velocity(scatter_scale),
+		"scatter_time": 0.24
 	})
 	active_xp_gems.append(gem)
 	return gem
@@ -789,13 +821,16 @@ func _acquire(pool_name: String) -> Node:
 	return pool.acquire(_get_runtime_parent())
 
 
-func _release(pool_name: String, node: Node) -> void:
+func _release(pool_name: String, node: Variant) -> void:
 	if node == null or not is_instance_valid(node):
 		return
-	if not pools.has(pool_name):
-		node.queue_free()
+	var pooled_node := node as Node
+	if pooled_node == null:
 		return
-	pools[pool_name].release(node)
+	if not pools.has(pool_name):
+		pooled_node.queue_free()
+		return
+	pools[pool_name].release(pooled_node)
 
 
 func _mark_inactive_for_release(node: Node) -> void:
@@ -853,5 +888,18 @@ func _get_runtime_parent() -> Node:
 	return get_tree().root
 
 
-func _random_scatter_velocity() -> Vector2:
-	return Vector2.RIGHT.rotated(randf() * TAU) * randf_range(70.0, 145.0)
+func _split_drop_amount(total_amount: int, desired_count: int) -> Array[int]:
+	var pieces: Array[int] = []
+	if total_amount <= 0:
+		return pieces
+	var count: int = clamp(desired_count, 1, total_amount)
+	var base_amount := int(total_amount / count)
+	var remainder := total_amount % count
+	for index in range(count):
+		pieces.append(base_amount + (1 if index < remainder else 0))
+	return pieces
+
+
+func _random_scatter_velocity(scatter_scale: float = 1.0) -> Vector2:
+	var safe_scale: float = max(0.15, scatter_scale)
+	return Vector2.RIGHT.rotated(randf() * TAU) * randf_range(95.0, 190.0) * safe_scale

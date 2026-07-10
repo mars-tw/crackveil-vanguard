@@ -1,10 +1,12 @@
 extends CanvasLayer
 
 signal restart_requested
+signal main_menu_requested
 
 var root: Control
 var panel: Panel
 var restart_button: Button
+var main_menu_button: Button
 var copy_seed_button: Button
 var summary_label: Label
 var achievements_label: RichTextLabel
@@ -76,6 +78,11 @@ func _build_ui() -> void:
 	restart_button.text = "再來一局"
 	restart_button.pressed.connect(_on_restart_pressed)
 	panel.add_child(restart_button)
+
+	main_menu_button = Button.new()
+	main_menu_button.text = "回主選單"
+	main_menu_button.pressed.connect(_on_main_menu_pressed)
+	panel.add_child(main_menu_button)
 	_apply_responsive_layout()
 
 
@@ -100,6 +107,11 @@ func show_summary(summary: Dictionary) -> void:
 func _on_restart_pressed() -> void:
 	root.visible = false
 	restart_requested.emit()
+
+
+func _on_main_menu_pressed() -> void:
+	root.visible = false
+	main_menu_requested.emit()
 
 
 func _on_copy_seed_pressed() -> void:
@@ -224,7 +236,7 @@ func _apply_responsive_layout() -> void:
 		achievements_label.offset_left = 40.0
 		achievements_label.offset_right = -40.0
 		achievements_label.offset_top = 258.0
-		achievements_label.offset_bottom = panel_height - 126.0
+		achievements_label.offset_bottom = panel_height - 166.0
 		achievements_label.add_theme_font_size_override("normal_font_size", 15 if not portrait else 14)
 
 	if copy_seed_button != null:
@@ -232,13 +244,21 @@ func _apply_responsive_layout() -> void:
 		copy_seed_button.anchor_right = 0.5
 		copy_seed_button.offset_left = -118.0
 		copy_seed_button.offset_right = 118.0
-		copy_seed_button.offset_top = panel_height - 116.0
-		copy_seed_button.offset_bottom = panel_height - 76.0
+		copy_seed_button.offset_top = panel_height - 150.0
+		copy_seed_button.offset_bottom = panel_height - 110.0
 
 	if restart_button != null:
 		restart_button.anchor_left = 0.5
 		restart_button.anchor_right = 0.5
 		restart_button.offset_left = -118.0
 		restart_button.offset_right = 118.0
-		restart_button.offset_top = panel_height - 66.0
-		restart_button.offset_bottom = panel_height - 24.0
+		restart_button.offset_top = panel_height - 104.0
+		restart_button.offset_bottom = panel_height - 64.0
+
+	if main_menu_button != null:
+		main_menu_button.anchor_left = 0.5
+		main_menu_button.anchor_right = 0.5
+		main_menu_button.offset_left = -118.0
+		main_menu_button.offset_right = 118.0
+		main_menu_button.offset_top = panel_height - 58.0
+		main_menu_button.offset_bottom = panel_height - 18.0

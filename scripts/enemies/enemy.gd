@@ -439,6 +439,15 @@ func apply_status_effect(effect_id: String, duration: float, strength: float) ->
 	status_strengths[effect_id] = strength
 
 
+func apply_knockback(source_position: Vector2, strength: float) -> void:
+	if not is_active or strength <= 0.0:
+		return
+	var direction := global_position - source_position
+	if direction.length_squared() <= 0.001:
+		direction = Vector2.RIGHT
+	global_position += direction.normalized() * strength
+
+
 func _tick_status_effects(delta: float) -> void:
 	if status_timers.is_empty():
 		return
@@ -496,22 +505,29 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 		GameManager.record_elite_kill()
 	if is_boss and GameManager.has_method("record_boss_kill"):
 		GameManager.record_boss_kill()
-	EntityFactory.call_deferred("spawn_death_burst", global_position, body_color)
+	var burst_scale := 2.25 if is_boss else (1.55 if is_elite else 1.0)
+	EntityFactory.call_deferred("spawn_death_burst", global_position, body_color, burst_scale)
 
 	if xp_value > 0:
-		EntityFactory.call_deferred("spawn_xp_gem", global_position, xp_value)
+		if is_elite or is_boss:
+			EntityFactory.call_deferred("spawn_xp_gem_burst", global_position, xp_value, 16 if is_boss else 7, 1.75 if is_boss else 1.35)
+		else:
+			EntityFactory.call_deferred("spawn_xp_gem", global_position, xp_value, 1.0)
 	if elite_bonus_xp > 0:
-		EntityFactory.call_deferred("spawn_visible_xp_gem", global_position, elite_bonus_xp)
+		EntityFactory.call_deferred("spawn_visible_xp_gem_burst", global_position, elite_bonus_xp, 12 if is_boss else 6, 1.85 if is_boss else 1.45)
 	if gold_value > 0:
 		var gold_drop := GameManager.get_gold_drop_amount(gold_value) if GameManager.has_method("get_gold_drop_amount") else gold_value
-		var coin_position := global_position + Vector2(randf_range(-10.0, 10.0), randf_range(-10.0, 10.0))
-		EntityFactory.call_deferred("spawn_gold_coin", coin_position, gold_drop)
+		if is_elite or is_boss:
+			EntityFactory.call_deferred("spawn_gold_coin_burst", global_position, gold_drop, 10 if is_boss else 5, 1.7 if is_boss else 1.3)
+		else:
+			var coin_position := global_position + Vector2(randf_range(-10.0, 10.0), randf_range(-10.0, 10.0))
+			EntityFactory.call_deferred("spawn_gold_coin", coin_position, gold_drop, 1.0)
 	if spawns_on_death:
 		_spawn_death_children()
 	if GameManager.has_method("has_magnetic_reclaim") and GameManager.has_magnetic_reclaim():
 		EntityFactory.call_deferred("magnetize_xp_near", global_position, 155.0)
 	if is_elite or is_boss:
-		var shake := 7.0 if is_boss else 4.6
+		var shake := 9.0 if is_boss else 5.6
 		if GameManager.has_method("request_combat_impact"):
 			GameManager.request_combat_impact(shake, 0.04)
 

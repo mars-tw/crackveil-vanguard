@@ -40,10 +40,14 @@ func _ready() -> void:
 		level_up_screen.upgrade_selected.connect(Callable(GameManager, "apply_upgrade"))
 	if game_over_screen.has_signal("restart_requested"):
 		game_over_screen.restart_requested.connect(_on_restart_requested)
+	if game_over_screen.has_signal("main_menu_requested"):
+		game_over_screen.main_menu_requested.connect(_on_main_menu_requested)
 	if rift_shop_screen.has_signal("purchase_selected"):
 		rift_shop_screen.purchase_selected.connect(Callable(GameManager, "apply_shop_purchase"))
 	if stage_victory_screen.has_signal("continue_requested"):
 		stage_victory_screen.continue_requested.connect(Callable(GameManager, "continue_after_stage_victory"))
+	if stage_victory_screen.has_signal("main_menu_requested"):
+		stage_victory_screen.main_menu_requested.connect(_on_main_menu_requested)
 	if contract_screen.has_signal("contract_selected"):
 		contract_screen.contract_selected.connect(Callable(GameManager, "apply_contract"))
 	if contract_screen.has_signal("seed_restart_requested"):
@@ -67,6 +71,13 @@ func _on_seed_restart_requested(seed_text: String) -> void:
 	GameManager.forced_run_seed = GameManager.seed_from_text(seed_text)
 	get_tree().paused = false
 	get_tree().reload_current_scene()
+
+
+func _on_main_menu_requested() -> void:
+	get_tree().paused = false
+	GameManager.game_running = false
+	GameManager.system_pause_owners.clear()
+	get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
 
 
 func _on_game_over_requested(summary: Dictionary) -> void:

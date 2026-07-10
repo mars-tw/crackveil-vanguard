@@ -95,6 +95,24 @@ def main() -> None:
         * envelope(i, n, 0.02, 0.64)
         * (sine(220.0 - 140.0 * t, t) * 0.56 + random.uniform(-1.0, 1.0) * 0.44),
     )
+    write_wav(
+        "pulse",
+        0.19,
+        lambda i, n, t: 0.22
+        * envelope(i, n, 0.025, 0.48)
+        * (
+            sine(180.0 + 880.0 * t, t) * 0.38
+            + sine(360.0 + 1240.0 * t, t) * 0.34
+            + random.uniform(-1.0, 1.0) * 0.28
+        ),
+    )
+    write_wav(
+        "pickup",
+        0.08,
+        lambda i, n, t: 0.18
+        * envelope(i, n, 0.03, 0.52)
+        * (sine(960.0 + 340.0 * t, t) * 0.64 + sine(1440.0 + 480.0 * t, t) * 0.36),
+    )
 
     for wav_path in sorted(OUTPUT_DIR.glob("*.wav")):
         print(f"{wav_path.name}: {wav_path.stat().st_size} bytes")
