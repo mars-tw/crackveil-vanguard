@@ -46,7 +46,7 @@ func pool_reset(args: Dictionary) -> void:
 func setup(world_position: Vector2, color_value: Color, scale_value: float = 1.0) -> void:
 	global_position = world_position
 	burst_color = color_value
-	burst_scale = clamp(scale_value, 0.6, 2.8)
+	burst_scale = clamp(scale_value, 0.75, 3.4)
 	age = 0.0
 	rotation = 0.0
 	_apply_sprite()
@@ -126,22 +126,22 @@ func _update_sprite_state() -> void:
 	var t: float = clamp(age / lifetime, 0.0, 1.0)
 	var texture := sprite.texture
 	if texture != null:
-		SPRITE_LOADER.fit_sprite(sprite, texture, (44.0 + 24.0 * t) * burst_scale, 1.0)
+		SPRITE_LOADER.fit_sprite(sprite, texture, (56.0 + 34.0 * t) * burst_scale, 1.0)
 	sprite.rotation += 1.8 * get_process_delta_time()
 	sprite.modulate = Color(burst_color.r, burst_color.g, burst_color.b, 1.0 - t)
 	if glow != null:
-		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), (80.0 + 46.0 * t) * burst_scale)
-		glow.modulate = Color(burst_color.r, burst_color.g, burst_color.b, (1.0 - t) * 0.46)
+		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), (104.0 + 58.0 * t) * burst_scale)
+		glow.modulate = Color(burst_color.r, burst_color.g, burst_color.b, (1.0 - t) * 0.56)
 
 
 func _emit_particles() -> void:
 	if particles == null:
 		return
-	particles.amount = int(clamp(round(16.0 * burst_scale), 12.0, 42.0))
-	particles.initial_velocity_min = 45.0 * burst_scale
-	particles.initial_velocity_max = 155.0 * burst_scale
-	particles.scale_amount_min = 0.18 * burst_scale
-	particles.scale_amount_max = 0.58 * burst_scale
+	particles.amount = int(clamp(round(22.0 * burst_scale), 16.0, 56.0))
+	particles.initial_velocity_min = 66.0 * burst_scale
+	particles.initial_velocity_max = 210.0 * burst_scale
+	particles.scale_amount_min = 0.22 * burst_scale
+	particles.scale_amount_max = 0.72 * burst_scale
 	particles.color = Color(burst_color.r, burst_color.g, burst_color.b, 0.88)
 	particles.restart()
 	particles.emitting = true

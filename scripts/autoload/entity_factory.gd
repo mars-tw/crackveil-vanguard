@@ -932,4 +932,4 @@ func _split_drop_amount(total_amount: int, desired_count: int) -> Array[int]:
 
 func _random_scatter_velocity(scatter_scale: float = 1.0) -> Vector2:
 	var safe_scale: float = max(0.15, scatter_scale)
-	return Vector2.RIGHT.rotated(randf() * TAU) * randf_range(95.0, 190.0) * safe_scale
+	return Vector2.RIGHT.rotated(randf() * TAU) * randf_range(135.0, 260.0) * safe_scale

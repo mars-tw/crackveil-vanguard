@@ -76,7 +76,7 @@ func _run_tests() -> void:
 	if not _test_empty_upgrade_pool_fallback():
 		return
 	current_phase = "r9_modal_owner_cleanup"
-	if not _test_modal_owner_overlap_and_death_cleanup():
+	if not await _test_modal_owner_overlap_and_death_cleanup():
 		return
 	current_phase = "r9_week_b_share_progress"
 	if not _test_r9_week_b_achievements_seed_settings():
@@ -335,9 +335,11 @@ func _test_weapon_evolutions() -> bool:
 	squad_manager.recruit_hero("pulse_artificer")
 	var specs: Array[Dictionary] = [
 		{"hero": "rift_captain", "weapon": "riftline_emitter", "required": "riftline_fork", "count": 2, "evo": "evo_rift_fan"},
-		{"hero": "orbit_guard", "weapon": "orbit_blades", "required": "orbit_resonance", "count": 1, "evo": "evo_shear_halo"},
+		{"hero": "rift_captain", "weapon": "orbit_blades", "required": "orbit_resonance", "count": 1, "evo": "evo_shear_halo"},
+		{"hero": "rift_captain", "weapon": "arc_chain", "required": "chain_overload", "count": 1, "evo": "evo_overload_nova"},
+		{"hero": "orbit_guard", "weapon": "rift_shield_boomerang", "required": "boomerang_rebound", "count": 2, "evo": "evo_razor_bulwark"},
+		{"hero": "arc_scout", "weapon": "rift_seeker_missiles", "required": "missile_guidance", "count": 2, "evo": "evo_hunter_swarm"},
 		{"hero": "pulse_artificer", "weapon": "pulse_bloom", "required": "pulse_embers", "count": 1, "evo": "evo_ember_well"},
-		{"hero": "arc_scout", "weapon": "arc_chain", "required": "chain_overload", "count": 1, "evo": "evo_overload_nova"}
 	]
 
 	var evolved: Array[String] = []
@@ -381,7 +383,7 @@ func _test_weapon_evolutions() -> bool:
 			str(spec.get("weapon", "")),
 			"weapon_damage"
 		)
-		if post_evo_damage_option.is_empty() or float(post_evo_damage_option.get("weight", 1.0)) > 0.36:
+		if post_evo_damage_option.is_empty() or float(post_evo_damage_option.get("weight", 1.0)) > 0.49:
 			_fail("evolved weapon numeric weight was not reduced")
 			return false
 		evolved.append(str(spec.get("evo", "")))
@@ -599,6 +601,7 @@ func _test_modal_owner_overlap_and_death_cleanup() -> bool:
 		return false
 
 	GameManager.apply_shop_purchase({"id": "skip"})
+	await get_tree().create_timer(0.36, true, false, true).timeout
 	if not GameManager.waiting_for_upgrade or GameManager.waiting_for_shop:
 		_fail("pending level-up did not open after shop closed")
 		return false

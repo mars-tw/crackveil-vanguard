@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/HomingMissileWeapon.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_data")
+id = "rift_seeker_missiles"
+display_name = "追蹤裂隙飛彈"
+description = "射出會彎曲追蹤的裂隙飛彈，適合斥候從側翼補刀。"
+behavior_id = "homing_missile"
+weapon_scene = ExtResource("2_scene")
+damage = 9.0
+cooldown = 1.08
+range = 680.0
+color = Color(0.5, 1, 0.78, 1)
+projectile_sprite_path = "res://assets/sprites/proj_bullet.png"
+sprite_scale = 1.44
+projectile_count = 2
+projectile_speed = 370.0
+projectile_radius = 5.6
+pierce = 0
+spread_degrees = 26.0
+homing_turn_rate = 5.8
+homing_retarget_radius = 620.0
+damage_upgrade = 3.0
+cooldown_upgrade_multiplier = 0.88
+range_upgrade = 30.0
+projectile_count_upgrade = 1
+pierce_upgrade = 1

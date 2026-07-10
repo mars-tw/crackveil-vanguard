@@ -168,7 +168,7 @@ func _normal_enemy_config() -> Dictionary:
 		"radius": 13.0,
 		"color": Color(0.72, 0.28, 0.36),
 		"sprite_path": "res://assets/sprites/enemy_grunt.png",
-		"sprite_scale": 1.0,
+		"sprite_scale": 1.3,
 		"attack_cooldown": 0.75
 	}
 
@@ -183,7 +183,7 @@ func _fast_enemy_config() -> Dictionary:
 		"radius": 10.0,
 		"color": Color(0.95, 0.72, 0.26),
 		"sprite_path": "res://assets/sprites/enemy_fast.png",
-		"sprite_scale": 1.0,
+		"sprite_scale": 1.25,
 		"attack_cooldown": 0.55
 	}
 
@@ -198,7 +198,7 @@ func _tank_enemy_config() -> Dictionary:
 		"radius": 20.0,
 		"color": Color(0.48, 0.36, 0.76),
 		"sprite_path": "res://assets/sprites/enemy_tank.png",
-		"sprite_scale": 1.0,
+		"sprite_scale": 1.36,
 		"attack_cooldown": 1.05
 	}
 
@@ -212,7 +212,7 @@ func _stress_projectile_stats() -> Dictionary:
 		"pierce": 1,
 		"color": Color(0.62, 0.93, 1.0),
 		"projectile_sprite_path": "res://assets/sprites/proj_bullet.png",
-		"sprite_scale": 1.0
+		"sprite_scale": 1.35
 	}
 
 

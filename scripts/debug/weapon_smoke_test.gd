@@ -2,8 +2,10 @@ extends Node
 
 const EXPECTED_INITIAL_WEAPONS: Array[String] = [
 	"rift_captain:riftline_emitter",
-	"orbit_guard:orbit_blades",
-	"arc_scout:arc_chain"
+	"rift_captain:orbit_blades",
+	"rift_captain:arc_chain",
+	"orbit_guard:rift_shield_boomerang",
+	"arc_scout:rift_seeker_missiles"
 ]
 
 const RECRUIT_HERO_ID := "pulse_artificer"

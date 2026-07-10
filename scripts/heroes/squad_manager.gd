@@ -16,6 +16,8 @@ const NUMERIC_UPGRADE_MAX_LEVELS: Dictionary = {
 	"weapon_cooldown": 4,
 	"weapon_projectiles": 3
 }
+const LEADER_WEAPON_WEIGHT_MULTIPLIER := 1.35
+const FOLLOWER_WEAPON_WEIGHT_MULTIPLIER := 0.82
 
 const QUALITATIVE_UPGRADES: Dictionary = {
 	"linear": [
@@ -49,6 +51,20 @@ const QUALITATIVE_UPGRADES: Dictionary = {
 			"upgrade_kind": "magnetic_reclaim",
 			"name": "磁暴回收",
 			"description": "擊殺時短距吸引附近 XP"
+		}
+	],
+	"boomerang": [
+		{
+			"upgrade_kind": "boomerang_rebound",
+			"name": "返刃共振",
+			"description": "迴旋鏢返場可二次命中；每級提高返場傷害與穿透"
+		}
+	],
+	"homing_missile": [
+		{
+			"upgrade_kind": "missile_guidance",
+			"name": "獵隙導引",
+			"description": "飛彈轉向更快；第 2 級追加短距再鎖定"
 		}
 	]
 }
@@ -144,7 +160,7 @@ func _append_weapon_upgrade_options(pool: Array) -> void:
 			var weapon_data: Resource = weapon.get("data")
 			if weapon_data == null:
 				continue
-			var numeric_weight: float = _numeric_upgrade_weight(weapon_data)
+			var numeric_weight: float = _numeric_upgrade_weight(member, weapon_data)
 			pool.append({
 				"id": "upgrade_hero_weapon",
 				"hero_id": str(member.get("hero_id")),
@@ -200,7 +216,7 @@ func _append_qualitative_upgrade_options(pool: Array, member: Node, weapon_id: S
 			"upgrade_kind": upgrade_kind,
 			"name": hero_name + "：" + str(definition.get("name", "質變升級")),
 			"description": str(definition.get("description", "")),
-			"weight": 3,
+			"weight": 4 if bool(member.get("is_leader")) else 3,
 			"max_level": max_level,
 			"level_key": _weapon_level_key(member, weapon_id, upgrade_kind),
 			"upgrade_category": "qualitative"
@@ -223,7 +239,7 @@ func _append_evolution_upgrade_option(pool: Array, member: Node, weapon_id: Stri
 		"upgrade_kind": evolution_id,
 		"name": hero_name + "：" + str(definition.get("name", "武器進化")),
 		"description": str(definition.get("description", "武器進化為新形態。")),
-		"weight": 8,
+		"weight": 9 if bool(member.get("is_leader")) else 8,
 		"max_level": 1,
 		"level_key": _weapon_level_key(member, weapon_id, evolution_id),
 		"upgrade_category": "evolution"
@@ -236,10 +252,11 @@ func _weapon_has_meaningful_cooldown_upgrade(weapon_data: Resource) -> bool:
 	return float(weapon_data.get("cooldown_upgrade_multiplier")) < 0.999
 
 
-func _numeric_upgrade_weight(weapon_data: Resource) -> float:
+func _numeric_upgrade_weight(member: Node, weapon_data: Resource) -> float:
+	var weight := LEADER_WEAPON_WEIGHT_MULTIPLIER if member != null and bool(member.get("is_leader")) else FOLLOWER_WEAPON_WEIGHT_MULTIPLIER
 	if weapon_data != null and weapon_data.has_method("is_evolved") and weapon_data.is_evolved():
-		return 0.35
-	return 1.0
+		weight *= 0.35
+	return weight
 
 
 func _weapon_level_key(member: Node, weapon_id: String, upgrade_kind: String) -> String:
@@ -485,6 +502,10 @@ func _get_count_upgrade_description(weapon_data: Resource) -> String:
 			return "+%s 爆炸半徑" % _format_number(float(weapon_data.get("area_radius_upgrade")))
 		"chain_lightning":
 			return "+%d 連鎖，+%s 跳躍距離" % [int(weapon_data.get("chain_count_upgrade")), _format_number(float(weapon_data.get("range_upgrade")))]
+		"boomerang":
+			return "+%d 迴旋鏢，+%d 返場穿透" % [int(weapon_data.get("projectile_count_upgrade")), int(weapon_data.get("pierce_upgrade"))]
+		"homing_missile":
+			return "+%d 追蹤飛彈，+%d 穿透" % [int(weapon_data.get("projectile_count_upgrade")), int(weapon_data.get("pierce_upgrade"))]
 		_:
 			return "強化武器參數"
 

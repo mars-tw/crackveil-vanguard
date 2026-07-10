@@ -10,6 +10,7 @@ signal contract_requested(options: Array)
 signal toast_requested(message: String)
 signal guide_replay_requested
 signal level_flash_requested
+signal combo_pulse_requested(combo_count: int)
 
 const SHOP_FIRST_TIME := 75.0
 const SHOP_SECOND_TIME := 150.0
@@ -183,6 +184,8 @@ var hit_stop_token: int = 0
 var camera_threat_zoom_timer: float = 0.0
 var combo_count: int = 0
 var combo_last_kill_time: float = -999.0
+var last_combo_pulse_count: int = 0
+var upgrade_entry_token: int = 0
 
 const META_HP_APPLIED_KEY := "_cv_meta_hp_multiplier_applied"
 const META_PICKUP_APPLIED_KEY := "_cv_meta_pickup_bonus_applied"
@@ -239,6 +242,8 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	camera_threat_zoom_timer = 0.0
 	combo_count = 0
 	combo_last_kill_time = -999.0
+	last_combo_pulse_count = 0
+	upgrade_entry_token += 1
 	if AchievementProgress != null and AchievementProgress.has_method("start_run"):
 		AchievementProgress.start_run()
 	system_pause_owners.clear()
@@ -449,13 +454,27 @@ func _record_combo_kill(amount: int) -> void:
 		combo_count += amount
 	else:
 		combo_count = amount
+		last_combo_pulse_count = 0
 	combo_last_kill_time = elapsed_time
 	if combo_count < 3:
 		return
 	var combo_position := Vector2.ZERO
 	if player != null and is_instance_valid(player):
 		combo_position = player.global_position + Vector2(0.0, -72.0)
-	EntityFactory.spawn_combo_text(combo_count, combo_position)
+	if combo_count < 10 or combo_count % 5 == 0:
+		EntityFactory.spawn_combo_text(combo_count, combo_position)
+	if combo_count >= 10 and combo_count % 10 == 0 and combo_count != last_combo_pulse_count:
+		last_combo_pulse_count = combo_count
+		_trigger_combo_pulse(combo_count, combo_position)
+
+
+func _trigger_combo_pulse(pulse_count: int, world_position: Vector2) -> void:
+	combo_pulse_requested.emit(pulse_count)
+	EntityFactory.spawn_death_burst(world_position, Color(0.62, 1.0, 0.9), 1.75)
+	request_combat_impact(2.8, 0.018)
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		var pitch: float = 0.92 + min(0.68, float(pulse_count / 10) * 0.08)
+		AudioManager.play_sfx("combo", false, -3.0, pitch)
 
 
 func add_gold(amount: int) -> void:
@@ -492,9 +511,25 @@ func _request_level_up() -> void:
 	if not _can_request_level_up():
 		return
 	waiting_for_upgrade = true
+	upgrade_entry_token += 1
+	var local_token := upgrade_entry_token
+	var choices := _build_upgrade_choices()
+	Engine.time_scale = min(Engine.time_scale, 0.35)
+	emit_stats()
+	_finish_level_up_slowmo(local_token, choices)
+
+
+func _finish_level_up_slowmo(local_token: int, choices: Array) -> void:
+	await get_tree().create_timer(0.3, true, false, true).timeout
+	if local_token != upgrade_entry_token:
+		return
+	if not waiting_for_upgrade or is_game_over or stage_victory_pending or not game_running:
+		Engine.time_scale = 1.0
+		return
+	Engine.time_scale = 1.0
 	_request_system_pause("upgrade")
 	emit_stats()
-	level_up_requested.emit(_build_upgrade_choices())
+	level_up_requested.emit(choices)
 
 
 func _build_upgrade_choices() -> Array:
@@ -517,6 +552,8 @@ func _build_upgrade_choices() -> Array:
 func apply_upgrade(upgrade: Dictionary) -> void:
 	if not waiting_for_upgrade or is_game_over:
 		return
+	upgrade_entry_token += 1
+	Engine.time_scale = 1.0
 
 	_register_upgrade_pick(upgrade)
 	var upgrade_id := str(upgrade.get("id", ""))
@@ -1152,6 +1189,8 @@ func player_died() -> void:
 	var dead_player := player
 	is_game_over = true
 	game_running = false
+	upgrade_entry_token += 1
+	Engine.time_scale = 1.0
 	waiting_for_upgrade = false
 	waiting_for_shop = false
 	waiting_for_contract = false
@@ -1216,6 +1255,8 @@ func record_boss_kill() -> void:
 		return
 	boss_killed = true
 	boss_active = false
+	upgrade_entry_token += 1
+	Engine.time_scale = 1.0
 	boss_kill_time = elapsed_time
 	if AchievementProgress != null and AchievementProgress.has_method("record_boss_kill"):
 		AchievementProgress.record_boss_kill()

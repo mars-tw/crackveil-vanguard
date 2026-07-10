@@ -7,6 +7,7 @@ var arc_color: Color = Color(0.6, 0.9, 1.0)
 var age: float = 0.0
 var lifetime: float = 0.22
 var sprite_path: String = "res://assets/sprites/proj_lightning.png"
+var arc_width: float = 24.0
 var is_active: bool = false
 var segments: Array[Sprite2D] = []
 
@@ -44,6 +45,7 @@ func setup(world_points: Array[Vector2], color_value: Color, duration: float, ne
 	arc_color = color_value
 	lifetime = max(0.05, duration)
 	sprite_path = new_sprite_path
+	arc_width = 24.0
 	age = 0.0
 	rotation = 0.0
 	_sync_segments()
@@ -87,7 +89,7 @@ func _sync_segments() -> void:
 		segment.rotation = segment_delta.angle()
 		var texture_width: float = max(1.0, float(texture.get_width()))
 		var texture_height: float = max(1.0, float(texture.get_height()))
-		segment.scale = Vector2(length / texture_width, 18.0 / texture_height)
+		segment.scale = Vector2(length / texture_width, arc_width / texture_height)
 
 
 func _update_segment_alpha() -> void:

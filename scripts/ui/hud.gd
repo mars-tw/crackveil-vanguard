@@ -23,6 +23,7 @@ var active_ability_label: Label
 var toast_panel: Panel
 var toast_label: Label
 var level_flash_rect: ColorRect
+var combo_pulse_rect: TextureRect
 var pause_overlay: Panel
 var pause_scroll: ScrollContainer
 var pause_content: VBoxContainer
@@ -45,6 +46,7 @@ var toast_queue: Array[String] = []
 var toast_showing: bool = false
 var reset_meta_confirm_pending: bool = false
 var level_flash_tween: Tween = null
+var combo_pulse_tween: Tween = null
 
 
 func _ready() -> void:
@@ -62,6 +64,8 @@ func _ready() -> void:
 		GameManager.toast_requested.connect(_on_toast_requested)
 	if GameManager.has_signal("level_flash_requested") and not GameManager.level_flash_requested.is_connected(_on_level_flash_requested):
 		GameManager.level_flash_requested.connect(_on_level_flash_requested)
+	if GameManager.has_signal("combo_pulse_requested") and not GameManager.combo_pulse_requested.is_connected(_on_combo_pulse_requested):
+		GameManager.combo_pulse_requested.connect(_on_combo_pulse_requested)
 	if AudioManager != null and AudioManager.has_signal("settings_changed") and not AudioManager.settings_changed.is_connected(_sync_audio_controls):
 		AudioManager.settings_changed.connect(_sync_audio_controls)
 	if AudioManager != null and AudioManager.has_signal("audio_unlocked") and not AudioManager.audio_unlocked.is_connected(_refresh_audio_prompt):
@@ -233,6 +237,16 @@ func _build_ui() -> void:
 	level_flash_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	level_flash_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(level_flash_rect)
+
+	combo_pulse_rect = TextureRect.new()
+	combo_pulse_rect.name = "ComboPulse"
+	combo_pulse_rect.texture = ART_RESOURCES.get_radial_glow()
+	combo_pulse_rect.material = ART_RESOURCES.get_additive_material()
+	combo_pulse_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	combo_pulse_rect.stretch_mode = TextureRect.STRETCH_SCALE
+	combo_pulse_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	combo_pulse_rect.visible = false
+	root.add_child(combo_pulse_rect)
 
 	_build_virtual_joystick()
 	_build_pause_overlay()
@@ -519,6 +533,11 @@ func _apply_responsive_layout() -> void:
 		toast_panel.offset_top = 56.0 if not portrait else 94.0
 		toast_panel.offset_bottom = toast_panel.offset_top + 48.0
 
+	if combo_pulse_rect != null and not combo_pulse_rect.visible:
+		var pulse_size: float = min(viewport_size.x, viewport_size.y) * 0.28
+		combo_pulse_rect.position = viewport_size * 0.5 - Vector2.ONE * pulse_size * 0.5
+		combo_pulse_rect.size = Vector2.ONE * pulse_size
+
 	if virtual_joystick != null:
 		var joystick_size := 164.0 if portrait else 150.0
 		virtual_joystick.size = Vector2(joystick_size, joystick_size)
@@ -629,6 +648,36 @@ func _on_level_flash_requested() -> void:
 	level_flash_tween = create_tween()
 	level_flash_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	level_flash_tween.tween_property(level_flash_rect, "color", Color(1.0, 1.0, 1.0, 0.0), 0.24)
+
+
+func _on_combo_pulse_requested(combo_count: int) -> void:
+	if combo_pulse_rect == null:
+		return
+	if combo_pulse_tween != null and combo_pulse_tween.is_valid():
+		combo_pulse_tween.kill()
+	var viewport_size := get_viewport().get_visible_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		viewport_size = Vector2(1280.0, 720.0)
+	var start_size: float = min(viewport_size.x, viewport_size.y) * 0.24
+	var end_size: float = max(viewport_size.x, viewport_size.y) * 1.65
+	var center := viewport_size * 0.5
+	var pulse_color := Color(0.55, 1.0, 0.86, 0.44)
+	if combo_count >= 30:
+		pulse_color = Color(1.0, 0.78, 0.36, 0.46)
+	combo_pulse_rect.visible = true
+	combo_pulse_rect.modulate = pulse_color
+	combo_pulse_rect.position = center - Vector2.ONE * start_size * 0.5
+	combo_pulse_rect.size = Vector2.ONE * start_size
+	combo_pulse_tween = create_tween()
+	combo_pulse_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	combo_pulse_tween.set_parallel(true)
+	combo_pulse_tween.tween_property(combo_pulse_rect, "position", center - Vector2.ONE * end_size * 0.5, 0.34)
+	combo_pulse_tween.tween_property(combo_pulse_rect, "size", Vector2.ONE * end_size, 0.34)
+	combo_pulse_tween.tween_property(combo_pulse_rect, "modulate", Color(pulse_color.r, pulse_color.g, pulse_color.b, 0.0), 0.34)
+	combo_pulse_tween.chain().tween_callback(func() -> void:
+		if combo_pulse_rect != null:
+			combo_pulse_rect.visible = false
+	)
 
 
 func _refresh_audio_prompt() -> void:

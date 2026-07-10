@@ -2,7 +2,7 @@ extends Node2D
 
 const ENEMY_CONFIGS: Dictionary = {
 	"normal": {
-		"max_hp": 20.0,
+		"max_hp": 24.0,
 		"speed": 88.0,
 		"damage": 8.0,
 		"xp": 2,
@@ -10,12 +10,12 @@ const ENEMY_CONFIGS: Dictionary = {
 		"radius": 13.0,
 		"color": Color(0.92, 0.28, 0.34),
 		"sprite_path": "res://assets/sprites/enemy_grunt.png",
-		"sprite_scale": 1.0,
+		"sprite_scale": 1.3,
 		"weight": 1.0,
 		"min_time": 0.0
 	},
 	"fast": {
-		"max_hp": 13.0,
+		"max_hp": 16.0,
 		"speed": 142.0,
 		"damage": 6.0,
 		"xp": 2,
@@ -23,12 +23,12 @@ const ENEMY_CONFIGS: Dictionary = {
 		"radius": 10.0,
 		"color": Color(1.0, 0.68, 0.18),
 		"sprite_path": "res://assets/sprites/enemy_fast.png",
-		"sprite_scale": 1.0,
+		"sprite_scale": 1.25,
 		"weight": 0.42,
-		"min_time": 18.0
+		"min_time": 12.0
 	},
 	"tank": {
-		"max_hp": 58.0,
+		"max_hp": 68.0,
 		"speed": 54.0,
 		"damage": 14.0,
 		"xp": 6,
@@ -36,13 +36,13 @@ const ENEMY_CONFIGS: Dictionary = {
 		"radius": 20.0,
 		"color": Color(0.55, 0.36, 0.9),
 		"sprite_path": "res://assets/sprites/enemy_tank.png",
-		"sprite_scale": 1.0,
+		"sprite_scale": 1.36,
 		"weight": 0.24,
 		"min_time": 42.0,
 		"attack_cooldown": 1.0
 	},
 	"ranged": {
-		"max_hp": 24.0,
+		"max_hp": 29.0,
 		"speed": 64.0,
 		"damage": 5.0,
 		"xp": 3,
@@ -50,7 +50,7 @@ const ENEMY_CONFIGS: Dictionary = {
 		"radius": 12.0,
 		"color": Color(1.0, 0.36, 0.28),
 		"sprite_path": "res://assets/sprites/enemy_grunt.png",
-		"sprite_scale": 1.05,
+		"sprite_scale": 1.3,
 		"weight": 0.22,
 		"min_time": 30.0,
 		"attack_cooldown": 2.35,
@@ -63,7 +63,7 @@ const ENEMY_CONFIGS: Dictionary = {
 		"projectile_radius": 6.0
 	},
 	"spawner": {
-		"max_hp": 42.0,
+		"max_hp": 49.0,
 		"speed": 42.0,
 		"damage": 7.0,
 		"xp": 5,
@@ -71,7 +71,7 @@ const ENEMY_CONFIGS: Dictionary = {
 		"radius": 18.0,
 		"color": Color(0.86, 0.26, 0.58),
 		"sprite_path": "res://assets/sprites/enemy_tank.png",
-		"sprite_scale": 0.92,
+		"sprite_scale": 1.22,
 		"weight": 0.16,
 		"min_time": 45.0,
 		"attack_cooldown": 1.2,
@@ -82,7 +82,7 @@ const ENEMY_CONFIGS: Dictionary = {
 		"death_spawn_cap": 150
 	},
 	"dasher": {
-		"max_hp": 30.0,
+		"max_hp": 35.0,
 		"speed": 112.0,
 		"damage": 7.0,
 		"xp": 3,
@@ -90,7 +90,7 @@ const ENEMY_CONFIGS: Dictionary = {
 		"radius": 11.0,
 		"color": Color(1.0, 0.62, 0.24),
 		"sprite_path": "res://assets/sprites/enemy_fast.png",
-		"sprite_scale": 1.08,
+		"sprite_scale": 1.3,
 		"weight": 0.2,
 		"min_time": 55.0,
 		"attack_cooldown": 1.05,
@@ -113,7 +113,7 @@ const ELITE_AFFIX_IDS: Array[String] = [
 @export var spawn_margin: float = 110.0
 @export var boss_time: float = 180.0
 
-var spawn_timer: float = 0.4
+var spawn_timer: float = 0.06
 var next_elite_time: float = 52.0
 var boss_spawned: bool = false
 var first_elite_time_applied: bool = false
@@ -143,13 +143,19 @@ func _process(delta: float) -> void:
 	if spawn_timer > 0.0:
 		return
 
-	var spawn_count := 1 + int(elapsed / 60.0)
+	var spawn_count := 1 + int(elapsed / 55.0)
+	if elapsed < 10.0:
+		spawn_count = 2
+	elif elapsed < 30.0:
+		spawn_count = 3
 	if bool(GameManager.get("boss_active")):
 		spawn_count = max(1, int(ceil(float(spawn_count) * 0.45)))
 	for _index in range(spawn_count):
 		_spawn_one()
 
-	spawn_timer = max(0.28, 1.05 - elapsed * 0.0048)
+	spawn_timer = max(0.28, 1.0 - elapsed * 0.0048)
+	if elapsed < 30.0:
+		spawn_timer = max(0.2, 0.42 - elapsed * 0.004)
 	if bool(GameManager.get("boss_active")):
 		spawn_timer *= 1.35
 	if GameManager.has_method("get_spawn_timer_multiplier"):
@@ -174,7 +180,7 @@ func _spawn_elite() -> bool:
 	config["damage"] = float(config.get("damage", 14.0)) * 1.3
 	config["radius"] = 28.0
 	config["color"] = Color(0.85, 0.28, 1.0)
-	config["sprite_scale"] = 1.25
+	config["sprite_scale"] = 1.56
 	config["xp"] = 8
 	config["gold"] = 6 + (GameManager.get_elite_bonus_gold() if GameManager.has_method("get_elite_bonus_gold") else 0)
 	config["is_elite"] = true
@@ -198,7 +204,7 @@ func _spawn_boss() -> void:
 		return
 	boss_spawned = true
 	var config := {
-		"max_hp": 1500.0,
+		"max_hp": 1950.0,
 		"speed": 46.0,
 		"damage": 18.0,
 		"xp": 30,
@@ -206,7 +212,7 @@ func _spawn_boss() -> void:
 		"radius": 34.0,
 		"color": Color(0.42, 0.18, 0.74),
 		"sprite_path": "res://assets/sprites/enemy_tank.png",
-		"sprite_scale": 1.58,
+		"sprite_scale": 2.08,
 		"attack_cooldown": 1.15,
 		"behavior_id": "boss",
 		"is_boss": true,
@@ -264,7 +270,7 @@ func _apply_elite_affix(config: Dictionary, affix_id: String) -> void:
 		"affix_split":
 			config["max_hp"] = float(config.get("max_hp", 174.0)) * 0.92
 			config["color"] = Color(0.55, 1.0, 0.58)
-			config["sprite_scale"] = 1.18
+			config["sprite_scale"] = 1.5
 			config["spawns_on_death"] = true
 			config["death_spawn_id"] = "affix_split_spawnling"
 			config["death_spawn_count"] = 2
@@ -272,7 +278,7 @@ func _apply_elite_affix(config: Dictionary, affix_id: String) -> void:
 		"affix_field":
 			config["speed"] = float(config.get("speed", 54.0)) * 0.86
 			config["color"] = Color(0.34, 0.88, 1.0)
-			config["sprite_scale"] = 1.28
+			config["sprite_scale"] = 1.58
 			config["affix_field_radius"] = 128.0
 			config["affix_field_slow_strength"] = 0.22
 		"affix_swift":
@@ -281,7 +287,7 @@ func _apply_elite_affix(config: Dictionary, affix_id: String) -> void:
 			config["damage"] = float(config.get("damage", 18.2)) * 0.9
 			config["radius"] = 25.0
 			config["color"] = Color(1.0, 0.62, 0.22)
-			config["sprite_scale"] = 1.16
+			config["sprite_scale"] = 1.48
 			config["attack_cooldown"] = 1.05
 			config["behavior_id"] = "dasher"
 			config["dash_trigger_range"] = 185.0
@@ -293,10 +299,10 @@ func _apply_elite_affix(config: Dictionary, affix_id: String) -> void:
 
 func _apply_time_scaling(config: Dictionary) -> void:
 	var elapsed := GameManager.elapsed_time
-	if elapsed < 90.0:
+	if elapsed < 60.0:
 		return
-	var minutes_after := (elapsed - 90.0) / 60.0
-	var multiplier := 1.0 + 0.04 * minutes_after
+	var minutes_after := (elapsed - 60.0) / 60.0
+	var multiplier := 1.0 + 0.055 * minutes_after
 	config["max_hp"] = float(config.get("max_hp", 1.0)) * multiplier
 	config["damage"] = float(config.get("damage", 1.0)) * multiplier
 	if config.has("projectile_damage"):

@@ -66,6 +66,16 @@ var shadow: Sprite2D = null
 var threat_glow: Sprite2D = null
 var hit_flash_timer: float = 0.0
 var threat_glow_base_alpha: float = 0.18
+var visual_walk_phase: float = 0.0
+var visual_idle_phase: float = 0.0
+var hit_squash_timer: float = 0.0
+var last_visual_direction: Vector2 = Vector2.RIGHT
+var sprite_base_scale: Vector2 = Vector2.ONE
+var shadow_base_scale: Vector2 = Vector2.ONE
+var threat_glow_base_scale: Vector2 = Vector2.ONE
+var visual_bob_frequency: float = 7.2
+var visual_bob_amplitude: float = 2.4
+var visual_tilt_amount: float = 0.085
 
 
 func _ready() -> void:
@@ -110,11 +120,16 @@ func pool_on_release() -> void:
 	rotation = 0.0
 	if sprite != null:
 		sprite.rotation = 0.0
+		sprite.position = Vector2.ZERO
 	if shadow != null:
 		shadow.visible = false
 	if threat_glow != null:
 		threat_glow.visible = false
 	hit_flash_timer = 0.0
+	hit_squash_timer = 0.0
+	visual_walk_phase = 0.0
+	visual_idle_phase = 0.0
+	last_visual_direction = Vector2.RIGHT
 	threat_glow_base_alpha = 0.18
 	if affix_ring != null:
 		affix_ring.visible = false
@@ -182,11 +197,18 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	rotation = 0.0
 	hit_flash_timer = 0.0
 	_apply_shape()
+	_apply_visual_motion_profile()
 	_apply_sprite()
 	_apply_affix_visuals()
 	_update_hp_bar()
 	_set_hp_bar_visible(false)
 	_request_camera_pressure_on_spawn()
+
+
+func _process(delta: float) -> void:
+	if not is_active:
+		return
+	_update_procedural_visual(delta)
 
 
 func get_hit_token() -> int:
@@ -321,8 +343,8 @@ func _physics_boss(delta: float, target: Node2D) -> void:
 
 func _move_and_face() -> void:
 	move_and_slide()
-	if velocity.length_squared() > 1.0 and sprite != null:
-		sprite.rotation = velocity.angle()
+	if velocity.length_squared() > 1.0:
+		last_visual_direction = velocity.normalized()
 
 
 func _try_contact_attack(target: Node2D, damage_multiplier: float = 1.0) -> void:
@@ -397,7 +419,7 @@ func _boss_dasher_config() -> Dictionary:
 		"radius": 10.0,
 		"color": Color(1.0, 0.54, 0.34),
 		"sprite_path": "res://assets/sprites/enemy_fast.png",
-		"sprite_scale": 1.08,
+		"sprite_scale": 1.34,
 		"attack_cooldown": 0.9,
 		"behavior_id": "dasher",
 		"dash_trigger_range": 170.0,
@@ -494,6 +516,7 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> void
 	EntityFactory.spawn_damage_number(final_amount, number_position, Color(1.0, 0.96, 0.72))
 	hp_bar_timer = 0.55
 	hit_flash_timer = 0.075
+	hit_squash_timer = 0.11
 	_update_hp_bar()
 	_set_hp_bar_visible(true)
 
@@ -508,6 +531,9 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 	status_timers.clear()
 	status_strengths.clear()
 	GameManager.add_kill()
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		var thump_pitch := 0.68 if is_boss else (0.78 if is_elite else 0.92)
+		AudioManager.play_sfx("kill_thump", false, -7.0, thump_pitch)
 	if is_elite and GameManager.has_method("record_elite_kill"):
 		GameManager.record_elite_kill()
 	if is_boss and GameManager.has_method("record_boss_kill"):
@@ -566,7 +592,7 @@ func _death_child_config() -> Dictionary:
 		"radius": 8.5,
 		"color": child_color,
 		"sprite_path": "res://assets/sprites/enemy_fast.png",
-		"sprite_scale": 0.82,
+		"sprite_scale": 1.08,
 		"attack_cooldown": 0.8,
 		"behavior_id": "chaser",
 		"spawns_on_death": false
@@ -697,7 +723,10 @@ func _apply_sprite() -> void:
 	sprite.visible = true
 	sprite.modulate = body_color
 	sprite.rotation = 0.0
+	sprite.position = Vector2.ZERO
+	sprite.flip_h = false
 	SPRITE_LOADER.fit_sprite(sprite, texture, radius * 3.0, sprite_scale)
+	sprite_base_scale = sprite.scale
 	_apply_shadow_and_glow()
 
 
@@ -711,6 +740,7 @@ func _apply_shadow_and_glow() -> void:
 		shadow.visible = true
 		shadow.position = Vector2(0.0, radius * 0.86)
 		ART_RESOURCES.fit_sprite(shadow, ART_RESOURCES.get_ellipse_shadow(), radius * 3.2)
+		shadow_base_scale = shadow.scale
 	if threat_glow != null:
 		threat_glow.visible = true
 		var glow_diameter := radius * 4.2
@@ -722,6 +752,7 @@ func _apply_shadow_and_glow() -> void:
 			glow_diameter = radius * 7.2
 			glow_alpha = 0.46
 		ART_RESOURCES.fit_sprite(threat_glow, ART_RESOURCES.get_radial_glow(), glow_diameter)
+		threat_glow_base_scale = threat_glow.scale
 		threat_glow_base_alpha = glow_alpha
 		var enemy_count: int = EntityFactory.get_enemy_live_count() if EntityFactory != null and EntityFactory.has_method("get_enemy_live_count") else 0
 		update_threat_glow_for_crowd_count(enemy_count)
@@ -765,6 +796,59 @@ func _tick_hit_flash(delta: float) -> void:
 	sprite.modulate = Color(1.0, 0.98, 0.9, 1.0).lerp(body_color, 1.0 - ratio)
 	if hit_flash_timer <= 0.0:
 		sprite.modulate = body_color
+
+
+func _update_procedural_visual(delta: float) -> void:
+	if sprite == null:
+		return
+	var moving := velocity.length_squared() > 4.0
+	visual_idle_phase += delta * 2.0
+	visual_walk_phase += delta * (visual_bob_frequency if moving else max(2.0, visual_bob_frequency * 0.34))
+	if hit_squash_timer > 0.0:
+		hit_squash_timer = max(hit_squash_timer - delta, 0.0)
+
+	if moving:
+		last_visual_direction = velocity.normalized()
+	if abs(last_visual_direction.x) > 0.05:
+		sprite.flip_h = last_visual_direction.x < 0.0
+
+	var bob := sin(visual_walk_phase) * (visual_bob_amplitude if moving else visual_bob_amplitude * 0.18)
+	var breath := 1.0 + sin(visual_idle_phase) * (0.01 if moving else 0.022)
+	var squash := hit_squash_timer / 0.11 if hit_squash_timer > 0.0 else 0.0
+	var squash_x := 1.0 + squash * 0.18
+	var squash_y := 1.0 - squash * 0.14
+	var tilt: float = clamp(last_visual_direction.x, -1.0, 1.0) * visual_tilt_amount if moving else 0.0
+
+	sprite.position = Vector2(0.0, bob)
+	sprite.rotation = tilt
+	sprite.scale = Vector2(sprite_base_scale.x * breath * squash_x, sprite_base_scale.y * breath * squash_y)
+	if shadow != null:
+		shadow.scale = shadow_base_scale * (1.0 - abs(bob) * 0.012)
+	if threat_glow != null:
+		threat_glow.scale = threat_glow_base_scale * (1.0 + sin(visual_idle_phase + 0.2) * 0.012)
+
+
+func _apply_visual_motion_profile() -> void:
+	if is_boss:
+		visual_bob_frequency = 4.1
+		visual_bob_amplitude = 2.1
+		visual_tilt_amount = 0.045
+	elif type_id.contains("tank") or type_id.contains("elite") or is_elite:
+		visual_bob_frequency = 4.8
+		visual_bob_amplitude = 2.2
+		visual_tilt_amount = 0.055
+	elif type_id.contains("fast") or behavior_id == "dasher":
+		visual_bob_frequency = 11.2
+		visual_bob_amplitude = 3.2
+		visual_tilt_amount = 0.13
+	elif behavior_id == "ranged":
+		visual_bob_frequency = 6.2
+		visual_bob_amplitude = 2.0
+		visual_tilt_amount = 0.075
+	else:
+		visual_bob_frequency = 7.2
+		visual_bob_amplitude = 2.4
+		visual_tilt_amount = 0.085
 
 
 func _apply_affix_visuals() -> void:

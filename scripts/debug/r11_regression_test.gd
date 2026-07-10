@@ -1,0 +1,243 @@
+extends Node
+
+const ARENA_SCENE: PackedScene = preload("res://scenes/arena/Arena.tscn")
+
+var arena: Node = null
+var squad_manager: Node = null
+var leader: Node2D = null
+var current_phase: String = "boot"
+
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	seed(11011)
+	call_deferred("_watchdog")
+	call_deferred("_run_tests")
+
+
+func _watchdog() -> void:
+	await get_tree().create_timer(18.0, true).timeout
+	if current_phase != "done":
+		_fail("watchdog timeout at phase: " + current_phase)
+
+
+func _run_tests() -> void:
+	current_phase = "setup"
+	arena = ARENA_SCENE.instantiate()
+	add_child(arena)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	squad_manager = arena.get_node_or_null("SquadManager")
+	leader = GameManager.player
+	if squad_manager == null or leader == null or not is_instance_valid(leader):
+		_fail("arena setup failed")
+		return
+	var spawner := arena.get_node_or_null("EnemySpawner")
+	if spawner != null:
+		spawner.set_process(false)
+	_prepare_run_state()
+
+	current_phase = "loadout"
+	if not _test_r11_loadout():
+		return
+	current_phase = "new_weapons"
+	if not await _test_new_weapon_hits():
+		return
+	current_phase = "animation"
+	if not await _test_procedural_animation_changes_transforms():
+		return
+	current_phase = "group_scan"
+	var pool_stats: Dictionary = EntityFactory.get_pool_stats()
+	if int(pool_stats.get("enemy_group_scans", 0)) != 0:
+		_fail("R11 introduced enemy group scans")
+		return
+
+	current_phase = "done"
+	print("R11_REGRESSION_PASS pool_stats=" + JSON.stringify({
+		"enemy_queries": int(pool_stats.get("enemy_queries", 0)),
+		"enemy_group_scans": int(pool_stats.get("enemy_group_scans", 0))
+	}))
+	get_tree().quit(0)
+
+
+func _prepare_run_state() -> void:
+	get_tree().paused = false
+	Engine.time_scale = 1.0
+	GameManager.game_running = true
+	GameManager.is_game_over = false
+	GameManager.waiting_for_contract = false
+	GameManager.waiting_for_upgrade = false
+	GameManager.waiting_for_shop = false
+	GameManager.stage_victory_pending = false
+	GameManager.manual_paused = false
+	GameManager.system_pause_owners.clear()
+	GameManager.level = 7
+	GameManager.xp = 0
+	GameManager.xp_required = 99999999
+	GameManager.player = leader
+	GameManager.squad_manager = squad_manager
+	EntityFactory.reset_debug_counters()
+
+
+func _test_r11_loadout() -> bool:
+	var captain: Node = squad_manager.get_member_by_id("rift_captain")
+	var guard: Node = squad_manager.get_member_by_id("orbit_guard")
+	var scout: Node = squad_manager.get_member_by_id("arc_scout")
+	if captain == null or guard == null or scout == null:
+		_fail("starting squad missing R11 members")
+		return false
+	if not _has_weapon(captain, "riftline_emitter") or not _has_weapon(captain, "orbit_blades") or not _has_weapon(captain, "arc_chain"):
+		_fail("captain does not carry all three flagship weapons")
+		return false
+	if not _has_weapon(guard, "rift_shield_boomerang") or _has_weapon(guard, "orbit_blades"):
+		_fail("orbit_guard weapon transfer failed")
+		return false
+	if not _has_weapon(scout, "rift_seeker_missiles") or _has_weapon(scout, "arc_chain"):
+		_fail("arc_scout weapon transfer failed")
+		return false
+	print("R11_LOADOUT captain=riftline+orbit+chain guard=boomerang scout=missiles")
+	return true
+
+
+func _test_new_weapon_hits() -> bool:
+	_release_active_enemies()
+	var guard: Node = squad_manager.get_member_by_id("orbit_guard")
+	var scout: Node = squad_manager.get_member_by_id("arc_scout")
+	if guard == null or scout == null:
+		_fail("new weapon owners missing")
+		return false
+
+	_disable_all_weapons_except(guard, "rift_shield_boomerang")
+	guard.global_position = Vector2.ZERO
+	var boomerang_weapon := _weapon_node(guard, "rift_shield_boomerang")
+	var boomerang_target := EntityFactory.spawn_enemy("r11_boomerang_target", _target_config(140.0), Vector2(190.0, 0.0))
+	var boomerang_hp_before: float = float(boomerang_target.get("hp"))
+	for _index in range(150):
+		await get_tree().physics_frame
+	var boomerang_hp_after: float = float(boomerang_target.get("hp"))
+	if boomerang_hp_after >= boomerang_hp_before or int(boomerang_weapon.get("trigger_count")) <= 0:
+		_fail("boomerang weapon did not damage target")
+		return false
+
+	_release_active_enemies()
+	_disable_all_weapons_except(scout, "rift_seeker_missiles")
+	scout.global_position = Vector2.ZERO
+	var missile_weapon := _weapon_node(scout, "rift_seeker_missiles")
+	var missile_target := EntityFactory.spawn_enemy("r11_missile_target", _target_config(120.0), Vector2(240.0, 80.0))
+	var missile_hp_before: float = float(missile_target.get("hp"))
+	for _index in range(140):
+		await get_tree().physics_frame
+	var missile_hp_after: float = float(missile_target.get("hp"))
+	if missile_hp_after >= missile_hp_before or int(missile_weapon.get("trigger_count")) <= 0:
+		_fail("homing missile weapon did not damage target")
+		return false
+	print("R11_NEW_WEAPONS boomerang_hp %.1f->%.1f missile_hp %.1f->%.1f" % [
+		boomerang_hp_before,
+		boomerang_hp_after,
+		missile_hp_before,
+		missile_hp_after
+	])
+	return true
+
+
+func _test_procedural_animation_changes_transforms() -> bool:
+	var visual := leader.get_node_or_null("Visual")
+	if visual == null:
+		_fail("leader visual missing")
+		return false
+	var sprite: Sprite2D = visual.get("sprite")
+	if sprite == null:
+		_fail("leader sprite missing")
+		return false
+	var start_y := sprite.position.y
+	leader.set_desired_velocity(Vector2(180.0, 0.0))
+	for _index in range(18):
+		await get_tree().process_frame
+	var moved_y := sprite.position.y
+	var moved_rotation := sprite.rotation
+	leader.set_desired_velocity(Vector2.ZERO)
+	if abs(moved_y - start_y) < 0.05 and abs(moved_rotation) < 0.01:
+		_fail("leader procedural animation did not change transform")
+		return false
+
+	var enemy := EntityFactory.spawn_enemy("r11_anim_fast", _moving_enemy_config(), leader.global_position + Vector2(220.0, 0.0))
+	var enemy_sprite: Sprite2D = enemy.get("sprite")
+	var enemy_start_y := enemy_sprite.position.y
+	for _index in range(18):
+		await get_tree().physics_frame
+		await get_tree().process_frame
+	var enemy_moved_y := enemy_sprite.position.y
+	if abs(enemy_moved_y - enemy_start_y) < 0.05:
+		_fail("enemy procedural animation did not bob")
+		return false
+	print("R11_ANIMATION leader_y %.2f->%.2f tilt=%.3f enemy_y %.2f->%.2f" % [
+		start_y,
+		moved_y,
+		moved_rotation,
+		enemy_start_y,
+		enemy_moved_y
+	])
+	return true
+
+
+func _has_weapon(hero: Node, weapon_id: String) -> bool:
+	var weapons: Dictionary = hero.get("weapons")
+	return weapons.has(weapon_id)
+
+
+func _weapon_node(hero: Node, weapon_id: String) -> Node:
+	var weapons: Dictionary = hero.get("weapons")
+	return weapons.get(weapon_id)
+
+
+func _disable_all_weapons_except(owner: Node, kept_weapon_id: String) -> void:
+	var members: Array = squad_manager.get_members()
+	for member in members:
+		if member == null or not is_instance_valid(member):
+			continue
+		var weapons: Dictionary = member.get("weapons")
+		for weapon_id in weapons.keys():
+			var weapon: Node = weapons.get(weapon_id)
+			if weapon == null or not is_instance_valid(weapon):
+				continue
+			var keep: bool = member == owner and str(weapon_id) == kept_weapon_id
+			weapon.set_process(keep)
+			weapon.set_physics_process(keep)
+			if not keep and weapon.has_method("release_owned_nodes"):
+				weapon.release_owned_nodes()
+
+
+func _release_active_enemies() -> void:
+	var live_enemies: Array = EntityFactory.get("enemy_spatial_index").get("live_enemies")
+	for enemy in live_enemies.duplicate():
+		if enemy != null and is_instance_valid(enemy):
+			EntityFactory.release_enemy(enemy)
+
+
+func _target_config(hp_value: float) -> Dictionary:
+	return {
+		"max_hp": hp_value,
+		"speed": 0.0,
+		"damage": 0.0,
+		"xp": 0,
+		"gold": 0,
+		"radius": 13.0,
+		"color": Color(0.55, 0.78, 1.0),
+		"sprite_path": "res://assets/sprites/enemy_grunt.png",
+		"sprite_scale": 1.3,
+		"attack_cooldown": 99.0
+	}
+
+
+func _moving_enemy_config() -> Dictionary:
+	var config := _target_config(80.0)
+	config["speed"] = 120.0
+	config["behavior_id"] = "dasher"
+	config["sprite_path"] = "res://assets/sprites/enemy_fast.png"
+	config["sprite_scale"] = 1.25
+	return config
+
+
+func _fail(message: String) -> void:
+	printerr("R11_REGRESSION_FAIL: " + message)
+	get_tree().quit(1)

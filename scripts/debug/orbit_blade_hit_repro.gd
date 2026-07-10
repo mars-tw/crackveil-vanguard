@@ -5,7 +5,7 @@ const ARENA_SCENE: PackedScene = preload("res://scenes/arena/Arena.tscn")
 var arena: Node = null
 var squad_manager: Node = null
 var leader: Node2D = null
-var orbit_guard: Node2D = null
+var captain: Node2D = null
 var orbit_weapon: Node = null
 var target_enemy: Node = null
 
@@ -24,9 +24,9 @@ func _run_repro() -> void:
 
 	squad_manager = arena.get_node_or_null("SquadManager")
 	leader = GameManager.player
-	orbit_guard = squad_manager.get_member_by_id("orbit_guard") if squad_manager != null else null
-	if orbit_guard == null or not is_instance_valid(orbit_guard):
-		_fail("orbit_guard not found")
+	captain = squad_manager.get_member_by_id("rift_captain") if squad_manager != null else null
+	if captain == null or not is_instance_valid(captain):
+		_fail("rift_captain not found")
 		return
 
 	var spawner := arena.get_node_or_null("EnemySpawner")
@@ -34,15 +34,15 @@ func _run_repro() -> void:
 		spawner.set_process(false)
 
 	_prepare_repro_state()
-	orbit_weapon = _weapon_node(orbit_guard, "orbit_blades")
+	orbit_weapon = _weapon_node(captain, "orbit_blades")
 	if orbit_weapon == null:
-		_fail("orbit weapon not found")
+		_fail("captain orbit weapon not found")
 		return
 	_disable_non_orbit_weapons()
 
 	var weapon_data: Resource = orbit_weapon.get("data")
 	var radius := float(weapon_data.get("orbit_radius"))
-	target_enemy = EntityFactory.spawn_enemy("orbit_repro_target", _target_config(), orbit_guard.global_position + Vector2(radius, 0.0))
+	target_enemy = EntityFactory.spawn_enemy("orbit_repro_target", _target_config(), captain.global_position + Vector2(radius, 0.0))
 	if target_enemy == null:
 		_fail("target enemy spawn failed")
 		return
@@ -87,8 +87,8 @@ func _prepare_repro_state() -> void:
 	GameManager.squad_manager = squad_manager
 	if leader != null:
 		leader.global_position = Vector2.ZERO
-	if orbit_guard != null:
-		orbit_guard.global_position = Vector2.ZERO
+	if captain != null:
+		captain.global_position = Vector2.ZERO
 	var members: Array = squad_manager.get_members() if squad_manager != null and squad_manager.has_method("get_members") else []
 	for member in members:
 		if member == null or not is_instance_valid(member):

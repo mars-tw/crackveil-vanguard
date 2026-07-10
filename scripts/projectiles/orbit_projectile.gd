@@ -230,10 +230,10 @@ func _apply_sprite() -> void:
 	if glow != null:
 		glow.visible = true
 		glow.modulate = Color(color.r, color.g, color.b, 0.34)
-		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), projectile_radius * 7.5)
+		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), projectile_radius * 8.8)
 	if trail != null:
 		trail.visible = true
-		trail.width = clamp(projectile_radius * 1.1, 3.0, 8.0)
-		trail.default_color = Color(color.r, color.g, color.b, 0.38)
-		var length := projectile_radius * 5.6
-		trail.points = PackedVector2Array([Vector2(-length, 0.0), Vector2.ZERO])
+		trail.width = clamp(projectile_radius * 1.45, 4.0, 12.0)
+		trail.default_color = Color(color.r, color.g, color.b, 0.48)
+		var length := projectile_radius * 7.2
+		trail.points = PackedVector2Array([Vector2(-length, 0.0), Vector2(-length * 0.32, 0.0), Vector2.ZERO])

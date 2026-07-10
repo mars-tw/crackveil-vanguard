@@ -14,7 +14,9 @@ const SFX_PATHS: Dictionary = {
 	"elite": "res://assets/audio/elite.wav",
 	"death": "res://assets/audio/death.wav",
 	"pulse": "res://assets/audio/pulse.wav",
-	"pickup": "res://assets/audio/pickup.wav"
+	"pickup": "res://assets/audio/pickup.wav",
+	"kill_thump": "res://assets/audio/kill_thump.wav",
+	"combo": "res://assets/audio/combo.wav"
 }
 const SFX_COOLDOWNS: Dictionary = {
 	"fire": 0.07,
@@ -24,7 +26,9 @@ const SFX_COOLDOWNS: Dictionary = {
 	"elite": 0.8,
 	"death": 1.0,
 	"pulse": 0.18,
-	"pickup": 0.025
+	"pickup": 0.025,
+	"kill_thump": 0.055,
+	"combo": 0.18
 }
 
 var master_volume: float = 0.75
@@ -77,7 +81,7 @@ func is_audio_unlocked() -> bool:
 	return unlocked
 
 
-func play_sfx(sfx_id: String, bypass_lock: bool = false, gain_db: float = 0.0) -> void:
+func play_sfx(sfx_id: String, bypass_lock: bool = false, gain_db: float = 0.0, pitch_scale: float = 1.0) -> void:
 	if not audio_runtime_enabled:
 		return
 	if not sfx_streams.has(sfx_id):
@@ -95,6 +99,7 @@ func play_sfx(sfx_id: String, bypass_lock: bool = false, gain_db: float = 0.0) -
 	if player.stream == null:
 		return
 	player.volume_db = gain_db
+	player.pitch_scale = clamp(pitch_scale, 0.4, 2.2)
 	player.play()
 
 

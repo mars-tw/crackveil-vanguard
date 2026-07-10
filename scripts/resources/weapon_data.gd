@@ -4,7 +4,7 @@ extends Resource
 @export var id: String = ""
 @export var display_name: String = "未命名武器"
 @export_multiline var description: String = ""
-@export_enum("linear", "orbit", "explosion", "chain_lightning") var behavior_id: String = "linear"
+@export_enum("linear", "orbit", "explosion", "chain_lightning", "boomerang", "homing_missile") var behavior_id: String = "linear"
 @export var weapon_scene: PackedScene
 
 @export_group("共同數值")
@@ -41,6 +41,12 @@ extends Resource
 @export var chain_radius: float = 170.0
 @export var chain_damage_falloff: float = 0.86
 
+@export_group("導引與返場")
+@export var homing_turn_rate: float = 5.4
+@export var homing_retarget_radius: float = 620.0
+@export var boomerang_return_ratio: float = 0.52
+@export var boomerang_catch_radius: float = 30.0
+
 @export_group("升級")
 @export var damage_upgrade: float = 4.0
 @export var cooldown_upgrade_multiplier: float = 0.88
@@ -58,10 +64,14 @@ const QUALITATIVE_MAX_LEVELS: Dictionary = {
 	"pulse_embers": 1,
 	"chain_overload": 1,
 	"magnetic_reclaim": 1,
+	"boomerang_rebound": 2,
+	"missile_guidance": 2,
 	"evo_rift_fan": 1,
 	"evo_shear_halo": 1,
 	"evo_ember_well": 1,
-	"evo_overload_nova": 1
+	"evo_overload_nova": 1,
+	"evo_razor_bulwark": 1,
+	"evo_hunter_swarm": 1
 }
 
 const EVOLUTION_DEFINITIONS: Dictionary = {
@@ -100,6 +110,24 @@ const EVOLUTION_DEFINITIONS: Dictionary = {
 		"required_level": 1,
 		"required_damage_level": 3,
 		"run_level": 7
+	},
+	"rift_shield_boomerang": {
+		"evolution_id": "evo_razor_bulwark",
+		"name": "剃界盾輪",
+		"description": "迴旋鏢返場時二次切割，刃體加寬並附加短暫易傷。",
+		"required_modifier": "boomerang_rebound",
+		"required_level": 2,
+		"required_damage_level": 3,
+		"run_level": 7
+	},
+	"rift_seeker_missiles": {
+		"evolution_id": "evo_hunter_swarm",
+		"name": "獵隙蜂群",
+		"description": "飛彈改為蜂群齊射，轉向更快並可穿過第一個目標。",
+		"required_modifier": "missile_guidance",
+		"required_level": 2,
+		"required_damage_level": 3,
+		"run_level": 7
 	}
 }
 
@@ -129,9 +157,9 @@ func apply_upgrade(upgrade_kind: String) -> void:
 			_increment_runtime_modifier("weapon_damage")
 			_increment_runtime_modifier("weapon_cooldown")
 			_increment_runtime_modifier("weapon_projectiles")
-		"evo_rift_fan", "evo_shear_halo", "evo_ember_well", "evo_overload_nova":
+		"evo_rift_fan", "evo_shear_halo", "evo_ember_well", "evo_overload_nova", "evo_razor_bulwark", "evo_hunter_swarm":
 			_apply_evolution(upgrade_kind)
-		"riftline_fork", "orbit_resonance", "pulse_embers", "chain_overload", "magnetic_reclaim":
+		"riftline_fork", "orbit_resonance", "pulse_embers", "chain_overload", "magnetic_reclaim", "boomerang_rebound", "missile_guidance":
 			_increment_modifier(upgrade_kind)
 		_:
 			damage += damage_upgrade
@@ -217,6 +245,19 @@ func _apply_evolution(evolution_id: String) -> void:
 			chain_radius += 24.0
 			effect_lifetime += 0.08
 			color = Color(0.72, 1.0, 0.92)
+		"evo_razor_bulwark":
+			projectile_count += 1
+			projectile_radius += 2.0
+			pierce += 2
+			range += 80.0
+			boomerang_return_ratio = min(0.66, boomerang_return_ratio + 0.08)
+			color = Color(0.9, 0.98, 1.0)
+		"evo_hunter_swarm":
+			projectile_count += 2
+			pierce = max(pierce, 1)
+			cooldown = max(0.16, cooldown * 0.82)
+			homing_turn_rate += 2.2
+			color = Color(0.55, 1.0, 0.84)
 
 
 func _apply_count_upgrade() -> void:
@@ -232,6 +273,14 @@ func _apply_count_upgrade() -> void:
 		"chain_lightning":
 			chain_count += chain_count_upgrade
 			chain_radius += range_upgrade
+		"boomerang":
+			projectile_count += projectile_count_upgrade
+			pierce += pierce_upgrade
+			range += range_upgrade
+		"homing_missile":
+			projectile_count += projectile_count_upgrade
+			pierce += pierce_upgrade
+			range += range_upgrade
 
 
 func to_projectile_stats() -> Dictionary:
@@ -246,8 +295,16 @@ func to_projectile_stats() -> Dictionary:
 		"projectile_sprite_path": projectile_sprite_path,
 		"sprite_scale": sprite_scale,
 		"target_group": "enemies",
+		"homing_turn_rate": homing_turn_rate,
+		"homing_retarget_radius": homing_retarget_radius,
+		"boomerang_return_ratio": boomerang_return_ratio,
+		"boomerang_catch_radius": boomerang_catch_radius,
 		"riftline_fork_level": get_modifier_level("riftline_fork"),
 		"evo_rift_fan_level": get_modifier_level("evo_rift_fan"),
+		"boomerang_rebound_level": get_modifier_level("boomerang_rebound"),
+		"missile_guidance_level": get_modifier_level("missile_guidance"),
+		"evo_razor_bulwark_level": get_modifier_level("evo_razor_bulwark"),
+		"evo_hunter_swarm_level": get_modifier_level("evo_hunter_swarm"),
 		"fork_depth": 0
 	}
 
@@ -266,6 +323,10 @@ func to_effect_stats() -> Dictionary:
 		"chain_count": chain_count,
 		"chain_radius": chain_radius,
 		"chain_damage_falloff": chain_damage_falloff,
+		"homing_turn_rate": homing_turn_rate,
+		"homing_retarget_radius": homing_retarget_radius,
+		"boomerang_return_ratio": boomerang_return_ratio,
+		"boomerang_catch_radius": boomerang_catch_radius,
 		"color": color,
 		"effect_lifetime": effect_lifetime,
 		"projectile_sprite_path": projectile_sprite_path,
@@ -277,7 +338,11 @@ func to_effect_stats() -> Dictionary:
 		"pulse_embers_level": get_modifier_level("pulse_embers"),
 		"chain_overload_level": get_modifier_level("chain_overload"),
 		"magnetic_reclaim_level": get_modifier_level("magnetic_reclaim"),
+		"boomerang_rebound_level": get_modifier_level("boomerang_rebound"),
+		"missile_guidance_level": get_modifier_level("missile_guidance"),
 		"evo_shear_halo_level": get_modifier_level("evo_shear_halo"),
 		"evo_ember_well_level": get_modifier_level("evo_ember_well"),
-		"evo_overload_nova_level": get_modifier_level("evo_overload_nova")
+		"evo_overload_nova_level": get_modifier_level("evo_overload_nova"),
+		"evo_razor_bulwark_level": get_modifier_level("evo_razor_bulwark"),
+		"evo_hunter_swarm_level": get_modifier_level("evo_hunter_swarm")
 	}

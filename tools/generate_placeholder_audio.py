@@ -113,6 +113,29 @@ def main() -> None:
         * envelope(i, n, 0.03, 0.52)
         * (sine(960.0 + 340.0 * t, t) * 0.64 + sine(1440.0 + 480.0 * t, t) * 0.36),
     )
+    write_wav(
+        "kill_thump",
+        0.16,
+        lambda i, n, t: 0.26
+        * envelope(i, n, 0.015, 0.72)
+        * (
+            sine(68.0 - 22.0 * t, t) * 0.62
+            + sine(124.0 - 40.0 * t, t) * 0.22
+            + random.uniform(-1.0, 1.0) * 0.16
+        ),
+    )
+    write_wav(
+        "combo",
+        0.24,
+        lambda i, n, t: 0.22
+        * envelope(i, n, 0.03, 0.42)
+        * (
+            sine(180.0 + 520.0 * t, t) * 0.32
+            + sine(360.0 + 940.0 * t, t) * 0.34
+            + sine(720.0 + 1180.0 * t, t) * 0.22
+            + random.uniform(-1.0, 1.0) * 0.12
+        ),
+    )
 
     for wav_path in sorted(OUTPUT_DIR.glob("*.wav")):
         print(f"{wav_path.name}: {wav_path.stat().st_size} bytes")

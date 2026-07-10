@@ -101,10 +101,10 @@ func _update_sprite_state() -> void:
 	var radius: float = float(stats.get("area_radius", 82.0))
 	var texture := sprite.texture
 	if texture != null:
-		var target_size := radius * (2.0 + t * 0.35)
+		var target_size := radius * (2.25 + t * 0.42)
 		SPRITE_LOADER.fit_sprite(sprite, texture, target_size, float(stats.get("sprite_scale", 1.0)))
 	var color: Color = stats.get("color", Color(1.0, 0.6, 0.25))
 	sprite.modulate = Color(color.r, color.g, color.b, 1.0 - t)
 	if glow != null:
-		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), radius * (2.55 + t * 0.5))
-		glow.modulate = Color(color.r, color.g, color.b, (1.0 - t) * 0.38)
+		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), radius * (2.95 + t * 0.62))
+		glow.modulate = Color(color.r, color.g, color.b, (1.0 - t) * 0.46)

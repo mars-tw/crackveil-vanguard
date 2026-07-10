@@ -79,7 +79,7 @@ func setup(amount: int, start_velocity: Vector2 = Vector2.ZERO, start_scatter_ti
 	forced_magnet_timer = 0.0
 	scatter_timer = max(0.0, start_scatter_time)
 	arc_height = 0.0
-	arc_velocity = randf_range(82.0, 132.0)
+	arc_velocity = randf_range(126.0, 190.0)
 	magnet_time = 0.0
 	rotation = 0.0
 	_apply_sprite()

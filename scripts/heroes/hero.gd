@@ -347,7 +347,10 @@ func _update_facing(delta: float) -> void:
 		facing_direction = (cached_facing_enemy.global_position - global_position).normalized()
 
 	if facing_direction != Vector2.ZERO and visual != null:
-		visual.rotation = facing_direction.angle()
+		if visual.has_method("set_facing_direction"):
+			visual.set_facing_direction(facing_direction)
+		else:
+			visual.rotation = facing_direction.angle()
 
 
 func _is_cached_facing_enemy_valid() -> bool:
@@ -397,6 +400,8 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> bool
 	if source_position != Vector2.ZERO:
 		number_position += (global_position - source_position).normalized() * 8.0
 	EntityFactory.spawn_damage_number(final_incoming, number_position, Color(1.0, 0.28, 0.22))
+	if visual != null and visual.has_method("trigger_hit_squash"):
+		visual.trigger_hit_squash()
 
 	GameManager.emit_stats()
 	if current_hp <= 0.0:

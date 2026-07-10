@@ -112,20 +112,20 @@ func _test_active_ability_damage_and_cooldown() -> bool:
 
 func _test_orbit_blade_hits_static_target() -> bool:
 	await _setup_arena()
-	var orbit_guard: Node = squad_manager.get_member_by_id("orbit_guard") if squad_manager != null else null
-	if orbit_guard == null or not is_instance_valid(orbit_guard):
-		_fail("orbit_guard missing")
+	var captain: Node = squad_manager.get_member_by_id("rift_captain") if squad_manager != null else null
+	if captain == null or not is_instance_valid(captain):
+		_fail("rift_captain missing")
 		return false
-	orbit_guard.global_position = Vector2.ZERO
-	_disable_non_orbit_weapons(orbit_guard)
+	captain.global_position = Vector2.ZERO
+	_disable_non_orbit_weapons(captain)
 	_freeze_heroes()
-	var orbit_weapon: Node = _weapon_node(orbit_guard, "orbit_blades")
+	var orbit_weapon: Node = _weapon_node(captain, "orbit_blades")
 	if orbit_weapon == null:
-		_fail("orbit weapon missing")
+		_fail("captain orbit weapon missing")
 		return false
 	var weapon_data: Resource = orbit_weapon.get("data")
 	var radius: float = float(weapon_data.get("orbit_radius"))
-	var enemy: Node = EntityFactory.spawn_enemy("r10_orbit_target", _target_config(90.0), orbit_guard.global_position + Vector2(radius, 0.0))
+	var enemy: Node = EntityFactory.spawn_enemy("r10_orbit_target", _target_config(90.0), captain.global_position + Vector2(radius, 0.0))
 	var hp_before: float = float(enemy.get("hp"))
 	var trigger_before: int = int(orbit_weapon.get("trigger_count"))
 	for _index in range(120):
@@ -240,8 +240,8 @@ func _test_main_menu_and_return_wiring() -> bool:
 	return true
 
 
-func _disable_non_orbit_weapons(orbit_guard: Node) -> void:
-	var orbit_weapon: Node = _weapon_node(orbit_guard, "orbit_blades")
+func _disable_non_orbit_weapons(captain: Node) -> void:
+	var orbit_weapon: Node = _weapon_node(captain, "orbit_blades")
 	var members: Array = squad_manager.get_members() if squad_manager != null and squad_manager.has_method("get_members") else []
 	for member in members:
 		if member == null or not is_instance_valid(member):
