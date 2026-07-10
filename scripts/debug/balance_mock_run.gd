@@ -3,6 +3,7 @@ extends Node
 const MOCK_SEED := 424242
 const RUN_SECONDS := 230
 const LEVEL_TIMES: Array[int] = [14, 28, 44, 62, 82, 104, 128, 152, 176, 198, 218]
+const SHOP_TIMES: Array[int] = [75, 150]
 const ELITE_SPAWN_TIMES: Array[int] = [52, 106, 161, 216]
 const BOSS_SPAWN_TIME := 180
 
@@ -58,7 +59,7 @@ func _run_mock() -> void:
 					dps += 3.0
 			level_index += 1
 
-		if second > 0 and second % 90 == 0:
+		if SHOP_TIMES.has(second):
 			shop_distribution["random_qualitative"] = int(shop_distribution.get("random_qualitative", 0)) + 1
 			dps += 8.0
 

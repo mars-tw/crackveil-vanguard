@@ -110,6 +110,7 @@ const ENEMY_CONFIGS: Dictionary = {
 var spawn_timer: float = 0.4
 var next_elite_time: float = 52.0
 var boss_spawned: bool = false
+var first_elite_time_applied: bool = false
 
 
 func _process(delta: float) -> void:
@@ -117,12 +118,19 @@ func _process(delta: float) -> void:
 		return
 
 	var elapsed := GameManager.elapsed_time
+	if not first_elite_time_applied:
+		first_elite_time_applied = true
+		if GameManager.has_method("get_first_elite_time"):
+			next_elite_time = GameManager.get_first_elite_time(next_elite_time)
+
 	if not boss_spawned and elapsed >= boss_time:
 		_spawn_boss()
 
 	if elapsed >= next_elite_time:
-		_spawn_elite()
-		next_elite_time = elapsed + randf_range(45.0, 60.0)
+		if _spawn_elite():
+			next_elite_time = elapsed + randf_range(45.0, 60.0)
+		else:
+			next_elite_time = elapsed + 1.0
 
 	spawn_timer -= delta
 	if spawn_timer > 0.0:
@@ -137,6 +145,8 @@ func _process(delta: float) -> void:
 	spawn_timer = max(0.28, 1.05 - elapsed * 0.0048)
 	if bool(GameManager.get("boss_active")):
 		spawn_timer *= 1.35
+	if GameManager.has_method("get_spawn_timer_multiplier"):
+		spawn_timer *= GameManager.get_spawn_timer_multiplier()
 
 
 func _spawn_one() -> void:
@@ -148,9 +158,10 @@ func _spawn_one() -> void:
 	EntityFactory.spawn_enemy(enemy_id, config, _get_spawn_position())
 
 
-func _spawn_elite() -> void:
+func _spawn_elite() -> bool:
 	if EntityFactory.get_enemy_live_count() >= max_enemies:
-		return
+		if not EntityFactory.reclaim_regular_enemy_for_elite(_elite_reclaim_reference_position()):
+			return false
 	var config := _config_for_spawn("tank")
 	config["max_hp"] = float(config.get("max_hp", 58.0)) * 3.0
 	config["damage"] = float(config.get("damage", 14.0)) * 1.3
@@ -158,12 +169,15 @@ func _spawn_elite() -> void:
 	config["color"] = Color(0.85, 0.28, 1.0)
 	config["sprite_scale"] = 1.25
 	config["xp"] = 8
-	config["gold"] = 6
+	config["gold"] = 6 + (GameManager.get_elite_bonus_gold() if GameManager.has_method("get_elite_bonus_gold") else 0)
 	config["is_elite"] = true
-	config["elite_bonus_xp"] = 24
-	EntityFactory.spawn_enemy("elite_distortion", config, _get_spawn_position())
+	config["elite_bonus_xp"] = 24 + (GameManager.consume_next_elite_bonus_xp() if GameManager.has_method("consume_next_elite_bonus_xp") else 0)
+	var elite := EntityFactory.spawn_enemy("elite_distortion", config, _get_spawn_position())
+	if elite == null:
+		return false
 	if GameManager.has_method("record_elite_spawn"):
 		GameManager.record_elite_spawn()
+	return true
 
 
 func _spawn_boss() -> void:
@@ -257,3 +271,9 @@ func _get_spawn_position() -> Vector2:
 			return center + Vector2(randf_range(-half_size.x, half_size.x), half_size.y + spawn_margin)
 		_:
 			return center + Vector2(-half_size.x - spawn_margin, randf_range(-half_size.y, half_size.y))
+
+
+func _elite_reclaim_reference_position() -> Vector2:
+	if GameManager.player != null and is_instance_valid(GameManager.player):
+		return GameManager.player.global_position
+	return Vector2.ZERO

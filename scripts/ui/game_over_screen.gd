@@ -60,13 +60,14 @@ func _build_ui() -> void:
 
 
 func show_summary(summary: Dictionary) -> void:
-	summary_label.text = "存活  %s\n擊殺  %d\n精英擊殺  %d\nBoss 擊破  %s\n金幣  %d\n等級  %d" % [
+	summary_label.text = "存活  %s\n擊殺  %d\n精英擊殺  %d\nBoss 擊破  %s\n金幣  %d\n等級  %d\n契約  %s" % [
 		GameManager.format_time(float(summary.get("elapsed_time", 0.0))),
 		int(summary.get("kills", 0)),
 		int(summary.get("elites_killed", 0)),
 		"是" if bool(summary.get("boss_killed", false)) else "否",
 		int(summary.get("gold", 0)),
-		int(summary.get("level", 1))
+		int(summary.get("level", 1)),
+		str(summary.get("contract_name", "無契約"))
 	]
 	root.visible = true
 
@@ -85,7 +86,7 @@ func _apply_responsive_layout() -> void:
 		viewport_size = Vector2(1280.0, 720.0)
 	var portrait := viewport_size.y > viewport_size.x
 	var panel_width: float = min(viewport_size.x - 32.0, 440.0)
-	var panel_height: float = 350.0 if portrait else 330.0
+	var panel_height: float = 380.0 if portrait else 360.0
 
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5
@@ -100,7 +101,7 @@ func _apply_responsive_layout() -> void:
 		summary_label.offset_left = 28.0
 		summary_label.offset_right = -28.0
 		summary_label.offset_top = 88.0
-		summary_label.offset_bottom = 222.0
+		summary_label.offset_bottom = 248.0
 		summary_label.add_theme_font_size_override("font_size", 18 if not portrait else 17)
 
 	if restart_button != null:

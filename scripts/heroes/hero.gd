@@ -228,7 +228,8 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> bool
 	if invulnerability_timer > 0.0 or current_hp <= 0.0 or not is_alive:
 		return false
 
-	var remaining_damage := amount
+	var final_incoming := amount * (GameManager.get_incoming_damage_multiplier() if GameManager.has_method("get_incoming_damage_multiplier") else 1.0)
+	var remaining_damage := final_incoming
 	if temporary_shield_hp > 0.0:
 		var absorbed: float = min(temporary_shield_hp, remaining_damage)
 		temporary_shield_hp -= absorbed
@@ -239,7 +240,7 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> bool
 	var number_position := global_position + Vector2(0.0, -30.0)
 	if source_position != Vector2.ZERO:
 		number_position += (global_position - source_position).normalized() * 8.0
-	EntityFactory.spawn_damage_number(amount, number_position, Color(1.0, 0.28, 0.22))
+	EntityFactory.spawn_damage_number(final_incoming, number_position, Color(1.0, 0.28, 0.22))
 
 	GameManager.emit_stats()
 	if current_hp <= 0.0:

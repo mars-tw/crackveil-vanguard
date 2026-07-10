@@ -131,7 +131,7 @@ func _damage_overlapping_enemies() -> void:
 			body.apply_status_effect("vulnerable", 1.35, 0.2)
 
 		if body.has_method("take_damage"):
-			body.take_damage(float(stats.get("damage", 8.0)), global_position)
+			body.take_damage(float(stats.get("damage", 8.0)) * GameManager.get_outgoing_damage_multiplier(owner_player), global_position)
 			hit_cooldowns[hit_key] = float(stats.get("hit_interval", 0.42))
 			damaged_count += 1
 			if weapon_node != null and is_instance_valid(weapon_node) and weapon_node.has_method("register_orbit_hit"):

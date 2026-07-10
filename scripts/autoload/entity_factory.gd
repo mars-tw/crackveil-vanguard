@@ -54,6 +54,10 @@ var active_xp_gems: Array[Node] = []
 var enemy_projectile_reclaims: int = 0
 var fork_projectile_cap_skips: int = 0
 var hazard_zone_reclaims: int = 0
+var elite_enemy_reclaims: int = 0
+var visible_xp_merges: int = 0
+var visible_xp_reclaims: int = 0
+var direct_xp_grants: int = 0
 
 
 func _ready() -> void:
@@ -78,6 +82,10 @@ func initialize_for_arena(arena: Node) -> void:
 	enemy_projectile_reclaims = 0
 	fork_projectile_cap_skips = 0
 	hazard_zone_reclaims = 0
+	elite_enemy_reclaims = 0
+	visible_xp_merges = 0
+	visible_xp_reclaims = 0
+	direct_xp_grants = 0
 	pool_root = Node.new()
 	pool_root.name = "Pools"
 	arena.add_child(pool_root)
@@ -247,16 +255,24 @@ func spawn_xp_gem(world_position: Vector2, amount: int) -> Node:
 
 
 func spawn_visible_xp_gem(world_position: Vector2, amount: int) -> Node:
+	if amount <= 0:
+		return null
 	if get_pool_live_count("xp_gem") < XP_GEM_CAP:
-		return spawn_xp_gem(world_position, amount)
+		return _spawn_visible_xp_gem_from_slot(world_position, amount)
 
 	_compact_active_xp_gems()
-	var merge_target := _nearest_active_xp_gem(world_position)
-	if merge_target != null and merge_target.has_method("add_value"):
-		merge_target.call("add_value", amount)
-		return merge_target
+	var registry_has_target := not active_xp_gems.is_empty()
+	if registry_has_target:
+		var merge_target := _nearest_active_xp_gem(world_position)
+		if merge_target != null and merge_target.has_method("add_value"):
+			visible_xp_merges += 1
+			merge_target.call("add_value", amount)
+			return merge_target
 
-	_grant_xp_direct(amount)
+	if _reclaim_xp_gem_for_visible(world_position):
+		return _spawn_visible_xp_gem_from_slot(world_position, amount)
+	if get_pool_live_count("xp_gem") < XP_GEM_CAP:
+		return _spawn_visible_xp_gem_from_slot(world_position, amount)
 	return null
 
 
@@ -438,6 +454,10 @@ func get_pool_stats() -> Dictionary:
 	stats["enemy_projectile_reclaims"] = enemy_projectile_reclaims
 	stats["fork_projectile_cap_skips"] = fork_projectile_cap_skips
 	stats["hazard_zone_reclaims"] = hazard_zone_reclaims
+	stats["elite_enemy_reclaims"] = elite_enemy_reclaims
+	stats["visible_xp_merges"] = visible_xp_merges
+	stats["visible_xp_reclaims"] = visible_xp_reclaims
+	stats["direct_xp_grants"] = direct_xp_grants
 	return stats
 
 
@@ -453,6 +473,19 @@ func reset_debug_counters() -> void:
 
 func record_enemy_group_scan(_reason: String = "") -> void:
 	enemy_group_scan_count += 1
+
+
+func debug_clear_active_xp_gem_registry() -> void:
+	active_xp_gems.clear()
+
+
+func reclaim_regular_enemy_for_elite(reference_position: Vector2) -> bool:
+	var enemy := _farthest_regular_enemy(reference_position)
+	if enemy == null:
+		return false
+	elite_enemy_reclaims += 1
+	release_enemy(enemy)
+	return true
 
 
 func _try_merge_damage_number(value: Variant, world_position: Vector2, number_color: Color) -> Node:
@@ -531,6 +564,22 @@ func _compact_active_xp_gems() -> void:
 	active_xp_gems = compacted
 
 
+func _rebuild_active_xp_gems_from_pool() -> void:
+	active_xp_gems.clear()
+	if not pools.has("xp_gem"):
+		return
+	var pool: RefCounted = pools["xp_gem"]
+	if not pool.has_method("get_live_nodes"):
+		return
+	for gem in pool.get_live_nodes():
+		if gem == null or not is_instance_valid(gem):
+			continue
+		var active_value: Variant = gem.get("is_active")
+		if active_value != null and not bool(active_value):
+			continue
+		active_xp_gems.append(gem)
+
+
 func _reclaim_oldest_normal_enemy_projectile() -> bool:
 	for projectile in active_enemy_projectiles.duplicate():
 		if projectile == null or not is_instance_valid(projectile):
@@ -556,6 +605,19 @@ func _reclaim_oldest_hazard_zone() -> bool:
 	return true
 
 
+func _reclaim_xp_gem_for_visible(world_position: Vector2) -> bool:
+	if active_xp_gems.is_empty():
+		_rebuild_active_xp_gems_from_pool()
+	if active_xp_gems.is_empty():
+		return false
+	var reclaim_target := _farthest_active_xp_gem(world_position)
+	if reclaim_target == null:
+		return false
+	visible_xp_reclaims += 1
+	release_xp_gem(reclaim_target)
+	return true
+
+
 func _nearest_active_xp_gem(world_position: Vector2) -> Node:
 	var nearest: Node = null
 	var best_distance_squared := INF
@@ -570,6 +632,67 @@ func _nearest_active_xp_gem(world_position: Vector2) -> Node:
 			best_distance_squared = distance_squared
 			nearest = gem
 	return nearest
+
+
+func _farthest_active_xp_gem(world_position: Vector2) -> Node:
+	var farthest: Node = null
+	var best_distance_squared := -1.0
+	for gem in active_xp_gems:
+		if gem == null or not is_instance_valid(gem):
+			continue
+		var active_value: Variant = gem.get("is_active")
+		if active_value != null and not bool(active_value):
+			continue
+		var distance_squared := world_position.distance_squared_to(gem.global_position)
+		if distance_squared > best_distance_squared:
+			best_distance_squared = distance_squared
+			farthest = gem
+	return farthest
+
+
+func _spawn_visible_xp_gem_from_slot(world_position: Vector2, amount: int) -> Node:
+	var gem := _acquire("xp_gem")
+	if gem == null:
+		return null
+	gem.pool_reset({
+		"position": world_position,
+		"amount": amount,
+		"velocity": _random_scatter_velocity()
+	})
+	active_xp_gems.append(gem)
+	return gem
+
+
+func _farthest_regular_enemy(reference_position: Vector2) -> Node:
+	if enemy_spatial_index == null:
+		return null
+	var live_enemies: Array = enemy_spatial_index.get("live_enemies")
+	var fallback: Node = null
+	var farthest: Node = null
+	var best_distance_squared := -1.0
+	for enemy in live_enemies:
+		if not _is_regular_reclaim_candidate(enemy):
+			continue
+		if fallback == null:
+			fallback = enemy
+		var distance_squared := reference_position.distance_squared_to(enemy.global_position)
+		if distance_squared > best_distance_squared:
+			best_distance_squared = distance_squared
+			farthest = enemy
+	return farthest if farthest != null else fallback
+
+
+func _is_regular_reclaim_candidate(enemy: Node) -> bool:
+	if enemy == null or not is_instance_valid(enemy):
+		return false
+	var active_value: Variant = enemy.get("is_active")
+	if active_value != null and not bool(active_value):
+		return false
+	if bool(enemy.get("is_elite")):
+		return false
+	if bool(enemy.get("is_boss")):
+		return false
+	return true
 
 
 func _nearest_living_hero(world_position: Vector2) -> Node2D:
@@ -613,6 +736,7 @@ func _apply_explosion_damage(world_position: Vector2, stats: Dictionary, _source
 func _grant_xp_direct(amount: int) -> void:
 	if amount <= 0:
 		return
+	direct_xp_grants += 1
 	GameManager.add_xp(amount)
 
 

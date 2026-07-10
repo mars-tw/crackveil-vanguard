@@ -5,6 +5,7 @@ var pool_name: String = ""
 var scene: PackedScene
 var pool_root: Node
 var free_list: Array[Node] = []
+var live_list: Array[Node] = []
 var live_count: int = 0
 var total_created: int = 0
 var exhausted_count: int = 0
@@ -56,6 +57,8 @@ func acquire(active_parent: Node) -> Node:
 	node.set_meta("_node_pool_name", pool_name)
 	if node.get_parent() != active_parent:
 		node.reparent(active_parent)
+	if not live_list.has(node):
+		live_list.append(node)
 	live_count += 1
 	if node.has_method("pool_on_acquire"):
 		node.pool_on_acquire()
@@ -80,6 +83,7 @@ func release(node: Node) -> void:
 		node.pool_on_release()
 	if pool_root != null and node.get_parent() != pool_root:
 		node.reparent(pool_root)
+	live_list.erase(node)
 	live_count = max(live_count - 1, 0)
 	_in_pool[instance_id] = true
 	free_list.append(node)
@@ -91,6 +95,16 @@ func get_free_count() -> int:
 
 func get_in_pool_count() -> int:
 	return _in_pool.size()
+
+
+func get_live_nodes() -> Array[Node]:
+	var compacted: Array[Node] = []
+	for node in live_list:
+		if node != null and is_instance_valid(node):
+			compacted.append(node)
+	live_list = compacted
+	live_count = live_list.size()
+	return live_list.duplicate()
 
 
 func get_duplicate_free_count() -> int:

@@ -7,6 +7,7 @@ extends Node2D
 @onready var game_over_screen: CanvasLayer = $GameOverScreen
 @onready var rift_shop_screen: CanvasLayer = $RiftShopScreen
 @onready var stage_victory_screen: CanvasLayer = $StageVictoryScreen
+@onready var contract_screen: CanvasLayer = $ContractScreen
 
 
 func _ready() -> void:
@@ -16,6 +17,7 @@ func _ready() -> void:
 	var game_over_callable := Callable(game_over_screen, "show_summary")
 	var shop_callable := Callable(rift_shop_screen, "show_options")
 	var stage_victory_callable := Callable(stage_victory_screen, "show_summary")
+	var contract_callable := Callable(contract_screen, "show_options")
 	if not GameManager.level_up_requested.is_connected(level_up_callable):
 		GameManager.level_up_requested.connect(level_up_callable)
 	if not GameManager.game_over_requested.is_connected(game_over_callable):
@@ -24,6 +26,8 @@ func _ready() -> void:
 		GameManager.shop_requested.connect(shop_callable)
 	if not GameManager.stage_victory_requested.is_connected(stage_victory_callable):
 		GameManager.stage_victory_requested.connect(stage_victory_callable)
+	if not GameManager.contract_requested.is_connected(contract_callable):
+		GameManager.contract_requested.connect(contract_callable)
 
 	if level_up_screen.has_signal("upgrade_selected"):
 		level_up_screen.upgrade_selected.connect(Callable(GameManager, "apply_upgrade"))
@@ -33,6 +37,8 @@ func _ready() -> void:
 		rift_shop_screen.purchase_selected.connect(Callable(GameManager, "apply_shop_purchase"))
 	if stage_victory_screen.has_signal("continue_requested"):
 		stage_victory_screen.continue_requested.connect(Callable(GameManager, "continue_after_stage_victory"))
+	if contract_screen.has_signal("contract_selected"):
+		contract_screen.contract_selected.connect(Callable(GameManager, "apply_contract"))
 
 	GameManager.arena = self
 	EntityFactory.initialize_for_arena(self)
@@ -58,3 +64,4 @@ func _apply_run_seed() -> void:
 		seed(selected_seed)
 	else:
 		randomize()
+	GameManager.current_run_seed = selected_seed

@@ -56,11 +56,12 @@ func _build_ui() -> void:
 
 
 func show_summary(summary: Dictionary) -> void:
-	summary_label.text = "擊破守門者·帷幕\n存活  %s\n擊殺  %d\n精英擊殺  %d\n金幣  %d" % [
+	summary_label.text = "擊破守門者·帷幕\n存活  %s\n擊殺  %d\n精英擊殺  %d\n金幣  %d\n契約  %s" % [
 		GameManager.format_time(float(summary.get("elapsed_time", 0.0))),
 		int(summary.get("kills", 0)),
 		int(summary.get("elites_killed", 0)),
-		int(summary.get("gold", 0))
+		int(summary.get("gold", 0)),
+		str(summary.get("contract_name", "無契約"))
 	]
 	root.visible = true
 
@@ -91,7 +92,7 @@ func _apply_responsive_layout() -> void:
 	summary_label.offset_left = 28.0
 	summary_label.offset_right = -28.0
 	summary_label.offset_top = 92.0
-	summary_label.offset_bottom = 220.0
+	summary_label.offset_bottom = 238.0
 
 	continue_button.anchor_left = 0.5
 	continue_button.anchor_right = 0.5

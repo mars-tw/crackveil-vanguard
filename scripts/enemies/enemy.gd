@@ -468,8 +468,9 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 	if elite_bonus_xp > 0:
 		EntityFactory.call_deferred("spawn_visible_xp_gem", global_position, elite_bonus_xp)
 	if gold_value > 0:
+		var gold_drop := GameManager.get_gold_drop_amount(gold_value) if GameManager.has_method("get_gold_drop_amount") else gold_value
 		var coin_position := global_position + Vector2(randf_range(-10.0, 10.0), randf_range(-10.0, 10.0))
-		EntityFactory.call_deferred("spawn_gold_coin", coin_position, gold_value)
+		EntityFactory.call_deferred("spawn_gold_coin", coin_position, gold_drop)
 	if spawns_on_death:
 		_spawn_death_children()
 	if GameManager.has_method("has_magnetic_reclaim") and GameManager.has_magnetic_reclaim():

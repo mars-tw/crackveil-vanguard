@@ -32,6 +32,12 @@ func _fire_at(target: Node2D) -> void:
 
 		var direction: Vector2 = base_direction.rotated(angle_offset).normalized()
 		var spawn_position: Vector2 = owner_player.global_position + direction * 20.0
-		EntityFactory.spawn_projectile(spawn_position, direction, data_projectile_stats(), owner_player)
+		EntityFactory.spawn_projectile(spawn_position, direction, _projectile_stats_for_fire(), owner_player)
 
 	register_trigger()
+
+
+func _projectile_stats_for_fire() -> Dictionary:
+	var stats := data_projectile_stats().duplicate(true)
+	stats["damage"] = float(stats.get("damage", data_float("damage", 10.0))) * GameManager.get_outgoing_damage_multiplier(owner_player)
+	return stats

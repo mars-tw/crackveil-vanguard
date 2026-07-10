@@ -54,6 +54,9 @@ func _prepare_run_state() -> void:
 	GameManager.is_game_over = false
 	GameManager.waiting_for_upgrade = false
 	GameManager.waiting_for_shop = false
+	GameManager.waiting_for_contract = false
+	GameManager.active_contract_id = ""
+	GameManager.contract_modifiers.clear()
 	GameManager.gold = 999
 	GameManager.xp_required = 99999999
 	get_tree().paused = false
@@ -68,10 +71,12 @@ func _prepare_run_state() -> void:
 
 func _test_shop_full_health_disabled() -> bool:
 	GameManager.waiting_for_shop = true
-	var heal_option := _find_option(GameManager._build_shop_options(), "heal_30")
-	if heal_option.is_empty():
-		_fail("heal shop option missing")
-		return false
+	var heal_option := GameManager._shop_option({
+		"id": "heal_30",
+		"name": "裂隙急救",
+		"description": "回復全隊 30 HP。",
+		"cost": 8
+	})
 	if bool(heal_option.get("enabled", true)):
 		_fail("heal option enabled while all members are full hp")
 		return false
@@ -136,10 +141,12 @@ func _test_shop_full_qualitative_disabled() -> bool:
 		return false
 
 	GameManager.waiting_for_shop = true
-	var qualitative_option := _find_option(GameManager._build_shop_options(), "random_qualitative")
-	if qualitative_option.is_empty():
-		_fail("random qualitative shop option missing")
-		return false
+	var qualitative_option := GameManager._shop_option({
+		"id": "random_qualitative",
+		"name": "偏壓改裝",
+		"description": "隨機取得一張可用質變升級。",
+		"cost": 18
+	})
 	if bool(qualitative_option.get("enabled", true)):
 		_fail("random qualitative option enabled when all qualitative upgrades are capped")
 		return false

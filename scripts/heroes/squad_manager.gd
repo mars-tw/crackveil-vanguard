@@ -271,18 +271,45 @@ func apply_random_qualitative_upgrade() -> bool:
 	if options.is_empty():
 		return false
 	var option: Dictionary = options[randi() % options.size()]
-	var hero := get_member_by_id(str(option.get("hero_id", "")))
-	if hero == null or not hero.has_method("upgrade_weapon"):
-		return false
-	var upgrade_kind := str(option.get("upgrade_kind", ""))
-	var applied: bool = hero.upgrade_weapon(str(option.get("weapon_id", "")), upgrade_kind)
-	if applied and upgrade_kind == "magnetic_reclaim" and GameManager.has_method("enable_magnetic_reclaim"):
-		GameManager.enable_magnetic_reclaim()
-	return applied
+	return apply_qualitative_upgrade(
+		str(option.get("hero_id", "")),
+		str(option.get("weapon_id", "")),
+		str(option.get("upgrade_kind", ""))
+	)
 
 
 func has_available_qualitative_upgrade() -> bool:
 	return not _collect_available_qualitative_options().is_empty()
+
+
+func get_available_qualitative_shop_options() -> Array:
+	return _collect_available_qualitative_options()
+
+
+func can_apply_qualitative_upgrade(hero_id: String, weapon_id: String, upgrade_kind: String) -> bool:
+	var hero := get_member_by_id(hero_id)
+	if hero == null or not is_instance_valid(hero):
+		return false
+	var weapons: Dictionary = hero.get("weapons")
+	var weapon: Node = weapons.get(weapon_id)
+	if weapon == null or not is_instance_valid(weapon):
+		return false
+	var weapon_data: Resource = weapon.get("data")
+	if weapon_data == null or not weapon_data.has_method("can_apply_upgrade"):
+		return false
+	return weapon_data.can_apply_upgrade(upgrade_kind)
+
+
+func apply_qualitative_upgrade(hero_id: String, weapon_id: String, upgrade_kind: String) -> bool:
+	if not can_apply_qualitative_upgrade(hero_id, weapon_id, upgrade_kind):
+		return false
+	var hero := get_member_by_id(hero_id)
+	if hero == null or not hero.has_method("upgrade_weapon"):
+		return false
+	var applied: bool = hero.upgrade_weapon(weapon_id, upgrade_kind)
+	if applied and upgrade_kind == "magnetic_reclaim" and GameManager.has_method("enable_magnetic_reclaim"):
+		GameManager.enable_magnetic_reclaim()
+	return applied
 
 
 func _collect_available_qualitative_options() -> Array:

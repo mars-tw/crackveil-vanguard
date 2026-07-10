@@ -29,7 +29,7 @@ func _cast_chain(first_target: Node2D) -> void:
 		current = _find_next_chain_target(current.global_position, used_ids)
 
 	var points: Array[Vector2] = [owner_player.global_position]
-	var damage_value: float = data_float("damage", 12.0)
+	var damage_value: float = data_float("damage", 12.0) * GameManager.get_outgoing_damage_multiplier(owner_player)
 	var final_target_position := Vector2.ZERO
 	var has_final_target := false
 	for target in chain_targets:
@@ -55,7 +55,7 @@ func _cast_chain(first_target: Node2D) -> void:
 
 func _make_overload_stats() -> Dictionary:
 	return {
-		"damage": data_float("damage", 12.0) * 0.42,
+		"damage": data_float("damage", 12.0) * 0.42 * GameManager.get_outgoing_damage_multiplier(owner_player),
 		"area_radius": max(42.0, data_float("chain_radius", 170.0) * 0.32),
 		"effect_lifetime": 0.22,
 		"explosion_sprite_path": "res://assets/sprites/fx_explosion.png",

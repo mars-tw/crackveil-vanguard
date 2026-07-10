@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/arena/arena.gd" id="1_arena"]
 [ext_resource type="Script" path="res://scripts/arena/arena_background.gd" id="2_background"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/GameOverScreen.tscn" id="7_gameover"]
 [ext_resource type="PackedScene" path="res://scenes/ui/RiftShopScreen.tscn" id="8_shop"]
 [ext_resource type="PackedScene" path="res://scenes/ui/StageVictoryScreen.tscn" id="9_stage"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ContractScreen.tscn" id="10_contract"]
 
 [node name="Arena" type="Node2D"]
 script = ExtResource("1_arena")
@@ -28,6 +29,8 @@ squad_data = ExtResource("4_squad_data")
 script = ExtResource("5_spawner")
 
 [node name="HUD" parent="." instance=ExtResource("5_hud")]
+
+[node name="ContractScreen" parent="." instance=ExtResource("10_contract")]
 
 [node name="LevelUpScreen" parent="." instance=ExtResource("6_level")]
 
