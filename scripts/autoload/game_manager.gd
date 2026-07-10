@@ -7,6 +7,7 @@ signal pause_changed(is_paused: bool)
 signal shop_requested(options: Array)
 signal stage_victory_requested(summary: Dictionary)
 signal contract_requested(options: Array)
+signal toast_requested(message: String)
 
 const SHOP_FIRST_TIME := 75.0
 const SHOP_SECOND_TIME := 150.0
@@ -97,6 +98,36 @@ const PLAYER_UPGRADE_POOL: Array = [
 	}
 ]
 
+const FALLBACK_UPGRADE_POOL: Array = [
+	{
+		"id": "fallback_heal",
+		"name": "緊急整補",
+		"description": "全隊回復 18 HP。升級池耗盡時的保底選項。",
+		"weight": 1,
+		"upgrade_category": "fallback"
+	},
+	{
+		"id": "fallback_gold",
+		"name": "裂隙拾荒",
+		"description": "立刻取得 8 金幣。升級池耗盡時的保底選項。",
+		"weight": 1,
+		"upgrade_category": "fallback"
+	},
+	{
+		"id": "fallback_damage",
+		"name": "短路超載",
+		"description": "全隊傷害 +15%，持續 12 秒。升級池耗盡時的保底選項。",
+		"weight": 1,
+		"upgrade_category": "fallback"
+	}
+]
+
+const AFFIX_TOASTS: Dictionary = {
+	"affix_split": "裂殖精英——死亡時分裂！",
+	"affix_field": "力場精英——靠近會緩速！",
+	"affix_swift": "迅捷精英——高速衝刺突入！"
+}
+
 var arena: Node = null
 var player: Node = null
 var squad_manager: Node = null
@@ -142,6 +173,7 @@ var contract_modifiers: Dictionary = {}
 var temporary_squad_damage_timer: float = 0.0
 var next_elite_bonus_xp: int = 0
 var echo_shards_awarded_this_run: int = 0
+var seen_affix_toasts: Dictionary = {}
 
 const META_HP_APPLIED_KEY := "_cv_meta_hp_multiplier_applied"
 const META_PICKUP_APPLIED_KEY := "_cv_meta_pickup_bonus_applied"
@@ -192,6 +224,7 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	temporary_squad_damage_timer = 0.0
 	next_elite_bonus_xp = 0
 	echo_shards_awarded_this_run = 0
+	seen_affix_toasts.clear()
 	system_pause_owners.clear()
 	_sync_pause_state()
 
@@ -332,16 +365,15 @@ func add_xp(amount: int) -> void:
 		return
 
 	xp += amount
-	while xp >= xp_required and not waiting_for_upgrade:
-		xp -= xp_required
-		level += 1
-		xp_required = int(round(float(xp_required) * 1.25 + 5.0))
-		_request_level_up()
+	while _try_request_pending_level_up():
+		pass
 
 	emit_stats()
 
 
 func _request_level_up() -> void:
+	if not _can_request_level_up():
+		return
 	waiting_for_upgrade = true
 	_request_system_pause("upgrade")
 	emit_stats()
@@ -359,7 +391,10 @@ func _build_upgrade_choices() -> Array:
 	for option in pool:
 		if _is_upgrade_available(option):
 			filtered.append(option)
-	return _pick_weighted_choices(filtered, get_upgrade_choice_count())
+	var choices := _pick_weighted_choices(filtered, get_upgrade_choice_count())
+	if choices.is_empty():
+		return _build_fallback_upgrade_choices()
+	return choices
 
 
 func apply_upgrade(upgrade: Dictionary) -> void:
@@ -367,16 +402,22 @@ func apply_upgrade(upgrade: Dictionary) -> void:
 		return
 
 	_register_upgrade_pick(upgrade)
-	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("apply_upgrade"):
+	var upgrade_id := str(upgrade.get("id", ""))
+	var was_fallback := _apply_fallback_upgrade(upgrade_id)
+	if was_fallback:
+		pass
+	elif squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("apply_upgrade"):
 		squad_manager.apply_upgrade(upgrade)
 	elif player != null and is_instance_valid(player) and player.has_method("apply_upgrade"):
 		player.apply_upgrade(upgrade)
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("upgrade")
 
 	waiting_for_upgrade = false
 
-	if xp >= xp_required:
-		_request_level_up()
-	elif randf() < 0.1 and not waiting_for_shop and _request_shop("level_up_random"):
+	if _try_request_pending_level_up():
+		return
+	elif not was_fallback and randf() < 0.1 and not waiting_for_shop and _request_shop("level_up_random"):
 		_release_system_pause("upgrade")
 		return
 	else:
@@ -431,6 +472,48 @@ func _pick_weighted_choices(pool: Array, count: int) -> Array:
 		choices.append(candidates[selected_index])
 		candidates.remove_at(selected_index)
 	return choices
+
+
+func _build_fallback_upgrade_choices() -> Array:
+	return FALLBACK_UPGRADE_POOL.duplicate(true)
+
+
+func _apply_fallback_upgrade(upgrade_id: String) -> bool:
+	match upgrade_id:
+		"fallback_heal":
+			if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("heal_members"):
+				squad_manager.heal_members(18.0)
+			elif player != null and is_instance_valid(player) and player.has_method("heal"):
+				player.heal(18.0)
+			return true
+		"fallback_gold":
+			add_gold(8)
+			return true
+		"fallback_damage":
+			_apply_temporary_squad_damage(12.0)
+			return true
+	return false
+
+
+func _can_request_level_up() -> bool:
+	return (
+		game_running
+		and not is_game_over
+		and not waiting_for_upgrade
+		and not waiting_for_shop
+		and not waiting_for_contract
+		and not stage_victory_pending
+	)
+
+
+func _try_request_pending_level_up() -> bool:
+	if xp < xp_required or not _can_request_level_up():
+		return false
+	xp -= xp_required
+	level += 1
+	xp_required = int(round(float(xp_required) * 1.25 + 5.0))
+	_request_level_up()
+	return true
 
 
 func _request_shop(source: String = "timed") -> bool:
@@ -563,6 +646,10 @@ func apply_contract(contract: Dictionary) -> void:
 	waiting_for_contract = false
 	_apply_contract_start_effects()
 	_release_system_pause("contract")
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("contract")
+	if _try_request_pending_level_up():
+		return
 	emit_stats()
 
 
@@ -901,6 +988,8 @@ func _summary_for_echo_delta(summary: Dictionary, desired_delta: int) -> Diction
 func _close_shop() -> void:
 	waiting_for_shop = false
 	_release_system_pause("shop")
+	if _try_request_pending_level_up():
+		return
 	emit_stats()
 
 
@@ -937,6 +1026,7 @@ func player_died() -> void:
 	waiting_for_upgrade = false
 	waiting_for_shop = false
 	waiting_for_contract = false
+	stage_victory_pending = false
 	manual_paused = false
 	system_pause_owners.clear()
 	if dead_player != null and is_instance_valid(dead_player):
@@ -944,6 +1034,8 @@ func player_died() -> void:
 		dead_player.set_physics_process(false)
 	player = null
 	_request_system_pause("game_over")
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("death")
 	emit_stats()
 	var summary := {
 		"elapsed_time": elapsed_time,
@@ -951,7 +1043,11 @@ func player_died() -> void:
 		"gold": gold,
 		"gold_earned": gold_earned,
 		"level": level,
+		"elites_spawned": elites_spawned,
 		"elites_killed": elites_killed,
+		"boss_spawned": boss_spawned,
+		"boss_active": boss_active,
+		"boss_phase_two_reached": boss_phase_two_time >= 0.0,
 		"boss_killed": boss_killed,
 		"contract_name": active_contract_name
 	}
@@ -988,6 +1084,10 @@ func record_boss_kill() -> void:
 	boss_killed = true
 	boss_active = false
 	boss_kill_time = elapsed_time
+	waiting_for_upgrade = false
+	waiting_for_shop = false
+	waiting_for_contract = false
+	system_pause_owners.clear()
 	stage_victory_pending = true
 	if elapsed_time >= next_shop_time:
 		next_shop_time = elapsed_time + SHOP_POST_VICTORY_GRACE
@@ -999,7 +1099,11 @@ func record_boss_kill() -> void:
 		"gold": gold,
 		"gold_earned": gold_earned,
 		"level": level,
+		"elites_spawned": elites_spawned,
 		"elites_killed": elites_killed,
+		"boss_spawned": boss_spawned,
+		"boss_active": false,
+		"boss_phase_two_reached": boss_phase_two_time >= 0.0,
 		"boss_killed": true,
 		"contract_name": active_contract_name
 	}
@@ -1013,7 +1117,16 @@ func continue_after_stage_victory() -> void:
 	if elapsed_time >= next_shop_time:
 		next_shop_time = elapsed_time + SHOP_POST_VICTORY_GRACE
 	_release_system_pause("stage_victory")
+	if _try_request_pending_level_up():
+		return
 	emit_stats()
+
+
+func notify_affix_encounter(affix_id: String) -> void:
+	if not AFFIX_TOASTS.has(affix_id) or seen_affix_toasts.has(affix_id):
+		return
+	seen_affix_toasts[affix_id] = true
+	toast_requested.emit(str(AFFIX_TOASTS.get(affix_id, "")))
 
 
 func format_time(seconds_value: float) -> String:

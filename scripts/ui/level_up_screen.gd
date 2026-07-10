@@ -61,9 +61,13 @@ func show_options(options: Array) -> void:
 
 	for option in options:
 		var button := Button.new()
-		button.text = "%s\n\n%s" % [str(option.get("name", "升級")), str(option.get("description", ""))]
+		var title := str(option.get("name", "升級"))
+		if _is_evolution_option(option):
+			title = "【武器進化】\n" + title
+		button.text = "%s\n\n%s" % [title, str(option.get("description", ""))]
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		button.add_theme_font_size_override("font_size", 20)
+		_apply_card_style(button, option)
 		button.pressed.connect(_on_upgrade_pressed.bind(option))
 		card_grid.add_child(button)
 		option_buttons.append(button)
@@ -75,6 +79,38 @@ func show_options(options: Array) -> void:
 func _on_upgrade_pressed(upgrade: Dictionary) -> void:
 	root.visible = false
 	upgrade_selected.emit(upgrade)
+
+
+func hide_screen() -> void:
+	if root != null:
+		root.visible = false
+
+
+func _is_evolution_option(option: Dictionary) -> bool:
+	return str(option.get("upgrade_category", "")) == "evolution"
+
+
+func _apply_card_style(button: Button, option: Dictionary) -> void:
+	if not _is_evolution_option(option):
+		return
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.16, 0.1, 0.19, 0.96)
+	normal.border_color = Color(1.0, 0.72, 0.24, 1.0)
+	normal.set_border_width_all(3)
+	normal.set_corner_radius_all(8)
+	normal.content_margin_left = 12.0
+	normal.content_margin_right = 12.0
+	normal.content_margin_top = 12.0
+	normal.content_margin_bottom = 12.0
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = Color(0.22, 0.13, 0.25, 0.98)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = Color(0.11, 0.07, 0.14, 0.98)
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", hover)
+	button.add_theme_stylebox_override("pressed", pressed)
+	button.add_theme_color_override("font_color", Color(1.0, 0.91, 0.62))
+	button.add_theme_color_override("font_hover_color", Color(1.0, 0.96, 0.72))
 
 
 func _apply_responsive_layout() -> void:

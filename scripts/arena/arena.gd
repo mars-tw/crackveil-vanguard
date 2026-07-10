@@ -1,5 +1,7 @@
 extends Node2D
 
+const FIRST_RUN_GUIDE_SCRIPT := preload("res://scripts/ui/first_run_guide.gd")
+
 @export var run_seed: int = 0
 
 @onready var squad_manager: Node = $SquadManager
@@ -9,14 +11,16 @@ extends Node2D
 @onready var stage_victory_screen: CanvasLayer = $StageVictoryScreen
 @onready var contract_screen: CanvasLayer = $ContractScreen
 
+var first_run_guide: CanvasLayer = null
+
 
 func _ready() -> void:
 	_apply_run_seed()
 
 	var level_up_callable := Callable(level_up_screen, "show_options")
-	var game_over_callable := Callable(game_over_screen, "show_summary")
+	var game_over_callable := Callable(self, "_on_game_over_requested")
 	var shop_callable := Callable(rift_shop_screen, "show_options")
-	var stage_victory_callable := Callable(stage_victory_screen, "show_summary")
+	var stage_victory_callable := Callable(self, "_on_stage_victory_requested")
 	var contract_callable := Callable(contract_screen, "show_options")
 	if not GameManager.level_up_requested.is_connected(level_up_callable):
 		GameManager.level_up_requested.connect(level_up_callable)
@@ -46,11 +50,42 @@ func _ready() -> void:
 	if squad_manager != null and squad_manager.has_method("start_squad"):
 		leader = squad_manager.start_squad()
 	GameManager.start_run(self, leader, squad_manager, false)
+	_attach_first_run_guide()
 
 
 func _on_restart_requested() -> void:
 	get_tree().paused = false
 	get_tree().reload_current_scene()
+
+
+func _on_game_over_requested(summary: Dictionary) -> void:
+	_hide_modal_screens([game_over_screen])
+	game_over_screen.show_summary(summary)
+
+
+func _on_stage_victory_requested(summary: Dictionary) -> void:
+	_hide_modal_screens([stage_victory_screen])
+	stage_victory_screen.show_summary(summary)
+
+
+func _attach_first_run_guide() -> void:
+	if first_run_guide != null and is_instance_valid(first_run_guide):
+		return
+	first_run_guide = FIRST_RUN_GUIDE_SCRIPT.new()
+	first_run_guide.name = "FirstRunGuide"
+	add_child(first_run_guide)
+
+
+func _hide_modal_screens(except_screens: Array = []) -> void:
+	for screen in [level_up_screen, game_over_screen, rift_shop_screen, stage_victory_screen, contract_screen]:
+		if screen == null or except_screens.has(screen):
+			continue
+		if screen.has_method("hide_screen"):
+			screen.hide_screen()
+			continue
+		var screen_root: Variant = screen.get("root")
+		if screen_root is Control:
+			(screen_root as Control).visible = false
 
 
 func _apply_run_seed() -> void:

@@ -77,6 +77,11 @@ func _on_continue_pressed() -> void:
 	continue_requested.emit()
 
 
+func hide_screen() -> void:
+	if root != null:
+		root.visible = false
+
+
 func _apply_responsive_layout() -> void:
 	if panel == null:
 		return

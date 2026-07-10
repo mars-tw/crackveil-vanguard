@@ -186,6 +186,10 @@ func _spawn_elite() -> bool:
 		return false
 	if GameManager.has_method("record_elite_spawn"):
 		GameManager.record_elite_spawn()
+	if GameManager.has_method("notify_affix_encounter"):
+		GameManager.notify_affix_encounter(affix_id)
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("elite")
 	return true
 
 

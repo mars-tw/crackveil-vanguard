@@ -9,9 +9,18 @@ var xp_bar: ProgressBar
 var time_label: Label
 var score_label: Label
 var pause_button: Button
+var version_label: Label
+var audio_prompt_button: Button
+var toast_panel: Panel
+var toast_label: Label
 var pause_overlay: Panel
+var pause_volume_label: Label
+var pause_volume_slider: HSlider
+var pause_mute_check: CheckBox
 var virtual_joystick: Control
 var force_touch_controls_visible: bool = false
+var syncing_audio_controls: bool = false
+var toast_token: int = 0
 
 
 func _ready() -> void:
@@ -24,8 +33,15 @@ func _ready() -> void:
 		GameManager.stats_changed.connect(_on_stats_changed)
 	if not GameManager.pause_changed.is_connected(_on_pause_changed):
 		GameManager.pause_changed.connect(_on_pause_changed)
+	if GameManager.has_signal("toast_requested") and not GameManager.toast_requested.is_connected(_on_toast_requested):
+		GameManager.toast_requested.connect(_on_toast_requested)
+	if AudioManager != null and AudioManager.has_signal("settings_changed") and not AudioManager.settings_changed.is_connected(_sync_audio_controls):
+		AudioManager.settings_changed.connect(_sync_audio_controls)
+	if AudioManager != null and AudioManager.has_signal("audio_unlocked") and not AudioManager.audio_unlocked.is_connected(_refresh_audio_prompt):
+		AudioManager.audio_unlocked.connect(_refresh_audio_prompt)
 
 	_on_stats_changed(GameManager.get_stats())
+	_refresh_audio_prompt()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -97,6 +113,35 @@ func _build_ui() -> void:
 	pause_button.pressed.connect(_on_pause_button_pressed)
 	root.add_child(pause_button)
 
+	version_label = Label.new()
+	version_label.name = "VersionLabel"
+	version_label.text = _build_version_text()
+	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	version_label.add_theme_font_size_override("font_size", 12)
+	root.add_child(version_label)
+
+	audio_prompt_button = Button.new()
+	audio_prompt_button.name = "AudioPromptButton"
+	audio_prompt_button.text = "點擊開始"
+	audio_prompt_button.pressed.connect(_on_audio_prompt_pressed)
+	root.add_child(audio_prompt_button)
+
+	toast_panel = Panel.new()
+	toast_panel.name = "ToastPanel"
+	toast_panel.visible = false
+	root.add_child(toast_panel)
+
+	toast_label = Label.new()
+	toast_label.name = "ToastLabel"
+	toast_label.anchor_left = 0.0
+	toast_label.anchor_right = 1.0
+	toast_label.anchor_top = 0.0
+	toast_label.anchor_bottom = 1.0
+	toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	toast_label.add_theme_font_size_override("font_size", 18)
+	toast_panel.add_child(toast_label)
+
 	_build_virtual_joystick()
 	_build_pause_overlay()
 	_apply_responsive_layout()
@@ -127,16 +172,34 @@ func _build_pause_overlay() -> void:
 	title.add_theme_font_size_override("font_size", 24)
 	pause_overlay.add_child(title)
 
+	pause_volume_label = Label.new()
+	pause_volume_label.text = "音量"
+	pause_volume_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pause_overlay.add_child(pause_volume_label)
+
+	pause_volume_slider = HSlider.new()
+	pause_volume_slider.min_value = 0.0
+	pause_volume_slider.max_value = 1.0
+	pause_volume_slider.step = 0.05
+	pause_volume_slider.value_changed.connect(_on_volume_slider_changed)
+	pause_overlay.add_child(pause_volume_slider)
+
+	pause_mute_check = CheckBox.new()
+	pause_mute_check.text = "靜音"
+	pause_mute_check.toggled.connect(_on_mute_toggled)
+	pause_overlay.add_child(pause_mute_check)
+
 	var resume_button := Button.new()
 	resume_button.text = "繼續"
 	resume_button.anchor_left = 0.5
 	resume_button.anchor_right = 0.5
 	resume_button.offset_left = -70.0
 	resume_button.offset_right = 70.0
-	resume_button.offset_top = 86.0
-	resume_button.offset_bottom = 124.0
+	resume_button.offset_top = 186.0
+	resume_button.offset_bottom = 226.0
 	resume_button.pressed.connect(_on_resume_button_pressed)
 	pause_overlay.add_child(resume_button)
+	_sync_audio_controls()
 
 
 func _build_virtual_joystick() -> void:
@@ -179,6 +242,16 @@ func _apply_responsive_layout() -> void:
 	score_label.offset_bottom = score_label.offset_top + 30.0
 	score_label.add_theme_font_size_override("font_size", 16 if portrait else 18)
 
+	version_label.anchor_left = 1.0
+	version_label.anchor_right = 1.0
+	version_label.anchor_top = 1.0
+	version_label.anchor_bottom = 1.0
+	version_label.offset_left = -290.0
+	version_label.offset_right = -margin
+	version_label.offset_top = -30.0
+	version_label.offset_bottom = -8.0
+	version_label.add_theme_font_size_override("font_size", 11 if portrait else 12)
+
 	pause_button.anchor_left = 1.0
 	pause_button.anchor_right = 1.0
 	pause_button.offset_left = -88.0
@@ -187,8 +260,8 @@ func _apply_responsive_layout() -> void:
 	pause_button.offset_bottom = 50.0
 
 	if pause_overlay != null:
-		var overlay_width: float = min(viewport_size.x - 40.0, 300.0)
-		var overlay_height := 170.0
+		var overlay_width: float = min(viewport_size.x - 40.0, 330.0)
+		var overlay_height := 262.0
 		pause_overlay.anchor_left = 0.5
 		pause_overlay.anchor_right = 0.5
 		pause_overlay.anchor_top = 0.5
@@ -197,6 +270,50 @@ func _apply_responsive_layout() -> void:
 		pause_overlay.offset_right = overlay_width * 0.5
 		pause_overlay.offset_top = -overlay_height * 0.5
 		pause_overlay.offset_bottom = overlay_height * 0.5
+
+	if pause_volume_label != null:
+		pause_volume_label.anchor_left = 0.0
+		pause_volume_label.anchor_right = 1.0
+		pause_volume_label.offset_top = 66.0
+		pause_volume_label.offset_bottom = 92.0
+		pause_volume_label.add_theme_font_size_override("font_size", 15)
+
+	if pause_volume_slider != null:
+		pause_volume_slider.anchor_left = 0.5
+		pause_volume_slider.anchor_right = 0.5
+		pause_volume_slider.offset_left = -112.0
+		pause_volume_slider.offset_right = 112.0
+		pause_volume_slider.offset_top = 100.0
+		pause_volume_slider.offset_bottom = 132.0
+
+	if pause_mute_check != null:
+		pause_mute_check.anchor_left = 0.5
+		pause_mute_check.anchor_right = 0.5
+		pause_mute_check.offset_left = -58.0
+		pause_mute_check.offset_right = 58.0
+		pause_mute_check.offset_top = 140.0
+		pause_mute_check.offset_bottom = 178.0
+
+	if audio_prompt_button != null:
+		audio_prompt_button.anchor_left = 0.5
+		audio_prompt_button.anchor_right = 0.5
+		audio_prompt_button.anchor_top = 1.0
+		audio_prompt_button.anchor_bottom = 1.0
+		audio_prompt_button.offset_left = -78.0
+		audio_prompt_button.offset_right = 78.0
+		audio_prompt_button.offset_top = -74.0
+		audio_prompt_button.offset_bottom = -34.0
+
+	if toast_panel != null:
+		var toast_width: float = min(viewport_size.x - 32.0, 520.0)
+		toast_panel.anchor_left = 0.5
+		toast_panel.anchor_right = 0.5
+		toast_panel.anchor_top = 0.0
+		toast_panel.anchor_bottom = 0.0
+		toast_panel.offset_left = -toast_width * 0.5
+		toast_panel.offset_right = toast_width * 0.5
+		toast_panel.offset_top = 56.0 if not portrait else 94.0
+		toast_panel.offset_bottom = toast_panel.offset_top + 48.0
 
 	if virtual_joystick != null:
 		var joystick_size := 164.0 if portrait else 150.0
@@ -242,6 +359,8 @@ func _on_stats_changed(stats: Dictionary) -> void:
 func _on_pause_changed(is_paused: bool) -> void:
 	pause_overlay.visible = is_paused
 	pause_button.text = "繼續" if is_paused else "暫停"
+	if is_paused:
+		_sync_audio_controls()
 
 
 func _on_pause_button_pressed() -> void:
@@ -254,3 +373,54 @@ func _on_resume_button_pressed() -> void:
 
 func _on_virtual_joystick_changed(direction: Vector2) -> void:
 	GameManager.set_touch_move_vector(direction)
+
+
+func _on_audio_prompt_pressed() -> void:
+	if AudioManager != null and AudioManager.has_method("unlock_audio"):
+		AudioManager.unlock_audio()
+	_refresh_audio_prompt()
+
+
+func _refresh_audio_prompt() -> void:
+	if audio_prompt_button == null:
+		return
+	audio_prompt_button.visible = OS.has_feature("web") and AudioManager != null and not AudioManager.is_audio_unlocked()
+
+
+func _sync_audio_controls() -> void:
+	if pause_volume_slider == null or pause_mute_check == null or AudioManager == null:
+		return
+	syncing_audio_controls = true
+	pause_volume_slider.value = float(AudioManager.get("master_volume"))
+	pause_mute_check.button_pressed = bool(AudioManager.get("muted"))
+	syncing_audio_controls = false
+
+
+func _on_volume_slider_changed(value: float) -> void:
+	if syncing_audio_controls or AudioManager == null:
+		return
+	AudioManager.set_master_volume(float(value))
+
+
+func _on_mute_toggled(value: bool) -> void:
+	if syncing_audio_controls or AudioManager == null:
+		return
+	AudioManager.set_muted(value)
+
+
+func _on_toast_requested(message: String) -> void:
+	if toast_panel == null or toast_label == null:
+		return
+	toast_token += 1
+	var current_token := toast_token
+	toast_label.text = message
+	toast_panel.visible = true
+	await get_tree().create_timer(1.5, true).timeout
+	if current_token == toast_token and toast_panel != null:
+		toast_panel.visible = false
+
+
+func _build_version_text() -> String:
+	var version := str(ProjectSettings.get_setting("application/config/version", "dev"))
+	var build_date := str(ProjectSettings.get_setting("application/config/build_date", "local"))
+	return "v%s  %s" % [version, build_date]

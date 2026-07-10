@@ -5,6 +5,7 @@ signal contract_selected(contract: Dictionary)
 var root: Control
 var panel: Panel
 var title_label: Label
+var subtitle_label: Label
 var meta_label: Label
 var meta_grid: GridContainer
 var card_grid: GridContainer
@@ -46,6 +47,14 @@ func _build_ui() -> void:
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_label.add_theme_font_size_override("font_size", 30)
 	panel.add_child(title_label)
+
+	subtitle_label = Label.new()
+	subtitle_label.text = "選一條本局規則——它會改變這一局的玩法"
+	subtitle_label.anchor_left = 0.0
+	subtitle_label.anchor_right = 1.0
+	subtitle_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	subtitle_label.add_theme_font_size_override("font_size", 16)
+	panel.add_child(subtitle_label)
 
 	meta_label = Label.new()
 	meta_label.name = "MetaLabel"
@@ -101,6 +110,11 @@ func _on_contract_pressed(contract: Dictionary) -> void:
 	contract_selected.emit(contract)
 
 
+func hide_screen() -> void:
+	if root != null:
+		root.visible = false
+
+
 func _build_meta_buttons() -> void:
 	for child in meta_grid.get_children():
 		child.queue_free()
@@ -152,6 +166,8 @@ func _on_meta_upgrade_pressed(track_id: String) -> void:
 	if MetaProgress.has_method("buy_upgrade") and MetaProgress.buy_upgrade(track_id):
 		if GameManager.has_method("apply_current_meta_progress_to_squad"):
 			GameManager.apply_current_meta_progress_to_squad()
+		if AudioManager != null and AudioManager.has_method("play_sfx"):
+			AudioManager.play_sfx("contract")
 		GameManager.emit_stats()
 	_refresh_meta_panel()
 
@@ -180,15 +196,19 @@ func _apply_responsive_layout() -> void:
 	title_label.offset_bottom = 58.0
 	title_label.add_theme_font_size_override("font_size", 28 if portrait else 30)
 
-	meta_label.offset_top = 58.0
-	meta_label.offset_bottom = 84.0
+	subtitle_label.offset_top = 56.0
+	subtitle_label.offset_bottom = 82.0
+	subtitle_label.add_theme_font_size_override("font_size", 14 if portrait else 16)
+
+	meta_label.offset_top = 82.0
+	meta_label.offset_bottom = 108.0
 	meta_label.add_theme_font_size_override("font_size", 14 if portrait else 16)
 
 	meta_grid.columns = 1 if portrait else 3
 	meta_grid.offset_left = 26.0
 	meta_grid.offset_right = -26.0
-	meta_grid.offset_top = 90.0
-	meta_grid.offset_bottom = 150.0 if not portrait else 270.0
+	meta_grid.offset_top = 114.0
+	meta_grid.offset_bottom = 174.0 if not portrait else 294.0
 
 	var meta_button_width: float = panel_width - 52.0 if portrait else max(180.0, (panel_width - 52.0 - 20.0) / 3.0)
 	var meta_button_height := 52.0
@@ -199,12 +219,12 @@ func _apply_responsive_layout() -> void:
 	card_grid.columns = 1 if portrait else min(4, max(1, option_buttons.size()))
 	card_grid.offset_left = 26.0
 	card_grid.offset_right = -26.0
-	card_grid.offset_top = 286.0 if portrait else 162.0
+	card_grid.offset_top = 310.0 if portrait else 186.0
 	card_grid.offset_bottom = -26.0
 
 	var column_count: int = max(1, card_grid.columns)
 	var card_width: float = panel_width - 52.0 if portrait else max(170.0, (panel_width - 52.0 - 18.0 * float(column_count - 1)) / float(column_count))
-	var card_height: float = 160.0 if portrait else max(190.0, panel_height - 206.0)
+	var card_height: float = 160.0 if portrait else max(190.0, panel_height - 230.0)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
 		button.add_theme_font_size_override("font_size", 18 if portrait else 20)

@@ -99,6 +99,11 @@ func _on_skip_pressed() -> void:
 	purchase_selected.emit({"id": "skip"})
 
 
+func hide_screen() -> void:
+	if root != null:
+		root.visible = false
+
+
 func _on_stats_changed(stats: Dictionary) -> void:
 	if root == null:
 		return

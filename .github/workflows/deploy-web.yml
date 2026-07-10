@@ -95,6 +95,34 @@ jobs:
           set -euo pipefail
           python3 tools/build_font_subset.py
 
+      - name: Inject build date
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          project = Path("project.godot")
+          build_date = __import__("datetime").date.today().isoformat()
+          lines = project.read_text(encoding="utf-8").splitlines()
+          replaced = False
+          for index, line in enumerate(lines):
+              if line.startswith("config/build_date="):
+                  lines[index] = f'config/build_date="{build_date}"'
+                  replaced = True
+                  break
+          if not replaced:
+              for index, line in enumerate(lines):
+                  if line.startswith("config/version="):
+                      lines.insert(index + 1, f'config/build_date="{build_date}"')
+                      replaced = True
+                      break
+          if not replaced:
+              raise SystemExit("application/config/build_date injection failed")
+          project.write_text("\n".join(lines) + "\n", encoding="utf-8")
+          print(f"build_date={build_date}")
+          PY
+
       - name: Export Web build
         shell: bash
         run: |

@@ -457,6 +457,8 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> void
 
 	var final_amount := amount * _damage_taken_multiplier()
 	hp = max(hp - final_amount, 0.0)
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("hit")
 	var number_position := global_position + Vector2(randf_range(-8.0, 8.0), -radius - 10.0)
 	EntityFactory.spawn_damage_number(final_amount, number_position, Color(1.0, 0.96, 0.72))
 	hp_bar_timer = 0.55

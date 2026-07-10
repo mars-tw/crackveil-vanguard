@@ -44,6 +44,8 @@ func _fire_at(target: Node2D) -> void:
 		EntityFactory.spawn_projectile(spawn_position, direction, shot_stats, owner_player)
 
 	register_trigger()
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("fire")
 
 
 func _projectile_stats_for_fire() -> Dictionary:

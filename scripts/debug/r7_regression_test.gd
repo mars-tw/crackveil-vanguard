@@ -7,6 +7,10 @@ var squad_manager: Node = null
 var leader: Node2D = null
 var spawner: Node = null
 var hud: CanvasLayer = null
+var level_up_screen: CanvasLayer = null
+var game_over_screen: CanvasLayer = null
+var rift_shop_screen: CanvasLayer = null
+var stage_victory_screen: CanvasLayer = null
 var contract_screen: CanvasLayer = null
 var test_selected_contract_id: String = ""
 var current_phase: String = "boot"
@@ -29,9 +33,13 @@ func _run_tests() -> void:
 	squad_manager = arena.get_node_or_null("SquadManager")
 	spawner = arena.get_node_or_null("EnemySpawner")
 	hud = arena.get_node_or_null("HUD") as CanvasLayer
+	level_up_screen = arena.get_node_or_null("LevelUpScreen") as CanvasLayer
+	game_over_screen = arena.get_node_or_null("GameOverScreen") as CanvasLayer
+	rift_shop_screen = arena.get_node_or_null("RiftShopScreen") as CanvasLayer
+	stage_victory_screen = arena.get_node_or_null("StageVictoryScreen") as CanvasLayer
 	contract_screen = arena.get_node_or_null("ContractScreen") as CanvasLayer
 	leader = GameManager.player
-	if squad_manager == null or spawner == null or hud == null or contract_screen == null or leader == null or not is_instance_valid(leader):
+	if squad_manager == null or spawner == null or hud == null or level_up_screen == null or game_over_screen == null or rift_shop_screen == null or stage_victory_screen == null or contract_screen == null or leader == null or not is_instance_valid(leader):
 		_fail("arena setup failed")
 		return
 
@@ -64,6 +72,12 @@ func _run_tests() -> void:
 	current_phase = "echo_delta"
 	if not _test_echo_delta_victory_continue_death():
 		return
+	current_phase = "r9_upgrade_fallback"
+	if not _test_empty_upgrade_pool_fallback():
+		return
+	current_phase = "r9_modal_owner_cleanup"
+	if not _test_modal_owner_overlap_and_death_cleanup():
+		return
 
 	current_phase = "done"
 	print("R7_REGRESSION_PASS")
@@ -85,7 +99,16 @@ func _prepare_run_state() -> void:
 	GameManager.stage_victory_pending = false
 	GameManager.manual_paused = false
 	GameManager.system_pause_owners.clear()
+	GameManager.elites_spawned = 0
+	GameManager.elites_killed = 0
+	GameManager.elite_spawn_times.clear()
+	GameManager.elite_kill_times.clear()
 	GameManager.boss_active = false
+	GameManager.boss_spawned = false
+	GameManager.boss_killed = false
+	GameManager.boss_spawn_time = -1.0
+	GameManager.boss_kill_time = -1.0
+	GameManager.boss_phase_two_time = -1.0
 	GameManager.active_contract_id = ""
 	GameManager.active_contract_name = "無契約"
 	GameManager.contract_modifiers.clear()
@@ -504,6 +527,116 @@ func _test_echo_delta_victory_continue_death() -> bool:
 	return true
 
 
+func _test_empty_upgrade_pool_fallback() -> bool:
+	_prepare_run_state()
+	leader.set_process(true)
+	leader.set_physics_process(true)
+	var saved_squad_manager := GameManager.squad_manager
+	var saved_player := GameManager.player
+	var saved_upgrade_counts: Dictionary = GameManager.upgrade_counts.duplicate(true)
+
+	GameManager.squad_manager = null
+	GameManager.player = null
+	GameManager.upgrade_counts.clear()
+	for option in GameManager.PLAYER_UPGRADE_POOL:
+		var max_level := int(option.get("max_level", 0))
+		if max_level > 0:
+			GameManager.upgrade_counts[GameManager._upgrade_level_key(option)] = max_level
+
+	var choices: Array = GameManager._build_upgrade_choices()
+	if choices.size() != 3:
+		_fail("empty upgrade pool did not return three fallback cards")
+		return false
+	for choice in choices:
+		if str(choice.get("upgrade_category", "")) != "fallback":
+			_fail("empty upgrade pool returned non-fallback option")
+			return false
+
+	GameManager.waiting_for_upgrade = true
+	GameManager._request_system_pause("upgrade")
+	var gold_before := int(GameManager.gold)
+	GameManager.apply_upgrade({"id": "fallback_gold", "name": "裂隙拾荒"})
+	if GameManager.waiting_for_upgrade or GameManager.system_pause_owners.has("upgrade") or get_tree().paused:
+		_fail("fallback upgrade did not release upgrade pause")
+		return false
+	if int(GameManager.gold) != gold_before + 8:
+		_fail("fallback gold option did not apply")
+		return false
+
+	GameManager.squad_manager = saved_squad_manager
+	GameManager.player = saved_player
+	GameManager.upgrade_counts = saved_upgrade_counts
+	print("R9_UPGRADE_FALLBACK choices=%d gold_delta=%d" % [choices.size(), int(GameManager.gold) - gold_before])
+	return true
+
+
+func _test_modal_owner_overlap_and_death_cleanup() -> bool:
+	_prepare_run_state()
+	leader.set_process(true)
+	leader.set_physics_process(true)
+	GameManager.player = leader
+	GameManager.squad_manager = squad_manager
+	_hide_all_modal_roots()
+
+	GameManager.xp_required = 10
+	GameManager.xp = 9
+	if not GameManager._request_shop("r9_overlap_regression"):
+		_fail("shop did not open for owner overlap test")
+		return false
+	if not _pause_owner_only("shop"):
+		_fail("shop owner was not isolated")
+		return false
+
+	GameManager.add_xp(2)
+	if GameManager.waiting_for_upgrade:
+		_fail("level-up opened while shop owner was active")
+		return false
+	if not GameManager.waiting_for_shop or not _pause_owner_only("shop"):
+		_fail("shop owner changed after deferred xp gain")
+		return false
+
+	GameManager.apply_shop_purchase({"id": "skip"})
+	if not GameManager.waiting_for_upgrade or GameManager.waiting_for_shop:
+		_fail("pending level-up did not open after shop closed")
+		return false
+	if not _pause_owner_only("upgrade"):
+		_fail("upgrade owner was not isolated after shop close")
+		return false
+	if not _is_modal_visible(level_up_screen) or _is_modal_visible(rift_shop_screen):
+		_fail("shop/upgrade UI visibility mismatch after shop close")
+		return false
+
+	GameManager.elapsed_time = 210.0
+	GameManager.record_boss_kill()
+	if not GameManager.stage_victory_pending or GameManager.waiting_for_upgrade or GameManager.waiting_for_shop:
+		_fail("stage victory did not clear shop/upgrade waits")
+		return false
+	if not _pause_owner_only("stage_victory"):
+		_fail("stage victory owner was not isolated")
+		return false
+	if _is_modal_visible(level_up_screen) or not _is_modal_visible(stage_victory_screen):
+		_fail("stage victory did not replace level-up UI")
+		return false
+
+	GameManager.player = leader
+	GameManager.player_died()
+	if not GameManager.is_game_over or not _pause_owner_only("game_over"):
+		_fail("death did not isolate game_over owner")
+		return false
+	if _is_modal_visible(level_up_screen) or _is_modal_visible(rift_shop_screen) or _is_modal_visible(stage_victory_screen) or _is_modal_visible(contract_screen):
+		_fail("death did not clear stale modal UI")
+		return false
+	if not _is_modal_visible(game_over_screen):
+		_fail("death did not show game over UI")
+		return false
+
+	print("R9_MODAL_OWNER_CLEANUP owners=%s gameover_visible=%s" % [
+		JSON.stringify(GameManager.system_pause_owners.keys()),
+		str(_is_modal_visible(game_over_screen))
+	])
+	return true
+
+
 func _find_upgrade_option(upgrade_kind: String) -> Dictionary:
 	var pool: Array = squad_manager.build_upgrade_pool([])
 	for option in pool:
@@ -539,6 +672,28 @@ func _echo_summary(boss_value: bool) -> Dictionary:
 
 func _record_contract_selection(contract: Dictionary) -> void:
 	test_selected_contract_id = str(contract.get("id", ""))
+
+
+func _pause_owner_only(owner: String) -> bool:
+	var owners: Dictionary = GameManager.system_pause_owners
+	return owners.size() == 1 and owners.has(owner)
+
+
+func _is_modal_visible(screen: Node) -> bool:
+	if screen == null:
+		return false
+	var screen_root: Variant = screen.get("root")
+	return screen_root is Control and (screen_root as Control).visible
+
+
+func _hide_all_modal_roots() -> void:
+	for screen in [level_up_screen, game_over_screen, rift_shop_screen, stage_victory_screen, contract_screen]:
+		if screen != null and screen.has_method("hide_screen"):
+			screen.hide_screen()
+		elif screen != null:
+			var screen_root: Variant = screen.get("root")
+			if screen_root is Control:
+				(screen_root as Control).visible = false
 
 
 func _weapon_node(hero: Node, weapon_id: String) -> Node:
