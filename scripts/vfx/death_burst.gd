@@ -1,12 +1,15 @@
 extends Node2D
 
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
+const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 
 var burst_color: Color = Color(1.0, 0.4, 0.4)
 var age: float = 0.0
 var lifetime: float = 0.32
 var is_active: bool = false
 var sprite: Sprite2D = null
+var glow: Sprite2D = null
+var particles: CPUParticles2D = null
 
 
 func _ready() -> void:
@@ -28,6 +31,10 @@ func pool_on_release() -> void:
 	if sprite != null:
 		sprite.visible = false
 		sprite.rotation = 0.0
+	if glow != null:
+		glow.visible = false
+	if particles != null:
+		particles.emitting = false
 
 
 func pool_reset(args: Dictionary) -> void:
@@ -40,6 +47,7 @@ func setup(world_position: Vector2, color_value: Color) -> void:
 	age = 0.0
 	rotation = 0.0
 	_apply_sprite()
+	_emit_particles()
 
 
 func _process(delta: float) -> void:
@@ -56,6 +64,39 @@ func _process(delta: float) -> void:
 func _ensure_sprite() -> void:
 	if sprite != null and is_instance_valid(sprite):
 		return
+	glow = get_node_or_null("Glow") as Sprite2D
+	if glow == null:
+		glow = Sprite2D.new()
+		glow.name = "Glow"
+		add_child(glow)
+	glow.texture = ART_RESOURCES.get_radial_glow()
+	glow.centered = true
+	glow.material = ART_RESOURCES.get_additive_material()
+	glow.z_index = -2
+
+	particles = get_node_or_null("BurstParticles") as CPUParticles2D
+	if particles == null:
+		particles = CPUParticles2D.new()
+		particles.name = "BurstParticles"
+		add_child(particles)
+	particles.texture = ART_RESOURCES.get_particle_core()
+	particles.material = ART_RESOURCES.get_additive_material()
+	particles.one_shot = true
+	particles.amount = 16
+	particles.lifetime = 0.34
+	particles.explosiveness = 0.92
+	particles.randomness = 0.48
+	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+	particles.emission_sphere_radius = 7.0
+	particles.direction = Vector2.RIGHT
+	particles.spread = 180.0
+	particles.gravity = Vector2.ZERO
+	particles.initial_velocity_min = 45.0
+	particles.initial_velocity_max = 155.0
+	particles.scale_amount_min = 0.18
+	particles.scale_amount_max = 0.58
+	particles.z_index = 3
+
 	sprite = get_node_or_null("Sprite2D") as Sprite2D
 	if sprite == null:
 		sprite = Sprite2D.new()
@@ -71,6 +112,8 @@ func _apply_sprite() -> void:
 		sprite.visible = false
 		return
 	sprite.visible = true
+	if glow != null:
+		glow.visible = true
 	_update_sprite_state()
 
 
@@ -83,3 +126,14 @@ func _update_sprite_state() -> void:
 		SPRITE_LOADER.fit_sprite(sprite, texture, 44.0 + 24.0 * t, 1.0)
 	sprite.rotation += 1.8 * get_process_delta_time()
 	sprite.modulate = Color(burst_color.r, burst_color.g, burst_color.b, 1.0 - t)
+	if glow != null:
+		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), 80.0 + 46.0 * t)
+		glow.modulate = Color(burst_color.r, burst_color.g, burst_color.b, (1.0 - t) * 0.46)
+
+
+func _emit_particles() -> void:
+	if particles == null:
+		return
+	particles.color = Color(burst_color.r, burst_color.g, burst_color.b, 0.88)
+	particles.restart()
+	particles.emitting = true

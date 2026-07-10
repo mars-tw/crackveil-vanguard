@@ -2,6 +2,10 @@ class_name Projectile
 extends Area2D
 
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
+const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
+
+const TRAIL_NODE_CAP := 160
+static var active_trail_nodes: int = 0
 
 var direction: Vector2 = Vector2.RIGHT
 var speed: float = 560.0
@@ -21,10 +25,16 @@ var riftline_fork_level: int = 0
 var evo_rift_fan_level: int = 0
 var fork_depth: int = 0
 var fork_stats_cache: Dictionary = {}
+var muzzle_flash_timer: float = 0.0
+var muzzle_flash_base_scale: Vector2 = Vector2.ONE
+var trail_registered: bool = false
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
 var sprite: Sprite2D = null
+var glow: Sprite2D = null
+var trail: Line2D = null
+var muzzle_flash: Sprite2D = null
 
 
 func _ready() -> void:
@@ -61,9 +71,20 @@ func pool_on_release() -> void:
 	fork_depth = 0
 	fork_stats_cache.clear()
 	traveled = 0.0
+	muzzle_flash_timer = 0.0
+	muzzle_flash_base_scale = Vector2.ONE
 	rotation = 0.0
 	if sprite != null:
 		sprite.rotation = 0.0
+	if glow != null:
+		glow.visible = false
+	if trail != null:
+		trail.visible = false
+	if trail_registered:
+		active_trail_nodes = max(0, active_trail_nodes - 1)
+		trail_registered = false
+	if muzzle_flash != null:
+		muzzle_flash.visible = false
 	var shape_node := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape_node != null:
 		shape_node.disabled = true
@@ -98,6 +119,7 @@ func setup(world_position: Vector2, projectile_direction: Vector2, projectile_st
 	_apply_shape()
 	_apply_sprite()
 	rotation = direction.angle()
+	muzzle_flash_timer = 0.06
 
 
 func _physics_process(delta: float) -> void:
@@ -106,6 +128,7 @@ func _physics_process(delta: float) -> void:
 	var step := direction * speed * delta
 	global_position += step
 	traveled += speed * delta
+	_tick_projectile_vfx(delta)
 	if traveled >= max_range:
 		is_active = false
 		EntityFactory.release_projectile(self)
@@ -202,6 +225,36 @@ func _apply_shape() -> void:
 func _ensure_sprite() -> void:
 	if sprite != null and is_instance_valid(sprite):
 		return
+	glow = get_node_or_null("Glow") as Sprite2D
+	if glow == null:
+		glow = Sprite2D.new()
+		glow.name = "Glow"
+		add_child(glow)
+	glow.texture = ART_RESOURCES.get_radial_glow()
+	glow.centered = true
+	glow.material = ART_RESOURCES.get_additive_material()
+	glow.z_index = -2
+
+	trail = get_node_or_null("Trail") as Line2D
+	if trail == null:
+		trail = Line2D.new()
+		trail.name = "Trail"
+		add_child(trail)
+	trail.width = 5.0
+	trail.material = ART_RESOURCES.get_additive_material()
+	trail.z_index = -3
+	trail.visible = false
+
+	muzzle_flash = get_node_or_null("MuzzleFlash") as Sprite2D
+	if muzzle_flash == null:
+		muzzle_flash = Sprite2D.new()
+		muzzle_flash.name = "MuzzleFlash"
+		add_child(muzzle_flash)
+	muzzle_flash.texture = ART_RESOURCES.get_radial_glow()
+	muzzle_flash.centered = true
+	muzzle_flash.material = ART_RESOURCES.get_additive_material()
+	muzzle_flash.z_index = 2
+
 	sprite = get_node_or_null("Sprite2D") as Sprite2D
 	if sprite == null:
 		sprite = Sprite2D.new()
@@ -219,3 +272,46 @@ func _apply_sprite() -> void:
 	sprite.visible = true
 	sprite.modulate = projectile_color
 	SPRITE_LOADER.fit_sprite(sprite, texture, radius * 4.0, sprite_scale)
+	_configure_projectile_vfx()
+
+
+func _configure_projectile_vfx() -> void:
+	var vfx_color := projectile_color
+	var glow_alpha: float = 0.34
+	if target_group == "heroes":
+		vfx_color = Color(1.0, 0.36, 0.18, 1.0)
+		glow_alpha = 0.44
+	elif fork_depth > 0:
+		glow_alpha = 0.22
+	if glow != null:
+		glow.visible = true
+		glow.modulate = Color(vfx_color.r, vfx_color.g, vfx_color.b, glow_alpha)
+		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), radius * 7.2)
+	if trail != null:
+		if not trail_registered and active_trail_nodes < TRAIL_NODE_CAP:
+			active_trail_nodes += 1
+			trail_registered = true
+		trail.visible = trail_registered
+		trail.width = clamp(radius * 1.25, 3.0, 7.0)
+		var alpha: float = 0.52 if target_group != "heroes" else 0.42
+		if fork_depth > 0:
+			alpha *= 0.62
+		trail.default_color = Color(vfx_color.r, vfx_color.g, vfx_color.b, alpha)
+		var length: float = clamp(speed * 0.052, 18.0, 54.0)
+		trail.points = PackedVector2Array([Vector2(-length, 0.0), Vector2(-length * 0.32, 0.0), Vector2.ZERO])
+	if muzzle_flash != null:
+		muzzle_flash.visible = true
+		muzzle_flash.modulate = Color(vfx_color.r, vfx_color.g, vfx_color.b, 0.72)
+		ART_RESOURCES.fit_sprite(muzzle_flash, ART_RESOURCES.get_radial_glow(), radius * 8.5)
+		muzzle_flash_base_scale = muzzle_flash.scale
+
+
+func _tick_projectile_vfx(delta: float) -> void:
+	if muzzle_flash == null or not muzzle_flash.visible:
+		return
+	muzzle_flash_timer = max(muzzle_flash_timer - delta, 0.0)
+	var ratio: float = muzzle_flash_timer / 0.06
+	muzzle_flash.modulate.a = 0.72 * ratio
+	muzzle_flash.scale = muzzle_flash_base_scale * (0.72 + ratio * 0.28)
+	if muzzle_flash_timer <= 0.0:
+		muzzle_flash.visible = false

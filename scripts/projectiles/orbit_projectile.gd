@@ -1,6 +1,7 @@
 extends Area2D
 
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
+const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 
 var owner_player: Node2D = null
 var weapon_node: Node = null
@@ -14,6 +15,8 @@ var is_active: bool = false
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
 var sprite: Sprite2D = null
+var glow: Sprite2D = null
+var trail: Line2D = null
 
 
 func _ready() -> void:
@@ -48,6 +51,10 @@ func pool_on_release() -> void:
 	rotation = 0.0
 	if sprite != null:
 		sprite.rotation = 0.0
+	if glow != null:
+		glow.visible = false
+	if trail != null:
+		trail.visible = false
 	var shape_node := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape_node != null:
 		shape_node.disabled = true
@@ -163,6 +170,25 @@ func _apply_shape() -> void:
 func _ensure_sprite() -> void:
 	if sprite != null and is_instance_valid(sprite):
 		return
+	glow = get_node_or_null("Glow") as Sprite2D
+	if glow == null:
+		glow = Sprite2D.new()
+		glow.name = "Glow"
+		add_child(glow)
+	glow.texture = ART_RESOURCES.get_radial_glow()
+	glow.centered = true
+	glow.material = ART_RESOURCES.get_additive_material()
+	glow.z_index = -2
+
+	trail = get_node_or_null("Trail") as Line2D
+	if trail == null:
+		trail = Line2D.new()
+		trail.name = "Trail"
+		add_child(trail)
+	trail.material = ART_RESOURCES.get_additive_material()
+	trail.z_index = -3
+	trail.width = 5.0
+
 	sprite = get_node_or_null("Sprite2D") as Sprite2D
 	if sprite == null:
 		sprite = Sprite2D.new()
@@ -182,3 +208,14 @@ func _apply_sprite() -> void:
 	sprite.modulate = stats.get("color", Color(0.8, 0.9, 1.0))
 	var projectile_radius: float = float(stats.get("projectile_radius", 8.0))
 	SPRITE_LOADER.fit_sprite(sprite, texture, projectile_radius * 4.2, float(stats.get("sprite_scale", 1.0)))
+	var color: Color = stats.get("color", Color(0.8, 0.9, 1.0))
+	if glow != null:
+		glow.visible = true
+		glow.modulate = Color(color.r, color.g, color.b, 0.34)
+		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), projectile_radius * 7.5)
+	if trail != null:
+		trail.visible = true
+		trail.width = clamp(projectile_radius * 1.1, 3.0, 8.0)
+		trail.default_color = Color(color.r, color.g, color.b, 0.38)
+		var length := projectile_radius * 5.6
+		trail.points = PackedVector2Array([Vector2(-length, 0.0), Vector2.ZERO])

@@ -28,6 +28,9 @@ var is_alive: bool = true
 var facing_refresh_timer: float = 0.0
 var cached_facing_enemy: Node2D = null
 var cached_facing_token: int = 0
+var screen_shake_timer: float = 0.0
+var screen_shake_duration: float = 0.0
+var screen_shake_strength: float = 0.0
 
 @onready var visual: Node2D = $Visual
 @onready var weapons_root: Node2D = $Weapons
@@ -88,6 +91,9 @@ func reset_for_run() -> void:
 	last_move_direction = Vector2.RIGHT
 	desired_velocity = Vector2.ZERO
 	velocity = Vector2.ZERO
+	screen_shake_timer = 0.0
+	screen_shake_duration = 0.0
+	screen_shake_strength = 0.0
 	movement_slow_timer = 0.0
 	movement_slow_strength = 0.0
 	is_alive = true
@@ -98,6 +104,8 @@ func reset_for_run() -> void:
 	if visual != null:
 		visual.visible = true
 		visual.modulate = Color.WHITE
+	if camera != null:
+		camera.offset = Vector2.ZERO
 	_clear_weapons()
 	_equip_starting_weapons()
 	set_physics_process(true)
@@ -164,8 +172,9 @@ func _physics_process(delta: float) -> void:
 			temporary_shield_hp = 0.0
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_update_flash()
+	_update_camera_shake(delta)
 
 
 func set_move_direction(direction: Vector2) -> void:
@@ -271,6 +280,30 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> bool
 	if current_hp <= 0.0:
 		_die()
 	return true
+
+
+func request_screen_shake(strength: float, duration: float) -> void:
+	if not is_leader or camera == null:
+		return
+	if PlayerSettings != null and not bool(PlayerSettings.get("screen_shake_enabled")):
+		return
+	screen_shake_strength = max(screen_shake_strength, strength)
+	screen_shake_duration = max(screen_shake_duration, duration)
+	screen_shake_timer = max(screen_shake_timer, duration)
+
+
+func _update_camera_shake(delta: float) -> void:
+	if camera == null or not is_leader:
+		return
+	if screen_shake_timer <= 0.0:
+		camera.offset = Vector2.ZERO
+		return
+	screen_shake_timer = max(screen_shake_timer - delta, 0.0)
+	var ratio: float = screen_shake_timer / max(0.001, screen_shake_duration)
+	var amount: float = screen_shake_strength * ratio * ratio
+	camera.offset = Vector2(randf_range(-amount, amount), randf_range(-amount, amount))
+	if screen_shake_timer <= 0.0:
+		camera.offset = Vector2.ZERO
 
 
 func heal(amount: float) -> bool:

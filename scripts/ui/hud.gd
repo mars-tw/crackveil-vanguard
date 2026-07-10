@@ -1,8 +1,14 @@
 extends CanvasLayer
 
 const VIRTUAL_JOYSTICK_SCENE := preload("res://scripts/ui/virtual_joystick.gd")
+const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 
 var root: Control
+var hud_panel: Panel
+var score_panel: Panel
+var hp_icon: TextureRect
+var xp_icon: TextureRect
+var gold_icon: TextureRect
 var hp_label: Label
 var level_label: Label
 var xp_bar: ProgressBar
@@ -78,15 +84,34 @@ func _build_ui() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
 
+	hud_panel = Panel.new()
+	hud_panel.name = "HUDPanel"
+	hud_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(hud_panel)
+
+	score_panel = Panel.new()
+	score_panel.name = "ScorePanel"
+	score_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(score_panel)
+
+	hp_icon = _make_hud_icon("HealthIcon", ART_RESOURCES.get_health_icon())
+	root.add_child(hp_icon)
+
+	xp_icon = _make_hud_icon("XPIcon", ART_RESOURCES.get_xp_icon())
+	root.add_child(xp_icon)
+
+	gold_icon = _make_hud_icon("GoldIcon", ART_RESOURCES.get_gold_icon())
+	root.add_child(gold_icon)
+
 	hp_label = Label.new()
 	hp_label.name = "HPLabel"
-	hp_label.position = Vector2(16.0, 12.0)
+	hp_label.position = Vector2(50.0, 12.0)
 	hp_label.add_theme_font_size_override("font_size", 20)
 	root.add_child(hp_label)
 
 	level_label = Label.new()
 	level_label.name = "LevelLabel"
-	level_label.position = Vector2(16.0, 42.0)
+	level_label.position = Vector2(50.0, 42.0)
 	level_label.add_theme_font_size_override("font_size", 16)
 	root.add_child(level_label)
 
@@ -280,6 +305,17 @@ func _build_virtual_joystick() -> void:
 	root.add_child(virtual_joystick)
 
 
+func _make_hud_icon(icon_name: String, texture: Texture2D) -> TextureRect:
+	var icon := TextureRect.new()
+	icon.name = icon_name
+	icon.texture = texture
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.size = Vector2(28.0, 28.0)
+	return icon
+
+
 func _apply_responsive_layout() -> void:
 	if root == null:
 		return
@@ -290,12 +326,37 @@ func _apply_responsive_layout() -> void:
 	var portrait := viewport_size.y > viewport_size.x
 	var margin := 14.0
 
-	hp_label.position = Vector2(margin, 10.0)
+	if hud_panel != null:
+		hud_panel.position = Vector2(8.0, 8.0)
+		hud_panel.size = Vector2(min(viewport_size.x * (0.7 if portrait else 0.36), 340.0), 88.0)
+	if score_panel != null:
+		score_panel.anchor_left = 1.0
+		score_panel.anchor_right = 1.0
+		score_panel.position = Vector2.ZERO
+		score_panel.offset_left = -332.0 if not portrait else -258.0
+		score_panel.offset_right = -margin
+		score_panel.offset_top = 8.0 if not portrait else 48.0
+		score_panel.offset_bottom = score_panel.offset_top + 46.0
+	if hp_icon != null:
+		hp_icon.position = Vector2(margin + 2.0, 14.0)
+		hp_icon.size = Vector2(26.0, 26.0)
+	if xp_icon != null:
+		xp_icon.position = Vector2(margin + 2.0, 44.0)
+		xp_icon.size = Vector2(24.0, 24.0)
+	if gold_icon != null:
+		gold_icon.anchor_left = 1.0
+		gold_icon.anchor_right = 1.0
+		gold_icon.offset_left = -318.0 if not portrait else -246.0
+		gold_icon.offset_right = gold_icon.offset_left + 26.0
+		gold_icon.offset_top = 18.0 if not portrait else 58.0
+		gold_icon.offset_bottom = gold_icon.offset_top + 26.0
+
+	hp_label.position = Vector2(margin + 36.0, 10.0)
 	hp_label.add_theme_font_size_override("font_size", 18 if portrait else 20)
-	level_label.position = Vector2(margin, 38.0)
+	level_label.position = Vector2(margin + 36.0, 38.0)
 	level_label.add_theme_font_size_override("font_size", 14 if portrait else 16)
-	xp_bar.position = Vector2(margin, 64.0)
-	xp_bar.size = Vector2(min(viewport_size.x * (0.58 if portrait else 0.32), 300.0), 14.0)
+	xp_bar.position = Vector2(margin + 36.0, 66.0)
+	xp_bar.size = Vector2(min(viewport_size.x * (0.5 if portrait else 0.27), 260.0), 14.0)
 
 	time_label.anchor_left = 0.5
 	time_label.anchor_right = 0.5

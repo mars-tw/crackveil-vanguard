@@ -2,6 +2,7 @@ class_name Enemy
 extends CharacterBody2D
 
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
+const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 
 @export var type_id: String = "normal"
 @export var max_hp: float = 18.0
@@ -59,6 +60,9 @@ var affix_ring: Line2D = null
 var affix_marker: Line2D = null
 var hp_bar_bg: Line2D = null
 var hp_bar_fg: Line2D = null
+var shadow: Sprite2D = null
+var threat_glow: Sprite2D = null
+var hit_flash_timer: float = 0.0
 
 
 func _ready() -> void:
@@ -103,6 +107,11 @@ func pool_on_release() -> void:
 	rotation = 0.0
 	if sprite != null:
 		sprite.rotation = 0.0
+	if shadow != null:
+		shadow.visible = false
+	if threat_glow != null:
+		threat_glow.visible = false
+	hit_flash_timer = 0.0
 	if affix_ring != null:
 		affix_ring.visible = false
 	if affix_marker != null:
@@ -167,6 +176,7 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	boss_phase_two_triggered = false
 	boss_ability_timer = float(config.get("boss_ability_cooldown", 4.8))
 	rotation = 0.0
+	hit_flash_timer = 0.0
 	_apply_shape()
 	_apply_sprite()
 	_apply_affix_visuals()
@@ -185,6 +195,7 @@ func _physics_process(delta: float) -> void:
 	_tick_status_effects(delta)
 	var target := _find_nearest_hero()
 	if target == null or not is_instance_valid(target):
+		_tick_hit_flash(delta)
 		return
 
 	attack_timer = max(attack_timer - delta, 0.0)
@@ -201,6 +212,7 @@ func _physics_process(delta: float) -> void:
 
 	_tick_affix(delta)
 	_tick_hp_bar(delta)
+	_tick_hit_flash(delta)
 
 
 func _physics_chaser(target: Node2D) -> void:
@@ -465,6 +477,7 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> void
 	var number_position := global_position + Vector2(randf_range(-8.0, 8.0), -radius - 10.0)
 	EntityFactory.spawn_damage_number(final_amount, number_position, Color(1.0, 0.96, 0.72))
 	hp_bar_timer = 0.55
+	hit_flash_timer = 0.075
 	_update_hp_bar()
 	_set_hp_bar_visible(true)
 
@@ -497,6 +510,10 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 		_spawn_death_children()
 	if GameManager.has_method("has_magnetic_reclaim") and GameManager.has_magnetic_reclaim():
 		EntityFactory.call_deferred("magnetize_xp_near", global_position, 155.0)
+	if is_elite or is_boss:
+		var shake := 7.0 if is_boss else 4.6
+		if GameManager.has_method("request_combat_impact"):
+			GameManager.request_combat_impact(shake, 0.04)
 
 	EntityFactory.release_enemy_deferred(self)
 
@@ -581,6 +598,26 @@ func _get_target_hit_radius(target: Node) -> float:
 
 
 func _ensure_visual_nodes() -> void:
+	shadow = get_node_or_null("Shadow") as Sprite2D
+	if shadow == null:
+		shadow = Sprite2D.new()
+		shadow.name = "Shadow"
+		add_child(shadow)
+	shadow.texture = ART_RESOURCES.get_ellipse_shadow()
+	shadow.centered = true
+	shadow.z_index = -4
+	shadow.modulate = Color(0.0, 0.0, 0.0, 0.68)
+
+	threat_glow = get_node_or_null("ThreatGlow") as Sprite2D
+	if threat_glow == null:
+		threat_glow = Sprite2D.new()
+		threat_glow.name = "ThreatGlow"
+		add_child(threat_glow)
+	threat_glow.texture = ART_RESOURCES.get_radial_glow()
+	threat_glow.centered = true
+	threat_glow.material = ART_RESOURCES.get_additive_material()
+	threat_glow.z_index = -3
+
 	sprite = get_node_or_null("Sprite2D") as Sprite2D
 	if sprite == null:
 		sprite = Sprite2D.new()
@@ -638,11 +675,41 @@ func _apply_sprite() -> void:
 	sprite.modulate = body_color
 	sprite.rotation = 0.0
 	SPRITE_LOADER.fit_sprite(sprite, texture, radius * 3.0, sprite_scale)
+	_apply_shadow_and_glow()
 
 
 func _set_sprite_modulate(color: Color) -> void:
-	if sprite != null:
+	if sprite != null and hit_flash_timer <= 0.0:
 		sprite.modulate = color
+
+
+func _apply_shadow_and_glow() -> void:
+	if shadow != null:
+		shadow.visible = true
+		shadow.position = Vector2(0.0, radius * 0.86)
+		ART_RESOURCES.fit_sprite(shadow, ART_RESOURCES.get_ellipse_shadow(), radius * 3.2)
+	if threat_glow != null:
+		threat_glow.visible = true
+		var glow_diameter := radius * 4.2
+		var glow_alpha := 0.18
+		if is_elite:
+			glow_diameter = radius * 5.6
+			glow_alpha = 0.34
+		if is_boss:
+			glow_diameter = radius * 7.2
+			glow_alpha = 0.46
+		ART_RESOURCES.fit_sprite(threat_glow, ART_RESOURCES.get_radial_glow(), glow_diameter)
+		threat_glow.modulate = Color(body_color.r, body_color.g * 0.82 + 0.06, body_color.b * 0.85 + 0.1, glow_alpha)
+
+
+func _tick_hit_flash(delta: float) -> void:
+	if hit_flash_timer <= 0.0 or sprite == null:
+		return
+	hit_flash_timer = max(hit_flash_timer - delta, 0.0)
+	var ratio := hit_flash_timer / 0.075
+	sprite.modulate = Color(1.0, 0.98, 0.9, 1.0).lerp(body_color, 1.0 - ratio)
+	if hit_flash_timer <= 0.0:
+		sprite.modulate = body_color
 
 
 func _apply_affix_visuals() -> void:
@@ -659,6 +726,14 @@ func _apply_affix_visuals() -> void:
 	var ring_color := Color(1.0, 1.0, 1.0, 0.0)
 	var marker_points := PackedVector2Array()
 	var marker_closed := true
+	if is_boss:
+		ring_radius = radius * 1.62
+		ring_color = Color(0.78, 0.44, 1.0, 0.86)
+		marker_points = _diamond_marker_points(radius * 0.92)
+	elif is_elite and affix_id == "":
+		ring_radius = radius * 1.42
+		ring_color = Color(0.98, 0.72, 1.0, 0.78)
+		marker_points = _diamond_marker_points(radius * 0.72)
 	match affix_id:
 		"affix_split":
 			ring_color = Color(0.58, 1.0, 0.62, 0.78)
@@ -672,7 +747,8 @@ func _apply_affix_visuals() -> void:
 			marker_points = _double_arrow_marker_points(radius * 0.64)
 			marker_closed = false
 		_:
-			return
+			if not is_elite and not is_boss:
+				return
 	affix_ring.default_color = ring_color
 	affix_ring.points = _circle_points(ring_radius, 40)
 	affix_ring.visible = true
@@ -707,6 +783,15 @@ func _square_marker_points(marker_radius: float) -> PackedVector2Array:
 		Vector2(marker_radius, -marker_radius),
 		Vector2(marker_radius, marker_radius),
 		Vector2(-marker_radius, marker_radius)
+	])
+
+
+func _diamond_marker_points(marker_radius: float) -> PackedVector2Array:
+	return PackedVector2Array([
+		Vector2(0.0, -marker_radius),
+		Vector2(marker_radius, 0.0),
+		Vector2(0.0, marker_radius),
+		Vector2(-marker_radius, 0.0)
 	])
 
 

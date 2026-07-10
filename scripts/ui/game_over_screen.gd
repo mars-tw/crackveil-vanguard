@@ -43,6 +43,9 @@ func _build_ui() -> void:
 	title.offset_bottom = 60.0
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 28)
+	title.add_theme_color_override("font_color", Color(1.0, 0.72, 0.54, 1.0))
+	title.add_theme_color_override("font_outline_color", Color(0.35, 0.06, 0.04, 0.9))
+	title.add_theme_constant_override("outline_size", 2)
 	panel.add_child(title)
 
 	summary_label = Label.new()

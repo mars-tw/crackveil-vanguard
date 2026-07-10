@@ -5,6 +5,8 @@ signal seed_restart_requested(seed_text: String)
 
 var root: Control
 var panel: Panel
+var logo_glow_label: Label
+var logo_label: Label
 var title_label: Label
 var subtitle_label: Label
 var meta_label: Label
@@ -45,12 +47,35 @@ func _build_ui() -> void:
 	panel.name = "Panel"
 	root.add_child(panel)
 
+	logo_glow_label = Label.new()
+	logo_glow_label.text = "CRACKVEIL VANGUARD"
+	logo_glow_label.anchor_left = 0.0
+	logo_glow_label.anchor_right = 1.0
+	logo_glow_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	logo_glow_label.add_theme_font_size_override("font_size", 34)
+	logo_glow_label.add_theme_color_override("font_color", Color(0.25, 0.92, 1.0, 0.42))
+	panel.add_child(logo_glow_label)
+
+	logo_label = Label.new()
+	logo_label.text = "CRACKVEIL VANGUARD"
+	logo_label.anchor_left = 0.0
+	logo_label.anchor_right = 1.0
+	logo_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	logo_label.add_theme_font_size_override("font_size", 31)
+	logo_label.add_theme_color_override("font_color", Color(0.88, 0.98, 1.0, 1.0))
+	logo_label.add_theme_color_override("font_outline_color", Color(0.16, 0.72, 1.0, 0.82))
+	logo_label.add_theme_constant_override("outline_size", 2)
+	panel.add_child(logo_label)
+
 	title_label = Label.new()
 	title_label.text = "選擇裂隙契約"
 	title_label.anchor_left = 0.0
 	title_label.anchor_right = 1.0
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_label.add_theme_font_size_override("font_size", 30)
+	title_label.add_theme_color_override("font_color", Color(0.74, 0.97, 1.0, 1.0))
+	title_label.add_theme_color_override("font_outline_color", Color(0.05, 0.36, 0.55, 0.85))
+	title_label.add_theme_constant_override("outline_size", 2)
 	panel.add_child(title_label)
 
 	subtitle_label = Label.new()
@@ -224,7 +249,7 @@ func _apply_responsive_layout() -> void:
 		viewport_size = Vector2(1280.0, 720.0)
 	var portrait := viewport_size.y > viewport_size.x
 	var panel_width: float = min(viewport_size.x - 28.0, 920.0 if not portrait else 620.0)
-	var panel_height: float = min(viewport_size.y - 54.0, 520.0 if not portrait else 860.0)
+	var panel_height: float = min(viewport_size.y - 54.0, 570.0 if not portrait else 900.0)
 
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5
@@ -235,23 +260,32 @@ func _apply_responsive_layout() -> void:
 	panel.offset_top = -panel_height * 0.5
 	panel.offset_bottom = panel_height * 0.5
 
-	title_label.offset_top = 18.0
-	title_label.offset_bottom = 58.0
+	if logo_glow_label != null:
+		logo_glow_label.offset_top = 10.0
+		logo_glow_label.offset_bottom = 50.0
+		logo_glow_label.add_theme_font_size_override("font_size", 30 if portrait else 34)
+	if logo_label != null:
+		logo_label.offset_top = 12.0
+		logo_label.offset_bottom = 50.0
+		logo_label.add_theme_font_size_override("font_size", 28 if portrait else 31)
+
+	title_label.offset_top = 56.0
+	title_label.offset_bottom = 90.0
 	title_label.add_theme_font_size_override("font_size", 28 if portrait else 30)
 
-	subtitle_label.offset_top = 56.0
-	subtitle_label.offset_bottom = 82.0
+	subtitle_label.offset_top = 88.0
+	subtitle_label.offset_bottom = 114.0
 	subtitle_label.add_theme_font_size_override("font_size", 14 if portrait else 16)
 
-	meta_label.offset_top = 82.0
-	meta_label.offset_bottom = 108.0
+	meta_label.offset_top = 114.0
+	meta_label.offset_bottom = 140.0
 	meta_label.add_theme_font_size_override("font_size", 14 if portrait else 16)
 
 	meta_grid.columns = 1 if portrait else 3
 	meta_grid.offset_left = 26.0
 	meta_grid.offset_right = -26.0
-	meta_grid.offset_top = 114.0
-	meta_grid.offset_bottom = 174.0 if not portrait else 294.0
+	meta_grid.offset_top = 146.0
+	meta_grid.offset_bottom = 206.0 if not portrait else 326.0
 
 	var meta_button_width: float = panel_width - 52.0 if portrait else max(180.0, (panel_width - 52.0 - 20.0) / 3.0)
 	var meta_button_height := 52.0
@@ -262,7 +296,7 @@ func _apply_responsive_layout() -> void:
 	if seed_row != null:
 		seed_row.offset_left = 26.0
 		seed_row.offset_right = -26.0
-		seed_row.offset_top = 302.0 if portrait else 182.0
+		seed_row.offset_top = 334.0 if portrait else 214.0
 		seed_row.offset_bottom = seed_row.offset_top + 42.0
 	if seed_input != null:
 		seed_input.custom_minimum_size = Vector2(180.0 if portrait else 280.0, 38.0)
@@ -274,12 +308,12 @@ func _apply_responsive_layout() -> void:
 	card_grid.columns = 1 if portrait else min(4, max(1, option_buttons.size()))
 	card_grid.offset_left = 26.0
 	card_grid.offset_right = -26.0
-	card_grid.offset_top = 352.0 if portrait else 232.0
+	card_grid.offset_top = 386.0 if portrait else 266.0
 	card_grid.offset_bottom = -26.0
 
 	var column_count: int = max(1, card_grid.columns)
 	var card_width: float = panel_width - 52.0 if portrait else max(170.0, (panel_width - 52.0 - 18.0 * float(column_count - 1)) / float(column_count))
-	var card_height: float = 160.0 if portrait else max(190.0, panel_height - 284.0)
+	var card_height: float = 160.0 if portrait else max(190.0, panel_height - 318.0)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
 		button.add_theme_font_size_override("font_size", 18 if portrait else 20)

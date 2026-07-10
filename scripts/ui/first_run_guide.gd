@@ -41,6 +41,9 @@ func _build_ui() -> void:
 	title_label.anchor_right = 1.0
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_label.add_theme_font_size_override("font_size", 28)
+	title_label.add_theme_color_override("font_color", Color(0.74, 0.97, 1.0, 1.0))
+	title_label.add_theme_color_override("font_outline_color", Color(0.05, 0.36, 0.55, 0.85))
+	title_label.add_theme_constant_override("outline_size", 2)
 	panel.add_child(title_label)
 
 	body_label = Label.new()

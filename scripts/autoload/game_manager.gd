@@ -177,6 +177,7 @@ var echo_shards_awarded_this_run: int = 0
 var seen_affix_toasts: Dictionary = {}
 var pending_toasts: Array[String] = []
 var run_token: int = 0
+var hit_stop_token: int = 0
 
 const META_HP_APPLIED_KEY := "_cv_meta_hp_multiplier_applied"
 const META_PICKUP_APPLIED_KEY := "_cv_meta_pickup_bonus_applied"
@@ -187,6 +188,7 @@ func _ready() -> void:
 
 
 func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null, reset_player: bool = true) -> void:
+	Engine.time_scale = 1.0
 	arena = new_arena
 	player = new_player
 	squad_manager = new_squad_manager
@@ -272,6 +274,19 @@ func show_toast(message: String) -> void:
 	if message == "":
 		return
 	toast_requested.emit(message)
+
+
+func request_combat_impact(shake_strength: float = 4.0, hit_stop_duration: float = 0.04) -> void:
+	if player != null and is_instance_valid(player) and player.has_method("request_screen_shake"):
+		player.request_screen_shake(shake_strength, 0.16)
+	if hit_stop_duration <= 0.0 or get_tree().paused:
+		return
+	hit_stop_token += 1
+	var local_token := hit_stop_token
+	Engine.time_scale = min(Engine.time_scale, 0.18)
+	await get_tree().create_timer(hit_stop_duration, true, false, true).timeout
+	if local_token == hit_stop_token:
+		Engine.time_scale = 1.0
 
 
 func queue_toast(message: String) -> void:
@@ -1004,11 +1019,11 @@ func _apply_meta_progress_to_members(members: Array) -> void:
 	for member in members:
 		if member == null or not is_instance_valid(member):
 			continue
-		var previous_hp_multiplier: float = float(member.get_meta(META_HP_APPLIED_KEY, 1.0))
+		var previous_hp_multiplier: float = _as_float(member.get_meta(META_HP_APPLIED_KEY, 1.0), 1.0)
 		if previous_hp_multiplier <= 0.0:
 			previous_hp_multiplier = 1.0
-		var old_max_hp: float = max(1.0, float(member.get("max_hp")))
-		var old_current_hp: float = float(member.get("current_hp"))
+		var old_max_hp: float = max(1.0, _as_float(member.get("max_hp"), 1.0))
+		var old_current_hp: float = _as_float(member.get("current_hp"), old_max_hp)
 		var hp_ratio: float = clamp(old_current_hp / old_max_hp, 0.0, 1.0)
 		var base_max_hp: float = max(1.0, old_max_hp / previous_hp_multiplier)
 		var new_max_hp: float = max(1.0, base_max_hp * hp_multiplier)
@@ -1016,10 +1031,18 @@ func _apply_meta_progress_to_members(members: Array) -> void:
 		member.set("current_hp", min(new_max_hp, new_max_hp * hp_ratio))
 		member.set_meta(META_HP_APPLIED_KEY, hp_multiplier)
 
-		var previous_pickup_bonus: float = float(member.get_meta(META_PICKUP_APPLIED_KEY, 0.0))
-		var base_pickup_radius: float = max(0.0, float(member.get("pickup_radius")) - previous_pickup_bonus)
+		var previous_pickup_bonus: float = _as_float(member.get_meta(META_PICKUP_APPLIED_KEY, 0.0), 0.0)
+		var base_pickup_radius: float = max(0.0, _as_float(member.get("pickup_radius"), 80.0) - previous_pickup_bonus)
 		member.set("pickup_radius", base_pickup_radius + pickup_bonus)
 		member.set_meta(META_PICKUP_APPLIED_KEY, pickup_bonus)
+
+
+func _as_float(value: Variant, fallback: float = 0.0) -> float:
+	match typeof(value):
+		TYPE_FLOAT, TYPE_INT:
+			return float(value)
+		_:
+			return fallback
 
 
 func _summary_with_echo(summary: Dictionary) -> Dictionary:

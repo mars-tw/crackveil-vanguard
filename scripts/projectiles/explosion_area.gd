@@ -1,12 +1,14 @@
 extends Node2D
 
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
+const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 
 var stats: Dictionary = {}
 var source: Node = null
 var age: float = 0.0
 var is_active: bool = false
 var sprite: Sprite2D = null
+var glow: Sprite2D = null
 
 
 func _ready() -> void:
@@ -30,6 +32,8 @@ func pool_on_release() -> void:
 	if sprite != null:
 		sprite.visible = false
 		sprite.rotation = 0.0
+	if glow != null:
+		glow.visible = false
 
 
 func pool_reset(args: Dictionary) -> void:
@@ -58,6 +62,16 @@ func _process(delta: float) -> void:
 func _ensure_sprite() -> void:
 	if sprite != null and is_instance_valid(sprite):
 		return
+	glow = get_node_or_null("Glow") as Sprite2D
+	if glow == null:
+		glow = Sprite2D.new()
+		glow.name = "Glow"
+		add_child(glow)
+	glow.texture = ART_RESOURCES.get_radial_glow()
+	glow.centered = true
+	glow.material = ART_RESOURCES.get_additive_material()
+	glow.z_index = -2
+
 	sprite = get_node_or_null("Sprite2D") as Sprite2D
 	if sprite == null:
 		sprite = Sprite2D.new()
@@ -73,6 +87,8 @@ func _apply_sprite() -> void:
 		sprite.visible = false
 		return
 	sprite.visible = true
+	if glow != null:
+		glow.visible = true
 	sprite.modulate = stats.get("color", Color(1.0, 0.6, 0.25))
 	_update_sprite_state()
 
@@ -89,3 +105,6 @@ func _update_sprite_state() -> void:
 		SPRITE_LOADER.fit_sprite(sprite, texture, target_size, float(stats.get("sprite_scale", 1.0)))
 	var color: Color = stats.get("color", Color(1.0, 0.6, 0.25))
 	sprite.modulate = Color(color.r, color.g, color.b, 1.0 - t)
+	if glow != null:
+		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), radius * (2.55 + t * 0.5))
+		glow.modulate = Color(color.r, color.g, color.b, (1.0 - t) * 0.38)

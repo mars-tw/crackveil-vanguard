@@ -1,6 +1,7 @@
 extends Area2D
 
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
+const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 
 @export var value: int = 1
 @export_enum("xp", "coin") var pickup_kind: String = "xp"
@@ -16,6 +17,8 @@ var forced_magnet_timer: float = 0.0
 var bob_phase: float = 0.0
 var is_active: bool = false
 var sprite: Sprite2D = null
+var shadow: Sprite2D = null
+var glow: Sprite2D = null
 
 
 func _ready() -> void:
@@ -49,6 +52,10 @@ func pool_on_release() -> void:
 	rotation = 0.0
 	if sprite != null:
 		sprite.rotation = 0.0
+	if shadow != null:
+		shadow.visible = false
+	if glow != null:
+		glow.visible = false
 
 
 func pool_reset(args: Dictionary) -> void:
@@ -169,6 +176,26 @@ func _find_collector() -> Node2D:
 func _ensure_sprite() -> void:
 	if sprite != null and is_instance_valid(sprite):
 		return
+	shadow = get_node_or_null("Shadow") as Sprite2D
+	if shadow == null:
+		shadow = Sprite2D.new()
+		shadow.name = "Shadow"
+		add_child(shadow)
+	shadow.texture = ART_RESOURCES.get_ellipse_shadow()
+	shadow.centered = true
+	shadow.z_index = -3
+	shadow.modulate = Color(0.0, 0.0, 0.0, 0.46)
+
+	glow = get_node_or_null("Glow") as Sprite2D
+	if glow == null:
+		glow = Sprite2D.new()
+		glow.name = "Glow"
+		add_child(glow)
+	glow.texture = ART_RESOURCES.get_radial_glow()
+	glow.centered = true
+	glow.material = ART_RESOURCES.get_additive_material()
+	glow.z_index = -2
+
 	sprite = get_node_or_null("Sprite2D") as Sprite2D
 	if sprite == null:
 		sprite = Sprite2D.new()
@@ -186,10 +213,24 @@ func _apply_sprite() -> void:
 	sprite.visible = true
 	var target_size: float = 20.0 + clamp(float(value) * 0.8, 0.0, 8.0)
 	SPRITE_LOADER.fit_sprite(sprite, texture, target_size, sprite_scale)
+	if shadow != null:
+		shadow.visible = true
+		shadow.position = Vector2(0.0, target_size * 0.34)
+		ART_RESOURCES.fit_sprite(shadow, ART_RESOURCES.get_ellipse_shadow(), target_size * 1.45)
+	if glow != null:
+		glow.visible = true
+		var glow_color := Color(0.34, 0.94, 1.0, 0.34)
+		if pickup_kind == "coin":
+			glow_color = Color(1.0, 0.64, 0.22, 0.34)
+		glow.modulate = glow_color
+		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), target_size * 2.55)
 	_update_sprite_bob()
 
 
 func _update_sprite_bob() -> void:
 	if sprite == null:
 		return
-	sprite.position.y = sin(bob_phase) * 1.5
+	var bob := sin(bob_phase) * 1.5
+	sprite.position.y = bob
+	if glow != null:
+		glow.position.y = bob * 0.55

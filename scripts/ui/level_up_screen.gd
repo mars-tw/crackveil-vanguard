@@ -40,6 +40,9 @@ func _build_ui() -> void:
 	title_label.anchor_right = 1.0
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_label.add_theme_font_size_override("font_size", 30)
+	title_label.add_theme_color_override("font_color", Color(0.74, 0.97, 1.0, 1.0))
+	title_label.add_theme_color_override("font_outline_color", Color(0.05, 0.36, 0.55, 0.85))
+	title_label.add_theme_constant_override("outline_size", 2)
 	panel.add_child(title_label)
 
 	card_grid = GridContainer.new()
@@ -94,18 +97,21 @@ func _apply_card_style(button: Button, option: Dictionary) -> void:
 	if not _is_evolution_option(option):
 		return
 	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0.16, 0.1, 0.19, 0.96)
-	normal.border_color = Color(1.0, 0.72, 0.24, 1.0)
+	normal.bg_color = Color(0.11, 0.07, 0.16, 0.96)
+	normal.border_color = Color(1.0, 0.68, 0.24, 1.0)
 	normal.set_border_width_all(3)
 	normal.set_corner_radius_all(8)
+	normal.shadow_color = Color(1.0, 0.46, 0.18, 0.22)
+	normal.shadow_size = 8
 	normal.content_margin_left = 12.0
 	normal.content_margin_right = 12.0
 	normal.content_margin_top = 12.0
 	normal.content_margin_bottom = 12.0
 	var hover := normal.duplicate() as StyleBoxFlat
-	hover.bg_color = Color(0.22, 0.13, 0.25, 0.98)
+	hover.bg_color = Color(0.18, 0.1, 0.24, 0.98)
+	hover.border_color = Color(1.0, 0.88, 0.46, 1.0)
 	var pressed := normal.duplicate() as StyleBoxFlat
-	pressed.bg_color = Color(0.11, 0.07, 0.14, 0.98)
+	pressed.bg_color = Color(0.08, 0.05, 0.12, 0.98)
 	button.add_theme_stylebox_override("normal", normal)
 	button.add_theme_stylebox_override("hover", hover)
 	button.add_theme_stylebox_override("pressed", pressed)

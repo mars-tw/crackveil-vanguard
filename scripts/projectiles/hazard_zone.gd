@@ -67,6 +67,7 @@ func _update_fade() -> void:
 		return
 	last_alpha = next_alpha
 	modulate = Color(1.0, 1.0, 1.0, next_alpha)
+	queue_redraw()
 
 
 func _apply_tick_damage() -> void:
@@ -98,8 +99,15 @@ func _draw() -> void:
 		return
 	var radius: float = float(stats.get("area_radius", 56.0))
 	var color: Color = stats.get("color", Color(1.0, 0.42, 0.12, 1.0))
-	draw_circle(Vector2.ZERO, radius, Color(color.r, color.g, color.b, 0.2))
-	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 48, Color(color.r, color.g, color.b, 0.54), 2.0)
+	draw_circle(Vector2.ZERO, radius, Color(color.r, color.g, color.b, 0.16))
+	draw_circle(Vector2.ZERO, radius * 0.72, Color(color.r, color.g, color.b, 0.08))
+	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 64, Color(color.r, color.g, color.b, 0.72), 2.5)
+	draw_arc(Vector2.ZERO, radius * 0.72, 0.3, TAU + 0.3, 48, Color(0.58, 0.95, 1.0, 0.34), 1.25)
+	for index in range(8):
+		var angle := TAU * float(index) / 8.0 + age * 0.8
+		var from := Vector2.RIGHT.rotated(angle) * radius * 0.36
+		var to := Vector2.RIGHT.rotated(angle) * radius * 0.94
+		draw_line(from, to, Color(color.r, color.g, color.b, 0.26), 1.0)
 
 
 func _request_redraw() -> void:
