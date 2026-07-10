@@ -122,4 +122,7 @@ func data_effect_stats() -> Dictionary:
 func _rebuild_stats_cache() -> void:
 	projectile_stats_cache = data.to_projectile_stats() if data != null and data.has_method("to_projectile_stats") else {}
 	effect_stats_cache = data.to_effect_stats() if data != null and data.has_method("to_effect_stats") else {}
+	var weapon_id := get_weapon_id()
+	projectile_stats_cache["source_weapon_id"] = weapon_id
+	effect_stats_cache["source_weapon_id"] = weapon_id
 	stats_cache_dirty = false

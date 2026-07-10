@@ -808,9 +808,10 @@ func _nearest_living_hero(world_position: Vector2) -> Node2D:
 	return nearest
 
 
-func _apply_explosion_damage(world_position: Vector2, stats: Dictionary, _source: Node) -> void:
+func _apply_explosion_damage(world_position: Vector2, stats: Dictionary, source: Node) -> void:
 	var radius: float = float(stats.get("area_radius", 82.0))
 	var damage_value: float = float(stats.get("damage", 10.0))
+	var weapon_id := str(stats.get("source_weapon_id", ""))
 
 	for enemy in get_enemies_in_radius(world_position, radius + 24.0):
 		if enemy == null or not is_instance_valid(enemy):
@@ -822,7 +823,8 @@ func _apply_explosion_damage(world_position: Vector2, stats: Dictionary, _source
 		var hit_distance: float = radius + enemy_radius
 		if world_position.distance_squared_to(enemy.global_position) <= hit_distance * hit_distance:
 			if enemy.has_method("take_damage"):
-				enemy.take_damage(damage_value, world_position)
+				var applied_damage: float = float(enemy.take_damage(damage_value, world_position))
+				GameManager.record_weapon_damage(source, weapon_id, applied_damage)
 
 
 func _grant_xp_direct(amount: int) -> void:

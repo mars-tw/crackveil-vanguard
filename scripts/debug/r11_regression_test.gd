@@ -43,6 +43,15 @@ func _run_tests() -> void:
 	current_phase = "new_weapons"
 	if not await _test_new_weapon_hits():
 		return
+	current_phase = "boomerang_hit_table"
+	if not _test_boomerang_rebound_hit_table():
+		return
+	current_phase = "evolution_stats"
+	if not _test_evolution_stats_apply_once():
+		return
+	current_phase = "upgrade_pool"
+	if not _test_upgrade_choices_keep_non_leader_card():
+		return
 	current_phase = "animation"
 	if not await _test_procedural_animation_changes_transforms():
 		return
@@ -140,6 +149,145 @@ func _test_new_weapon_hits() -> bool:
 	return true
 
 
+func _test_boomerang_rebound_hit_table() -> bool:
+	_release_active_enemies()
+	var guard: Node = squad_manager.get_member_by_id("orbit_guard")
+	if guard == null:
+		_fail("boomerang rebound owner missing")
+		return false
+	var enemy := EntityFactory.spawn_enemy("r11_boomerang_rebound_target", _target_config(80.0), guard.global_position + Vector2(160.0, 0.0))
+	if enemy == null:
+		_fail("boomerang rebound target spawn failed")
+		return false
+
+	var base_stats := _manual_boomerang_stats(0)
+	var base_projectile := EntityFactory.spawn_projectile(enemy.global_position, Vector2.RIGHT, base_stats, guard)
+	if base_projectile == null:
+		_fail("base boomerang projectile spawn failed")
+		return false
+	var base_hp_before: float = float(enemy.get("hp"))
+	base_projectile._on_body_entered(enemy)
+	var base_hp_after_first: float = float(enemy.get("hp"))
+	base_projectile._on_body_entered(enemy)
+	var base_hp_after_second: float = float(enemy.get("hp"))
+	if base_hp_after_first >= base_hp_before or not is_equal_approx(base_hp_after_second, base_hp_after_first):
+		_fail("base boomerang hit table contract failed")
+		return false
+	EntityFactory.release_projectile(base_projectile)
+
+	var rebound_stats := _manual_boomerang_stats(1)
+	var rebound_projectile := EntityFactory.spawn_projectile(enemy.global_position, Vector2.RIGHT, rebound_stats, guard)
+	if rebound_projectile == null:
+		_fail("rebound boomerang projectile spawn failed")
+		return false
+	var rebound_hp_before: float = float(enemy.get("hp"))
+	rebound_projectile._on_body_entered(enemy)
+	var rebound_hp_after_out: float = float(enemy.get("hp"))
+	rebound_projectile.set("traveled", float(rebound_stats.get("range")) * 0.53)
+	rebound_projectile._tick_boomerang(0.016)
+	if not bool(rebound_projectile.get("boomerang_returning")):
+		_fail("rebound boomerang did not enter return state")
+		return false
+	rebound_projectile._on_body_entered(enemy)
+	var rebound_hp_after_return: float = float(enemy.get("hp"))
+	if rebound_hp_after_out >= rebound_hp_before or rebound_hp_after_return >= rebound_hp_after_out:
+		_fail("rebound boomerang did not allow return hit")
+		return false
+	EntityFactory.release_projectile(rebound_projectile)
+	EntityFactory.release_enemy(enemy)
+	print("R11_BOOMERANG_HIT_TABLE base_second_blocked=true rebound_return_hit=true")
+	return true
+
+
+func _test_evolution_stats_apply_once() -> bool:
+	var guard: Node = squad_manager.get_member_by_id("orbit_guard")
+	var scout: Node = squad_manager.get_member_by_id("arc_scout")
+	if guard == null or scout == null:
+		_fail("evolution stat owners missing")
+		return false
+
+	var boomerang_weapon := _weapon_node(guard, "rift_shield_boomerang")
+	if boomerang_weapon == null:
+		_fail("boomerang weapon missing for evolution stat test")
+		return false
+	boomerang_weapon.apply_data_upgrade("boomerang_rebound")
+	boomerang_weapon.apply_data_upgrade("boomerang_rebound")
+	boomerang_weapon.apply_data_upgrade("evo_razor_bulwark")
+	var boomerang_data: Resource = boomerang_weapon.get("data")
+	var boomerang_stats: Dictionary = boomerang_weapon._projectile_stats_for_fire()
+	var expected_pierce := int(boomerang_data.get("pierce")) + int(boomerang_data.get_modifier_level("boomerang_rebound"))
+	var actual_pierce := int(boomerang_stats.get("pierce", -1))
+	if actual_pierce != expected_pierce:
+		_fail("evo razor pierce applied more than once: expected %d got %d" % [expected_pierce, actual_pierce])
+		return false
+
+	var missile_weapon := _weapon_node(scout, "rift_seeker_missiles")
+	if missile_weapon == null:
+		_fail("missile weapon missing for evolution stat test")
+		return false
+	missile_weapon.apply_data_upgrade("missile_guidance")
+	missile_weapon.apply_data_upgrade("missile_guidance")
+	missile_weapon.apply_data_upgrade("evo_hunter_swarm")
+	var dummy_target := Node2D.new()
+	add_child(dummy_target)
+	dummy_target.global_position = scout.global_position + Vector2(240.0, 0.0)
+	var missile_data: Resource = missile_weapon.get("data")
+	var missile_stats: Dictionary = missile_weapon._projectile_stats_for_fire(dummy_target)
+	dummy_target.queue_free()
+	var expected_turn_rate := float(missile_data.get("homing_turn_rate")) + float(missile_data.get_modifier_level("missile_guidance")) * 1.1
+	var actual_turn_rate := float(missile_stats.get("homing_turn_rate", -1.0))
+	if abs(actual_turn_rate - expected_turn_rate) > 0.001:
+		_fail("evo hunter turn_rate applied more than once: expected %.3f got %.3f" % [expected_turn_rate, actual_turn_rate])
+		return false
+
+	print("R11_EVOLUTION_STATS pierce=%d turn_rate=%.2f" % [actual_pierce, actual_turn_rate])
+	return true
+
+
+func _test_upgrade_choices_keep_non_leader_card() -> bool:
+	var pool: Array = [
+		{
+			"id": "upgrade_hero_weapon",
+			"hero_id": "rift_captain",
+			"weapon_id": "riftline_emitter",
+			"upgrade_kind": "weapon_damage",
+			"weight": 100.0
+		},
+		{
+			"id": "upgrade_hero_weapon",
+			"hero_id": "rift_captain",
+			"weapon_id": "orbit_blades",
+			"upgrade_kind": "weapon_damage",
+			"weight": 100.0
+		},
+		{
+			"id": "upgrade_hero_weapon",
+			"hero_id": "rift_captain",
+			"weapon_id": "arc_chain",
+			"upgrade_kind": "weapon_damage",
+			"weight": 100.0
+		},
+		{
+			"id": "upgrade_hero_weapon",
+			"hero_id": "orbit_guard",
+			"weapon_id": "rift_shield_boomerang",
+			"upgrade_kind": "weapon_damage",
+			"weight": 0.1
+		}
+	]
+	for index in range(40):
+		seed(12000 + index)
+		var choices: Array = GameManager._pick_upgrade_choices(pool, 3)
+		if choices.size() != 3:
+			_fail("pool guard returned wrong choice count")
+			return false
+		if not _choices_have_non_leader_card(choices):
+			_fail("pool guard allowed all-leader three-choice hand")
+			return false
+	print("R11_POOL_HEALTH nonleader_three_choice_guard=true")
+	return true
+
+
 func _test_procedural_animation_changes_transforms() -> bool:
 	var visual := leader.get_node_or_null("Visual")
 	if visual == null:
@@ -190,6 +338,13 @@ func _weapon_node(hero: Node, weapon_id: String) -> Node:
 	return weapons.get(weapon_id)
 
 
+func _choices_have_non_leader_card(choices: Array) -> bool:
+	for choice in choices:
+		if not GameManager._is_leader_upgrade_option(choice):
+			return true
+	return false
+
+
 func _disable_all_weapons_except(owner: Node, kept_weapon_id: String) -> void:
 	var members: Array = squad_manager.get_members()
 	for member in members:
@@ -236,6 +391,22 @@ func _moving_enemy_config() -> Dictionary:
 	config["sprite_path"] = "res://assets/sprites/enemy_fast.png"
 	config["sprite_scale"] = 1.25
 	return config
+
+
+func _manual_boomerang_stats(rebound_level: int) -> Dictionary:
+	return {
+		"damage": 5.0,
+		"range": 200.0,
+		"projectile_speed": 0.0,
+		"projectile_radius": 8.0,
+		"pierce": 10,
+		"color": Color(0.78, 0.92, 1.0),
+		"target_group": "enemies",
+		"motion_mode": "boomerang",
+		"boomerang_return_ratio": 0.52,
+		"boomerang_catch_radius": 34.0,
+		"boomerang_rebound_level": rebound_level
+	}
 
 
 func _fail(message: String) -> void:

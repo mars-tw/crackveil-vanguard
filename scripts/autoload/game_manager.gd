@@ -186,6 +186,9 @@ var combo_count: int = 0
 var combo_last_kill_time: float = -999.0
 var last_combo_pulse_count: int = 0
 var upgrade_entry_token: int = 0
+var combat_metrics_enabled: bool = false
+var combat_damage_by_weapon: Dictionary = {}
+var combat_damage_total: float = 0.0
 
 const META_HP_APPLIED_KEY := "_cv_meta_hp_multiplier_applied"
 const META_PICKUP_APPLIED_KEY := "_cv_meta_pickup_bonus_applied"
@@ -543,7 +546,7 @@ func _build_upgrade_choices() -> Array:
 	for option in pool:
 		if _is_upgrade_available(option):
 			filtered.append(option)
-	var choices := _pick_weighted_choices(filtered, get_upgrade_choice_count())
+	var choices := _pick_upgrade_choices(filtered, get_upgrade_choice_count())
 	if choices.is_empty():
 		return _build_fallback_upgrade_choices()
 	return choices
@@ -626,6 +629,61 @@ func _pick_weighted_choices(pool: Array, count: int) -> Array:
 		choices.append(candidates[selected_index])
 		candidates.remove_at(selected_index)
 	return choices
+
+
+func _pick_upgrade_choices(pool: Array, count: int) -> Array:
+	var choices := _pick_weighted_choices(pool, count)
+	if count < 3 or choices.is_empty() or _has_non_leader_upgrade_choice(choices):
+		return choices
+
+	var selected_keys: Dictionary = {}
+	for choice in choices:
+		selected_keys[_upgrade_level_key(choice)] = true
+
+	var non_leader_candidates: Array = []
+	for option in pool:
+		if _is_leader_upgrade_option(option):
+			continue
+		if selected_keys.has(_upgrade_level_key(option)):
+			continue
+		non_leader_candidates.append(option)
+	if non_leader_candidates.is_empty():
+		return choices
+
+	var replacement := _pick_weighted_choices(non_leader_candidates, 1)
+	if replacement.is_empty():
+		return choices
+
+	var replace_index := _leader_upgrade_replacement_index(choices)
+	if replace_index >= 0:
+		choices[replace_index] = replacement[0]
+	return choices
+
+
+func _has_non_leader_upgrade_choice(choices: Array) -> bool:
+	for choice in choices:
+		if not _is_leader_upgrade_option(choice):
+			return true
+	return false
+
+
+func _leader_upgrade_replacement_index(choices: Array) -> int:
+	for index in range(choices.size() - 1, -1, -1):
+		if _is_leader_upgrade_option(choices[index]):
+			return index
+	return -1
+
+
+func _is_leader_upgrade_option(option: Dictionary) -> bool:
+	if str(option.get("id", "")) != "upgrade_hero_weapon":
+		return false
+	var hero_id := str(option.get("hero_id", ""))
+	if hero_id == "":
+		return false
+	if squad_manager == null or not is_instance_valid(squad_manager) or not squad_manager.has_method("get_member_by_id"):
+		return false
+	var member: Node = squad_manager.get_member_by_id(hero_id)
+	return member != null and is_instance_valid(member) and bool(member.get("is_leader"))
 
 
 func _build_fallback_upgrade_choices() -> Array:
@@ -833,6 +891,33 @@ func get_outgoing_damage_multiplier(source: Node = null) -> float:
 
 func get_incoming_damage_multiplier() -> float:
 	return float(contract_modifiers.get("incoming_damage_multiplier", 1.0))
+
+
+func reset_combat_metrics(enabled: bool = true) -> void:
+	combat_metrics_enabled = enabled
+	combat_damage_by_weapon.clear()
+	combat_damage_total = 0.0
+
+
+func record_weapon_damage(source: Node, weapon_id: String, amount: float) -> void:
+	if not combat_metrics_enabled or amount <= 0.0:
+		return
+	var hero_id := "unknown"
+	if source != null and is_instance_valid(source):
+		hero_id = str(source.get("hero_id"))
+	if weapon_id == "":
+		weapon_id = "unknown"
+	var key := hero_id + ":" + weapon_id
+	combat_damage_by_weapon[key] = float(combat_damage_by_weapon.get(key, 0.0)) + amount
+	combat_damage_total += amount
+
+
+func get_combat_metrics() -> Dictionary:
+	return {
+		"enabled": combat_metrics_enabled,
+		"total_damage": combat_damage_total,
+		"damage_by_weapon": combat_damage_by_weapon.duplicate(true)
+	}
 
 
 func get_gold_drop_multiplier() -> float:

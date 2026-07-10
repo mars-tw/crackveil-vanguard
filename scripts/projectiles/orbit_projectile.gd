@@ -145,7 +145,11 @@ func _damage_overlapping_enemies() -> void:
 			body.apply_status_effect("slow", 0.9, 0.22)
 
 		if body.has_method("take_damage"):
-			body.take_damage(float(stats.get("damage", 8.0)) * GameManager.get_outgoing_damage_multiplier(owner_player), global_position)
+			var applied_damage: float = float(body.take_damage(float(stats.get("damage", 8.0)) * GameManager.get_outgoing_damage_multiplier(owner_player), global_position))
+			var weapon_id := ""
+			if weapon_node != null and is_instance_valid(weapon_node) and weapon_node.has_method("get_weapon_id"):
+				weapon_id = str(weapon_node.get_weapon_id())
+			GameManager.record_weapon_damage(owner_player, weapon_id, applied_damage)
 			hit_cooldowns[hit_key] = float(stats.get("hit_interval", 0.42))
 			damaged_count += 1
 			hit_flash_timer = 0.09

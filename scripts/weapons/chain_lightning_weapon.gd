@@ -41,7 +41,8 @@ func _cast_chain(first_target: Node2D) -> void:
 		final_target_position = target.global_position
 		has_final_target = true
 		if target.has_method("take_damage"):
-			target.take_damage(damage_value, owner_player.global_position)
+			var applied_damage: float = float(target.take_damage(damage_value, owner_player.global_position))
+			GameManager.record_weapon_damage(owner_player, get_weapon_id(), applied_damage)
 		damage_value *= data_float("chain_damage_falloff", 0.86)
 
 	var effect_stats := data_effect_stats()
@@ -62,6 +63,7 @@ func _cast_chain(first_target: Node2D) -> void:
 func _make_overload_stats() -> Dictionary:
 	return {
 		"damage": data_float("damage", 12.0) * 0.42 * GameManager.get_outgoing_damage_multiplier(owner_player),
+		"source_weapon_id": get_weapon_id(),
 		"area_radius": max(42.0, data_float("chain_radius", 170.0) * 0.32),
 		"effect_lifetime": 0.22,
 		"explosion_sprite_path": "res://assets/sprites/fx_explosion.png",
@@ -73,6 +75,7 @@ func _make_overload_stats() -> Dictionary:
 func _make_nova_stats() -> Dictionary:
 	return {
 		"damage": data_float("damage", 12.0) * 0.54 * GameManager.get_outgoing_damage_multiplier(owner_player),
+		"source_weapon_id": get_weapon_id(),
 		"area_radius": max(68.0, data_float("chain_radius", 170.0) * 0.42),
 		"effect_lifetime": 0.28,
 		"explosion_sprite_path": "res://assets/sprites/fx_explosion.png",
@@ -95,7 +98,8 @@ func _cast_overload_nova(origin: Vector2, used_ids: Dictionary) -> void:
 		if used_ids.has(_hit_key_for(enemy)):
 			continue
 		if enemy.has_method("take_damage"):
-			enemy.take_damage(damage_value, origin)
+			var applied_damage: float = float(enemy.take_damage(damage_value, origin))
+			GameManager.record_weapon_damage(owner_player, get_weapon_id(), applied_damage)
 			arc_points.append(enemy.global_position)
 			hits += 1
 	if arc_points.size() > 1:

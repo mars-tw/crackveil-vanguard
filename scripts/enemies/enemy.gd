@@ -504,9 +504,9 @@ func _effective_speed() -> float:
 	return speed * clamp(multiplier, 0.35, 1.6)
 
 
-func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> void:
+func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> float:
 	if hp <= 0.0 or not is_active:
-		return
+		return 0.0
 
 	var final_amount := amount * _damage_taken_multiplier()
 	hp = max(hp - final_amount, 0.0)
@@ -522,6 +522,7 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> void
 
 	if hp <= 0.0:
 		_die(source_position)
+	return final_amount
 
 
 func _die(_source_position: Vector2 = Vector2.ZERO) -> void:

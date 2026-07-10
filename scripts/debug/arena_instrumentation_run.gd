@@ -1,0 +1,181 @@
+extends Node
+
+const ARENA_SCENE: PackedScene = preload("res://scenes/arena/Arena.tscn")
+const FIXED_SEED := 771101
+const SAMPLE_SECONDS := 12.0
+const REAL_TIMEOUT_MSEC := 25000
+
+var arena: Node = null
+var squad_manager: Node = null
+var leader: Node2D = null
+var current_phase := "boot"
+
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	call_deferred("_watchdog")
+	call_deferred("_run_probe")
+
+
+func _watchdog() -> void:
+	await get_tree().create_timer(25.0, true, false, true).timeout
+	if current_phase != "done":
+		_fail("watchdog timeout at phase: " + current_phase)
+
+
+func _run_probe() -> void:
+	current_phase = "setup"
+	GameManager.forced_run_seed = FIXED_SEED
+	GameManager.reset_combat_metrics(true)
+	_connect_automation()
+
+	arena = ARENA_SCENE.instantiate()
+	add_child(arena)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	squad_manager = arena.get_node_or_null("SquadManager")
+	leader = GameManager.player
+	if squad_manager == null or leader == null or not is_instance_valid(leader):
+		_fail("arena setup failed")
+		return
+	_hide_first_run_guide()
+	_force_new_weapon_evolutions()
+
+	current_phase = "sample"
+	var real_deadline := Time.get_ticks_msec() + REAL_TIMEOUT_MSEC
+	while GameManager.game_running and GameManager.elapsed_time < SAMPLE_SECONDS:
+		if Time.get_ticks_msec() > real_deadline:
+			_fail("real-time sample timeout")
+			return
+		GameManager.set_touch_move_vector(_movement_for_time(GameManager.elapsed_time))
+		await get_tree().process_frame
+
+	GameManager.set_touch_move_vector(Vector2.ZERO)
+	if not _report_probe():
+		return
+	current_phase = "done"
+	get_tree().quit(0)
+
+
+func _connect_automation() -> void:
+	var level_callable := Callable(self, "_on_level_up_requested")
+	var shop_callable := Callable(self, "_on_shop_requested")
+	var victory_callable := Callable(self, "_on_stage_victory_requested")
+	if not GameManager.level_up_requested.is_connected(level_callable):
+		GameManager.level_up_requested.connect(level_callable)
+	if not GameManager.shop_requested.is_connected(shop_callable):
+		GameManager.shop_requested.connect(shop_callable)
+	if not GameManager.stage_victory_requested.is_connected(victory_callable):
+		GameManager.stage_victory_requested.connect(victory_callable)
+
+
+func _on_level_up_requested(choices: Array) -> void:
+	if choices.is_empty():
+		return
+	call_deferred("_apply_upgrade_deferred", _prefer_non_leader_choice(choices))
+
+
+func _apply_upgrade_deferred(choice: Dictionary) -> void:
+	if GameManager.waiting_for_upgrade:
+		GameManager.apply_upgrade(choice)
+
+
+func _on_shop_requested(_options: Array) -> void:
+	call_deferred("_skip_shop_deferred")
+
+
+func _skip_shop_deferred() -> void:
+	if GameManager.waiting_for_shop:
+		GameManager.apply_shop_purchase({"id": "skip"})
+
+
+func _on_stage_victory_requested(_summary: Dictionary) -> void:
+	call_deferred("_continue_victory_deferred")
+
+
+func _continue_victory_deferred() -> void:
+	if GameManager.stage_victory_pending:
+		GameManager.continue_after_stage_victory()
+
+
+func _prefer_non_leader_choice(choices: Array) -> Dictionary:
+	for choice in choices:
+		if not GameManager._is_leader_upgrade_option(choice):
+			return choice
+	return choices[0]
+
+
+func _hide_first_run_guide() -> void:
+	var guide := arena.get_node_or_null("FirstRunGuide")
+	if guide == null:
+		return
+	var root: Variant = guide.get("root")
+	if root is Control:
+		(root as Control).visible = false
+
+
+func _force_new_weapon_evolutions() -> void:
+	var guard: Node = squad_manager.get_member_by_id("orbit_guard")
+	var scout: Node = squad_manager.get_member_by_id("arc_scout")
+	_apply_weapon_upgrades(guard, "rift_shield_boomerang", ["boomerang_rebound", "boomerang_rebound", "evo_razor_bulwark"])
+	_apply_weapon_upgrades(scout, "rift_seeker_missiles", ["missile_guidance", "missile_guidance", "evo_hunter_swarm"])
+
+
+func _apply_weapon_upgrades(hero: Node, weapon_id: String, upgrades: Array) -> void:
+	if hero == null or not is_instance_valid(hero):
+		return
+	var weapons: Dictionary = hero.get("weapons")
+	var weapon: Node = weapons.get(weapon_id)
+	if weapon == null or not is_instance_valid(weapon) or not weapon.has_method("apply_data_upgrade"):
+		return
+	for upgrade in upgrades:
+		weapon.apply_data_upgrade(upgrade)
+
+
+func _movement_for_time(time_value: float) -> Vector2:
+	var angle: float = time_value * 0.72
+	return Vector2(cos(angle), sin(angle * 0.73)).limit_length(1.0)
+
+
+func _report_probe() -> bool:
+	var elapsed: float = maxf(0.001, float(GameManager.elapsed_time))
+	var metrics: Dictionary = GameManager.get_combat_metrics()
+	var damage_by_weapon: Dictionary = metrics.get("damage_by_weapon", {})
+	var dps_by_weapon: Dictionary = {}
+	for key in damage_by_weapon.keys():
+		dps_by_weapon[key] = round(float(damage_by_weapon[key]) / elapsed * 100.0) / 100.0
+	var trigger_counts: Dictionary = {}
+	if squad_manager != null and squad_manager.has_method("get_weapon_trigger_counts"):
+		trigger_counts = squad_manager.get_weapon_trigger_counts()
+	var hp := 0.0
+	var max_hp := 0.0
+	if leader != null and is_instance_valid(leader):
+		hp = float(leader.get("current_hp"))
+		max_hp = float(leader.get("max_hp"))
+	var pool_stats: Dictionary = EntityFactory.get_pool_stats()
+	print("ARENA_INSTRUMENT_RESULT seed=%d seconds=%.2f survived=%s kills=%d hp=%.1f/%.1f total_damage=%.1f" % [
+		GameManager.current_run_seed,
+		elapsed,
+		str(GameManager.game_running and not GameManager.is_game_over),
+		GameManager.kills,
+		hp,
+		max_hp,
+		float(metrics.get("total_damage", 0.0))
+	])
+	print("ARENA_INSTRUMENT_DPS=" + JSON.stringify(dps_by_weapon))
+	print("ARENA_INSTRUMENT_TRIGGERS=" + JSON.stringify(trigger_counts))
+	print("ARENA_INSTRUMENT_POOL_STATS=" + JSON.stringify(pool_stats))
+	if float(metrics.get("total_damage", 0.0)) <= 0.0:
+		_fail("no weapon damage recorded")
+		return false
+	if not dps_by_weapon.has("orbit_guard:rift_shield_boomerang") or not dps_by_weapon.has("arc_scout:rift_seeker_missiles"):
+		_fail("new weapon DPS was not recorded")
+		return false
+	print("ARENA_INSTRUMENT_PASS")
+	return true
+
+
+func _fail(message: String) -> void:
+	printerr("ARENA_INSTRUMENT_FAIL: " + message)
+	current_phase = "done"
+	get_tree().quit(1)

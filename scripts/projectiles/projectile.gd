@@ -10,6 +10,7 @@ static var active_trail_nodes: int = 0
 var direction: Vector2 = Vector2.RIGHT
 var speed: float = 560.0
 var damage: float = 12.0
+var source_weapon_id: String = ""
 var max_range: float = 560.0
 var radius: float = 4.5
 var projectile_color: Color = Color(0.7, 0.96, 1.0)
@@ -78,6 +79,7 @@ func pool_on_release() -> void:
 	remove_from_group("projectiles")
 	hit_bodies.clear()
 	source = null
+	source_weapon_id = ""
 	target_group = "enemies"
 	riftline_fork_level = 0
 	evo_rift_fan_level = 0
@@ -127,6 +129,7 @@ func setup(world_position: Vector2, projectile_direction: Vector2, projectile_st
 		direction = Vector2.RIGHT
 	speed = float(projectile_stats.get("projectile_speed", speed))
 	damage = float(projectile_stats.get("damage", damage))
+	source_weapon_id = str(projectile_stats.get("source_weapon_id", ""))
 	max_range = float(projectile_stats.get("range", max_range))
 	radius = float(projectile_stats.get("projectile_radius", radius))
 	projectile_color = projectile_stats.get("color", projectile_color)
@@ -240,7 +243,9 @@ func _on_body_entered(body: Node) -> void:
 
 	hit_bodies[hit_key] = true
 	if body.has_method("take_damage"):
-		body.take_damage(_damage_for_current_hit(), global_position)
+		var applied_damage: float = float(body.take_damage(_damage_for_current_hit(), global_position))
+		if target_group == "enemies":
+			GameManager.record_weapon_damage(source, source_weapon_id, applied_damage)
 	_try_spawn_riftline_forks()
 
 	if pierce_left <= 0:
@@ -317,6 +322,7 @@ func _rebuild_fork_stats_cache() -> void:
 		"color": projectile_color,
 		"projectile_sprite_path": sprite_path,
 		"sprite_scale": sprite_scale,
+		"source_weapon_id": source_weapon_id,
 		"target_group": "enemies",
 		"riftline_fork_level": 0,
 		"fork_depth": fork_depth + 1

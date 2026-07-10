@@ -41,6 +41,7 @@ func _make_ember_stats(effect_stats: Dictionary) -> Dictionary:
 	if int(effect_stats.get("evo_ember_well_level", 0)) > 0:
 		return {
 			"damage_per_second": float(effect_stats.get("damage", 18.0)) * 0.2,
+			"source_weapon_id": str(effect_stats.get("source_weapon_id", get_weapon_id())),
 			"area_radius": float(effect_stats.get("area_radius", 82.0)) * 0.72,
 			"duration": 2.0,
 			"tick_interval": 0.45,
@@ -51,6 +52,7 @@ func _make_ember_stats(effect_stats: Dictionary) -> Dictionary:
 		}
 	return {
 		"damage_per_second": float(effect_stats.get("damage", 18.0)) * 0.22,
+		"source_weapon_id": str(effect_stats.get("source_weapon_id", get_weapon_id())),
 		"area_radius": float(effect_stats.get("area_radius", 82.0)) * 0.64,
 		"duration": 1.2,
 		"tick_interval": 0.24,
@@ -61,6 +63,7 @@ func _make_ember_stats(effect_stats: Dictionary) -> Dictionary:
 func _make_ember_well_delayed_explosion_stats(effect_stats: Dictionary) -> Dictionary:
 	return {
 		"damage": float(effect_stats.get("damage", 18.0)) * 0.55,
+		"source_weapon_id": str(effect_stats.get("source_weapon_id", get_weapon_id())),
 		"area_radius": float(effect_stats.get("area_radius", 82.0)) * 0.82,
 		"effect_lifetime": 0.24,
 		"explosion_sprite_path": str(effect_stats.get("explosion_sprite_path", "res://assets/sprites/fx_explosion.png")),

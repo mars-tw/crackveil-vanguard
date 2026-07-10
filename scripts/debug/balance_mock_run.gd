@@ -26,6 +26,7 @@ func _ready() -> void:
 
 
 func _run_mock() -> void:
+	print("BALANCE_MOCK_NOTE trend_only=true arena_instrumentation_required=true")
 	seed(MOCK_SEED)
 	var hp := 110.0
 	var max_hp := 110.0

@@ -47,7 +47,6 @@ func _projectile_stats_for_fire() -> Dictionary:
 	stats["pierce"] = int(stats.get("pierce", data_int("pierce", 2))) + int(stats.get("boomerang_rebound_level", 0))
 	stats["projectile_radius"] = float(stats.get("projectile_radius", data_float("projectile_radius", 8.0)))
 	if int(stats.get("evo_razor_bulwark_level", 0)) > 0:
-		stats["pierce"] = int(stats.get("pierce", 0)) + 2
 		stats["range"] = float(stats.get("range", data_float("range", 520.0))) * 1.08
 	return stats
 

@@ -114,7 +114,7 @@ const EVOLUTION_DEFINITIONS: Dictionary = {
 	"rift_shield_boomerang": {
 		"evolution_id": "evo_razor_bulwark",
 		"name": "剃界盾輪",
-		"description": "迴旋鏢返場時二次切割，刃體加寬並附加短暫易傷。",
+		"description": "迴旋鏢返場時重置命中表，刃體加寬，穿透與航程提升。",
 		"required_modifier": "boomerang_rebound",
 		"required_level": 2,
 		"required_damage_level": 3,

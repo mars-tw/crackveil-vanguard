@@ -53,7 +53,6 @@ func _projectile_stats_for_fire(target: Node2D) -> Dictionary:
 		stats["range"] = float(stats.get("range", data_float("range", 560.0))) * 1.12
 	if evolved:
 		stats["pierce"] = max(1, int(stats.get("pierce", 0)))
-		stats["homing_turn_rate"] = float(stats.get("homing_turn_rate", 5.4)) + 1.4
 	return stats
 
 

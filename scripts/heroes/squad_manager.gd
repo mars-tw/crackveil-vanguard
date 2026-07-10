@@ -64,7 +64,7 @@ const QUALITATIVE_UPGRADES: Dictionary = {
 		{
 			"upgrade_kind": "missile_guidance",
 			"name": "獵隙導引",
-			"description": "飛彈轉向更快；第 2 級追加短距再鎖定"
+			"description": "飛彈轉向更快；第 2 級提高重取目標頻率與鎖定距離"
 		}
 	]
 }
@@ -503,7 +503,7 @@ func _get_count_upgrade_description(weapon_data: Resource) -> String:
 		"chain_lightning":
 			return "+%d 連鎖，+%s 跳躍距離" % [int(weapon_data.get("chain_count_upgrade")), _format_number(float(weapon_data.get("range_upgrade")))]
 		"boomerang":
-			return "+%d 迴旋鏢，+%d 返場穿透" % [int(weapon_data.get("projectile_count_upgrade")), int(weapon_data.get("pierce_upgrade"))]
+			return "+%d 迴旋鏢，+%d 穿透，+%s 射程" % [int(weapon_data.get("projectile_count_upgrade")), int(weapon_data.get("pierce_upgrade")), _format_number(float(weapon_data.get("range_upgrade")))]
 		"homing_missile":
 			return "+%d 追蹤飛彈，+%d 穿透" % [int(weapon_data.get("projectile_count_upgrade")), int(weapon_data.get("pierce_upgrade"))]
 		_:
