@@ -103,6 +103,12 @@ const ENEMY_CONFIGS: Dictionary = {
 	}
 }
 
+const ELITE_AFFIX_IDS: Array[String] = [
+	"affix_split",
+	"affix_field",
+	"affix_swift"
+]
+
 @export var max_enemies: int = 150
 @export var spawn_margin: float = 110.0
 @export var boss_time: float = 180.0
@@ -111,6 +117,7 @@ var spawn_timer: float = 0.4
 var next_elite_time: float = 52.0
 var boss_spawned: bool = false
 var first_elite_time_applied: bool = false
+var debug_forced_elite_affix_id: String = ""
 
 
 func _process(delta: float) -> void:
@@ -172,6 +179,8 @@ func _spawn_elite() -> bool:
 	config["gold"] = 6 + (GameManager.get_elite_bonus_gold() if GameManager.has_method("get_elite_bonus_gold") else 0)
 	config["is_elite"] = true
 	config["elite_bonus_xp"] = 24 + (GameManager.consume_next_elite_bonus_xp() if GameManager.has_method("consume_next_elite_bonus_xp") else 0)
+	var affix_id := _roll_elite_affix_id()
+	_apply_elite_affix(config, affix_id)
 	var elite := EntityFactory.spawn_enemy("elite_distortion", config, _get_spawn_position())
 	if elite == null:
 		return false
@@ -237,6 +246,45 @@ func _config_for_spawn(enemy_id: String) -> Dictionary:
 	var config: Dictionary = ENEMY_CONFIGS[enemy_id].duplicate(true)
 	_apply_time_scaling(config)
 	return config
+
+
+func _roll_elite_affix_id() -> String:
+	if debug_forced_elite_affix_id != "":
+		return debug_forced_elite_affix_id
+	return ELITE_AFFIX_IDS[randi() % ELITE_AFFIX_IDS.size()]
+
+
+func _apply_elite_affix(config: Dictionary, affix_id: String) -> void:
+	config["affix_id"] = affix_id
+	match affix_id:
+		"affix_split":
+			config["max_hp"] = float(config.get("max_hp", 174.0)) * 0.92
+			config["color"] = Color(0.55, 1.0, 0.58)
+			config["sprite_scale"] = 1.18
+			config["spawns_on_death"] = true
+			config["death_spawn_id"] = "affix_split_spawnling"
+			config["death_spawn_count"] = 2
+			config["death_spawn_cap"] = max_enemies
+		"affix_field":
+			config["speed"] = float(config.get("speed", 54.0)) * 0.86
+			config["color"] = Color(0.34, 0.88, 1.0)
+			config["sprite_scale"] = 1.28
+			config["affix_field_radius"] = 128.0
+			config["affix_field_slow_strength"] = 0.22
+		"affix_swift":
+			config["max_hp"] = float(config.get("max_hp", 174.0)) * 0.82
+			config["speed"] = float(config.get("speed", 54.0)) * 1.45
+			config["damage"] = float(config.get("damage", 18.2)) * 0.9
+			config["radius"] = 25.0
+			config["color"] = Color(1.0, 0.62, 0.22)
+			config["sprite_scale"] = 1.16
+			config["attack_cooldown"] = 1.05
+			config["behavior_id"] = "dasher"
+			config["dash_trigger_range"] = 185.0
+			config["dash_windup"] = 0.32
+			config["dash_duration"] = 0.26
+			config["dash_recover"] = 0.48
+			config["dash_speed"] = 465.0
 
 
 func _apply_time_scaling(config: Dictionary) -> void:

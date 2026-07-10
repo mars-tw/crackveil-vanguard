@@ -144,6 +144,7 @@ func _append_weapon_upgrade_options(pool: Array) -> void:
 			var weapon_data: Resource = weapon.get("data")
 			if weapon_data == null:
 				continue
+			var numeric_weight: float = _numeric_upgrade_weight(weapon_data)
 			pool.append({
 				"id": "upgrade_hero_weapon",
 				"hero_id": str(member.get("hero_id")),
@@ -151,7 +152,7 @@ func _append_weapon_upgrade_options(pool: Array) -> void:
 				"upgrade_kind": "weapon_damage",
 				"name": hero_name + "：" + str(weapon_data.get("display_name")) + "增幅",
 				"description": "+%s 傷害" % _format_number(float(weapon_data.get("damage_upgrade"))),
-				"weight": 1,
+				"weight": numeric_weight,
 				"max_level": int(NUMERIC_UPGRADE_MAX_LEVELS.get("weapon_damage", 5)),
 				"level_key": _weapon_level_key(member, weapon_id, "weapon_damage")
 			})
@@ -163,7 +164,7 @@ func _append_weapon_upgrade_options(pool: Array) -> void:
 					"upgrade_kind": "weapon_cooldown",
 					"name": hero_name + "：" + str(weapon_data.get("display_name")) + "冷卻",
 					"description": "冷卻 -%d%%" % int(round((1.0 - float(weapon_data.get("cooldown_upgrade_multiplier"))) * 100.0)),
-					"weight": 1,
+					"weight": numeric_weight,
 					"max_level": int(NUMERIC_UPGRADE_MAX_LEVELS.get("weapon_cooldown", 4)),
 					"level_key": _weapon_level_key(member, weapon_id, "weapon_cooldown")
 				})
@@ -174,11 +175,12 @@ func _append_weapon_upgrade_options(pool: Array) -> void:
 				"upgrade_kind": "weapon_projectiles",
 				"name": hero_name + "：" + str(weapon_data.get("display_name")) + "擴張",
 				"description": _get_count_upgrade_description(weapon_data),
-				"weight": 1,
+				"weight": numeric_weight,
 				"max_level": int(NUMERIC_UPGRADE_MAX_LEVELS.get("weapon_projectiles", 3)),
 				"level_key": _weapon_level_key(member, weapon_id, "weapon_projectiles")
 			})
 			_append_qualitative_upgrade_options(pool, member, weapon_id, weapon_data, hero_name)
+			_append_evolution_upgrade_option(pool, member, weapon_id, weapon_data, hero_name)
 
 
 func _append_qualitative_upgrade_options(pool: Array, member: Node, weapon_id: String, weapon_data: Resource, hero_name: String) -> void:
@@ -205,10 +207,39 @@ func _append_qualitative_upgrade_options(pool: Array, member: Node, weapon_id: S
 		})
 
 
+func _append_evolution_upgrade_option(pool: Array, member: Node, weapon_id: String, weapon_data: Resource, hero_name: String) -> void:
+	if weapon_data == null or not weapon_data.has_method("can_offer_evolution"):
+		return
+	if not weapon_data.can_offer_evolution(int(GameManager.get("level"))):
+		return
+	var definition: Dictionary = weapon_data.get_evolution_definition()
+	var evolution_id := str(definition.get("evolution_id", ""))
+	if evolution_id == "":
+		return
+	pool.append({
+		"id": "upgrade_hero_weapon",
+		"hero_id": str(member.get("hero_id")),
+		"weapon_id": str(weapon_id),
+		"upgrade_kind": evolution_id,
+		"name": hero_name + "：" + str(definition.get("name", "武器進化")),
+		"description": str(definition.get("description", "武器進化為新形態。")),
+		"weight": 8,
+		"max_level": 1,
+		"level_key": _weapon_level_key(member, weapon_id, evolution_id),
+		"upgrade_category": "evolution"
+	})
+
+
 func _weapon_has_meaningful_cooldown_upgrade(weapon_data: Resource) -> bool:
 	if float(weapon_data.get("cooldown")) <= 0.0:
 		return false
 	return float(weapon_data.get("cooldown_upgrade_multiplier")) < 0.999
+
+
+func _numeric_upgrade_weight(weapon_data: Resource) -> float:
+	if weapon_data != null and weapon_data.has_method("is_evolved") and weapon_data.is_evolved():
+		return 0.35
+	return 1.0
 
 
 func _weapon_level_key(member: Node, weapon_id: String, upgrade_kind: String) -> String:
@@ -356,7 +387,9 @@ func recruit_hero(hero_id: String) -> bool:
 	if hero_data == null:
 		return false
 
-	_spawn_member(hero_data, false)
+	var hero := _spawn_member(hero_data, false)
+	if hero != null and GameManager.has_method("apply_current_meta_progress_to_member"):
+		GameManager.apply_current_meta_progress_to_member(hero)
 	return true
 
 

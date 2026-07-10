@@ -45,12 +45,17 @@ var death_spawn_cap: int = 150
 var is_elite: bool = false
 var is_boss: bool = false
 var elite_bonus_xp: int = 0
+var affix_id: String = ""
+var affix_field_radius: float = 0.0
+var affix_field_slow_strength: float = 0.0
+var affix_field_tick_timer: float = 0.0
 var boss_phase_two_triggered: bool = false
 var boss_ability_timer: float = 0.0
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
 var sprite: Sprite2D = null
+var affix_ring: Line2D = null
 var hp_bar_bg: Line2D = null
 var hp_bar_fg: Line2D = null
 
@@ -88,11 +93,17 @@ func pool_on_release() -> void:
 	status_timers.clear()
 	status_strengths.clear()
 	expired_status_ids.clear()
+	affix_id = ""
+	affix_field_radius = 0.0
+	affix_field_slow_strength = 0.0
+	affix_field_tick_timer = 0.0
 	boss_phase_two_triggered = false
 	boss_ability_timer = 0.0
 	rotation = 0.0
 	if sprite != null:
 		sprite.rotation = 0.0
+	if affix_ring != null:
+		affix_ring.visible = false
 	_set_hp_bar_visible(false)
 	var shape_node := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape_node != null:
@@ -137,6 +148,10 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	is_elite = bool(config.get("is_elite", false))
 	is_boss = bool(config.get("is_boss", false))
 	elite_bonus_xp = int(config.get("elite_bonus_xp", 0))
+	affix_id = str(config.get("affix_id", ""))
+	affix_field_radius = float(config.get("affix_field_radius", 0.0))
+	affix_field_slow_strength = float(config.get("affix_field_slow_strength", 0.0))
+	affix_field_tick_timer = 0.0
 	velocity = Vector2.ZERO
 	attack_timer = 0.0
 	hp_bar_timer = 0.0
@@ -151,6 +166,7 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	rotation = 0.0
 	_apply_shape()
 	_apply_sprite()
+	_apply_affix_visuals()
 	_update_hp_bar()
 	_set_hp_bar_visible(false)
 
@@ -180,6 +196,7 @@ func _physics_process(delta: float) -> void:
 		_:
 			_physics_chaser(target)
 
+	_tick_affix(delta)
 	_tick_hp_bar(delta)
 
 
@@ -482,7 +499,9 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 func _spawn_death_children() -> void:
 	var count: int = max(0, death_spawn_count)
 	for index in range(count):
-		if EntityFactory.get_enemy_live_count() >= death_spawn_cap:
+		if EntityFactory.has_method("get_enemy_active_count") and EntityFactory.get_enemy_active_count() >= death_spawn_cap:
+			return
+		if not EntityFactory.has_method("get_enemy_active_count") and EntityFactory.get_enemy_live_count() >= death_spawn_cap:
 			return
 		var angle := TAU * float(index) / float(max(1, count))
 		var child_position := global_position + Vector2.RIGHT.rotated(angle) * (radius + 12.0)
@@ -490,6 +509,9 @@ func _spawn_death_children() -> void:
 
 
 func _death_child_config() -> Dictionary:
+	var child_color := Color(0.95, 0.42, 0.35)
+	if affix_id == "affix_split":
+		child_color = Color(0.58, 1.0, 0.62)
 	return {
 		"max_hp": 12.0,
 		"speed": 124.0,
@@ -497,13 +519,39 @@ func _death_child_config() -> Dictionary:
 		"xp": 1,
 		"gold": 0,
 		"radius": 8.5,
-		"color": Color(0.95, 0.42, 0.35),
+		"color": child_color,
 		"sprite_path": "res://assets/sprites/enemy_fast.png",
 		"sprite_scale": 0.82,
 		"attack_cooldown": 0.8,
 		"behavior_id": "chaser",
 		"spawns_on_death": false
 	}
+
+
+func _tick_affix(delta: float) -> void:
+	if affix_id != "affix_field" or affix_field_radius <= 0.0 or affix_field_slow_strength <= 0.0:
+		return
+	affix_field_tick_timer = max(affix_field_tick_timer - delta, 0.0)
+	if affix_field_tick_timer > 0.0:
+		return
+	affix_field_tick_timer = 0.12
+
+	var members: Array = []
+	if GameManager.squad_manager != null and is_instance_valid(GameManager.squad_manager) and GameManager.squad_manager.has_method("get_members"):
+		members = GameManager.squad_manager.get_members()
+	elif GameManager.player != null and is_instance_valid(GameManager.player):
+		members = [GameManager.player]
+
+	var radius_squared := affix_field_radius * affix_field_radius
+	for member in members:
+		if member == null or not is_instance_valid(member):
+			continue
+		if bool(member.get("is_alive")) == false:
+			continue
+		if global_position.distance_squared_to(member.global_position) > radius_squared:
+			continue
+		if member.has_method("apply_movement_slow"):
+			member.apply_movement_slow(0.2, affix_field_slow_strength)
 
 
 func _apply_shape() -> void:
@@ -535,6 +583,16 @@ func _ensure_visual_nodes() -> void:
 		add_child(sprite)
 	sprite.centered = true
 	sprite.z_index = 0
+
+	affix_ring = get_node_or_null("AffixRing") as Line2D
+	if affix_ring == null:
+		affix_ring = Line2D.new()
+		affix_ring.name = "AffixRing"
+		add_child(affix_ring)
+	affix_ring.closed = true
+	affix_ring.width = 3.0
+	affix_ring.z_index = -1
+	affix_ring.visible = false
 
 	hp_bar_bg = get_node_or_null("HPBarBG") as Line2D
 	if hp_bar_bg == null:
@@ -571,6 +629,41 @@ func _apply_sprite() -> void:
 func _set_sprite_modulate(color: Color) -> void:
 	if sprite != null:
 		sprite.modulate = color
+
+
+func _apply_affix_visuals() -> void:
+	_ensure_visual_nodes()
+	if affix_ring == null:
+		return
+	affix_ring.visible = false
+	if hp_bar_fg != null:
+		hp_bar_fg.default_color = Color(0.9, 0.16, 0.16, 0.96)
+
+	var ring_radius := radius * 1.32
+	var ring_color := Color(1.0, 1.0, 1.0, 0.0)
+	match affix_id:
+		"affix_split":
+			ring_color = Color(0.58, 1.0, 0.62, 0.78)
+		"affix_field":
+			ring_radius = max(affix_field_radius, radius * 1.4)
+			ring_color = Color(0.36, 0.92, 1.0, 0.42)
+		"affix_swift":
+			ring_color = Color(1.0, 0.66, 0.24, 0.74)
+		_:
+			return
+	affix_ring.default_color = ring_color
+	affix_ring.points = _circle_points(ring_radius, 40)
+	affix_ring.visible = true
+	if hp_bar_fg != null:
+		hp_bar_fg.default_color = Color(ring_color.r, ring_color.g, ring_color.b, 0.96)
+
+
+func _circle_points(circle_radius: float, segments: int) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	var safe_segments: int = max(8, segments)
+	for index in range(safe_segments):
+		points.append(Vector2.RIGHT.rotated(TAU * float(index) / float(safe_segments)) * circle_radius)
+	return points
 
 
 func _update_hp_bar() -> void:

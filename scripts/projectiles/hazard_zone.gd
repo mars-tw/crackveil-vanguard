@@ -82,6 +82,13 @@ func _apply_tick_damage() -> void:
 		var enemy_radius: float = float(enemy.get("radius"))
 		var hit_distance: float = radius + enemy_radius
 		if global_position.distance_squared_to(enemy.global_position) <= hit_distance * hit_distance:
+			var status_effect := str(stats.get("status_effect", ""))
+			if status_effect != "" and enemy.has_method("apply_status_effect"):
+				enemy.apply_status_effect(
+					status_effect,
+					float(stats.get("status_duration", float(stats.get("tick_interval", 0.24)))),
+					float(stats.get("status_strength", 0.0))
+				)
 			if enemy.has_method("take_damage"):
 				enemy.take_damage(tick_damage, global_position)
 

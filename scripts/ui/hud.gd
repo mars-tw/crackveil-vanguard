@@ -38,6 +38,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _build_ui() -> void:
 	root = Control.new()
 	root.name = "Root"
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
 
@@ -77,7 +78,7 @@ func _build_ui() -> void:
 	score_label.name = "ScoreLabel"
 	score_label.anchor_left = 1.0
 	score_label.anchor_right = 1.0
-	score_label.offset_left = -250.0
+	score_label.offset_left = -320.0
 	score_label.offset_right = -86.0
 	score_label.offset_top = 14.0
 	score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -105,6 +106,7 @@ func _build_pause_overlay() -> void:
 	pause_overlay = Panel.new()
 	pause_overlay.name = "PauseOverlay"
 	pause_overlay.visible = false
+	pause_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	pause_overlay.anchor_left = 0.5
 	pause_overlay.anchor_right = 0.5
 	pause_overlay.anchor_top = 0.5
@@ -171,7 +173,7 @@ func _apply_responsive_layout() -> void:
 
 	score_label.anchor_left = 1.0
 	score_label.anchor_right = 1.0
-	score_label.offset_left = -250.0 if not portrait else -224.0
+	score_label.offset_left = -320.0 if not portrait else -244.0
 	score_label.offset_right = -96.0 if not portrait else -14.0
 	score_label.offset_top = 16.0 if not portrait else 52.0
 	score_label.offset_bottom = score_label.offset_top + 30.0
@@ -229,7 +231,12 @@ func _on_stats_changed(stats: Dictionary) -> void:
 	level_label.text = "等級 %d   經驗 %d/%d" % [current_level, xp, xp_required]
 	xp_bar.value = clamp(float(xp) / float(xp_required), 0.0, 1.0)
 	time_label.text = GameManager.format_time(float(stats.get("elapsed_time", 0.0)))
-	score_label.text = "擊殺 %d   金幣 %d" % [int(stats.get("kills", 0)), int(stats.get("gold", 0))]
+	score_label.text = "擊殺 %d   金幣 %d   殘響 %d" % [
+		int(stats.get("kills", 0)),
+		int(stats.get("gold", 0)),
+		int(stats.get("echo_shards", 0))
+	]
+	_on_pause_changed(bool(stats.get("manual_pause_visible", bool(stats.get("manual_paused", false)))))
 
 
 func _on_pause_changed(is_paused: bool) -> void:

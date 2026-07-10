@@ -10,7 +10,9 @@ const BOSS_SPAWN_TIME := 180
 var upgrade_counts: Dictionary = {}
 var upgrade_distribution: Dictionary = {}
 var shop_distribution: Dictionary = {}
+var affix_distribution: Dictionary = {}
 var elite_kill_times: Array[int] = []
+var evolution_trigger_time: int = -1
 var boss_phase_two_time: int = -1
 var boss_kill_time: int = -1
 var min_hp_ratio: float = 1.0
@@ -44,6 +46,9 @@ func _run_mock() -> void:
 				"qualitative":
 					dps += float(upgrade.get("dps", 9.0))
 					pickup_quality += float(upgrade.get("pickup", 0.0))
+				"evolution":
+					dps += float(upgrade.get("dps", 18.0))
+					evolution_trigger_time = second
 				"damage":
 					dps += 7.0
 				"projectiles":
@@ -65,6 +70,8 @@ func _run_mock() -> void:
 
 		if ELITE_SPAWN_TIMES.has(second):
 			elites_spawned += 1
+			var affix := _affix_for_elite(elites_spawned - 1)
+			affix_distribution[affix] = int(affix_distribution.get(affix, 0)) + 1
 			elite_kill_times.append(second + 9)
 
 		if second == BOSS_SPAWN_TIME:
@@ -86,6 +93,14 @@ func _run_mock() -> void:
 		var incoming := (density * hp_scale * 1.18) - (dps / 260.0) - ((pickup_quality - 1.0) * 0.16)
 		if ELITE_SPAWN_TIMES.has(second):
 			incoming += 7.5
+			var current_affix := _affix_for_elite(elites_spawned - 1)
+			match current_affix:
+				"affix_field":
+					incoming += 1.4
+				"affix_swift":
+					incoming += 2.1
+				"affix_split":
+					incoming += 0.8
 		if boss_active:
 			incoming += 2.4
 		hp = clamp(hp - incoming + 0.9, 1.0, max_hp)
@@ -103,11 +118,13 @@ func _run_mock() -> void:
 	])
 	print("BALANCE_MOCK_UPGRADES=" + JSON.stringify(upgrade_distribution))
 	print("BALANCE_MOCK_SHOP=" + JSON.stringify(shop_distribution))
-	print("BALANCE_MOCK_EVENTS elites_spawned=%d elites_killed=%d elite_spawn_times=%s elite_kill_times=%s boss_spawn_time=%d boss_phase_two_time=%d boss_kill_time=%d density_drop_during_boss=true" % [
+	print("BALANCE_MOCK_EVENTS elites_spawned=%d elites_killed=%d elite_spawn_times=%s elite_kill_times=%s affixes=%s evolution_trigger_time=%d boss_spawn_time=%d boss_phase_two_time=%d boss_kill_time=%d density_drop_during_boss=true" % [
 		elites_spawned,
 		elite_kill_times.size(),
 		JSON.stringify(ELITE_SPAWN_TIMES),
 		JSON.stringify(elite_kill_times),
+		JSON.stringify(affix_distribution),
+		evolution_trigger_time,
 		BOSS_SPAWN_TIME,
 		boss_phase_two_time,
 		boss_kill_time
@@ -136,6 +153,7 @@ func _choose_upgrade() -> Dictionary:
 
 
 func _available_upgrade_pool() -> Array:
+	var numeric_weight := 0.35 if int(upgrade_counts.get("evo_rift_fan", 0)) > 0 else 1.0
 	var base_pool: Array = [
 		{"id": "recruit_hero", "kind": "recruit", "weight": 4, "max": 2},
 		{"id": "riftline_fork", "kind": "qualitative", "weight": 3, "max": 2, "dps": 12.0},
@@ -143,9 +161,9 @@ func _available_upgrade_pool() -> Array:
 		{"id": "pulse_embers", "kind": "qualitative", "weight": 3, "max": 1, "dps": 10.0},
 		{"id": "chain_overload", "kind": "qualitative", "weight": 3, "max": 1, "dps": 11.0},
 		{"id": "magnetic_reclaim", "kind": "qualitative", "weight": 3, "max": 1, "dps": 4.0, "pickup": 0.35},
-		{"id": "weapon_damage", "kind": "damage", "weight": 1, "max": 5},
-		{"id": "weapon_projectiles", "kind": "projectiles", "weight": 1, "max": 3},
-		{"id": "weapon_cooldown", "kind": "cooldown", "weight": 1, "max": 4},
+		{"id": "weapon_damage", "kind": "damage", "weight": numeric_weight, "max": 5},
+		{"id": "weapon_projectiles", "kind": "projectiles", "weight": numeric_weight, "max": 3},
+		{"id": "weapon_cooldown", "kind": "cooldown", "weight": numeric_weight, "max": 4},
 		{"id": "max_hp", "kind": "max_hp", "weight": 1, "max": 5},
 		{"id": "pickup_radius", "kind": "pickup", "weight": 1, "max": 5}
 	]
@@ -154,6 +172,8 @@ func _available_upgrade_pool() -> Array:
 		var id := str(option.get("id", ""))
 		if int(upgrade_counts.get(id, 0)) < int(option.get("max", 1)):
 			pool.append(option)
+	if int(upgrade_counts.get("riftline_fork", 0)) >= 2 and int(upgrade_counts.get("weapon_damage", 0)) >= 3 and int(upgrade_counts.get("evo_rift_fan", 0)) <= 0:
+		pool.append({"id": "evo_rift_fan", "kind": "evolution", "weight": 8, "max": 1, "dps": 18.0})
 	return pool
 
 
@@ -167,3 +187,8 @@ func _format_time(seconds_value: int) -> String:
 	var minutes := int(seconds_value / 60)
 	var seconds := seconds_value % 60
 	return "%02d:%02d" % [minutes, seconds]
+
+
+func _affix_for_elite(index: int) -> String:
+	var affixes := ["affix_split", "affix_field", "affix_swift"]
+	return affixes[index % affixes.size()]

@@ -202,6 +202,10 @@ func spawn_explosion(world_position: Vector2, stats: Dictionary, source: Node) -
 	return explosion
 
 
+func spawn_delayed_explosion(world_position: Vector2, stats: Dictionary, source: Node, delay: float) -> void:
+	_spawn_delayed_explosion(world_position, stats.duplicate(true), source, max(0.0, delay))
+
+
 func spawn_hazard_zone(world_position: Vector2, stats: Dictionary, source: Node) -> Node:
 	_compact_active_hazard_zones()
 	if active_hazard_zones.size() >= HAZARD_ZONE_CAP:
@@ -220,6 +224,15 @@ func spawn_hazard_zone(world_position: Vector2, stats: Dictionary, source: Node)
 
 func apply_explosion_damage(world_position: Vector2, stats: Dictionary, source: Node) -> void:
 	_apply_explosion_damage(world_position, stats, source)
+
+
+func _spawn_delayed_explosion(world_position: Vector2, stats: Dictionary, source: Node, delay: float) -> void:
+	if delay > 0.0:
+		await get_tree().create_timer(delay, false).timeout
+	if not GameManager.game_running or bool(GameManager.get("is_game_over")):
+		return
+	var valid_source := source if source != null and is_instance_valid(source) else null
+	spawn_explosion(world_position, stats, valid_source)
 
 
 func spawn_lightning_arc(points: Array[Vector2], arc_color: Color, lifetime: float, sprite_path: String = "res://assets/sprites/proj_lightning.png") -> Node:
@@ -426,6 +439,21 @@ func get_enemy_live_count() -> int:
 	if enemy_spatial_index == null:
 		return 0
 	return int(enemy_spatial_index.get("live_count"))
+
+
+func get_enemy_active_count() -> int:
+	if enemy_spatial_index == null:
+		return 0
+	var count := 0
+	var live_enemies: Array = enemy_spatial_index.get("live_enemies")
+	for enemy in live_enemies:
+		if enemy == null or not is_instance_valid(enemy):
+			continue
+		var active_value: Variant = enemy.get("is_active")
+		if active_value != null and not bool(active_value):
+			continue
+		count += 1
+	return count
 
 
 func get_pool_live_count(pool_name: String) -> int:

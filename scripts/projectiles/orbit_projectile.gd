@@ -86,6 +86,8 @@ func _physics_process(delta: float) -> void:
 	var angular_speed: float = float(stats.get("orbit_angular_speed", 4.0))
 	var orbit_radius: float = float(stats.get("orbit_radius", 58.0))
 	orbit_angle += angular_speed * delta
+	if int(stats.get("evo_shear_halo_level", 0)) > 0:
+		orbit_radius += sin(orbit_angle * 2.0 + float(orbit_index)) * 9.0
 	global_position = owner_player.global_position + Vector2.RIGHT.rotated(orbit_angle) * orbit_radius
 	rotation = orbit_angle + PI * 0.5
 
@@ -129,6 +131,8 @@ func _damage_overlapping_enemies() -> void:
 
 		if int(stats.get("orbit_resonance_level", 0)) > 0 and body.has_method("apply_status_effect"):
 			body.apply_status_effect("vulnerable", 1.35, 0.2)
+		if int(stats.get("evo_shear_halo_level", 0)) > 0 and body.has_method("apply_status_effect"):
+			body.apply_status_effect("slow", 0.9, 0.22)
 
 		if body.has_method("take_damage"):
 			body.take_damage(float(stats.get("damage", 8.0)) * GameManager.get_outgoing_damage_multiplier(owner_player), global_position)

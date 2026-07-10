@@ -10,6 +10,7 @@ var summary_label: Label
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	layer = 30
 	_build_ui()
 	if not get_viewport().size_changed.is_connected(_apply_responsive_layout):
 		get_viewport().size_changed.connect(_apply_responsive_layout)
@@ -19,6 +20,7 @@ func _ready() -> void:
 func _build_ui() -> void:
 	root = Control.new()
 	root.name = "Root"
+	root.mouse_filter = Control.MOUSE_FILTER_STOP
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
 
@@ -60,14 +62,18 @@ func _build_ui() -> void:
 
 
 func show_summary(summary: Dictionary) -> void:
-	summary_label.text = "存活  %s\n擊殺  %d\n精英擊殺  %d\nBoss 擊破  %s\n金幣  %d\n等級  %d\n契約  %s" % [
+	var progress: Dictionary = summary.get("echo_progress", {})
+	summary_label.text = "存活  %s\n擊殺  %d\n精英擊殺  %d\nBoss 擊破  %s\n金幣  %d\n等級  %d\n契約  %s\n殘響  +%d（本局 %d / 持有 %d）" % [
 		GameManager.format_time(float(summary.get("elapsed_time", 0.0))),
 		int(summary.get("kills", 0)),
 		int(summary.get("elites_killed", 0)),
 		"是" if bool(summary.get("boss_killed", false)) else "否",
 		int(summary.get("gold", 0)),
 		int(summary.get("level", 1)),
-		str(summary.get("contract_name", "無契約"))
+		str(summary.get("contract_name", "無契約")),
+		int(summary.get("echo_shards_earned", 0)),
+		int(summary.get("echo_shards_run_total", 0)),
+		int(progress.get("shards", 0))
 	]
 	root.visible = true
 

@@ -108,10 +108,12 @@ var waiting_for_shop: bool = false
 var waiting_for_contract: bool = false
 var stage_victory_pending: bool = false
 var manual_paused: bool = false
+var system_pause_owners: Dictionary = {}
 
 var elapsed_time: float = 0.0
 var kills: int = 0
 var gold: int = 0
+var gold_earned: int = 0
 var level: int = 1
 var xp: int = 0
 var xp_required: int = 12
@@ -139,6 +141,10 @@ var active_contract_name: String = "無契約"
 var contract_modifiers: Dictionary = {}
 var temporary_squad_damage_timer: float = 0.0
 var next_elite_bonus_xp: int = 0
+var echo_shards_awarded_this_run: int = 0
+
+const META_HP_APPLIED_KEY := "_cv_meta_hp_multiplier_applied"
+const META_PICKUP_APPLIED_KEY := "_cv_meta_pickup_bonus_applied"
 
 
 func _ready() -> void:
@@ -159,6 +165,7 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	elapsed_time = 0.0
 	kills = 0
 	gold = 0
+	gold_earned = 0
 	level = 1
 	xp = 0
 	xp_required = 12
@@ -184,16 +191,19 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	contract_modifiers.clear()
 	temporary_squad_damage_timer = 0.0
 	next_elite_bonus_xp = 0
-	get_tree().paused = false
+	echo_shards_awarded_this_run = 0
+	system_pause_owners.clear()
+	_sync_pause_state()
 
 	if reset_player and player != null and player.has_method("reset_for_run"):
 		player.reset_for_run()
+	_apply_meta_progress_start_effects()
 
 	if _should_request_contract():
 		_request_contract()
 	else:
 		emit_stats()
-		pause_changed.emit(false)
+		_emit_pause_changed()
 
 
 func _process(delta: float) -> void:
@@ -229,11 +239,15 @@ func get_stats() -> Dictionary:
 		"elapsed_time": elapsed_time,
 		"kills": kills,
 		"gold": gold,
+		"gold_earned": gold_earned,
+		"echo_shards": int(MetaProgress.get("shards")) if MetaProgress != null else 0,
 		"level": level,
 		"xp": xp,
 		"xp_required": xp_required,
 		"game_running": game_running,
 		"manual_paused": manual_paused,
+		"system_paused": _has_system_pause_owner(),
+		"manual_pause_visible": _is_manual_pause_visible(),
 		"waiting_for_upgrade": waiting_for_upgrade,
 		"waiting_for_shop": waiting_for_shop,
 		"waiting_for_contract": waiting_for_contract,
@@ -243,6 +257,48 @@ func get_stats() -> Dictionary:
 		"temporary_squad_damage_timer": temporary_squad_damage_timer,
 		"is_game_over": is_game_over
 	}
+
+
+func is_system_pause_active() -> bool:
+	return _has_system_pause_owner()
+
+
+func _request_system_pause(owner: String) -> void:
+	if owner == "":
+		return
+	system_pause_owners[owner] = true
+	_sync_pause_state()
+	_emit_pause_changed()
+
+
+func _release_system_pause(owner: String) -> void:
+	if owner == "":
+		return
+	system_pause_owners.erase(owner)
+	_sync_pause_state()
+	_emit_pause_changed()
+
+
+func _clear_system_pauses() -> void:
+	system_pause_owners.clear()
+	_sync_pause_state()
+	_emit_pause_changed()
+
+
+func _has_system_pause_owner() -> bool:
+	return not system_pause_owners.is_empty()
+
+
+func _is_manual_pause_visible() -> bool:
+	return manual_paused and not _has_system_pause_owner()
+
+
+func _sync_pause_state() -> void:
+	get_tree().paused = manual_paused or _has_system_pause_owner()
+
+
+func _emit_pause_changed() -> void:
+	pause_changed.emit(_is_manual_pause_visible())
 
 
 func add_kill(amount: int = 1) -> void:
@@ -256,6 +312,7 @@ func add_gold(amount: int) -> void:
 	if not game_running:
 		return
 	gold += amount
+	gold_earned += max(0, amount)
 	emit_stats()
 
 
@@ -286,7 +343,7 @@ func add_xp(amount: int) -> void:
 
 func _request_level_up() -> void:
 	waiting_for_upgrade = true
-	get_tree().paused = true
+	_request_system_pause("upgrade")
 	emit_stats()
 	level_up_requested.emit(_build_upgrade_choices())
 
@@ -320,9 +377,10 @@ func apply_upgrade(upgrade: Dictionary) -> void:
 	if xp >= xp_required:
 		_request_level_up()
 	elif randf() < 0.1 and not waiting_for_shop and _request_shop("level_up_random"):
+		_release_system_pause("upgrade")
 		return
 	else:
-		get_tree().paused = manual_paused
+		_release_system_pause("upgrade")
 		emit_stats()
 
 
@@ -383,7 +441,7 @@ func _request_shop(source: String = "timed") -> bool:
 		return false
 	waiting_for_shop = true
 	shop_refresh_count = 0
-	get_tree().paused = true
+	_request_system_pause("shop")
 	emit_stats()
 	shop_requested.emit(_build_shop_options())
 	return true
@@ -504,20 +562,23 @@ func apply_contract(contract: Dictionary) -> void:
 	contract_modifiers = _contract_modifiers_for(contract_id)
 	waiting_for_contract = false
 	_apply_contract_start_effects()
-	get_tree().paused = manual_paused
+	_release_system_pause("contract")
 	emit_stats()
-	pause_changed.emit(false)
 
 
 func get_upgrade_choice_count() -> int:
 	var count := 3
 	if active_contract_id == "contract_golden_famine" and elapsed_time < float(contract_modifiers.get("upgrade_choice_until", 0.0)):
 		count = int(contract_modifiers.get("upgrade_choice_count", 2))
+	if MetaProgress.has_method("get_starting_upgrade_choice_bonus"):
+		count += int(MetaProgress.get_starting_upgrade_choice_bonus(level))
 	return max(1, count)
 
 
 func get_outgoing_damage_multiplier(source: Node = null) -> float:
 	var multiplier := float(contract_modifiers.get("damage_multiplier", 1.0))
+	if MetaProgress.has_method("get_damage_multiplier"):
+		multiplier *= float(MetaProgress.get_damage_multiplier())
 	if temporary_squad_damage_timer > 0.0:
 		multiplier *= 1.15
 	if active_contract_id == "contract_single_thread" and source != null and is_instance_valid(source):
@@ -579,14 +640,16 @@ func get_contract_summary() -> Dictionary:
 
 func _request_contract() -> void:
 	waiting_for_contract = true
-	get_tree().paused = true
+	_request_system_pause("contract")
 	emit_stats()
-	pause_changed.emit(true)
 	contract_requested.emit(_build_contract_choices())
 
 
 func _build_contract_choices() -> Array:
-	return _pick_weighted_choices(CONTRACT_POOL.duplicate(true), 3)
+	var count := 3
+	if MetaProgress.has_method("get_contract_choice_bonus"):
+		count += int(MetaProgress.get_contract_choice_bonus())
+	return _pick_weighted_choices(CONTRACT_POOL.duplicate(true), count)
 
 
 func _contract_definition(contract_id: String) -> Dictionary:
@@ -767,9 +830,77 @@ func _get_squad_members() -> Array:
 	return []
 
 
+func apply_current_meta_progress_to_squad() -> void:
+	_apply_meta_progress_to_members(_get_squad_members())
+
+
+func apply_current_meta_progress_to_member(member: Node) -> void:
+	_apply_meta_progress_to_members([member])
+
+
+func _apply_meta_progress_start_effects() -> void:
+	apply_current_meta_progress_to_squad()
+
+
+func _apply_meta_progress_to_members(members: Array) -> void:
+	if not MetaProgress.has_method("get_max_hp_multiplier"):
+		return
+	var hp_multiplier: float = float(MetaProgress.get_max_hp_multiplier())
+	var pickup_bonus: float = float(MetaProgress.get_pickup_radius_bonus()) if MetaProgress.has_method("get_pickup_radius_bonus") else 0.0
+	for member in members:
+		if member == null or not is_instance_valid(member):
+			continue
+		var previous_hp_multiplier: float = float(member.get_meta(META_HP_APPLIED_KEY, 1.0))
+		if previous_hp_multiplier <= 0.0:
+			previous_hp_multiplier = 1.0
+		var old_max_hp: float = max(1.0, float(member.get("max_hp")))
+		var old_current_hp: float = float(member.get("current_hp"))
+		var hp_ratio: float = clamp(old_current_hp / old_max_hp, 0.0, 1.0)
+		var base_max_hp: float = max(1.0, old_max_hp / previous_hp_multiplier)
+		var new_max_hp: float = max(1.0, base_max_hp * hp_multiplier)
+		member.set("max_hp", new_max_hp)
+		member.set("current_hp", min(new_max_hp, new_max_hp * hp_ratio))
+		member.set_meta(META_HP_APPLIED_KEY, hp_multiplier)
+
+		var previous_pickup_bonus: float = float(member.get_meta(META_PICKUP_APPLIED_KEY, 0.0))
+		var base_pickup_radius: float = max(0.0, float(member.get("pickup_radius")) - previous_pickup_bonus)
+		member.set("pickup_radius", base_pickup_radius + pickup_bonus)
+		member.set_meta(META_PICKUP_APPLIED_KEY, pickup_bonus)
+
+
+func _summary_with_echo(summary: Dictionary) -> Dictionary:
+	var enriched := summary.duplicate(true)
+	var total_eligible: int = 0
+	if MetaProgress.has_method("calculate_run_shards"):
+		total_eligible = int(MetaProgress.calculate_run_shards(enriched))
+	var delta: int = max(0, total_eligible - echo_shards_awarded_this_run)
+	var awarded: int = 0
+	if delta > 0 and MetaProgress.has_method("award_run"):
+		awarded = int(MetaProgress.award_run(_summary_for_echo_delta(enriched, delta)))
+		echo_shards_awarded_this_run += awarded
+	enriched["echo_shards_earned"] = awarded
+	enriched["echo_shards_run_total"] = echo_shards_awarded_this_run
+	if MetaProgress.has_method("get_progress_summary"):
+		enriched["echo_progress"] = MetaProgress.get_progress_summary()
+	return enriched
+
+
+func _summary_for_echo_delta(summary: Dictionary, desired_delta: int) -> Dictionary:
+	var delta_summary := summary.duplicate(true)
+	delta_summary["gold"] = 0
+	delta_summary["gold_earned"] = 0
+	delta_summary["kills"] = 0
+	delta_summary["level"] = 0
+	delta_summary["elites_killed"] = 0
+	delta_summary["boss_killed"] = false
+	delta_summary["elapsed_time"] = 0.0
+	delta_summary["_fixed_echo_delta"] = desired_delta
+	return delta_summary
+
+
 func _close_shop() -> void:
 	waiting_for_shop = false
-	get_tree().paused = manual_paused
+	_release_system_pause("shop")
 	emit_stats()
 
 
@@ -783,8 +914,8 @@ func set_manual_pause(value: bool) -> void:
 	if waiting_for_contract or waiting_for_upgrade or waiting_for_shop or stage_victory_pending or is_game_over or not game_running:
 		return
 	manual_paused = value
-	get_tree().paused = value
-	pause_changed.emit(value)
+	_sync_pause_state()
+	_emit_pause_changed()
 	emit_stats()
 
 
@@ -807,21 +938,24 @@ func player_died() -> void:
 	waiting_for_shop = false
 	waiting_for_contract = false
 	manual_paused = false
+	system_pause_owners.clear()
 	if dead_player != null and is_instance_valid(dead_player):
 		dead_player.set_process(false)
 		dead_player.set_physics_process(false)
 	player = null
-	get_tree().paused = true
+	_request_system_pause("game_over")
 	emit_stats()
-	game_over_requested.emit({
+	var summary := {
 		"elapsed_time": elapsed_time,
 		"kills": kills,
 		"gold": gold,
+		"gold_earned": gold_earned,
 		"level": level,
 		"elites_killed": elites_killed,
 		"boss_killed": boss_killed,
 		"contract_name": active_contract_name
-	})
+	}
+	game_over_requested.emit(_summary_with_echo(summary))
 
 
 func record_elite_spawn() -> void:
@@ -857,16 +991,19 @@ func record_boss_kill() -> void:
 	stage_victory_pending = true
 	if elapsed_time >= next_shop_time:
 		next_shop_time = elapsed_time + SHOP_POST_VICTORY_GRACE
-	get_tree().paused = true
+	_request_system_pause("stage_victory")
 	emit_stats()
-	stage_victory_requested.emit({
+	var summary := {
 		"elapsed_time": elapsed_time,
 		"kills": kills,
 		"gold": gold,
+		"gold_earned": gold_earned,
 		"level": level,
 		"elites_killed": elites_killed,
+		"boss_killed": true,
 		"contract_name": active_contract_name
-	})
+	}
+	stage_victory_requested.emit(_summary_with_echo(summary))
 
 
 func continue_after_stage_victory() -> void:
@@ -875,7 +1012,7 @@ func continue_after_stage_victory() -> void:
 	stage_victory_pending = false
 	if elapsed_time >= next_shop_time:
 		next_shop_time = elapsed_time + SHOP_POST_VICTORY_GRACE
-	get_tree().paused = manual_paused
+	_release_system_pause("stage_victory")
 	emit_stats()
 
 

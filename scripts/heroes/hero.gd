@@ -20,6 +20,8 @@ var hit_radius: float = 13.0
 var invulnerability_timer: float = 0.0
 var last_move_direction: Vector2 = Vector2.RIGHT
 var desired_velocity: Vector2 = Vector2.ZERO
+var movement_slow_timer: float = 0.0
+var movement_slow_strength: float = 0.0
 var weapons: Dictionary = {}
 var weapon_order: Array[String] = []
 var is_alive: bool = true
@@ -86,6 +88,8 @@ func reset_for_run() -> void:
 	last_move_direction = Vector2.RIGHT
 	desired_velocity = Vector2.ZERO
 	velocity = Vector2.ZERO
+	movement_slow_timer = 0.0
+	movement_slow_strength = 0.0
 	is_alive = true
 	if not is_in_group("heroes"):
 		add_to_group("heroes")
@@ -147,7 +151,8 @@ func _physics_process(delta: float) -> void:
 	if desired_velocity.length_squared() > 1.0:
 		last_move_direction = desired_velocity.normalized()
 
-	velocity = desired_velocity.limit_length(move_speed * 1.35)
+	_tick_movement_slow(delta)
+	velocity = desired_velocity.limit_length(move_speed * 1.35) * _movement_multiplier()
 	move_and_slide()
 	_update_facing(delta)
 
@@ -169,6 +174,26 @@ func set_move_direction(direction: Vector2) -> void:
 
 func set_desired_velocity(new_velocity: Vector2) -> void:
 	desired_velocity = new_velocity
+
+
+func apply_movement_slow(duration: float, strength: float) -> void:
+	if not is_alive:
+		return
+	movement_slow_timer = max(movement_slow_timer, duration)
+	movement_slow_strength = max(movement_slow_strength, clamp(strength, 0.0, 0.65))
+
+
+func _tick_movement_slow(delta: float) -> void:
+	if movement_slow_timer <= 0.0:
+		movement_slow_strength = 0.0
+		return
+	movement_slow_timer = max(movement_slow_timer - delta, 0.0)
+	if movement_slow_timer <= 0.0:
+		movement_slow_strength = 0.0
+
+
+func _movement_multiplier() -> float:
+	return 1.0 - clamp(movement_slow_strength, 0.0, 0.65)
 
 
 func get_facing_direction() -> Vector2:

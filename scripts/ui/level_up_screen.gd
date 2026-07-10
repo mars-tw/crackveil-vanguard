@@ -11,6 +11,7 @@ var option_buttons: Array[Button] = []
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	layer = 20
 	_build_ui()
 	if not get_viewport().size_changed.is_connected(_apply_responsive_layout):
 		get_viewport().size_changed.connect(_apply_responsive_layout)
@@ -20,6 +21,7 @@ func _ready() -> void:
 func _build_ui() -> void:
 	root = Control.new()
 	root.name = "Root"
+	root.mouse_filter = Control.MOUSE_FILTER_STOP
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
 

@@ -18,6 +18,7 @@ var hit_bodies: Dictionary = {}
 var is_active: bool = false
 var target_group: String = "enemies"
 var riftline_fork_level: int = 0
+var evo_rift_fan_level: int = 0
 var fork_depth: int = 0
 var fork_stats_cache: Dictionary = {}
 
@@ -56,6 +57,7 @@ func pool_on_release() -> void:
 	source = null
 	target_group = "enemies"
 	riftline_fork_level = 0
+	evo_rift_fan_level = 0
 	fork_depth = 0
 	fork_stats_cache.clear()
 	traveled = 0.0
@@ -86,6 +88,7 @@ func setup(world_position: Vector2, projectile_direction: Vector2, projectile_st
 	pierce_left = int(projectile_stats.get("pierce", pierce_left))
 	target_group = str(projectile_stats.get("target_group", "enemies"))
 	riftline_fork_level = int(projectile_stats.get("riftline_fork_level", 0))
+	evo_rift_fan_level = int(projectile_stats.get("evo_rift_fan_level", 0))
 	fork_depth = int(projectile_stats.get("fork_depth", 0))
 	_rebuild_fork_stats_cache()
 	source = projectile_source
@@ -155,8 +158,10 @@ func _try_spawn_riftline_forks() -> void:
 		return
 
 	fork_stats_cache["pierce"] = max(0, min(pierce_left, riftline_fork_level - 1))
-	var fork_angle := deg_to_rad(20.0)
-	for angle in [-fork_angle, fork_angle]:
+	var fork_angles: Array[float] = [-deg_to_rad(20.0), deg_to_rad(20.0)]
+	if evo_rift_fan_level > 0:
+		fork_angles = [-deg_to_rad(30.0), 0.0, deg_to_rad(30.0)]
+	for angle in fork_angles:
 		var fork_direction := direction.rotated(float(angle)).normalized()
 		EntityFactory.spawn_fork_projectile(global_position + fork_direction * (radius + 4.0), fork_direction, fork_stats_cache, source)
 
@@ -166,9 +171,10 @@ func _rebuild_fork_stats_cache() -> void:
 	if target_group != "enemies" or riftline_fork_level <= 0 or fork_depth > 0:
 		return
 
+	var evolved_fan := evo_rift_fan_level > 0
 	fork_stats_cache = {
-		"damage": damage * 0.5,
-		"range": max_range * (0.46 + 0.12 * float(min(riftline_fork_level, 2) - 1)),
+		"damage": damage * (0.38 if evolved_fan else 0.5),
+		"range": max_range * (0.58 if evolved_fan else (0.46 + 0.12 * float(min(riftline_fork_level, 2) - 1))),
 		"projectile_speed": speed,
 		"projectile_radius": radius,
 		"pierce": max(0, min(pierce_left, riftline_fork_level - 1)),
