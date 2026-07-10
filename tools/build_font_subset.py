@@ -98,6 +98,8 @@ def load_safety_chars(limit: int, cache_path: Path) -> list[str]:
 
 def builtin_symbols() -> set[str]:
     chars = {chr(codepoint) for codepoint in range(0x20, 0x7F)}
+    # Latin-1 Supplement（±、°、×、÷ 等），R11 實測 ±20° 豆腐後補上
+    chars.update(chr(codepoint) for codepoint in range(0xA0, 0x100))
     # General Punctuation（——、‘’、“”、…、‧ 等），R9 實測 U+2014 破折號豆腐後補上
     chars.update(chr(codepoint) for codepoint in range(0x2000, 0x2070))
     chars.update(chr(codepoint) for codepoint in range(0x3000, 0x3040))
