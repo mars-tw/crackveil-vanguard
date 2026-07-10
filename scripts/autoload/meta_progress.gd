@@ -62,6 +62,9 @@ func load_progress() -> void:
 	var config := ConfigFile.new()
 	var error := config.load(save_path)
 	if error != OK:
+		if FileAccess.file_exists(save_path):
+			save_progress()
+			_queue_load_failure_toast()
 		return
 	shards = max(0, int(config.get_value("echo", "shards", 0)))
 	lifetime_shards = max(0, int(config.get_value("echo", "lifetime_shards", 0)))
@@ -106,6 +109,8 @@ func award_run(summary: Dictionary) -> int:
 	shards += amount
 	lifetime_shards += amount
 	save_progress()
+	if has_unlock("contract_slot") and AchievementProgress != null and AchievementProgress.has_method("record_contract_slot_unlock"):
+		AchievementProgress.record_contract_slot_unlock()
 	progress_changed.emit()
 	return amount
 
@@ -218,3 +223,8 @@ func _track_definition(track_id: String) -> Dictionary:
 		if str(track.get("id", "")) == track_id:
 			return track
 	return {}
+
+
+func _queue_load_failure_toast() -> void:
+	if GameManager != null and GameManager.has_method("queue_toast"):
+		GameManager.queue_toast("殘響存檔載入失敗，已安全重置。")

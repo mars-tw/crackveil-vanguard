@@ -52,6 +52,8 @@ python -m http.server 8067
 
 更完整的 Web 匯出與部署紀錄見 [docs/WEB_EXPORT.md](docs/WEB_EXPORT.md)。
 
+宣傳與商店頁文案素材見 [PRESSKIT.md](PRESSKIT.md)。
+
 ## GitHub Pages 部署
 
 採 GitHub Actions 匯出部署。`.github/workflows/deploy-web.yml` 會在 CI 下載 Godot 4.7 與官方 export templates，匯出 Web build 到 `public/`，加入 `.nojekyll`，再透過 Pages artifact 部署。

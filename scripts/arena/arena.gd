@@ -22,6 +22,7 @@ func _ready() -> void:
 	var shop_callable := Callable(rift_shop_screen, "show_options")
 	var stage_victory_callable := Callable(self, "_on_stage_victory_requested")
 	var contract_callable := Callable(contract_screen, "show_options")
+	var guide_replay_callable := Callable(self, "_on_guide_replay_requested")
 	if not GameManager.level_up_requested.is_connected(level_up_callable):
 		GameManager.level_up_requested.connect(level_up_callable)
 	if not GameManager.game_over_requested.is_connected(game_over_callable):
@@ -32,6 +33,8 @@ func _ready() -> void:
 		GameManager.stage_victory_requested.connect(stage_victory_callable)
 	if not GameManager.contract_requested.is_connected(contract_callable):
 		GameManager.contract_requested.connect(contract_callable)
+	if GameManager.has_signal("guide_replay_requested") and not GameManager.guide_replay_requested.is_connected(guide_replay_callable):
+		GameManager.guide_replay_requested.connect(guide_replay_callable)
 
 	if level_up_screen.has_signal("upgrade_selected"):
 		level_up_screen.upgrade_selected.connect(Callable(GameManager, "apply_upgrade"))
@@ -43,6 +46,8 @@ func _ready() -> void:
 		stage_victory_screen.continue_requested.connect(Callable(GameManager, "continue_after_stage_victory"))
 	if contract_screen.has_signal("contract_selected"):
 		contract_screen.contract_selected.connect(Callable(GameManager, "apply_contract"))
+	if contract_screen.has_signal("seed_restart_requested"):
+		contract_screen.seed_restart_requested.connect(_on_seed_restart_requested)
 
 	GameManager.arena = self
 	EntityFactory.initialize_for_arena(self)
@@ -54,6 +59,12 @@ func _ready() -> void:
 
 
 func _on_restart_requested() -> void:
+	get_tree().paused = false
+	get_tree().reload_current_scene()
+
+
+func _on_seed_restart_requested(seed_text: String) -> void:
+	GameManager.forced_run_seed = GameManager.seed_from_text(seed_text)
 	get_tree().paused = false
 	get_tree().reload_current_scene()
 
@@ -76,6 +87,12 @@ func _attach_first_run_guide() -> void:
 	add_child(first_run_guide)
 
 
+func _on_guide_replay_requested() -> void:
+	_attach_first_run_guide()
+	if first_run_guide != null and first_run_guide.has_method("force_show"):
+		first_run_guide.force_show()
+
+
 func _hide_modal_screens(except_screens: Array = []) -> void:
 	for screen in [level_up_screen, game_over_screen, rift_shop_screen, stage_victory_screen, contract_screen]:
 		if screen == null or except_screens.has(screen):
@@ -92,11 +109,11 @@ func _apply_run_seed() -> void:
 	var selected_seed := run_seed
 	for argument in OS.get_cmdline_args():
 		if argument.begins_with("--run-seed="):
-			selected_seed = int(argument.get_slice("=", 1))
+			selected_seed = GameManager.seed_from_text(argument.get_slice("=", 1))
 	if selected_seed == 0 and int(GameManager.get("forced_run_seed")) != 0:
 		selected_seed = int(GameManager.get("forced_run_seed"))
-	if selected_seed != 0:
-		seed(selected_seed)
-	else:
+	if selected_seed == 0:
 		randomize()
+		selected_seed = max(1, randi())
+	seed(selected_seed)
 	GameManager.current_run_seed = selected_seed

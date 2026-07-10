@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 signal contract_selected(contract: Dictionary)
+signal seed_restart_requested(seed_text: String)
 
 var root: Control
 var panel: Panel
@@ -8,6 +9,10 @@ var title_label: Label
 var subtitle_label: Label
 var meta_label: Label
 var meta_grid: GridContainer
+var seed_row: HBoxContainer
+var seed_input: LineEdit
+var seed_paste_button: Button
+var seed_start_button: Button
 var card_grid: GridContainer
 var option_buttons: Array[Button] = []
 var meta_buttons: Dictionary = {}
@@ -73,6 +78,28 @@ func _build_ui() -> void:
 	panel.add_child(meta_grid)
 	_build_meta_buttons()
 
+	seed_row = HBoxContainer.new()
+	seed_row.name = "SeedRow"
+	seed_row.add_theme_constant_override("separation", 8)
+	panel.add_child(seed_row)
+
+	seed_input = LineEdit.new()
+	seed_input.name = "SeedInput"
+	seed_input.placeholder_text = "輸入種子，空白隨機"
+	seed_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	seed_input.text_submitted.connect(_on_seed_submitted)
+	seed_row.add_child(seed_input)
+
+	seed_paste_button = Button.new()
+	seed_paste_button.text = "貼上"
+	seed_paste_button.pressed.connect(_on_seed_paste_pressed)
+	seed_row.add_child(seed_paste_button)
+
+	seed_start_button = Button.new()
+	seed_start_button.text = "用種子開局"
+	seed_start_button.pressed.connect(_on_seed_start_pressed)
+	seed_row.add_child(seed_start_button)
+
 	card_grid = GridContainer.new()
 	card_grid.name = "CardGrid"
 	card_grid.anchor_left = 0.0
@@ -108,6 +135,22 @@ func show_options(options: Array) -> void:
 func _on_contract_pressed(contract: Dictionary) -> void:
 	root.visible = false
 	contract_selected.emit(contract)
+
+
+func _on_seed_submitted(text: String) -> void:
+	root.visible = false
+	seed_restart_requested.emit(text)
+
+
+func _on_seed_start_pressed() -> void:
+	root.visible = false
+	seed_restart_requested.emit(seed_input.text if seed_input != null else "")
+
+
+func _on_seed_paste_pressed() -> void:
+	if seed_input == null:
+		return
+	seed_input.text = DisplayServer.clipboard_get()
 
 
 func hide_screen() -> void:
@@ -216,15 +259,27 @@ func _apply_responsive_layout() -> void:
 		button.custom_minimum_size = Vector2(meta_button_width, meta_button_height)
 		button.add_theme_font_size_override("font_size", 13 if portrait else 14)
 
+	if seed_row != null:
+		seed_row.offset_left = 26.0
+		seed_row.offset_right = -26.0
+		seed_row.offset_top = 302.0 if portrait else 182.0
+		seed_row.offset_bottom = seed_row.offset_top + 42.0
+	if seed_input != null:
+		seed_input.custom_minimum_size = Vector2(180.0 if portrait else 280.0, 38.0)
+	if seed_paste_button != null:
+		seed_paste_button.custom_minimum_size = Vector2(58.0, 38.0)
+	if seed_start_button != null:
+		seed_start_button.custom_minimum_size = Vector2(116.0, 38.0)
+
 	card_grid.columns = 1 if portrait else min(4, max(1, option_buttons.size()))
 	card_grid.offset_left = 26.0
 	card_grid.offset_right = -26.0
-	card_grid.offset_top = 310.0 if portrait else 186.0
+	card_grid.offset_top = 352.0 if portrait else 232.0
 	card_grid.offset_bottom = -26.0
 
 	var column_count: int = max(1, card_grid.columns)
 	var card_width: float = panel_width - 52.0 if portrait else max(170.0, (panel_width - 52.0 - 18.0 * float(column_count - 1)) / float(column_count))
-	var card_height: float = 160.0 if portrait else max(190.0, panel_height - 230.0)
+	var card_height: float = 160.0 if portrait else max(190.0, panel_height - 284.0)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
 		button.add_theme_font_size_override("font_size", 18 if portrait else 20)

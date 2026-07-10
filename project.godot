@@ -8,7 +8,7 @@ config_version=5
 
 config/name="Crackveil Vanguard"
 run/main_scene="res://scenes/arena/Arena.tscn"
-config/version="0.9.0-r9-week-a"
+config/version="0.9.0-r9-week-b"
 config/build_date="2026-07-10"
 config/features=PackedStringArray("4.2")
 config/icon=""
@@ -16,8 +16,10 @@ config/icon=""
 [autoload]
 
 GameManager="*res://scripts/autoload/game_manager.gd"
+PlayerSettings="*res://scripts/autoload/player_settings.gd"
 EntityFactory="*res://scripts/autoload/entity_factory.gd"
 MetaProgress="*res://scripts/autoload/meta_progress.gd"
+AchievementProgress="*res://scripts/autoload/achievement_progress.gd"
 AudioManager="*res://scripts/autoload/audio_manager.gd"
 
 [display]

@@ -72,6 +72,14 @@ func _on_start_pressed() -> void:
 	root.visible = false
 
 
+func force_show() -> void:
+	if root == null:
+		return
+	if dont_show_check != null:
+		dont_show_check.button_pressed = false
+	root.visible = true
+
+
 func _is_disabled() -> bool:
 	var config := ConfigFile.new()
 	if config.load(SAVE_PATH) != OK:

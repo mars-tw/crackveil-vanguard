@@ -56,6 +56,7 @@ var boss_ability_timer: float = 0.0
 
 var sprite: Sprite2D = null
 var affix_ring: Line2D = null
+var affix_marker: Line2D = null
 var hp_bar_bg: Line2D = null
 var hp_bar_fg: Line2D = null
 
@@ -104,6 +105,8 @@ func pool_on_release() -> void:
 		sprite.rotation = 0.0
 	if affix_ring != null:
 		affix_ring.visible = false
+	if affix_marker != null:
+		affix_marker.visible = false
 	_set_hp_bar_visible(false)
 	var shape_node := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape_node != null:
@@ -596,6 +599,15 @@ func _ensure_visual_nodes() -> void:
 	affix_ring.z_index = -1
 	affix_ring.visible = false
 
+	affix_marker = get_node_or_null("AffixMarker") as Line2D
+	if affix_marker == null:
+		affix_marker = Line2D.new()
+		affix_marker.name = "AffixMarker"
+		add_child(affix_marker)
+	affix_marker.width = 3.0
+	affix_marker.z_index = 3
+	affix_marker.visible = false
+
 	hp_bar_bg = get_node_or_null("HPBarBG") as Line2D
 	if hp_bar_bg == null:
 		hp_bar_bg = Line2D.new()
@@ -638,24 +650,37 @@ func _apply_affix_visuals() -> void:
 	if affix_ring == null:
 		return
 	affix_ring.visible = false
+	if affix_marker != null:
+		affix_marker.visible = false
 	if hp_bar_fg != null:
 		hp_bar_fg.default_color = Color(0.9, 0.16, 0.16, 0.96)
 
 	var ring_radius := radius * 1.32
 	var ring_color := Color(1.0, 1.0, 1.0, 0.0)
+	var marker_points := PackedVector2Array()
+	var marker_closed := true
 	match affix_id:
 		"affix_split":
 			ring_color = Color(0.58, 1.0, 0.62, 0.78)
+			marker_points = _triangle_marker_points(radius * 0.78)
 		"affix_field":
 			ring_radius = max(affix_field_radius, radius * 1.4)
 			ring_color = Color(0.36, 0.92, 1.0, 0.42)
+			marker_points = _square_marker_points(radius * 0.58)
 		"affix_swift":
 			ring_color = Color(1.0, 0.66, 0.24, 0.74)
+			marker_points = _double_arrow_marker_points(radius * 0.64)
+			marker_closed = false
 		_:
 			return
 	affix_ring.default_color = ring_color
 	affix_ring.points = _circle_points(ring_radius, 40)
 	affix_ring.visible = true
+	if affix_marker != null:
+		affix_marker.default_color = Color(ring_color.r, ring_color.g, ring_color.b, 0.96)
+		affix_marker.closed = marker_closed
+		affix_marker.points = marker_points
+		affix_marker.visible = not marker_points.is_empty()
 	if hp_bar_fg != null:
 		hp_bar_fg.default_color = Color(ring_color.r, ring_color.g, ring_color.b, 0.96)
 
@@ -666,6 +691,35 @@ func _circle_points(circle_radius: float, segments: int) -> PackedVector2Array:
 	for index in range(safe_segments):
 		points.append(Vector2.RIGHT.rotated(TAU * float(index) / float(safe_segments)) * circle_radius)
 	return points
+
+
+func _triangle_marker_points(marker_radius: float) -> PackedVector2Array:
+	return PackedVector2Array([
+		Vector2.UP * marker_radius,
+		Vector2.RIGHT.rotated(TAU / 12.0) * marker_radius,
+		Vector2.LEFT.rotated(-TAU / 12.0) * marker_radius
+	])
+
+
+func _square_marker_points(marker_radius: float) -> PackedVector2Array:
+	return PackedVector2Array([
+		Vector2(-marker_radius, -marker_radius),
+		Vector2(marker_radius, -marker_radius),
+		Vector2(marker_radius, marker_radius),
+		Vector2(-marker_radius, marker_radius)
+	])
+
+
+func _double_arrow_marker_points(marker_radius: float) -> PackedVector2Array:
+	var half := marker_radius * 0.55
+	return PackedVector2Array([
+		Vector2(-half, -marker_radius),
+		Vector2(half, 0.0),
+		Vector2(-half, marker_radius),
+		Vector2(0.0, -marker_radius),
+		Vector2(marker_radius, 0.0),
+		Vector2(0.0, marker_radius)
+	])
 
 
 func _update_hp_bar() -> void:

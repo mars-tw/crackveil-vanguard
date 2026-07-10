@@ -5,6 +5,7 @@ signal continue_requested
 var root: Control
 var panel: Panel
 var summary_label: Label
+var copy_seed_button: Button
 var continue_button: Button
 
 
@@ -50,6 +51,11 @@ func _build_ui() -> void:
 	summary_label.add_theme_font_size_override("font_size", 20)
 	panel.add_child(summary_label)
 
+	copy_seed_button = Button.new()
+	copy_seed_button.text = "複製本局種子"
+	copy_seed_button.pressed.connect(_on_copy_seed_pressed)
+	panel.add_child(copy_seed_button)
+
 	continue_button = Button.new()
 	continue_button.text = "繼續無盡"
 	continue_button.pressed.connect(_on_continue_pressed)
@@ -59,7 +65,7 @@ func _build_ui() -> void:
 
 func show_summary(summary: Dictionary) -> void:
 	var progress: Dictionary = summary.get("echo_progress", {})
-	summary_label.text = "擊破守門者·帷幕\n存活  %s\n擊殺  %d\n精英擊殺  %d\n金幣  %d\n契約  %s\n殘響  +%d（本局 %d / 持有 %d）" % [
+	summary_label.text = "擊破守門者·帷幕\n存活  %s\n擊殺  %d\n精英擊殺  %d\n金幣  %d\n契約  %s\n殘響  +%d（本局 %d / 持有 %d）\n新成就  %s" % [
 		GameManager.format_time(float(summary.get("elapsed_time", 0.0))),
 		int(summary.get("kills", 0)),
 		int(summary.get("elites_killed", 0)),
@@ -67,7 +73,8 @@ func show_summary(summary: Dictionary) -> void:
 		str(summary.get("contract_name", "無契約")),
 		int(summary.get("echo_shards_earned", 0)),
 		int(summary.get("echo_shards_run_total", 0)),
-		int(progress.get("shards", 0))
+		int(progress.get("shards", 0)),
+		_new_achievement_text(summary)
 	]
 	root.visible = true
 
@@ -75,6 +82,10 @@ func show_summary(summary: Dictionary) -> void:
 func _on_continue_pressed() -> void:
 	root.visible = false
 	continue_requested.emit()
+
+
+func _on_copy_seed_pressed() -> void:
+	GameManager.copy_current_run_seed_to_clipboard()
 
 
 func hide_screen() -> void:
@@ -103,7 +114,14 @@ func _apply_responsive_layout() -> void:
 	summary_label.offset_left = 28.0
 	summary_label.offset_right = -28.0
 	summary_label.offset_top = 92.0
-	summary_label.offset_bottom = 238.0
+	summary_label.offset_bottom = 254.0
+
+	copy_seed_button.anchor_left = 0.5
+	copy_seed_button.anchor_right = 0.5
+	copy_seed_button.offset_left = -98.0
+	copy_seed_button.offset_right = 98.0
+	copy_seed_button.offset_top = panel_height - 136.0
+	copy_seed_button.offset_bottom = panel_height - 94.0
 
 	continue_button.anchor_left = 0.5
 	continue_button.anchor_right = 0.5
@@ -111,3 +129,13 @@ func _apply_responsive_layout() -> void:
 	continue_button.offset_right = 98.0
 	continue_button.offset_top = panel_height - 88.0
 	continue_button.offset_bottom = panel_height - 42.0
+
+
+func _new_achievement_text(summary: Dictionary) -> String:
+	var unlocks: Array = summary.get("achievement_unlocks", [])
+	if unlocks.is_empty():
+		return "無"
+	var names: Array[String] = []
+	for achievement in unlocks:
+		names.append(str(achievement.get("name", "")))
+	return "、".join(names)

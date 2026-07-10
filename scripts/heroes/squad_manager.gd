@@ -258,6 +258,8 @@ func apply_upgrade(upgrade: Dictionary) -> void:
 				var applied: bool = hero.upgrade_weapon(str(upgrade.get("weapon_id", "")), upgrade_kind)
 				if applied and upgrade_kind == "magnetic_reclaim" and GameManager.has_method("enable_magnetic_reclaim"):
 					GameManager.enable_magnetic_reclaim()
+				if applied and str(upgrade.get("upgrade_category", "")) == "evolution" and AchievementProgress != null and AchievementProgress.has_method("record_evolution"):
+					AchievementProgress.record_evolution()
 		_:
 			if leader != null and is_instance_valid(leader) and leader.has_method("apply_personal_upgrade"):
 				leader.apply_personal_upgrade(upgrade)
@@ -390,6 +392,8 @@ func recruit_hero(hero_id: String) -> bool:
 	var hero := _spawn_member(hero_data, false)
 	if hero != null and GameManager.has_method("apply_current_meta_progress_to_member"):
 		GameManager.apply_current_meta_progress_to_member(hero)
+	if hero != null and AchievementProgress != null and AchievementProgress.has_method("record_squad_size"):
+		AchievementProgress.record_squad_size(get_member_count(), int(squad_data.get("max_members")))
 	return true
 
 

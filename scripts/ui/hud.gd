@@ -14,13 +14,26 @@ var audio_prompt_button: Button
 var toast_panel: Panel
 var toast_label: Label
 var pause_overlay: Panel
+var pause_scroll: ScrollContainer
+var pause_content: VBoxContainer
 var pause_volume_label: Label
 var pause_volume_slider: HSlider
 var pause_mute_check: CheckBox
+var pause_damage_numbers_check: CheckBox
+var pause_screen_shake_check: CheckBox
+var pause_seed_button: Button
+var pause_reset_meta_button: Button
+var pause_guide_button: Button
+var pause_achievements_label: RichTextLabel
+var pause_resume_button: Button
 var virtual_joystick: Control
 var force_touch_controls_visible: bool = false
 var syncing_audio_controls: bool = false
+var syncing_settings_controls: bool = false
 var toast_token: int = 0
+var toast_queue: Array[String] = []
+var toast_showing: bool = false
+var reset_meta_confirm_pending: bool = false
 
 
 func _ready() -> void:
@@ -39,9 +52,16 @@ func _ready() -> void:
 		AudioManager.settings_changed.connect(_sync_audio_controls)
 	if AudioManager != null and AudioManager.has_signal("audio_unlocked") and not AudioManager.audio_unlocked.is_connected(_refresh_audio_prompt):
 		AudioManager.audio_unlocked.connect(_refresh_audio_prompt)
+	if PlayerSettings != null and PlayerSettings.has_signal("settings_changed") and not PlayerSettings.settings_changed.is_connected(_sync_settings_controls):
+		PlayerSettings.settings_changed.connect(_sync_settings_controls)
+	if AchievementProgress != null and AchievementProgress.has_signal("achievement_unlocked") and not AchievementProgress.achievement_unlocked.is_connected(_on_achievement_unlocked):
+		AchievementProgress.achievement_unlocked.connect(_on_achievement_unlocked)
 
 	_on_stats_changed(GameManager.get_stats())
 	_refresh_audio_prompt()
+	_sync_settings_controls()
+	_refresh_achievement_list()
+	_drain_pending_toasts()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -129,6 +149,7 @@ func _build_ui() -> void:
 	toast_panel = Panel.new()
 	toast_panel.name = "ToastPanel"
 	toast_panel.visible = false
+	toast_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(toast_panel)
 
 	toast_label = Label.new()
@@ -140,6 +161,7 @@ func _build_ui() -> void:
 	toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	toast_label.add_theme_font_size_override("font_size", 18)
+	toast_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	toast_panel.add_child(toast_label)
 
 	_build_virtual_joystick()
@@ -164,42 +186,91 @@ func _build_pause_overlay() -> void:
 
 	var title := Label.new()
 	title.text = "暫停"
-	title.anchor_left = 0.0
-	title.anchor_right = 1.0
-	title.offset_top = 18.0
-	title.offset_bottom = 50.0
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 24)
-	pause_overlay.add_child(title)
+	title.custom_minimum_size = Vector2(0.0, 38.0)
+
+	pause_scroll = ScrollContainer.new()
+	pause_scroll.name = "PauseScroll"
+	pause_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	pause_scroll.anchor_left = 0.0
+	pause_scroll.anchor_right = 1.0
+	pause_scroll.anchor_top = 0.0
+	pause_scroll.anchor_bottom = 1.0
+	pause_overlay.add_child(pause_scroll)
+
+	pause_content = VBoxContainer.new()
+	pause_content.name = "PauseContent"
+	pause_content.add_theme_constant_override("separation", 8)
+	pause_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_scroll.add_child(pause_content)
+	pause_content.add_child(title)
 
 	pause_volume_label = Label.new()
 	pause_volume_label.text = "音量"
 	pause_volume_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	pause_overlay.add_child(pause_volume_label)
+	pause_content.add_child(pause_volume_label)
 
 	pause_volume_slider = HSlider.new()
 	pause_volume_slider.min_value = 0.0
 	pause_volume_slider.max_value = 1.0
 	pause_volume_slider.step = 0.05
+	pause_volume_slider.custom_minimum_size = Vector2(240.0, 28.0)
 	pause_volume_slider.value_changed.connect(_on_volume_slider_changed)
-	pause_overlay.add_child(pause_volume_slider)
+	pause_content.add_child(pause_volume_slider)
 
 	pause_mute_check = CheckBox.new()
 	pause_mute_check.text = "靜音"
 	pause_mute_check.toggled.connect(_on_mute_toggled)
-	pause_overlay.add_child(pause_mute_check)
+	pause_content.add_child(pause_mute_check)
 
-	var resume_button := Button.new()
-	resume_button.text = "繼續"
-	resume_button.anchor_left = 0.5
-	resume_button.anchor_right = 0.5
-	resume_button.offset_left = -70.0
-	resume_button.offset_right = 70.0
-	resume_button.offset_top = 186.0
-	resume_button.offset_bottom = 226.0
-	resume_button.pressed.connect(_on_resume_button_pressed)
-	pause_overlay.add_child(resume_button)
+	pause_damage_numbers_check = CheckBox.new()
+	pause_damage_numbers_check.text = "顯示傷害數字"
+	pause_damage_numbers_check.toggled.connect(_on_damage_numbers_toggled)
+	pause_content.add_child(pause_damage_numbers_check)
+
+	pause_screen_shake_check = CheckBox.new()
+	pause_screen_shake_check.text = "螢幕震動"
+	pause_screen_shake_check.toggled.connect(_on_screen_shake_toggled)
+	pause_content.add_child(pause_screen_shake_check)
+
+	pause_seed_button = Button.new()
+	pause_seed_button.text = "複製本局種子"
+	pause_seed_button.pressed.connect(_on_copy_seed_pressed)
+	pause_content.add_child(pause_seed_button)
+
+	pause_guide_button = Button.new()
+	pause_guide_button.text = "重看教學"
+	pause_guide_button.pressed.connect(_on_rewatch_guide_pressed)
+	pause_content.add_child(pause_guide_button)
+
+	pause_reset_meta_button = Button.new()
+	pause_reset_meta_button.text = "重置殘響"
+	pause_reset_meta_button.pressed.connect(_on_reset_meta_pressed)
+	pause_content.add_child(pause_reset_meta_button)
+
+	var achievement_title := Label.new()
+	achievement_title.text = "成就"
+	achievement_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	achievement_title.add_theme_font_size_override("font_size", 18)
+	pause_content.add_child(achievement_title)
+
+	pause_achievements_label = RichTextLabel.new()
+	pause_achievements_label.bbcode_enabled = true
+	pause_achievements_label.fit_content = true
+	pause_achievements_label.scroll_active = false
+	pause_achievements_label.custom_minimum_size = Vector2(260.0, 228.0)
+	pause_achievements_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pause_content.add_child(pause_achievements_label)
+
+	pause_resume_button = Button.new()
+	pause_resume_button.text = "繼續"
+	pause_resume_button.custom_minimum_size = Vector2(160.0, 42.0)
+	pause_resume_button.pressed.connect(_on_resume_button_pressed)
+	pause_content.add_child(pause_resume_button)
 	_sync_audio_controls()
+	_sync_settings_controls()
+	_refresh_achievement_list()
 
 
 func _build_virtual_joystick() -> void:
@@ -260,8 +331,8 @@ func _apply_responsive_layout() -> void:
 	pause_button.offset_bottom = 50.0
 
 	if pause_overlay != null:
-		var overlay_width: float = min(viewport_size.x - 40.0, 330.0)
-		var overlay_height := 262.0
+		var overlay_width: float = min(viewport_size.x - 40.0, 380.0)
+		var overlay_height: float = min(viewport_size.y - 44.0, 610.0)
 		pause_overlay.anchor_left = 0.5
 		pause_overlay.anchor_right = 0.5
 		pause_overlay.anchor_top = 0.5
@@ -270,6 +341,15 @@ func _apply_responsive_layout() -> void:
 		pause_overlay.offset_right = overlay_width * 0.5
 		pause_overlay.offset_top = -overlay_height * 0.5
 		pause_overlay.offset_bottom = overlay_height * 0.5
+
+	if pause_scroll != null:
+		pause_scroll.offset_left = 20.0
+		pause_scroll.offset_right = -20.0
+		pause_scroll.offset_top = 16.0
+		pause_scroll.offset_bottom = -16.0
+
+	if pause_content != null:
+		pause_content.custom_minimum_size = Vector2(max(260.0, min(viewport_size.x - 80.0, 340.0)), 0.0)
 
 	if pause_volume_label != null:
 		pause_volume_label.anchor_left = 0.0
@@ -361,6 +441,11 @@ func _on_pause_changed(is_paused: bool) -> void:
 	pause_button.text = "繼續" if is_paused else "暫停"
 	if is_paused:
 		_sync_audio_controls()
+		_sync_settings_controls()
+		_refresh_achievement_list()
+		reset_meta_confirm_pending = false
+		if pause_reset_meta_button != null:
+			pause_reset_meta_button.text = "重置殘響"
 
 
 func _on_pause_button_pressed() -> void:
@@ -408,16 +493,101 @@ func _on_mute_toggled(value: bool) -> void:
 	AudioManager.set_muted(value)
 
 
+func _sync_settings_controls() -> void:
+	if PlayerSettings == null:
+		return
+	syncing_settings_controls = true
+	if pause_damage_numbers_check != null:
+		pause_damage_numbers_check.button_pressed = bool(PlayerSettings.get("damage_numbers_enabled"))
+	if pause_screen_shake_check != null:
+		pause_screen_shake_check.button_pressed = bool(PlayerSettings.get("screen_shake_enabled"))
+	syncing_settings_controls = false
+
+
+func _on_damage_numbers_toggled(value: bool) -> void:
+	if syncing_settings_controls or PlayerSettings == null:
+		return
+	PlayerSettings.set_damage_numbers_enabled(value)
+
+
+func _on_screen_shake_toggled(value: bool) -> void:
+	if syncing_settings_controls or PlayerSettings == null:
+		return
+	PlayerSettings.set_screen_shake_enabled(value)
+
+
+func _on_copy_seed_pressed() -> void:
+	GameManager.copy_current_run_seed_to_clipboard()
+
+
+func _on_rewatch_guide_pressed() -> void:
+	GameManager.request_guide_replay()
+
+
+func _on_reset_meta_pressed() -> void:
+	if MetaProgress == null or not MetaProgress.has_method("reset_progress"):
+		return
+	if not reset_meta_confirm_pending:
+		reset_meta_confirm_pending = true
+		if pause_reset_meta_button != null:
+			pause_reset_meta_button.text = "再次按下確認重置"
+		GameManager.show_toast("再次按下以重置殘響進度。")
+		return
+	reset_meta_confirm_pending = false
+	MetaProgress.reset_progress()
+	if GameManager.has_method("apply_current_meta_progress_to_squad"):
+		GameManager.apply_current_meta_progress_to_squad()
+	if pause_reset_meta_button != null:
+		pause_reset_meta_button.text = "重置殘響"
+	GameManager.show_toast("殘響進度已重置。")
+	GameManager.emit_stats()
+
+
+func _on_achievement_unlocked(_achievement: Dictionary) -> void:
+	_refresh_achievement_list()
+
+
+func _refresh_achievement_list() -> void:
+	if pause_achievements_label == null or AchievementProgress == null or not AchievementProgress.has_method("get_display_rows"):
+		return
+	var lines: Array[String] = []
+	for row in AchievementProgress.get_display_rows():
+		var unlocked := bool(row.get("unlocked", false))
+		var color := "#f1f5f0" if unlocked else "#777f86"
+		var mark := "已" if unlocked else "未"
+		lines.append("[color=%s]%s %s[/color]" % [color, mark, str(row.get("name", ""))])
+	pause_achievements_label.text = "\n".join(lines)
+
+
+func _drain_pending_toasts() -> void:
+	if GameManager == null or not GameManager.has_method("consume_pending_toasts"):
+		return
+	var messages: Array[String] = GameManager.consume_pending_toasts()
+	for message in messages:
+		_on_toast_requested(message)
+		await get_tree().create_timer(1.6, true).timeout
+
+
 func _on_toast_requested(message: String) -> void:
 	if toast_panel == null or toast_label == null:
 		return
-	toast_token += 1
-	var current_token := toast_token
-	toast_label.text = message
-	toast_panel.visible = true
-	await get_tree().create_timer(1.5, true).timeout
-	if current_token == toast_token and toast_panel != null:
+	if message == "":
+		return
+	toast_queue.append(message)
+	if not toast_showing:
+		_play_toast_queue()
+
+
+func _play_toast_queue() -> void:
+	toast_showing = true
+	while not toast_queue.is_empty():
+		toast_token += 1
+		toast_label.text = toast_queue.pop_front()
+		toast_panel.visible = true
+		await get_tree().create_timer(1.5, true).timeout
+	if toast_panel != null:
 		toast_panel.visible = false
+	toast_showing = false
 
 
 func _build_version_text() -> String:

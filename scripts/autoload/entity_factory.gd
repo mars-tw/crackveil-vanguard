@@ -325,6 +325,8 @@ func magnetize_xp_near(world_position: Vector2, radius: float) -> int:
 
 
 func spawn_damage_number(value: Variant, world_position: Vector2, number_color: Color = Color.WHITE) -> Node:
+	if PlayerSettings != null and not bool(PlayerSettings.get("damage_numbers_enabled")):
+		return null
 	var merged := _try_merge_damage_number(value, world_position, number_color)
 	if merged != null:
 		return merged

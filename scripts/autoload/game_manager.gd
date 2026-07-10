@@ -8,6 +8,7 @@ signal shop_requested(options: Array)
 signal stage_victory_requested(summary: Dictionary)
 signal contract_requested(options: Array)
 signal toast_requested(message: String)
+signal guide_replay_requested
 
 const SHOP_FIRST_TIME := 75.0
 const SHOP_SECOND_TIME := 150.0
@@ -174,6 +175,8 @@ var temporary_squad_damage_timer: float = 0.0
 var next_elite_bonus_xp: int = 0
 var echo_shards_awarded_this_run: int = 0
 var seen_affix_toasts: Dictionary = {}
+var pending_toasts: Array[String] = []
+var run_token: int = 0
 
 const META_HP_APPLIED_KEY := "_cv_meta_hp_multiplier_applied"
 const META_PICKUP_APPLIED_KEY := "_cv_meta_pickup_bonus_applied"
@@ -225,12 +228,16 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	next_elite_bonus_xp = 0
 	echo_shards_awarded_this_run = 0
 	seen_affix_toasts.clear()
+	run_token += 1
+	if AchievementProgress != null and AchievementProgress.has_method("start_run"):
+		AchievementProgress.start_run()
 	system_pause_owners.clear()
 	_sync_pause_state()
 
 	if reset_player and player != null and player.has_method("reset_for_run"):
 		player.reset_for_run()
 	_apply_meta_progress_start_effects()
+	_schedule_survival_achievement_timer(run_token)
 
 	if _should_request_contract():
 		_request_contract()
@@ -251,6 +258,64 @@ func _process(delta: float) -> void:
 		if elapsed_time >= next_shop_time:
 			if _request_shop("timed"):
 				_schedule_next_shop_after(next_shop_time)
+
+
+func _schedule_survival_achievement_timer(token: int) -> void:
+	await get_tree().create_timer(300.0, false).timeout
+	if token != run_token or not game_running or is_game_over:
+		return
+	if AchievementProgress != null and AchievementProgress.has_method("record_survival_time"):
+		AchievementProgress.record_survival_time(elapsed_time)
+
+
+func show_toast(message: String) -> void:
+	if message == "":
+		return
+	toast_requested.emit(message)
+
+
+func queue_toast(message: String) -> void:
+	if message == "":
+		return
+	pending_toasts.append(message)
+
+
+func consume_pending_toasts() -> Array[String]:
+	var result: Array[String] = pending_toasts.duplicate()
+	pending_toasts.clear()
+	return result
+
+
+func request_guide_replay() -> void:
+	guide_replay_requested.emit()
+
+
+func seed_from_text(text: String) -> int:
+	var source := text.strip_edges()
+	var digits := ""
+	var last_digits := ""
+	for index in range(source.length()):
+		var codepoint := source.unicode_at(index)
+		if codepoint >= 48 and codepoint <= 57:
+			digits += String.chr(codepoint)
+		elif digits != "":
+			last_digits = digits
+			digits = ""
+	if digits != "":
+		last_digits = digits
+	if last_digits == "":
+		return 0
+	var value := int(last_digits)
+	return value if value > 0 else 0
+
+
+func copy_current_run_seed_to_clipboard() -> bool:
+	if current_run_seed <= 0:
+		show_toast("本局種子尚未建立。")
+		return false
+	DisplayServer.clipboard_set(str(current_run_seed))
+	show_toast("已複製本局種子：%d" % current_run_seed)
+	return true
 
 
 func emit_stats() -> void:
@@ -338,6 +403,8 @@ func add_kill(amount: int = 1) -> void:
 	if not game_running:
 		return
 	kills += amount
+	if AchievementProgress != null and AchievementProgress.has_method("record_kills"):
+		AchievementProgress.record_kills(kills)
 	emit_stats()
 
 
@@ -969,6 +1036,9 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 	enriched["echo_shards_run_total"] = echo_shards_awarded_this_run
 	if MetaProgress.has_method("get_progress_summary"):
 		enriched["echo_progress"] = MetaProgress.get_progress_summary()
+	enriched["run_seed"] = current_run_seed
+	if AchievementProgress != null and AchievementProgress.has_method("get_run_unlocked_definitions"):
+		enriched["achievement_unlocks"] = AchievementProgress.get_run_unlocked_definitions()
 	return enriched
 
 
@@ -1034,6 +1104,8 @@ func player_died() -> void:
 		dead_player.set_physics_process(false)
 	player = null
 	_request_system_pause("game_over")
+	if AchievementProgress != null and AchievementProgress.has_method("record_survival_time"):
+		AchievementProgress.record_survival_time(elapsed_time)
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("death")
 	emit_stats()
@@ -1062,6 +1134,8 @@ func record_elite_spawn() -> void:
 func record_elite_kill() -> void:
 	elites_killed += 1
 	elite_kill_times.append(elapsed_time)
+	if AchievementProgress != null and AchievementProgress.has_method("record_elite_kill"):
+		AchievementProgress.record_elite_kill()
 
 
 func record_boss_spawn() -> void:
@@ -1084,6 +1158,10 @@ func record_boss_kill() -> void:
 	boss_killed = true
 	boss_active = false
 	boss_kill_time = elapsed_time
+	if AchievementProgress != null and AchievementProgress.has_method("record_boss_kill"):
+		AchievementProgress.record_boss_kill()
+	if AchievementProgress != null and AchievementProgress.has_method("record_survival_time"):
+		AchievementProgress.record_survival_time(elapsed_time)
 	waiting_for_upgrade = false
 	waiting_for_shop = false
 	waiting_for_contract = false
@@ -1126,7 +1204,9 @@ func notify_affix_encounter(affix_id: String) -> void:
 	if not AFFIX_TOASTS.has(affix_id) or seen_affix_toasts.has(affix_id):
 		return
 	seen_affix_toasts[affix_id] = true
-	toast_requested.emit(str(AFFIX_TOASTS.get(affix_id, "")))
+	if AchievementProgress != null and AchievementProgress.has_method("record_affix_encounter"):
+		AchievementProgress.record_affix_encounter(affix_id)
+	show_toast(str(AFFIX_TOASTS.get(affix_id, "")))
 
 
 func format_time(seconds_value: float) -> String:

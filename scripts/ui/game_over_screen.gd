@@ -5,7 +5,9 @@ signal restart_requested
 var root: Control
 var panel: Panel
 var restart_button: Button
+var copy_seed_button: Button
 var summary_label: Label
+var achievements_label: RichTextLabel
 
 
 func _ready() -> void:
@@ -54,6 +56,19 @@ func _build_ui() -> void:
 	summary_label.add_theme_font_size_override("font_size", 20)
 	panel.add_child(summary_label)
 
+	achievements_label = RichTextLabel.new()
+	achievements_label.name = "AchievementsLabel"
+	achievements_label.bbcode_enabled = true
+	achievements_label.fit_content = true
+	achievements_label.scroll_active = false
+	achievements_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(achievements_label)
+
+	copy_seed_button = Button.new()
+	copy_seed_button.text = "複製本局種子"
+	copy_seed_button.pressed.connect(_on_copy_seed_pressed)
+	panel.add_child(copy_seed_button)
+
 	restart_button = Button.new()
 	restart_button.text = "再來一局"
 	restart_button.pressed.connect(_on_restart_pressed)
@@ -74,12 +89,18 @@ func show_summary(summary: Dictionary) -> void:
 		str(summary.get("contract_name", "無契約")),
 		_echo_destination_text(summary, progress)
 	]
+	if achievements_label != null:
+		achievements_label.text = _achievement_text(summary)
 	root.visible = true
 
 
 func _on_restart_pressed() -> void:
 	root.visible = false
 	restart_requested.emit()
+
+
+func _on_copy_seed_pressed() -> void:
+	GameManager.copy_current_run_seed_to_clipboard()
 
 
 func hide_screen() -> void:
@@ -152,6 +173,23 @@ func _next_meta_track() -> Dictionary:
 	return {}
 
 
+func _achievement_text(summary: Dictionary) -> String:
+	if AchievementProgress == null or not AchievementProgress.has_method("get_display_rows"):
+		return ""
+	var new_unlocks: Array = summary.get("achievement_unlocks", [])
+	var names: Array[String] = []
+	for achievement in new_unlocks:
+		names.append(str(achievement.get("name", "")))
+	var lines: Array[String] = []
+	lines.append("[color=#f4e8a0]本局新解鎖：%s[/color]" % ("、".join(names) if not names.is_empty() else "無"))
+	for row in AchievementProgress.get_display_rows():
+		var unlocked := bool(row.get("unlocked", false))
+		var color := "#f1f5f0" if unlocked else "#777f86"
+		var mark := "已" if unlocked else "未"
+		lines.append("[color=%s]%s %s[/color]" % [color, mark, str(row.get("name", ""))])
+	return "\n".join(lines)
+
+
 func _apply_responsive_layout() -> void:
 	if panel == null:
 		return
@@ -161,7 +199,7 @@ func _apply_responsive_layout() -> void:
 		viewport_size = Vector2(1280.0, 720.0)
 	var portrait := viewport_size.y > viewport_size.x
 	var panel_width: float = min(viewport_size.x - 32.0, 600.0)
-	var panel_height: float = 500.0 if portrait else 430.0
+	var panel_height: float = min(viewport_size.y - 32.0, 660.0 if portrait else 560.0)
 
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5
@@ -176,13 +214,28 @@ func _apply_responsive_layout() -> void:
 		summary_label.offset_left = 32.0
 		summary_label.offset_right = -32.0
 		summary_label.offset_top = 88.0
-		summary_label.offset_bottom = panel_height - 118.0
+		summary_label.offset_bottom = 248.0
 		summary_label.add_theme_font_size_override("font_size", 17 if not portrait else 16)
+
+	if achievements_label != null:
+		achievements_label.offset_left = 40.0
+		achievements_label.offset_right = -40.0
+		achievements_label.offset_top = 258.0
+		achievements_label.offset_bottom = panel_height - 126.0
+		achievements_label.add_theme_font_size_override("normal_font_size", 15 if not portrait else 14)
+
+	if copy_seed_button != null:
+		copy_seed_button.anchor_left = 0.5
+		copy_seed_button.anchor_right = 0.5
+		copy_seed_button.offset_left = -118.0
+		copy_seed_button.offset_right = 118.0
+		copy_seed_button.offset_top = panel_height - 116.0
+		copy_seed_button.offset_bottom = panel_height - 76.0
 
 	if restart_button != null:
 		restart_button.anchor_left = 0.5
 		restart_button.anchor_right = 0.5
 		restart_button.offset_left = -118.0
 		restart_button.offset_right = 118.0
-		restart_button.offset_top = panel_height - 92.0
-		restart_button.offset_bottom = panel_height - 38.0
+		restart_button.offset_top = panel_height - 66.0
+		restart_button.offset_bottom = panel_height - 24.0

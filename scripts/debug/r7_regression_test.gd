@@ -78,6 +78,9 @@ func _run_tests() -> void:
 	current_phase = "r9_modal_owner_cleanup"
 	if not _test_modal_owner_overlap_and_death_cleanup():
 		return
+	current_phase = "r9_week_b_share_progress"
+	if not _test_r9_week_b_achievements_seed_settings():
+		return
 
 	current_phase = "done"
 	print("R7_REGRESSION_PASS")
@@ -637,12 +640,80 @@ func _test_modal_owner_overlap_and_death_cleanup() -> bool:
 	return true
 
 
+func _test_r9_week_b_achievements_seed_settings() -> bool:
+	AchievementProgress.debug_use_save_path("user://r9_achievements_test.cfg", true)
+	AchievementProgress.start_run()
+	AchievementProgress.record_elite_kill()
+	AchievementProgress.record_evolution()
+	AchievementProgress.record_boss_kill()
+	AchievementProgress.record_squad_size(5, 5)
+	AchievementProgress.record_affix_encounter("affix_split")
+	AchievementProgress.record_affix_encounter("affix_field")
+	AchievementProgress.record_affix_encounter("affix_swift")
+	AchievementProgress.record_survival_time(300.0)
+	AchievementProgress.record_kills(500)
+	MetaProgress.debug_use_save_path("user://r9_meta_achievement_test.cfg", true)
+	var awarded := MetaProgress.award_run({"_fixed_echo_delta": 60})
+	if awarded != 60 or not AchievementProgress.is_unlocked("echo_contract_slot"):
+		_fail("contract slot achievement did not unlock from echo lifetime")
+		return false
+	if AchievementProgress.get_unlocked_count() != AchievementProgress.get_total_count():
+		_fail("not all week b achievements unlocked in regression")
+		return false
+	if AchievementProgress.get_run_unlocked_definitions().size() != AchievementProgress.get_total_count():
+		_fail("run achievement unlock list did not track this-run unlocks")
+		return false
+
+	MetaProgress.debug_use_save_path("user://r9_seed_repro_meta.cfg", true)
+	var seed_value := 24681357
+	seed(seed_value)
+	var first_ids := _contract_choice_ids(GameManager._build_contract_choices())
+	seed(seed_value)
+	var second_ids := _contract_choice_ids(GameManager._build_contract_choices())
+	if JSON.stringify(first_ids) != JSON.stringify(second_ids):
+		_fail("contract choices were not deterministic for same seed")
+		return false
+	if GameManager.seed_from_text("Crackveil Vanguard v0.9 seed=24681357") != seed_value:
+		_fail("seed parser did not extract the shared seed")
+		return false
+	if GameManager.seed_from_text("not-a-seed") != 0:
+		_fail("invalid seed parser did not fall back to random")
+		return false
+
+	PlayerSettings.debug_use_save_path("user://r9_settings_test.cfg", true)
+	PlayerSettings.set_damage_numbers_enabled(false)
+	PlayerSettings.set_screen_shake_enabled(false)
+	PlayerSettings.load_settings()
+	if bool(PlayerSettings.get("damage_numbers_enabled")) or bool(PlayerSettings.get("screen_shake_enabled")):
+		_fail("player settings did not persist disabled toggles")
+		return false
+	PlayerSettings.set_damage_numbers_enabled(true)
+	PlayerSettings.set_screen_shake_enabled(true)
+	PlayerSettings.load_settings()
+	if not bool(PlayerSettings.get("damage_numbers_enabled")) or not bool(PlayerSettings.get("screen_shake_enabled")):
+		_fail("player settings did not persist enabled toggles")
+		return false
+
+	print("R9_WEEK_B achievements=%d seed_ids=%s settings=true" % [
+		AchievementProgress.get_unlocked_count(),
+		JSON.stringify(first_ids)
+	])
+	return true
+
+
 func _find_upgrade_option(upgrade_kind: String) -> Dictionary:
 	var pool: Array = squad_manager.build_upgrade_pool([])
 	for option in pool:
 		if str(option.get("upgrade_kind", "")) == upgrade_kind:
 			return option
 	return {}
+
+
+func _contract_choice_ids(options: Array) -> Array[String]:
+	var ids: Array[String] = []
+	for option in options:
+		ids.append(str(option.get("id", "")))
+	return ids
 
 
 func _find_numeric_option(hero_id: String, weapon_id: String, upgrade_kind: String) -> Dictionary:
