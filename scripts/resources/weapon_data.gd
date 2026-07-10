@@ -50,9 +50,20 @@ extends Resource
 @export var area_radius_upgrade: float = 18.0
 @export var chain_count_upgrade: int = 1
 
+var modifier_levels: Dictionary = {}
+
+const QUALITATIVE_MAX_LEVELS: Dictionary = {
+	"riftline_fork": 2,
+	"orbit_resonance": 1,
+	"pulse_embers": 1,
+	"chain_overload": 1,
+	"magnetic_reclaim": 1
+}
+
 
 func make_runtime_copy() -> Resource:
 	var copy: Resource = duplicate(true)
+	copy.set("modifier_levels", {})
 	return copy
 
 
@@ -69,8 +80,33 @@ func apply_upgrade(upgrade_kind: String) -> void:
 			cooldown = max(0.08, cooldown * cooldown_upgrade_multiplier)
 			range += range_upgrade
 			_apply_count_upgrade()
+		"riftline_fork", "orbit_resonance", "pulse_embers", "chain_overload", "magnetic_reclaim":
+			_increment_modifier(upgrade_kind)
 		_:
 			damage += damage_upgrade
+
+
+func can_apply_upgrade(upgrade_kind: String) -> bool:
+	if not QUALITATIVE_MAX_LEVELS.has(upgrade_kind):
+		return true
+	return get_modifier_level(upgrade_kind) < get_modifier_max_level(upgrade_kind)
+
+
+func get_modifier_level(modifier_id: String) -> int:
+	return int(modifier_levels.get(modifier_id, 0))
+
+
+func get_modifier_max_level(modifier_id: String) -> int:
+	return int(QUALITATIVE_MAX_LEVELS.get(modifier_id, 1))
+
+
+func has_modifier(modifier_id: String) -> bool:
+	return get_modifier_level(modifier_id) > 0
+
+
+func _increment_modifier(modifier_id: String) -> void:
+	var next_level: int = min(get_modifier_level(modifier_id) + 1, get_modifier_max_level(modifier_id))
+	modifier_levels[modifier_id] = next_level
 
 
 func _apply_count_upgrade() -> void:
@@ -98,7 +134,10 @@ func to_projectile_stats() -> Dictionary:
 		"pierce": pierce,
 		"color": color,
 		"projectile_sprite_path": projectile_sprite_path,
-		"sprite_scale": sprite_scale
+		"sprite_scale": sprite_scale,
+		"target_group": "enemies",
+		"riftline_fork_level": get_modifier_level("riftline_fork"),
+		"fork_depth": 0
 	}
 
 
@@ -122,5 +161,9 @@ func to_effect_stats() -> Dictionary:
 		"orbit_sprite_path": orbit_sprite_path,
 		"explosion_sprite_path": explosion_sprite_path,
 		"lightning_sprite_path": lightning_sprite_path,
-		"sprite_scale": sprite_scale
+		"sprite_scale": sprite_scale,
+		"orbit_resonance_level": get_modifier_level("orbit_resonance"),
+		"pulse_embers_level": get_modifier_level("pulse_embers"),
+		"chain_overload_level": get_modifier_level("chain_overload"),
+		"magnetic_reclaim_level": get_modifier_level("magnetic_reclaim")
 	}

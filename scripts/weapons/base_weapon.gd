@@ -4,6 +4,9 @@ var owner_player: Node2D = null
 var data: Resource = null
 var cooldown_timer: float = 0.0
 var trigger_count: int = 0
+var projectile_stats_cache: Dictionary = {}
+var effect_stats_cache: Dictionary = {}
+var stats_cache_dirty: bool = true
 
 
 func setup(player_node: Node2D, weapon_data: Resource) -> void:
@@ -13,6 +16,7 @@ func setup(player_node: Node2D, weapon_data: Resource) -> void:
 	else:
 		data = weapon_data.duplicate(true)
 	name = get_weapon_id()
+	_rebuild_stats_cache()
 	reset_weapon()
 
 
@@ -38,6 +42,8 @@ func apply_data_upgrade(upgrade_kind: String) -> void:
 		return
 	if data.has_method("apply_upgrade"):
 		data.apply_upgrade(upgrade_kind)
+	stats_cache_dirty = true
+	_rebuild_stats_cache()
 	_on_data_changed()
 
 
@@ -97,12 +103,18 @@ func data_color(property_name: String, fallback: Color) -> Color:
 
 
 func data_projectile_stats() -> Dictionary:
-	if data != null and data.has_method("to_projectile_stats"):
-		return data.to_projectile_stats()
-	return {}
+	if stats_cache_dirty:
+		_rebuild_stats_cache()
+	return projectile_stats_cache
 
 
 func data_effect_stats() -> Dictionary:
-	if data != null and data.has_method("to_effect_stats"):
-		return data.to_effect_stats()
-	return {}
+	if stats_cache_dirty:
+		_rebuild_stats_cache()
+	return effect_stats_cache
+
+
+func _rebuild_stats_cache() -> void:
+	projectile_stats_cache = data.to_projectile_stats() if data != null and data.has_method("to_projectile_stats") else {}
+	effect_stats_cache = data.to_effect_stats() if data != null and data.has_method("to_effect_stats") else {}
+	stats_cache_dirty = false

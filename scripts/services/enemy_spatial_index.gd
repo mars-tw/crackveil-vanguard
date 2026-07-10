@@ -69,6 +69,9 @@ func find_nearest(center: Vector2, max_range: float) -> Node2D:
 			for enemy in bucket:
 				if enemy == null or not is_instance_valid(enemy):
 					continue
+				var active_value: Variant = enemy.get("is_active")
+				if active_value != null and not bool(active_value):
+					continue
 				var distance_squared: float = center.distance_squared_to(enemy.global_position)
 				if distance_squared < best_distance_squared:
 					best_distance_squared = distance_squared
@@ -90,6 +93,9 @@ func get_enemies_in_radius(center: Vector2, radius: float) -> Array[Node2D]:
 			for enemy in bucket:
 				if enemy == null or not is_instance_valid(enemy):
 					continue
+				var active_value: Variant = enemy.get("is_active")
+				if active_value != null and not bool(active_value):
+					continue
 				if center.distance_squared_to(enemy.global_position) <= radius_squared:
 					result.append(enemy)
 
@@ -100,6 +106,9 @@ func _update_enemy_cells() -> void:
 	var compacted: Array[Node2D] = []
 	for enemy in live_enemies:
 		if enemy == null or not is_instance_valid(enemy):
+			continue
+		var active_value: Variant = enemy.get("is_active")
+		if active_value != null and not bool(active_value):
 			continue
 		compacted.append(enemy)
 		var instance_id := enemy.get_instance_id()

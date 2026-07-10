@@ -43,7 +43,7 @@ func pool_on_release() -> void:
 	remove_from_group("projectiles")
 	owner_player = null
 	weapon_node = null
-	stats.clear()
+	stats = {}
 	hit_cooldowns.clear()
 	rotation = 0.0
 	if sprite != null:
@@ -67,7 +67,7 @@ func configure_orbit(index: int, total: int, effect_stats: Dictionary) -> void:
 	var index_changed: bool = orbit_index != index or orbit_total != max(1, total)
 	orbit_index = index
 	orbit_total = max(1, total)
-	stats = effect_stats.duplicate(true)
+	stats = effect_stats
 	if index_changed:
 		orbit_angle = TAU * float(orbit_index) / float(orbit_total)
 	rotation = orbit_angle + PI * 0.5
@@ -126,6 +126,9 @@ func _damage_overlapping_enemies() -> void:
 		var hit_key := _hit_key_for(body)
 		if hit_cooldowns.has(hit_key):
 			continue
+
+		if int(stats.get("orbit_resonance_level", 0)) > 0 and body.has_method("apply_status_effect"):
+			body.apply_status_effect("vulnerable", 1.35, 0.2)
 
 		if body.has_method("take_damage"):
 			body.take_damage(float(stats.get("damage", 8.0)), global_position)

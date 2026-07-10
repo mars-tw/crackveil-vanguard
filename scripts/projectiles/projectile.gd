@@ -16,6 +16,9 @@ var traveled: float = 0.0
 var source: Node = null
 var hit_bodies: Dictionary = {}
 var is_active: bool = false
+var target_group: String = "enemies"
+var riftline_fork_level: int = 0
+var fork_depth: int = 0
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
@@ -50,6 +53,9 @@ func pool_on_release() -> void:
 	remove_from_group("projectiles")
 	hit_bodies.clear()
 	source = null
+	target_group = "enemies"
+	riftline_fork_level = 0
+	fork_depth = 0
 	traveled = 0.0
 	rotation = 0.0
 	if sprite != null:
@@ -76,9 +82,13 @@ func setup(world_position: Vector2, projectile_direction: Vector2, projectile_st
 	sprite_path = str(projectile_stats.get("projectile_sprite_path", "res://assets/sprites/proj_bullet.png"))
 	sprite_scale = float(projectile_stats.get("sprite_scale", 1.0))
 	pierce_left = int(projectile_stats.get("pierce", pierce_left))
+	target_group = str(projectile_stats.get("target_group", "enemies"))
+	riftline_fork_level = int(projectile_stats.get("riftline_fork_level", 0))
+	fork_depth = int(projectile_stats.get("fork_depth", 0))
 	source = projectile_source
 	traveled = 0.0
 	hit_bodies.clear()
+	collision_mask = 1 if target_group == "heroes" else 2
 	_apply_shape()
 	_apply_sprite()
 	rotation = direction.angle()
@@ -106,6 +116,7 @@ func _on_body_entered(body: Node) -> void:
 	hit_bodies[hit_key] = true
 	if body.has_method("take_damage"):
 		body.take_damage(damage, global_position)
+	_try_spawn_riftline_forks()
 
 	if pierce_left <= 0:
 		is_active = false
@@ -119,8 +130,11 @@ func can_hit(body: Node) -> bool:
 		return false
 	if body == null or not is_instance_valid(body):
 		return false
-	if not body.is_in_group("enemies"):
+	if not body.is_in_group(target_group):
 		return false
+	if target_group == "heroes":
+		var alive_value: Variant = body.get("is_alive")
+		return alive_value == null or bool(alive_value)
 	var active_value: Variant = body.get("is_active")
 	return active_value == null or bool(active_value)
 
@@ -129,6 +143,29 @@ func _hit_key_for(body: Node) -> int:
 	if body != null and body.has_method("get_hit_token"):
 		return int(body.get_hit_token())
 	return int(body.get_instance_id())
+
+
+func _try_spawn_riftline_forks() -> void:
+	if target_group != "enemies" or riftline_fork_level <= 0 or fork_depth > 0:
+		return
+
+	var fork_stats := {
+		"damage": damage * 0.5,
+		"range": max_range * (0.46 + 0.12 * float(min(riftline_fork_level, 2) - 1)),
+		"projectile_speed": speed,
+		"projectile_radius": radius,
+		"pierce": max(0, min(pierce_left, riftline_fork_level - 1)),
+		"color": projectile_color,
+		"projectile_sprite_path": sprite_path,
+		"sprite_scale": sprite_scale,
+		"target_group": "enemies",
+		"riftline_fork_level": 0,
+		"fork_depth": fork_depth + 1
+	}
+	var fork_angle := deg_to_rad(20.0)
+	for angle in [-fork_angle, fork_angle]:
+		var fork_direction := direction.rotated(float(angle)).normalized()
+		EntityFactory.spawn_projectile(global_position + fork_direction * (radius + 4.0), fork_direction, fork_stats, source)
 
 
 func _apply_shape() -> void:

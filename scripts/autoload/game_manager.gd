@@ -4,22 +4,30 @@ signal stats_changed(stats: Dictionary)
 signal level_up_requested(options: Array)
 signal game_over_requested(summary: Dictionary)
 signal pause_changed(is_paused: bool)
+signal shop_requested(options: Array)
+signal stage_victory_requested(summary: Dictionary)
 
 const PLAYER_UPGRADE_POOL: Array = [
 	{
 		"id": "move_speed",
 		"name": "疾步校準",
-		"description": "+20 移動速度"
+		"description": "+20 移動速度",
+		"weight": 1,
+		"max_level": 6
 	},
 	{
 		"id": "max_hp",
 		"name": "裂隙護甲",
-		"description": "+20 最大 HP，並回復 20 HP"
+		"description": "+20 最大 HP，並回復 20 HP",
+		"weight": 1,
+		"max_level": 5
 	},
 	{
 		"id": "pickup_radius",
 		"name": "回收磁場",
-		"description": "+24 拾取範圍"
+		"description": "+24 拾取範圍",
+		"weight": 1,
+		"max_level": 5
 	}
 ]
 
@@ -30,6 +38,8 @@ var squad_manager: Node = null
 var game_running: bool = false
 var is_game_over: bool = false
 var waiting_for_upgrade: bool = false
+var waiting_for_shop: bool = false
+var stage_victory_pending: bool = false
 var manual_paused: bool = false
 
 var elapsed_time: float = 0.0
@@ -40,6 +50,19 @@ var xp: int = 0
 var xp_required: int = 12
 var stats_timer: float = 0.0
 var touch_move_vector: Vector2 = Vector2.ZERO
+var upgrade_counts: Dictionary = {}
+var elites_spawned: int = 0
+var elites_killed: int = 0
+var elite_spawn_times: Array[float] = []
+var elite_kill_times: Array[float] = []
+var boss_active: bool = false
+var boss_spawned: bool = false
+var boss_killed: bool = false
+var boss_spawn_time: float = -1.0
+var boss_kill_time: float = -1.0
+var boss_phase_two_time: float = -1.0
+var next_shop_time: float = 90.0
+var forced_run_seed: int = 0
 
 
 func _ready() -> void:
@@ -53,6 +76,8 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	game_running = true
 	is_game_over = false
 	waiting_for_upgrade = false
+	waiting_for_shop = false
+	stage_victory_pending = false
 	manual_paused = false
 	elapsed_time = 0.0
 	kills = 0
@@ -62,6 +87,18 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	xp_required = 12
 	stats_timer = 0.0
 	touch_move_vector = Vector2.ZERO
+	upgrade_counts.clear()
+	elites_spawned = 0
+	elites_killed = 0
+	elite_spawn_times.clear()
+	elite_kill_times.clear()
+	boss_active = false
+	boss_spawned = false
+	boss_killed = false
+	boss_spawn_time = -1.0
+	boss_kill_time = -1.0
+	boss_phase_two_time = -1.0
+	next_shop_time = 90.0
 	get_tree().paused = false
 
 	if reset_player and player != null and player.has_method("reset_for_run"):
@@ -78,6 +115,9 @@ func _process(delta: float) -> void:
 		if stats_timer <= 0.0:
 			stats_timer = 0.1
 			emit_stats()
+		if elapsed_time >= next_shop_time:
+			next_shop_time += 90.0
+			_request_shop()
 
 
 func emit_stats() -> void:
@@ -105,6 +145,7 @@ func get_stats() -> Dictionary:
 		"game_running": game_running,
 		"manual_paused": manual_paused,
 		"waiting_for_upgrade": waiting_for_upgrade,
+		"waiting_for_shop": waiting_for_shop,
 		"is_game_over": is_game_over
 	}
 
@@ -121,6 +162,16 @@ func add_gold(amount: int) -> void:
 		return
 	gold += amount
 	emit_stats()
+
+
+func spend_gold(amount: int) -> bool:
+	if amount <= 0:
+		return true
+	if gold < amount:
+		return false
+	gold -= amount
+	emit_stats()
+	return true
 
 
 func add_xp(amount: int) -> void:
@@ -152,18 +203,18 @@ func _build_upgrade_choices() -> Array:
 	elif player != null and is_instance_valid(player) and player.has_method("build_upgrade_pool"):
 		pool = player.build_upgrade_pool(pool)
 
-	pool.shuffle()
-	var choices: Array = []
-	var choice_count: int = min(3, pool.size())
-	for index in range(choice_count):
-		choices.append(pool[index])
-	return choices
+	var filtered: Array = []
+	for option in pool:
+		if _is_upgrade_available(option):
+			filtered.append(option)
+	return _pick_weighted_choices(filtered, 3)
 
 
 func apply_upgrade(upgrade: Dictionary) -> void:
 	if not waiting_for_upgrade or is_game_over:
 		return
 
+	_register_upgrade_pick(upgrade)
 	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("apply_upgrade"):
 		squad_manager.apply_upgrade(upgrade)
 	elif player != null and is_instance_valid(player) and player.has_method("apply_upgrade"):
@@ -173,19 +224,136 @@ func apply_upgrade(upgrade: Dictionary) -> void:
 
 	if xp >= xp_required:
 		_request_level_up()
+	elif randf() < 0.1 and not waiting_for_shop:
+		_request_shop()
 	else:
 		get_tree().paused = manual_paused
 		emit_stats()
 
 
+func _is_upgrade_available(upgrade: Dictionary) -> bool:
+	var max_level := int(upgrade.get("max_level", 0))
+	if max_level <= 0:
+		return true
+	return int(upgrade_counts.get(_upgrade_level_key(upgrade), 0)) < max_level
+
+
+func _register_upgrade_pick(upgrade: Dictionary) -> void:
+	var max_level := int(upgrade.get("max_level", 0))
+	if max_level <= 0:
+		return
+	var key := _upgrade_level_key(upgrade)
+	upgrade_counts[key] = int(upgrade_counts.get(key, 0)) + 1
+
+
+func _upgrade_level_key(upgrade: Dictionary) -> String:
+	if upgrade.has("level_key"):
+		return str(upgrade.get("level_key"))
+	return "%s|%s|%s|%s" % [
+		str(upgrade.get("id", "")),
+		str(upgrade.get("hero_id", "")),
+		str(upgrade.get("weapon_id", "")),
+		str(upgrade.get("upgrade_kind", ""))
+	]
+
+
+func _pick_weighted_choices(pool: Array, count: int) -> Array:
+	var candidates := pool.duplicate(true)
+	var choices: Array = []
+	while choices.size() < count and not candidates.is_empty():
+		var total_weight := 0.0
+		for option in candidates:
+			total_weight += max(0.0, float(option.get("weight", 1.0)))
+		if total_weight <= 0.0:
+			break
+
+		var roll := randf() * total_weight
+		var cursor := 0.0
+		var selected_index := 0
+		for index in range(candidates.size()):
+			cursor += max(0.0, float(candidates[index].get("weight", 1.0)))
+			if roll <= cursor:
+				selected_index = index
+				break
+		choices.append(candidates[selected_index])
+		candidates.remove_at(selected_index)
+	return choices
+
+
+func _request_shop() -> void:
+	if waiting_for_upgrade or waiting_for_shop or stage_victory_pending or is_game_over or not game_running:
+		return
+	waiting_for_shop = true
+	get_tree().paused = true
+	emit_stats()
+	shop_requested.emit(_build_shop_options())
+
+
+func _build_shop_options() -> Array:
+	return [
+		{
+			"id": "heal_30",
+			"name": "裂隙急救",
+			"description": "花 8 金幣，回復全隊 30 HP",
+			"cost": 8
+		},
+		{
+			"id": "random_qualitative",
+			"name": "偏壓改裝",
+			"description": "花 18 金幣，隨機取得一張質變升級",
+			"cost": 18
+		},
+		{
+			"id": "temporary_shield",
+			"name": "帷幕護盾",
+			"description": "花 12 金幣，獲得 30 點暫時護盾",
+			"cost": 12
+		}
+	]
+
+
+func apply_shop_purchase(option: Dictionary) -> void:
+	if not waiting_for_shop or is_game_over:
+		return
+	var option_id := str(option.get("id", ""))
+	if option_id == "skip":
+		_close_shop()
+		return
+
+	var cost := int(option.get("cost", 0))
+	if gold < cost:
+		emit_stats()
+		return
+
+	var success := false
+	match option_id:
+		"heal_30":
+			success = squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("heal_members") and squad_manager.heal_members(30.0)
+		"random_qualitative":
+			success = squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("apply_random_qualitative_upgrade") and squad_manager.apply_random_qualitative_upgrade()
+		"temporary_shield":
+			success = squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("apply_temporary_shield") and squad_manager.apply_temporary_shield(30.0, 12.0)
+
+	if success and spend_gold(cost):
+		_close_shop()
+	elif not success:
+		emit_stats()
+
+
+func _close_shop() -> void:
+	waiting_for_shop = false
+	get_tree().paused = manual_paused
+	emit_stats()
+
+
 func toggle_pause() -> void:
-	if waiting_for_upgrade or is_game_over or not game_running:
+	if waiting_for_upgrade or waiting_for_shop or stage_victory_pending or is_game_over or not game_running:
 		return
 	set_manual_pause(not manual_paused)
 
 
 func set_manual_pause(value: bool) -> void:
-	if waiting_for_upgrade or is_game_over or not game_running:
+	if waiting_for_upgrade or waiting_for_shop or stage_victory_pending or is_game_over or not game_running:
 		return
 	manual_paused = value
 	get_tree().paused = value
@@ -220,8 +388,60 @@ func player_died() -> void:
 		"elapsed_time": elapsed_time,
 		"kills": kills,
 		"gold": gold,
-		"level": level
+		"level": level,
+		"elites_killed": elites_killed,
+		"boss_killed": boss_killed
 	})
+
+
+func record_elite_spawn() -> void:
+	elites_spawned += 1
+	elite_spawn_times.append(elapsed_time)
+
+
+func record_elite_kill() -> void:
+	elites_killed += 1
+	elite_kill_times.append(elapsed_time)
+
+
+func record_boss_spawn() -> void:
+	boss_spawned = true
+	boss_spawn_time = elapsed_time
+
+
+func set_boss_active(value: bool) -> void:
+	boss_active = value
+
+
+func record_boss_phase_two() -> void:
+	if boss_phase_two_time < 0.0:
+		boss_phase_two_time = elapsed_time
+
+
+func record_boss_kill() -> void:
+	if boss_killed:
+		return
+	boss_killed = true
+	boss_active = false
+	boss_kill_time = elapsed_time
+	stage_victory_pending = true
+	get_tree().paused = true
+	emit_stats()
+	stage_victory_requested.emit({
+		"elapsed_time": elapsed_time,
+		"kills": kills,
+		"gold": gold,
+		"level": level,
+		"elites_killed": elites_killed
+	})
+
+
+func continue_after_stage_victory() -> void:
+	if not stage_victory_pending:
+		return
+	stage_victory_pending = false
+	get_tree().paused = manual_paused
+	emit_stats()
 
 
 func format_time(seconds_value: float) -> String:

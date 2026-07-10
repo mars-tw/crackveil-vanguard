@@ -12,6 +12,8 @@ var hero_id: String = ""
 var display_name: String = "未命名英雄"
 var max_hp: float = 100.0
 var current_hp: float = 100.0
+var temporary_shield_hp: float = 0.0
+var temporary_shield_timer: float = 0.0
 var move_speed: float = 220.0
 var pickup_radius: float = 80.0
 var hit_radius: float = 13.0
@@ -78,6 +80,8 @@ func _apply_hero_data() -> void:
 
 func reset_for_run() -> void:
 	current_hp = max_hp
+	temporary_shield_hp = 0.0
+	temporary_shield_timer = 0.0
 	invulnerability_timer = 0.0
 	last_move_direction = Vector2.RIGHT
 	desired_velocity = Vector2.ZERO
@@ -149,6 +153,10 @@ func _physics_process(delta: float) -> void:
 
 	if invulnerability_timer > 0.0:
 		invulnerability_timer = max(invulnerability_timer - delta, 0.0)
+	if temporary_shield_timer > 0.0:
+		temporary_shield_timer = max(temporary_shield_timer - delta, 0.0)
+		if temporary_shield_timer <= 0.0:
+			temporary_shield_hp = 0.0
 
 
 func _process(_delta: float) -> void:
@@ -220,7 +228,12 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> bool
 	if invulnerability_timer > 0.0 or current_hp <= 0.0 or not is_alive:
 		return false
 
-	current_hp = max(current_hp - amount, 0.0)
+	var remaining_damage := amount
+	if temporary_shield_hp > 0.0:
+		var absorbed: float = min(temporary_shield_hp, remaining_damage)
+		temporary_shield_hp -= absorbed
+		remaining_damage -= absorbed
+	current_hp = max(current_hp - remaining_damage, 0.0)
 	invulnerability_timer = invulnerability_time
 
 	var number_position := global_position + Vector2(0.0, -30.0)
@@ -232,6 +245,22 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> bool
 	if current_hp <= 0.0:
 		_die()
 	return true
+
+
+func heal(amount: float) -> bool:
+	if not is_alive or amount <= 0.0:
+		return false
+	var before := current_hp
+	current_hp = min(max_hp, current_hp + amount)
+	GameManager.emit_stats()
+	return current_hp > before
+
+
+func add_temporary_shield(amount: float, duration: float) -> void:
+	if not is_alive:
+		return
+	temporary_shield_hp = max(temporary_shield_hp, amount)
+	temporary_shield_timer = max(temporary_shield_timer, duration)
 
 
 func _die() -> void:

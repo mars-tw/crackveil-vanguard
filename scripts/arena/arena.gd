@@ -1,24 +1,38 @@
 extends Node2D
 
+@export var run_seed: int = 0
+
 @onready var squad_manager: Node = $SquadManager
 @onready var level_up_screen: CanvasLayer = $LevelUpScreen
 @onready var game_over_screen: CanvasLayer = $GameOverScreen
+@onready var rift_shop_screen: CanvasLayer = $RiftShopScreen
+@onready var stage_victory_screen: CanvasLayer = $StageVictoryScreen
 
 
 func _ready() -> void:
-	randomize()
+	_apply_run_seed()
 
 	var level_up_callable := Callable(level_up_screen, "show_options")
 	var game_over_callable := Callable(game_over_screen, "show_summary")
+	var shop_callable := Callable(rift_shop_screen, "show_options")
+	var stage_victory_callable := Callable(stage_victory_screen, "show_summary")
 	if not GameManager.level_up_requested.is_connected(level_up_callable):
 		GameManager.level_up_requested.connect(level_up_callable)
 	if not GameManager.game_over_requested.is_connected(game_over_callable):
 		GameManager.game_over_requested.connect(game_over_callable)
+	if not GameManager.shop_requested.is_connected(shop_callable):
+		GameManager.shop_requested.connect(shop_callable)
+	if not GameManager.stage_victory_requested.is_connected(stage_victory_callable):
+		GameManager.stage_victory_requested.connect(stage_victory_callable)
 
 	if level_up_screen.has_signal("upgrade_selected"):
 		level_up_screen.upgrade_selected.connect(Callable(GameManager, "apply_upgrade"))
 	if game_over_screen.has_signal("restart_requested"):
 		game_over_screen.restart_requested.connect(_on_restart_requested)
+	if rift_shop_screen.has_signal("purchase_selected"):
+		rift_shop_screen.purchase_selected.connect(Callable(GameManager, "apply_shop_purchase"))
+	if stage_victory_screen.has_signal("continue_requested"):
+		stage_victory_screen.continue_requested.connect(Callable(GameManager, "continue_after_stage_victory"))
 
 	GameManager.arena = self
 	EntityFactory.initialize_for_arena(self)
@@ -31,3 +45,16 @@ func _ready() -> void:
 func _on_restart_requested() -> void:
 	get_tree().paused = false
 	get_tree().reload_current_scene()
+
+
+func _apply_run_seed() -> void:
+	var selected_seed := run_seed
+	for argument in OS.get_cmdline_args():
+		if argument.begins_with("--run-seed="):
+			selected_seed = int(argument.get_slice("=", 1))
+	if selected_seed == 0 and int(GameManager.get("forced_run_seed")) != 0:
+		selected_seed = int(GameManager.get("forced_run_seed"))
+	if selected_seed != 0:
+		seed(selected_seed)
+	else:
+		randomize()

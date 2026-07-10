@@ -11,6 +11,48 @@ var recruited_once: Dictionary = {}
 var dead_ids: Dictionary = {}
 var leader: Node = null
 
+const NUMERIC_UPGRADE_MAX_LEVELS: Dictionary = {
+	"weapon_damage": 5,
+	"weapon_cooldown": 4,
+	"weapon_projectiles": 3
+}
+
+const QUALITATIVE_UPGRADES: Dictionary = {
+	"linear": [
+		{
+			"upgrade_kind": "riftline_fork",
+			"name": "裂線分叉",
+			"description": "命中後裂出 ±20° 碎彈，裂片傷害 50%"
+		}
+	],
+	"orbit": [
+		{
+			"upgrade_kind": "orbit_resonance",
+			"name": "星環共鳴",
+			"description": "星環命中使敵人短暫易傷 +20%"
+		}
+	],
+	"explosion": [
+		{
+			"upgrade_kind": "pulse_embers",
+			"name": "脈衝餘燼",
+			"description": "爆炸留下 1.2 秒低傷燃燒區"
+		}
+	],
+	"chain_lightning": [
+		{
+			"upgrade_kind": "chain_overload",
+			"name": "雷鏈過載",
+			"description": "雷鏈末跳引發小範圍爆裂"
+		},
+		{
+			"upgrade_kind": "magnetic_reclaim",
+			"name": "磁暴回收",
+			"description": "擊殺時短距吸引附近 XP"
+		}
+	]
+}
+
 
 func start_squad() -> Node:
 	clear_squad()
@@ -83,7 +125,8 @@ func _append_recruit_options(pool: Array) -> void:
 			"id": "recruit_hero",
 			"hero_id": hero_id,
 			"name": "招募：" + str(hero_data.get("display_name")),
-			"description": str(hero_data.get("description"))
+			"description": str(hero_data.get("description")),
+			"weight": 4
 		})
 
 
@@ -107,24 +150,69 @@ func _append_weapon_upgrade_options(pool: Array) -> void:
 				"weapon_id": str(weapon_id),
 				"upgrade_kind": "weapon_damage",
 				"name": hero_name + "：" + str(weapon_data.get("display_name")) + "增幅",
-				"description": "+%s 傷害" % _format_number(float(weapon_data.get("damage_upgrade")))
+				"description": "+%s 傷害" % _format_number(float(weapon_data.get("damage_upgrade"))),
+				"weight": 1,
+				"max_level": int(NUMERIC_UPGRADE_MAX_LEVELS.get("weapon_damage", 5)),
+				"level_key": _weapon_level_key(member, weapon_id, "weapon_damage")
 			})
-			pool.append({
-				"id": "upgrade_hero_weapon",
-				"hero_id": str(member.get("hero_id")),
-				"weapon_id": str(weapon_id),
-				"upgrade_kind": "weapon_cooldown",
-				"name": hero_name + "：" + str(weapon_data.get("display_name")) + "冷卻",
-				"description": "冷卻 -%d%%" % int(round((1.0 - float(weapon_data.get("cooldown_upgrade_multiplier"))) * 100.0))
-			})
+			if _weapon_has_meaningful_cooldown_upgrade(weapon_data):
+				pool.append({
+					"id": "upgrade_hero_weapon",
+					"hero_id": str(member.get("hero_id")),
+					"weapon_id": str(weapon_id),
+					"upgrade_kind": "weapon_cooldown",
+					"name": hero_name + "：" + str(weapon_data.get("display_name")) + "冷卻",
+					"description": "冷卻 -%d%%" % int(round((1.0 - float(weapon_data.get("cooldown_upgrade_multiplier"))) * 100.0)),
+					"weight": 1,
+					"max_level": int(NUMERIC_UPGRADE_MAX_LEVELS.get("weapon_cooldown", 4)),
+					"level_key": _weapon_level_key(member, weapon_id, "weapon_cooldown")
+				})
 			pool.append({
 				"id": "upgrade_hero_weapon",
 				"hero_id": str(member.get("hero_id")),
 				"weapon_id": str(weapon_id),
 				"upgrade_kind": "weapon_projectiles",
 				"name": hero_name + "：" + str(weapon_data.get("display_name")) + "擴張",
-				"description": _get_count_upgrade_description(weapon_data)
+				"description": _get_count_upgrade_description(weapon_data),
+				"weight": 1,
+				"max_level": int(NUMERIC_UPGRADE_MAX_LEVELS.get("weapon_projectiles", 3)),
+				"level_key": _weapon_level_key(member, weapon_id, "weapon_projectiles")
 			})
+			_append_qualitative_upgrade_options(pool, member, weapon_id, weapon_data, hero_name)
+
+
+func _append_qualitative_upgrade_options(pool: Array, member: Node, weapon_id: String, weapon_data: Resource, hero_name: String) -> void:
+	var behavior_id := str(weapon_data.get("behavior_id"))
+	var definitions: Array = QUALITATIVE_UPGRADES.get(behavior_id, [])
+	for definition in definitions:
+		var upgrade_kind := str(definition.get("upgrade_kind", ""))
+		if weapon_data.has_method("can_apply_upgrade") and not weapon_data.can_apply_upgrade(upgrade_kind):
+			continue
+		var max_level := 1
+		if weapon_data.has_method("get_modifier_max_level"):
+			max_level = int(weapon_data.get_modifier_max_level(upgrade_kind))
+		pool.append({
+			"id": "upgrade_hero_weapon",
+			"hero_id": str(member.get("hero_id")),
+			"weapon_id": str(weapon_id),
+			"upgrade_kind": upgrade_kind,
+			"name": hero_name + "：" + str(definition.get("name", "質變升級")),
+			"description": str(definition.get("description", "")),
+			"weight": 3,
+			"max_level": max_level,
+			"level_key": _weapon_level_key(member, weapon_id, upgrade_kind),
+			"upgrade_category": "qualitative"
+		})
+
+
+func _weapon_has_meaningful_cooldown_upgrade(weapon_data: Resource) -> bool:
+	if float(weapon_data.get("cooldown")) <= 0.0:
+		return false
+	return float(weapon_data.get("cooldown_upgrade_multiplier")) < 0.999
+
+
+func _weapon_level_key(member: Node, weapon_id: String, upgrade_kind: String) -> String:
+	return "%s|%s|%s" % [str(member.get("hero_id")), str(weapon_id), upgrade_kind]
 
 
 func apply_upgrade(upgrade: Dictionary) -> void:
@@ -141,6 +229,68 @@ func apply_upgrade(upgrade: Dictionary) -> void:
 				leader.apply_personal_upgrade(upgrade)
 
 	GameManager.emit_stats()
+
+
+func heal_members(amount: float) -> bool:
+	var applied := false
+	for member in get_members():
+		if member == null or not is_instance_valid(member):
+			continue
+		if member.has_method("heal"):
+			applied = member.heal(amount) or applied
+	return applied
+
+
+func apply_temporary_shield(amount: float, duration: float) -> bool:
+	var applied := false
+	for member in get_members():
+		if member == null or not is_instance_valid(member):
+			continue
+		if member.has_method("add_temporary_shield"):
+			member.add_temporary_shield(amount, duration)
+			applied = true
+	return applied
+
+
+func apply_random_qualitative_upgrade() -> bool:
+	var options: Array = []
+	for member in members:
+		if member == null or not is_instance_valid(member):
+			continue
+		var hero_name: String = str(member.get("display_name"))
+		var weapon_order: Array = member.get("weapon_order")
+		var weapons: Dictionary = member.get("weapons")
+		for weapon_id in weapon_order:
+			var weapon: Node = weapons.get(weapon_id)
+			if weapon == null or not is_instance_valid(weapon):
+				continue
+			var weapon_data: Resource = weapon.get("data")
+			if weapon_data == null:
+				continue
+			_append_qualitative_upgrade_options(options, member, str(weapon_id), weapon_data, hero_name)
+
+	if options.is_empty():
+		return false
+	var option: Dictionary = options[randi() % options.size()]
+	var hero := get_member_by_id(str(option.get("hero_id", "")))
+	if hero == null or not hero.has_method("upgrade_weapon"):
+		return false
+	return hero.upgrade_weapon(str(option.get("weapon_id", "")), str(option.get("upgrade_kind", "")))
+
+
+func has_weapon_modifier(modifier_id: String) -> bool:
+	for member in members:
+		if member == null or not is_instance_valid(member):
+			continue
+		var weapons: Dictionary = member.get("weapons")
+		for weapon_id in weapons.keys():
+			var weapon: Node = weapons.get(weapon_id)
+			if weapon == null or not is_instance_valid(weapon):
+				continue
+			var weapon_data: Resource = weapon.get("data")
+			if weapon_data != null and weapon_data.has_method("has_modifier") and weapon_data.has_modifier(modifier_id):
+				return true
+	return false
 
 
 func recruit_hero(hero_id: String) -> bool:

@@ -8,6 +8,7 @@ const HERO_SCENE: PackedScene = preload("res://scenes/heroes/Hero.tscn")
 const PROJECTILE_SCENE: PackedScene = preload("res://scenes/projectiles/Projectile.tscn")
 const ORBIT_PROJECTILE_SCENE: PackedScene = preload("res://scenes/projectiles/OrbitProjectile.tscn")
 const EXPLOSION_AREA_SCENE: PackedScene = preload("res://scenes/projectiles/ExplosionArea.tscn")
+const HAZARD_ZONE_SCENE: PackedScene = preload("res://scenes/projectiles/HazardZone.tscn")
 const XP_GEM_SCENE: PackedScene = preload("res://scenes/pickups/XPGem.tscn")
 const COIN_PICKUP_SCENE: PackedScene = preload("res://scenes/pickups/CoinPickup.tscn")
 const DAMAGE_NUMBER_SCENE: PackedScene = preload("res://scenes/vfx/DamageNumber.tscn")
@@ -19,6 +20,7 @@ const PREWARM_COUNTS: Dictionary = {
 	"projectile": 240,
 	"orbit_projectile": 40,
 	"explosion": 80,
+	"hazard_zone": 8,
 	"xp_gem": 220,
 	"coin": 220,
 	"damage_number": 80,
@@ -30,6 +32,8 @@ const DAMAGE_NUMBER_CAP := 64
 const DAMAGE_NUMBER_MERGE_RADIUS := 48.0
 const DAMAGE_NUMBER_MERGE_AGE := 0.24
 const EXPLOSION_CAP := 36
+const HAZARD_ZONE_CAP := 8
+const ENEMY_PROJECTILE_CAP := 48
 const DEATH_BURST_CAP := 20
 const LIGHTNING_ARC_CAP := 32
 const XP_GEM_CAP := 180
@@ -41,6 +45,8 @@ var enemy_spatial_index: Node = null
 var next_enemy_spawn_token: int = 1
 var enemy_group_scan_count: int = 0
 var active_damage_numbers: Array[Node] = []
+var active_enemy_projectiles: Array[Node] = []
+var active_xp_gems: Array[Node] = []
 
 
 func _ready() -> void:
@@ -56,6 +62,8 @@ func initialize_for_arena(arena: Node) -> void:
 
 	pools.clear()
 	active_damage_numbers.clear()
+	active_enemy_projectiles.clear()
+	active_xp_gems.clear()
 	next_enemy_spawn_token = 1
 	enemy_group_scan_count = 0
 	pool_root = Node.new()
@@ -66,6 +74,7 @@ func initialize_for_arena(arena: Node) -> void:
 	_create_pool("projectile", PROJECTILE_SCENE)
 	_create_pool("orbit_projectile", ORBIT_PROJECTILE_SCENE)
 	_create_pool("explosion", EXPLOSION_AREA_SCENE)
+	_create_pool("hazard_zone", HAZARD_ZONE_SCENE)
 	_create_pool("xp_gem", XP_GEM_SCENE)
 	_create_pool("coin", COIN_PICKUP_SCENE)
 	_create_pool("damage_number", DAMAGE_NUMBER_SCENE)
@@ -109,6 +118,17 @@ func spawn_projectile(world_position: Vector2, direction: Vector2, stats: Dictio
 	return projectile
 
 
+func spawn_enemy_projectile(world_position: Vector2, direction: Vector2, stats: Dictionary, source: Node) -> Node:
+	_compact_active_enemy_projectiles()
+	if active_enemy_projectiles.size() >= ENEMY_PROJECTILE_CAP:
+		return null
+	var projectile := spawn_projectile(world_position, direction, stats, source)
+	if projectile == null:
+		return null
+	active_enemy_projectiles.append(projectile)
+	return projectile
+
+
 func spawn_orbit_projectile(player_node: Node2D, weapon_node: Node, stats: Dictionary, index: int, total: int) -> Node:
 	var projectile := _acquire("orbit_projectile")
 	if projectile == null:
@@ -136,6 +156,24 @@ func spawn_explosion(world_position: Vector2, stats: Dictionary, source: Node) -
 		"source": source
 	})
 	return explosion
+
+
+func spawn_hazard_zone(world_position: Vector2, stats: Dictionary, source: Node) -> Node:
+	if get_pool_live_count("hazard_zone") >= HAZARD_ZONE_CAP:
+		return null
+	var hazard := _acquire("hazard_zone")
+	if hazard == null:
+		return null
+	hazard.pool_reset({
+		"position": world_position,
+		"stats": stats,
+		"source": source
+	})
+	return hazard
+
+
+func apply_explosion_damage(world_position: Vector2, stats: Dictionary, source: Node) -> void:
+	_apply_explosion_damage(world_position, stats, source)
 
 
 func spawn_lightning_arc(points: Array[Vector2], arc_color: Color, lifetime: float, sprite_path: String = "res://assets/sprites/proj_lightning.png") -> Node:
@@ -166,7 +204,22 @@ func spawn_xp_gem(world_position: Vector2, amount: int) -> Node:
 		"amount": amount,
 		"velocity": _random_scatter_velocity()
 	})
+	active_xp_gems.append(gem)
 	return gem
+
+
+func spawn_visible_xp_gem(world_position: Vector2, amount: int) -> Node:
+	if get_pool_live_count("xp_gem") < XP_GEM_CAP:
+		return spawn_xp_gem(world_position, amount)
+
+	_compact_active_xp_gems()
+	var merge_target := _nearest_active_xp_gem(world_position)
+	if merge_target != null and merge_target.has_method("add_value"):
+		merge_target.call("add_value", amount)
+		return merge_target
+
+	_grant_xp_direct(amount)
+	return null
 
 
 func spawn_gold_coin(world_position: Vector2, amount: int) -> Node:
@@ -183,6 +236,25 @@ func spawn_gold_coin(world_position: Vector2, amount: int) -> Node:
 		"velocity": _random_scatter_velocity()
 	})
 	return coin
+
+
+func magnetize_xp_near(world_position: Vector2, radius: float) -> int:
+	_compact_active_xp_gems()
+	var collector := _nearest_living_hero(world_position)
+	if collector == null:
+		return 0
+
+	var radius_squared := radius * radius
+	var magnetized_count := 0
+	for gem in active_xp_gems:
+		if gem == null or not is_instance_valid(gem):
+			continue
+		if world_position.distance_squared_to(gem.global_position) > radius_squared:
+			continue
+		if gem.has_method("force_magnet_to"):
+			gem.force_magnet_to(collector)
+			magnetized_count += 1
+	return magnetized_count
 
 
 func spawn_damage_number(value: Variant, world_position: Vector2, number_color: Color = Color.WHITE) -> Node:
@@ -233,6 +305,7 @@ func release_enemy_deferred(enemy: Node) -> void:
 
 func release_projectile(projectile: Node) -> void:
 	_mark_inactive_for_release(projectile)
+	active_enemy_projectiles.erase(projectile)
 	call_deferred("_release", "projectile", projectile)
 
 
@@ -246,8 +319,14 @@ func release_explosion(explosion: Node) -> void:
 	_release("explosion", explosion)
 
 
+func release_hazard_zone(hazard: Node) -> void:
+	_mark_inactive_for_release(hazard)
+	_release("hazard_zone", hazard)
+
+
 func release_xp_gem(gem: Node) -> void:
 	_mark_inactive_for_release(gem)
+	active_xp_gems.erase(gem)
 	_release("xp_gem", gem)
 
 
@@ -358,6 +437,67 @@ func _compact_active_damage_numbers() -> void:
 	active_damage_numbers = compacted
 
 
+func _compact_active_enemy_projectiles() -> void:
+	var compacted: Array[Node] = []
+	for projectile in active_enemy_projectiles:
+		if projectile == null or not is_instance_valid(projectile):
+			continue
+		var active_value: Variant = projectile.get("is_active")
+		if active_value != null and not bool(active_value):
+			continue
+		compacted.append(projectile)
+	active_enemy_projectiles = compacted
+
+
+func _compact_active_xp_gems() -> void:
+	var compacted: Array[Node] = []
+	for gem in active_xp_gems:
+		if gem == null or not is_instance_valid(gem):
+			continue
+		var active_value: Variant = gem.get("is_active")
+		if active_value != null and not bool(active_value):
+			continue
+		compacted.append(gem)
+	active_xp_gems = compacted
+
+
+func _nearest_active_xp_gem(world_position: Vector2) -> Node:
+	var nearest: Node = null
+	var best_distance_squared := INF
+	for gem in active_xp_gems:
+		if gem == null or not is_instance_valid(gem):
+			continue
+		var active_value: Variant = gem.get("is_active")
+		if active_value != null and not bool(active_value):
+			continue
+		var distance_squared := world_position.distance_squared_to(gem.global_position)
+		if distance_squared < best_distance_squared:
+			best_distance_squared = distance_squared
+			nearest = gem
+	return nearest
+
+
+func _nearest_living_hero(world_position: Vector2) -> Node2D:
+	var nearest: Node2D = null
+	var best_distance_squared := INF
+	var members: Array = []
+	if GameManager.squad_manager != null and is_instance_valid(GameManager.squad_manager) and GameManager.squad_manager.has_method("get_members"):
+		members = GameManager.squad_manager.get_members()
+	elif GameManager.player != null and is_instance_valid(GameManager.player):
+		members = [GameManager.player]
+
+	for member in members:
+		if member == null or not is_instance_valid(member):
+			continue
+		if bool(member.get("is_alive")) == false:
+			continue
+		var distance_squared := world_position.distance_squared_to(member.global_position)
+		if distance_squared < best_distance_squared:
+			best_distance_squared = distance_squared
+			nearest = member
+	return nearest
+
+
 func _apply_explosion_damage(world_position: Vector2, stats: Dictionary, _source: Node) -> void:
 	var radius: float = float(stats.get("area_radius", 82.0))
 	var damage_value: float = float(stats.get("damage", 10.0))
@@ -433,6 +573,8 @@ func _scene_for_pool(pool_name: String) -> PackedScene:
 			return ORBIT_PROJECTILE_SCENE
 		"explosion":
 			return EXPLOSION_AREA_SCENE
+		"hazard_zone":
+			return HAZARD_ZONE_SCENE
 		"xp_gem":
 			return XP_GEM_SCENE
 		"coin":

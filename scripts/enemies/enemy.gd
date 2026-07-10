@@ -20,6 +20,33 @@ var spawn_token: int = 0
 var sprite_path: String = ""
 var sprite_scale: float = 1.0
 var hp_bar_timer: float = 0.0
+var behavior_id: String = "chaser"
+var status_timers: Dictionary = {}
+var status_strengths: Dictionary = {}
+var expired_status_ids: Array = []
+var behavior_state: String = "chase"
+var behavior_timer: float = 0.0
+var dash_direction: Vector2 = Vector2.ZERO
+var dash_trigger_range: float = 155.0
+var dash_windup: float = 0.42
+var dash_duration: float = 0.24
+var dash_recover: float = 0.55
+var dash_speed: float = 430.0
+var ranged_preferred_distance: float = 245.0
+var ranged_windup: float = 0.3
+var ranged_projectile_damage: float = 5.0
+var ranged_projectile_speed: float = 260.0
+var ranged_projectile_range: float = 820.0
+var ranged_projectile_radius: float = 6.0
+var spawns_on_death: bool = false
+var death_spawn_id: String = "normal"
+var death_spawn_count: int = 0
+var death_spawn_cap: int = 150
+var is_elite: bool = false
+var is_boss: bool = false
+var elite_bonus_xp: int = 0
+var boss_phase_two_triggered: bool = false
+var boss_ability_timer: float = 0.0
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
@@ -55,6 +82,14 @@ func pool_on_release() -> void:
 	hp = 0.0
 	attack_timer = 0.0
 	hp_bar_timer = 0.0
+	behavior_state = "chase"
+	behavior_timer = 0.0
+	dash_direction = Vector2.ZERO
+	status_timers.clear()
+	status_strengths.clear()
+	expired_status_ids.clear()
+	boss_phase_two_triggered = false
+	boss_ability_timer = 0.0
 	rotation = 0.0
 	if sprite != null:
 		sprite.rotation = 0.0
@@ -83,9 +118,36 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	sprite_path = str(config.get("sprite_path", _default_sprite_path_for_type(type_id)))
 	sprite_scale = float(config.get("sprite_scale", 1.0))
 	attack_cooldown = float(config.get("attack_cooldown", attack_cooldown))
+	behavior_id = str(config.get("behavior_id", "chaser"))
+	dash_trigger_range = float(config.get("dash_trigger_range", dash_trigger_range))
+	dash_windup = float(config.get("dash_windup", dash_windup))
+	dash_duration = float(config.get("dash_duration", dash_duration))
+	dash_recover = float(config.get("dash_recover", dash_recover))
+	dash_speed = float(config.get("dash_speed", dash_speed))
+	ranged_preferred_distance = float(config.get("preferred_distance", ranged_preferred_distance))
+	ranged_windup = float(config.get("windup", ranged_windup))
+	ranged_projectile_damage = float(config.get("projectile_damage", damage * 0.75))
+	ranged_projectile_speed = float(config.get("projectile_speed", ranged_projectile_speed))
+	ranged_projectile_range = float(config.get("projectile_range", ranged_projectile_range))
+	ranged_projectile_radius = float(config.get("projectile_radius", ranged_projectile_radius))
+	spawns_on_death = bool(config.get("spawns_on_death", false))
+	death_spawn_id = str(config.get("death_spawn_id", "normal"))
+	death_spawn_count = int(config.get("death_spawn_count", 0))
+	death_spawn_cap = int(config.get("death_spawn_cap", 150))
+	is_elite = bool(config.get("is_elite", false))
+	is_boss = bool(config.get("is_boss", false))
+	elite_bonus_xp = int(config.get("elite_bonus_xp", 0))
 	velocity = Vector2.ZERO
 	attack_timer = 0.0
 	hp_bar_timer = 0.0
+	behavior_state = "chase"
+	behavior_timer = 0.0
+	dash_direction = Vector2.ZERO
+	status_timers.clear()
+	status_strengths.clear()
+	expired_status_ids.clear()
+	boss_phase_two_triggered = false
+	boss_ability_timer = float(config.get("boss_ability_cooldown", 4.8))
 	rotation = 0.0
 	_apply_shape()
 	_apply_sprite()
@@ -101,29 +163,213 @@ func _physics_process(delta: float) -> void:
 	if not is_active:
 		return
 
+	_tick_status_effects(delta)
 	var target := _find_nearest_hero()
 	if target == null or not is_instance_valid(target):
 		return
 
 	attack_timer = max(attack_timer - delta, 0.0)
 
+	match behavior_id:
+		"ranged":
+			_physics_ranged(delta, target)
+		"dasher":
+			_physics_dasher(delta, target)
+		"boss":
+			_physics_boss(delta, target)
+		_:
+			_physics_chaser(target)
+
+	_tick_hp_bar(delta)
+
+
+func _physics_chaser(target: Node2D) -> void:
 	var to_target: Vector2 = target.global_position - global_position
-	var distance_squared: float = to_target.length_squared()
-	if distance_squared > 1.0:
-		velocity = to_target.normalized() * speed
+	if to_target.length_squared() > 1.0:
+		velocity = to_target.normalized() * _effective_speed()
 	else:
 		velocity = Vector2.ZERO
+	_move_and_face()
+	_try_contact_attack(target)
+
+
+func _physics_ranged(delta: float, target: Node2D) -> void:
+	if behavior_state == "windup":
+		behavior_timer = max(behavior_timer - delta, 0.0)
+		velocity = Vector2.ZERO
+		_move_and_face()
+		_set_sprite_modulate(Color(1.0, 0.88, 0.36))
+		if behavior_timer <= 0.0:
+			_fire_ranged_projectile(target)
+			behavior_state = "chase"
+			attack_timer = attack_cooldown
+			_set_sprite_modulate(body_color)
+		return
+
+	var to_target: Vector2 = target.global_position - global_position
+	var distance_squared := to_target.length_squared()
+	var preferred := ranged_preferred_distance
+	if distance_squared > preferred * preferred * 1.18:
+		velocity = to_target.normalized() * _effective_speed()
+	elif distance_squared < preferred * preferred * 0.52:
+		velocity = -to_target.normalized() * _effective_speed() * 0.75
+	else:
+		velocity = Vector2.ZERO
+		if attack_timer <= 0.0:
+			behavior_state = "windup"
+			behavior_timer = ranged_windup
+	_move_and_face()
+	_try_contact_attack(target)
+
+
+func _physics_dasher(delta: float, target: Node2D) -> void:
+	match behavior_state:
+		"windup":
+			behavior_timer = max(behavior_timer - delta, 0.0)
+			velocity = Vector2.ZERO
+			_move_and_face()
+			_set_sprite_modulate(Color(1.0, 0.55, 0.42))
+			if behavior_timer <= 0.0:
+				behavior_state = "dash"
+				behavior_timer = dash_duration
+				_set_sprite_modulate(body_color)
+		"dash":
+			behavior_timer = max(behavior_timer - delta, 0.0)
+			velocity = dash_direction * dash_speed
+			_move_and_face()
+			_try_contact_attack(target, 1.35)
+			if behavior_timer <= 0.0:
+				behavior_state = "recover"
+				behavior_timer = dash_recover
+				velocity = Vector2.ZERO
+		"recover":
+			behavior_timer = max(behavior_timer - delta, 0.0)
+			velocity = Vector2.ZERO
+			_move_and_face()
+			if behavior_timer <= 0.0:
+				behavior_state = "chase"
+		_:
+			var to_target: Vector2 = target.global_position - global_position
+			if to_target.length_squared() <= dash_trigger_range * dash_trigger_range and attack_timer <= 0.0:
+				dash_direction = to_target.normalized()
+				if dash_direction == Vector2.ZERO:
+					dash_direction = Vector2.RIGHT
+				behavior_state = "windup"
+				behavior_timer = dash_windup
+				attack_timer = attack_cooldown
+				velocity = Vector2.ZERO
+			else:
+				velocity = to_target.normalized() * _effective_speed() if to_target.length_squared() > 1.0 else Vector2.ZERO
+			_move_and_face()
+			_try_contact_attack(target)
+
+
+func _physics_boss(delta: float, target: Node2D) -> void:
+	var to_target: Vector2 = target.global_position - global_position
+	if to_target.length_squared() > 180.0 * 180.0:
+		velocity = to_target.normalized() * _effective_speed()
+	else:
+		velocity = Vector2.ZERO
+	_move_and_face()
+	_try_contact_attack(target, 1.15)
+
+	boss_ability_timer -= delta
+	if boss_ability_timer <= 0.0:
+		_fire_ring_projectiles(10)
+		boss_ability_timer = 5.4
+
+	if not boss_phase_two_triggered and hp <= max_hp * 0.5:
+		_trigger_boss_phase_two()
+
+
+func _move_and_face() -> void:
 	move_and_slide()
 	if velocity.length_squared() > 1.0 and sprite != null:
 		sprite.rotation = velocity.angle()
 
+
+func _try_contact_attack(target: Node2D, damage_multiplier: float = 1.0) -> void:
 	var target_hit_radius: float = _get_target_hit_radius(target)
 	var attack_distance: float = radius + target_hit_radius + 4.0
-	if distance_squared <= attack_distance * attack_distance and attack_timer <= 0.0:
-		attack_timer = attack_cooldown
-		if target.has_method("take_damage"):
-			target.take_damage(damage, global_position)
+	if global_position.distance_squared_to(target.global_position) > attack_distance * attack_distance:
+		return
+	if attack_timer > 0.0:
+		return
+	attack_timer = attack_cooldown
+	if target.has_method("take_damage"):
+		target.take_damage(damage * damage_multiplier, global_position)
 
+
+func _fire_ranged_projectile(target: Node2D) -> void:
+	if target == null or not is_instance_valid(target):
+		return
+	var direction := (target.global_position - global_position).normalized()
+	if direction == Vector2.ZERO:
+		direction = Vector2.RIGHT
+	EntityFactory.spawn_enemy_projectile(global_position + direction * (radius + 8.0), direction, _enemy_projectile_stats(), self)
+
+
+func _fire_ring_projectiles(count: int) -> void:
+	var projectile_count: int = max(1, count)
+	var projectile_stats := _enemy_projectile_stats(0.82)
+	for index in range(projectile_count):
+		var direction := Vector2.RIGHT.rotated(TAU * float(index) / float(projectile_count))
+		EntityFactory.spawn_enemy_projectile(global_position + direction * (radius + 8.0), direction, projectile_stats, self)
+
+
+func _enemy_projectile_stats(damage_multiplier: float = 1.0) -> Dictionary:
+	return {
+		"damage": ranged_projectile_damage * damage_multiplier,
+		"range": ranged_projectile_range,
+		"projectile_speed": ranged_projectile_speed,
+		"projectile_radius": ranged_projectile_radius,
+		"pierce": 0,
+		"color": Color(1.0, 0.35, 0.24),
+		"projectile_sprite_path": "res://assets/sprites/proj_bullet.png",
+		"sprite_scale": 1.0,
+		"target_group": "heroes"
+	}
+
+
+func _trigger_boss_phase_two() -> void:
+	boss_phase_two_triggered = true
+	_fire_ring_projectiles(14)
+	_spawn_boss_dashers(4)
+	if GameManager.has_method("record_boss_phase_two"):
+		GameManager.record_boss_phase_two()
+
+
+func _spawn_boss_dashers(count: int) -> void:
+	for index in range(count):
+		if EntityFactory.get_enemy_live_count() >= death_spawn_cap:
+			return
+		var angle := TAU * float(index) / float(max(1, count))
+		EntityFactory.spawn_enemy("boss_dasher", _boss_dasher_config(), global_position + Vector2.RIGHT.rotated(angle) * 72.0)
+
+
+func _boss_dasher_config() -> Dictionary:
+	return {
+		"max_hp": 28.0,
+		"speed": 116.0,
+		"damage": 7.0,
+		"xp": 1,
+		"gold": 1,
+		"radius": 10.0,
+		"color": Color(1.0, 0.54, 0.34),
+		"sprite_path": "res://assets/sprites/enemy_fast.png",
+		"sprite_scale": 1.08,
+		"attack_cooldown": 0.9,
+		"behavior_id": "dasher",
+		"dash_trigger_range": 170.0,
+		"dash_windup": 0.34,
+		"dash_duration": 0.24,
+		"dash_recover": 0.55,
+		"dash_speed": 430.0,
+		"spawns_on_death": false
+	}
+
+
+func _tick_hp_bar(delta: float) -> void:
 	if hp_bar_timer > 0.0:
 		hp_bar_timer = max(hp_bar_timer - delta, 0.0)
 		if hp_bar_timer <= 0.0:
@@ -153,13 +399,48 @@ func _find_nearest_hero() -> Node2D:
 	return nearest
 
 
+func apply_status_effect(effect_id: String, duration: float, strength: float) -> void:
+	if not is_active or effect_id == "":
+		return
+	status_timers[effect_id] = max(float(status_timers.get(effect_id, 0.0)), duration)
+	status_strengths[effect_id] = strength
+
+
+func _tick_status_effects(delta: float) -> void:
+	if status_timers.is_empty():
+		return
+	expired_status_ids.clear()
+	for effect_id in status_timers:
+		status_timers[effect_id] = float(status_timers[effect_id]) - delta
+		if float(status_timers[effect_id]) <= 0.0:
+			expired_status_ids.append(effect_id)
+	for effect_id in expired_status_ids:
+		status_timers.erase(effect_id)
+		status_strengths.erase(effect_id)
+
+
+func _damage_taken_multiplier() -> float:
+	var multiplier := 1.0
+	if status_timers.has("vulnerable"):
+		multiplier += float(status_strengths.get("vulnerable", 0.0))
+	return multiplier
+
+
+func _effective_speed() -> float:
+	var multiplier := 1.0
+	if status_timers.has("slow"):
+		multiplier -= float(status_strengths.get("slow", 0.0))
+	return speed * clamp(multiplier, 0.35, 1.6)
+
+
 func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> void:
 	if hp <= 0.0 or not is_active:
 		return
 
-	hp = max(hp - amount, 0.0)
+	var final_amount := amount * _damage_taken_multiplier()
+	hp = max(hp - final_amount, 0.0)
 	var number_position := global_position + Vector2(randf_range(-8.0, 8.0), -radius - 10.0)
-	EntityFactory.spawn_damage_number(amount, number_position, Color(1.0, 0.96, 0.72))
+	EntityFactory.spawn_damage_number(final_amount, number_position, Color(1.0, 0.96, 0.72))
 	hp_bar_timer = 0.55
 	_update_hp_bar()
 	_set_hp_bar_visible(true)
@@ -172,16 +453,56 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 	if not is_active:
 		return
 	is_active = false
+	status_timers.clear()
+	status_strengths.clear()
 	GameManager.add_kill()
+	if is_elite and GameManager.has_method("record_elite_kill"):
+		GameManager.record_elite_kill()
+	if is_boss and GameManager.has_method("record_boss_kill"):
+		GameManager.record_boss_kill()
 	EntityFactory.call_deferred("spawn_death_burst", global_position, body_color)
 
 	if xp_value > 0:
 		EntityFactory.call_deferred("spawn_xp_gem", global_position, xp_value)
+	if elite_bonus_xp > 0:
+		EntityFactory.call_deferred("spawn_visible_xp_gem", global_position, elite_bonus_xp)
 	if gold_value > 0:
 		var coin_position := global_position + Vector2(randf_range(-10.0, 10.0), randf_range(-10.0, 10.0))
 		EntityFactory.call_deferred("spawn_gold_coin", coin_position, gold_value)
+	if spawns_on_death:
+		_spawn_death_children()
+	if GameManager.squad_manager != null and is_instance_valid(GameManager.squad_manager) and GameManager.squad_manager.has_method("has_weapon_modifier"):
+		if GameManager.squad_manager.has_weapon_modifier("magnetic_reclaim"):
+			EntityFactory.call_deferred("magnetize_xp_near", global_position, 155.0)
 
 	EntityFactory.release_enemy_deferred(self)
+
+
+func _spawn_death_children() -> void:
+	var count: int = max(0, death_spawn_count)
+	for index in range(count):
+		if EntityFactory.get_enemy_live_count() >= death_spawn_cap:
+			return
+		var angle := TAU * float(index) / float(max(1, count))
+		var child_position := global_position + Vector2.RIGHT.rotated(angle) * (radius + 12.0)
+		EntityFactory.spawn_enemy(death_spawn_id, _death_child_config(), child_position)
+
+
+func _death_child_config() -> Dictionary:
+	return {
+		"max_hp": 12.0,
+		"speed": 124.0,
+		"damage": 4.0,
+		"xp": 1,
+		"gold": 0,
+		"radius": 8.5,
+		"color": Color(0.95, 0.42, 0.35),
+		"sprite_path": "res://assets/sprites/enemy_fast.png",
+		"sprite_scale": 0.82,
+		"attack_cooldown": 0.8,
+		"behavior_id": "chaser",
+		"spawns_on_death": false
+	}
 
 
 func _apply_shape() -> void:
@@ -244,6 +565,11 @@ func _apply_sprite() -> void:
 	sprite.modulate = body_color
 	sprite.rotation = 0.0
 	SPRITE_LOADER.fit_sprite(sprite, texture, radius * 3.0, sprite_scale)
+
+
+func _set_sprite_modulate(color: Color) -> void:
+	if sprite != null:
+		sprite.modulate = color
 
 
 func _update_hp_bar() -> void:

@@ -40,29 +40,103 @@ const ENEMY_CONFIGS: Dictionary = {
 		"weight": 0.24,
 		"min_time": 42.0,
 		"attack_cooldown": 1.0
+	},
+	"ranged": {
+		"max_hp": 24.0,
+		"speed": 64.0,
+		"damage": 5.0,
+		"xp": 3,
+		"gold": 1,
+		"radius": 12.0,
+		"color": Color(1.0, 0.36, 0.28),
+		"sprite_path": "res://assets/sprites/enemy_grunt.png",
+		"sprite_scale": 1.05,
+		"weight": 0.22,
+		"min_time": 30.0,
+		"attack_cooldown": 2.35,
+		"behavior_id": "ranged",
+		"preferred_distance": 255.0,
+		"windup": 0.3,
+		"projectile_damage": 5.0,
+		"projectile_speed": 240.0,
+		"projectile_range": 880.0,
+		"projectile_radius": 6.0
+	},
+	"spawner": {
+		"max_hp": 42.0,
+		"speed": 42.0,
+		"damage": 7.0,
+		"xp": 5,
+		"gold": 2,
+		"radius": 18.0,
+		"color": Color(0.86, 0.26, 0.58),
+		"sprite_path": "res://assets/sprites/enemy_tank.png",
+		"sprite_scale": 0.92,
+		"weight": 0.16,
+		"min_time": 45.0,
+		"attack_cooldown": 1.2,
+		"behavior_id": "chaser",
+		"spawns_on_death": true,
+		"death_spawn_id": "spawnling",
+		"death_spawn_count": 2,
+		"death_spawn_cap": 150
+	},
+	"dasher": {
+		"max_hp": 30.0,
+		"speed": 112.0,
+		"damage": 7.0,
+		"xp": 3,
+		"gold": 1,
+		"radius": 11.0,
+		"color": Color(1.0, 0.62, 0.24),
+		"sprite_path": "res://assets/sprites/enemy_fast.png",
+		"sprite_scale": 1.08,
+		"weight": 0.2,
+		"min_time": 55.0,
+		"attack_cooldown": 1.05,
+		"behavior_id": "dasher",
+		"dash_trigger_range": 165.0,
+		"dash_windup": 0.42,
+		"dash_duration": 0.24,
+		"dash_recover": 0.55,
+		"dash_speed": 420.0
 	}
 }
 
 @export var max_enemies: int = 150
 @export var spawn_margin: float = 110.0
+@export var boss_time: float = 180.0
 
 var spawn_timer: float = 0.4
+var next_elite_time: float = 52.0
+var boss_spawned: bool = false
 
 
 func _process(delta: float) -> void:
 	if not GameManager.game_running:
 		return
 
+	var elapsed := GameManager.elapsed_time
+	if not boss_spawned and elapsed >= boss_time:
+		_spawn_boss()
+
+	if elapsed >= next_elite_time:
+		_spawn_elite()
+		next_elite_time = elapsed + randf_range(45.0, 60.0)
+
 	spawn_timer -= delta
 	if spawn_timer > 0.0:
 		return
 
-	var elapsed := GameManager.elapsed_time
-	var spawn_count := 1 + int(elapsed / 45.0)
+	var spawn_count := 1 + int(elapsed / 60.0)
+	if bool(GameManager.get("boss_active")):
+		spawn_count = max(1, int(ceil(float(spawn_count) * 0.45)))
 	for _index in range(spawn_count):
 		_spawn_one()
 
-	spawn_timer = max(0.22, 1.05 - elapsed * 0.006)
+	spawn_timer = max(0.28, 1.05 - elapsed * 0.0048)
+	if bool(GameManager.get("boss_active")):
+		spawn_timer *= 1.35
 
 
 func _spawn_one() -> void:
@@ -70,8 +144,57 @@ func _spawn_one() -> void:
 		return
 
 	var enemy_id := _choose_enemy_type()
-	var config: Dictionary = ENEMY_CONFIGS[enemy_id]
+	var config: Dictionary = _config_for_spawn(enemy_id)
 	EntityFactory.spawn_enemy(enemy_id, config, _get_spawn_position())
+
+
+func _spawn_elite() -> void:
+	if EntityFactory.get_enemy_live_count() >= max_enemies:
+		return
+	var config := _config_for_spawn("tank")
+	config["max_hp"] = float(config.get("max_hp", 58.0)) * 3.0
+	config["damage"] = float(config.get("damage", 14.0)) * 1.3
+	config["radius"] = 28.0
+	config["color"] = Color(0.85, 0.28, 1.0)
+	config["sprite_scale"] = 1.25
+	config["xp"] = 8
+	config["gold"] = 6
+	config["is_elite"] = true
+	config["elite_bonus_xp"] = 24
+	EntityFactory.spawn_enemy("elite_distortion", config, _get_spawn_position())
+	if GameManager.has_method("record_elite_spawn"):
+		GameManager.record_elite_spawn()
+
+
+func _spawn_boss() -> void:
+	if EntityFactory.get_enemy_live_count() >= max_enemies:
+		return
+	boss_spawned = true
+	var config := {
+		"max_hp": 1500.0,
+		"speed": 46.0,
+		"damage": 18.0,
+		"xp": 30,
+		"gold": 16,
+		"radius": 34.0,
+		"color": Color(0.42, 0.18, 0.74),
+		"sprite_path": "res://assets/sprites/enemy_tank.png",
+		"sprite_scale": 1.58,
+		"attack_cooldown": 1.15,
+		"behavior_id": "boss",
+		"is_boss": true,
+		"projectile_damage": 7.0,
+		"projectile_speed": 215.0,
+		"projectile_range": 940.0,
+		"projectile_radius": 7.0,
+		"boss_ability_cooldown": 4.2,
+		"death_spawn_cap": max_enemies
+	}
+	EntityFactory.spawn_enemy("veil_gatekeeper", config, _get_spawn_position())
+	if GameManager.has_method("record_boss_spawn"):
+		GameManager.record_boss_spawn()
+	if GameManager.has_method("set_boss_active"):
+		GameManager.set_boss_active(true)
 
 
 func _choose_enemy_type() -> String:
@@ -94,6 +217,24 @@ func _choose_enemy_type() -> String:
 			return enemy_id
 
 	return "normal"
+
+
+func _config_for_spawn(enemy_id: String) -> Dictionary:
+	var config: Dictionary = ENEMY_CONFIGS[enemy_id].duplicate(true)
+	_apply_time_scaling(config)
+	return config
+
+
+func _apply_time_scaling(config: Dictionary) -> void:
+	var elapsed := GameManager.elapsed_time
+	if elapsed < 90.0:
+		return
+	var minutes_after := (elapsed - 90.0) / 60.0
+	var multiplier := 1.0 + 0.04 * minutes_after
+	config["max_hp"] = float(config.get("max_hp", 1.0)) * multiplier
+	config["damage"] = float(config.get("damage", 1.0)) * multiplier
+	if config.has("projectile_damage"):
+		config["projectile_damage"] = float(config.get("projectile_damage", 1.0)) * multiplier
 
 
 func _get_spawn_position() -> Vector2:

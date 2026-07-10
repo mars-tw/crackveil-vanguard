@@ -11,6 +11,8 @@ const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 
 var drift_velocity: Vector2 = Vector2.ZERO
 var magnetized: bool = false
+var forced_collector: Node2D = null
+var forced_magnet_timer: float = 0.0
 var bob_phase: float = 0.0
 var is_active: bool = false
 var sprite: Sprite2D = null
@@ -41,6 +43,8 @@ func pool_on_release() -> void:
 	value = 0
 	drift_velocity = Vector2.ZERO
 	magnetized = false
+	forced_collector = null
+	forced_magnet_timer = 0.0
 	bob_phase = 0.0
 	rotation = 0.0
 	if sprite != null:
@@ -56,6 +60,8 @@ func setup(amount: int, start_velocity: Vector2 = Vector2.ZERO) -> void:
 	value = amount
 	drift_velocity = start_velocity
 	magnetized = false
+	forced_collector = null
+	forced_magnet_timer = 0.0
 	rotation = 0.0
 	_apply_sprite()
 
@@ -72,7 +78,12 @@ func _physics_process(delta: float) -> void:
 		drift_velocity = drift_velocity.move_toward(Vector2.ZERO, 320.0 * delta)
 		moved = true
 
-	var collector := _find_collector()
+	if forced_magnet_timer > 0.0:
+		forced_magnet_timer = max(forced_magnet_timer - delta, 0.0)
+		if forced_magnet_timer <= 0.0:
+			forced_collector = null
+
+	var collector := forced_collector if _is_forced_collector_valid() else _find_collector()
 	if collector == null:
 		if moved or magnetized:
 			_update_sprite_bob()
@@ -84,7 +95,7 @@ func _physics_process(delta: float) -> void:
 
 	var to_collector: Vector2 = collector.global_position - global_position
 	var distance := to_collector.length()
-	if distance <= pickup_radius:
+	if forced_collector != null or distance <= pickup_radius:
 		magnetized = true
 
 	if magnetized and distance > 0.001:
@@ -107,6 +118,27 @@ func collect(_player: Node) -> void:
 		_:
 			GameManager.add_xp(value)
 			EntityFactory.release_xp_gem(self)
+
+
+func force_magnet_to(collector: Node2D) -> void:
+	if pickup_kind != "xp" or collector == null or not is_instance_valid(collector):
+		return
+	forced_collector = collector
+	forced_magnet_timer = 1.45
+	magnetized = true
+
+
+func add_value(amount: int) -> void:
+	value += amount
+	_apply_sprite()
+
+
+func _is_forced_collector_valid() -> bool:
+	if forced_collector == null or not is_instance_valid(forced_collector):
+		return false
+	if bool(forced_collector.get("is_alive")) == false:
+		return false
+	return forced_magnet_timer > 0.0
 
 
 func _find_collector() -> Node2D:

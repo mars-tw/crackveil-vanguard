@@ -23,7 +23,7 @@ func pool_on_release() -> void:
 	is_active = false
 	visible = false
 	set_process(false)
-	stats.clear()
+	stats = {}
 	source = null
 	age = 0.0
 	rotation = 0.0
@@ -38,7 +38,7 @@ func pool_reset(args: Dictionary) -> void:
 
 func setup(world_position: Vector2, effect_stats: Dictionary, effect_source: Node) -> void:
 	global_position = world_position
-	stats = effect_stats.duplicate(true)
+	stats = effect_stats
 	source = effect_source
 	age = 0.0
 	rotation = 0.0

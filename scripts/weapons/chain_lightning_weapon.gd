@@ -25,18 +25,25 @@ func _cast_chain(first_target: Node2D) -> void:
 
 	while current != null and chain_targets.size() < max(1, data_int("chain_count", 4)):
 		chain_targets.append(current)
-		used_ids[current.get_instance_id()] = true
+		used_ids[_hit_key_for(current)] = true
 		current = _find_next_chain_target(current.global_position, used_ids)
 
 	var points: Array[Vector2] = [owner_player.global_position]
 	var damage_value: float = data_float("damage", 12.0)
+	var final_target_position := Vector2.ZERO
+	var has_final_target := false
 	for target in chain_targets:
 		if target == null or not is_instance_valid(target):
 			continue
 		points.append(target.global_position)
+		final_target_position = target.global_position
+		has_final_target = true
 		if target.has_method("take_damage"):
 			target.take_damage(damage_value, owner_player.global_position)
 		damage_value *= data_float("chain_damage_falloff", 0.86)
+
+	if int(data_effect_stats().get("chain_overload_level", 0)) > 0 and has_final_target:
+		EntityFactory.spawn_explosion(final_target_position, _make_overload_stats(), owner_player)
 
 	EntityFactory.spawn_lightning_arc(
 		points,
@@ -44,6 +51,17 @@ func _cast_chain(first_target: Node2D) -> void:
 		data_float("effect_lifetime", 0.22),
 		data_string("lightning_sprite_path", "res://assets/sprites/proj_lightning.png")
 	)
+
+
+func _make_overload_stats() -> Dictionary:
+	return {
+		"damage": data_float("damage", 12.0) * 0.42,
+		"area_radius": max(42.0, data_float("chain_radius", 170.0) * 0.32),
+		"effect_lifetime": 0.22,
+		"explosion_sprite_path": "res://assets/sprites/fx_explosion.png",
+		"color": data_color("color", Color(0.6, 0.9, 1.0)),
+		"sprite_scale": 0.72
+	}
 
 
 func _find_next_chain_target(origin: Vector2, used_ids: Dictionary) -> Node2D:
@@ -54,7 +72,7 @@ func _find_next_chain_target(origin: Vector2, used_ids: Dictionary) -> Node2D:
 	for enemy in EntityFactory.get_enemies_in_radius(origin, chain_radius):
 		if enemy == null or not is_instance_valid(enemy):
 			continue
-		if used_ids.has(enemy.get_instance_id()):
+		if used_ids.has(_hit_key_for(enemy)):
 			continue
 		var distance_squared: float = origin.distance_squared_to(enemy.global_position)
 		if distance_squared < best_distance_squared:
@@ -62,3 +80,9 @@ func _find_next_chain_target(origin: Vector2, used_ids: Dictionary) -> Node2D:
 			nearest = enemy
 
 	return nearest
+
+
+func _hit_key_for(body: Node) -> int:
+	if body != null and body.has_method("get_hit_token"):
+		return int(body.get_hit_token())
+	return int(body.get_instance_id())
