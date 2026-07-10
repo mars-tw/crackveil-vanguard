@@ -98,6 +98,8 @@ def load_safety_chars(limit: int, cache_path: Path) -> list[str]:
 
 def builtin_symbols() -> set[str]:
     chars = {chr(codepoint) for codepoint in range(0x20, 0x7F)}
+    # General Punctuation（——、‘’、“”、…、‧ 等），R9 實測 U+2014 破折號豆腐後補上
+    chars.update(chr(codepoint) for codepoint in range(0x2000, 0x2070))
     chars.update(chr(codepoint) for codepoint in range(0x3000, 0x3040))
     chars.update(chr(codepoint) for codepoint in range(0xFF01, 0xFF5F))
     return chars
@@ -152,7 +154,8 @@ def parse_args() -> argparse.Namespace:
         default=repo_root / "assets/fonts/NotoSansCJKtc-Regular-UI-Subset.chars.txt",
     )
     parser.add_argument("--safety-limit", type=int, default=2800)
-    parser.add_argument("--max-size-bytes", type=int, default=1_500_000)
+    # R9：補 General Punctuation 後 1,503,160 bytes，上限調至 1.55MB（守門防失控用意不變）
+    parser.add_argument("--max-size-bytes", type=int, default=1_550_000)
     parser.add_argument(
         "--check-chars",
         default="載暴距引跳雷鏈過磁回收",
