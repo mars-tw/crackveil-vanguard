@@ -12,6 +12,7 @@ var gold_icon: TextureRect
 var hp_label: Label
 var level_label: Label
 var xp_bar: ProgressBar
+var theme_label: Label
 var time_label: Label
 var score_label: Label
 var pause_button: Button
@@ -139,6 +140,13 @@ func _build_ui() -> void:
 	xp_bar.max_value = 1.0
 	xp_bar.show_percentage = false
 	root.add_child(xp_bar)
+
+	theme_label = Label.new()
+	theme_label.name = "ThemeLabel"
+	theme_label.position = Vector2(50.0, 84.0)
+	theme_label.add_theme_font_size_override("font_size", 13)
+	theme_label.modulate = Color(0.74, 0.92, 0.86, 0.9)
+	root.add_child(theme_label)
 
 	time_label = Label.new()
 	time_label.name = "TimeLabel"
@@ -387,7 +395,7 @@ func _apply_responsive_layout() -> void:
 
 	if hud_panel != null:
 		hud_panel.position = Vector2(8.0, 8.0)
-		hud_panel.size = Vector2(min(viewport_size.x * (0.7 if portrait else 0.36), 340.0), 88.0)
+		hud_panel.size = Vector2(min(viewport_size.x * (0.72 if portrait else 0.36), 340.0), 108.0)
 	if score_panel != null:
 		score_panel.anchor_left = 1.0
 		score_panel.anchor_right = 1.0
@@ -416,6 +424,10 @@ func _apply_responsive_layout() -> void:
 	level_label.add_theme_font_size_override("font_size", 14 if portrait else 16)
 	xp_bar.position = Vector2(margin + 36.0, 66.0)
 	xp_bar.size = Vector2(min(viewport_size.x * (0.5 if portrait else 0.27), 260.0), 14.0)
+	if theme_label != null:
+		theme_label.position = Vector2(margin + 36.0, 82.0)
+		theme_label.size = Vector2(min(viewport_size.x * (0.55 if portrait else 0.28), 276.0), 22.0)
+		theme_label.add_theme_font_size_override("font_size", 12 if portrait else 13)
 
 	time_label.anchor_left = 0.5
 	time_label.anchor_right = 0.5
@@ -570,6 +582,10 @@ func _on_stats_changed(stats: Dictionary) -> void:
 	hp_label.text = "HP %d/%d" % [hp, max_hp]
 	level_label.text = "等級 %d   經驗 %d/%d" % [current_level, xp, xp_required]
 	xp_bar.value = clamp(float(xp) / float(xp_required), 0.0, 1.0)
+	var theme_name := str(stats.get("run_theme_name", ""))
+	if theme_label != null:
+		theme_label.text = "地圖：%s" % theme_name if theme_name != "" else ""
+		theme_label.visible = theme_name != ""
 	time_label.text = GameManager.format_time(float(stats.get("elapsed_time", 0.0)))
 	score_label.text = "擊殺 %d   金幣 %d   殘響 %d" % [
 		int(stats.get("kills", 0)),

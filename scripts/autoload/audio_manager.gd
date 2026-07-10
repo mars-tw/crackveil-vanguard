@@ -16,7 +16,8 @@ const SFX_PATHS: Dictionary = {
 	"pulse": "res://assets/audio/pulse.wav",
 	"pickup": "res://assets/audio/pickup.wav",
 	"kill_thump": "res://assets/audio/kill_thump.wav",
-	"combo": "res://assets/audio/combo.wav"
+	"combo": "res://assets/audio/combo.wav",
+	"footstep": "res://assets/audio/footstep.wav"
 }
 const SFX_COOLDOWNS: Dictionary = {
 	"fire": 0.07,
@@ -28,7 +29,8 @@ const SFX_COOLDOWNS: Dictionary = {
 	"pulse": 0.18,
 	"pickup": 0.025,
 	"kill_thump": 0.055,
-	"combo": 0.18
+	"combo": 0.18,
+	"footstep": 0.045
 }
 
 var master_volume: float = 0.75

@@ -84,6 +84,16 @@ scripts/      GDScript 遊戲邏輯、autoload、服務與 UI
 
 Web 版內嵌 `assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf`，由 Noto Sans CJK TC Regular 子集化產生，用於繁體中文 UI。Noto Sans CJK 採 SIL Open Font License 1.1，授權文字見 `assets/fonts/OFL.txt`。
 
+## R12 特色
+
+- 本局地圖主題依 run seed 決定，包含「裂隙虛空」、「廢土農野」、「餘燼裂原」三種視覺。
+- 玩家小隊移動時有交替步伐傾斜、小跳步、腳下步塵與低音量腳步 tick；敵人保留輕量交替步相位。
+- 地圖加入 seed 決定性 decor 散佈、裂隙脈衝、遠景裂隙閃電、植物微晃與偶發流星/碎片。
+
+## 素材 Credits
+
+- 廢土農野地形與部分 decor 裁切/改色自同作者 MIT 開源專案 `pixel-idle-farm-skill` 的農場像素素材；本 repo 僅收錄 R12 需要的小裁片，不包含原始大型 atlas。
+
 ## License
 
 MIT License. See [LICENSE](LICENSE).

@@ -170,6 +170,8 @@ var shop_schedule_index: int = 0
 var shop_refresh_count: int = 0
 var forced_run_seed: int = 0
 var current_run_seed: int = 0
+var current_run_theme_id: String = ""
+var current_run_theme_name: String = ""
 var magnetic_reclaim_enabled: bool = false
 var active_contract_id: String = ""
 var active_contract_name: String = "無契約"
@@ -363,6 +365,11 @@ func emit_stats() -> void:
 	stats_changed.emit(get_stats())
 
 
+func set_current_run_theme(theme_id: String, theme_name: String) -> void:
+	current_run_theme_id = theme_id
+	current_run_theme_name = theme_name
+
+
 func get_stats() -> Dictionary:
 	var hp_value := 0.0
 	var max_hp_value := 0.0
@@ -393,6 +400,9 @@ func get_stats() -> Dictionary:
 		"magnetic_reclaim_enabled": magnetic_reclaim_enabled,
 		"active_contract_id": active_contract_id,
 		"active_contract_name": active_contract_name,
+		"run_seed": current_run_seed,
+		"run_theme_id": current_run_theme_id,
+		"run_theme_name": current_run_theme_name,
 		"temporary_squad_damage_timer": temporary_squad_damage_timer,
 		"is_game_over": is_game_over
 	}

@@ -1,6 +1,7 @@
 extends Node2D
 
 const FIRST_RUN_GUIDE_SCRIPT := preload("res://scripts/ui/first_run_guide.gd")
+const RUN_THEME := preload("res://scripts/arena/run_theme.gd")
 
 @export var run_seed: int = 0
 
@@ -16,6 +17,7 @@ var first_run_guide: CanvasLayer = null
 
 func _ready() -> void:
 	_apply_run_seed()
+	_apply_background_theme()
 
 	var level_up_callable := Callable(level_up_screen, "show_options")
 	var game_over_callable := Callable(self, "_on_game_over_requested")
@@ -128,3 +130,14 @@ func _apply_run_seed() -> void:
 		selected_seed = max(1, randi())
 	seed(selected_seed)
 	GameManager.current_run_seed = selected_seed
+	var theme_id := RUN_THEME.select_theme_id(selected_seed)
+	GameManager.set_current_run_theme(theme_id, RUN_THEME.get_theme_name(theme_id))
+
+
+func _apply_background_theme() -> void:
+	var background := get_node_or_null("Background")
+	if background != null and background.has_method("configure_run_theme"):
+		background.configure_run_theme(
+			GameManager.current_run_seed,
+			GameManager.current_run_theme_id
+		)

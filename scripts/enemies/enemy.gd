@@ -76,6 +76,7 @@ var threat_glow_base_scale: Vector2 = Vector2.ONE
 var visual_bob_frequency: float = 7.2
 var visual_bob_amplitude: float = 2.4
 var visual_tilt_amount: float = 0.085
+var visual_step_interval: float = 0.3
 
 
 func _ready() -> void:
@@ -802,9 +803,10 @@ func _tick_hit_flash(delta: float) -> void:
 func _update_procedural_visual(delta: float) -> void:
 	if sprite == null:
 		return
+	var visual_delta := maxf(delta, 1.0 / 120.0)
 	var moving := velocity.length_squared() > 4.0
-	visual_idle_phase += delta * 2.0
-	visual_walk_phase += delta * (visual_bob_frequency if moving else max(2.0, visual_bob_frequency * 0.34))
+	visual_idle_phase += visual_delta * 2.0
+	visual_walk_phase += visual_delta * (TAU / max(0.08, visual_step_interval) if moving else max(2.0, visual_bob_frequency * 0.34))
 	if hit_squash_timer > 0.0:
 		hit_squash_timer = max(hit_squash_timer - delta, 0.0)
 
@@ -813,14 +815,19 @@ func _update_procedural_visual(delta: float) -> void:
 	if abs(last_visual_direction.x) > 0.05:
 		sprite.flip_h = last_visual_direction.x < 0.0
 
-	var bob := sin(visual_walk_phase) * (visual_bob_amplitude if moving else visual_bob_amplitude * 0.18)
+	var step_phase := fposmod(visual_walk_phase, TAU)
+	var foot_sign: float = -1.0 if int(floor(visual_walk_phase / TAU)) % 2 == 0 else 1.0
+	var step_lift: float = maxf(0.0, sin(step_phase))
+	var step_land: float = pow(maxf(0.0, cos(step_phase)), 8.0) if moving else 0.0
+	var bob: float = (-step_lift * visual_bob_amplitude + step_land * visual_bob_amplitude * 0.24) if moving else sin(visual_walk_phase) * visual_bob_amplitude * 0.18
+	var lateral_offset: float = foot_sign * step_lift * visual_bob_amplitude * 0.22 if moving else 0.0
 	var breath := 1.0 + sin(visual_idle_phase) * (0.01 if moving else 0.022)
 	var squash := hit_squash_timer / 0.11 if hit_squash_timer > 0.0 else 0.0
-	var squash_x := 1.0 + squash * 0.18
-	var squash_y := 1.0 - squash * 0.14
-	var tilt: float = clamp(last_visual_direction.x, -1.0, 1.0) * visual_tilt_amount if moving else 0.0
+	var squash_x := 1.0 + squash * 0.18 + step_land * 0.035
+	var squash_y := 1.0 - squash * 0.14 - step_land * 0.025
+	var tilt: float = (foot_sign * step_lift * visual_tilt_amount + clamp(last_visual_direction.x, -1.0, 1.0) * visual_tilt_amount * 0.25) if moving else 0.0
 
-	sprite.position = Vector2(0.0, bob)
+	sprite.position = Vector2(lateral_offset, bob)
 	sprite.rotation = tilt
 	sprite.scale = Vector2(sprite_base_scale.x * breath * squash_x, sprite_base_scale.y * breath * squash_y)
 	if shadow != null:
@@ -831,23 +838,28 @@ func _update_procedural_visual(delta: float) -> void:
 
 func _apply_visual_motion_profile() -> void:
 	if is_boss:
-		visual_bob_frequency = 4.1
+		visual_step_interval = 0.46
+		visual_bob_frequency = TAU / visual_step_interval
 		visual_bob_amplitude = 2.1
 		visual_tilt_amount = 0.045
 	elif type_id.contains("tank") or type_id.contains("elite") or is_elite:
-		visual_bob_frequency = 4.8
+		visual_step_interval = 0.38
+		visual_bob_frequency = TAU / visual_step_interval
 		visual_bob_amplitude = 2.2
 		visual_tilt_amount = 0.055
 	elif type_id.contains("fast") or behavior_id == "dasher":
-		visual_bob_frequency = 11.2
+		visual_step_interval = 0.18
+		visual_bob_frequency = TAU / visual_step_interval
 		visual_bob_amplitude = 3.2
 		visual_tilt_amount = 0.13
 	elif behavior_id == "ranged":
-		visual_bob_frequency = 6.2
+		visual_step_interval = 0.32
+		visual_bob_frequency = TAU / visual_step_interval
 		visual_bob_amplitude = 2.0
 		visual_tilt_amount = 0.075
 	else:
-		visual_bob_frequency = 7.2
+		visual_step_interval = 0.28
+		visual_bob_frequency = TAU / visual_step_interval
 		visual_bob_amplitude = 2.4
 		visual_tilt_amount = 0.085
 

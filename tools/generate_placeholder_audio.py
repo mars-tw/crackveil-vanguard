@@ -136,6 +136,17 @@ def main() -> None:
             + random.uniform(-1.0, 1.0) * 0.12
         ),
     )
+    write_wav(
+        "footstep",
+        0.045,
+        lambda i, n, t: 0.13
+        * envelope(i, n, 0.025, 0.78)
+        * (
+            sine(92.0 - 28.0 * t, t) * 0.34
+            + sine(176.0 - 56.0 * t, t) * 0.18
+            + random.uniform(-1.0, 1.0) * 0.48
+        ),
+    )
 
     for wav_path in sorted(OUTPUT_DIR.glob("*.wav")):
         print(f"{wav_path.name}: {wav_path.stat().st_size} bytes")
