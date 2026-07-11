@@ -13,6 +13,7 @@ const XP_GEM_SCENE: PackedScene = preload("res://scenes/pickups/XPGem.tscn")
 const COIN_PICKUP_SCENE: PackedScene = preload("res://scenes/pickups/CoinPickup.tscn")
 const DAMAGE_NUMBER_SCENE: PackedScene = preload("res://scenes/vfx/DamageNumber.tscn")
 const DEATH_BURST_SCENE: PackedScene = preload("res://scenes/vfx/DeathBurst.tscn")
+const CORPSE_GHOST_SCENE: PackedScene = preload("res://scenes/vfx/CorpseGhost.tscn")
 const LIGHTNING_ARC_SCENE: PackedScene = preload("res://scenes/vfx/LightningArc.tscn")
 
 const PREWARM_COUNTS: Dictionary = {
@@ -26,6 +27,7 @@ const PREWARM_COUNTS: Dictionary = {
 	"coin": 220,
 	"damage_number": 96,
 	"death_burst": 32,
+	"corpse_ghost": 32,
 	"lightning_arc": 80
 }
 
@@ -37,6 +39,7 @@ const HAZARD_ZONE_CAP := 8
 const FORK_PROJECTILE_CAP := 48
 const ENEMY_PROJECTILE_CAP := 72
 const DEATH_BURST_CAP := 20
+const CORPSE_GHOST_CAP := 24
 const LIGHTNING_ARC_CAP := 32
 const XP_GEM_CAP := 180
 const COIN_CAP := 180
@@ -113,6 +116,7 @@ func initialize_for_arena(arena: Node) -> void:
 	_create_pool("coin", COIN_PICKUP_SCENE)
 	_create_pool("damage_number", DAMAGE_NUMBER_SCENE)
 	_create_pool("death_burst", DEATH_BURST_SCENE)
+	_create_pool("corpse_ghost", CORPSE_GHOST_SCENE)
 	_create_pool("lightning_arc", LIGHTNING_ARC_SCENE)
 
 
@@ -406,6 +410,24 @@ func spawn_death_burst(world_position: Vector2, burst_color: Color, burst_scale:
 	return burst
 
 
+func spawn_corpse_ghost(world_position: Vector2, corpse_sprite_path: String, corpse_color: Color, corpse_radius: float, corpse_sprite_scale: float, flip_h: bool = false, sprite_rotation: float = 0.0) -> Node:
+	if corpse_sprite_path == "" or get_pool_live_count("corpse_ghost") >= CORPSE_GHOST_CAP:
+		return null
+	var ghost := _acquire("corpse_ghost")
+	if ghost == null:
+		return null
+	ghost.pool_reset({
+		"position": world_position,
+		"sprite_path": corpse_sprite_path,
+		"color": corpse_color,
+		"radius": corpse_radius,
+		"sprite_scale": corpse_sprite_scale,
+		"flip_h": flip_h,
+		"rotation": sprite_rotation
+	})
+	return ghost
+
+
 func release_enemy(enemy: Node) -> void:
 	_mark_inactive_for_release(enemy)
 	if enemy_spatial_index != null:
@@ -466,6 +488,11 @@ func release_damage_number(number: Node) -> void:
 func release_death_burst(burst: Node) -> void:
 	_mark_inactive_for_release(burst)
 	_release("death_burst", burst)
+
+
+func release_corpse_ghost(ghost: Node) -> void:
+	_mark_inactive_for_release(ghost)
+	_release("corpse_ghost", ghost)
 
 
 func release_lightning_arc(arc: Node) -> void:
@@ -801,7 +828,8 @@ func _nearest_living_hero(world_position: Vector2) -> Node2D:
 	for member in members:
 		if member == null or not is_instance_valid(member):
 			continue
-		if bool(member.get("is_alive")) == false:
+		var member_alive: Variant = member.get("is_alive")
+		if member_alive != null and bool(member_alive) == false:
 			continue
 		var distance_squared := world_position.distance_squared_to(member.global_position)
 		if distance_squared < best_distance_squared:
@@ -903,6 +931,8 @@ func _scene_for_pool(pool_name: String) -> PackedScene:
 			return DAMAGE_NUMBER_SCENE
 		"death_burst":
 			return DEATH_BURST_SCENE
+		"corpse_ghost":
+			return CORPSE_GHOST_SCENE
 		"lightning_arc":
 			return LIGHTNING_ARC_SCENE
 		_:

@@ -24,6 +24,9 @@ var sprite: Sprite2D = null
 var shadow: Sprite2D = null
 var glow: Sprite2D = null
 
+static var pickup_streak_count: int = 0
+static var pickup_streak_last_msec: int = -1000000
+
 
 func _ready() -> void:
 	if sprite_path == "":
@@ -175,7 +178,8 @@ func add_value(amount: int) -> void:
 func _is_forced_collector_valid() -> bool:
 	if forced_collector == null or not is_instance_valid(forced_collector):
 		return false
-	if bool(forced_collector.get("is_alive")) == false:
+	var collector_alive: Variant = forced_collector.get("is_alive")
+	if collector_alive != null and bool(collector_alive) == false:
 		return false
 	return forced_magnet_timer > 0.0
 
@@ -192,7 +196,8 @@ func _find_collector() -> Node2D:
 	for member in members:
 		if member == null or not is_instance_valid(member):
 			continue
-		if bool(member.get("is_alive")) == false:
+		var member_alive: Variant = member.get("is_alive")
+		if member_alive != null and bool(member_alive) == false:
 			continue
 		var pickup_radius: float = 90.0
 		if member.has_method("get_pickup_radius"):
@@ -270,4 +275,15 @@ func _update_sprite_bob() -> void:
 
 func _play_pickup_sfx() -> void:
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
-		AudioManager.play_sfx("pickup")
+		var pitch := _next_pickup_pitch() if pickup_kind == "xp" else 0.96
+		AudioManager.play_sfx("pickup", false, 0.0, pitch)
+
+
+func _next_pickup_pitch() -> float:
+	var now := Time.get_ticks_msec()
+	if now - pickup_streak_last_msec <= 520:
+		pickup_streak_count += 1
+	else:
+		pickup_streak_count = 1
+	pickup_streak_last_msec = now
+	return clamp(0.94 + float(min(pickup_streak_count - 1, 12)) * 0.045, 0.86, 1.48)

@@ -14,6 +14,7 @@ signal combo_pulse_requested(combo_count: int)
 signal combo_milestone_requested(combo_count: int)
 signal combo_break_requested(combo_count: int)
 signal boss_intro_requested(boss_name: String)
+signal captain_ability_hit_flash_requested
 
 const SHOP_FIRST_TIME := 75.0
 const SHOP_SECOND_TIME := 150.0
@@ -189,6 +190,9 @@ var seen_affix_toasts: Dictionary = {}
 var pending_toasts: Array[String] = []
 var run_token: int = 0
 var hit_stop_token: int = 0
+var time_scale_owner_tokens: Dictionary = {}
+var time_scale_owner_scales: Dictionary = {}
+var time_scale_next_token: int = 1
 var camera_threat_zoom_timer: float = 0.0
 var combo_count: int = 0
 var combo_last_kill_time: float = -999.0
@@ -208,7 +212,7 @@ func _ready() -> void:
 
 
 func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null, reset_player: bool = true) -> void:
-	Engine.time_scale = 1.0
+	clear_time_scale_owners()
 	arena = new_arena
 	player = new_player
 	squad_manager = new_squad_manager
@@ -308,17 +312,61 @@ func show_toast(message: String) -> void:
 	toast_requested.emit(message)
 
 
+func request_captain_ability_hit_flash() -> void:
+	captain_ability_hit_flash_requested.emit()
+
+
+func acquire_time_scale(owner: String, scale: float) -> int:
+	if owner == "":
+		return 0
+	var token := time_scale_next_token
+	time_scale_next_token += 1
+	time_scale_owner_tokens[owner] = token
+	time_scale_owner_scales[owner] = clamp(scale, 0.05, 1.0)
+	_sync_time_scale()
+	return token
+
+
+func release_time_scale(owner: String, token: int = 0) -> void:
+	if owner == "":
+		return
+	if token > 0 and int(time_scale_owner_tokens.get(owner, 0)) != token:
+		return
+	time_scale_owner_tokens.erase(owner)
+	time_scale_owner_scales.erase(owner)
+	_sync_time_scale()
+
+
+func clear_time_scale_owners() -> void:
+	time_scale_owner_tokens.clear()
+	time_scale_owner_scales.clear()
+	Engine.time_scale = 1.0
+
+
+func get_time_scale_owner_count() -> int:
+	return time_scale_owner_scales.size()
+
+
+func _sync_time_scale() -> void:
+	if time_scale_owner_scales.is_empty():
+		Engine.time_scale = 1.0
+		return
+	var scale := 1.0
+	for owner in time_scale_owner_scales.keys():
+		scale = min(scale, float(time_scale_owner_scales[owner]))
+	Engine.time_scale = scale
+
+
 func request_combat_impact(shake_strength: float = 4.0, hit_stop_duration: float = 0.04) -> void:
 	if player != null and is_instance_valid(player) and player.has_method("request_screen_shake"):
 		player.request_screen_shake(shake_strength, 0.16)
 	if hit_stop_duration <= 0.0 or get_tree().paused:
 		return
 	hit_stop_token += 1
-	var local_token := hit_stop_token
-	Engine.time_scale = min(Engine.time_scale, 0.18)
+	var owner := "hit_stop:%d" % hit_stop_token
+	var local_token := acquire_time_scale(owner, 0.18)
 	await get_tree().create_timer(hit_stop_duration, true, false, true).timeout
-	if local_token == hit_stop_token:
-		Engine.time_scale = 1.0
+	release_time_scale(owner, local_token)
 
 
 func request_camera_threat_zoom(duration: float = 1.4) -> void:
@@ -571,9 +619,10 @@ func _request_level_up() -> void:
 	var local_token := upgrade_entry_token
 	var choices := _build_upgrade_choices()
 	_spawn_level_up_ritual()
-	Engine.time_scale = min(Engine.time_scale, 0.35)
+	var time_scale_owner := "level_up:%d" % local_token
+	var time_scale_token := acquire_time_scale(time_scale_owner, 0.35)
 	emit_stats()
-	_finish_level_up_slowmo(local_token, choices)
+	_finish_level_up_slowmo(local_token, choices, time_scale_owner, time_scale_token)
 
 
 func _spawn_level_up_ritual() -> void:
@@ -582,14 +631,15 @@ func _spawn_level_up_ritual() -> void:
 	EntityFactory.spawn_death_burst(player.global_position, Color(0.68, 1.0, 0.88), 1.35, "level_column")
 
 
-func _finish_level_up_slowmo(local_token: int, choices: Array) -> void:
+func _finish_level_up_slowmo(local_token: int, choices: Array, time_scale_owner: String, time_scale_token: int) -> void:
 	await get_tree().create_timer(0.3, true, false, true).timeout
 	if local_token != upgrade_entry_token:
+		release_time_scale(time_scale_owner, time_scale_token)
 		return
 	if not waiting_for_upgrade or is_game_over or stage_victory_pending or not game_running:
-		Engine.time_scale = 1.0
+		release_time_scale(time_scale_owner, time_scale_token)
 		return
-	Engine.time_scale = 1.0
+	release_time_scale(time_scale_owner, time_scale_token)
 	_request_system_pause("upgrade")
 	emit_stats()
 	level_up_requested.emit(choices)
@@ -616,7 +666,7 @@ func apply_upgrade(upgrade: Dictionary) -> void:
 	if not waiting_for_upgrade or is_game_over:
 		return
 	upgrade_entry_token += 1
-	Engine.time_scale = 1.0
+	clear_time_scale_owners()
 
 	_register_upgrade_pick(upgrade)
 	var upgrade_id := str(upgrade.get("id", ""))
@@ -1345,7 +1395,7 @@ func player_died() -> void:
 	is_game_over = true
 	game_running = false
 	upgrade_entry_token += 1
-	Engine.time_scale = 1.0
+	clear_time_scale_owners()
 	waiting_for_upgrade = false
 	waiting_for_shop = false
 	waiting_for_contract = false
@@ -1414,7 +1464,7 @@ func record_boss_kill() -> void:
 	boss_killed = true
 	boss_active = false
 	upgrade_entry_token += 1
-	Engine.time_scale = 1.0
+	clear_time_scale_owners()
 	boss_kill_time = elapsed_time
 	if AchievementProgress != null and AchievementProgress.has_method("record_boss_kill"):
 		AchievementProgress.record_boss_kill()

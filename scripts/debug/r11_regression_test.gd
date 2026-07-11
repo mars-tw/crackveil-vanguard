@@ -297,19 +297,32 @@ func _test_procedural_animation_changes_transforms() -> bool:
 	if sprite == null:
 		_fail("leader sprite missing")
 		return false
+	var animated_sprite: AnimatedSprite2D = visual.get("animated_sprite")
+	if animated_sprite == null or animated_sprite.sprite_frames == null or animated_sprite.sprite_frames.get_frame_count("walk") < 3:
+		_fail("leader animated walk frames missing")
+		return false
 	var start_y := sprite.position.y
-	leader.set_desired_velocity(Vector2(180.0, 0.0))
+	GameManager.set_touch_move_vector(Vector2.RIGHT)
 	for _index in range(18):
+		await get_tree().physics_frame
 		await get_tree().process_frame
 	var moved_y := sprite.position.y
 	var moved_rotation := sprite.rotation
+	GameManager.set_touch_move_vector(Vector2.ZERO)
 	leader.set_desired_velocity(Vector2.ZERO)
 	if abs(moved_y - start_y) < 0.05 and abs(moved_rotation) < 0.01:
 		_fail("leader procedural animation did not change transform")
 		return false
+	if str(animated_sprite.animation) != "walk":
+		_fail("leader animated sprite did not switch to walk")
+		return false
 
 	var enemy := EntityFactory.spawn_enemy("r11_anim_fast", _moving_enemy_config(), leader.global_position + Vector2(220.0, 0.0))
 	var enemy_sprite: Sprite2D = enemy.get("sprite")
+	var enemy_animated_sprite: AnimatedSprite2D = enemy.get("animated_sprite")
+	if enemy_animated_sprite == null or enemy_animated_sprite.sprite_frames == null or enemy_animated_sprite.sprite_frames.get_frame_count("walk") < 2:
+		_fail("enemy animated walk frames missing")
+		return false
 	var enemy_start_y := enemy_sprite.position.y
 	var enemy_max_bob := 0.0
 	for _index in range(18):
@@ -319,6 +332,9 @@ func _test_procedural_animation_changes_transforms() -> bool:
 	var enemy_moved_y := enemy_sprite.position.y
 	if enemy_max_bob < 0.05:
 		_fail("enemy procedural animation did not bob")
+		return false
+	if str(enemy_animated_sprite.animation) != "walk":
+		_fail("enemy animated sprite did not switch to walk")
 		return false
 	print("R11_ANIMATION leader_y %.2f->%.2f tilt=%.3f enemy_y %.2f->%.2f max_bob=%.2f" % [
 		start_y,

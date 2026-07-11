@@ -58,6 +58,7 @@ var boss_ability_timer: float = 0.0
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
 var sprite: Sprite2D = null
+var animated_sprite: AnimatedSprite2D = null
 var affix_ring: Line2D = null
 var affix_marker: Line2D = null
 var hp_bar_bg: Line2D = null
@@ -71,12 +72,15 @@ var visual_idle_phase: float = 0.0
 var hit_squash_timer: float = 0.0
 var last_visual_direction: Vector2 = Vector2.RIGHT
 var sprite_base_scale: Vector2 = Vector2.ONE
+var animated_sprite_base_scale: Vector2 = Vector2.ONE
 var shadow_base_scale: Vector2 = Vector2.ONE
 var threat_glow_base_scale: Vector2 = Vector2.ONE
 var visual_bob_frequency: float = 7.2
 var visual_bob_amplitude: float = 2.4
 var visual_tilt_amount: float = 0.085
 var visual_step_interval: float = 0.3
+var animation_frames_ready: bool = false
+var current_animation_name: String = ""
 
 
 func _ready() -> void:
@@ -122,6 +126,10 @@ func pool_on_release() -> void:
 	if sprite != null:
 		sprite.rotation = 0.0
 		sprite.position = Vector2.ZERO
+	if animated_sprite != null:
+		animated_sprite.rotation = 0.0
+		animated_sprite.position = Vector2.ZERO
+		animated_sprite.visible = false
 	if shadow != null:
 		shadow.visible = false
 	if threat_glow != null:
@@ -452,7 +460,8 @@ func _find_nearest_hero() -> Node2D:
 	for hero in heroes:
 		if hero == null or not is_instance_valid(hero):
 			continue
-		if bool(hero.get("is_alive")) == false:
+		var hero_alive: Variant = hero.get("is_alive")
+		if hero_alive != null and bool(hero_alive) == false:
 			continue
 		var distance_squared: float = global_position.distance_squared_to(hero.global_position)
 		if distance_squared < best_distance_squared:
@@ -543,6 +552,15 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 	if is_boss and GameManager.has_method("record_boss_kill"):
 		GameManager.record_boss_kill()
 	var burst_scale := 2.25 if is_boss else (1.55 if is_elite else 1.0)
+	var corpse_flip := false
+	var corpse_rotation := 0.0
+	if animated_sprite != null and animated_sprite.visible:
+		corpse_flip = animated_sprite.flip_h
+		corpse_rotation = animated_sprite.rotation
+	elif sprite != null:
+		corpse_flip = sprite.flip_h
+		corpse_rotation = sprite.rotation
+	EntityFactory.call_deferred("spawn_corpse_ghost", global_position, sprite_path, body_color, radius, sprite_scale, corpse_flip, corpse_rotation)
 	EntityFactory.call_deferred("spawn_death_burst", global_position, body_color, burst_scale)
 	if is_elite and not is_boss:
 		EntityFactory.call_deferred("spawn_death_burst", global_position + Vector2(0.0, -18.0), Color(1.0, 0.76, 0.18), 1.75, "gold_rain")
@@ -623,7 +641,8 @@ func _tick_affix(delta: float) -> void:
 	for member in members:
 		if member == null or not is_instance_valid(member):
 			continue
-		if bool(member.get("is_alive")) == false:
+		var member_alive: Variant = member.get("is_alive")
+		if member_alive != null and bool(member_alive) == false:
 			continue
 		if global_position.distance_squared_to(member.global_position) > radius_squared:
 			continue
@@ -680,6 +699,13 @@ func _ensure_visual_nodes() -> void:
 		add_child(sprite)
 	sprite.centered = true
 	sprite.z_index = 0
+	animated_sprite = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if animated_sprite == null:
+		animated_sprite = AnimatedSprite2D.new()
+		animated_sprite.name = "AnimatedSprite2D"
+		add_child(animated_sprite)
+	animated_sprite.centered = true
+	animated_sprite.z_index = 0
 
 	affix_ring = get_node_or_null("AffixRing") as Line2D
 	if affix_ring == null:
@@ -733,12 +759,15 @@ func _apply_sprite() -> void:
 	sprite.flip_h = false
 	SPRITE_LOADER.fit_sprite(sprite, texture, radius * 3.0, sprite_scale)
 	sprite_base_scale = sprite.scale
+	_setup_animation_frames(radius * 3.0, sprite_scale)
 	_apply_shadow_and_glow()
 
 
 func _set_sprite_modulate(color: Color) -> void:
 	if sprite != null and hit_flash_timer <= 0.0:
 		sprite.modulate = color
+	if animated_sprite != null and hit_flash_timer <= 0.0:
+		animated_sprite.modulate = color
 
 
 func _apply_shadow_and_glow() -> void:
@@ -799,9 +828,14 @@ func _tick_hit_flash(delta: float) -> void:
 		return
 	hit_flash_timer = max(hit_flash_timer - delta, 0.0)
 	var ratio := hit_flash_timer / 0.075
-	sprite.modulate = Color(1.0, 0.98, 0.9, 1.0).lerp(body_color, 1.0 - ratio)
+	var flash_color := Color(1.0, 0.98, 0.9, 1.0).lerp(body_color, 1.0 - ratio)
+	sprite.modulate = flash_color
+	if animated_sprite != null:
+		animated_sprite.modulate = flash_color
 	if hit_flash_timer <= 0.0:
 		sprite.modulate = body_color
+		if animated_sprite != null:
+			animated_sprite.modulate = body_color
 
 
 func _update_procedural_visual(delta: float) -> void:
@@ -818,6 +852,9 @@ func _update_procedural_visual(delta: float) -> void:
 		last_visual_direction = velocity.normalized()
 	if abs(last_visual_direction.x) > 0.05:
 		sprite.flip_h = last_visual_direction.x < 0.0
+		if animated_sprite != null:
+			animated_sprite.flip_h = sprite.flip_h
+	_update_animation_state(moving)
 
 	var step_phase := fposmod(visual_walk_phase, TAU)
 	var foot_sign: float = -1.0 if int(floor(visual_walk_phase / TAU)) % 2 == 0 else 1.0
@@ -831,13 +868,90 @@ func _update_procedural_visual(delta: float) -> void:
 	var squash_y := 1.0 - squash * 0.14 - step_land * 0.025
 	var tilt: float = (foot_sign * step_lift * visual_tilt_amount + clamp(last_visual_direction.x, -1.0, 1.0) * visual_tilt_amount * 0.25) if moving else 0.0
 
-	sprite.position = Vector2(lateral_offset, bob)
-	sprite.rotation = tilt
-	sprite.scale = Vector2(sprite_base_scale.x * breath * squash_x, sprite_base_scale.y * breath * squash_y)
+	_apply_visual_transform(
+		Vector2(lateral_offset, bob),
+		tilt,
+		Vector2(sprite_base_scale.x * breath * squash_x, sprite_base_scale.y * breath * squash_y)
+	)
 	if shadow != null:
 		shadow.scale = shadow_base_scale * (1.0 - abs(bob) * 0.012)
 	if threat_glow != null:
 		threat_glow.scale = threat_glow_base_scale * (1.0 + sin(visual_idle_phase + 0.2) * 0.012)
+
+
+func _setup_animation_frames(target_diameter: float, scale_multiplier: float) -> void:
+	animation_frames_ready = false
+	current_animation_name = ""
+	if animated_sprite == null:
+		return
+	var frames := SpriteFrames.new()
+	var idle_frames := _load_generated_frames("idle", 1)
+	var walk_frames := _load_generated_frames("walk", 2)
+	if idle_frames.is_empty() or walk_frames.size() < 2:
+		animated_sprite.visible = false
+		sprite.visible = true
+		return
+	frames.add_animation("idle")
+	frames.set_animation_loop("idle", true)
+	frames.set_animation_speed("idle", 2.2)
+	for texture in idle_frames:
+		frames.add_frame("idle", texture)
+	frames.add_animation("walk")
+	frames.set_animation_loop("walk", true)
+	frames.set_animation_speed("walk", 7.0)
+	for texture in walk_frames:
+		frames.add_frame("walk", texture)
+	animated_sprite.sprite_frames = frames
+	animated_sprite.animation = "idle"
+	animated_sprite.modulate = body_color
+	animated_sprite.play()
+	animation_frames_ready = true
+	animated_sprite.visible = true
+	sprite.visible = false
+	var max_size: float = max(float(idle_frames[0].get_width()), float(idle_frames[0].get_height()))
+	var scale_value := 1.0 if max_size <= 0.0 else target_diameter / max_size * scale_multiplier
+	animated_sprite_base_scale = Vector2.ONE * scale_value
+	sprite_base_scale = animated_sprite_base_scale
+
+
+func _load_generated_frames(animation_name: String, frame_count: int) -> Array[Texture2D]:
+	var frames: Array[Texture2D] = []
+	var base_name := sprite_path.get_file().get_basename()
+	if base_name == "":
+		return frames
+	for index in range(frame_count):
+		var path := "res://assets/sprites/generated/%s_%s_%d.png" % [base_name, animation_name, index]
+		var texture := SPRITE_LOADER.get_texture(path)
+		if texture == null:
+			break
+		frames.append(texture)
+	return frames
+
+
+func _update_animation_state(moving: bool) -> void:
+	if not animation_frames_ready or animated_sprite == null:
+		return
+	var next_animation := "walk" if moving else "idle"
+	if current_animation_name != next_animation:
+		current_animation_name = next_animation
+		animated_sprite.animation = next_animation
+		animated_sprite.play(next_animation)
+	if moving:
+		var speed_ratio: float = velocity.length() / max(1.0, speed)
+		animated_sprite.speed_scale = clamp(speed_ratio * 1.08, 0.65, 1.95)
+	else:
+		animated_sprite.speed_scale = 1.0
+
+
+func _apply_visual_transform(new_position: Vector2, new_rotation: float, new_scale: Vector2) -> void:
+	if sprite != null:
+		sprite.position = new_position
+		sprite.rotation = new_rotation
+		sprite.scale = new_scale
+	if animated_sprite != null:
+		animated_sprite.position = new_position
+		animated_sprite.rotation = new_rotation
+		animated_sprite.scale = new_scale
 
 
 func _apply_visual_motion_profile() -> void:

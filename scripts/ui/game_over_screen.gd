@@ -8,6 +8,8 @@ signal main_menu_requested
 var root: Control
 var panel: Panel
 var title_label: Label
+var body_scroll: ScrollContainer
+var body_content: VBoxContainer
 var restart_button: Button
 var main_menu_button: Button
 var copy_seed_button: Button
@@ -54,16 +56,26 @@ func _build_ui() -> void:
 	title_label.add_theme_constant_override("outline_size", 2)
 	panel.add_child(title_label)
 
+	body_scroll = ScrollContainer.new()
+	body_scroll.name = "BodyScroll"
+	body_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	body_scroll.anchor_left = 0.0
+	body_scroll.anchor_right = 1.0
+	body_scroll.anchor_top = 0.0
+	body_scroll.anchor_bottom = 1.0
+	panel.add_child(body_scroll)
+
+	body_content = VBoxContainer.new()
+	body_content.name = "BodyContent"
+	body_content.add_theme_constant_override("separation", 10)
+	body_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body_scroll.add_child(body_content)
+
 	summary_label = Label.new()
-	summary_label.anchor_left = 0.0
-	summary_label.anchor_right = 1.0
-	summary_label.offset_left = 30.0
-	summary_label.offset_right = -30.0
-	summary_label.offset_top = 88.0
-	summary_label.offset_bottom = 180.0
 	summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	summary_label.add_theme_font_size_override("font_size", 20)
-	panel.add_child(summary_label)
+	body_content.add_child(summary_label)
 
 	achievements_label = RichTextLabel.new()
 	achievements_label.name = "AchievementsLabel"
@@ -71,7 +83,7 @@ func _build_ui() -> void:
 	achievements_label.fit_content = true
 	achievements_label.scroll_active = false
 	achievements_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.add_child(achievements_label)
+	body_content.add_child(achievements_label)
 
 	copy_seed_button = Button.new()
 	copy_seed_button.text = "複製本局種子"
@@ -218,8 +230,9 @@ func _apply_responsive_layout() -> void:
 		viewport_size = Vector2(1280.0, 720.0)
 	var portrait := viewport_size.y > viewport_size.x
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
+	var compact_landscape := mobile and not portrait
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
-	var panel_width: float = min(viewport_size.x - (24.0 if mobile else 32.0), 640.0 if mobile else 600.0)
+	var panel_width: float = min(viewport_size.x - (24.0 if mobile else 32.0), 820.0 if compact_landscape else 640.0 if mobile else 600.0)
 	var panel_height: float = min(viewport_size.y - (24.0 if mobile else 32.0), 760.0 if mobile and portrait else 620.0 if mobile else 660.0 if portrait else 560.0)
 
 	panel.anchor_left = 0.5
@@ -232,45 +245,59 @@ func _apply_responsive_layout() -> void:
 	panel.offset_bottom = panel_height * 0.5
 
 	if title_label != null:
-		title_label.offset_top = 20.0
-		title_label.offset_bottom = title_label.offset_top + (56.0 if mobile else 36.0)
-		title_label.add_theme_font_size_override("font_size", (24 if portrait else 26) if mobile else 28)
+		title_label.offset_top = 14.0 if compact_landscape else 20.0
+		title_label.offset_bottom = title_label.offset_top + (56.0 if compact_landscape else 56.0 if mobile else 36.0)
+		title_label.add_theme_font_size_override("font_size", (24 if portrait else 22) if mobile else 28)
 
-	if summary_label != null:
-		summary_label.offset_left = 24.0 if mobile else 32.0
-		summary_label.offset_right = -summary_label.offset_left
-		summary_label.offset_top = 90.0 if mobile else 88.0
-		summary_label.offset_bottom = 276.0 if mobile else 248.0
-		summary_label.add_theme_font_size_override("font_size", (15 if portrait else 16) if mobile else (17 if not portrait else 16))
-
-	if achievements_label != null:
-		achievements_label.offset_left = 28.0 if mobile else 40.0
-		achievements_label.offset_right = -achievements_label.offset_left
-		achievements_label.offset_top = 288.0 if mobile else 258.0
-		achievements_label.offset_bottom = panel_height - ((touch_height + 12.0) * 3.0 + 24.0 if mobile else 166.0)
-		achievements_label.add_theme_font_size_override("normal_font_size", (13 if portrait else 14) if mobile else (15 if not portrait else 14))
+	var button_width: float = 246.0 if compact_landscape else 272.0 if mobile else 236.0
+	var button_left: float = panel_width - button_width - 24.0 if compact_landscape else (panel_width - button_width) * 0.5
+	var button_gap: float = 12.0
+	var button_height: float = touch_height if mobile else 40.0
+	var button_stack_height: float = button_height * 3.0 + button_gap * 2.0
+	var button_top: float = max((title_label.offset_bottom + 14.0) if title_label != null else 72.0, (panel_height - button_stack_height) * 0.5) if compact_landscape else panel_height - ((touch_height + 12.0) * 3.0 + 12.0 if mobile else 150.0)
 
 	if copy_seed_button != null:
-		copy_seed_button.anchor_left = 0.5
-		copy_seed_button.anchor_right = 0.5
-		copy_seed_button.offset_left = -136.0 if mobile else -118.0
-		copy_seed_button.offset_right = 136.0 if mobile else 118.0
-		copy_seed_button.offset_top = panel_height - ((touch_height + 12.0) * 3.0 + 12.0 if mobile else 150.0)
-		copy_seed_button.offset_bottom = copy_seed_button.offset_top + (touch_height if mobile else 40.0)
+		copy_seed_button.anchor_left = 0.0
+		copy_seed_button.anchor_right = 0.0
+		copy_seed_button.offset_left = button_left
+		copy_seed_button.offset_right = button_left + button_width
+		copy_seed_button.offset_top = button_top
+		copy_seed_button.offset_bottom = copy_seed_button.offset_top + button_height
 
 	if restart_button != null:
-		restart_button.anchor_left = 0.5
-		restart_button.anchor_right = 0.5
-		restart_button.offset_left = -136.0 if mobile else -118.0
-		restart_button.offset_right = 136.0 if mobile else 118.0
-		restart_button.offset_top = copy_seed_button.offset_bottom + 12.0 if copy_seed_button != null else panel_height - 104.0
-		restart_button.offset_bottom = restart_button.offset_top + (touch_height if mobile else 40.0)
+		restart_button.anchor_left = 0.0
+		restart_button.anchor_right = 0.0
+		restart_button.offset_left = button_left
+		restart_button.offset_right = button_left + button_width
+		restart_button.offset_top = copy_seed_button.offset_bottom + button_gap if copy_seed_button != null else button_top + button_height + button_gap
+		restart_button.offset_bottom = restart_button.offset_top + button_height
 
 	if main_menu_button != null:
-		main_menu_button.anchor_left = 0.5
-		main_menu_button.anchor_right = 0.5
-		main_menu_button.offset_left = -136.0 if mobile else -118.0
-		main_menu_button.offset_right = 136.0 if mobile else 118.0
-		main_menu_button.offset_top = restart_button.offset_bottom + 12.0 if restart_button != null else panel_height - 58.0
-		main_menu_button.offset_bottom = main_menu_button.offset_top + (touch_height if mobile else 40.0)
+		main_menu_button.anchor_left = 0.0
+		main_menu_button.anchor_right = 0.0
+		main_menu_button.offset_left = button_left
+		main_menu_button.offset_right = button_left + button_width
+		main_menu_button.offset_top = restart_button.offset_bottom + button_gap if restart_button != null else button_top + (button_height + button_gap) * 2.0
+		main_menu_button.offset_bottom = main_menu_button.offset_top + button_height
+
+	var body_left: float = 24.0 if mobile else 32.0
+	var body_right: float = -(panel_width - button_left + 18.0) if compact_landscape else -body_left
+	var body_top: float = (title_label.offset_bottom + 10.0) if title_label != null else 84.0
+	var body_bottom: float = -20.0 if compact_landscape else -(panel_height - button_top + 12.0)
+	if body_scroll != null:
+		body_scroll.offset_left = body_left
+		body_scroll.offset_right = body_right
+		body_scroll.offset_top = body_top
+		body_scroll.offset_bottom = body_bottom
+	if body_content != null:
+		var body_width: float = max(1.0, panel_width + body_right - body_left)
+		body_content.custom_minimum_size = Vector2(body_width, 0.0)
+
+	if summary_label != null:
+		summary_label.add_theme_font_size_override("font_size", (15 if portrait else 16) if mobile else (17 if not portrait else 16))
+		summary_label.custom_minimum_size = Vector2(0.0, 108.0 if not compact_landscape else 96.0)
+
+	if achievements_label != null:
+		achievements_label.add_theme_font_size_override("normal_font_size", (13 if portrait else 14) if mobile else (15 if not portrait else 14))
+		achievements_label.custom_minimum_size = Vector2(0.0, 138.0 if compact_landscape else 180.0 if mobile else 160.0)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)

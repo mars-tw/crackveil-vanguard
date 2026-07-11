@@ -58,6 +58,13 @@ func _check_portrait_layout() -> bool:
 	if pause_button == null or not _rect_inside(pause_button.get_global_rect(), viewport_size):
 		_fail("pause button outside portrait viewport")
 		return false
+	var visual_radius := float(joystick.get("stick_radius"))
+	if visual_radius < viewport_size.x * 0.22:
+		_fail("virtual joystick visual radius below 22 percent portrait width")
+		return false
+	if joystick.size.x < visual_radius * 2.0 * 1.3 - 1.0:
+		_fail("virtual joystick heat zone below 1.3x visual radius")
+		return false
 
 	var level_screen := arena.get_node_or_null("LevelUpScreen")
 	if level_screen != null and level_screen.has_method("show_options"):
@@ -103,7 +110,8 @@ func _check_virtual_joystick_movement() -> bool:
 		return false
 
 	var start_position := leader.global_position
-	var center := joystick.size * 0.5
+	var radius := float(joystick.get("stick_radius"))
+	var center := Vector2(radius + 18.0, joystick.size.y - radius - 18.0)
 	var touch := InputEventScreenTouch.new()
 	touch.index = 7
 	touch.pressed = true
@@ -112,7 +120,7 @@ func _check_virtual_joystick_movement() -> bool:
 
 	var drag := InputEventScreenDrag.new()
 	drag.index = 7
-	drag.position = center + Vector2(58.0, 0.0)
+	drag.position = center + Vector2(radius * 0.82, 0.0)
 	joystick._gui_input(drag)
 
 	if GameManager.get_touch_move_vector().x < 0.65:

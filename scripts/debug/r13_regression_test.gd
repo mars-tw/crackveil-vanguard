@@ -35,6 +35,9 @@ func _run_tests() -> void:
 	current_phase = "level_ritual"
 	if not _test_level_up_ritual():
 		return
+	current_phase = "time_scale_stack"
+	if not await _test_time_scale_owner_stack():
+		return
 
 	current_phase = "done"
 	print("R13_REGRESSION_PASS")
@@ -150,6 +153,33 @@ func _test_level_up_ritual() -> bool:
 		_fail("level-up ritual did not spawn pooled visual")
 		return false
 	print("R13_LEVEL_RITUAL death_burst_delta=%d" % [after_count - before_count])
+	return true
+
+
+func _test_time_scale_owner_stack() -> bool:
+	GameManager.clear_time_scale_owners()
+	var slow_token := GameManager.acquire_time_scale("r13_level_slow", 0.35)
+	if abs(Engine.time_scale - 0.35) > 0.001:
+		_fail("level slow owner did not set time scale")
+		return false
+	GameManager.request_combat_impact(0.0, 0.05)
+	await get_tree().process_frame
+	if abs(Engine.time_scale - 0.18) > 0.001:
+		_fail("hit-stop owner did not take priority over level slow")
+		return false
+	await get_tree().create_timer(0.07, true, false, true).timeout
+	if abs(Engine.time_scale - 0.35) > 0.001:
+		_fail("hit-stop release did not restore remaining level slow")
+		return false
+	GameManager.release_time_scale("r13_level_slow", slow_token + 99)
+	if abs(Engine.time_scale - 0.35) > 0.001:
+		_fail("stale time-scale token released active owner")
+		return false
+	GameManager.release_time_scale("r13_level_slow", slow_token)
+	if Engine.time_scale != 1.0 or GameManager.get_time_scale_owner_count() != 0:
+		_fail("last time-scale owner did not restore 1.0")
+		return false
+	print("R13_TIME_SCALE_STACK hit_stop_then_level_slow=true")
 	return true
 
 

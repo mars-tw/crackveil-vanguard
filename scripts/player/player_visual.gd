@@ -12,6 +12,7 @@ const STEP_DUST_POOL_SIZE := 8
 @export var sprite_scale: float = 1.0
 
 var sprite: Sprite2D = null
+var animated_sprite: AnimatedSprite2D = null
 var shadow: Sprite2D = null
 var aura: Sprite2D = null
 var facing_direction: Vector2 = Vector2.RIGHT
@@ -23,12 +24,15 @@ var hit_squash_timer: float = 0.0
 var turn_squash_timer: float = 0.0
 var last_facing_sign: int = 1
 var sprite_base_scale: Vector2 = Vector2.ONE
+var animated_sprite_base_scale: Vector2 = Vector2.ONE
 var shadow_base_scale: Vector2 = Vector2.ONE
 var aura_base_scale: Vector2 = Vector2.ONE
 var step_dust_pool: Array[CPUParticles2D] = []
 var next_step_dust_index: int = 0
 var step_dust_emit_count: int = 0
 var footstep_tick_count: int = 0
+var animation_frames_ready: bool = false
+var current_animation_name: String = ""
 
 
 func _ready() -> void:
@@ -94,6 +98,13 @@ func _ensure_sprite() -> void:
 		add_child(sprite)
 	sprite.centered = true
 	sprite.z_index = 1
+	animated_sprite = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if animated_sprite == null:
+		animated_sprite = AnimatedSprite2D.new()
+		animated_sprite.name = "AnimatedSprite2D"
+		add_child(animated_sprite)
+	animated_sprite.centered = true
+	animated_sprite.z_index = 1
 	_ensure_step_dust_pool()
 
 
@@ -106,6 +117,7 @@ func _apply_sprite() -> void:
 	sprite.visible = true
 	SPRITE_LOADER.fit_sprite(sprite, texture, body_radius * 3.1, sprite_scale)
 	sprite_base_scale = sprite.scale
+	_setup_animation_frames(body_radius * 3.1, sprite_scale)
 	if shadow != null:
 		ART_RESOURCES.fit_sprite(shadow, ART_RESOURCES.get_ellipse_shadow(), body_radius * 3.2)
 		shadow_base_scale = shadow.scale
@@ -121,6 +133,7 @@ func _update_procedural_motion(delta: float) -> void:
 		return
 	var motion := _current_motion_velocity()
 	var moving := motion.length_squared() > 9.0
+	_update_animation_state(moving, motion)
 	idle_phase += delta * 2.4
 	if moving:
 		step_timer += delta
@@ -159,14 +172,102 @@ func _update_procedural_motion(delta: float) -> void:
 		if sign != 0:
 			last_facing_sign = sign
 		sprite.flip_h = sign < 0
+		if animated_sprite != null:
+			animated_sprite.flip_h = sign < 0
 
-	sprite.position = Vector2(lateral_offset, bob)
-	sprite.rotation = tilt
-	sprite.scale = Vector2(sprite_base_scale.x * breath * squash_x, sprite_base_scale.y * breath * squash_y)
+	_apply_visual_transform(
+		Vector2(lateral_offset, bob),
+		tilt,
+		Vector2(sprite_base_scale.x * breath * squash_x, sprite_base_scale.y * breath * squash_y)
+	)
 	if shadow != null:
 		shadow.scale = shadow_base_scale * (1.0 - abs(bob) * 0.012)
 	if aura != null:
 		aura.scale = aura_base_scale * (1.0 + sin(idle_phase + 0.4) * 0.018)
+
+
+func _setup_animation_frames(target_diameter: float, scale_multiplier: float) -> void:
+	animation_frames_ready = false
+	current_animation_name = ""
+	if animated_sprite == null:
+		return
+	var frames := SpriteFrames.new()
+	var idle_frames := _load_generated_frames("idle", 2)
+	var walk_frames := _load_generated_frames("walk", 4)
+	if idle_frames.is_empty() or walk_frames.size() < 3:
+		animated_sprite.visible = false
+		sprite.visible = true
+		return
+	frames.add_animation("idle")
+	frames.set_animation_loop("idle", true)
+	frames.set_animation_speed("idle", 3.2)
+	for texture in idle_frames:
+		frames.add_frame("idle", texture)
+	frames.add_animation("walk")
+	frames.set_animation_loop("walk", true)
+	frames.set_animation_speed("walk", 10.0)
+	for texture in walk_frames:
+		frames.add_frame("walk", texture)
+	animated_sprite.sprite_frames = frames
+	animated_sprite.animation = "idle"
+	animated_sprite.play()
+	animation_frames_ready = true
+	animated_sprite.visible = true
+	sprite.visible = false
+	var max_size: float = max(float(idle_frames[0].get_width()), float(idle_frames[0].get_height()))
+	var scale_value := 1.0 if max_size <= 0.0 else target_diameter / max_size * scale_multiplier
+	animated_sprite_base_scale = Vector2.ONE * scale_value
+	sprite_base_scale = animated_sprite_base_scale
+
+
+func _load_generated_frames(animation_name: String, frame_count: int) -> Array[Texture2D]:
+	var frames: Array[Texture2D] = []
+	var base_name := sprite_path.get_file().get_basename()
+	if base_name == "":
+		return frames
+	for index in range(frame_count):
+		var path := "res://assets/sprites/generated/%s_%s_%d.png" % [base_name, animation_name, index]
+		var texture := SPRITE_LOADER.get_texture(path)
+		if texture == null:
+			break
+		frames.append(texture)
+	return frames
+
+
+func _update_animation_state(moving: bool, motion: Vector2) -> void:
+	if not animation_frames_ready or animated_sprite == null:
+		return
+	var next_animation := "walk" if moving else "idle"
+	if current_animation_name != next_animation:
+		current_animation_name = next_animation
+		animated_sprite.animation = next_animation
+		animated_sprite.play(next_animation)
+	if moving:
+		var speed_ratio: float = motion.length() / max(1.0, _movement_speed_for_animation())
+		animated_sprite.speed_scale = clamp(speed_ratio * 1.18, 0.72, 1.85)
+	else:
+		animated_sprite.speed_scale = 1.0
+
+
+func _movement_speed_for_animation() -> float:
+	var parent := get_parent()
+	if parent == null:
+		return 220.0
+	var move_speed_value: Variant = parent.get("move_speed")
+	if typeof(move_speed_value) == TYPE_FLOAT or typeof(move_speed_value) == TYPE_INT:
+		return float(move_speed_value)
+	return 220.0
+
+
+func _apply_visual_transform(new_position: Vector2, new_rotation: float, new_scale: Vector2) -> void:
+	if sprite != null:
+		sprite.position = new_position
+		sprite.rotation = new_rotation
+		sprite.scale = new_scale
+	if animated_sprite != null:
+		animated_sprite.position = new_position
+		animated_sprite.rotation = new_rotation
+		animated_sprite.scale = new_scale
 
 
 func _current_motion_velocity() -> Vector2:

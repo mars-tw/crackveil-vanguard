@@ -6,6 +6,7 @@ const SAVE_PATH := "user://crackveil_settings.cfg"
 
 var damage_numbers_enabled: bool = true
 var screen_shake_enabled: bool = true
+var joystick_size_index: int = 1
 var save_path: String = SAVE_PATH
 
 
@@ -25,12 +26,14 @@ func load_settings() -> void:
 		return
 	damage_numbers_enabled = bool(config.get_value("settings", "damage_numbers_enabled", damage_numbers_enabled))
 	screen_shake_enabled = bool(config.get_value("settings", "screen_shake_enabled", screen_shake_enabled))
+	joystick_size_index = clamp(int(config.get_value("settings", "joystick_size_index", joystick_size_index)), 0, 2)
 
 
 func save_settings() -> void:
 	var config := ConfigFile.new()
 	config.set_value("settings", "damage_numbers_enabled", damage_numbers_enabled)
 	config.set_value("settings", "screen_shake_enabled", screen_shake_enabled)
+	config.set_value("settings", "joystick_size_index", joystick_size_index)
 	config.save(save_path)
 
 
@@ -50,6 +53,15 @@ func set_screen_shake_enabled(value: bool) -> void:
 	settings_changed.emit()
 
 
+func set_joystick_size_index(value: int) -> void:
+	var next_value: int = clamp(value, 0, 2)
+	if joystick_size_index == next_value:
+		return
+	joystick_size_index = next_value
+	save_settings()
+	settings_changed.emit()
+
+
 func debug_use_save_path(path: String, reset: bool = true) -> void:
 	save_path = path if path != "" else SAVE_PATH
 	if reset:
@@ -63,6 +75,7 @@ func debug_use_save_path(path: String, reset: bool = true) -> void:
 func _reset_runtime_defaults() -> void:
 	damage_numbers_enabled = true
 	screen_shake_enabled = true
+	joystick_size_index = 1
 
 
 func _queue_load_failure_toast() -> void:

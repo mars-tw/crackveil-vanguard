@@ -299,7 +299,7 @@ func _cast_rift_pulse_damage(forward: Vector2) -> void:
 	var pulse_damage := RIFT_PULSE_DAMAGE * GameManager.get_outgoing_damage_multiplier(self)
 	for enemy in EntityFactory.get_enemies_in_radius(global_position, RIFT_PULSE_RANGE + 42.0):
 		if damaged_count >= RIFT_PULSE_MAX_TARGETS:
-			return
+			break
 		if enemy == null or not is_instance_valid(enemy):
 			continue
 		var active_value: Variant = enemy.get("is_active")
@@ -319,6 +319,8 @@ func _cast_rift_pulse_damage(forward: Vector2) -> void:
 			enemy.apply_knockback(global_position, RIFT_PULSE_KNOCKBACK)
 		if enemy.has_method("apply_status_effect"):
 			enemy.apply_status_effect("slow", RIFT_PULSE_SLOW_DURATION, RIFT_PULSE_SLOW_STRENGTH)
+	if damaged_count > 0 and GameManager.has_method("request_captain_ability_hit_flash"):
+		GameManager.request_captain_ability_hit_flash()
 
 
 func _spawn_rift_pulse_visuals(forward: Vector2) -> void:

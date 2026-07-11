@@ -6,6 +6,7 @@ const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 const RADIAL_GLOW_PATH := "res://assets/art/radial_glow.png"
 const ELLIPSE_SHADOW_PATH := "res://assets/art/ellipse_shadow.png"
 const PARTICLE_CORE_PATH := "res://assets/art/particle_core.png"
+const VIGNETTE_PATH := "res://assets/art/vignette.png"
 const ICON_HEALTH_PATH := "res://assets/art/icon_health.png"
 const ICON_XP_PATH := "res://assets/art/icon_xp.png"
 const ICON_GOLD_PATH := "res://assets/art/icon_gold.png"
@@ -31,6 +32,10 @@ static func get_ellipse_shadow() -> Texture2D:
 
 static func get_particle_core() -> Texture2D:
 	return SPRITE_LOADER.get_texture(PARTICLE_CORE_PATH)
+
+
+static func get_vignette() -> Texture2D:
+	return SPRITE_LOADER.get_texture(VIGNETTE_PATH)
 
 
 static func get_health_icon() -> Texture2D:

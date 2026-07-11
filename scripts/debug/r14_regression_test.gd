@@ -8,6 +8,9 @@ const CONTRACT_SCREEN_SCRIPT := preload("res://scripts/ui/contract_screen.gd")
 const LEVEL_UP_SCREEN_SCRIPT := preload("res://scripts/ui/level_up_screen.gd")
 const FIRST_RUN_GUIDE_SCRIPT := preload("res://scripts/ui/first_run_guide.gd")
 const HUD_SCRIPT := preload("res://scripts/ui/hud.gd")
+const RIFT_SHOP_SCRIPT := preload("res://scripts/ui/rift_shop_screen.gd")
+const STAGE_VICTORY_SCRIPT := preload("res://scripts/ui/stage_victory_screen.gd")
+const GAME_OVER_SCRIPT := preload("res://scripts/ui/game_over_screen.gd")
 
 var current_phase: String = "boot"
 
@@ -98,6 +101,18 @@ func _test_mobile_ui_scaling() -> bool:
 	if not await _test_hud_mobile_layout(portrait):
 		return false
 	if not await _test_hud_mobile_layout(landscape):
+		return false
+	if not await _test_shop_mobile_layout(portrait):
+		return false
+	if not await _test_shop_mobile_layout(landscape):
+		return false
+	if not await _test_stage_victory_mobile_layout(portrait):
+		return false
+	if not await _test_stage_victory_mobile_layout(landscape):
+		return false
+	if not await _test_game_over_mobile_layout(portrait):
+		return false
+	if not await _test_game_over_mobile_layout(landscape):
 		return false
 	print("R14_MOBILE_UI portrait_scale=%.2f landscape_scale=%.2f font=%d touch=%.1f" % [
 		MOBILE_TUNING.ui_scale(portrait, true),
@@ -269,6 +284,81 @@ func _test_hud_mobile_layout(size: Vector2) -> bool:
 	return true
 
 
+func _test_shop_mobile_layout(size: Vector2) -> bool:
+	var viewport := _make_ui_viewport(size)
+	var screen := RIFT_SHOP_SCRIPT.new()
+	viewport.add_child(screen)
+	await get_tree().process_frame
+	GameManager.gold = 99
+	screen.show_options(_sample_shop_options())
+	await get_tree().process_frame
+	if not _control_inside_viewport(screen.panel, size, "shop panel"):
+		return false
+	if not _control_inside_viewport(screen.card_scroll, size, "shop card scroll"):
+		return false
+	if not _control_inside_viewport(screen.skip_button, size, "shop skip button"):
+		return false
+	if screen.option_buttons.is_empty():
+		_fail("shop options were not created")
+		return false
+	if _controls_overlap(screen.card_scroll, screen.skip_button):
+		_fail("shop scroll viewport overlaps skip button")
+		return false
+	if size.x > size.y and screen.card_grid.columns != 3:
+		_fail("shop landscape did not use three columns")
+		return false
+	viewport.queue_free()
+	return true
+
+
+func _test_stage_victory_mobile_layout(size: Vector2) -> bool:
+	var viewport := _make_ui_viewport(size)
+	var screen := STAGE_VICTORY_SCRIPT.new()
+	viewport.add_child(screen)
+	await get_tree().process_frame
+	screen.show_summary(_sample_summary())
+	await get_tree().process_frame
+	if not _control_inside_viewport(screen.panel, size, "stage victory panel"):
+		return false
+	if not _control_inside_viewport(screen.summary_scroll, size, "stage victory summary scroll"):
+		return false
+	if not _control_inside_viewport(screen.copy_seed_button, size, "stage victory copy seed"):
+		return false
+	if not _control_inside_viewport(screen.continue_button, size, "stage victory continue"):
+		return false
+	if screen.main_menu_button != null and not _control_inside_viewport(screen.main_menu_button, size, "stage victory main menu"):
+		return false
+	if _controls_overlap(screen.summary_scroll, screen.copy_seed_button) or _controls_overlap(screen.summary_scroll, screen.continue_button):
+		_fail("stage victory summary overlaps action buttons")
+		return false
+	viewport.queue_free()
+	return true
+
+
+func _test_game_over_mobile_layout(size: Vector2) -> bool:
+	var viewport := _make_ui_viewport(size)
+	var screen := GAME_OVER_SCRIPT.new()
+	viewport.add_child(screen)
+	await get_tree().process_frame
+	screen.show_summary(_sample_summary())
+	await get_tree().process_frame
+	if not _control_inside_viewport(screen.panel, size, "game over panel"):
+		return false
+	if not _control_inside_viewport(screen.body_scroll, size, "game over body scroll"):
+		return false
+	if not _control_inside_viewport(screen.copy_seed_button, size, "game over copy seed"):
+		return false
+	if not _control_inside_viewport(screen.restart_button, size, "game over restart"):
+		return false
+	if screen.main_menu_button != null and not _control_inside_viewport(screen.main_menu_button, size, "game over main menu"):
+		return false
+	if _controls_overlap(screen.body_scroll, screen.copy_seed_button) or _controls_overlap(screen.body_scroll, screen.restart_button):
+		_fail("game over body overlaps action buttons")
+		return false
+	viewport.queue_free()
+	return true
+
+
 func _make_ui_viewport(size: Vector2) -> SubViewport:
 	var viewport := SubViewport.new()
 	viewport.size = Vector2i(int(size.x), int(size.y))
@@ -292,6 +382,35 @@ func _sample_options() -> Array:
 			"description": "Narrow layouts use scrollable space instead of clipping."
 		}
 	]
+
+
+func _sample_shop_options() -> Array:
+	return [
+		{"id": "heal", "name": "Shop Alpha", "description": "Readable offer copy stays inside the card.", "cost": 4},
+		{"id": "damage", "name": "Shop Beta", "description": "Compact landscape cards must not touch the action button.", "cost": 8},
+		{"id": "refresh", "name": "Shop Gamma", "description": "Three columns remain tappable at 844 by 390.", "cost": 12}
+	]
+
+
+func _sample_summary() -> Dictionary:
+	return {
+		"elapsed_time": 213.0,
+		"kills": 188,
+		"gold": 64,
+		"gold_earned": 91,
+		"level": 8,
+		"elites_spawned": 4,
+		"elites_killed": 3,
+		"boss_spawned": true,
+		"boss_active": false,
+		"boss_phase_two_reached": true,
+		"boss_killed": true,
+		"contract_name": "Regression Contract",
+		"echo_shards_earned": 9,
+		"echo_shards_run_total": 9,
+		"echo_progress": {"shards": 18},
+		"achievement_unlocks": []
+	}
 
 
 func _control_inside_viewport(control: Control, size: Vector2, label: String) -> bool:

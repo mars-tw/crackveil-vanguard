@@ -25,6 +25,7 @@ var active_ability_label: Label
 var toast_panel: Panel
 var toast_label: Label
 var level_flash_rect: ColorRect
+var captain_hit_flash_rect: TextureRect
 var combo_pulse_rect: TextureRect
 var milestone_label: Label
 var combo_break_label: Label
@@ -38,6 +39,8 @@ var pause_volume_slider: HSlider
 var pause_mute_check: CheckBox
 var pause_damage_numbers_check: CheckBox
 var pause_screen_shake_check: CheckBox
+var pause_joystick_size_label: Label
+var pause_joystick_size_slider: HSlider
 var pause_seed_button: Button
 var pause_reset_meta_button: Button
 var pause_guide_button: Button
@@ -52,6 +55,7 @@ var toast_queue: Array[String] = []
 var toast_showing: bool = false
 var reset_meta_confirm_pending: bool = false
 var level_flash_tween: Tween = null
+var captain_hit_flash_tween: Tween = null
 var combo_pulse_tween: Tween = null
 var milestone_tween: Tween = null
 var combo_break_tween: Tween = null
@@ -73,6 +77,8 @@ func _ready() -> void:
 		GameManager.toast_requested.connect(_on_toast_requested)
 	if GameManager.has_signal("level_flash_requested") and not GameManager.level_flash_requested.is_connected(_on_level_flash_requested):
 		GameManager.level_flash_requested.connect(_on_level_flash_requested)
+	if GameManager.has_signal("captain_ability_hit_flash_requested") and not GameManager.captain_ability_hit_flash_requested.is_connected(_on_captain_ability_hit_flash_requested):
+		GameManager.captain_ability_hit_flash_requested.connect(_on_captain_ability_hit_flash_requested)
 	if GameManager.has_signal("combo_pulse_requested") and not GameManager.combo_pulse_requested.is_connected(_on_combo_pulse_requested):
 		GameManager.combo_pulse_requested.connect(_on_combo_pulse_requested)
 	if GameManager.has_signal("combo_milestone_requested") and not GameManager.combo_milestone_requested.is_connected(_on_combo_milestone_requested):
@@ -260,6 +266,17 @@ func _build_ui() -> void:
 	level_flash_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(level_flash_rect)
 
+	captain_hit_flash_rect = TextureRect.new()
+	captain_hit_flash_rect.name = "CaptainHitFlash"
+	captain_hit_flash_rect.texture = ART_RESOURCES.get_vignette()
+	captain_hit_flash_rect.material = ART_RESOURCES.get_additive_material()
+	captain_hit_flash_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	captain_hit_flash_rect.stretch_mode = TextureRect.STRETCH_SCALE
+	captain_hit_flash_rect.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	captain_hit_flash_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	captain_hit_flash_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(captain_hit_flash_rect)
+
 	combo_pulse_rect = TextureRect.new()
 	combo_pulse_rect.name = "ComboPulse"
 	combo_pulse_rect.texture = ART_RESOURCES.get_radial_glow()
@@ -373,6 +390,21 @@ func _build_pause_overlay() -> void:
 	pause_screen_shake_check.text = "螢幕震動"
 	pause_screen_shake_check.toggled.connect(_on_screen_shake_toggled)
 	pause_content.add_child(pause_screen_shake_check)
+
+	pause_joystick_size_label = Label.new()
+	pause_joystick_size_label.text = "搖桿大小：中"
+	pause_joystick_size_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pause_content.add_child(pause_joystick_size_label)
+
+	pause_joystick_size_slider = HSlider.new()
+	pause_joystick_size_slider.min_value = 0.0
+	pause_joystick_size_slider.max_value = 2.0
+	pause_joystick_size_slider.step = 1.0
+	pause_joystick_size_slider.tick_count = 3
+	pause_joystick_size_slider.ticks_on_borders = true
+	pause_joystick_size_slider.custom_minimum_size = Vector2(240.0, 28.0)
+	pause_joystick_size_slider.value_changed.connect(_on_joystick_size_slider_changed)
+	pause_content.add_child(pause_joystick_size_slider)
 
 	pause_seed_button = Button.new()
 	pause_seed_button.text = "複製本局種子"
@@ -628,6 +660,12 @@ func _apply_responsive_layout() -> void:
 		toast_panel.offset_top = 238.0 if mobile and portrait else 64.0 if mobile else 56.0 if not portrait else 94.0
 		toast_panel.offset_bottom = toast_panel.offset_top + (58.0 if mobile else 48.0)
 
+	if captain_hit_flash_rect != null:
+		captain_hit_flash_rect.offset_left = 0.0
+		captain_hit_flash_rect.offset_top = 0.0
+		captain_hit_flash_rect.offset_right = 0.0
+		captain_hit_flash_rect.offset_bottom = 0.0
+
 	if combo_pulse_rect != null and not combo_pulse_rect.visible:
 		var pulse_size: float = min(viewport_size.x, viewport_size.y) * 0.28
 		combo_pulse_rect.position = viewport_size * 0.5 - Vector2.ONE * pulse_size * 0.5
@@ -652,9 +690,16 @@ func _apply_responsive_layout() -> void:
 		combo_break_label.add_theme_font_size_override("font_size", (16 if portrait else 20) if mobile else (18 if portrait else 22))
 
 	if virtual_joystick != null:
-		var joystick_size := 188.0 if mobile and portrait else 170.0 if mobile else 164.0 if portrait else 150.0
-		virtual_joystick.size = Vector2(joystick_size, joystick_size)
-		virtual_joystick.position = Vector2(22.0, viewport_size.y - joystick_size - 24.0)
+		var joystick_size_index: int = int(PlayerSettings.get("joystick_size_index")) if PlayerSettings != null else 1
+		var joystick_size: Vector2 = Vector2(188.0, 188.0)
+		if virtual_joystick.has_method("configure_for_viewport"):
+			joystick_size = virtual_joystick.configure_for_viewport(viewport_size, mobile, joystick_size_index)
+		else:
+			var fallback_size: float = 188.0 if mobile and portrait else 170.0 if mobile else 164.0 if portrait else 150.0
+			joystick_size = Vector2(fallback_size, fallback_size)
+		virtual_joystick.size = joystick_size
+		var joystick_margin: float = max(14.0, joystick_size.x * 0.08)
+		virtual_joystick.position = Vector2(joystick_margin, viewport_size.y - joystick_size.y - joystick_margin)
 		virtual_joystick.visible = _should_show_touch_controls()
 	MOBILE_TUNING.apply_control_tree(root, viewport_size, force_touch_controls_visible)
 
@@ -762,6 +807,18 @@ func _on_level_flash_requested() -> void:
 	level_flash_tween = create_tween()
 	level_flash_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	level_flash_tween.tween_property(level_flash_rect, "color", Color(1.0, 1.0, 1.0, 0.0), 0.24)
+
+
+func _on_captain_ability_hit_flash_requested() -> void:
+	if captain_hit_flash_rect == null:
+		return
+	if captain_hit_flash_tween != null and captain_hit_flash_tween.is_valid():
+		captain_hit_flash_tween.kill()
+	captain_hit_flash_rect.visible = true
+	captain_hit_flash_rect.modulate = Color(1.0, 1.0, 1.0, 0.58)
+	captain_hit_flash_tween = create_tween()
+	captain_hit_flash_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	captain_hit_flash_tween.tween_property(captain_hit_flash_rect, "modulate", Color(1.0, 1.0, 1.0, 0.0), 0.05)
 
 
 func _on_combo_pulse_requested(combo_count: int) -> void:
@@ -922,6 +979,10 @@ func _sync_settings_controls() -> void:
 		pause_damage_numbers_check.button_pressed = bool(PlayerSettings.get("damage_numbers_enabled"))
 	if pause_screen_shake_check != null:
 		pause_screen_shake_check.button_pressed = bool(PlayerSettings.get("screen_shake_enabled"))
+	if pause_joystick_size_slider != null:
+		pause_joystick_size_slider.value = float(PlayerSettings.get("joystick_size_index"))
+	if pause_joystick_size_label != null:
+		pause_joystick_size_label.text = "搖桿大小：%s" % _joystick_size_label(int(PlayerSettings.get("joystick_size_index")))
 	syncing_settings_controls = false
 
 
@@ -935,6 +996,25 @@ func _on_screen_shake_toggled(value: bool) -> void:
 	if syncing_settings_controls or PlayerSettings == null:
 		return
 	PlayerSettings.set_screen_shake_enabled(value)
+
+
+func _on_joystick_size_slider_changed(value: float) -> void:
+	if syncing_settings_controls or PlayerSettings == null:
+		return
+	PlayerSettings.set_joystick_size_index(int(round(value)))
+	if pause_joystick_size_label != null:
+		pause_joystick_size_label.text = "搖桿大小：%s" % _joystick_size_label(int(round(value)))
+	_apply_responsive_layout()
+
+
+func _joystick_size_label(index: int) -> String:
+	match clamp(index, 0, 2):
+		0:
+			return "小"
+		2:
+			return "大"
+		_:
+			return "中"
 
 
 func _on_copy_seed_pressed() -> void:

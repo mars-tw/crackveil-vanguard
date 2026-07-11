@@ -8,6 +8,7 @@ var root: Control
 var panel: Panel
 var title_label: Label
 var gold_label: Label
+var card_scroll: ScrollContainer
 var card_grid: GridContainer
 var skip_button: Button
 var option_buttons: Array[Button] = []
@@ -58,15 +59,21 @@ func _build_ui() -> void:
 	gold_label.add_theme_font_size_override("font_size", 18)
 	panel.add_child(gold_label)
 
+	card_scroll = ScrollContainer.new()
+	card_scroll.name = "CardScroll"
+	card_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	card_scroll.anchor_left = 0.0
+	card_scroll.anchor_right = 1.0
+	card_scroll.anchor_top = 0.0
+	card_scroll.anchor_bottom = 1.0
+	panel.add_child(card_scroll)
+
 	card_grid = GridContainer.new()
 	card_grid.name = "CardGrid"
-	card_grid.anchor_left = 0.0
-	card_grid.anchor_right = 1.0
-	card_grid.anchor_top = 0.0
-	card_grid.anchor_bottom = 1.0
+	card_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	card_grid.add_theme_constant_override("h_separation", 18)
 	card_grid.add_theme_constant_override("v_separation", 14)
-	panel.add_child(card_grid)
+	card_scroll.add_child(card_grid)
 
 	skip_button = Button.new()
 	skip_button.text = "離開"
@@ -134,6 +141,7 @@ func _apply_responsive_layout() -> void:
 		viewport_size = Vector2(1280.0, 720.0)
 	var portrait := viewport_size.y > viewport_size.x
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
+	var compact_landscape := mobile and not portrait
 	var outer_margin := 12.0 if mobile else 28.0
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
 	var panel_width: float = min(viewport_size.x - outer_margin * 2.0, 900.0 if not portrait else 620.0)
@@ -150,22 +158,27 @@ func _apply_responsive_layout() -> void:
 	panel.offset_top = -panel_height * 0.5
 	panel.offset_bottom = panel_height * 0.5
 
-	title_label.offset_top = 16.0 if mobile else 18.0
-	title_label.offset_bottom = title_label.offset_top + (48.0 if mobile else 36.0)
-	title_label.add_theme_font_size_override("font_size", (24 if portrait else 28) if mobile else 30)
+	title_label.offset_top = 12.0 if compact_landscape else 16.0 if mobile else 18.0
+	title_label.offset_bottom = title_label.offset_top + (40.0 if compact_landscape else 48.0 if mobile else 36.0)
+	title_label.add_theme_font_size_override("font_size", (24 if portrait else 22) if mobile else 30)
 	gold_label.offset_top = title_label.offset_bottom
-	gold_label.offset_bottom = gold_label.offset_top + (34.0 if mobile else 24.0)
+	gold_label.offset_bottom = gold_label.offset_top + (26.0 if compact_landscape else 34.0 if mobile else 24.0)
 	gold_label.add_theme_font_size_override("font_size", (15 if portrait else 17) if mobile else 18)
 
 	card_grid.columns = 1 if portrait else 3
-	card_grid.offset_left = 20.0 if mobile else 26.0
-	card_grid.offset_right = -card_grid.offset_left
-	card_grid.offset_top = gold_label.offset_bottom + (12.0 if mobile else 14.0)
-	card_grid.offset_bottom = -(touch_height + 30.0 if mobile else 82.0)
+	if card_scroll != null:
+		card_scroll.offset_left = 20.0 if mobile else 26.0
+		card_scroll.offset_right = -card_scroll.offset_left
+		card_scroll.offset_top = gold_label.offset_bottom + (12.0 if mobile else 14.0)
+		card_scroll.offset_bottom = -(touch_height + 30.0 if mobile else 82.0)
+		card_grid.custom_minimum_size = Vector2(max(1.0, panel_width - card_scroll.offset_left * 2.0), 0.0)
 
-	var side_padding := 40.0 if mobile else 52.0
+	var side_padding: float = 40.0 if mobile else 52.0
 	var card_width: float = panel_width - side_padding if portrait else max(190.0, (panel_width - side_padding - 36.0) / 3.0)
-	var card_height: float = 190.0 if mobile and portrait else 146.0 if portrait else max(206.0 if mobile else 174.0, panel_height - 186.0)
+	var card_scroll_top: float = card_scroll.offset_top if card_scroll != null else gold_label.offset_bottom + 12.0
+	var card_scroll_bottom: float = card_scroll.offset_bottom if card_scroll != null else -(touch_height + 30.0 if mobile else 82.0)
+	var available_card_height: float = panel_height + card_scroll_bottom - card_scroll_top
+	var card_height: float = 190.0 if mobile and portrait else 146.0 if portrait else clamp(available_card_height, 132.0 if compact_landscape else 174.0, 206.0 if mobile else 240.0)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
 		button.add_theme_font_size_override("font_size", 18 if portrait else 19)

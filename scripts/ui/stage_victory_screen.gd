@@ -8,6 +8,7 @@ signal main_menu_requested
 var root: Control
 var panel: Panel
 var title_label: Label
+var summary_scroll: ScrollContainer
 var summary_label: Label
 var copy_seed_button: Button
 var continue_button: Button
@@ -53,12 +54,20 @@ func _build_ui() -> void:
 	title.add_theme_constant_override("outline_size", 2)
 	panel.add_child(title)
 
+	summary_scroll = ScrollContainer.new()
+	summary_scroll.name = "SummaryScroll"
+	summary_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	summary_scroll.anchor_left = 0.0
+	summary_scroll.anchor_right = 1.0
+	summary_scroll.anchor_top = 0.0
+	summary_scroll.anchor_bottom = 1.0
+	panel.add_child(summary_scroll)
+
 	summary_label = Label.new()
-	summary_label.anchor_left = 0.0
-	summary_label.anchor_right = 1.0
 	summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	summary_label.add_theme_font_size_override("font_size", 20)
-	panel.add_child(summary_label)
+	summary_scroll.add_child(summary_label)
 
 	copy_seed_button = Button.new()
 	copy_seed_button.text = "複製本局種子"
@@ -120,8 +129,9 @@ func _apply_responsive_layout() -> void:
 		viewport_size = Vector2(1280.0, 720.0)
 	var portrait := viewport_size.y > viewport_size.x
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
+	var compact_landscape := mobile and not portrait
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
-	var panel_width: float = min(viewport_size.x - (24.0 if mobile else 32.0), 520.0 if mobile else 460.0)
+	var panel_width: float = min(viewport_size.x - (24.0 if mobile else 32.0), 820.0 if compact_landscape else 520.0 if mobile else 460.0)
 	var panel_height: float = min(viewport_size.y - (24.0 if mobile else 32.0), 520.0 if mobile else 402.0)
 
 	panel.anchor_left = 0.5
@@ -134,37 +144,50 @@ func _apply_responsive_layout() -> void:
 	panel.offset_bottom = panel_height * 0.5
 
 	if title_label != null:
-		title_label.offset_top = 20.0
+		title_label.offset_top = 14.0 if compact_landscape else 20.0
 		title_label.offset_bottom = title_label.offset_top + (56.0 if mobile else 38.0)
-		title_label.add_theme_font_size_override("font_size", (24 if portrait else 27) if mobile else 30)
+		title_label.add_theme_font_size_override("font_size", (24 if portrait else 22) if mobile else 30)
 
-	summary_label.offset_left = 24.0 if mobile else 28.0
-	summary_label.offset_right = -summary_label.offset_left
-	summary_label.offset_top = 92.0
-	summary_label.offset_bottom = panel_height - ((touch_height + 12.0) * 3.0 + 28.0 if mobile else 148.0)
+	var button_width: float = 246.0 if compact_landscape else 260.0 if mobile else 196.0
+	var button_left: float = panel_width - button_width - 24.0 if compact_landscape else (panel_width - button_width) * 0.5
+	var button_gap: float = 12.0
+	var button_height: float = touch_height if mobile else 42.0
+	var button_stack_height: float = button_height * 3.0 + button_gap * 2.0
+	var button_top: float = max((title_label.offset_bottom + 14.0) if title_label != null else 72.0, (panel_height - button_stack_height) * 0.5) if compact_landscape else panel_height - ((touch_height + 12.0) * 3.0 + 12.0 if mobile else 178.0)
+
+	if summary_scroll != null:
+		var summary_left: float = 24.0 if mobile else 28.0
+		var summary_right: float = -(panel_width - button_left + 18.0) if compact_landscape else -summary_left
+		summary_scroll.offset_left = summary_left
+		summary_scroll.offset_right = summary_right
+		summary_scroll.offset_top = (title_label.offset_bottom + 10.0) if title_label != null else 92.0
+		summary_scroll.offset_bottom = -20.0 if compact_landscape else -(panel_height - button_top + 16.0)
+		summary_label.custom_minimum_size = Vector2(max(1.0, panel_width + summary_right - summary_left), 156.0 if compact_landscape else 208.0 if mobile else 160.0)
 	summary_label.add_theme_font_size_override("font_size", (15 if portrait else 17) if mobile else 20)
 
 	copy_seed_button.anchor_left = 0.5
 	copy_seed_button.anchor_right = 0.5
-	copy_seed_button.offset_left = -130.0 if mobile else -98.0
-	copy_seed_button.offset_right = 130.0 if mobile else 98.0
-	copy_seed_button.offset_top = panel_height - ((touch_height + 12.0) * 3.0 + 12.0 if mobile else 178.0)
-	copy_seed_button.offset_bottom = copy_seed_button.offset_top + (touch_height if mobile else 42.0)
+	copy_seed_button.anchor_left = 0.0
+	copy_seed_button.anchor_right = 0.0
+	copy_seed_button.offset_left = button_left
+	copy_seed_button.offset_right = button_left + button_width
+	copy_seed_button.offset_top = button_top
+	copy_seed_button.offset_bottom = copy_seed_button.offset_top + button_height
 
-	continue_button.anchor_left = 0.5
-	continue_button.anchor_right = 0.5
-	continue_button.offset_left = -130.0 if mobile else -98.0
-	continue_button.offset_right = 130.0 if mobile else 98.0
-	continue_button.offset_top = copy_seed_button.offset_bottom + 12.0
-	continue_button.offset_bottom = continue_button.offset_top + (touch_height if mobile else 42.0)
+	continue_button.anchor_left = 0.0
+	continue_button.anchor_right = 0.0
+	continue_button.offset_left = button_left
+	continue_button.offset_right = button_left + button_width
+	continue_button.offset_top = copy_seed_button.offset_bottom + button_gap
+	continue_button.offset_bottom = continue_button.offset_top + button_height
 
 	if main_menu_button != null:
-		main_menu_button.anchor_left = 0.5
-		main_menu_button.anchor_right = 0.5
-		main_menu_button.offset_left = -130.0 if mobile else -98.0
-		main_menu_button.offset_right = 130.0 if mobile else 98.0
-		main_menu_button.offset_top = continue_button.offset_bottom + 12.0
-		main_menu_button.offset_bottom = main_menu_button.offset_top + (touch_height if mobile else 42.0)
+		main_menu_button.anchor_left = 0.0
+		main_menu_button.anchor_right = 0.0
+		main_menu_button.offset_left = button_left
+		main_menu_button.offset_right = button_left + button_width
+		main_menu_button.offset_top = continue_button.offset_bottom + button_gap
+		main_menu_button.offset_bottom = main_menu_button.offset_top + button_height
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
 
 
