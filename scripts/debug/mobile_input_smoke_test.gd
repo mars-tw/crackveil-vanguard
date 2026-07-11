@@ -1,6 +1,7 @@
 extends Node
 
 const ARENA_SCENE: PackedScene = preload("res://scenes/arena/Arena.tscn")
+const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 
 var arena: Node = null
 var hud: CanvasLayer = null
@@ -62,8 +63,8 @@ func _check_portrait_layout() -> bool:
 	if visual_radius < viewport_size.x * 0.22:
 		_fail("virtual joystick visual radius below 22 percent portrait width")
 		return false
-	if joystick.size.x < visual_radius * 2.0 * 1.3 - 1.0:
-		_fail("virtual joystick heat zone below 1.3x visual radius")
+	if joystick.size.x < visual_radius * 2.0 * MOBILE_TUNING.MOBILE_JOYSTICK_HEAT_ZONE_MULTIPLIER - 1.0:
+		_fail("virtual joystick heat zone below M1 multiplier")
 		return false
 
 	var level_screen := arena.get_node_or_null("LevelUpScreen")

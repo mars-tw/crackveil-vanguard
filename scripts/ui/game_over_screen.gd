@@ -255,13 +255,16 @@ func _apply_responsive_layout() -> void:
 	var button_height: float = touch_height if mobile else 40.0
 	var button_stack_height: float = button_height * 3.0 + button_gap * 2.0
 	var button_top: float = max((title_label.offset_bottom + 14.0) if title_label != null else 72.0, (panel_height - button_stack_height) * 0.5) if compact_landscape else panel_height - ((touch_height + 12.0) * 3.0 + 12.0 if mobile else 150.0)
+	var copy_top: float = button_top
+	var secondary_top: float = copy_top + button_height + button_gap
+	var primary_top: float = secondary_top + button_height + button_gap
 
 	if copy_seed_button != null:
 		copy_seed_button.anchor_left = 0.0
 		copy_seed_button.anchor_right = 0.0
 		copy_seed_button.offset_left = button_left
 		copy_seed_button.offset_right = button_left + button_width
-		copy_seed_button.offset_top = button_top
+		copy_seed_button.offset_top = copy_top
 		copy_seed_button.offset_bottom = copy_seed_button.offset_top + button_height
 
 	if restart_button != null:
@@ -269,7 +272,7 @@ func _apply_responsive_layout() -> void:
 		restart_button.anchor_right = 0.0
 		restart_button.offset_left = button_left
 		restart_button.offset_right = button_left + button_width
-		restart_button.offset_top = copy_seed_button.offset_bottom + button_gap if copy_seed_button != null else button_top + button_height + button_gap
+		restart_button.offset_top = primary_top if mobile and portrait else secondary_top
 		restart_button.offset_bottom = restart_button.offset_top + button_height
 
 	if main_menu_button != null:
@@ -277,7 +280,7 @@ func _apply_responsive_layout() -> void:
 		main_menu_button.anchor_right = 0.0
 		main_menu_button.offset_left = button_left
 		main_menu_button.offset_right = button_left + button_width
-		main_menu_button.offset_top = restart_button.offset_bottom + button_gap if restart_button != null else button_top + (button_height + button_gap) * 2.0
+		main_menu_button.offset_top = secondary_top if mobile and portrait else primary_top
 		main_menu_button.offset_bottom = main_menu_button.offset_top + button_height
 
 	var body_left: float = 24.0 if mobile else 32.0

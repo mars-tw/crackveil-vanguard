@@ -1,5 +1,7 @@
 extends Node
 
+const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+
 const ENEMY_COUNT := 150
 const PROJECTILE_COUNT := 80
 const START_FRAME := 10
@@ -27,6 +29,9 @@ const EXPECTED_FULL_SQUAD_WEAPONS: Array[String] = [
 	"rift_sniper:rail_lance",
 	"echo_singer:echo_hymn"
 ]
+const MOBILE_LOD_VIEWPORT_SIZE := Vector2i(390, 844)
+
+@export var mobile_lod_scenario: bool = false
 
 var arena: Node = null
 var squad_manager: Node = null
@@ -42,6 +47,10 @@ var last_frame_tick_usec: int = 0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	mobile_lod_scenario = mobile_lod_scenario or _has_stress_arg("--mobile-lod")
+	MOBILE_TUNING.set_force_mobile_lod_for_tests(mobile_lod_scenario)
+	if mobile_lod_scenario:
+		get_window().size = MOBILE_LOD_VIEWPORT_SIZE
 	arena = load("res://scenes/arena/Arena.tscn").instantiate()
 	add_child(arena)
 
@@ -89,6 +98,15 @@ func _initialize_stress() -> void:
 	frame_times_ms.clear()
 	measured_frames = 0
 	last_frame_tick_usec = Time.get_ticks_usec()
+	print("STRESS_SCENARIO mobile_lod=%s viewport=%s particle_multiplier=%.2f damage_cap=%d hazard_tick=%.3f death_burst_cap=%d corpse_cap=%d" % [
+		str(mobile_lod_scenario),
+		str(get_viewport().get_visible_rect().size),
+		MOBILE_TUNING.lod_particle_multiplier(get_viewport().get_visible_rect().size, mobile_lod_scenario),
+		MOBILE_TUNING.damage_number_cap(get_viewport().get_visible_rect().size, EntityFactory.DAMAGE_NUMBER_CAP, mobile_lod_scenario),
+		MOBILE_TUNING.hazard_tick_interval(get_viewport().get_visible_rect().size, 0.24, mobile_lod_scenario),
+		MOBILE_TUNING.death_burst_cap(get_viewport().get_visible_rect().size, EntityFactory.DEATH_BURST_CAP, mobile_lod_scenario),
+		MOBILE_TUNING.corpse_ghost_cap(get_viewport().get_visible_rect().size, EntityFactory.CORPSE_GHOST_CAP, mobile_lod_scenario)
+	])
 	print("STRESS_INIT members=%d enemies=%d projectiles=%d" % [
 		squad_manager.get_member_count(),
 		EntityFactory.get_enemy_live_count(),
@@ -326,6 +344,13 @@ func _finish_stress() -> void:
 
 	print("STRESS_PASS")
 	get_tree().quit(0)
+
+
+func _has_stress_arg(flag: String) -> bool:
+	for argument in OS.get_cmdline_args():
+		if str(argument) == flag:
+			return true
+	return false
 
 
 func _calculate_frame_stats() -> Dictionary:

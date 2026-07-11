@@ -6,6 +6,7 @@ const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 var burst_color: Color = Color(1.0, 0.4, 0.4)
 var burst_scale: float = 1.0
 var burst_style: String = "burst"
+var particle_multiplier: float = 1.0
 var age: float = 0.0
 var lifetime: float = 0.32
 var is_active: bool = false
@@ -45,6 +46,7 @@ func pool_on_release() -> void:
 		shockwave.visible = false
 	burst_scale = 1.0
 	burst_style = "burst"
+	particle_multiplier = 1.0
 
 
 func pool_reset(args: Dictionary) -> void:
@@ -52,15 +54,17 @@ func pool_reset(args: Dictionary) -> void:
 		args.get("position", Vector2.ZERO),
 		args.get("color", Color.WHITE),
 		float(args.get("scale", 1.0)),
-		str(args.get("style", "burst"))
+		str(args.get("style", "burst")),
+		float(args.get("particle_multiplier", 1.0))
 	)
 
 
-func setup(world_position: Vector2, color_value: Color, scale_value: float = 1.0, style_value: String = "burst") -> void:
+func setup(world_position: Vector2, color_value: Color, scale_value: float = 1.0, style_value: String = "burst", particle_multiplier_value: float = 1.0) -> void:
 	global_position = world_position
 	burst_color = color_value
 	burst_scale = clamp(scale_value, 0.75, 3.4)
 	burst_style = style_value
+	particle_multiplier = clamp(particle_multiplier_value, 0.2, 1.0)
 	lifetime = _lifetime_for_style()
 	age = 0.0
 	rotation = 0.0
@@ -203,14 +207,14 @@ func _configure_particles_for_style() -> void:
 	particles.color = Color(burst_color.r, burst_color.g, burst_color.b, 0.88)
 	match burst_style:
 		"spark":
-			particles.amount = int(clamp(round(12.0 * burst_scale), 8.0, 24.0))
+			particles.amount = _scaled_particle_amount(12.0, 8.0, 24.0)
 			particles.lifetime = 0.22
 			particles.initial_velocity_min = 120.0 * burst_scale
 			particles.initial_velocity_max = 255.0 * burst_scale
 			particles.scale_amount_min = 0.12 * burst_scale
 			particles.scale_amount_max = 0.34 * burst_scale
 		"smoke_ring":
-			particles.amount = int(clamp(round(18.0 * burst_scale), 12.0, 28.0))
+			particles.amount = _scaled_particle_amount(18.0, 12.0, 28.0)
 			particles.lifetime = 0.42
 			particles.initial_velocity_min = 45.0 * burst_scale
 			particles.initial_velocity_max = 105.0 * burst_scale
@@ -218,7 +222,7 @@ func _configure_particles_for_style() -> void:
 			particles.scale_amount_max = 0.92 * burst_scale
 			particles.color = Color(burst_color.r, burst_color.g, burst_color.b, 0.42)
 		"gold_rain":
-			particles.amount = int(clamp(round(30.0 * burst_scale), 18.0, 54.0))
+			particles.amount = _scaled_particle_amount(30.0, 18.0, 54.0)
 			particles.lifetime = 0.48
 			particles.direction = Vector2(0.0, -1.0)
 			particles.spread = 72.0
@@ -228,7 +232,7 @@ func _configure_particles_for_style() -> void:
 			particles.scale_amount_min = 0.16 * burst_scale
 			particles.scale_amount_max = 0.46 * burst_scale
 		"level_column":
-			particles.amount = int(clamp(round(26.0 * burst_scale), 18.0, 44.0))
+			particles.amount = _scaled_particle_amount(26.0, 18.0, 44.0)
 			particles.lifetime = 0.52
 			particles.direction = Vector2(0.0, -1.0)
 			particles.spread = 34.0
@@ -237,12 +241,17 @@ func _configure_particles_for_style() -> void:
 			particles.scale_amount_min = 0.18 * burst_scale
 			particles.scale_amount_max = 0.52 * burst_scale
 		_:
-			particles.amount = int(clamp(round(22.0 * burst_scale), 16.0, 56.0))
+			particles.amount = _scaled_particle_amount(22.0, 16.0, 56.0)
 			particles.lifetime = 0.34
 			particles.initial_velocity_min = 66.0 * burst_scale
 			particles.initial_velocity_max = 210.0 * burst_scale
 			particles.scale_amount_min = 0.22 * burst_scale
 			particles.scale_amount_max = 0.72 * burst_scale
+
+
+func _scaled_particle_amount(base_amount: float, min_amount: float, max_amount: float) -> int:
+	var unscaled_amount: float = clamp(round(base_amount * burst_scale), min_amount, max_amount)
+	return max(1, int(round(unscaled_amount * particle_multiplier)))
 
 
 func _lifetime_for_style() -> float:

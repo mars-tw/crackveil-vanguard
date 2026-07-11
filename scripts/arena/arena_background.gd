@@ -3,6 +3,7 @@ extends Node2D
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 const RUN_THEME := preload("res://scripts/arena/run_theme.gd")
+const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 
 const DEEP_SPACE_TEXTURE_PATH := "res://assets/art/deep_space_gradient.png"
 const NEBULA_TEXTURE_PATH := "res://assets/art/nebula_layer.png"
@@ -228,19 +229,20 @@ func _process(delta: float) -> void:
 	global_position = center
 	var center_cell := Vector2i(floori(center.x / 48.0), floori(center.y / 48.0))
 	var evolution_step := _evolution_step_for_time(time_accum)
+	var mobile_lod := _mobile_lod_active()
 	if evolution_step != last_evolution_step:
 		last_evolution_step = evolution_step
 		last_decor_cell = Vector2i(999999, 999999)
 	_update_rift_sprites(center)
 	_update_dust_bounds()
 	_update_environment_colors()
-	_update_decor_positions(center)
+	_update_decor_positions(center, mobile_lod)
 	_update_lightning(delta, center)
 	_update_meteors(delta, center)
 	redraw_timer -= delta
 	if center_cell != last_center_cell or redraw_timer <= 0.0:
 		last_center_cell = center_cell
-		redraw_timer = 0.08
+		redraw_timer = 0.14 if mobile_lod else 0.08
 		queue_redraw()
 
 
@@ -252,18 +254,20 @@ func _draw() -> void:
 	var draw_background := _evolved_color(background_color, 0.85)
 	var draw_rift := _evolved_color(rift_color, 1.0)
 	var draw_nebula := _evolved_color(nebula_color, 0.85)
+	var dynamic_multiplier := MOBILE_TUNING.background_dynamic_multiplier(viewport_size)
 	draw_rect(rect, draw_background, true)
 
 	_draw_theme_ground(center, draw_size)
 	_draw_tiled(deep_space_texture, center, draw_size, 0.055, 1.45, _evolved_color(Color(0.82, 0.9, 1.0, _deep_space_alpha()), 0.35))
-	_draw_tiled(nebula_texture, center + Vector2(time_accum * 12.0, -time_accum * 7.0), draw_size, 0.14, 1.25, draw_nebula)
-	_draw_tiled(nebula_texture, center + Vector2(-time_accum * 6.0, time_accum * 9.0), draw_size, 0.18, 0.86, _secondary_nebula_color())
+	_draw_tiled(nebula_texture, center + Vector2(time_accum * 12.0, -time_accum * 7.0) * dynamic_multiplier, draw_size, 0.14, 1.25, draw_nebula)
+	_draw_tiled(nebula_texture, center + Vector2(-time_accum * 6.0, time_accum * 9.0) * dynamic_multiplier, draw_size, 0.18, 0.86, _secondary_nebula_color())
 	_draw_tiled(rift_crack_texture, center, draw_size, 0.34, 1.15, Color(draw_rift.r, draw_rift.g, draw_rift.b, 0.22))
 
-	for index in range(18):
+	var ambient_line_count := 8 if dynamic_multiplier < 1.0 else 18
+	for index in range(ambient_line_count):
 		var seed_vec := center * 0.013 + Vector2(float(index) * 31.7, float(index) * -17.2)
-		var x := fposmod(sin(seed_vec.x + time_accum * 0.12) * 927.0 + float(index) * 131.0, draw_size.x) - draw_size.x * 0.5
-		var y := fposmod(cos(seed_vec.y - time_accum * 0.09) * 719.0 + float(index) * 89.0, draw_size.y) - draw_size.y * 0.5
+		var x := fposmod(sin(seed_vec.x + time_accum * 0.12 * dynamic_multiplier) * 927.0 + float(index) * 131.0, draw_size.x) - draw_size.x * 0.5
+		var y := fposmod(cos(seed_vec.y - time_accum * 0.09 * dynamic_multiplier) * 719.0 + float(index) * 89.0, draw_size.y) - draw_size.y * 0.5
 		var length := 34.0 + float(index % 5) * 11.0
 		var alpha := 0.06 + float(index % 4) * 0.02
 		var from := Vector2(x, y)
@@ -404,8 +408,9 @@ func _ensure_rift_sprites() -> void:
 func _update_rift_sprites(center: Vector2) -> void:
 	if rift_glow == null or rift_cracks == null:
 		return
-	var seam_offset := Vector2(sin(time_accum * 0.17 + center.x * 0.001), cos(time_accum * 0.13 + center.y * 0.001)) * 92.0
-	var pulse := 0.5 + 0.5 * sin(time_accum * 2.15)
+	var dynamic_multiplier := MOBILE_TUNING.background_dynamic_multiplier(_viewport_size())
+	var seam_offset := Vector2(sin(time_accum * 0.17 * dynamic_multiplier + center.x * 0.001), cos(time_accum * 0.13 * dynamic_multiplier + center.y * 0.001)) * 92.0
+	var pulse := 0.5 + 0.5 * sin(time_accum * 2.15 * dynamic_multiplier)
 	var surge := pulse * pulse * pulse
 	var glow_color := _evolved_color(rift_color, 1.0)
 	rift_glow.position = seam_offset
@@ -425,7 +430,7 @@ func _ensure_dust_particles() -> void:
 		add_child(dust_particles)
 	dust_particles.texture = ART_RESOURCES.get_particle_core()
 	dust_particles.material = ART_RESOURCES.get_additive_material()
-	dust_particles.amount = max(0, int(round(float(dust_amount) * float(current_theme.get("dust_amount_multiplier", 1.0)))))
+	dust_particles.amount = max(0, int(round(float(dust_amount) * float(current_theme.get("dust_amount_multiplier", 1.0)) * MOBILE_TUNING.lod_particle_multiplier(_viewport_size()))))
 	dust_particles.lifetime = 7.5
 	dust_particles.preprocess = 7.5
 	dust_particles.randomness = 0.72
@@ -446,7 +451,8 @@ func _ensure_dust_particles() -> void:
 func _update_dust_bounds() -> void:
 	if dust_particles == null:
 		return
-	dust_particles.emission_rect_extents = _viewport_size() * 0.68
+	var viewport_size := _viewport_size()
+	dust_particles.emission_rect_extents = viewport_size * (0.56 if MOBILE_TUNING.mobile_lod_enabled(viewport_size) else 0.68)
 
 
 func _ensure_decor_pool() -> void:
@@ -469,7 +475,7 @@ func _rebuild_decor(center: Vector2) -> void:
 	if decor_cell == last_decor_cell:
 		return
 	last_decor_cell = decor_cell
-	var entries := _build_decor_entries(decor_cell, DECOR_POOL_SIZE)
+	var entries := _build_decor_entries(decor_cell, _decor_pool_target_size())
 	for index in range(DECOR_POOL_SIZE):
 		var sprite := decor_sprites[index]
 		if index >= entries.size():
@@ -492,10 +498,10 @@ func _rebuild_decor(center: Vector2) -> void:
 		sprite.material = ART_RESOURCES.get_additive_material() if bool(definition.get("glow", false)) else null
 		sprite.visible = true
 		decor_states[index] = entry
-	_update_decor_positions(center)
+	_update_decor_positions(center, _mobile_lod_active())
 
 
-func _update_decor_positions(center: Vector2) -> void:
+func _update_decor_positions(center: Vector2, mobile_lod: bool = false) -> void:
 	var decor_cell := Vector2i(floori(center.x / DECOR_CELL_SIZE), floori(center.y / DECOR_CELL_SIZE))
 	if decor_cell != last_decor_cell:
 		_rebuild_decor(center)
@@ -509,13 +515,13 @@ func _update_decor_positions(center: Vector2) -> void:
 		if boss_flash_timer > 0.0:
 			sprite.modulate = _decor_modulate(state, bool(state.get("glow", false)))
 		var sway_offset := 0.0
-		if bool(state.get("sway", false)):
+		if bool(state.get("sway", false)) and not mobile_lod:
 			var phase := float(state.get("phase", 0.0))
 			var speed := float(state.get("sway_speed", 1.0))
 			var amount := float(state.get("sway_amount", 0.018))
 			sprite.rotation = float(state.get("rotation", 0.0)) + sin(time_accum * speed + phase) * amount
 			sway_offset = sin(time_accum * speed * 0.82 + phase) * 2.2
-		elif bool(state.get("glow", false)):
+		elif bool(state.get("glow", false)) and not mobile_lod:
 			var pulse := 0.5 + 0.5 * sin(time_accum * 2.4 + float(state.get("phase", 0.0)))
 			sprite.modulate.a = float(state.get("alpha", 0.58)) * (0.82 + pulse * 0.28)
 		sprite.position = (world_position - center) * parallax + Vector2(sway_offset, 0.0)
@@ -526,7 +532,7 @@ func _build_decor_entries(base_cell: Vector2i, max_count: int) -> Array[Dictiona
 	var decor_ids: Array = current_theme.get("decor", [])
 	if decor_ids.is_empty():
 		return entries
-	var base_density := float(current_theme.get("decor_density", 0.32))
+	var base_density := float(current_theme.get("decor_density", 0.32)) * MOBILE_TUNING.background_decor_multiplier(_viewport_size())
 	for y in range(-DECOR_GRID_RADIUS_Y, DECOR_GRID_RADIUS_Y + 1):
 		for x in range(-DECOR_GRID_RADIUS_X, DECOR_GRID_RADIUS_X + 1):
 			if entries.size() >= max_count:
@@ -614,6 +620,7 @@ func _update_lightning(_delta: float, _center: Vector2) -> void:
 func _trigger_lightning() -> void:
 	lightning_token += 1
 	var viewport_size := _viewport_size()
+	var mobile_lod := MOBILE_TUNING.mobile_lod_enabled(viewport_size)
 	var start := Vector2(
 		-viewport_size.x * 0.58,
 		lerpf(-viewport_size.y * 0.42, viewport_size.y * 0.18, _hash01(lightning_token, run_seed, 301))
@@ -623,7 +630,7 @@ func _trigger_lightning() -> void:
 		start.y + lerpf(-96.0, 96.0, _hash01(lightning_token, run_seed, 302))
 	)
 	var points := PackedVector2Array()
-	var segments := 7
+	var segments := 5 if mobile_lod else 7
 	for index in range(segments + 1):
 		var t := float(index) / float(segments)
 		var point := start.lerp(end, t)
@@ -631,7 +638,7 @@ func _trigger_lightning() -> void:
 		points.append(point)
 	lightning_line.points = points
 	lightning_timer = 0.26
-	next_lightning_time = time_accum + 20.0 + _hash01(lightning_token, run_seed, 304) * 20.0
+	next_lightning_time = time_accum + (32.0 if mobile_lod else 20.0) + _hash01(lightning_token, run_seed, 304) * (32.0 if mobile_lod else 20.0)
 
 
 func _ensure_meteor_pool() -> void:
@@ -697,13 +704,14 @@ func _trigger_meteor() -> void:
 		return
 	meteor_token += 1
 	var viewport_size := _viewport_size()
+	var mobile_lod := MOBILE_TUNING.mobile_lod_enabled(viewport_size)
 	var start := Vector2(
 		lerpf(-viewport_size.x * 0.48, viewport_size.x * 0.58, _hash01(meteor_token, run_seed, 401)),
 		-viewport_size.y * 0.62
 	)
 	var direction := Vector2(lerpf(-0.42, 0.42, _hash01(meteor_token, run_seed, 402)), 1.0).normalized()
 	var speed := lerpf(210.0, 340.0, _hash01(meteor_token, run_seed, 403))
-	var tail_length := lerpf(46.0, 92.0, _hash01(meteor_token, run_seed, 404))
+	var tail_length := lerpf(46.0, 92.0, _hash01(meteor_token, run_seed, 404)) * (0.72 if mobile_lod else 1.0)
 	var line := meteor_lines[slot]
 	line.points = PackedVector2Array([Vector2.ZERO, -direction * tail_length])
 	var color: Color = _evolved_color(current_theme.get("meteor_color", Color(0.76, 0.96, 1.0, 0.68)), 0.8)
@@ -715,7 +723,7 @@ func _trigger_meteor() -> void:
 		"lifetime": lerpf(1.1, 1.7, _hash01(meteor_token, run_seed, 405)),
 		"color": color
 	}
-	next_meteor_time = time_accum + 7.0 + _hash01(meteor_token, run_seed, 406) * 12.0
+	next_meteor_time = time_accum + (16.0 if mobile_lod else 7.0) + _hash01(meteor_token, run_seed, 406) * (18.0 if mobile_lod else 12.0)
 
 
 func _ensure_vignette() -> void:
@@ -818,6 +826,24 @@ func _update_environment_colors() -> void:
 		dust_particles.color = _evolved_color(current_theme.get("dust_color", Color(0.57, 0.96, 1.0, 0.38)), 0.75)
 	if canvas_tone_node != null and is_instance_valid(canvas_tone_node):
 		canvas_tone_node.color = _evolved_color(current_theme.get("canvas_tone", Color(0.86, 0.94, 1.0, 1.0)), 0.35)
+
+
+func _mobile_lod_active() -> bool:
+	return MOBILE_TUNING.mobile_lod_enabled(_viewport_size())
+
+
+func _decor_pool_target_size() -> int:
+	var multiplier := MOBILE_TUNING.background_decor_multiplier(_viewport_size())
+	return clampi(int(round(float(DECOR_POOL_SIZE) * multiplier)), 48, DECOR_POOL_SIZE)
+
+
+func get_mobile_lod_debug_state() -> Dictionary:
+	return {
+		"mobile_lod": _mobile_lod_active(),
+		"dust_amount": dust_particles.amount if dust_particles != null else 0,
+		"decor_target": _decor_pool_target_size(),
+		"dynamic_multiplier": MOBILE_TUNING.background_dynamic_multiplier(_viewport_size())
+	}
 
 
 func _on_boss_intro_requested(_boss_name: String) -> void:

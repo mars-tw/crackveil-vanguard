@@ -5,7 +5,7 @@ signal direction_changed(direction: Vector2)
 
 @export var stick_radius: float = 86.0
 @export var knob_radius: float = 26.0
-@export var heat_zone_multiplier: float = 1.3
+@export var heat_zone_multiplier: float = 1.24
 @export var dead_zone: float = 0.045
 
 var direction: Vector2 = Vector2.ZERO
@@ -74,11 +74,11 @@ func configure_for_viewport(viewport_size: Vector2, mobile: bool, size_index: in
 	var clamped_index: int = clamp(size_index, 0, 2)
 	var radius: float = 66.0
 	if mobile:
-		var portrait_ratios: Array[float] = [0.22, 0.25, 0.29]
-		var landscape_ratios: Array[float] = [0.18, 0.20, 0.23]
+		var portrait_ratios: Array[float] = [0.20, 0.24, 0.27]
+		var landscape_ratios: Array[float] = [0.17, 0.20, 0.22]
 		var base_axis: float = safe_size.x if portrait else min(safe_size.x, safe_size.y)
 		var ratio: float = float(portrait_ratios[clamped_index] if portrait else landscape_ratios[clamped_index])
-		radius = max(72.0, base_axis * ratio)
+		radius = max(70.0 if portrait else 64.0, base_axis * ratio)
 	else:
 		var desktop_radii: Array[float] = [58.0, 66.0, 76.0]
 		radius = desktop_radii[clamped_index]

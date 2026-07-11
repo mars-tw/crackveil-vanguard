@@ -3,6 +3,7 @@ extends Area2D
 
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
+const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 
 const TRAIL_NODE_CAP := 160
 static var active_trail_nodes: int = 0
@@ -457,7 +458,7 @@ func _apply_sprite() -> void:
 		sprite.visible = false
 		return
 	sprite.visible = true
-	sprite.modulate = projectile_color
+	sprite.modulate = _projectile_display_color()
 	SPRITE_LOADER.fit_sprite(sprite, texture, radius * 4.0, sprite_scale)
 	_configure_projectile_vfx()
 
@@ -465,6 +466,8 @@ func _apply_sprite() -> void:
 func _configure_projectile_vfx() -> void:
 	var vfx_color := projectile_color
 	var glow_alpha: float = 0.34
+	var mobile_readability := MOBILE_TUNING.use_mobile_ui(_viewport_size_for_lod())
+	var enemy_projectile := target_group == "heroes"
 	if target_group == "heroes":
 		vfx_color = Color(1.0, 0.36, 0.18, 1.0)
 		glow_alpha = 0.44
@@ -477,8 +480,12 @@ func _configure_projectile_vfx() -> void:
 	if glow != null:
 		glow.visible = true
 		glow.position = Vector2.ZERO
-		glow.modulate = Color(vfx_color.r, vfx_color.g, vfx_color.b, glow_alpha)
-		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), radius * (8.6 if motion_mode == "boomerang" else 7.8))
+		if enemy_projectile and mobile_readability:
+			glow.modulate = Color(0.01, 0.014, 0.018, 0.84)
+			ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), radius * 10.8)
+		else:
+			glow.modulate = Color(vfx_color.r, vfx_color.g, vfx_color.b, glow_alpha)
+			ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), radius * (8.6 if motion_mode == "boomerang" else 7.8))
 	if trail != null:
 		if not trail_registered and active_trail_nodes < TRAIL_NODE_CAP:
 			active_trail_nodes += 1
@@ -492,6 +499,8 @@ func _configure_projectile_vfx() -> void:
 			alpha *= 1.18
 		if motion_mode == "boomerang":
 			alpha *= 1.25
+		if enemy_projectile and mobile_readability:
+			alpha = max(alpha, 0.66)
 		trail.default_color = Color(vfx_color.r, vfx_color.g, vfx_color.b, alpha)
 		var length: float = clamp(speed * (0.072 if motion_mode == "boomerang" else 0.06), 20.0, 72.0)
 		trail.points = PackedVector2Array([Vector2(-length, 0.0), Vector2(-length * 0.32, 0.0), Vector2.ZERO])
@@ -500,6 +509,12 @@ func _configure_projectile_vfx() -> void:
 		muzzle_flash.modulate = Color(vfx_color.r, vfx_color.g, vfx_color.b, 0.72)
 		ART_RESOURCES.fit_sprite(muzzle_flash, ART_RESOURCES.get_radial_glow(), radius * 8.5)
 		muzzle_flash_base_scale = muzzle_flash.scale
+
+
+func _projectile_display_color() -> Color:
+	if target_group == "heroes" and MOBILE_TUNING.use_mobile_ui(_viewport_size_for_lod()):
+		return Color(1.0, 0.44, 0.16, 1.0)
+	return projectile_color
 
 
 func _tick_projectile_vfx(delta: float) -> void:
@@ -539,3 +554,13 @@ func _on_lob_landed() -> void:
 		cluster_stats["damage"] = float(cluster_stats.get("damage", damage)) * 0.58
 		cluster_stats["area_radius"] = float(cluster_stats.get("area_radius", radius * 8.0)) * 0.58
 		EntityFactory.spawn_delayed_explosion(cluster_position, cluster_stats, source, 0.05 * float(index))
+
+
+func _viewport_size_for_lod() -> Vector2:
+	var viewport_size := get_viewport_rect().size
+	if viewport_size.x > 0.0 and viewport_size.y > 0.0:
+		return viewport_size
+	var window_size := DisplayServer.window_get_size()
+	if window_size.x > 0 and window_size.y > 0:
+		return Vector2(window_size)
+	return Vector2(1280.0, 720.0)

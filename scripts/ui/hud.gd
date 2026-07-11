@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 const VIRTUAL_JOYSTICK_SCENE := preload("res://scripts/ui/virtual_joystick.gd")
+const COOLDOWN_RING_SCRIPT := preload("res://scripts/ui/cooldown_ring.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 
@@ -21,6 +22,7 @@ var version_label: Label
 var audio_prompt_button: Button
 var active_ability_button: Button
 var active_ability_cooldown: TextureProgressBar
+var active_ability_cooldown_ring: Control
 var active_ability_label: Label
 var toast_panel: Panel
 var toast_label: Label
@@ -44,6 +46,7 @@ var pause_joystick_size_slider: HSlider
 var pause_seed_button: Button
 var pause_reset_meta_button: Button
 var pause_guide_button: Button
+var pause_run_stats_label: Label
 var pause_achievements_label: RichTextLabel
 var pause_resume_button: Button
 var virtual_joystick: Control
@@ -221,6 +224,11 @@ func _build_ui() -> void:
 	active_ability_button.tooltip_text = "裂隙脈衝"
 	active_ability_button.pressed.connect(_on_active_ability_pressed)
 	root.add_child(active_ability_button)
+
+	active_ability_cooldown_ring = COOLDOWN_RING_SCRIPT.new()
+	active_ability_cooldown_ring.name = "ActiveAbilityCooldownRing"
+	active_ability_cooldown_ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(active_ability_cooldown_ring)
 
 	active_ability_cooldown = TextureProgressBar.new()
 	active_ability_cooldown.name = "ActiveAbilityCooldown"
@@ -416,6 +424,13 @@ func _build_pause_overlay() -> void:
 	pause_guide_button.pressed.connect(_on_rewatch_guide_pressed)
 	pause_content.add_child(pause_guide_button)
 
+	pause_run_stats_label = Label.new()
+	pause_run_stats_label.name = "PauseRunStatsLabel"
+	pause_run_stats_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pause_run_stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	pause_run_stats_label.add_theme_font_size_override("font_size", 14)
+	pause_content.add_child(pause_run_stats_label)
+
 	pause_reset_meta_button = Button.new()
 	pause_reset_meta_button.text = "重置殘響"
 	pause_reset_meta_button.pressed.connect(_on_reset_meta_pressed)
@@ -474,61 +489,64 @@ func _apply_responsive_layout() -> void:
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size) or force_touch_controls_visible
 	var margin := 16.0 if mobile else 14.0
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size, force_touch_controls_visible)
+	var safe_top := MOBILE_TUNING.safe_top_padding(viewport_size, force_touch_controls_visible)
 
 	if hud_panel != null:
-		hud_panel.position = Vector2(8.0, 66.0) if mobile and portrait else Vector2(8.0, 8.0)
-		hud_panel.size = Vector2(min(viewport_size.x - 16.0, 382.0), 150.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.72 if portrait else 0.38), 390.0 if mobile else 340.0), 126.0 if mobile else 108.0)
+		hud_panel.position = Vector2(8.0, safe_top + 58.0) if mobile and portrait else Vector2(8.0, safe_top + 8.0 if mobile else 8.0)
+		hud_panel.size = Vector2(min(viewport_size.x - 16.0, 382.0), 126.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.72 if portrait else 0.38), 390.0 if mobile else 340.0), 112.0 if mobile else 108.0)
 	if score_panel != null:
 		if mobile and portrait:
-			score_panel.anchor_left = 0.0
-			score_panel.anchor_right = 1.0
+			score_panel.anchor_left = 0.5
+			score_panel.anchor_right = 0.5
 			score_panel.position = Vector2.ZERO
-			score_panel.offset_left = 8.0
-			score_panel.offset_right = -8.0
-			score_panel.offset_top = 184.0
-			score_panel.offset_bottom = 230.0
+			score_panel.offset_left = -52.0
+			score_panel.offset_right = 52.0
+			score_panel.offset_top = safe_top + 6.0
+			score_panel.offset_bottom = score_panel.offset_top + 44.0
 		else:
 			score_panel.anchor_left = 1.0
 			score_panel.anchor_right = 1.0
 			score_panel.position = Vector2.ZERO
 			score_panel.offset_left = -358.0 if not portrait else -276.0
 			score_panel.offset_right = -margin
-			score_panel.offset_top = 84.0 if mobile and not portrait else 8.0 if not portrait else 48.0
+			score_panel.offset_top = safe_top + 76.0 if mobile and not portrait else 8.0 if not portrait else 48.0
 			score_panel.offset_bottom = score_panel.offset_top + (52.0 if mobile else 46.0)
 	if hp_icon != null:
 		hp_icon.anchor_left = 0.0
 		hp_icon.anchor_right = 0.0
-		hp_icon.position = Vector2(margin + 2.0, 80.0) if mobile and portrait else Vector2(margin + 2.0, 14.0)
+		hp_icon.position = Vector2(margin + 2.0, safe_top + 72.0) if mobile and portrait else Vector2(margin + 2.0, safe_top + 14.0 if mobile else 14.0)
 		hp_icon.size = Vector2(36.0, 36.0) if mobile and portrait else Vector2(32.0, 32.0) if mobile else Vector2(26.0, 26.0)
 	if xp_icon != null:
 		xp_icon.anchor_left = 0.0
 		xp_icon.anchor_right = 0.0
-		xp_icon.position = Vector2(margin + 2.0, 124.0) if mobile and portrait else Vector2(margin + 2.0, 44.0)
+		xp_icon.position = Vector2(margin + 2.0, safe_top + 114.0) if mobile and portrait else Vector2(margin + 2.0, safe_top + 42.0 if mobile else 44.0)
 		xp_icon.size = Vector2(34.0, 34.0) if mobile and portrait else Vector2(30.0, 30.0) if mobile else Vector2(24.0, 24.0)
 	if gold_icon != null:
+		gold_icon.visible = not mobile
 		if mobile and portrait:
 			gold_icon.anchor_left = 0.0
 			gold_icon.anchor_right = 0.0
 			gold_icon.offset_left = margin + 2.0
 			gold_icon.offset_right = gold_icon.offset_left + 30.0
-			gold_icon.offset_top = 224.0
+			gold_icon.offset_top = safe_top + 188.0
 			gold_icon.offset_bottom = gold_icon.offset_top + 30.0
 		else:
 			gold_icon.anchor_left = 1.0
 			gold_icon.anchor_right = 1.0
 			gold_icon.offset_left = -336.0 if not portrait else -258.0
 			gold_icon.offset_right = gold_icon.offset_left + (30.0 if mobile else 26.0)
-			gold_icon.offset_top = 94.0 if mobile and not portrait else 20.0 if not portrait else 60.0
+			gold_icon.offset_top = safe_top + 86.0 if mobile and not portrait else 20.0 if not portrait else 60.0
 			gold_icon.offset_bottom = gold_icon.offset_top + (30.0 if mobile else 26.0)
 
-	hp_label.position = Vector2(margin + 48.0, 76.0) if mobile and portrait else Vector2(margin + 36.0, 10.0)
+	hp_label.position = Vector2(margin + 48.0, safe_top + 68.0) if mobile and portrait else Vector2(margin + 36.0, safe_top + 10.0 if mobile else 10.0)
 	hp_label.add_theme_font_size_override("font_size", (18 if portrait else 18) if mobile else (18 if portrait else 20))
-	level_label.position = Vector2(margin + 48.0, 122.0) if mobile and portrait else Vector2(margin + 36.0, 38.0)
+	level_label.position = Vector2(margin + 48.0, safe_top + 110.0) if mobile and portrait else Vector2(margin + 36.0, safe_top + 36.0 if mobile else 38.0)
 	level_label.add_theme_font_size_override("font_size", (16 if portrait else 15) if mobile else (14 if portrait else 16))
-	xp_bar.position = Vector2(margin + 48.0, 166.0) if mobile and portrait else Vector2(margin + 36.0, 66.0)
+	xp_bar.position = Vector2(margin + 48.0, safe_top + 150.0) if mobile and portrait else Vector2(margin + 36.0, safe_top + 62.0 if mobile else 66.0)
 	xp_bar.size = Vector2(min(viewport_size.x - margin * 2.0 - 58.0, 306.0), 20.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.5 if portrait else 0.28), 286.0 if mobile else 260.0), 16.0 if mobile else 14.0)
 	if theme_label != null:
-		theme_label.position = Vector2(margin + 48.0, 190.0) if mobile and portrait else Vector2(margin + 36.0, 86.0 if mobile else 82.0)
+		theme_label.visible = not mobile and theme_label.text != ""
+		theme_label.position = Vector2(margin + 48.0, safe_top + 174.0) if mobile and portrait else Vector2(margin + 36.0, safe_top + 82.0 if mobile else 82.0)
 		theme_label.size = Vector2(min(viewport_size.x - margin * 2.0 - 58.0, 306.0), 26.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.55 if portrait else 0.3), 286.0 if mobile else 276.0), 26.0 if mobile else 22.0)
 		theme_label.add_theme_font_size_override("font_size", (13 if portrait else 12) if mobile else (12 if portrait else 13))
 
@@ -536,7 +554,7 @@ func _apply_responsive_layout() -> void:
 	time_label.anchor_right = 0.0 if mobile and portrait else 0.5
 	time_label.offset_left = margin if mobile and portrait else -92.0 if mobile else -78.0
 	time_label.offset_right = margin + 168.0 if mobile and portrait else 92.0 if mobile else 78.0
-	time_label.offset_top = 8.0 if mobile else 10.0
+	time_label.offset_top = safe_top if mobile else 10.0
 	time_label.offset_bottom = time_label.offset_top + (46.0 if mobile else 32.0)
 	time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if mobile and portrait else HORIZONTAL_ALIGNMENT_CENTER
 	time_label.add_theme_font_size_override("font_size", (22 if portrait else 23) if mobile else (22 if portrait else 24))
@@ -544,21 +562,22 @@ func _apply_responsive_layout() -> void:
 	score_label.anchor_left = 1.0
 	score_label.anchor_right = 1.0
 	if mobile and portrait:
-		score_label.anchor_left = 0.0
-		score_label.anchor_right = 1.0
-		score_label.offset_left = margin + 42.0
-		score_label.offset_right = -14.0
-		score_label.offset_top = 222.0
-		score_label.offset_bottom = 262.0
-		score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		score_label.anchor_left = 0.5
+		score_label.anchor_right = 0.5
+		score_label.offset_left = -48.0
+		score_label.offset_right = 48.0
+		score_label.offset_top = safe_top + 8.0
+		score_label.offset_bottom = score_label.offset_top + 38.0
+		score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	else:
 		score_label.offset_left = -338.0 if not portrait else -258.0
 		score_label.offset_right = -104.0 if not portrait else -14.0
-		score_label.offset_top = 92.0 if mobile and not portrait else 17.0 if not portrait else 54.0
+		score_label.offset_top = safe_top + 84.0 if mobile and not portrait else 17.0 if not portrait else 54.0
 		score_label.offset_bottom = score_label.offset_top + (34.0 if mobile else 30.0)
 		score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	score_label.add_theme_font_size_override("font_size", (14 if portrait else 16) if mobile else (16 if portrait else 18))
 
+	version_label.visible = not mobile
 	version_label.anchor_left = 1.0
 	version_label.anchor_right = 1.0
 	version_label.anchor_top = 1.0
@@ -574,7 +593,7 @@ func _apply_responsive_layout() -> void:
 	var pause_width: float = max(touch_height, 104.0) if mobile and portrait else max(touch_height, 116.0) if mobile else 74.0
 	pause_button.offset_left = -(pause_width + margin) if mobile else -88.0
 	pause_button.offset_right = -margin
-	pause_button.offset_top = 8.0 if mobile else 10.0
+	pause_button.offset_top = safe_top if mobile else 10.0
 	pause_button.offset_bottom = pause_button.offset_top + (touch_height if mobile else 40.0)
 
 	if pause_overlay != null:
@@ -632,16 +651,21 @@ func _apply_responsive_layout() -> void:
 		audio_prompt_button.offset_bottom = -34.0
 
 	if active_ability_button != null:
-		var ability_size := 82.0 if mobile and portrait else 74.0 if mobile else 68.0 if portrait else 62.0
-		var bottom_margin := 34.0 if portrait else 28.0
+		var ability_size := MOBILE_TUNING.ability_button_size(viewport_size, force_touch_controls_visible)
+		var ability_position := MOBILE_TUNING.ability_button_position(viewport_size, force_touch_controls_visible)
 		active_ability_button.anchor_left = 0.0
 		active_ability_button.anchor_right = 0.0
 		active_ability_button.anchor_top = 0.0
 		active_ability_button.anchor_bottom = 0.0
-		active_ability_button.position = Vector2(viewport_size.x - ability_size - 24.0, viewport_size.y - ability_size - bottom_margin)
+		active_ability_button.position = ability_position
 		active_ability_button.size = Vector2(ability_size, ability_size)
 		active_ability_button.custom_minimum_size = Vector2(ability_size, ability_size)
-		active_ability_button.add_theme_font_size_override("font_size", 22 if portrait else 20)
+		active_ability_button.add_theme_font_size_override("font_size", (24 if portrait else 22) if mobile else 22 if portrait else 20)
+	if active_ability_cooldown_ring != null and active_ability_button != null:
+		active_ability_cooldown_ring.position = active_ability_button.position
+		active_ability_cooldown_ring.size = active_ability_button.size
+		if active_ability_cooldown_ring.has_method("set_ring_width"):
+			active_ability_cooldown_ring.call("set_ring_width", 7.0 if mobile else 5.0)
 	if active_ability_cooldown != null and active_ability_button != null:
 		active_ability_cooldown.position = active_ability_button.position
 		active_ability_cooldown.size = active_ability_button.size
@@ -657,7 +681,7 @@ func _apply_responsive_layout() -> void:
 		toast_panel.anchor_bottom = 0.0
 		toast_panel.offset_left = -toast_width * 0.5
 		toast_panel.offset_right = toast_width * 0.5
-		toast_panel.offset_top = 238.0 if mobile and portrait else 64.0 if mobile else 56.0 if not portrait else 94.0
+		toast_panel.offset_top = safe_top + 186.0 if mobile and portrait else safe_top + 64.0 if mobile else 56.0 if not portrait else 94.0
 		toast_panel.offset_bottom = toast_panel.offset_top + (58.0 if mobile else 48.0)
 
 	if captain_hit_flash_rect != null:
@@ -681,11 +705,11 @@ func _apply_responsive_layout() -> void:
 		boss_intro_label.size = Vector2(max(1.0, viewport_size.x - 48.0), 118.0 if mobile else 82.0)
 		boss_intro_label.add_theme_font_size_override("font_size", (32 if portrait else 42) if mobile else (36 if portrait else 48))
 	if milestone_label != null:
-		milestone_label.position = Vector2(24.0, viewport_size.y * 0.22)
+		milestone_label.position = Vector2(24.0, max(safe_top + 116.0, viewport_size.y * (0.29 if mobile and portrait else 0.22)))
 		milestone_label.size = Vector2(max(1.0, viewport_size.x - 48.0), 108.0 if mobile else 78.0)
 		milestone_label.add_theme_font_size_override("font_size", (25 if portrait else 32) if mobile else (28 if portrait else 36))
 	if combo_break_label != null:
-		combo_break_label.position = Vector2(24.0, viewport_size.y * 0.32)
+		combo_break_label.position = Vector2(24.0, viewport_size.y * (0.40 if mobile and portrait else 0.32))
 		combo_break_label.size = Vector2(max(1.0, viewport_size.x - 48.0), 58.0 if mobile else 44.0)
 		combo_break_label.add_theme_font_size_override("font_size", (16 if portrait else 20) if mobile else (18 if portrait else 22))
 
@@ -698,8 +722,8 @@ func _apply_responsive_layout() -> void:
 			var fallback_size: float = 188.0 if mobile and portrait else 170.0 if mobile else 164.0 if portrait else 150.0
 			joystick_size = Vector2(fallback_size, fallback_size)
 		virtual_joystick.size = joystick_size
-		var joystick_margin: float = max(14.0, joystick_size.x * 0.08)
-		virtual_joystick.position = Vector2(joystick_margin, viewport_size.y - joystick_size.y - joystick_margin)
+		var joystick_target := MOBILE_TUNING.joystick_rect(viewport_size, joystick_size, force_touch_controls_visible)
+		virtual_joystick.position = joystick_target.position
 		virtual_joystick.visible = _should_show_touch_controls()
 	MOBILE_TUNING.apply_control_tree(root, viewport_size, force_touch_controls_visible)
 
@@ -728,13 +752,19 @@ func _on_stats_changed(stats: Dictionary) -> void:
 	var theme_name := str(stats.get("run_theme_name", ""))
 	if theme_label != null:
 		theme_label.text = "地圖：%s" % theme_name if theme_name != "" else ""
-		theme_label.visible = theme_name != ""
+		theme_label.visible = theme_name != "" and not MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size, force_touch_controls_visible)
 	time_label.text = GameManager.format_time(float(stats.get("elapsed_time", 0.0)))
-	score_label.text = "擊殺 %d   金幣 %d   殘響 %d" % [
-		int(stats.get("kills", 0)),
-		int(stats.get("gold", 0)),
-		int(stats.get("echo_shards", 0))
+	var mobile := MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size, force_touch_controls_visible)
+	var kills := int(stats.get("kills", 0))
+	var gold := int(stats.get("gold", 0))
+	var echo_shards := int(stats.get("echo_shards", 0))
+	score_label.text = "擊殺 %d" % kills if mobile else "擊殺 %d   金幣 %d   殘響 %d" % [
+		kills,
+		gold,
+		echo_shards
 	]
+	if pause_run_stats_label != null:
+		pause_run_stats_label.text = "本局：擊殺 %d   金幣 %d   殘響 %d" % [kills, gold, echo_shards]
 	_on_pause_changed(bool(stats.get("manual_pause_visible", bool(stats.get("manual_paused", false)))))
 
 
@@ -782,6 +812,8 @@ func _refresh_active_ability_button() -> void:
 	active_ability_button.visible = visible_for_player
 	if active_ability_cooldown != null:
 		active_ability_cooldown.visible = visible_for_player
+	if active_ability_cooldown_ring != null:
+		active_ability_cooldown_ring.visible = visible_for_player
 	if active_ability_label != null:
 		active_ability_label.visible = visible_for_player
 	if not visible_for_player:
@@ -793,7 +825,9 @@ func _refresh_active_ability_button() -> void:
 	active_ability_button.text = "裂"
 	if active_ability_cooldown != null:
 		active_ability_cooldown.value = ratio
-		active_ability_cooldown.modulate = Color(1.0, 1.0, 1.0, 0.86 if ratio > 0.0 else 0.0)
+		active_ability_cooldown.modulate = Color(1.0, 1.0, 1.0, 0.30 if ratio > 0.0 else 0.0)
+	if active_ability_cooldown_ring != null and active_ability_cooldown_ring.has_method("set_cooldown_ratio"):
+		active_ability_cooldown_ring.call("set_cooldown_ratio", ratio)
 	if active_ability_label != null:
 		active_ability_label.text = "%.1f" % remaining if remaining > 0.05 else ""
 

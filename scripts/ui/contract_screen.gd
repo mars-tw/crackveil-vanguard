@@ -21,6 +21,7 @@ var card_scroll: ScrollContainer
 var card_grid: GridContainer
 var option_buttons: Array[Button] = []
 var meta_buttons: Dictionary = {}
+var pending_mobile_confirm_button: Button = null
 
 
 func _ready() -> void:
@@ -151,10 +152,13 @@ func show_options(options: Array) -> void:
 	for child in card_grid.get_children():
 		child.queue_free()
 	option_buttons.clear()
+	pending_mobile_confirm_button = null
 
 	for option in options:
 		var button := Button.new()
 		button.text = "%s\n\n%s" % [str(option.get("name", "契約")), str(option.get("description", ""))]
+		button.set_meta("base_text", button.text)
+		button.set_meta("option_key", _option_key(option))
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		button.add_theme_font_size_override("font_size", 20)
 		button.pressed.connect(_on_contract_pressed.bind(option))
@@ -167,6 +171,15 @@ func show_options(options: Array) -> void:
 
 
 func _on_contract_pressed(contract: Dictionary) -> void:
+	if MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size):
+		var pressed_button := _button_for_option(contract)
+		if pressed_button != null and pressed_button != pending_mobile_confirm_button:
+			_reset_pending_mobile_confirm()
+			pending_mobile_confirm_button = pressed_button
+			pressed_button.text = "再次點擊確認\n\n" + str(pressed_button.get_meta("base_text", pressed_button.text))
+			return
+		if pressed_button != null:
+			_reset_pending_mobile_confirm()
 	root.visible = false
 	contract_selected.emit(contract)
 
@@ -190,6 +203,31 @@ func _on_seed_paste_pressed() -> void:
 func hide_screen() -> void:
 	if root != null:
 		root.visible = false
+	_reset_pending_mobile_confirm()
+
+
+func _button_for_option(contract: Dictionary) -> Button:
+	var key := _option_key(contract)
+	for button in option_buttons:
+		if button == null or not is_instance_valid(button):
+			continue
+		if str(button.get_meta("option_key", "")) == key:
+			return button
+	return null
+
+
+func _option_key(option: Dictionary) -> String:
+	return "%s|%s|%s" % [
+		str(option.get("id", "")),
+		str(option.get("name", "")),
+		str(option.get("description", ""))
+	]
+
+
+func _reset_pending_mobile_confirm() -> void:
+	if pending_mobile_confirm_button != null and is_instance_valid(pending_mobile_confirm_button):
+		pending_mobile_confirm_button.text = str(pending_mobile_confirm_button.get_meta("base_text", pending_mobile_confirm_button.text))
+	pending_mobile_confirm_button = null
 
 
 func _build_meta_buttons() -> void:
@@ -327,6 +365,8 @@ func _apply_responsive_layout() -> void:
 		seed_start_button.custom_minimum_size = Vector2(128.0 if mobile else 116.0, touch_height if mobile else 38.0)
 
 	card_grid.columns = 1 if portrait else min(4, max(1, option_buttons.size()))
+	card_grid.add_theme_constant_override("h_separation", 26 if mobile else 18)
+	card_grid.add_theme_constant_override("v_separation", 22 if mobile else 14)
 	if card_scroll != null:
 		card_scroll.offset_left = 20.0 if mobile else 26.0
 		card_scroll.offset_right = -card_scroll.offset_left

@@ -6,6 +6,17 @@ const DESKTOP_THREAT_CAMERA_ZOOM := Vector2(1.12, 1.12)
 const MOBILE_CAMERA_ZOOM := Vector2(1.56, 1.56)
 const MOBILE_THREAT_CAMERA_ZOOM := Vector2(1.36, 1.36)
 const MOBILE_VIEWPORT_WIDTH_TRIGGER := 700.0
+const FORCE_MOBILE_LOD_SETTING := "crackveil/debug/force_mobile_lod"
+const MOBILE_LOD_PARTICLE_MULTIPLIER := 0.6
+const MOBILE_BACKGROUND_DYNAMIC_MULTIPLIER := 0.6
+const MOBILE_BACKGROUND_DECOR_MULTIPLIER := 0.72
+const MOBILE_DAMAGE_NUMBER_MERGE_RADIUS := 82.0
+const MOBILE_DAMAGE_NUMBER_MERGE_AGE := 0.34
+const MOBILE_DAMAGE_NUMBER_CAP := 30
+const MOBILE_HAZARD_TICK_INTERVAL_MULTIPLIER := 1.55
+const MOBILE_CORPSE_GHOST_CAP := 12
+const MOBILE_DEATH_BURST_CAP := 12
+const MOBILE_JOYSTICK_HEAT_ZONE_MULTIPLIER := 1.24
 
 const META_FONT_BASE_PREFIX := "r14_font_base_"
 const META_FONT_HAD_PREFIX := "r14_font_had_"
@@ -64,6 +75,125 @@ static func touch_target(viewport_size: Vector2, force_mobile: bool = false) -> 
 	if short_side <= 430.0:
 		return 76.0 if portrait else 68.0
 	return 72.0
+
+
+static func safe_top_padding(viewport_size: Vector2, force_mobile: bool = false) -> float:
+	if not use_mobile_ui(viewport_size, force_mobile):
+		return 0.0
+	var size := _safe_viewport_size(viewport_size)
+	var portrait := size.y > size.x
+	if portrait and size.x <= 430.0:
+		return 26.0
+	return 16.0 if portrait else 10.0
+
+
+static func safe_bottom_padding(viewport_size: Vector2, force_mobile: bool = false) -> float:
+	if not use_mobile_ui(viewport_size, force_mobile):
+		return 0.0
+	var size := _safe_viewport_size(viewport_size)
+	return 10.0 if size.y > size.x else 6.0
+
+
+static func ability_button_size(viewport_size: Vector2, force_mobile: bool = false) -> float:
+	if not use_mobile_ui(viewport_size, force_mobile):
+		return 68.0 if _safe_viewport_size(viewport_size).y > _safe_viewport_size(viewport_size).x else 62.0
+	var size := _safe_viewport_size(viewport_size)
+	return 92.0 if size.y > size.x else 84.0
+
+
+static func ability_button_position(viewport_size: Vector2, force_mobile: bool = false) -> Vector2:
+	var size := _safe_viewport_size(viewport_size)
+	var button_size := ability_button_size(size, force_mobile)
+	if not use_mobile_ui(size, force_mobile):
+		var desktop_bottom := 34.0 if size.y > size.x else 28.0
+		return Vector2(size.x - button_size - 24.0, size.y - button_size - desktop_bottom)
+	var portrait := size.y > size.x
+	var right_margin := 22.0 if portrait else 20.0
+	var bottom_margin := safe_bottom_padding(size, force_mobile) + (24.0 if portrait else 18.0)
+	return Vector2(size.x - button_size - right_margin, size.y - button_size - bottom_margin)
+
+
+static func joystick_margin(viewport_size: Vector2, joystick_size: Vector2, force_mobile: bool = false) -> Vector2:
+	var size := _safe_viewport_size(viewport_size)
+	if not use_mobile_ui(size, force_mobile):
+		var desktop_margin: float = max(14.0, joystick_size.x * 0.08)
+		return Vector2(desktop_margin, desktop_margin)
+	var portrait := size.y > size.x
+	return Vector2(18.0 if portrait else 16.0, safe_bottom_padding(size, force_mobile) + (18.0 if portrait else 14.0))
+
+
+static func joystick_rect(viewport_size: Vector2, joystick_size: Vector2, force_mobile: bool = false) -> Rect2:
+	var size := _safe_viewport_size(viewport_size)
+	var margin := joystick_margin(size, joystick_size, force_mobile)
+	return Rect2(Vector2(margin.x, size.y - joystick_size.y - margin.y), joystick_size)
+
+
+static func ability_button_rect(viewport_size: Vector2, force_mobile: bool = false) -> Rect2:
+	var size := _safe_viewport_size(viewport_size)
+	var button_size := ability_button_size(size, force_mobile)
+	return Rect2(ability_button_position(size, force_mobile), Vector2.ONE * button_size)
+
+
+static func mobile_lod_enabled(viewport_size: Vector2, force_mobile: bool = false) -> bool:
+	if bool(ProjectSettings.get_setting(FORCE_MOBILE_LOD_SETTING, false)):
+		return true
+	return use_mobile_ui(viewport_size, force_mobile)
+
+
+static func set_force_mobile_lod_for_tests(enabled: bool) -> void:
+	ProjectSettings.set_setting(FORCE_MOBILE_LOD_SETTING, enabled)
+
+
+static func lod_particle_multiplier(viewport_size: Vector2, force_mobile: bool = false) -> float:
+	return MOBILE_LOD_PARTICLE_MULTIPLIER if mobile_lod_enabled(viewport_size, force_mobile) else 1.0
+
+
+static func background_dynamic_multiplier(viewport_size: Vector2, force_mobile: bool = false) -> float:
+	return MOBILE_BACKGROUND_DYNAMIC_MULTIPLIER if mobile_lod_enabled(viewport_size, force_mobile) else 1.0
+
+
+static func background_decor_multiplier(viewport_size: Vector2, force_mobile: bool = false) -> float:
+	return MOBILE_BACKGROUND_DECOR_MULTIPLIER if mobile_lod_enabled(viewport_size, force_mobile) else 1.0
+
+
+static func damage_number_merge_radius(viewport_size: Vector2, base_radius: float, active_count: int, cap: int, force_mobile: bool = false) -> float:
+	var radius := base_radius
+	if active_count >= cap:
+		radius *= 2.4
+	if mobile_lod_enabled(viewport_size, force_mobile):
+		radius = max(radius, MOBILE_DAMAGE_NUMBER_MERGE_RADIUS)
+		if active_count >= MOBILE_DAMAGE_NUMBER_CAP:
+			radius *= 1.45
+	return radius
+
+
+static func damage_number_merge_age(viewport_size: Vector2, base_age: float, force_mobile: bool = false) -> float:
+	return max(base_age, MOBILE_DAMAGE_NUMBER_MERGE_AGE) if mobile_lod_enabled(viewport_size, force_mobile) else base_age
+
+
+static func damage_number_cap(viewport_size: Vector2, base_cap: int, force_mobile: bool = false) -> int:
+	return min(base_cap, MOBILE_DAMAGE_NUMBER_CAP) if mobile_lod_enabled(viewport_size, force_mobile) else base_cap
+
+
+static func damage_number_font_size(viewport_size: Vector2, requested_size: int = 0, force_mobile: bool = false) -> int:
+	if not mobile_lod_enabled(viewport_size, force_mobile):
+		return requested_size
+	if requested_size > 0:
+		return min(requested_size, 20)
+	return 14
+
+
+static func hazard_tick_interval(viewport_size: Vector2, base_interval: float, force_mobile: bool = false) -> float:
+	var safe_interval: float = max(0.01, base_interval)
+	return safe_interval * MOBILE_HAZARD_TICK_INTERVAL_MULTIPLIER if mobile_lod_enabled(viewport_size, force_mobile) else safe_interval
+
+
+static func corpse_ghost_cap(viewport_size: Vector2, base_cap: int, force_mobile: bool = false) -> int:
+	return min(base_cap, MOBILE_CORPSE_GHOST_CAP) if mobile_lod_enabled(viewport_size, force_mobile) else base_cap
+
+
+static func death_burst_cap(viewport_size: Vector2, base_cap: int, force_mobile: bool = false) -> int:
+	return min(base_cap, MOBILE_DEATH_BURST_CAP) if mobile_lod_enabled(viewport_size, force_mobile) else base_cap
 
 
 static func leader_camera_zoom(viewport_size: Vector2, force_mobile: bool = false) -> Vector2:

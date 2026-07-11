@@ -22,6 +22,15 @@ const EXPECTED_FULL_SQUAD_WEAPONS: Array[String] = [
 	"rift_sniper:rail_lance",
 	"echo_singer:echo_hymn"
 ]
+const EXPECTED_DAMAGE_WEAPONS: Array[String] = [
+	"orbit_guard:rift_shield_boomerang",
+	"arc_scout:rift_seeker_missiles",
+	"pulse_artificer:pulse_bloom",
+	"line_mender:riftline_emitter",
+	"ember_grenadier:grenade_lob",
+	"void_weaver:void_net",
+	"rift_sniper:rail_lance"
+]
 
 var arena: Node = null
 var squad_manager: Node = null
@@ -203,6 +212,10 @@ func _report_probe() -> bool:
 		_fail("no weapon damage recorded")
 		return false
 	for key in EXPECTED_FULL_SQUAD_WEAPONS:
+		if int(trigger_counts.get(key, 0)) <= 0:
+			_fail("full squad weapon trigger missing: " + key)
+			return false
+	for key in EXPECTED_DAMAGE_WEAPONS:
 		if not dps_by_weapon.has(key):
 			_fail("full squad weapon DPS missing: " + key)
 			return false

@@ -2,6 +2,7 @@ extends Node
 
 const NODE_POOL_SCRIPT: Script = preload("res://scripts/pooling/node_pool.gd")
 const ENEMY_SPATIAL_INDEX_SCRIPT: Script = preload("res://scripts/services/enemy_spatial_index.gd")
+const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 
 const ENEMY_SCENE: PackedScene = preload("res://scenes/enemies/Enemy.tscn")
 const HERO_SCENE: PackedScene = preload("res://scenes/heroes/Hero.tscn")
@@ -370,21 +371,24 @@ func magnetize_xp_near(world_position: Vector2, radius: float) -> int:
 func spawn_damage_number(value: Variant, world_position: Vector2, number_color: Color = Color.WHITE, font_size_override: int = 0) -> Node:
 	if PlayerSettings != null and not bool(PlayerSettings.get("damage_numbers_enabled")):
 		return null
-	var merged := _try_merge_damage_number(value, world_position, number_color)
+	_compact_active_damage_numbers()
+	var viewport_size := _viewport_size_for_lod()
+	var effective_cap := MOBILE_TUNING.damage_number_cap(viewport_size, DAMAGE_NUMBER_CAP)
+	var merged := _try_merge_damage_number(value, world_position, number_color, viewport_size, effective_cap)
 	if merged != null:
 		return merged
-	_compact_active_damage_numbers()
-	if active_damage_numbers.size() >= DAMAGE_NUMBER_CAP:
+	if active_damage_numbers.size() >= effective_cap:
 		return null
 	var number := _acquire("damage_number")
 	if number == null:
 		return null
+	var effective_font_size := MOBILE_TUNING.damage_number_font_size(viewport_size, font_size_override)
 	active_damage_numbers.append(number)
 	number.pool_reset({
 		"value": value,
 		"position": world_position,
 		"color": number_color,
-		"font_size": font_size_override
+		"font_size": effective_font_size
 	})
 	return number
 
@@ -396,7 +400,8 @@ func spawn_combo_text(combo_count: int, world_position: Vector2) -> Node:
 
 
 func spawn_death_burst(world_position: Vector2, burst_color: Color, burst_scale: float = 1.0, burst_style: String = "burst") -> Node:
-	if get_pool_live_count("death_burst") >= DEATH_BURST_CAP:
+	var viewport_size := _viewport_size_for_lod()
+	if get_pool_live_count("death_burst") >= MOBILE_TUNING.death_burst_cap(viewport_size, DEATH_BURST_CAP):
 		return null
 	var burst := _acquire("death_burst")
 	if burst == null:
@@ -405,13 +410,15 @@ func spawn_death_burst(world_position: Vector2, burst_color: Color, burst_scale:
 		"position": world_position,
 		"color": burst_color,
 		"scale": burst_scale,
-		"style": burst_style
+		"style": burst_style,
+		"particle_multiplier": MOBILE_TUNING.lod_particle_multiplier(viewport_size)
 	})
 	return burst
 
 
 func spawn_corpse_ghost(world_position: Vector2, corpse_sprite_path: String, corpse_color: Color, corpse_radius: float, corpse_sprite_scale: float, flip_h: bool = false, sprite_rotation: float = 0.0) -> Node:
-	if corpse_sprite_path == "" or get_pool_live_count("corpse_ghost") >= CORPSE_GHOST_CAP:
+	var viewport_size := _viewport_size_for_lod()
+	if corpse_sprite_path == "" or get_pool_live_count("corpse_ghost") >= MOBILE_TUNING.corpse_ghost_cap(viewport_size, CORPSE_GHOST_CAP):
 		return null
 	var ghost := _acquire("corpse_ghost")
 	if ghost == null:
@@ -593,16 +600,15 @@ func reclaim_regular_enemy_for_elite(reference_position: Vector2) -> bool:
 	return true
 
 
-func _try_merge_damage_number(value: Variant, world_position: Vector2, number_color: Color) -> Node:
+func _try_merge_damage_number(value: Variant, world_position: Vector2, number_color: Color, viewport_size: Vector2, effective_cap: int) -> Node:
 	if not (typeof(value) == TYPE_FLOAT or typeof(value) == TYPE_INT):
 		return null
-	var merge_radius := DAMAGE_NUMBER_MERGE_RADIUS
-	if active_damage_numbers.size() >= DAMAGE_NUMBER_CAP:
-		merge_radius *= 2.4
+	var merge_radius := MOBILE_TUNING.damage_number_merge_radius(viewport_size, DAMAGE_NUMBER_MERGE_RADIUS, active_damage_numbers.size(), effective_cap)
+	var merge_age := MOBILE_TUNING.damage_number_merge_age(viewport_size, DAMAGE_NUMBER_MERGE_AGE)
 	for number in active_damage_numbers:
 		if number == null or not is_instance_valid(number):
 			continue
-		if number.has_method("can_merge") and number.can_merge(world_position, merge_radius, DAMAGE_NUMBER_MERGE_AGE):
+		if number.has_method("can_merge") and number.can_merge(world_position, merge_radius, merge_age):
 			if number.has_method("merge_value"):
 				number.merge_value(value, world_position, number_color)
 			return number
@@ -874,6 +880,18 @@ func _create_pool(pool_name: String, scene: PackedScene) -> void:
 	var pool = NODE_POOL_SCRIPT.new(pool_name, scene, pool_root)
 	pools[pool_name] = pool
 	pool.warm(int(PREWARM_COUNTS.get(pool_name, 0)))
+
+
+func _viewport_size_for_lod() -> Vector2:
+	var viewport := get_viewport()
+	if viewport != null:
+		var viewport_size := viewport.get_visible_rect().size
+		if viewport_size.x > 0.0 and viewport_size.y > 0.0:
+			return viewport_size
+	var window_size := DisplayServer.window_get_size()
+	if window_size.x > 0 and window_size.y > 0:
+		return Vector2(window_size)
+	return Vector2(1280.0, 720.0)
 
 
 func _acquire(pool_name: String) -> Node:

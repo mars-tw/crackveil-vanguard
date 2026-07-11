@@ -154,6 +154,9 @@ func _apply_responsive_layout() -> void:
 	var button_height: float = touch_height if mobile else 42.0
 	var button_stack_height: float = button_height * 3.0 + button_gap * 2.0
 	var button_top: float = max((title_label.offset_bottom + 14.0) if title_label != null else 72.0, (panel_height - button_stack_height) * 0.5) if compact_landscape else panel_height - ((touch_height + 12.0) * 3.0 + 12.0 if mobile else 178.0)
+	var copy_top: float = button_top
+	var secondary_top: float = copy_top + button_height + button_gap
+	var primary_top: float = secondary_top + button_height + button_gap
 
 	if summary_scroll != null:
 		var summary_left: float = 24.0 if mobile else 28.0
@@ -171,14 +174,14 @@ func _apply_responsive_layout() -> void:
 	copy_seed_button.anchor_right = 0.0
 	copy_seed_button.offset_left = button_left
 	copy_seed_button.offset_right = button_left + button_width
-	copy_seed_button.offset_top = button_top
+	copy_seed_button.offset_top = copy_top
 	copy_seed_button.offset_bottom = copy_seed_button.offset_top + button_height
 
 	continue_button.anchor_left = 0.0
 	continue_button.anchor_right = 0.0
 	continue_button.offset_left = button_left
 	continue_button.offset_right = button_left + button_width
-	continue_button.offset_top = copy_seed_button.offset_bottom + button_gap
+	continue_button.offset_top = primary_top if mobile and portrait else secondary_top
 	continue_button.offset_bottom = continue_button.offset_top + button_height
 
 	if main_menu_button != null:
@@ -186,7 +189,7 @@ func _apply_responsive_layout() -> void:
 		main_menu_button.anchor_right = 0.0
 		main_menu_button.offset_left = button_left
 		main_menu_button.offset_right = button_left + button_width
-		main_menu_button.offset_top = continue_button.offset_bottom + button_gap
+		main_menu_button.offset_top = secondary_top if mobile and portrait else primary_top
 		main_menu_button.offset_bottom = main_menu_button.offset_top + button_height
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
 
