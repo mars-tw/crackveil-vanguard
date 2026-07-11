@@ -222,6 +222,9 @@ func _ensure_sprite() -> void:
 	trail.material = ART_RESOURCES.get_additive_material()
 	trail.z_index = -3
 	trail.width = 5.0
+	trail.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	trail.end_cap_mode = Line2D.LINE_CAP_ROUND
+	trail.joint_mode = Line2D.LINE_JOINT_ROUND
 
 	sprite = get_node_or_null("Sprite2D") as Sprite2D
 	if sprite == null:
@@ -249,7 +252,18 @@ func _apply_sprite() -> void:
 		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), projectile_radius * 8.8)
 	if trail != null:
 		trail.visible = true
-		trail.width = clamp(projectile_radius * 1.45, 4.0, 12.0)
-		trail.default_color = Color(color.r, color.g, color.b, 0.48)
-		var length := projectile_radius * 7.2
-		trail.points = PackedVector2Array([Vector2(-length, 0.0), Vector2(-length * 0.32, 0.0), Vector2.ZERO])
+		trail.width = clamp(projectile_radius * 0.82, 3.0, 8.0)
+		trail.default_color = Color.WHITE
+		var gradient := Gradient.new()
+		gradient.set_color(0, Color(color.r, color.g, color.b, 0.0))
+		gradient.set_color(1, Color(color.r, color.g, color.b, 0.42))
+		gradient.add_point(0.58, Color(color.r, color.g, color.b, 0.16))
+		trail.gradient = gradient
+		var length := projectile_radius * 4.0
+		var arc_height := projectile_radius * 0.42
+		trail.points = PackedVector2Array([
+			Vector2(-length, -arc_height),
+			Vector2(-length * 0.58, -arc_height * 0.52),
+			Vector2(-length * 0.18, 0.0),
+			Vector2.ZERO
+		])

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/hero_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = "void_weaver"
+display_name = "虛空織網者"
+description = "放置減速力場網，拖住敵群並製造隊伍輸出窗口。"
+body_color = Color(0.58, 0.42, 1, 1)
+core_color = Color(0.86, 0.72, 1, 1)
+sprite_path = "res://assets/sprites/hero_scout.png"
+sprite_scale = 1.36
+max_hp = 82.0
+move_speed = 232.0
+hit_radius = 11.0
+pickup_radius = 76.0
+starting_weapon_ids = PackedStringArray("void_net")
+passive_id = "void_weaver"
+passive_value = 0.1
+passive_description = "力場半徑提高，控制覆蓋更穩定。"

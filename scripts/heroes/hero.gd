@@ -24,6 +24,8 @@ var is_leader: bool = false
 var formation_index: int = 0
 var hero_id: String = ""
 var display_name: String = "未命名英雄"
+var passive_id: String = ""
+var passive_value: float = 0.0
 var max_hp: float = 100.0
 var current_hp: float = 100.0
 var temporary_shield_hp: float = 0.0
@@ -74,6 +76,8 @@ func _apply_hero_data() -> void:
 
 	hero_id = str(hero_data.get("id"))
 	display_name = str(hero_data.get("display_name"))
+	passive_id = str(hero_data.get("passive_id"))
+	passive_value = float(hero_data.get("passive_value"))
 	max_hp = float(hero_data.get("max_hp"))
 	move_speed = float(hero_data.get("move_speed"))
 	pickup_radius = float(hero_data.get("pickup_radius"))
@@ -82,7 +86,13 @@ func _apply_hero_data() -> void:
 
 	if visual != null:
 		if visual.has_method("configure_visual"):
-			visual.configure_visual(str(hero_data.get("sprite_path")), float(hero_data.get("sprite_scale")), hit_radius + 2.0)
+			visual.configure_visual(
+				str(hero_data.get("sprite_path")),
+				float(hero_data.get("sprite_scale")),
+				hit_radius + 2.0,
+				hero_data.get("body_color"),
+				hero_data.get("core_color")
+			)
 		else:
 			visual.set("body_color", hero_data.get("body_color"))
 			visual.set("core_color", hero_data.get("core_color"))

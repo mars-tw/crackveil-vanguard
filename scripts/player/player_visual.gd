@@ -48,10 +48,18 @@ func _process(delta: float) -> void:
 	_update_procedural_motion(delta)
 
 
-func configure_visual(new_sprite_path: String, new_scale: float, new_radius: float) -> void:
+func configure_visual(
+	new_sprite_path: String,
+	new_scale: float,
+	new_radius: float,
+	new_body_color: Color = Color(0.35, 0.78, 1.0),
+	new_core_color: Color = Color(0.88, 0.98, 1.0)
+) -> void:
 	sprite_path = new_sprite_path
 	sprite_scale = new_scale
 	body_radius = new_radius
+	body_color = new_body_color
+	core_color = new_core_color
 	_apply_sprite()
 
 
@@ -115,6 +123,7 @@ func _apply_sprite() -> void:
 		sprite.visible = false
 		return
 	sprite.visible = true
+	sprite.modulate = _hero_tint()
 	SPRITE_LOADER.fit_sprite(sprite, texture, body_radius * 3.1, sprite_scale)
 	sprite_base_scale = sprite.scale
 	_setup_animation_frames(body_radius * 3.1, sprite_scale)
@@ -125,7 +134,7 @@ func _apply_sprite() -> void:
 	if aura != null:
 		ART_RESOURCES.fit_sprite(aura, ART_RESOURCES.get_radial_glow(), body_radius * 5.2)
 		aura_base_scale = aura.scale
-		aura.modulate = Color(body_color.r * 0.45 + 0.2, body_color.g * 0.72 + 0.25, 1.0, 0.38)
+		aura.modulate = Color(core_color.r * 0.62 + body_color.r * 0.24, core_color.g * 0.62 + body_color.g * 0.24, core_color.b * 0.72 + 0.22, 0.38)
 
 
 func _update_procedural_motion(delta: float) -> void:
@@ -210,6 +219,7 @@ func _setup_animation_frames(target_diameter: float, scale_multiplier: float) ->
 		frames.add_frame("walk", texture)
 	animated_sprite.sprite_frames = frames
 	animated_sprite.animation = "idle"
+	animated_sprite.modulate = _hero_tint()
 	animated_sprite.play()
 	animation_frames_ready = true
 	animated_sprite.visible = true
@@ -366,6 +376,10 @@ func _facing_sign() -> int:
 	if facing_direction.x < -0.05:
 		return -1
 	return 0
+
+
+func _hero_tint() -> Color:
+	return Color.WHITE.lerp(body_color, 0.42)
 
 
 func get_step_dust_pool_size() -> int:

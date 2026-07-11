@@ -204,7 +204,7 @@ func _spawn_boss() -> void:
 		return
 	boss_spawned = true
 	var config := {
-		"max_hp": 1950.0,
+		"max_hp": 2600.0,
 		"speed": 46.0,
 		"damage": 18.0,
 		"xp": 30,
@@ -302,7 +302,7 @@ func _apply_time_scaling(config: Dictionary) -> void:
 	if elapsed < 60.0:
 		return
 	var minutes_after := (elapsed - 60.0) / 60.0
-	var multiplier := 1.0 + 0.055 * minutes_after
+	var multiplier := 1.0 + 0.075 * minutes_after
 	config["max_hp"] = float(config.get("max_hp", 1.0)) * multiplier
 	config["damage"] = float(config.get("damage", 1.0)) * multiplier
 	if config.has("projectile_damage"):

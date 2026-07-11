@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/EchoHymnWeapon.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_data")
+id = "echo_hymn"
+display_name = "迴響頌歌"
+description = "週期治療全隊，並以短暫光環提升隊伍輸出。"
+behavior_id = "echo_hymn"
+weapon_scene = ExtResource("2_scene")
+damage = 12.0
+cooldown = 4.0
+range = 0.0
+color = Color(1, 0.86, 0.46, 1)
+effect_lifetime = 0.28
+lightning_sprite_path = "res://assets/sprites/proj_lightning.png"
+projectile_count = 1
+area_radius = 126.0
+damage_upgrade = 2.4
+cooldown_upgrade_multiplier = 0.9
+area_radius_upgrade = 18.0
+projectile_count_upgrade = 1

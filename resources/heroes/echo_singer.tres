@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/hero_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = "echo_singer"
+display_name = "迴響歌者"
+description = "首位輔助英雄，週期治療全隊並提供短暫增傷光環。"
+body_color = Color(1, 0.82, 0.42, 1)
+core_color = Color(1, 0.98, 0.74, 1)
+sprite_path = "res://assets/sprites/hero_scout.png"
+sprite_scale = 1.32
+max_hp = 84.0
+move_speed = 226.0
+hit_radius = 11.0
+pickup_radius = 80.0
+starting_weapon_ids = PackedStringArray("echo_hymn")
+passive_id = "echo_singer"
+passive_value = 0.08
+passive_description = "治療脈衝與光環半徑小幅提高。"

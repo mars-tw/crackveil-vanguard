@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WeaponCatalog" load_steps=8 format=3]
+[gd_resource type="Resource" script_class="WeaponCatalog" load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/weapon_catalog.gd" id="1_catalog"]
 [ext_resource type="Resource" path="res://resources/weapons/riftline_emitter.tres" id="2_linear"]
@@ -7,8 +7,12 @@
 [ext_resource type="Resource" path="res://resources/weapons/arc_chain.tres" id="5_chain"]
 [ext_resource type="Resource" path="res://resources/weapons/rift_shield_boomerang.tres" id="6_boomerang"]
 [ext_resource type="Resource" path="res://resources/weapons/rift_seeker_missiles.tres" id="7_missile"]
+[ext_resource type="Resource" path="res://resources/weapons/grenade_lob.tres" id="8_grenade"]
+[ext_resource type="Resource" path="res://resources/weapons/void_net.tres" id="9_void"]
+[ext_resource type="Resource" path="res://resources/weapons/rail_lance.tres" id="10_rail"]
+[ext_resource type="Resource" path="res://resources/weapons/echo_hymn.tres" id="11_echo"]
 
 [resource]
 script = ExtResource("1_catalog")
 starting_weapons = Array[Resource]([ExtResource("2_linear"), ExtResource("3_orbit"), ExtResource("5_chain")])
-available_weapons = Array[Resource]([ExtResource("2_linear"), ExtResource("3_orbit"), ExtResource("4_explosion"), ExtResource("5_chain"), ExtResource("6_boomerang"), ExtResource("7_missile")])
+available_weapons = Array[Resource]([ExtResource("2_linear"), ExtResource("3_orbit"), ExtResource("4_explosion"), ExtResource("5_chain"), ExtResource("6_boomerang"), ExtResource("7_missile"), ExtResource("8_grenade"), ExtResource("9_void"), ExtResource("10_rail"), ExtResource("11_echo")])

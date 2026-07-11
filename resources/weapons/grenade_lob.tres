@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/GrenadeLobWeapon.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_data")
+id = "grenade_lob"
+display_name = "燼焰榴彈"
+description = "拋物線榴彈轟炸敵群，落點爆裂並留下短暫燃燒區。"
+behavior_id = "grenade_lob"
+weapon_scene = ExtResource("2_scene")
+damage = 18.0
+cooldown = 2.1
+range = 560.0
+color = Color(1, 0.48, 0.18, 1)
+effect_lifetime = 0.34
+projectile_sprite_path = "res://assets/sprites/proj_bullet.png"
+explosion_sprite_path = "res://assets/sprites/fx_explosion.png"
+sprite_scale = 1.28
+projectile_count = 1
+projectile_speed = 360.0
+projectile_radius = 7.0
+area_radius = 74.0
+damage_upgrade = 4.8
+cooldown_upgrade_multiplier = 0.9
+range_upgrade = 28.0
+projectile_count_upgrade = 1
+area_radius_upgrade = 14.0

@@ -18,29 +18,29 @@ const LIGHTNING_ARC_SCENE: PackedScene = preload("res://scenes/vfx/LightningArc.
 
 const PREWARM_COUNTS: Dictionary = {
 	"enemy": 220,
-	"projectile": 240,
+	"projectile": 320,
 	"fork_projectile": 56,
-	"orbit_projectile": 40,
-	"explosion": 80,
-	"hazard_zone": 8,
+	"orbit_projectile": 56,
+	"explosion": 112,
+	"hazard_zone": 18,
 	"xp_gem": 220,
 	"coin": 220,
 	"damage_number": 96,
 	"death_burst": 32,
 	"corpse_ghost": 32,
-	"lightning_arc": 80
+	"lightning_arc": 112
 }
 
-const DAMAGE_NUMBER_CAP := 72
+const DAMAGE_NUMBER_CAP := 48
 const DAMAGE_NUMBER_MERGE_RADIUS := 48.0
 const DAMAGE_NUMBER_MERGE_AGE := 0.24
-const EXPLOSION_CAP := 36
-const HAZARD_ZONE_CAP := 8
+const EXPLOSION_CAP := 48
+const HAZARD_ZONE_CAP := 16
 const FORK_PROJECTILE_CAP := 48
 const ENEMY_PROJECTILE_CAP := 72
 const DEATH_BURST_CAP := 20
 const CORPSE_GHOST_CAP := 24
-const LIGHTNING_ARC_CAP := 32
+const LIGHTNING_ARC_CAP := 48
 const XP_GEM_CAP := 180
 const COIN_CAP := 180
 const ENEMY_GLOW_REFRESH_INTERVAL := 0.24

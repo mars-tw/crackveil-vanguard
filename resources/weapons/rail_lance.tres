@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/RailLanceWeapon.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_data")
+id = "rail_lance"
+display_name = "裂光狙擊槍"
+description = "長冷卻超遠程貫通狙擊線，對直線敵群造成高額傷害。"
+behavior_id = "rail_lance"
+weapon_scene = ExtResource("2_scene")
+damage = 38.0
+cooldown = 3.15
+range = 820.0
+color = Color(0.72, 0.96, 1, 1)
+effect_lifetime = 0.18
+lightning_sprite_path = "res://assets/sprites/proj_lightning.png"
+projectile_radius = 6.5
+pierce = 4
+damage_upgrade = 6.0
+cooldown_upgrade_multiplier = 0.9
+range_upgrade = 46.0
+pierce_upgrade = 1

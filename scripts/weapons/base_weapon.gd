@@ -21,7 +21,7 @@ func setup(player_node: Node2D, weapon_data: Resource) -> void:
 
 
 func reset_weapon() -> void:
-	cooldown_timer = 0.15
+	cooldown_timer = _initial_cooldown_stagger()
 	trigger_count = 0
 
 
@@ -114,6 +114,30 @@ func data_color(property_name: String, fallback: Color) -> Color:
 	return value
 
 
+func owner_passive_id() -> String:
+	if owner_player == null or not is_instance_valid(owner_player):
+		return ""
+	var hero_data_value: Variant = owner_player.get("hero_data")
+	if hero_data_value == null:
+		return ""
+	var hero_data_resource: Resource = hero_data_value as Resource
+	if hero_data_resource == null:
+		return ""
+	return str(hero_data_resource.get("passive_id"))
+
+
+func owner_passive_value() -> float:
+	if owner_player == null or not is_instance_valid(owner_player):
+		return 0.0
+	var hero_data_value: Variant = owner_player.get("hero_data")
+	if hero_data_value == null:
+		return 0.0
+	var hero_data_resource: Resource = hero_data_value as Resource
+	if hero_data_resource == null:
+		return 0.0
+	return float(hero_data_resource.get("passive_value"))
+
+
 func data_projectile_stats() -> Dictionary:
 	if stats_cache_dirty:
 		_rebuild_stats_cache()
@@ -133,3 +157,13 @@ func _rebuild_stats_cache() -> void:
 	projectile_stats_cache["source_weapon_id"] = weapon_id
 	effect_stats_cache["source_weapon_id"] = weapon_id
 	stats_cache_dirty = false
+
+
+func _initial_cooldown_stagger() -> float:
+	var slot_index: int = 0
+	if owner_player != null and is_instance_valid(owner_player):
+		var slot_value: Variant = owner_player.get("formation_index")
+		if typeof(slot_value) == TYPE_INT or typeof(slot_value) == TYPE_FLOAT:
+			slot_index = int(slot_value)
+	var id_hash: int = abs(hash(get_weapon_id())) % 97
+	return 0.08 + fposmod(float(slot_index) * 0.053 + float(id_hash) * 0.003, 0.28)

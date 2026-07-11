@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/hero_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = "rift_sniper"
+display_name = "裂光狙擊手"
+description = "長冷卻超遠程狙擊線，貫穿直線上的高威脅目標。"
+body_color = Color(0.62, 0.95, 1, 1)
+core_color = Color(0.98, 1, 1, 1)
+sprite_path = "res://assets/sprites/hero_captain.png"
+sprite_scale = 1.34
+max_hp = 78.0
+move_speed = 224.0
+hit_radius = 11.0
+pickup_radius = 70.0
+starting_weapon_ids = PackedStringArray("rail_lance")
+passive_id = "rift_sniper"
+passive_value = 0.12
+passive_description = "裂光狙擊線傷害提高。"

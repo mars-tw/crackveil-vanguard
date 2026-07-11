@@ -18,6 +18,25 @@ const NUMERIC_UPGRADE_MAX_LEVELS: Dictionary = {
 }
 const LEADER_WEAPON_WEIGHT_MULTIPLIER := 1.35
 const FOLLOWER_WEAPON_WEIGHT_MULTIPLIER := 0.82
+const RECRUIT_LEVEL_GATES: Dictionary = {
+	4: 2,
+	5: 3,
+	6: 4,
+	7: 5,
+	8: 6,
+	9: 8
+}
+const FORMATION_OFFSETS: Array[Vector2] = [
+	Vector2.ZERO,
+	Vector2(-46.0, 58.0),
+	Vector2(46.0, 58.0),
+	Vector2(-92.0, 106.0),
+	Vector2(0.0, 116.0),
+	Vector2(92.0, 106.0),
+	Vector2(-68.0, 170.0),
+	Vector2(0.0, 184.0),
+	Vector2(68.0, 170.0)
+]
 
 const QUALITATIVE_UPGRADES: Dictionary = {
 	"linear": [
@@ -65,6 +84,34 @@ const QUALITATIVE_UPGRADES: Dictionary = {
 			"upgrade_kind": "missile_guidance",
 			"name": "獵隙導引",
 			"description": "飛彈轉向更快；第 2 級提高重取目標頻率與鎖定距離"
+		}
+	],
+	"grenade_lob": [
+		{
+			"upgrade_kind": "grenade_cluster",
+			"name": "分裂燼彈",
+			"description": "榴彈落地後追加小範圍連爆。"
+		}
+	],
+	"void_net": [
+		{
+			"upgrade_kind": "void_anchor",
+			"name": "虛空錨點",
+			"description": "力場持續更久，減速更強。"
+		}
+	],
+	"rail_lance": [
+		{
+			"upgrade_kind": "rail_focus",
+			"name": "裂光校準",
+			"description": "狙擊線更寬，貫通傷害更穩定。"
+		}
+	],
+	"echo_hymn": [
+		{
+			"upgrade_kind": "echo_crescendo",
+			"name": "漸強和聲",
+			"description": "治療量與增傷光環持續時間提升。"
 		}
 	]
 }
@@ -129,6 +176,10 @@ func _append_recruit_options(pool: Array) -> void:
 		return
 	if get_member_count() >= int(squad_data.get("max_members")):
 		return
+	var next_slot := get_member_count() + 1
+	if not _can_offer_recruit_for_slot(next_slot):
+		return
+	var recruit_weight := _recruit_option_weight(next_slot)
 
 	var available_heroes: Array = squad_data.get("available_heroes")
 	for hero_data in available_heroes:
@@ -142,7 +193,7 @@ func _append_recruit_options(pool: Array) -> void:
 			"hero_id": hero_id,
 			"name": "招募：" + str(hero_data.get("display_name")),
 			"description": str(hero_data.get("description")),
-			"weight": 4
+			"weight": recruit_weight
 		})
 
 
@@ -473,12 +524,28 @@ func get_formation_world_position(slot_index: int) -> Vector2:
 func get_formation_local_offset(slot_index: int) -> Vector2:
 	if slot_index <= 0:
 		return Vector2.ZERO
+	if slot_index < FORMATION_OFFSETS.size():
+		return FORMATION_OFFSETS[slot_index]
 
 	var row: int = int((slot_index - 1) / 2) + 1
 	var side: float = -1.0 if slot_index % 2 == 1 else 1.0
 	var lateral: float = side * (slot_spacing_x + float(row - 1) * row_spacing_x_growth)
 	var back: float = row_spacing_y * float(row)
 	return Vector2(lateral, back)
+
+
+func _can_offer_recruit_for_slot(slot_count: int) -> bool:
+	var required_level := int(RECRUIT_LEVEL_GATES.get(slot_count, 8))
+	return int(GameManager.get("level")) >= required_level
+
+
+func _recruit_option_weight(slot_count: int) -> float:
+	var level_value: int = int(GameManager.get("level"))
+	var max_members: int = int(squad_data.get("max_members")) if squad_data != null else 9
+	var curve_target: int = int(clamp(3 + int(floor(float(max(0, level_value - 1)) / 1.15)), 3, max_members))
+	if get_member_count() < curve_target:
+		return 4.2 if slot_count <= 6 else 3.4
+	return 2.5 if slot_count <= 6 else 1.9
 
 
 func get_weapon_trigger_counts() -> Dictionary:
@@ -506,6 +573,14 @@ func _get_count_upgrade_description(weapon_data: Resource) -> String:
 			return "+%d 迴旋鏢，+%d 穿透，+%s 射程" % [int(weapon_data.get("projectile_count_upgrade")), int(weapon_data.get("pierce_upgrade")), _format_number(float(weapon_data.get("range_upgrade")))]
 		"homing_missile":
 			return "+%d 追蹤飛彈，+%d 穿透" % [int(weapon_data.get("projectile_count_upgrade")), int(weapon_data.get("pierce_upgrade"))]
+		"grenade_lob":
+			return "+%d 榴彈，爆炸半徑 +%s" % [int(weapon_data.get("projectile_count_upgrade")), _format_number(float(weapon_data.get("area_radius_upgrade")))]
+		"void_net":
+			return "力場半徑 +%s，施放距離 +%s" % [_format_number(float(weapon_data.get("area_radius_upgrade"))), _format_number(float(weapon_data.get("range_upgrade")))]
+		"rail_lance":
+			return "+%d 貫通，射程 +%s" % [int(weapon_data.get("pierce_upgrade")), _format_number(float(weapon_data.get("range_upgrade")))]
+		"echo_hymn":
+			return "+%d 和聲層，脈衝半徑 +%s" % [int(weapon_data.get("projectile_count_upgrade")), _format_number(float(weapon_data.get("area_radius_upgrade")))]
 		_:
 			return "強化武器參數"
 

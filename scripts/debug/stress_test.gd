@@ -1,11 +1,32 @@
 extends Node
 
 const ENEMY_COUNT := 150
-const PROJECTILE_COUNT := 100
+const PROJECTILE_COUNT := 80
 const START_FRAME := 10
 const END_FRAME := 420
 const MAX_ENEMY_REFILL_PER_FRAME := 24
 const MAX_PROJECTILE_REFILL_PER_FRAME := 8
+const FULL_SQUAD_RECRUITS: Array[String] = [
+	"pulse_artificer",
+	"line_mender",
+	"ember_grenadier",
+	"void_weaver",
+	"rift_sniper",
+	"echo_singer"
+]
+const EXPECTED_FULL_SQUAD_WEAPONS: Array[String] = [
+	"rift_captain:riftline_emitter",
+	"rift_captain:orbit_blades",
+	"rift_captain:arc_chain",
+	"orbit_guard:rift_shield_boomerang",
+	"arc_scout:rift_seeker_missiles",
+	"pulse_artificer:pulse_bloom",
+	"line_mender:riftline_emitter",
+	"ember_grenadier:grenade_lob",
+	"void_weaver:void_net",
+	"rift_sniper:rail_lance",
+	"echo_singer:echo_hymn"
+]
 
 var arena: Node = null
 var squad_manager: Node = null
@@ -53,10 +74,13 @@ func _initialize_stress() -> void:
 	if spawner != null:
 		spawner.set_process(false)
 
+	_prepare_full_squad_for_stress()
 	_prepare_heroes_for_stress()
 	GameManager.xp_required = 99999999
+	GameManager.level = 12
 	GameManager.waiting_for_upgrade = false
 	GameManager.game_running = true
+	GameManager.reset_combat_metrics(true)
 	EntityFactory.reset_debug_counters()
 
 	_refill_enemies(true)
@@ -65,10 +89,42 @@ func _initialize_stress() -> void:
 	frame_times_ms.clear()
 	measured_frames = 0
 	last_frame_tick_usec = Time.get_ticks_usec()
-	print("STRESS_INIT enemies=%d projectiles=%d" % [
+	print("STRESS_INIT members=%d enemies=%d projectiles=%d" % [
+		squad_manager.get_member_count(),
 		EntityFactory.get_enemy_live_count(),
 		EntityFactory.get_pool_live_count("projectile")
 	])
+
+
+func _prepare_full_squad_for_stress() -> void:
+	for hero_id in FULL_SQUAD_RECRUITS:
+		squad_manager.recruit_hero(hero_id)
+	_force_weapon_upgrades_for_stress()
+
+
+func _force_weapon_upgrades_for_stress() -> void:
+	_apply_weapon_upgrades(squad_manager.get_member_by_id("rift_captain"), "riftline_emitter", ["weapon_damage", "weapon_damage", "weapon_damage", "riftline_fork", "riftline_fork", "evo_rift_fan"])
+	_apply_weapon_upgrades(squad_manager.get_member_by_id("rift_captain"), "orbit_blades", ["weapon_damage", "weapon_damage", "weapon_damage", "weapon_projectiles", "orbit_resonance", "evo_shear_halo"])
+	_apply_weapon_upgrades(squad_manager.get_member_by_id("rift_captain"), "arc_chain", ["weapon_damage", "weapon_damage", "weapon_damage", "chain_overload", "evo_overload_nova"])
+	_apply_weapon_upgrades(squad_manager.get_member_by_id("orbit_guard"), "rift_shield_boomerang", ["weapon_damage", "weapon_projectiles", "boomerang_rebound", "boomerang_rebound", "evo_razor_bulwark"])
+	_apply_weapon_upgrades(squad_manager.get_member_by_id("arc_scout"), "rift_seeker_missiles", ["weapon_damage", "weapon_projectiles", "missile_guidance", "missile_guidance", "evo_hunter_swarm"])
+	_apply_weapon_upgrades(squad_manager.get_member_by_id("pulse_artificer"), "pulse_bloom", ["weapon_damage", "weapon_damage", "pulse_embers", "evo_ember_well"])
+	_apply_weapon_upgrades(squad_manager.get_member_by_id("line_mender"), "riftline_emitter", ["weapon_damage", "riftline_fork", "riftline_fork", "evo_rift_fan"])
+	_apply_weapon_upgrades(squad_manager.get_member_by_id("ember_grenadier"), "grenade_lob", ["weapon_damage", "weapon_projectiles", "grenade_cluster", "grenade_cluster", "evo_cinder_barrage"])
+	_apply_weapon_upgrades(squad_manager.get_member_by_id("void_weaver"), "void_net", ["weapon_damage", "weapon_projectiles", "void_anchor", "evo_event_horizon"])
+	_apply_weapon_upgrades(squad_manager.get_member_by_id("rift_sniper"), "rail_lance", ["weapon_damage", "weapon_cooldown", "rail_focus", "rail_focus", "evo_star_piercer"])
+	_apply_weapon_upgrades(squad_manager.get_member_by_id("echo_singer"), "echo_hymn", ["weapon_damage", "weapon_projectiles", "echo_crescendo", "echo_crescendo", "evo_resonant_chorus"])
+
+
+func _apply_weapon_upgrades(hero: Node, weapon_id: String, upgrades: Array) -> void:
+	if hero == null or not is_instance_valid(hero):
+		return
+	var weapons: Dictionary = hero.get("weapons")
+	var weapon: Node = weapons.get(weapon_id)
+	if weapon == null or not is_instance_valid(weapon) or not weapon.has_method("apply_data_upgrade"):
+		return
+	for upgrade in upgrades:
+		weapon.apply_data_upgrade(str(upgrade))
 
 
 func _prepare_heroes_for_stress() -> void:
@@ -160,7 +216,7 @@ func _spawn_initial_vfx() -> void:
 
 func _normal_enemy_config() -> Dictionary:
 	return {
-		"max_hp": 30.0,
+		"max_hp": 92.0,
 		"speed": 88.0,
 		"damage": 6.0,
 		"xp": 1,
@@ -175,7 +231,7 @@ func _normal_enemy_config() -> Dictionary:
 
 func _fast_enemy_config() -> Dictionary:
 	return {
-		"max_hp": 22.0,
+		"max_hp": 68.0,
 		"speed": 142.0,
 		"damage": 4.0,
 		"xp": 1,
@@ -190,7 +246,7 @@ func _fast_enemy_config() -> Dictionary:
 
 func _tank_enemy_config() -> Dictionary:
 	return {
-		"max_hp": 85.0,
+		"max_hp": 230.0,
 		"speed": 54.0,
 		"damage": 12.0,
 		"xp": 3,
@@ -251,6 +307,7 @@ func _finish_stress() -> void:
 		GameManager.xp
 	])
 	print("STRESS_POOL_STATS=" + JSON.stringify(pool_stats))
+	print("STRESS_WEAPON_TRIGGERS=" + JSON.stringify(squad_manager.get_weapon_trigger_counts()))
 
 	var validation_error := _validate_pool_stats(pool_stats)
 	if validation_error != "":
@@ -261,6 +318,11 @@ func _finish_stress() -> void:
 		print("STRESS_PERF_BELOW_60=true")
 	else:
 		print("STRESS_PERF_BELOW_60=false")
+
+	var trigger_validation := _validate_full_squad_triggers()
+	if trigger_validation != "":
+		_fail(trigger_validation)
+		return
 
 	print("STRESS_PASS")
 	get_tree().quit(0)
@@ -326,6 +388,16 @@ func _validate_pool_stats(pool_stats: Dictionary) -> String:
 			return "%s pool saw duplicate releases during stress" % key
 		if int(pool_entry.get("foreign_releases", 0)) > 0:
 			return "%s pool saw foreign releases during stress" % key
+	return ""
+
+
+func _validate_full_squad_triggers() -> String:
+	if squad_manager == null or not squad_manager.has_method("get_weapon_trigger_counts"):
+		return "squad trigger counts unavailable"
+	var counts: Dictionary = squad_manager.get_weapon_trigger_counts()
+	for key in EXPECTED_FULL_SQUAD_WEAPONS:
+		if int(counts.get(key, 0)) <= 0:
+			return "full squad weapon did not trigger: " + key
 	return ""
 
 

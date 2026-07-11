@@ -2,8 +2,26 @@ extends Node
 
 const ARENA_SCENE: PackedScene = preload("res://scenes/arena/Arena.tscn")
 const FIXED_SEED := 771101
-const SAMPLE_SECONDS := 12.0
+const SAMPLE_SECONDS := 16.0
 const REAL_TIMEOUT_MSEC := 25000
+const FULL_SQUAD_RECRUITS: Array[String] = [
+	"pulse_artificer",
+	"line_mender",
+	"ember_grenadier",
+	"void_weaver",
+	"rift_sniper",
+	"echo_singer"
+]
+const EXPECTED_FULL_SQUAD_WEAPONS: Array[String] = [
+	"orbit_guard:rift_shield_boomerang",
+	"arc_scout:rift_seeker_missiles",
+	"pulse_artificer:pulse_bloom",
+	"line_mender:riftline_emitter",
+	"ember_grenadier:grenade_lob",
+	"void_weaver:void_net",
+	"rift_sniper:rail_lance",
+	"echo_singer:echo_hymn"
+]
 
 var arena: Node = null
 var squad_manager: Node = null
@@ -39,6 +57,7 @@ func _run_probe() -> void:
 		_fail("arena setup failed")
 		return
 	_hide_first_run_guide()
+	_force_full_squad()
 	_force_new_weapon_evolutions()
 
 	current_phase = "sample"
@@ -117,8 +136,23 @@ func _hide_first_run_guide() -> void:
 func _force_new_weapon_evolutions() -> void:
 	var guard: Node = squad_manager.get_member_by_id("orbit_guard")
 	var scout: Node = squad_manager.get_member_by_id("arc_scout")
+	var pulse: Node = squad_manager.get_member_by_id("pulse_artificer")
+	var ember: Node = squad_manager.get_member_by_id("ember_grenadier")
+	var void_member: Node = squad_manager.get_member_by_id("void_weaver")
+	var sniper: Node = squad_manager.get_member_by_id("rift_sniper")
+	var echo: Node = squad_manager.get_member_by_id("echo_singer")
 	_apply_weapon_upgrades(guard, "rift_shield_boomerang", ["boomerang_rebound", "boomerang_rebound", "evo_razor_bulwark"])
 	_apply_weapon_upgrades(scout, "rift_seeker_missiles", ["missile_guidance", "missile_guidance", "evo_hunter_swarm"])
+	_apply_weapon_upgrades(pulse, "pulse_bloom", ["pulse_embers", "evo_ember_well"])
+	_apply_weapon_upgrades(ember, "grenade_lob", ["grenade_cluster", "grenade_cluster", "evo_cinder_barrage"])
+	_apply_weapon_upgrades(void_member, "void_net", ["void_anchor", "evo_event_horizon"])
+	_apply_weapon_upgrades(sniper, "rail_lance", ["rail_focus", "rail_focus", "evo_star_piercer"])
+	_apply_weapon_upgrades(echo, "echo_hymn", ["echo_crescendo", "echo_crescendo", "evo_resonant_chorus"])
+
+
+func _force_full_squad() -> void:
+	for hero_id in FULL_SQUAD_RECRUITS:
+		squad_manager.recruit_hero(hero_id)
 
 
 func _apply_weapon_upgrades(hero: Node, weapon_id: String, upgrades: Array) -> void:
@@ -168,9 +202,10 @@ func _report_probe() -> bool:
 	if float(metrics.get("total_damage", 0.0)) <= 0.0:
 		_fail("no weapon damage recorded")
 		return false
-	if not dps_by_weapon.has("orbit_guard:rift_shield_boomerang") or not dps_by_weapon.has("arc_scout:rift_seeker_missiles"):
-		_fail("new weapon DPS was not recorded")
-		return false
+	for key in EXPECTED_FULL_SQUAD_WEAPONS:
+		if not dps_by_weapon.has(key):
+			_fail("full squad weapon DPS missing: " + key)
+			return false
 	print("ARENA_INSTRUMENT_PASS")
 	return true
 

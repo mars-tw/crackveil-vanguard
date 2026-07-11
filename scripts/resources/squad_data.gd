@@ -1,7 +1,7 @@
 class_name SquadData
 extends Resource
 
-@export var max_members: int = 5
+@export var max_members: int = 9
 @export var starting_heroes: Array[Resource] = []
 @export var available_heroes: Array[Resource] = []
 

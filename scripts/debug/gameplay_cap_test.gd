@@ -1,7 +1,7 @@
 extends Node
 
 const ARENA_SCENE: PackedScene = preload("res://scenes/arena/Arena.tscn")
-const EXPLOSION_CAP_TEST := 36
+const EXPLOSION_CAP_TEST := 48
 const PICKUP_CAP_TEST := 180
 
 var arena: Node = null

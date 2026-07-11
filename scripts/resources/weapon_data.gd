@@ -4,7 +4,7 @@ extends Resource
 @export var id: String = ""
 @export var display_name: String = "未命名武器"
 @export_multiline var description: String = ""
-@export_enum("linear", "orbit", "explosion", "chain_lightning", "boomerang", "homing_missile") var behavior_id: String = "linear"
+@export_enum("linear", "orbit", "explosion", "chain_lightning", "boomerang", "homing_missile", "grenade_lob", "void_net", "rail_lance", "echo_hymn") var behavior_id: String = "linear"
 @export var weapon_scene: PackedScene
 
 @export_group("共同數值")
@@ -66,12 +66,20 @@ const QUALITATIVE_MAX_LEVELS: Dictionary = {
 	"magnetic_reclaim": 1,
 	"boomerang_rebound": 2,
 	"missile_guidance": 2,
+	"grenade_cluster": 2,
+	"void_anchor": 1,
+	"rail_focus": 2,
+	"echo_crescendo": 2,
 	"evo_rift_fan": 1,
 	"evo_shear_halo": 1,
 	"evo_ember_well": 1,
 	"evo_overload_nova": 1,
 	"evo_razor_bulwark": 1,
-	"evo_hunter_swarm": 1
+	"evo_hunter_swarm": 1,
+	"evo_cinder_barrage": 1,
+	"evo_event_horizon": 1,
+	"evo_star_piercer": 1,
+	"evo_resonant_chorus": 1
 }
 
 const EVOLUTION_DEFINITIONS: Dictionary = {
@@ -128,6 +136,42 @@ const EVOLUTION_DEFINITIONS: Dictionary = {
 		"required_level": 2,
 		"required_damage_level": 3,
 		"run_level": 7
+	},
+	"grenade_lob": {
+		"evolution_id": "evo_cinder_barrage",
+		"name": "燼雨連爆",
+		"description": "榴彈分裂成短促連爆，落點留下更大的燃燒區。",
+		"required_modifier": "grenade_cluster",
+		"required_level": 2,
+		"required_damage_level": 3,
+		"run_level": 7
+	},
+	"void_net": {
+		"evolution_id": "evo_event_horizon",
+		"name": "事件穹網",
+		"description": "虛空網擴大並附加易傷，敵人穿越時被拖慢更久。",
+		"required_modifier": "void_anchor",
+		"required_level": 1,
+		"required_damage_level": 3,
+		"run_level": 7
+	},
+	"rail_lance": {
+		"evolution_id": "evo_star_piercer",
+		"name": "星裂貫槍",
+		"description": "狙擊線變寬且貫穿更多目標，尾端追加裂光爆閃。",
+		"required_modifier": "rail_focus",
+		"required_level": 2,
+		"required_damage_level": 3,
+		"run_level": 7
+	},
+	"echo_hymn": {
+		"evolution_id": "evo_resonant_chorus",
+		"name": "共鳴聖歌",
+		"description": "治療脈衝變成雙段合唱，延長全隊輕增傷並震退近身敵群。",
+		"required_modifier": "echo_crescendo",
+		"required_level": 2,
+		"required_damage_level": 3,
+		"run_level": 7
 	}
 }
 
@@ -157,9 +201,9 @@ func apply_upgrade(upgrade_kind: String) -> void:
 			_increment_runtime_modifier("weapon_damage")
 			_increment_runtime_modifier("weapon_cooldown")
 			_increment_runtime_modifier("weapon_projectiles")
-		"evo_rift_fan", "evo_shear_halo", "evo_ember_well", "evo_overload_nova", "evo_razor_bulwark", "evo_hunter_swarm":
+		"evo_rift_fan", "evo_shear_halo", "evo_ember_well", "evo_overload_nova", "evo_razor_bulwark", "evo_hunter_swarm", "evo_cinder_barrage", "evo_event_horizon", "evo_star_piercer", "evo_resonant_chorus":
 			_apply_evolution(upgrade_kind)
-		"riftline_fork", "orbit_resonance", "pulse_embers", "chain_overload", "magnetic_reclaim", "boomerang_rebound", "missile_guidance":
+		"riftline_fork", "orbit_resonance", "pulse_embers", "chain_overload", "magnetic_reclaim", "boomerang_rebound", "missile_guidance", "grenade_cluster", "void_anchor", "rail_focus", "echo_crescendo":
 			_increment_modifier(upgrade_kind)
 		_:
 			damage += damage_upgrade
@@ -258,6 +302,27 @@ func _apply_evolution(evolution_id: String) -> void:
 			cooldown = max(0.16, cooldown * 0.82)
 			homing_turn_rate += 2.2
 			color = Color(0.55, 1.0, 0.84)
+		"evo_cinder_barrage":
+			projectile_count += 2
+			area_radius += 22.0
+			cooldown = max(0.18, cooldown * 0.88)
+			color = Color(1.0, 0.38, 0.16)
+		"evo_event_horizon":
+			area_radius += 34.0
+			effect_lifetime += 0.9
+			cooldown = max(0.2, cooldown * 0.9)
+			color = Color(0.58, 0.42, 1.0)
+		"evo_star_piercer":
+			pierce += 4
+			projectile_radius += 2.0
+			range += 120.0
+			cooldown = max(0.24, cooldown * 0.9)
+			color = Color(0.72, 0.98, 1.0)
+		"evo_resonant_chorus":
+			area_radius += 42.0
+			projectile_count += 1
+			cooldown = max(0.24, cooldown * 0.88)
+			color = Color(1.0, 0.86, 0.46)
 
 
 func _apply_count_upgrade() -> void:
@@ -281,6 +346,18 @@ func _apply_count_upgrade() -> void:
 			projectile_count += projectile_count_upgrade
 			pierce += pierce_upgrade
 			range += range_upgrade
+		"grenade_lob":
+			projectile_count += projectile_count_upgrade
+			area_radius += area_radius_upgrade
+		"void_net":
+			area_radius += area_radius_upgrade
+			range += range_upgrade
+		"rail_lance":
+			pierce += pierce_upgrade
+			range += range_upgrade
+		"echo_hymn":
+			area_radius += area_radius_upgrade
+			projectile_count += projectile_count_upgrade
 
 
 func to_projectile_stats() -> Dictionary:
@@ -305,6 +382,8 @@ func to_projectile_stats() -> Dictionary:
 		"missile_guidance_level": get_modifier_level("missile_guidance"),
 		"evo_razor_bulwark_level": get_modifier_level("evo_razor_bulwark"),
 		"evo_hunter_swarm_level": get_modifier_level("evo_hunter_swarm"),
+		"grenade_cluster_level": get_modifier_level("grenade_cluster"),
+		"evo_cinder_barrage_level": get_modifier_level("evo_cinder_barrage"),
 		"fork_depth": 0
 	}
 
@@ -340,9 +419,17 @@ func to_effect_stats() -> Dictionary:
 		"magnetic_reclaim_level": get_modifier_level("magnetic_reclaim"),
 		"boomerang_rebound_level": get_modifier_level("boomerang_rebound"),
 		"missile_guidance_level": get_modifier_level("missile_guidance"),
+		"grenade_cluster_level": get_modifier_level("grenade_cluster"),
+		"void_anchor_level": get_modifier_level("void_anchor"),
+		"rail_focus_level": get_modifier_level("rail_focus"),
+		"echo_crescendo_level": get_modifier_level("echo_crescendo"),
 		"evo_shear_halo_level": get_modifier_level("evo_shear_halo"),
 		"evo_ember_well_level": get_modifier_level("evo_ember_well"),
 		"evo_overload_nova_level": get_modifier_level("evo_overload_nova"),
 		"evo_razor_bulwark_level": get_modifier_level("evo_razor_bulwark"),
-		"evo_hunter_swarm_level": get_modifier_level("evo_hunter_swarm")
+		"evo_hunter_swarm_level": get_modifier_level("evo_hunter_swarm"),
+		"evo_cinder_barrage_level": get_modifier_level("evo_cinder_barrage"),
+		"evo_event_horizon_level": get_modifier_level("evo_event_horizon"),
+		"evo_star_piercer_level": get_modifier_level("evo_star_piercer"),
+		"evo_resonant_chorus_level": get_modifier_level("evo_resonant_chorus")
 	}

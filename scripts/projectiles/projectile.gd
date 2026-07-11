@@ -25,6 +25,14 @@ var target_group: String = "enemies"
 var riftline_fork_level: int = 0
 var evo_rift_fan_level: int = 0
 var motion_mode: String = "linear"
+var lob_target_position: Vector2 = Vector2.ZERO
+var lob_start_position: Vector2 = Vector2.ZERO
+var lob_distance: float = 1.0
+var lob_arc_height: float = 42.0
+var lob_explosion_stats: Dictionary = {}
+var lob_hazard_stats: Dictionary = {}
+var lob_cluster_count: int = 1
+var lob_cluster_radius: float = 0.0
 var homing_turn_rate: float = 0.0
 var homing_retarget_radius: float = 0.0
 var homing_retarget_timer: float = 0.0
@@ -84,6 +92,14 @@ func pool_on_release() -> void:
 	riftline_fork_level = 0
 	evo_rift_fan_level = 0
 	motion_mode = "linear"
+	lob_target_position = Vector2.ZERO
+	lob_start_position = Vector2.ZERO
+	lob_distance = 1.0
+	lob_arc_height = 42.0
+	lob_explosion_stats.clear()
+	lob_hazard_stats.clear()
+	lob_cluster_count = 1
+	lob_cluster_radius = 0.0
 	homing_turn_rate = 0.0
 	homing_retarget_radius = 0.0
 	homing_retarget_timer = 0.0
@@ -104,8 +120,10 @@ func pool_on_release() -> void:
 	rotation = 0.0
 	if sprite != null:
 		sprite.rotation = 0.0
+		sprite.position = Vector2.ZERO
 	if glow != null:
 		glow.visible = false
+		glow.position = Vector2.ZERO
 	if trail != null:
 		trail.visible = false
 	if trail_registered:
@@ -140,6 +158,20 @@ func setup(world_position: Vector2, projectile_direction: Vector2, projectile_st
 	riftline_fork_level = int(projectile_stats.get("riftline_fork_level", 0))
 	evo_rift_fan_level = int(projectile_stats.get("evo_rift_fan_level", 0))
 	motion_mode = str(projectile_stats.get("motion_mode", "linear"))
+	lob_target_position = projectile_stats.get("lob_target_position", world_position)
+	lob_start_position = world_position
+	lob_distance = max(1.0, world_position.distance_to(lob_target_position))
+	lob_arc_height = float(projectile_stats.get("lob_arc_height", 42.0))
+	lob_explosion_stats = projectile_stats.get("lob_explosion_stats", {}).duplicate(true)
+	lob_hazard_stats = projectile_stats.get("lob_hazard_stats", {}).duplicate(true)
+	lob_cluster_count = max(1, int(projectile_stats.get("lob_cluster_count", 1)))
+	lob_cluster_radius = max(0.0, float(projectile_stats.get("lob_cluster_radius", 0.0)))
+	if motion_mode == "lob":
+		target_group = "none"
+		max_range = lob_distance
+		direction = (lob_target_position - world_position).normalized()
+		if direction == Vector2.ZERO:
+			direction = Vector2.RIGHT
 	homing_turn_rate = float(projectile_stats.get("homing_turn_rate", 0.0))
 	homing_retarget_radius = float(projectile_stats.get("homing_retarget_radius", 0.0))
 	homing_retarget_timer = 0.0
@@ -157,7 +189,12 @@ func setup(world_position: Vector2, projectile_direction: Vector2, projectile_st
 	source = projectile_source
 	traveled = 0.0
 	hit_bodies.clear()
-	collision_mask = 1 if target_group == "heroes" else 2
+	if target_group == "none":
+		collision_mask = 0
+		monitoring = false
+	else:
+		collision_mask = 1 if target_group == "heroes" else 2
+		monitoring = true
 	_apply_shape()
 	_apply_sprite()
 	rotation = direction.angle()
@@ -225,6 +262,11 @@ func _tick_boomerang(delta: float) -> void:
 
 
 func _should_release_after_step() -> bool:
+	if motion_mode == "lob":
+		if traveled >= max_range:
+			_on_lob_landed()
+			return true
+		return false
 	if motion_mode == "boomerang":
 		if boomerang_returning and source != null and is_instance_valid(source):
 			if global_position.distance_squared_to(source.global_position) <= boomerang_catch_radius * boomerang_catch_radius:
@@ -330,7 +372,7 @@ func _try_spawn_riftline_forks() -> void:
 		fork_angles = [-deg_to_rad(30.0), 0.0, deg_to_rad(30.0)]
 	for angle in fork_angles:
 		var fork_direction := direction.rotated(float(angle)).normalized()
-		EntityFactory.spawn_fork_projectile(global_position + fork_direction * (radius + 4.0), fork_direction, fork_stats_cache, source)
+		EntityFactory.call_deferred("spawn_fork_projectile", global_position + fork_direction * (radius + 4.0), fork_direction, fork_stats_cache.duplicate(true), source)
 
 
 func _rebuild_fork_stats_cache() -> void:
@@ -434,6 +476,7 @@ func _configure_projectile_vfx() -> void:
 		glow_alpha = 0.48
 	if glow != null:
 		glow.visible = true
+		glow.position = Vector2.ZERO
 		glow.modulate = Color(vfx_color.r, vfx_color.g, vfx_color.b, glow_alpha)
 		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), radius * (8.6 if motion_mode == "boomerang" else 7.8))
 	if trail != null:
@@ -460,6 +503,8 @@ func _configure_projectile_vfx() -> void:
 
 
 func _tick_projectile_vfx(delta: float) -> void:
+	if motion_mode == "lob":
+		_tick_lob_arc_vfx()
 	if muzzle_flash == null or not muzzle_flash.visible:
 		return
 	muzzle_flash_timer = max(muzzle_flash_timer - delta, 0.0)
@@ -468,3 +513,29 @@ func _tick_projectile_vfx(delta: float) -> void:
 	muzzle_flash.scale = muzzle_flash_base_scale * (0.72 + ratio * 0.28)
 	if muzzle_flash_timer <= 0.0:
 		muzzle_flash.visible = false
+
+
+func _tick_lob_arc_vfx() -> void:
+	var t: float = clamp(traveled / max(1.0, lob_distance), 0.0, 1.0)
+	var lift: float = sin(t * PI) * lob_arc_height
+	if sprite != null:
+		sprite.position = Vector2(0.0, -lift)
+	if glow != null:
+		glow.position = Vector2(0.0, -lift * 0.34)
+
+
+func _on_lob_landed() -> void:
+	if not lob_explosion_stats.is_empty():
+		EntityFactory.spawn_explosion(lob_target_position, lob_explosion_stats, source)
+	if not lob_hazard_stats.is_empty():
+		EntityFactory.spawn_hazard_zone(lob_target_position, lob_hazard_stats, source)
+	if lob_cluster_count <= 1 or lob_cluster_radius <= 0.0 or lob_explosion_stats.is_empty():
+		return
+	for index in range(1, lob_cluster_count):
+		var angle := TAU * float(index) / float(lob_cluster_count) + 0.37
+		var distance := lob_cluster_radius * (0.62 + 0.2 * float(index % 2))
+		var cluster_position := lob_target_position + Vector2.RIGHT.rotated(angle) * distance
+		var cluster_stats := lob_explosion_stats.duplicate(true)
+		cluster_stats["damage"] = float(cluster_stats.get("damage", damage)) * 0.58
+		cluster_stats["area_radius"] = float(cluster_stats.get("area_radius", radius * 8.0)) * 0.58
+		EntityFactory.spawn_delayed_explosion(cluster_position, cluster_stats, source, 0.05 * float(index))

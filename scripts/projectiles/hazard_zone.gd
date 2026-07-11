@@ -90,6 +90,13 @@ func _apply_tick_damage() -> void:
 					float(stats.get("status_duration", float(stats.get("tick_interval", 0.24)))),
 					float(stats.get("status_strength", 0.0))
 				)
+			var secondary_status_effect := str(stats.get("secondary_status_effect", ""))
+			if secondary_status_effect != "" and enemy.has_method("apply_status_effect"):
+				enemy.apply_status_effect(
+					secondary_status_effect,
+					float(stats.get("secondary_status_duration", float(stats.get("tick_interval", 0.24)))),
+					float(stats.get("secondary_status_strength", 0.0))
+				)
 			if enemy.has_method("take_damage"):
 				var applied_damage: float = float(enemy.take_damage(tick_damage, global_position))
 				GameManager.record_weapon_damage(source, str(stats.get("source_weapon_id", "")), applied_damage)
