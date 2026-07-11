@@ -28,7 +28,7 @@ func _process(delta: float) -> void:
 	register_trigger()
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("fire")
-	cooldown_timer = data_float("cooldown", 1.0)
+	cooldown_timer = scaled_cooldown(data_float("cooldown", 1.0))
 
 
 func _effect_stats_for_fire() -> Dictionary:

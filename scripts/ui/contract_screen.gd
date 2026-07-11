@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+
 signal contract_selected(contract: Dictionary)
 signal seed_restart_requested(seed_text: String)
 
@@ -15,6 +17,7 @@ var seed_row: HBoxContainer
 var seed_input: LineEdit
 var seed_paste_button: Button
 var seed_start_button: Button
+var card_scroll: ScrollContainer
 var card_grid: GridContainer
 var option_buttons: Array[Button] = []
 var meta_buttons: Dictionary = {}
@@ -125,15 +128,21 @@ func _build_ui() -> void:
 	seed_start_button.pressed.connect(_on_seed_start_pressed)
 	seed_row.add_child(seed_start_button)
 
+	card_scroll = ScrollContainer.new()
+	card_scroll.name = "CardScroll"
+	card_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	card_scroll.anchor_left = 0.0
+	card_scroll.anchor_right = 1.0
+	card_scroll.anchor_top = 0.0
+	card_scroll.anchor_bottom = 1.0
+	panel.add_child(card_scroll)
+
 	card_grid = GridContainer.new()
 	card_grid.name = "CardGrid"
-	card_grid.anchor_left = 0.0
-	card_grid.anchor_right = 1.0
-	card_grid.anchor_top = 0.0
-	card_grid.anchor_bottom = 1.0
+	card_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	card_grid.add_theme_constant_override("h_separation", 18)
 	card_grid.add_theme_constant_override("v_separation", 14)
-	panel.add_child(card_grid)
+	card_scroll.add_child(card_grid)
 	_refresh_meta_panel()
 	_apply_responsive_layout()
 
@@ -248,8 +257,13 @@ func _apply_responsive_layout() -> void:
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = Vector2(1280.0, 720.0)
 	var portrait := viewport_size.y > viewport_size.x
-	var panel_width: float = min(viewport_size.x - 28.0, 920.0 if not portrait else 620.0)
-	var panel_height: float = min(viewport_size.y - 54.0, 570.0 if not portrait else 900.0)
+	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
+	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
+	var outer_margin := 12.0 if mobile else 28.0
+	var panel_width: float = min(viewport_size.x - outer_margin * 2.0, 920.0 if not portrait else 620.0)
+	var panel_height: float = min(viewport_size.y - (outer_margin * 2.0 if mobile else 54.0), 570.0 if not portrait else 900.0)
+	if mobile:
+		panel_height = viewport_size.y - outer_margin * 2.0
 
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5
@@ -261,59 +275,66 @@ func _apply_responsive_layout() -> void:
 	panel.offset_bottom = panel_height * 0.5
 
 	if logo_glow_label != null:
-		logo_glow_label.offset_top = 10.0
-		logo_glow_label.offset_bottom = 50.0
-		logo_glow_label.add_theme_font_size_override("font_size", 30 if portrait else 34)
+		logo_glow_label.text = "CRACKVEIL\nVANGUARD" if mobile and portrait else "CRACKVEIL VANGUARD"
+		logo_glow_label.offset_top = 8.0
+		logo_glow_label.offset_bottom = 82.0 if mobile and portrait else 50.0
+		logo_glow_label.add_theme_font_size_override("font_size", (24 if portrait else 30) if mobile else (30 if portrait else 34))
 	if logo_label != null:
-		logo_label.offset_top = 12.0
-		logo_label.offset_bottom = 50.0
-		logo_label.add_theme_font_size_override("font_size", 28 if portrait else 31)
+		logo_label.text = logo_glow_label.text if logo_glow_label != null else "CRACKVEIL VANGUARD"
+		logo_label.offset_top = 10.0
+		logo_label.offset_bottom = 84.0 if mobile and portrait else 50.0
+		logo_label.add_theme_font_size_override("font_size", (24 if portrait else 28) if mobile else (28 if portrait else 31))
 
-	title_label.offset_top = 56.0
-	title_label.offset_bottom = 90.0
-	title_label.add_theme_font_size_override("font_size", 28 if portrait else 30)
+	var title_top := 90.0 if mobile and portrait else 56.0
+	title_label.offset_top = title_top
+	title_label.offset_bottom = title_top + (46.0 if mobile else 34.0)
+	title_label.add_theme_font_size_override("font_size", (24 if portrait else 28) if mobile else (28 if portrait else 30))
 
-	subtitle_label.offset_top = 88.0
-	subtitle_label.offset_bottom = 114.0
-	subtitle_label.add_theme_font_size_override("font_size", 14 if portrait else 16)
+	subtitle_label.offset_top = title_label.offset_bottom + 2.0
+	subtitle_label.offset_bottom = subtitle_label.offset_top + (36.0 if mobile else 26.0)
+	subtitle_label.add_theme_font_size_override("font_size", (13 if portrait else 15) if mobile else (14 if portrait else 16))
 
-	meta_label.offset_top = 114.0
-	meta_label.offset_bottom = 140.0
-	meta_label.add_theme_font_size_override("font_size", 14 if portrait else 16)
+	meta_label.offset_top = subtitle_label.offset_bottom + 2.0
+	meta_label.offset_bottom = meta_label.offset_top + (34.0 if mobile else 26.0)
+	meta_label.add_theme_font_size_override("font_size", (13 if portrait else 15) if mobile else (14 if portrait else 16))
 
 	meta_grid.columns = 1 if portrait else 3
-	meta_grid.offset_left = 26.0
-	meta_grid.offset_right = -26.0
-	meta_grid.offset_top = 146.0
-	meta_grid.offset_bottom = 206.0 if not portrait else 326.0
+	meta_grid.offset_left = 20.0 if mobile else 26.0
+	meta_grid.offset_right = -meta_grid.offset_left
+	meta_grid.offset_top = meta_label.offset_bottom + 8.0
+	meta_grid.offset_bottom = meta_grid.offset_top + ((touch_height + 8.0) * 3.0 if portrait else touch_height + 8.0)
 
-	var meta_button_width: float = panel_width - 52.0 if portrait else max(180.0, (panel_width - 52.0 - 20.0) / 3.0)
-	var meta_button_height := 52.0
+	var side_padding := 40.0 if mobile else 52.0
+	var meta_button_width: float = panel_width - side_padding if portrait else max(180.0, (panel_width - side_padding - 20.0) / 3.0)
+	var meta_button_height := touch_height if mobile else 52.0
 	for button in meta_buttons.values():
 		button.custom_minimum_size = Vector2(meta_button_width, meta_button_height)
 		button.add_theme_font_size_override("font_size", 13 if portrait else 14)
 
 	if seed_row != null:
-		seed_row.offset_left = 26.0
-		seed_row.offset_right = -26.0
-		seed_row.offset_top = 334.0 if portrait else 214.0
-		seed_row.offset_bottom = seed_row.offset_top + 42.0
+		seed_row.offset_left = 20.0 if mobile else 26.0
+		seed_row.offset_right = -seed_row.offset_left
+		seed_row.offset_top = meta_grid.offset_bottom + 10.0
+		seed_row.offset_bottom = seed_row.offset_top + (touch_height if mobile else 42.0)
 	if seed_input != null:
-		seed_input.custom_minimum_size = Vector2(180.0 if portrait else 280.0, 38.0)
+		seed_input.custom_minimum_size = Vector2(154.0 if portrait else 280.0, touch_height if mobile else 38.0)
 	if seed_paste_button != null:
-		seed_paste_button.custom_minimum_size = Vector2(58.0, 38.0)
+		seed_paste_button.custom_minimum_size = Vector2(72.0 if mobile else 58.0, touch_height if mobile else 38.0)
 	if seed_start_button != null:
-		seed_start_button.custom_minimum_size = Vector2(116.0, 38.0)
+		seed_start_button.custom_minimum_size = Vector2(128.0 if mobile else 116.0, touch_height if mobile else 38.0)
 
 	card_grid.columns = 1 if portrait else min(4, max(1, option_buttons.size()))
-	card_grid.offset_left = 26.0
-	card_grid.offset_right = -26.0
-	card_grid.offset_top = 386.0 if portrait else 266.0
-	card_grid.offset_bottom = -26.0
+	if card_scroll != null:
+		card_scroll.offset_left = 20.0 if mobile else 26.0
+		card_scroll.offset_right = -card_scroll.offset_left
+		card_scroll.offset_top = seed_row.offset_bottom + 12.0 if seed_row != null else 386.0
+		card_scroll.offset_bottom = -20.0 if mobile else -26.0
+		card_grid.custom_minimum_size = Vector2(max(1.0, panel_width - card_scroll.offset_left * 2.0), 0.0)
 
 	var column_count: int = max(1, card_grid.columns)
-	var card_width: float = panel_width - 52.0 if portrait else max(170.0, (panel_width - 52.0 - 18.0 * float(column_count - 1)) / float(column_count))
-	var card_height: float = 160.0 if portrait else max(190.0, panel_height - 318.0)
+	var card_width: float = panel_width - (40.0 if mobile else 52.0) if portrait else max(170.0, (panel_width - (40.0 if mobile else 52.0) - 18.0 * float(column_count - 1)) / float(column_count))
+	var card_height: float = 188.0 if mobile and portrait else 160.0 if portrait else max(190.0, panel_height - 318.0)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
 		button.add_theme_font_size_override("font_size", 18 if portrait else 20)
+	MOBILE_TUNING.apply_control_tree(root, viewport_size)

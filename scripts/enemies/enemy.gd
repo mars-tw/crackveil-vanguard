@@ -535,6 +535,8 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 	GameManager.add_kill()
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
 		var thump_pitch := 0.68 if is_boss else (0.78 if is_elite else 0.92)
+		if GameManager.has_method("get_kill_thump_pitch"):
+			thump_pitch = GameManager.get_kill_thump_pitch(thump_pitch)
 		AudioManager.play_sfx("kill_thump", false, -7.0, thump_pitch)
 	if is_elite and GameManager.has_method("record_elite_kill"):
 		GameManager.record_elite_kill()
@@ -542,6 +544,8 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 		GameManager.record_boss_kill()
 	var burst_scale := 2.25 if is_boss else (1.55 if is_elite else 1.0)
 	EntityFactory.call_deferred("spawn_death_burst", global_position, body_color, burst_scale)
+	if is_elite and not is_boss:
+		EntityFactory.call_deferred("spawn_death_burst", global_position + Vector2(0.0, -18.0), Color(1.0, 0.76, 0.18), 1.75, "gold_rain")
 
 	if xp_value > 0:
 		if is_elite or is_boss:
@@ -564,7 +568,7 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 	if is_elite or is_boss:
 		var shake := 9.0 if is_boss else 5.6
 		if GameManager.has_method("request_combat_impact"):
-			GameManager.request_combat_impact(shake, 0.04)
+			GameManager.request_combat_impact(shake, 0.15 if is_elite and not is_boss else 0.04)
 
 	EntityFactory.release_enemy_deferred(self)
 

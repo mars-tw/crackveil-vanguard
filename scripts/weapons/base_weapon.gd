@@ -60,6 +60,13 @@ func register_trigger() -> void:
 	trigger_count += 1
 
 
+func scaled_cooldown(base_cooldown: float) -> float:
+	var multiplier := 1.0
+	if GameManager != null and GameManager.has_method("get_fire_rate_multiplier"):
+		multiplier = max(0.1, float(GameManager.get_fire_rate_multiplier(owner_player)))
+	return max(0.02, base_cooldown / multiplier)
+
+
 func find_nearest_enemy(max_range: float) -> Node2D:
 	if owner_player == null or not is_instance_valid(owner_player):
 		return null

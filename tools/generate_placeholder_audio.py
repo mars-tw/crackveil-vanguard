@@ -147,6 +147,41 @@ def main() -> None:
             + random.uniform(-1.0, 1.0) * 0.48
         ),
     )
+    write_wav(
+        "combo_milestone",
+        0.36,
+        lambda i, n, t: 0.24
+        * envelope(i, n, 0.025, 0.5)
+        * (
+            sine(220.0 + 760.0 * t, t) * 0.28
+            + sine(440.0 + 1120.0 * t, t) * 0.30
+            + sine(880.0 + 1460.0 * t, t) * 0.26
+            + random.uniform(-1.0, 1.0) * 0.16
+        ),
+    )
+    write_wav(
+        "boss_roar",
+        0.62,
+        lambda i, n, t: 0.25
+        * envelope(i, n, 0.04, 0.58)
+        * (
+            sine(58.0 - 18.0 * t, t) * 0.46
+            + sine(93.0 - 24.0 * t, t) * 0.30
+            + square(37.0, t) * 0.12
+            + random.uniform(-1.0, 1.0) * 0.12
+        ),
+    )
+    write_wav(
+        "boomerang_catch",
+        0.085,
+        lambda i, n, t: 0.18
+        * envelope(i, n, 0.01, 0.76)
+        * (
+            square(1120.0 - 580.0 * t, t) * 0.34
+            + sine(1760.0 - 900.0 * t, t) * 0.22
+            + random.uniform(-1.0, 1.0) * 0.44
+        ),
+    )
 
     for wav_path in sorted(OUTPUT_DIR.glob("*.wav")):
         print(f"{wav_path.name}: {wav_path.stat().st_size} bytes")

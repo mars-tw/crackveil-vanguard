@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+
 signal purchase_selected(option: Dictionary)
 
 var root: Control
@@ -131,8 +133,13 @@ func _apply_responsive_layout() -> void:
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = Vector2(1280.0, 720.0)
 	var portrait := viewport_size.y > viewport_size.x
-	var panel_width: float = min(viewport_size.x - 28.0, 900.0 if not portrait else 620.0)
-	var panel_height: float = min(viewport_size.y - 54.0, 440.0 if not portrait else 780.0)
+	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
+	var outer_margin := 12.0 if mobile else 28.0
+	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
+	var panel_width: float = min(viewport_size.x - outer_margin * 2.0, 900.0 if not portrait else 620.0)
+	var panel_height: float = min(viewport_size.y - (outer_margin * 2.0 if mobile else 54.0), 460.0 if not portrait else 790.0)
+	if mobile:
+		panel_height = viewport_size.y - outer_margin * 2.0
 
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5
@@ -143,29 +150,33 @@ func _apply_responsive_layout() -> void:
 	panel.offset_top = -panel_height * 0.5
 	panel.offset_bottom = panel_height * 0.5
 
-	title_label.offset_top = 18.0
-	title_label.offset_bottom = 54.0
-	gold_label.offset_top = 54.0
-	gold_label.offset_bottom = 78.0
+	title_label.offset_top = 16.0 if mobile else 18.0
+	title_label.offset_bottom = title_label.offset_top + (48.0 if mobile else 36.0)
+	title_label.add_theme_font_size_override("font_size", (24 if portrait else 28) if mobile else 30)
+	gold_label.offset_top = title_label.offset_bottom
+	gold_label.offset_bottom = gold_label.offset_top + (34.0 if mobile else 24.0)
+	gold_label.add_theme_font_size_override("font_size", (15 if portrait else 17) if mobile else 18)
 
 	card_grid.columns = 1 if portrait else 3
-	card_grid.offset_left = 26.0
-	card_grid.offset_right = -26.0
-	card_grid.offset_top = 92.0
-	card_grid.offset_bottom = -82.0
+	card_grid.offset_left = 20.0 if mobile else 26.0
+	card_grid.offset_right = -card_grid.offset_left
+	card_grid.offset_top = gold_label.offset_bottom + (12.0 if mobile else 14.0)
+	card_grid.offset_bottom = -(touch_height + 30.0 if mobile else 82.0)
 
-	var card_width: float = panel_width - 52.0 if portrait else max(190.0, (panel_width - 52.0 - 36.0) / 3.0)
-	var card_height: float = 146.0 if portrait else max(174.0, panel_height - 186.0)
+	var side_padding := 40.0 if mobile else 52.0
+	var card_width: float = panel_width - side_padding if portrait else max(190.0, (panel_width - side_padding - 36.0) / 3.0)
+	var card_height: float = 190.0 if mobile and portrait else 146.0 if portrait else max(206.0 if mobile else 174.0, panel_height - 186.0)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
 		button.add_theme_font_size_override("font_size", 18 if portrait else 19)
 
 	skip_button.anchor_left = 0.5
 	skip_button.anchor_right = 0.5
-	skip_button.offset_left = -86.0
-	skip_button.offset_right = 86.0
-	skip_button.offset_top = panel_height - 64.0
-	skip_button.offset_bottom = panel_height - 24.0
+	skip_button.offset_left = -108.0 if mobile else -86.0
+	skip_button.offset_right = 108.0 if mobile else 86.0
+	skip_button.offset_top = panel_height - (touch_height + 18.0 if mobile else 64.0)
+	skip_button.offset_bottom = skip_button.offset_top + (touch_height if mobile else 40.0)
+	MOBILE_TUNING.apply_control_tree(root, viewport_size)
 
 
 func _option_disabled(option: Dictionary, current_gold: int) -> bool:

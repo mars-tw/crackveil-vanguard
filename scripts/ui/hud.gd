@@ -2,6 +2,7 @@ extends CanvasLayer
 
 const VIRTUAL_JOYSTICK_SCENE := preload("res://scripts/ui/virtual_joystick.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
+const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 
 var root: Control
 var hud_panel: Panel
@@ -25,6 +26,10 @@ var toast_panel: Panel
 var toast_label: Label
 var level_flash_rect: ColorRect
 var combo_pulse_rect: TextureRect
+var milestone_label: Label
+var combo_break_label: Label
+var boss_intro_rect: ColorRect
+var boss_intro_label: Label
 var pause_overlay: Panel
 var pause_scroll: ScrollContainer
 var pause_content: VBoxContainer
@@ -48,6 +53,9 @@ var toast_showing: bool = false
 var reset_meta_confirm_pending: bool = false
 var level_flash_tween: Tween = null
 var combo_pulse_tween: Tween = null
+var milestone_tween: Tween = null
+var combo_break_tween: Tween = null
+var boss_intro_tween: Tween = null
 
 
 func _ready() -> void:
@@ -67,6 +75,12 @@ func _ready() -> void:
 		GameManager.level_flash_requested.connect(_on_level_flash_requested)
 	if GameManager.has_signal("combo_pulse_requested") and not GameManager.combo_pulse_requested.is_connected(_on_combo_pulse_requested):
 		GameManager.combo_pulse_requested.connect(_on_combo_pulse_requested)
+	if GameManager.has_signal("combo_milestone_requested") and not GameManager.combo_milestone_requested.is_connected(_on_combo_milestone_requested):
+		GameManager.combo_milestone_requested.connect(_on_combo_milestone_requested)
+	if GameManager.has_signal("combo_break_requested") and not GameManager.combo_break_requested.is_connected(_on_combo_break_requested):
+		GameManager.combo_break_requested.connect(_on_combo_break_requested)
+	if GameManager.has_signal("boss_intro_requested") and not GameManager.boss_intro_requested.is_connected(_on_boss_intro_requested):
+		GameManager.boss_intro_requested.connect(_on_boss_intro_requested)
 	if AudioManager != null and AudioManager.has_signal("settings_changed") and not AudioManager.settings_changed.is_connected(_sync_audio_controls):
 		AudioManager.settings_changed.connect(_sync_audio_controls)
 	if AudioManager != null and AudioManager.has_signal("audio_unlocked") and not AudioManager.audio_unlocked.is_connected(_refresh_audio_prompt):
@@ -256,6 +270,40 @@ func _build_ui() -> void:
 	combo_pulse_rect.visible = false
 	root.add_child(combo_pulse_rect)
 
+	boss_intro_rect = ColorRect.new()
+	boss_intro_rect.name = "BossIntroDim"
+	boss_intro_rect.color = Color(0.0, 0.0, 0.0, 0.0)
+	boss_intro_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	boss_intro_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(boss_intro_rect)
+
+	boss_intro_label = Label.new()
+	boss_intro_label.name = "BossIntroLabel"
+	boss_intro_label.visible = false
+	boss_intro_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_intro_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	boss_intro_label.add_theme_font_size_override("font_size", 46)
+	boss_intro_label.modulate = Color(1.0, 0.78, 0.42, 0.0)
+	root.add_child(boss_intro_label)
+
+	milestone_label = Label.new()
+	milestone_label.name = "ComboMilestoneLabel"
+	milestone_label.visible = false
+	milestone_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	milestone_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	milestone_label.add_theme_font_size_override("font_size", 34)
+	milestone_label.modulate = Color(1.0, 0.78, 0.24, 0.0)
+	root.add_child(milestone_label)
+
+	combo_break_label = Label.new()
+	combo_break_label.name = "ComboBreakLabel"
+	combo_break_label.visible = false
+	combo_break_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	combo_break_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	combo_break_label.add_theme_font_size_override("font_size", 22)
+	combo_break_label.modulate = Color(0.86, 0.92, 0.96, 0.0)
+	root.add_child(combo_break_label)
+
 	_build_virtual_joystick()
 	_build_pause_overlay()
 	_apply_responsive_layout()
@@ -391,59 +439,92 @@ func _apply_responsive_layout() -> void:
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = Vector2(1280.0, 720.0)
 	var portrait := viewport_size.y > viewport_size.x
-	var margin := 14.0
+	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size) or force_touch_controls_visible
+	var margin := 16.0 if mobile else 14.0
+	var touch_height := MOBILE_TUNING.touch_target(viewport_size, force_touch_controls_visible)
 
 	if hud_panel != null:
-		hud_panel.position = Vector2(8.0, 8.0)
-		hud_panel.size = Vector2(min(viewport_size.x * (0.72 if portrait else 0.36), 340.0), 108.0)
+		hud_panel.position = Vector2(8.0, 58.0) if mobile and portrait else Vector2(8.0, 8.0)
+		hud_panel.size = Vector2(min(viewport_size.x - 16.0, 370.0), 118.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.72 if portrait else 0.38), 370.0 if mobile else 340.0), 122.0 if mobile else 108.0)
 	if score_panel != null:
-		score_panel.anchor_left = 1.0
-		score_panel.anchor_right = 1.0
-		score_panel.position = Vector2.ZERO
-		score_panel.offset_left = -332.0 if not portrait else -258.0
-		score_panel.offset_right = -margin
-		score_panel.offset_top = 8.0 if not portrait else 48.0
-		score_panel.offset_bottom = score_panel.offset_top + 46.0
+		if mobile and portrait:
+			score_panel.anchor_left = 0.0
+			score_panel.anchor_right = 1.0
+			score_panel.position = Vector2.ZERO
+			score_panel.offset_left = 8.0
+			score_panel.offset_right = -8.0
+			score_panel.offset_top = 184.0
+			score_panel.offset_bottom = 230.0
+		else:
+			score_panel.anchor_left = 1.0
+			score_panel.anchor_right = 1.0
+			score_panel.position = Vector2.ZERO
+			score_panel.offset_left = -358.0 if not portrait else -276.0
+			score_panel.offset_right = -margin
+			score_panel.offset_top = 8.0 if not portrait else 48.0
+			score_panel.offset_bottom = score_panel.offset_top + (52.0 if mobile else 46.0)
 	if hp_icon != null:
-		hp_icon.position = Vector2(margin + 2.0, 14.0)
-		hp_icon.size = Vector2(26.0, 26.0)
+		hp_icon.anchor_left = 0.0
+		hp_icon.anchor_right = 0.0
+		hp_icon.position = Vector2(margin + 2.0, 68.0) if mobile and portrait else Vector2(margin + 2.0, 14.0)
+		hp_icon.size = Vector2(32.0, 32.0) if mobile else Vector2(26.0, 26.0)
 	if xp_icon != null:
-		xp_icon.position = Vector2(margin + 2.0, 44.0)
-		xp_icon.size = Vector2(24.0, 24.0)
+		xp_icon.anchor_left = 0.0
+		xp_icon.anchor_right = 0.0
+		xp_icon.position = Vector2(margin + 2.0, 104.0) if mobile and portrait else Vector2(margin + 2.0, 44.0)
+		xp_icon.size = Vector2(30.0, 30.0) if mobile else Vector2(24.0, 24.0)
 	if gold_icon != null:
-		gold_icon.anchor_left = 1.0
-		gold_icon.anchor_right = 1.0
-		gold_icon.offset_left = -318.0 if not portrait else -246.0
-		gold_icon.offset_right = gold_icon.offset_left + 26.0
-		gold_icon.offset_top = 18.0 if not portrait else 58.0
-		gold_icon.offset_bottom = gold_icon.offset_top + 26.0
+		if mobile and portrait:
+			gold_icon.anchor_left = 0.0
+			gold_icon.anchor_right = 0.0
+			gold_icon.offset_left = margin + 2.0
+			gold_icon.offset_right = gold_icon.offset_left + 30.0
+			gold_icon.offset_top = 192.0
+			gold_icon.offset_bottom = gold_icon.offset_top + 30.0
+		else:
+			gold_icon.anchor_left = 1.0
+			gold_icon.anchor_right = 1.0
+			gold_icon.offset_left = -336.0 if not portrait else -258.0
+			gold_icon.offset_right = gold_icon.offset_left + (30.0 if mobile else 26.0)
+			gold_icon.offset_top = 20.0 if not portrait else 60.0
+			gold_icon.offset_bottom = gold_icon.offset_top + (30.0 if mobile else 26.0)
 
-	hp_label.position = Vector2(margin + 36.0, 10.0)
-	hp_label.add_theme_font_size_override("font_size", 18 if portrait else 20)
-	level_label.position = Vector2(margin + 36.0, 38.0)
-	level_label.add_theme_font_size_override("font_size", 14 if portrait else 16)
-	xp_bar.position = Vector2(margin + 36.0, 66.0)
-	xp_bar.size = Vector2(min(viewport_size.x * (0.5 if portrait else 0.27), 260.0), 14.0)
+	hp_label.position = Vector2(margin + 42.0, 64.0) if mobile and portrait else Vector2(margin + 36.0, 10.0)
+	hp_label.add_theme_font_size_override("font_size", (17 if portrait else 18) if mobile else (18 if portrait else 20))
+	level_label.position = Vector2(margin + 42.0, 100.0) if mobile and portrait else Vector2(margin + 36.0, 38.0)
+	level_label.add_theme_font_size_override("font_size", (13 if portrait else 15) if mobile else (14 if portrait else 16))
+	xp_bar.position = Vector2(margin + 42.0, 134.0) if mobile and portrait else Vector2(margin + 36.0, 66.0)
+	xp_bar.size = Vector2(min(viewport_size.x - margin * 2.0 - 50.0, 292.0), 18.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.5 if portrait else 0.28), 286.0 if mobile else 260.0), 16.0 if mobile else 14.0)
 	if theme_label != null:
-		theme_label.position = Vector2(margin + 36.0, 82.0)
-		theme_label.size = Vector2(min(viewport_size.x * (0.55 if portrait else 0.28), 276.0), 22.0)
-		theme_label.add_theme_font_size_override("font_size", 12 if portrait else 13)
+		theme_label.position = Vector2(margin + 42.0, 154.0) if mobile and portrait else Vector2(margin + 36.0, 86.0 if mobile else 82.0)
+		theme_label.size = Vector2(min(viewport_size.x - margin * 2.0 - 50.0, 292.0), 26.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.55 if portrait else 0.3), 286.0 if mobile else 276.0), 26.0 if mobile else 22.0)
+		theme_label.add_theme_font_size_override("font_size", (11 if portrait else 12) if mobile else (12 if portrait else 13))
 
 	time_label.anchor_left = 0.5
 	time_label.anchor_right = 0.5
-	time_label.offset_left = -78.0
-	time_label.offset_right = 78.0
-	time_label.offset_top = 10.0
-	time_label.offset_bottom = 42.0
-	time_label.add_theme_font_size_override("font_size", 22 if portrait else 24)
+	time_label.offset_left = -92.0 if mobile else -78.0
+	time_label.offset_right = 92.0 if mobile else 78.0
+	time_label.offset_top = 8.0 if mobile else 10.0
+	time_label.offset_bottom = time_label.offset_top + (46.0 if mobile else 32.0)
+	time_label.add_theme_font_size_override("font_size", (21 if portrait else 23) if mobile else (22 if portrait else 24))
 
 	score_label.anchor_left = 1.0
 	score_label.anchor_right = 1.0
-	score_label.offset_left = -320.0 if not portrait else -244.0
-	score_label.offset_right = -96.0 if not portrait else -14.0
-	score_label.offset_top = 16.0 if not portrait else 52.0
-	score_label.offset_bottom = score_label.offset_top + 30.0
-	score_label.add_theme_font_size_override("font_size", 16 if portrait else 18)
+	if mobile and portrait:
+		score_label.anchor_left = 0.0
+		score_label.anchor_right = 1.0
+		score_label.offset_left = margin + 42.0
+		score_label.offset_right = -14.0
+		score_label.offset_top = 190.0
+		score_label.offset_bottom = 226.0
+		score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	else:
+		score_label.offset_left = -338.0 if not portrait else -258.0
+		score_label.offset_right = -104.0 if not portrait else -14.0
+		score_label.offset_top = 17.0 if not portrait else 54.0
+		score_label.offset_bottom = score_label.offset_top + (34.0 if mobile else 30.0)
+		score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	score_label.add_theme_font_size_override("font_size", (13 if portrait else 16) if mobile else (16 if portrait else 18))
 
 	version_label.anchor_left = 1.0
 	version_label.anchor_right = 1.0
@@ -457,14 +538,15 @@ func _apply_responsive_layout() -> void:
 
 	pause_button.anchor_left = 1.0
 	pause_button.anchor_right = 1.0
-	pause_button.offset_left = -88.0
+	var pause_width: float = max(touch_height, 116.0) if mobile else 74.0
+	pause_button.offset_left = -(pause_width + margin) if mobile else -88.0
 	pause_button.offset_right = -margin
-	pause_button.offset_top = 10.0
-	pause_button.offset_bottom = 50.0
+	pause_button.offset_top = 8.0 if mobile else 10.0
+	pause_button.offset_bottom = pause_button.offset_top + (touch_height if mobile else 40.0)
 
 	if pause_overlay != null:
-		var overlay_width: float = min(viewport_size.x - 40.0, 380.0)
-		var overlay_height: float = min(viewport_size.y - 44.0, 610.0)
+		var overlay_width: float = min(viewport_size.x - (24.0 if mobile else 40.0), 430.0 if mobile else 380.0)
+		var overlay_height: float = min(viewport_size.y - (24.0 if mobile else 44.0), 680.0 if mobile else 610.0)
 		pause_overlay.anchor_left = 0.5
 		pause_overlay.anchor_right = 0.5
 		pause_overlay.anchor_top = 0.5
@@ -475,13 +557,13 @@ func _apply_responsive_layout() -> void:
 		pause_overlay.offset_bottom = overlay_height * 0.5
 
 	if pause_scroll != null:
-		pause_scroll.offset_left = 20.0
-		pause_scroll.offset_right = -20.0
-		pause_scroll.offset_top = 16.0
-		pause_scroll.offset_bottom = -16.0
+		pause_scroll.offset_left = 18.0 if mobile else 20.0
+		pause_scroll.offset_right = -pause_scroll.offset_left
+		pause_scroll.offset_top = 14.0 if mobile else 16.0
+		pause_scroll.offset_bottom = -pause_scroll.offset_top
 
 	if pause_content != null:
-		pause_content.custom_minimum_size = Vector2(max(260.0, min(viewport_size.x - 80.0, 340.0)), 0.0)
+		pause_content.custom_minimum_size = Vector2(max(280.0 if mobile else 260.0, min(viewport_size.x - 60.0, 386.0 if mobile else 340.0)), 0.0)
 
 	if pause_volume_label != null:
 		pause_volume_label.anchor_left = 0.0
@@ -517,7 +599,7 @@ func _apply_responsive_layout() -> void:
 		audio_prompt_button.offset_bottom = -34.0
 
 	if active_ability_button != null:
-		var ability_size := 68.0 if portrait else 62.0
+		var ability_size := 82.0 if mobile and portrait else 74.0 if mobile else 68.0 if portrait else 62.0
 		var bottom_margin := 34.0 if portrait else 28.0
 		active_ability_button.anchor_left = 0.0
 		active_ability_button.anchor_right = 0.0
@@ -542,29 +624,44 @@ func _apply_responsive_layout() -> void:
 		toast_panel.anchor_bottom = 0.0
 		toast_panel.offset_left = -toast_width * 0.5
 		toast_panel.offset_right = toast_width * 0.5
-		toast_panel.offset_top = 56.0 if not portrait else 94.0
-		toast_panel.offset_bottom = toast_panel.offset_top + 48.0
+		toast_panel.offset_top = 238.0 if mobile and portrait else 64.0 if mobile else 56.0 if not portrait else 94.0
+		toast_panel.offset_bottom = toast_panel.offset_top + (58.0 if mobile else 48.0)
 
 	if combo_pulse_rect != null and not combo_pulse_rect.visible:
 		var pulse_size: float = min(viewport_size.x, viewport_size.y) * 0.28
 		combo_pulse_rect.position = viewport_size * 0.5 - Vector2.ONE * pulse_size * 0.5
 		combo_pulse_rect.size = Vector2.ONE * pulse_size
 
+	if boss_intro_rect != null:
+		boss_intro_rect.offset_left = 0.0
+		boss_intro_rect.offset_top = 0.0
+		boss_intro_rect.offset_right = 0.0
+		boss_intro_rect.offset_bottom = 0.0
+	if boss_intro_label != null:
+		boss_intro_label.position = Vector2(24.0, viewport_size.y * 0.31)
+		boss_intro_label.size = Vector2(max(1.0, viewport_size.x - 48.0), 118.0 if mobile else 82.0)
+		boss_intro_label.add_theme_font_size_override("font_size", (32 if portrait else 42) if mobile else (36 if portrait else 48))
+	if milestone_label != null:
+		milestone_label.position = Vector2(24.0, viewport_size.y * 0.22)
+		milestone_label.size = Vector2(max(1.0, viewport_size.x - 48.0), 108.0 if mobile else 78.0)
+		milestone_label.add_theme_font_size_override("font_size", (25 if portrait else 32) if mobile else (28 if portrait else 36))
+	if combo_break_label != null:
+		combo_break_label.position = Vector2(24.0, viewport_size.y * 0.32)
+		combo_break_label.size = Vector2(max(1.0, viewport_size.x - 48.0), 58.0 if mobile else 44.0)
+		combo_break_label.add_theme_font_size_override("font_size", (16 if portrait else 20) if mobile else (18 if portrait else 22))
+
 	if virtual_joystick != null:
-		var joystick_size := 164.0 if portrait else 150.0
+		var joystick_size := 188.0 if mobile and portrait else 170.0 if mobile else 164.0 if portrait else 150.0
 		virtual_joystick.size = Vector2(joystick_size, joystick_size)
 		virtual_joystick.position = Vector2(22.0, viewport_size.y - joystick_size - 24.0)
 		virtual_joystick.visible = _should_show_touch_controls()
+	MOBILE_TUNING.apply_control_tree(root, viewport_size, force_touch_controls_visible)
 
 
 func _should_show_touch_controls() -> bool:
 	if force_touch_controls_visible:
 		return true
-	if OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios"):
-		return true
-	if DisplayServer.has_method("is_touchscreen_available"):
-		return DisplayServer.call("is_touchscreen_available") == true
-	return false
+	return MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size)
 
 
 func set_touch_controls_forced_visible(value: bool) -> void:
@@ -693,6 +790,99 @@ func _on_combo_pulse_requested(combo_count: int) -> void:
 	combo_pulse_tween.chain().tween_callback(func() -> void:
 		if combo_pulse_rect != null:
 			combo_pulse_rect.visible = false
+	)
+
+
+func _on_combo_milestone_requested(combo_count: int) -> void:
+	if milestone_label == null:
+		return
+	if milestone_tween != null and milestone_tween.is_valid():
+		milestone_tween.kill()
+	if combo_pulse_tween != null and combo_pulse_tween.is_valid():
+		combo_pulse_tween.kill()
+	var viewport_size := get_viewport().get_visible_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		viewport_size = Vector2(1280.0, 720.0)
+	milestone_label.text = "COMBO x%d  OVERDRIVE +10%%" % combo_count
+	milestone_label.visible = true
+	milestone_label.modulate = Color(1.0, 0.78, 0.24, 0.0)
+	milestone_label.scale = Vector2.ONE * 0.82
+	if combo_pulse_rect != null:
+		var start_size: float = min(viewport_size.x, viewport_size.y) * 0.34
+		var end_size: float = max(viewport_size.x, viewport_size.y) * 1.95
+		var center := viewport_size * 0.5
+		var pulse_color := Color(1.0, 0.74, 0.18, 0.62)
+		combo_pulse_rect.visible = true
+		combo_pulse_rect.modulate = pulse_color
+		combo_pulse_rect.position = center - Vector2.ONE * start_size * 0.5
+		combo_pulse_rect.size = Vector2.ONE * start_size
+		combo_pulse_tween = create_tween()
+		combo_pulse_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		combo_pulse_tween.set_parallel(true)
+		combo_pulse_tween.tween_property(combo_pulse_rect, "position", center - Vector2.ONE * end_size * 0.5, 0.46)
+		combo_pulse_tween.tween_property(combo_pulse_rect, "size", Vector2.ONE * end_size, 0.46)
+		combo_pulse_tween.tween_property(combo_pulse_rect, "modulate", Color(pulse_color.r, pulse_color.g, pulse_color.b, 0.0), 0.46)
+		combo_pulse_tween.chain().tween_callback(func() -> void:
+			if combo_pulse_rect != null:
+				combo_pulse_rect.visible = false
+		)
+	milestone_tween = create_tween()
+	milestone_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	milestone_tween.set_parallel(true)
+	milestone_tween.tween_property(milestone_label, "modulate", Color(1.0, 0.78, 0.24, 1.0), 0.08)
+	milestone_tween.tween_property(milestone_label, "scale", Vector2.ONE, 0.12)
+	milestone_tween.chain().tween_interval(0.76)
+	milestone_tween.chain().tween_property(milestone_label, "modulate", Color(1.0, 0.78, 0.24, 0.0), 0.32)
+	milestone_tween.chain().tween_callback(func() -> void:
+		if milestone_label != null:
+			milestone_label.visible = false
+			milestone_label.scale = Vector2.ONE
+	)
+
+
+func _on_combo_break_requested(combo_count: int) -> void:
+	if combo_break_label == null or combo_count < 3:
+		return
+	if combo_break_tween != null and combo_break_tween.is_valid():
+		combo_break_tween.kill()
+	combo_break_label.text = "COMBO LOST x%d" % combo_count
+	combo_break_label.visible = true
+	combo_break_label.modulate = Color(0.86, 0.92, 0.96, 0.88)
+	combo_break_label.position.y += 4.0
+	combo_break_tween = create_tween()
+	combo_break_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	combo_break_tween.set_parallel(true)
+	combo_break_tween.tween_property(combo_break_label, "modulate", Color(0.86, 0.92, 0.96, 0.0), 0.72)
+	combo_break_tween.tween_property(combo_break_label, "position:y", combo_break_label.position.y - 14.0, 0.72)
+	combo_break_tween.chain().tween_callback(func() -> void:
+		if combo_break_label != null:
+			combo_break_label.visible = false
+			_apply_responsive_layout()
+	)
+
+
+func _on_boss_intro_requested(boss_name: String) -> void:
+	if boss_intro_rect == null or boss_intro_label == null:
+		return
+	if boss_intro_tween != null and boss_intro_tween.is_valid():
+		boss_intro_tween.kill()
+	boss_intro_label.text = boss_name
+	boss_intro_label.visible = true
+	boss_intro_rect.color = Color(0.0, 0.0, 0.0, 0.0)
+	boss_intro_label.modulate = Color(1.0, 0.72, 0.34, 0.0)
+	boss_intro_label.scale = Vector2.ONE * 0.9
+	boss_intro_tween = create_tween()
+	boss_intro_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	boss_intro_tween.set_parallel(true)
+	boss_intro_tween.tween_property(boss_intro_rect, "color", Color(0.0, 0.0, 0.0, 0.44), 0.16)
+	boss_intro_tween.tween_property(boss_intro_label, "modulate", Color(1.0, 0.72, 0.34, 1.0), 0.16)
+	boss_intro_tween.tween_property(boss_intro_label, "scale", Vector2.ONE, 0.18)
+	boss_intro_tween.chain().tween_interval(0.56)
+	boss_intro_tween.chain().tween_property(boss_intro_rect, "color", Color(0.0, 0.0, 0.0, 0.0), 0.28)
+	boss_intro_tween.parallel().tween_property(boss_intro_label, "modulate", Color(1.0, 0.72, 0.34, 0.0), 0.28)
+	boss_intro_tween.chain().tween_callback(func() -> void:
+		if boss_intro_label != null:
+			boss_intro_label.visible = false
 	)
 
 

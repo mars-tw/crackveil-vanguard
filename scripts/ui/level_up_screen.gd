@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+
 signal upgrade_selected(upgrade: Dictionary)
 
 var root: Control
@@ -127,8 +129,12 @@ func _apply_responsive_layout() -> void:
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = Vector2(1280.0, 720.0)
 	var portrait := viewport_size.y > viewport_size.x
-	var panel_width: float = min(viewport_size.x - 28.0, 920.0 if not portrait else 620.0)
-	var panel_height: float = min(viewport_size.y - 54.0, 400.0 if not portrait else 760.0)
+	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
+	var outer_margin := 12.0 if mobile else 28.0
+	var panel_width: float = min(viewport_size.x - outer_margin * 2.0, 920.0 if not portrait else 620.0)
+	var panel_height: float = min(viewport_size.y - (outer_margin * 2.0 if mobile else 54.0), 420.0 if not portrait else 790.0)
+	if mobile:
+		panel_height = viewport_size.y - outer_margin * 2.0
 
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5
@@ -139,18 +145,20 @@ func _apply_responsive_layout() -> void:
 	panel.offset_top = -panel_height * 0.5
 	panel.offset_bottom = panel_height * 0.5
 
-	title_label.offset_top = 18.0
-	title_label.offset_bottom = 58.0
-	title_label.add_theme_font_size_override("font_size", 28 if portrait else 30)
+	title_label.offset_top = 16.0 if mobile else 18.0
+	title_label.offset_bottom = title_label.offset_top + (52.0 if mobile else 40.0)
+	title_label.add_theme_font_size_override("font_size", (24 if portrait else 28) if mobile else (28 if portrait else 30))
 
 	card_grid.columns = 1 if portrait else 3
-	card_grid.offset_left = 26.0
-	card_grid.offset_right = -26.0
-	card_grid.offset_top = 76.0
-	card_grid.offset_bottom = -26.0
+	card_grid.offset_left = 20.0 if mobile else 26.0
+	card_grid.offset_right = -card_grid.offset_left
+	card_grid.offset_top = title_label.offset_bottom + (14.0 if mobile else 18.0)
+	card_grid.offset_bottom = -20.0 if mobile else -26.0
 
-	var card_width: float = panel_width - 52.0 if portrait else max(190.0, (panel_width - 52.0 - 36.0) / 3.0)
-	var card_height: float = 165.0 if portrait else max(190.0, panel_height - 120.0)
+	var side_padding := 40.0 if mobile else 52.0
+	var card_width: float = panel_width - side_padding if portrait else max(190.0, (panel_width - side_padding - 36.0) / 3.0)
+	var card_height: float = 204.0 if mobile and portrait else 165.0 if portrait else max(214.0 if mobile else 190.0, panel_height - 120.0)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
 		button.add_theme_font_size_override("font_size", 18 if portrait else 20)
+	MOBILE_TUNING.apply_control_tree(root, viewport_size)

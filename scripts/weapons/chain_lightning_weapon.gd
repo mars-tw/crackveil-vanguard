@@ -17,7 +17,7 @@ func _process(delta: float) -> void:
 	register_trigger()
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("fire")
-	cooldown_timer = data_float("cooldown", 1.0)
+	cooldown_timer = scaled_cooldown(data_float("cooldown", 1.0))
 
 
 func _cast_chain(first_target: Node2D) -> void:
@@ -54,10 +54,13 @@ func _cast_chain(first_target: Node2D) -> void:
 
 	EntityFactory.spawn_lightning_arc(
 		points,
-		data_color("color", Color(0.6, 0.9, 1.0)),
-		data_float("effect_lifetime", 0.22),
-		data_string("lightning_sprite_path", "res://assets/sprites/proj_lightning.png")
+		data_color("color", Color(0.6, 0.9, 1.0)).lerp(Color.WHITE, 0.28),
+		data_float("effect_lifetime", 0.22) + 0.04,
+		data_string("lightning_sprite_path", "res://assets/sprites/proj_lightning.png"),
+		34.0
 	)
+	if has_final_target:
+		EntityFactory.spawn_death_burst(final_target_position, data_color("color", Color(0.72, 1.0, 0.92)), 0.78, "spark")
 
 
 func _make_overload_stats() -> Dictionary:
@@ -105,9 +108,10 @@ func _cast_overload_nova(origin: Vector2, used_ids: Dictionary) -> void:
 	if arc_points.size() > 1:
 		EntityFactory.spawn_lightning_arc(
 			arc_points,
-			data_color("color", Color(0.72, 1.0, 0.92)),
+			data_color("color", Color(0.72, 1.0, 0.92)).lerp(Color.WHITE, 0.34),
 			0.18,
-			data_string("lightning_sprite_path", "res://assets/sprites/proj_lightning.png")
+			data_string("lightning_sprite_path", "res://assets/sprites/proj_lightning.png"),
+			38.0
 		)
 
 

@@ -250,7 +250,7 @@ func _spawn_delayed_explosion(world_position: Vector2, stats: Dictionary, source
 	spawn_explosion(world_position, stats, valid_source)
 
 
-func spawn_lightning_arc(points: Array[Vector2], arc_color: Color, lifetime: float, sprite_path: String = "res://assets/sprites/proj_lightning.png") -> Node:
+func spawn_lightning_arc(points: Array[Vector2], arc_color: Color, lifetime: float, sprite_path: String = "res://assets/sprites/proj_lightning.png", arc_width: float = 24.0) -> Node:
 	if get_pool_live_count("lightning_arc") >= LIGHTNING_ARC_CAP:
 		return null
 	var arc := _acquire("lightning_arc")
@@ -260,7 +260,8 @@ func spawn_lightning_arc(points: Array[Vector2], arc_color: Color, lifetime: flo
 		"points": points,
 		"color": arc_color,
 		"lifetime": lifetime,
-		"sprite_path": sprite_path
+		"sprite_path": sprite_path,
+		"width": arc_width
 	})
 	return arc
 
@@ -390,7 +391,7 @@ func spawn_combo_text(combo_count: int, world_position: Vector2) -> Node:
 	return spawn_damage_number("COMBO ×%d" % combo_count, world_position, Color(0.72, 1.0, 0.92), 24)
 
 
-func spawn_death_burst(world_position: Vector2, burst_color: Color, burst_scale: float = 1.0) -> Node:
+func spawn_death_burst(world_position: Vector2, burst_color: Color, burst_scale: float = 1.0, burst_style: String = "burst") -> Node:
 	if get_pool_live_count("death_burst") >= DEATH_BURST_CAP:
 		return null
 	var burst := _acquire("death_burst")
@@ -399,7 +400,8 @@ func spawn_death_burst(world_position: Vector2, burst_color: Color, burst_scale:
 	burst.pool_reset({
 		"position": world_position,
 		"color": burst_color,
-		"scale": burst_scale
+		"scale": burst_scale,
+		"style": burst_style
 	})
 	return burst
 

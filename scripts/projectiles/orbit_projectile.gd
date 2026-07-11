@@ -12,6 +12,7 @@ var stats: Dictionary = {}
 var hit_cooldowns: Dictionary = {}
 var is_active: bool = false
 var hit_flash_timer: float = 0.0
+var spark_cooldown: float = 0.0
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
@@ -57,6 +58,7 @@ func pool_on_release() -> void:
 	if trail != null:
 		trail.visible = false
 	hit_flash_timer = 0.0
+	spark_cooldown = 0.0
 	var shape_node := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape_node != null:
 		shape_node.disabled = true
@@ -101,6 +103,7 @@ func _physics_process(delta: float) -> void:
 	rotation = orbit_angle + PI * 0.5
 
 	_tick_hit_cooldowns(delta)
+	spark_cooldown = max(spark_cooldown - delta, 0.0)
 	_damage_overlapping_enemies()
 	_tick_hit_flash(delta)
 
@@ -153,8 +156,17 @@ func _damage_overlapping_enemies() -> void:
 			hit_cooldowns[hit_key] = float(stats.get("hit_interval", 0.42))
 			damaged_count += 1
 			hit_flash_timer = 0.09
+			_spawn_hit_spark()
 			if weapon_node != null and is_instance_valid(weapon_node) and weapon_node.has_method("register_orbit_hit"):
 				weapon_node.register_orbit_hit()
+
+
+func _spawn_hit_spark() -> void:
+	if spark_cooldown > 0.0:
+		return
+	spark_cooldown = 0.08
+	var color: Color = stats.get("color", Color(0.8, 0.9, 1.0))
+	EntityFactory.spawn_death_burst(global_position, color.lerp(Color(1.0, 0.94, 0.56), 0.56), 0.72, "spark")
 
 
 func _tick_hit_flash(delta: float) -> void:

@@ -1,10 +1,13 @@
 extends CanvasLayer
 
+const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+
 signal continue_requested
 signal main_menu_requested
 
 var root: Control
 var panel: Panel
+var title_label: Label
 var summary_label: Label
 var copy_seed_button: Button
 var continue_button: Button
@@ -36,7 +39,8 @@ func _build_ui() -> void:
 	panel.name = "Panel"
 	root.add_child(panel)
 
-	var title := Label.new()
+	title_label = Label.new()
+	var title := title_label
 	title.text = "階段勝利"
 	title.anchor_left = 0.0
 	title.anchor_right = 1.0
@@ -114,8 +118,11 @@ func _apply_responsive_layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = Vector2(1280.0, 720.0)
-	var panel_width: float = min(viewport_size.x - 32.0, 460.0)
-	var panel_height: float = 402.0
+	var portrait := viewport_size.y > viewport_size.x
+	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
+	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
+	var panel_width: float = min(viewport_size.x - (24.0 if mobile else 32.0), 520.0 if mobile else 460.0)
+	var panel_height: float = min(viewport_size.y - (24.0 if mobile else 32.0), 520.0 if mobile else 402.0)
 
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5
@@ -126,32 +133,39 @@ func _apply_responsive_layout() -> void:
 	panel.offset_top = -panel_height * 0.5
 	panel.offset_bottom = panel_height * 0.5
 
-	summary_label.offset_left = 28.0
-	summary_label.offset_right = -28.0
+	if title_label != null:
+		title_label.offset_top = 20.0
+		title_label.offset_bottom = title_label.offset_top + (56.0 if mobile else 38.0)
+		title_label.add_theme_font_size_override("font_size", (24 if portrait else 27) if mobile else 30)
+
+	summary_label.offset_left = 24.0 if mobile else 28.0
+	summary_label.offset_right = -summary_label.offset_left
 	summary_label.offset_top = 92.0
-	summary_label.offset_bottom = 254.0
+	summary_label.offset_bottom = panel_height - ((touch_height + 12.0) * 3.0 + 28.0 if mobile else 148.0)
+	summary_label.add_theme_font_size_override("font_size", (15 if portrait else 17) if mobile else 20)
 
 	copy_seed_button.anchor_left = 0.5
 	copy_seed_button.anchor_right = 0.5
-	copy_seed_button.offset_left = -98.0
-	copy_seed_button.offset_right = 98.0
-	copy_seed_button.offset_top = panel_height - 178.0
-	copy_seed_button.offset_bottom = panel_height - 136.0
+	copy_seed_button.offset_left = -130.0 if mobile else -98.0
+	copy_seed_button.offset_right = 130.0 if mobile else 98.0
+	copy_seed_button.offset_top = panel_height - ((touch_height + 12.0) * 3.0 + 12.0 if mobile else 178.0)
+	copy_seed_button.offset_bottom = copy_seed_button.offset_top + (touch_height if mobile else 42.0)
 
 	continue_button.anchor_left = 0.5
 	continue_button.anchor_right = 0.5
-	continue_button.offset_left = -98.0
-	continue_button.offset_right = 98.0
-	continue_button.offset_top = panel_height - 126.0
-	continue_button.offset_bottom = panel_height - 84.0
+	continue_button.offset_left = -130.0 if mobile else -98.0
+	continue_button.offset_right = 130.0 if mobile else 98.0
+	continue_button.offset_top = copy_seed_button.offset_bottom + 12.0
+	continue_button.offset_bottom = continue_button.offset_top + (touch_height if mobile else 42.0)
 
 	if main_menu_button != null:
 		main_menu_button.anchor_left = 0.5
 		main_menu_button.anchor_right = 0.5
-		main_menu_button.offset_left = -98.0
-		main_menu_button.offset_right = 98.0
-		main_menu_button.offset_top = panel_height - 74.0
-		main_menu_button.offset_bottom = panel_height - 32.0
+		main_menu_button.offset_left = -130.0 if mobile else -98.0
+		main_menu_button.offset_right = 130.0 if mobile else 98.0
+		main_menu_button.offset_top = continue_button.offset_bottom + 12.0
+		main_menu_button.offset_bottom = main_menu_button.offset_top + (touch_height if mobile else 42.0)
+	MOBILE_TUNING.apply_control_tree(root, viewport_size)
 
 
 func _new_achievement_text(summary: Dictionary) -> String:

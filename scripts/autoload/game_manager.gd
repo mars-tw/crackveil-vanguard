@@ -11,6 +11,9 @@ signal toast_requested(message: String)
 signal guide_replay_requested
 signal level_flash_requested
 signal combo_pulse_requested(combo_count: int)
+signal combo_milestone_requested(combo_count: int)
+signal combo_break_requested(combo_count: int)
+signal boss_intro_requested(boss_name: String)
 
 const SHOP_FIRST_TIME := 75.0
 const SHOP_SECOND_TIME := 150.0
@@ -21,6 +24,8 @@ const SHOP_BOSS_WINDOW_AFTER := 25.0
 const SHOP_BOSS_ACTIVE_RETRY := 5.0
 const SHOP_POST_VICTORY_GRACE := 12.0
 const COMBO_WINDOW := 1.15
+const COMBO_MILESTONES: Array[int] = [25, 50, 100]
+const COMBO_FIRE_RATE_BUFF_DURATION := 5.0
 
 const CONTRACT_POOL: Array = [
 	{
@@ -177,6 +182,7 @@ var active_contract_id: String = ""
 var active_contract_name: String = "無契約"
 var contract_modifiers: Dictionary = {}
 var temporary_squad_damage_timer: float = 0.0
+var combo_fire_rate_timer: float = 0.0
 var next_elite_bonus_xp: int = 0
 var echo_shards_awarded_this_run: int = 0
 var seen_affix_toasts: Dictionary = {}
@@ -187,6 +193,7 @@ var camera_threat_zoom_timer: float = 0.0
 var combo_count: int = 0
 var combo_last_kill_time: float = -999.0
 var last_combo_pulse_count: int = 0
+var last_combo_milestone_count: int = 0
 var upgrade_entry_token: int = 0
 var combat_metrics_enabled: bool = false
 var combat_damage_by_weapon: Dictionary = {}
@@ -240,6 +247,7 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	active_contract_name = "無契約"
 	contract_modifiers.clear()
 	temporary_squad_damage_timer = 0.0
+	combo_fire_rate_timer = 0.0
 	next_elite_bonus_xp = 0
 	echo_shards_awarded_this_run = 0
 	seen_affix_toasts.clear()
@@ -248,6 +256,7 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	combo_count = 0
 	combo_last_kill_time = -999.0
 	last_combo_pulse_count = 0
+	last_combo_milestone_count = 0
 	upgrade_entry_token += 1
 	if AchievementProgress != null and AchievementProgress.has_method("start_run"):
 		AchievementProgress.start_run()
@@ -271,8 +280,11 @@ func _process(delta: float) -> void:
 		elapsed_time += delta
 		if temporary_squad_damage_timer > 0.0:
 			temporary_squad_damage_timer = max(temporary_squad_damage_timer - delta, 0.0)
+		if combo_fire_rate_timer > 0.0:
+			combo_fire_rate_timer = max(combo_fire_rate_timer - delta, 0.0)
 		if camera_threat_zoom_timer > 0.0:
 			camera_threat_zoom_timer = max(camera_threat_zoom_timer - delta, 0.0)
+		_tick_combo_break()
 		stats_timer -= delta
 		if stats_timer <= 0.0:
 			stats_timer = 0.1
@@ -404,6 +416,7 @@ func get_stats() -> Dictionary:
 		"run_theme_id": current_run_theme_id,
 		"run_theme_name": current_run_theme_name,
 		"temporary_squad_damage_timer": temporary_squad_damage_timer,
+		"combo_fire_rate_timer": combo_fire_rate_timer,
 		"is_game_over": is_game_over
 	}
 
@@ -468,6 +481,7 @@ func _record_combo_kill(amount: int) -> void:
 	else:
 		combo_count = amount
 		last_combo_pulse_count = 0
+		last_combo_milestone_count = 0
 	combo_last_kill_time = elapsed_time
 	if combo_count < 3:
 		return
@@ -479,6 +493,7 @@ func _record_combo_kill(amount: int) -> void:
 	if combo_count >= 10 and combo_count % 10 == 0 and combo_count != last_combo_pulse_count:
 		last_combo_pulse_count = combo_count
 		_trigger_combo_pulse(combo_count, combo_position)
+	_try_trigger_combo_milestone(combo_count, combo_position)
 
 
 func _trigger_combo_pulse(pulse_count: int, world_position: Vector2) -> void:
@@ -488,6 +503,34 @@ func _trigger_combo_pulse(pulse_count: int, world_position: Vector2) -> void:
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
 		var pitch: float = 0.92 + min(0.68, float(pulse_count / 10) * 0.08)
 		AudioManager.play_sfx("combo", false, -3.0, pitch)
+
+
+func _try_trigger_combo_milestone(current_combo: int, world_position: Vector2) -> void:
+	for milestone in COMBO_MILESTONES:
+		if current_combo >= milestone and last_combo_milestone_count < milestone:
+			_trigger_combo_milestone(milestone, world_position)
+
+
+func _trigger_combo_milestone(milestone: int, world_position: Vector2) -> void:
+	last_combo_milestone_count = milestone
+	combo_fire_rate_timer = max(combo_fire_rate_timer, COMBO_FIRE_RATE_BUFF_DURATION)
+	combo_milestone_requested.emit(milestone)
+	EntityFactory.spawn_death_burst(world_position, Color(1.0, 0.78, 0.24), 2.15, "gold_rain")
+	request_combat_impact(4.2, 0.026)
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("combo_milestone", false, -2.0, 0.96 + min(0.24, float(milestone) / 420.0))
+
+
+func _tick_combo_break() -> void:
+	if combo_count < 3:
+		return
+	if elapsed_time - combo_last_kill_time <= COMBO_WINDOW:
+		return
+	var broken_combo := combo_count
+	combo_count = 0
+	last_combo_pulse_count = 0
+	last_combo_milestone_count = 0
+	combo_break_requested.emit(broken_combo)
 
 
 func add_gold(amount: int) -> void:
@@ -527,9 +570,16 @@ func _request_level_up() -> void:
 	upgrade_entry_token += 1
 	var local_token := upgrade_entry_token
 	var choices := _build_upgrade_choices()
+	_spawn_level_up_ritual()
 	Engine.time_scale = min(Engine.time_scale, 0.35)
 	emit_stats()
 	_finish_level_up_slowmo(local_token, choices)
+
+
+func _spawn_level_up_ritual() -> void:
+	if player == null or not is_instance_valid(player):
+		return
+	EntityFactory.spawn_death_burst(player.global_position, Color(0.68, 1.0, 0.88), 1.35, "level_column")
 
 
 func _finish_level_up_slowmo(local_token: int, choices: Array) -> void:
@@ -897,6 +947,16 @@ func get_outgoing_damage_multiplier(source: Node = null) -> float:
 		else:
 			multiplier *= float(contract_modifiers.get("member_damage_multiplier", 1.0))
 	return multiplier
+
+
+func get_fire_rate_multiplier(_source: Node = null) -> float:
+	return 1.1 if combo_fire_rate_timer > 0.0 else 1.0
+
+
+func get_kill_thump_pitch(base_pitch: float) -> float:
+	var combo_value: float = max(0.0, float(combo_count))
+	var lift: float = min(0.16, log(combo_value + 1.0) / log(101.0) * 0.16)
+	return clamp(base_pitch + lift, 0.55, 1.28)
 
 
 func get_incoming_damage_multiplier() -> float:
@@ -1331,9 +1391,12 @@ func record_elite_kill() -> void:
 		AchievementProgress.record_elite_kill()
 
 
-func record_boss_spawn() -> void:
+func record_boss_spawn(boss_name: String = "VEIL GATEKEEPER") -> void:
 	boss_spawned = true
 	boss_spawn_time = elapsed_time
+	boss_intro_requested.emit(boss_name)
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("boss_roar", false, -2.5, 0.92)
 
 
 func set_boss_active(value: bool) -> void:

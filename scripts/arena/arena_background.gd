@@ -10,7 +10,7 @@ const RIFT_CRACK_TEXTURE_PATH := "res://assets/art/rift_cracks.png"
 const VIGNETTE_TEXTURE_PATH := "res://assets/art/vignette.png"
 const DECOR_PATH_PREFIX := "res://assets/art/decor/"
 
-const DECOR_POOL_SIZE := 72
+const DECOR_POOL_SIZE := 96
 const DECOR_CELL_SIZE := 245.0
 const DECOR_GRID_RADIUS_X := 6
 const DECOR_GRID_RADIUS_Y := 4
@@ -18,34 +18,38 @@ const METEOR_POOL_SIZE := 4
 
 const THEME_PROFILES: Dictionary = {
 	"rift_void": {
-		"background_color": Color(0.018, 0.026, 0.06),
-		"rift_color": Color(0.31, 0.92, 1.0, 0.56),
-		"nebula_color": Color(0.62, 0.42, 1.0, 0.36),
-		"canvas_tone": Color(0.86, 0.94, 1.0, 1.0),
-		"dust_color": Color(0.57, 0.96, 1.0, 0.38),
+		"background_color": Color(0.011, 0.024, 0.078),
+		"rift_color": Color(0.22, 0.98, 1.0, 0.64),
+		"nebula_color": Color(0.54, 0.38, 1.0, 0.42),
+		"canvas_tone": Color(0.82, 0.94, 1.0, 1.0),
+		"dust_color": Color(0.35, 1.0, 0.96, 0.48),
 		"ground_mode": "void",
-		"ground_tint": Color(0.64, 0.8, 1.0, 0.18),
-		"decor_density": 0.31,
-		"decor_alpha": 0.55,
-		"lightning_color": Color(0.48, 0.96, 1.0, 0.82),
-		"meteor_color": Color(0.76, 0.96, 1.0, 0.68),
+		"ground_tint": Color(0.5, 0.83, 1.0, 0.32),
+		"decor_density": 0.43,
+		"decor_alpha": 0.72,
+		"lightning_color": Color(0.32, 1.0, 0.98, 0.9),
+		"meteor_color": Color(0.62, 0.98, 1.0, 0.78),
+		"boss_flash_color": Color(1.0, 0.42, 0.9, 0.86),
+		"evolution_hue_step": 0.035,
 		"decor": [
 			"void_rock_01", "void_rock_02", "void_stump", "void_debris_01",
 			"void_bush_ghost", "void_crystal_01", "void_crystal_02", "void_crack_marker"
 		]
 	},
 	"wasteland_farm": {
-		"background_color": Color(0.055, 0.073, 0.052),
-		"rift_color": Color(0.32, 0.98, 0.86, 0.48),
-		"nebula_color": Color(0.33, 0.92, 0.74, 0.20),
-		"canvas_tone": Color(0.88, 0.96, 0.82, 1.0),
-		"dust_color": Color(0.72, 0.82, 0.54, 0.34),
+		"background_color": Color(0.032, 0.086, 0.042),
+		"rift_color": Color(0.28, 1.0, 0.74, 0.54),
+		"nebula_color": Color(0.2, 0.94, 0.54, 0.25),
+		"canvas_tone": Color(0.82, 1.0, 0.78, 1.0),
+		"dust_color": Color(0.5, 1.0, 0.36, 0.42),
 		"ground_mode": "farm",
-		"ground_tint": Color(0.74, 0.88, 0.58, 0.86),
-		"decor_density": 0.36,
-		"decor_alpha": 0.62,
-		"lightning_color": Color(0.42, 1.0, 0.82, 0.74),
-		"meteor_color": Color(0.86, 0.96, 0.62, 0.62),
+		"ground_tint": Color(0.72, 0.98, 0.42, 0.96),
+		"decor_density": 0.49,
+		"decor_alpha": 0.78,
+		"lightning_color": Color(0.36, 1.0, 0.62, 0.82),
+		"meteor_color": Color(0.88, 1.0, 0.48, 0.72),
+		"boss_flash_color": Color(1.0, 0.2, 0.18, 0.84),
+		"evolution_hue_step": 0.026,
 		"decor": [
 			"farm_rock", "farm_stump", "farm_bush", "farm_wood_stack", "farm_stone_stack",
 			"farm_fence_gate", "farm_well", "farm_hay_bale", "farm_dead_oak",
@@ -53,17 +57,19 @@ const THEME_PROFILES: Dictionary = {
 		]
 	},
 	"ember_rift": {
-		"background_color": Color(0.082, 0.038, 0.026),
-		"rift_color": Color(1.0, 0.38, 0.12, 0.56),
-		"nebula_color": Color(1.0, 0.32, 0.13, 0.26),
-		"canvas_tone": Color(1.0, 0.87, 0.72, 1.0),
-		"dust_color": Color(1.0, 0.52, 0.2, 0.32),
+		"background_color": Color(0.118, 0.032, 0.018),
+		"rift_color": Color(1.0, 0.3, 0.08, 0.66),
+		"nebula_color": Color(1.0, 0.24, 0.08, 0.34),
+		"canvas_tone": Color(1.0, 0.82, 0.62, 1.0),
+		"dust_color": Color(1.0, 0.42, 0.08, 0.48),
 		"ground_mode": "ember",
-		"ground_tint": Color(1.0, 0.54, 0.24, 0.84),
-		"decor_density": 0.34,
-		"decor_alpha": 0.61,
-		"lightning_color": Color(1.0, 0.5, 0.16, 0.8),
-		"meteor_color": Color(1.0, 0.55, 0.18, 0.72),
+		"ground_tint": Color(1.0, 0.44, 0.15, 0.98),
+		"decor_density": 0.47,
+		"decor_alpha": 0.78,
+		"lightning_color": Color(1.0, 0.43, 0.08, 0.9),
+		"meteor_color": Color(1.0, 0.46, 0.1, 0.82),
+		"boss_flash_color": Color(0.2, 0.92, 1.0, 0.88),
+		"evolution_hue_step": 0.032,
 		"decor": [
 			"ember_rock_01", "ember_rock_02", "ember_charred_stump", "ember_ash_bush",
 			"ember_cinder_stack", "ember_scorched_pine", "ember_ruin_barn",
@@ -129,6 +135,10 @@ var last_center_cell: Vector2i = Vector2i(999999, 999999)
 var last_decor_cell: Vector2i = Vector2i(999999, 999999)
 var time_accum: float = 0.0
 var redraw_timer: float = 0.0
+var evolution_interval: float = 75.0
+var last_evolution_step: int = -1
+var boss_flash_timer: float = 0.0
+var boss_flash_duration: float = 0.42
 var next_lightning_time: float = 28.0
 var lightning_timer: float = 0.0
 var lightning_token: int = 0
@@ -137,6 +147,7 @@ var meteor_token: int = 0
 var rift_glow: Sprite2D = null
 var rift_cracks: Sprite2D = null
 var dust_particles: CPUParticles2D = null
+var canvas_tone_node: CanvasModulate = null
 var vignette_rect: TextureRect = null
 var lightning_line: Line2D = null
 var deep_space_texture: Texture2D = null
@@ -159,6 +170,7 @@ func _ready() -> void:
 	current_theme = _profile_for_id(current_theme_id)
 	_load_theme_textures()
 	_apply_theme_exports()
+	_reset_environment_timers()
 	_ensure_canvas_tone()
 	_ensure_rift_sprites()
 	_ensure_dust_particles()
@@ -166,7 +178,8 @@ func _ready() -> void:
 	_ensure_lightning_pool()
 	_ensure_meteor_pool()
 	_ensure_vignette()
-	_reset_environment_timers()
+	if GameManager.has_signal("boss_intro_requested") and not GameManager.boss_intro_requested.is_connected(_on_boss_intro_requested):
+		GameManager.boss_intro_requested.connect(_on_boss_intro_requested)
 	queue_redraw()
 
 
@@ -175,9 +188,9 @@ func configure_run_theme(new_run_seed: int, theme_id: String = "") -> void:
 	current_theme_id = theme_id if theme_id != "" else RUN_THEME.select_theme_id(run_seed)
 	current_theme = _profile_for_id(current_theme_id)
 	_apply_theme_exports()
+	_reset_environment_timers()
 	_ensure_canvas_tone()
 	_ensure_dust_particles()
-	_reset_environment_timers()
 	last_decor_cell = Vector2i(999999, 999999)
 	last_center_cell = Vector2i(999999, 999999)
 	_rebuild_decor(_get_center())
@@ -209,11 +222,18 @@ func get_decor_signature_for_center(center: Vector2 = Vector2.ZERO, max_entries:
 
 func _process(delta: float) -> void:
 	time_accum += delta
+	if boss_flash_timer > 0.0:
+		boss_flash_timer = max(boss_flash_timer - delta, 0.0)
 	var center := _get_center()
 	global_position = center
 	var center_cell := Vector2i(floori(center.x / 48.0), floori(center.y / 48.0))
+	var evolution_step := _evolution_step_for_time(time_accum)
+	if evolution_step != last_evolution_step:
+		last_evolution_step = evolution_step
+		last_decor_cell = Vector2i(999999, 999999)
 	_update_rift_sprites(center)
 	_update_dust_bounds()
+	_update_environment_colors()
 	_update_decor_positions(center)
 	_update_lightning(delta, center)
 	_update_meteors(delta, center)
@@ -229,13 +249,16 @@ func _draw() -> void:
 	var viewport_size := _viewport_size()
 	var draw_size := viewport_size * 2.4
 	var rect := Rect2(-draw_size * 0.5, draw_size)
-	draw_rect(rect, background_color, true)
+	var draw_background := _evolved_color(background_color, 0.85)
+	var draw_rift := _evolved_color(rift_color, 1.0)
+	var draw_nebula := _evolved_color(nebula_color, 0.85)
+	draw_rect(rect, draw_background, true)
 
 	_draw_theme_ground(center, draw_size)
-	_draw_tiled(deep_space_texture, center, draw_size, 0.035, 1.45, Color(0.82, 0.9, 1.0, _deep_space_alpha()))
-	_draw_tiled(nebula_texture, center + Vector2(time_accum * 12.0, -time_accum * 7.0), draw_size, 0.11, 1.25, nebula_color)
+	_draw_tiled(deep_space_texture, center, draw_size, 0.055, 1.45, _evolved_color(Color(0.82, 0.9, 1.0, _deep_space_alpha()), 0.35))
+	_draw_tiled(nebula_texture, center + Vector2(time_accum * 12.0, -time_accum * 7.0), draw_size, 0.14, 1.25, draw_nebula)
 	_draw_tiled(nebula_texture, center + Vector2(-time_accum * 6.0, time_accum * 9.0), draw_size, 0.18, 0.86, _secondary_nebula_color())
-	_draw_tiled(rift_crack_texture, center, draw_size, 0.24, 1.15, Color(rift_color.r, rift_color.g, rift_color.b, 0.16))
+	_draw_tiled(rift_crack_texture, center, draw_size, 0.34, 1.15, Color(draw_rift.r, draw_rift.g, draw_rift.b, 0.22))
 
 	for index in range(18):
 		var seed_vec := center * 0.013 + Vector2(float(index) * 31.7, float(index) * -17.2)
@@ -245,7 +268,7 @@ func _draw() -> void:
 		var alpha := 0.06 + float(index % 4) * 0.02
 		var from := Vector2(x, y)
 		var to := from + Vector2(length, 0.0).rotated(0.62 + float(index) * 0.73)
-		draw_line(from, to, Color(rift_color.r, rift_color.g, rift_color.b, alpha), 1.0)
+		draw_line(from, to, Color(draw_rift.r, draw_rift.g, draw_rift.b, alpha * 1.35), 1.0)
 
 
 func _draw_theme_ground(center: Vector2, draw_size: Vector2) -> void:
@@ -265,14 +288,17 @@ func _draw_void_stone_speckles(center: Vector2, draw_size: Vector2) -> void:
 	var max_x := ceili((center.x + draw_size.x * 0.5) / tile_size) + 1
 	var min_y := floori((center.y - draw_size.y * 0.5) / tile_size) - 1
 	var max_y := ceili((center.y + draw_size.y * 0.5) / tile_size) + 1
+	var tint: Color = current_theme.get("ground_tint", Color(0.5, 0.83, 1.0, 0.32))
+	tint = _evolved_color(tint, 0.45)
 	for x in range(min_x, max_x + 1):
 		for y in range(min_y, max_y + 1):
-			if _hash01(x, y, 71) > 0.17:
+			if _hash01(x, y, 71) > 0.34:
 				continue
 			var world := Vector2(float(x) * tile_size, float(y) * tile_size)
 			var local := world - center
-			var size := tile_size * lerpf(0.34, 0.62, _hash01(x, y, 72))
-			var color := Color(0.42, 0.72, 0.94, 0.11 + _hash01(x, y, 73) * 0.08)
+			var size := tile_size * lerpf(0.46, 0.82, _hash01(x, y, 72))
+			var alpha := 0.17 + _hash01(x, y, 73) * 0.14
+			var color := Color(tint.r, tint.g, tint.b, alpha)
 			draw_texture_rect(texture, Rect2(local - Vector2.ONE * size * 0.5, Vector2.ONE * size), false, color)
 
 
@@ -282,14 +308,17 @@ func _draw_ground_tile_field(center: Vector2, draw_size: Vector2, ground_mode: S
 	var max_x := ceili((center.x + draw_size.x * 0.5) / tile_size) + 1
 	var min_y := floori((center.y - draw_size.y * 0.5) / tile_size) - 1
 	var max_y := ceili((center.y + draw_size.y * 0.5) / tile_size) + 1
-	var tint: Color = current_theme.get("ground_tint", Color.WHITE)
+	var tint: Color = _evolved_color(current_theme.get("ground_tint", Color.WHITE), 0.45)
 	for x in range(min_x, max_x + 1):
 		for y in range(min_y, max_y + 1):
 			var texture := _ground_texture_for_cell(ground_mode, x, y)
 			if texture == null:
 				continue
 			var local := Vector2(float(x) * tile_size, float(y) * tile_size) - center
-			draw_texture_rect(texture, Rect2(local, Vector2.ONE * tile_size), false, tint)
+			var cell_tint := _ground_cell_tint(tint, x, y)
+			draw_texture_rect(texture, Rect2(local, Vector2.ONE * tile_size), false, cell_tint)
+			if _hash01(x, y, 121) < 0.22:
+				draw_rect(Rect2(local, Vector2.ONE * tile_size), Color(cell_tint.r, cell_tint.g, cell_tint.b, 0.075), false, 1.0)
 
 
 func _ground_texture_for_cell(ground_mode: String, x: int, y: int) -> Texture2D:
@@ -334,16 +363,18 @@ func _draw_tiled(texture: Texture2D, center: Vector2, draw_size: Vector2, parall
 
 
 func _ensure_canvas_tone() -> void:
-	var tone_color: Color = current_theme.get("canvas_tone", Color(0.86, 0.94, 1.0, 1.0))
+	var tone_color: Color = _evolved_color(current_theme.get("canvas_tone", Color(0.86, 0.94, 1.0, 1.0)), 0.35)
 	var existing: CanvasModulate = null
 	if get_parent() != null:
 		existing = get_parent().get_node_or_null("R10CanvasTone") as CanvasModulate
 	if existing != null:
 		existing.color = tone_color
+		canvas_tone_node = existing
 		return
 	var tone := CanvasModulate.new()
 	tone.name = "R10CanvasTone"
 	tone.color = tone_color
+	canvas_tone_node = tone
 	if get_parent() != null:
 		get_parent().call_deferred("add_child", tone)
 
@@ -376,13 +407,14 @@ func _update_rift_sprites(center: Vector2) -> void:
 	var seam_offset := Vector2(sin(time_accum * 0.17 + center.x * 0.001), cos(time_accum * 0.13 + center.y * 0.001)) * 92.0
 	var pulse := 0.5 + 0.5 * sin(time_accum * 2.15)
 	var surge := pulse * pulse * pulse
+	var glow_color := _evolved_color(rift_color, 1.0)
 	rift_glow.position = seam_offset
 	rift_glow.scale = Vector2.ONE * (4.78 + pulse * 0.34)
-	rift_glow.modulate = Color(rift_color.r, rift_color.g, rift_color.b, 0.22 + surge * 0.14)
+	rift_glow.modulate = Color(glow_color.r, glow_color.g, glow_color.b, 0.26 + surge * 0.18)
 	rift_cracks.position = seam_offset + Vector2(24.0, -16.0)
 	rift_cracks.rotation = 0.2 + sin(time_accum * 0.08) * 0.08
 	rift_cracks.scale = Vector2.ONE * (1.31 + surge * 0.08)
-	rift_cracks.modulate = Color(rift_color.r, rift_color.g, rift_color.b, 0.38 + surge * 0.22)
+	rift_cracks.modulate = Color(glow_color.r, glow_color.g, glow_color.b, 0.46 + surge * 0.26)
 
 
 func _ensure_dust_particles() -> void:
@@ -393,7 +425,7 @@ func _ensure_dust_particles() -> void:
 		add_child(dust_particles)
 	dust_particles.texture = ART_RESOURCES.get_particle_core()
 	dust_particles.material = ART_RESOURCES.get_additive_material()
-	dust_particles.amount = max(0, dust_amount)
+	dust_particles.amount = max(0, int(round(float(dust_amount) * float(current_theme.get("dust_amount_multiplier", 1.0)))))
 	dust_particles.lifetime = 7.5
 	dust_particles.preprocess = 7.5
 	dust_particles.randomness = 0.72
@@ -405,7 +437,7 @@ func _ensure_dust_particles() -> void:
 	dust_particles.initial_velocity_max = 18.0
 	dust_particles.scale_amount_min = 0.18
 	dust_particles.scale_amount_max = 0.62
-	dust_particles.color = current_theme.get("dust_color", Color(0.57, 0.96, 1.0, 0.38))
+	dust_particles.color = _evolved_color(current_theme.get("dust_color", Color(0.57, 0.96, 1.0, 0.38)), 0.75)
 	dust_particles.z_index = 80
 	dust_particles.emitting = true
 	_update_dust_bounds()
@@ -474,6 +506,8 @@ func _update_decor_positions(center: Vector2) -> void:
 		var sprite := decor_sprites[index]
 		var world_position: Vector2 = state.get("world_position", Vector2.ZERO)
 		var parallax := float(state.get("parallax", 0.985))
+		if boss_flash_timer > 0.0:
+			sprite.modulate = _decor_modulate(state, bool(state.get("glow", false)))
 		var sway_offset := 0.0
 		if bool(state.get("sway", false)):
 			var phase := float(state.get("phase", 0.0))
@@ -492,12 +526,13 @@ func _build_decor_entries(base_cell: Vector2i, max_count: int) -> Array[Dictiona
 	var decor_ids: Array = current_theme.get("decor", [])
 	if decor_ids.is_empty():
 		return entries
-	var density := float(current_theme.get("decor_density", 0.32))
+	var base_density := float(current_theme.get("decor_density", 0.32))
 	for y in range(-DECOR_GRID_RADIUS_Y, DECOR_GRID_RADIUS_Y + 1):
 		for x in range(-DECOR_GRID_RADIUS_X, DECOR_GRID_RADIUS_X + 1):
 			if entries.size() >= max_count:
 				return entries
 			var cell := Vector2i(base_cell.x + x, base_cell.y + y)
+			var density := _decor_density_for_cell(cell, base_density)
 			var roll := _hash01(cell.x, cell.y, 211)
 			if roll > density:
 				continue
@@ -536,13 +571,16 @@ func _build_decor_entries(base_cell: Vector2i, max_count: int) -> Array[Dictiona
 func _decor_modulate(entry: Dictionary, glow: bool) -> Color:
 	var alpha := float(entry.get("alpha", 0.58))
 	if glow:
-		var glow_color: Color = current_theme.get("rift_color", Color.WHITE)
+		var glow_color: Color = _evolved_color(current_theme.get("rift_color", Color.WHITE), 0.95)
 		return Color(glow_color.r, glow_color.g, glow_color.b, alpha)
 	if current_theme_id == "wasteland_farm":
-		return Color(0.76, 0.88, 0.68, alpha)
+		var farm_color := _evolved_color(Color(0.62, 0.96, 0.42, alpha), 0.3)
+		return Color(farm_color.r, farm_color.g, farm_color.b, alpha)
 	if current_theme_id == "ember_rift":
-		return Color(0.92, 0.68, 0.52, alpha)
-	return Color(0.66, 0.86, 1.0, alpha)
+		var ember_color := _evolved_color(Color(1.0, 0.56, 0.32, alpha), 0.3)
+		return Color(ember_color.r, ember_color.g, ember_color.b, alpha)
+	var void_color := _evolved_color(Color(0.56, 0.9, 1.0, alpha), 0.3)
+	return Color(void_color.r, void_color.g, void_color.b, alpha)
 
 
 func _ensure_lightning_pool() -> void:
@@ -567,7 +605,7 @@ func _update_lightning(_delta: float, _center: Vector2) -> void:
 		return
 	lightning_timer = max(lightning_timer - _delta, 0.0)
 	var ratio := lightning_timer / 0.26
-	var color: Color = current_theme.get("lightning_color", Color(0.48, 0.96, 1.0, 0.82))
+	var color: Color = _evolved_color(current_theme.get("lightning_color", Color(0.48, 0.96, 1.0, 0.82)), 0.85)
 	lightning_line.default_color = Color(color.r, color.g, color.b, color.a * ratio)
 	lightning_line.width = 1.0 + ratio * 2.5
 	lightning_line.visible = lightning_timer > 0.0
@@ -668,7 +706,7 @@ func _trigger_meteor() -> void:
 	var tail_length := lerpf(46.0, 92.0, _hash01(meteor_token, run_seed, 404))
 	var line := meteor_lines[slot]
 	line.points = PackedVector2Array([Vector2.ZERO, -direction * tail_length])
-	var color: Color = current_theme.get("meteor_color", Color(0.76, 0.96, 1.0, 0.68))
+	var color: Color = _evolved_color(current_theme.get("meteor_color", Color(0.76, 0.96, 1.0, 0.68)), 0.8)
 	meteor_states[slot] = {
 		"active": true,
 		"position": start,
@@ -722,6 +760,9 @@ func _apply_theme_exports() -> void:
 
 
 func _reset_environment_timers() -> void:
+	evolution_interval = 60.0 + _hash01(run_seed, 0, 503) * 30.0
+	last_evolution_step = -1
+	boss_flash_timer = 0.0
 	lightning_token = 0
 	meteor_token = 0
 	lightning_timer = 0.0
@@ -738,19 +779,112 @@ func _reset_environment_timers() -> void:
 func _deep_space_alpha() -> float:
 	match str(current_theme.get("ground_mode", "void")):
 		"farm":
-			return 0.18
+			return 0.1
 		"ember":
-			return 0.22
+			return 0.14
 		_:
 			return 0.95
 
 
 func _secondary_nebula_color() -> Color:
 	if current_theme_id == "ember_rift":
-		return Color(1.0, 0.62, 0.22, 0.15)
+		return _evolved_color(Color(1.0, 0.62, 0.22, 0.18), 0.55)
 	if current_theme_id == "wasteland_farm":
-		return Color(0.16, 0.86, 0.68, 0.13)
-	return Color(0.18, 0.82, 1.0, 0.18)
+		return _evolved_color(Color(0.12, 0.9, 0.46, 0.17), 0.55)
+	return _evolved_color(Color(0.14, 0.86, 1.0, 0.22), 0.55)
+
+
+func _ground_cell_tint(base: Color, x: int, y: int) -> Color:
+	var value_shift := lerpf(0.76, 1.18, _hash01(x, y, 122))
+	var alpha_shift := lerpf(0.86, 1.15, _hash01(x, y, 123))
+	return Color(
+		clamp(base.r * value_shift, 0.0, 1.0),
+		clamp(base.g * value_shift, 0.0, 1.0),
+		clamp(base.b * value_shift, 0.0, 1.0),
+		clamp(base.a * alpha_shift, 0.0, 1.0)
+	)
+
+
+func _decor_density_for_cell(cell: Vector2i, base_density: float) -> float:
+	var zone := Vector2i(floori(float(cell.x) / 4.0), floori(float(cell.y) / 3.0))
+	var zone_value := _hash01(zone.x, zone.y, 231)
+	var wave := 0.5 + 0.5 * sin(float(_evolution_step_for_time(time_accum)) * 0.74 + float(zone.x - zone.y) * 0.37)
+	var multiplier := lerpf(0.58, 1.38, zone_value) * lerpf(0.88, 1.12, wave)
+	return clamp(base_density * multiplier, 0.16, 0.76)
+
+
+func _update_environment_colors() -> void:
+	if dust_particles != null:
+		dust_particles.color = _evolved_color(current_theme.get("dust_color", Color(0.57, 0.96, 1.0, 0.38)), 0.75)
+	if canvas_tone_node != null and is_instance_valid(canvas_tone_node):
+		canvas_tone_node.color = _evolved_color(current_theme.get("canvas_tone", Color(0.86, 0.94, 1.0, 1.0)), 0.35)
+
+
+func _on_boss_intro_requested(_boss_name: String) -> void:
+	boss_flash_timer = boss_flash_duration
+	queue_redraw()
+
+
+func trigger_boss_flash_for_test() -> void:
+	_on_boss_intro_requested("test")
+
+
+func get_background_evolution_signature(center: Vector2 = Vector2.ZERO, elapsed: float = 0.0) -> String:
+	var old_time := time_accum
+	time_accum = elapsed
+	var base_cell := Vector2i(floori(center.x / DECOR_CELL_SIZE), floori(center.y / DECOR_CELL_SIZE))
+	var density := _decor_density_for_cell(base_cell, float(current_theme.get("decor_density", 0.32)))
+	var shifted := _evolved_color_for_time(current_theme.get("background_color", background_color), 0.85, elapsed, false)
+	var hue_shift := _hue_shift_for_time(elapsed)
+	var step := _evolution_step_for_time(elapsed)
+	time_accum = old_time
+	return "%s:%d:%.3f:%.3f:%.3f,%.3f,%.3f" % [
+		current_theme_id,
+		step,
+		hue_shift,
+		density,
+		shifted.r,
+		shifted.g,
+		shifted.b
+	]
+
+
+func _evolution_step_for_time(elapsed: float) -> int:
+	return int(floor(max(0.0, elapsed) / max(1.0, evolution_interval)))
+
+
+func _hue_shift_for_time(elapsed: float) -> float:
+	var interval: float = max(1.0, evolution_interval)
+	var phase: float = max(0.0, elapsed) / interval
+	var step_float: float = floor(phase)
+	var local_t: float = clamp(phase - step_float, 0.0, 1.0)
+	var smooth_t: float = local_t * local_t * (3.0 - 2.0 * local_t)
+	var direction: float = -1.0 if _hash01(run_seed, 0, 504) < 0.5 else 1.0
+	var step_size := float(current_theme.get("evolution_hue_step", 0.03))
+	return direction * step_size * (step_float + smooth_t)
+
+
+func _evolved_color(base: Color, strength: float = 1.0) -> Color:
+	return _evolved_color_for_time(base, strength, time_accum, true)
+
+
+func _evolved_color_for_time(base: Color, strength: float, elapsed: float, include_flash: bool) -> Color:
+	var hue_shift: float = _hue_shift_for_time(elapsed) * clamp(strength, 0.0, 1.5)
+	var shifted: Color = Color.from_hsv(fposmod(base.h + hue_shift, 1.0), clamp(base.s * (1.0 + 0.08 * strength), 0.0, 1.0), clamp(base.v * (1.0 + 0.035 * strength), 0.0, 1.0), base.a)
+	if include_flash:
+		var flash: float = _boss_flash_ratio()
+		if flash > 0.0:
+			var flash_color: Color = current_theme.get("boss_flash_color", Color(1.0, 0.42, 0.9, base.a))
+			var inverted: Color = Color(1.0 - shifted.r, 1.0 - shifted.g, 1.0 - shifted.b, shifted.a).lerp(flash_color, 0.46)
+			shifted = shifted.lerp(inverted, flash * 0.9)
+	return shifted
+
+
+func _boss_flash_ratio() -> float:
+	if boss_flash_timer <= 0.0 or boss_flash_duration <= 0.0:
+		return 0.0
+	var t: float = clamp(boss_flash_timer / boss_flash_duration, 0.0, 1.0)
+	return sin(t * PI)
 
 
 func _hash_int(x: int, y: int, salt: int) -> int:

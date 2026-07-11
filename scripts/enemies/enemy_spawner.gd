@@ -225,7 +225,7 @@ func _spawn_boss() -> void:
 	}
 	EntityFactory.spawn_enemy("veil_gatekeeper", config, _get_spawn_position())
 	if GameManager.has_method("record_boss_spawn"):
-		GameManager.record_boss_spawn()
+		GameManager.record_boss_spawn("VEIL GATEKEEPER")
 	if GameManager.has_method("set_boss_active"):
 		GameManager.set_boss_active(true)
 

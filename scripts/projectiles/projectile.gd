@@ -228,6 +228,7 @@ func _should_release_after_step() -> bool:
 	if motion_mode == "boomerang":
 		if boomerang_returning and source != null and is_instance_valid(source):
 			if global_position.distance_squared_to(source.global_position) <= boomerang_catch_radius * boomerang_catch_radius:
+				_play_boomerang_catch_feedback()
 				return true
 		return traveled >= max_range * (1.6 + float(evo_razor_bulwark_level) * 0.18)
 	return traveled >= max_range
@@ -246,6 +247,7 @@ func _on_body_entered(body: Node) -> void:
 		var applied_damage: float = float(body.take_damage(_damage_for_current_hit(), global_position))
 		if target_group == "enemies":
 			GameManager.record_weapon_damage(source, source_weapon_id, applied_damage)
+			_apply_enemy_hit_feedback(body)
 	_try_spawn_riftline_forks()
 
 	if pierce_left <= 0:
@@ -253,6 +255,30 @@ func _on_body_entered(body: Node) -> void:
 		EntityFactory.release_projectile(self)
 	else:
 		pierce_left -= 1
+
+
+func _apply_enemy_hit_feedback(body: Node) -> void:
+	if body == null or not is_instance_valid(body):
+		return
+	if source_weapon_id == "riftline_emitter" and body.has_method("apply_knockback"):
+		var knockback_origin := global_position
+		if source != null and is_instance_valid(source):
+			knockback_origin = source.global_position
+		var knockback_strength := 4.0 + minf(4.0, radius * 0.35)
+		if bool(body.get("is_boss")):
+			knockback_strength *= 0.62
+		body.apply_knockback(knockback_origin, knockback_strength)
+	if motion_mode == "homing":
+		EntityFactory.spawn_death_burst(global_position, Color(1.0, 0.48, 0.22), 0.82, "burst")
+		EntityFactory.spawn_death_burst(global_position, Color(0.48, 0.44, 0.38), 0.9, "smoke_ring")
+
+
+func _play_boomerang_catch_feedback() -> void:
+	if AudioManager == null or not AudioManager.has_method("play_sfx"):
+		return
+	if target_group != "enemies":
+		return
+	AudioManager.play_sfx("boomerang_catch", false, -5.0, 1.0 + float(boomerang_rebound_level) * 0.04)
 
 
 func _damage_for_current_hit() -> float:

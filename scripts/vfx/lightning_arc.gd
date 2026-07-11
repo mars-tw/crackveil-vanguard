@@ -36,16 +36,17 @@ func pool_reset(args: Dictionary) -> void:
 		args.get("points", []),
 		args.get("color", Color(0.6, 0.9, 1.0)),
 		float(args.get("lifetime", 0.22)),
-		str(args.get("sprite_path", "res://assets/sprites/proj_lightning.png"))
+		str(args.get("sprite_path", "res://assets/sprites/proj_lightning.png")),
+		float(args.get("width", 24.0))
 	)
 
 
-func setup(world_points: Array[Vector2], color_value: Color, duration: float, new_sprite_path: String = "res://assets/sprites/proj_lightning.png") -> void:
+func setup(world_points: Array[Vector2], color_value: Color, duration: float, new_sprite_path: String = "res://assets/sprites/proj_lightning.png", width_value: float = 24.0) -> void:
 	points = world_points.duplicate()
 	arc_color = color_value
 	lifetime = max(0.05, duration)
 	sprite_path = new_sprite_path
-	arc_width = 24.0
+	arc_width = clamp(width_value, 8.0, 48.0)
 	age = 0.0
 	rotation = 0.0
 	_sync_segments()

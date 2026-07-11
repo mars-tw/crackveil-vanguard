@@ -1,6 +1,8 @@
 class_name Hero
 extends CharacterBody2D
 
+const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+
 const LEADER_CAMERA_ZOOM := Vector2(1.28, 1.28)
 const LEADER_THREAT_CAMERA_ZOOM := Vector2(1.12, 1.12)
 const LEADER_CAMERA_ZOOM_LERP_SPEED := 7.5
@@ -94,7 +96,7 @@ func _apply_hero_data() -> void:
 	if camera != null:
 		camera.enabled = is_leader
 		if is_leader:
-			camera.zoom = LEADER_CAMERA_ZOOM
+			camera.zoom = _leader_camera_zoom()
 			camera.make_current()
 		else:
 			camera.zoom = Vector2.ONE
@@ -126,7 +128,7 @@ func reset_for_run() -> void:
 	if camera != null:
 		camera.offset = Vector2.ZERO
 		if is_leader:
-			camera.zoom = LEADER_CAMERA_ZOOM
+			camera.zoom = _leader_camera_zoom()
 	_clear_weapons()
 	_equip_starting_weapons()
 	set_physics_process(true)
@@ -422,11 +424,26 @@ func request_screen_shake(strength: float, duration: float) -> void:
 func _update_camera_zoom(delta: float) -> void:
 	if camera == null or not is_leader:
 		return
-	var target_zoom := LEADER_CAMERA_ZOOM
+	var target_zoom := _leader_camera_zoom()
 	if GameManager.has_method("is_camera_threat_zoom_requested") and GameManager.is_camera_threat_zoom_requested():
-		target_zoom = LEADER_THREAT_CAMERA_ZOOM
+		target_zoom = _leader_threat_camera_zoom()
 	var weight: float = 1.0 - exp(-delta * LEADER_CAMERA_ZOOM_LERP_SPEED)
 	camera.zoom = camera.zoom.lerp(target_zoom, clamp(weight, 0.0, 1.0))
+
+
+func _leader_camera_zoom() -> Vector2:
+	return MOBILE_TUNING.leader_camera_zoom(_camera_viewport_size())
+
+
+func _leader_threat_camera_zoom() -> Vector2:
+	return MOBILE_TUNING.leader_threat_camera_zoom(_camera_viewport_size())
+
+
+func _camera_viewport_size() -> Vector2:
+	var viewport_size := get_viewport_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		return Vector2(1280.0, 720.0)
+	return viewport_size
 
 
 func _update_camera_shake(delta: float) -> void:
