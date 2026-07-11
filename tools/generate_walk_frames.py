@@ -8,6 +8,10 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 SPRITES = ROOT / "assets" / "sprites"
 OUT = SPRITES / "generated"
+HERO_MAX_DIMENSION = 112
+ENEMY_MAX_DIMENSION = 96
+FRAME_PADDING = 10
+PALETTE_COLORS = 96
 
 HEROES = [
     "hero_captain",
@@ -111,24 +115,71 @@ def make_enemy_frame(source: Image.Image, frame_index: int) -> Image.Image:
     return body_lean(canvas, lean, top + height * 0.55)
 
 
-def save_frame(image: Image.Image, name: str) -> None:
+def padded_union_bbox(images: list[Image.Image], padding: int) -> tuple[int, int, int, int]:
+    if not images:
+        return (0, 0, 1, 1)
+    left = images[0].width
+    top = images[0].height
+    right = 0
+    bottom = 0
+    for image in images:
+        bbox = alpha_bbox(image)
+        left = min(left, bbox[0])
+        top = min(top, bbox[1])
+        right = max(right, bbox[2])
+        bottom = max(bottom, bbox[3])
+    return (
+        max(0, left - padding),
+        max(0, top - padding),
+        min(images[0].width, right + padding),
+        min(images[0].height, bottom + padding),
+    )
+
+
+def prepare_frame(image: Image.Image, crop_box: tuple[int, int, int, int], max_dimension: int) -> Image.Image:
+    cropped = image.crop(crop_box)
+    largest_side = max(cropped.size)
+    if largest_side > max_dimension:
+        scale = max_dimension / float(largest_side)
+        size = (
+            max(1, round(cropped.width * scale)),
+            max(1, round(cropped.height * scale)),
+        )
+        cropped = cropped.resize(size, Image.Resampling.LANCZOS)
+    return cropped
+
+
+def save_frame(image: Image.Image, name: str, crop_box: tuple[int, int, int, int], max_dimension: int) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    image.save(OUT / name, optimize=True)
+    prepared = prepare_frame(image, crop_box, max_dimension)
+    quantized = prepared.quantize(
+        colors=PALETTE_COLORS,
+        method=Image.Quantize.FASTOCTREE,
+        dither=Image.Dither.NONE,
+    )
+    quantized.save(OUT / name, optimize=True)
 
 
 def build() -> None:
     for name in HEROES:
         source = Image.open(SPRITES / f"{name}.png").convert("RGBA")
+        frames: dict[str, Image.Image] = {}
         for index in range(2):
-            save_frame(make_idle_frame(source, index), f"{name}_idle_{index}.png")
+            frames[f"{name}_idle_{index}.png"] = make_idle_frame(source, index)
         for index in range(4):
-            save_frame(make_hero_frame(source, index), f"{name}_walk_{index}.png")
+            frames[f"{name}_walk_{index}.png"] = make_hero_frame(source, index)
+        crop_box = padded_union_bbox(list(frames.values()), FRAME_PADDING)
+        for file_name, frame in frames.items():
+            save_frame(frame, file_name, crop_box, HERO_MAX_DIMENSION)
 
     for name in ENEMIES:
         source = Image.open(SPRITES / f"{name}.png").convert("RGBA")
-        save_frame(source, f"{name}_idle_0.png")
+        frames: dict[str, Image.Image] = {f"{name}_idle_0.png": source}
         for index in range(2):
-            save_frame(make_enemy_frame(source, index), f"{name}_walk_{index}.png")
+            frames[f"{name}_walk_{index}.png"] = make_enemy_frame(source, index)
+        crop_box = padded_union_bbox(list(frames.values()), FRAME_PADDING)
+        for file_name, frame in frames.items():
+            save_frame(frame, file_name, crop_box, ENEMY_MAX_DIMENSION)
 
     for path in sorted(OUT.glob("*.png")):
         print(f"{path.relative_to(ROOT)} {path.stat().st_size} bytes")

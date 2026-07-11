@@ -908,10 +908,19 @@ func _setup_animation_frames(target_diameter: float, scale_multiplier: float) ->
 	animation_frames_ready = true
 	animated_sprite.visible = true
 	sprite.visible = false
-	var max_size: float = max(float(idle_frames[0].get_width()), float(idle_frames[0].get_height()))
+	var max_size := _max_animation_frame_size(idle_frames + walk_frames)
 	var scale_value := 1.0 if max_size <= 0.0 else target_diameter / max_size * scale_multiplier
 	animated_sprite_base_scale = Vector2.ONE * scale_value
 	sprite_base_scale = animated_sprite_base_scale
+
+
+func _max_animation_frame_size(frames: Array[Texture2D]) -> float:
+	var max_size := 0.0
+	for texture in frames:
+		if texture == null:
+			continue
+		max_size = maxf(max_size, maxf(float(texture.get_width()), float(texture.get_height())))
+	return max_size
 
 
 func _load_generated_frames(animation_name: String, frame_count: int) -> Array[Texture2D]:
