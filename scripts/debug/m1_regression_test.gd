@@ -8,6 +8,8 @@ const LEVEL_UP_SCREEN_SCRIPT := preload("res://scripts/ui/level_up_screen.gd")
 const STAGE_VICTORY_SCRIPT := preload("res://scripts/ui/stage_victory_screen.gd")
 const GAME_OVER_SCRIPT := preload("res://scripts/ui/game_over_screen.gd")
 const BACKGROUND_SCRIPT := preload("res://scripts/arena/arena_background.gd")
+const HAZARD_SCRIPT := preload("res://scripts/projectiles/hazard_zone.gd")
+const PROJECTILE_SCENE := preload("res://scenes/projectiles/Projectile.tscn")
 
 var current_phase: String = "boot"
 
@@ -153,7 +155,7 @@ func _test_mobile_flow_confirmations() -> bool:
 		return false
 	if not await _test_level_up_confirmation(size):
 		return false
-	print("M1_FLOW_CONFIRMATIONS contract=true level_up=true")
+	print("M1_FLOW_CONFIRMATIONS contract=true level_up_window_ms=%d" % LEVEL_UP_SCREEN_SCRIPT.MOBILE_CONFIRM_WINDOW_MSEC)
 	return true
 
 
@@ -198,22 +200,38 @@ func _test_level_up_confirmation(size: Vector2) -> bool:
 		emitted.append(upgrade)
 	)
 	screen.show_options([
-		{"id": "m1_upgrade", "name": "M1 Upgrade", "description": "Touch confirmation regression."}
+		{"id": "m1_upgrade_a", "name": "M1 Upgrade A", "description": "Touch confirmation regression A."},
+		{"id": "m1_upgrade_b", "name": "M1 Upgrade B", "description": "Touch confirmation regression B."}
 	])
 	await get_tree().process_frame
 	var first_button: Button = screen.option_buttons[0]
+	var second_button: Button = screen.option_buttons[1]
+	var first_text := first_button.text
 	first_button.pressed.emit()
 	await get_tree().process_frame
 	if emitted.size() != 0 or not screen.root.visible:
 		_fail("level up first tap selected instead of confirming")
 		return false
-	if first_button.text.find("再次點擊確認") < 0:
-		_fail("level up first tap did not mark confirm state")
+	if screen.pending_mobile_confirm_button != first_button or first_button.text != first_text:
+		_fail("level up first tap did not highlight without obscuring card text")
+		return false
+	second_button.pressed.emit()
+	await get_tree().process_frame
+	if emitted.size() != 0 or screen.pending_mobile_confirm_button != second_button:
+		_fail("level up different card tap did not switch highlight")
+		return false
+	first_button.pressed.emit()
+	await get_tree().process_frame
+	await get_tree().create_timer(0.38, true).timeout
+	first_button.pressed.emit()
+	await get_tree().process_frame
+	if emitted.size() != 0 or screen.pending_mobile_confirm_button != first_button:
+		_fail("level up expired confirm window selected instead of restarting")
 		return false
 	first_button.pressed.emit()
 	await get_tree().process_frame
 	if emitted.size() != 1 or screen.root.visible:
-		_fail("level up second tap did not select")
+		_fail("level up same-card tap inside 350ms did not select")
 		return false
 	viewport.queue_free()
 	return true
@@ -221,6 +239,7 @@ func _test_level_up_confirmation(size: Vector2) -> bool:
 
 func _test_mobile_lod_profile() -> bool:
 	var desktop := Vector2(1280.0, 720.0)
+	var narrow_desktop := Vector2(620.0, 900.0)
 	var portrait := Vector2(390.0, 844.0)
 	MOBILE_TUNING.set_force_mobile_lod_for_tests(false)
 	if MOBILE_TUNING.mobile_lod_enabled(desktop, false):
@@ -231,6 +250,25 @@ func _test_mobile_lod_profile() -> bool:
 		return false
 	if MOBILE_TUNING.damage_number_cap(desktop, EntityFactory.DAMAGE_NUMBER_CAP, false) != EntityFactory.DAMAGE_NUMBER_CAP:
 		_fail("desktop damage number cap changed")
+		return false
+	var desktop_mouse_hints := {"mobile_os": false, "ua_mobile": false, "touch_available": false, "mouse_available": true}
+	var touch_desktop_hints := {"mobile_os": false, "ua_mobile": false, "touch_available": true, "mouse_available": true}
+	var touch_only_hints := {"mobile_os": false, "ua_mobile": false, "touch_available": true, "mouse_available": false}
+	var mobile_ua_hints := {"mobile_os": false, "ua_mobile": true, "touch_available": true, "mouse_available": true}
+	if MOBILE_TUNING.mobile_lod_enabled(narrow_desktop, false, desktop_mouse_hints):
+		_fail("narrow mouse desktop unexpectedly uses mobile LOD")
+		return false
+	if MOBILE_TUNING.mobile_lod_enabled(desktop, false, touch_desktop_hints):
+		_fail("touch desktop with mouse unexpectedly uses mobile LOD")
+		return false
+	if not MOBILE_TUNING.mobile_lod_enabled(desktop, false, touch_only_hints):
+		_fail("touch-only device did not enable mobile LOD")
+		return false
+	if not MOBILE_TUNING.mobile_lod_enabled(desktop, false, mobile_ua_hints):
+		_fail("mobile UA hint did not enable mobile LOD")
+		return false
+	if not MOBILE_TUNING.use_mobile_ui(narrow_desktop, false):
+		_fail("narrow desktop stopped receiving responsive UI")
 		return false
 	if not MOBILE_TUNING.mobile_lod_enabled(portrait, true):
 		_fail("portrait did not enable mobile LOD")
@@ -247,8 +285,13 @@ func _test_mobile_lod_profile() -> bool:
 	if MOBILE_TUNING.corpse_ghost_cap(portrait, EntityFactory.CORPSE_GHOST_CAP, true) != 12:
 		_fail("mobile corpse ghost cap drifted")
 		return false
-	if abs(MOBILE_TUNING.hazard_tick_interval(portrait, 0.24, true) - 0.372) > 0.001:
-		_fail("mobile hazard tick interval drifted")
+	if abs(MOBILE_TUNING.hazard_tick_interval(portrait, 0.24, true) - 0.24) > 0.001:
+		_fail("mobile hazard gameplay tick diverged")
+		return false
+	var desktop_damage := _simulate_hazard_damage(51037, false)
+	var mobile_damage := _simulate_hazard_damage(51037, true)
+	if desktop_damage != mobile_damage:
+		_fail("same-seed hazard damage diverged across LOD: desktop=%s mobile=%s" % [str(desktop_damage), str(mobile_damage)])
 		return false
 
 	MOBILE_TUNING.set_force_mobile_lod_for_tests(true)
@@ -266,10 +309,103 @@ func _test_mobile_lod_profile() -> bool:
 	if int(background_state.get("decor_target", 0)) > 70:
 		_fail("background decor target did not reduce")
 		return false
+	var mobile_dust := int(background_state.get("dust_amount", 0))
+	MOBILE_TUNING.set_force_mobile_lod_for_tests(false)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var restored_background_state: Dictionary = background.get_mobile_lod_debug_state()
+	if bool(restored_background_state.get("applied_mobile_lod", true)):
+		_fail("background did not restore desktop LOD after rotation/resize")
+		return false
+	if int(restored_background_state.get("dust_amount", 0)) <= mobile_dust:
+		_fail("live dust amount did not restore on mobile-to-desktop switch")
+		return false
+	if int(restored_background_state.get("decor_target", 0)) != BACKGROUND_SCRIPT.DECOR_POOL_SIZE:
+		_fail("live decor target did not restore on mobile-to-desktop switch")
+		return false
+
+	var hazard := HAZARD_SCRIPT.new()
+	viewport.add_child(hazard)
+	hazard.pool_on_acquire()
+	hazard.setup(Vector2.ZERO, {"tick_interval": 0.24, "damage_per_second": 10.0, "duration": 10.0}, null)
+	await get_tree().process_frame
+	var desktop_hazard_state: Dictionary = hazard.get_mobile_lod_debug_state()
+	MOBILE_TUNING.set_force_mobile_lod_for_tests(true)
+	await get_tree().process_frame
+	var mobile_hazard_state: Dictionary = hazard.get_mobile_lod_debug_state()
+	if not bool(mobile_hazard_state.get("mobile_lod", false)):
+		_fail("live hazard did not apply mobile visual LOD")
+		return false
+	if abs(float(mobile_hazard_state.get("tick_interval", 0.0)) - float(desktop_hazard_state.get("tick_interval", -1.0))) > 0.0001:
+		_fail("live hazard visual LOD changed gameplay tick")
+		return false
+	if float(mobile_hazard_state.get("visual_redraw_interval", 0.0)) <= float(desktop_hazard_state.get("visual_redraw_interval", 0.0)):
+		_fail("mobile hazard visual redraw interval did not reduce redraw frequency")
+		return false
+	MOBILE_TUNING.set_force_mobile_lod_for_tests(false)
+	await get_tree().process_frame
+	var restored_hazard_state: Dictionary = hazard.get_mobile_lod_debug_state()
+	if bool(restored_hazard_state.get("mobile_lod", true)) or abs(float(restored_hazard_state.get("visual_redraw_interval", 0.0)) - HAZARD_SCRIPT.BASE_VISUAL_REDRAW_INTERVAL) > 0.0001:
+		_fail("live hazard did not restore desktop visual LOD")
+		return false
+	hazard.queue_free()
+
+	viewport.size = Vector2i(390, 844)
+	var projectile := PROJECTILE_SCENE.instantiate()
+	viewport.add_child(projectile)
+	projectile.pool_on_acquire()
+	projectile.setup(Vector2.ZERO, Vector2.RIGHT, {
+		"projectile_speed": 0.0,
+		"damage": 1.0,
+		"range": 10000.0,
+		"projectile_radius": 5.0,
+		"target_group": "heroes"
+	}, null)
+	await get_tree().process_frame
+	if not bool(projectile.get_mobile_readability_debug_state().get("mobile_readability", false)):
+		_fail("live enemy projectile did not start with portrait readability")
+		return false
+	viewport.size = Vector2i(1280, 720)
+	await get_tree().process_frame
+	projectile._refresh_projectile_readability()
+	if bool(projectile.get_mobile_readability_debug_state().get("mobile_readability", true)):
+		_fail("live enemy projectile did not restore desktop readability after resize")
+		return false
+	projectile.queue_free()
 	viewport.queue_free()
 	MOBILE_TUNING.set_force_mobile_lod_for_tests(false)
-	print("M1_LOD particle=0.60 damage_cap=30 hazard_tick=0.372 death_burst_cap=12 corpse_cap=12")
+	print("M1_LOD particle=0.60 damage_cap=30 hazard_tick=0.240 visual_redraw=%.4f same_seed_damage=%.3f ticks=%d dust_mobile=%d dust_desktop=%d" % [
+		float(mobile_hazard_state.get("visual_redraw_interval", 0.0)),
+		float(mobile_damage.get("damage", 0.0)),
+		int(mobile_damage.get("ticks", 0)),
+		mobile_dust,
+		int(restored_background_state.get("dust_amount", 0))
+	])
 	return true
+
+
+func _simulate_hazard_damage(run_seed: int, force_mobile_lod: bool) -> Dictionary:
+	MOBILE_TUNING.set_force_mobile_lod_for_tests(force_mobile_lod)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = run_seed
+	var damage_total := 0.0
+	var tick_total := 0
+	for sample in range(36):
+		var base_interval := rng.randf_range(0.18, 0.46)
+		var tick_interval := MOBILE_TUNING.hazard_tick_interval(Vector2(390.0, 844.0), base_interval)
+		var damage_per_second := rng.randf_range(3.0, 18.0)
+		var duration := rng.randf_range(0.28, 2.4)
+		var age := 0.0
+		var tick_timer := 0.0
+		while age < duration:
+			var delta := rng.randf_range(0.012, 0.021)
+			age += delta
+			tick_timer -= delta
+			if tick_timer <= 0.0:
+				damage_total += damage_per_second * tick_interval
+				tick_total += 1
+				tick_timer = tick_interval
+	return {"damage": snappedf(damage_total, 0.000001), "ticks": tick_total}
 
 
 func _test_result_thumb_reach() -> bool:

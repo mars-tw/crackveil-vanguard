@@ -161,6 +161,8 @@ var decor_sprites: Array[Sprite2D] = []
 var decor_states: Array[Dictionary] = []
 var meteor_lines: Array[Line2D] = []
 var meteor_states: Array[Dictionary] = []
+var applied_mobile_lod: bool = false
+var mobile_lod_initialized: bool = false
 
 
 func _ready() -> void:
@@ -179,6 +181,7 @@ func _ready() -> void:
 	_ensure_lightning_pool()
 	_ensure_meteor_pool()
 	_ensure_vignette()
+	_apply_visual_lod_state(_mobile_lod_active(), true)
 	if GameManager.has_signal("boss_intro_requested") and not GameManager.boss_intro_requested.is_connected(_on_boss_intro_requested):
 		GameManager.boss_intro_requested.connect(_on_boss_intro_requested)
 	queue_redraw()
@@ -230,6 +233,7 @@ func _process(delta: float) -> void:
 	var center_cell := Vector2i(floori(center.x / 48.0), floori(center.y / 48.0))
 	var evolution_step := _evolution_step_for_time(time_accum)
 	var mobile_lod := _mobile_lod_active()
+	_apply_visual_lod_state(mobile_lod)
 	if evolution_step != last_evolution_step:
 		last_evolution_step = evolution_step
 		last_decor_cell = Vector2i(999999, 999999)
@@ -453,6 +457,21 @@ func _update_dust_bounds() -> void:
 		return
 	var viewport_size := _viewport_size()
 	dust_particles.emission_rect_extents = viewport_size * (0.56 if MOBILE_TUNING.mobile_lod_enabled(viewport_size) else 0.68)
+
+
+func _apply_visual_lod_state(mobile_lod: bool, force_refresh: bool = false) -> void:
+	if not force_refresh and mobile_lod_initialized and mobile_lod == applied_mobile_lod:
+		return
+	applied_mobile_lod = mobile_lod
+	mobile_lod_initialized = true
+	if dust_particles != null:
+		dust_particles.amount = max(0, int(round(float(dust_amount) * float(current_theme.get("dust_amount_multiplier", 1.0)) * MOBILE_TUNING.lod_particle_multiplier(_viewport_size()))))
+		_update_dust_bounds()
+	if not decor_sprites.is_empty():
+		last_decor_cell = Vector2i(999999, 999999)
+		_rebuild_decor(_get_center())
+	redraw_timer = 0.0
+	queue_redraw()
 
 
 func _ensure_decor_pool() -> void:
@@ -840,6 +859,7 @@ func _decor_pool_target_size() -> int:
 func get_mobile_lod_debug_state() -> Dictionary:
 	return {
 		"mobile_lod": _mobile_lod_active(),
+		"applied_mobile_lod": applied_mobile_lod,
 		"dust_amount": dust_particles.amount if dust_particles != null else 0,
 		"decor_target": _decor_pool_target_size(),
 		"dynamic_multiplier": MOBILE_TUNING.background_dynamic_multiplier(_viewport_size())

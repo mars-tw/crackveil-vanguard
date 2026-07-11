@@ -51,6 +51,7 @@ var fork_stats_cache: Dictionary = {}
 var muzzle_flash_timer: float = 0.0
 var muzzle_flash_base_scale: Vector2 = Vector2.ONE
 var trail_registered: bool = false
+var mobile_readability_active: bool = false
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
@@ -118,6 +119,7 @@ func pool_on_release() -> void:
 	traveled = 0.0
 	muzzle_flash_timer = 0.0
 	muzzle_flash_base_scale = Vector2.ONE
+	mobile_readability_active = false
 	rotation = 0.0
 	if sprite != null:
 		sprite.rotation = 0.0
@@ -205,6 +207,7 @@ func setup(world_position: Vector2, projectile_direction: Vector2, projectile_st
 func _physics_process(delta: float) -> void:
 	if not is_active:
 		return
+	_refresh_projectile_readability()
 	_update_motion(delta)
 	var step := direction * speed * delta
 	global_position += step
@@ -467,6 +470,7 @@ func _configure_projectile_vfx() -> void:
 	var vfx_color := projectile_color
 	var glow_alpha: float = 0.34
 	var mobile_readability := MOBILE_TUNING.use_mobile_ui(_viewport_size_for_lod())
+	mobile_readability_active = mobile_readability
 	var enemy_projectile := target_group == "heroes"
 	if target_group == "heroes":
 		vfx_color = Color(1.0, 0.36, 0.18, 1.0)
@@ -515,6 +519,22 @@ func _projectile_display_color() -> Color:
 	if target_group == "heroes" and MOBILE_TUNING.use_mobile_ui(_viewport_size_for_lod()):
 		return Color(1.0, 0.44, 0.16, 1.0)
 	return projectile_color
+
+
+func _refresh_projectile_readability() -> void:
+	var next_mobile_readability := MOBILE_TUNING.use_mobile_ui(_viewport_size_for_lod())
+	if next_mobile_readability == mobile_readability_active:
+		return
+	_apply_sprite()
+
+
+func get_mobile_readability_debug_state() -> Dictionary:
+	return {
+		"mobile_readability": mobile_readability_active,
+		"sprite_color": sprite.modulate if sprite != null else Color.TRANSPARENT,
+		"glow_color": glow.modulate if glow != null else Color.TRANSPARENT,
+		"trail_color": trail.default_color if trail != null else Color.TRANSPARENT
+	}
 
 
 func _tick_projectile_vfx(delta: float) -> void:

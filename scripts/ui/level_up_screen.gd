@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+const MOBILE_CONFIRM_WINDOW_MSEC := 350
 
 signal upgrade_selected(upgrade: Dictionary)
 
@@ -11,6 +12,7 @@ var card_scroll: ScrollContainer
 var card_grid: GridContainer
 var option_buttons: Array[Button] = []
 var pending_mobile_confirm_button: Button = null
+var pending_mobile_confirm_started_msec: int = 0
 
 
 func _ready() -> void:
@@ -72,6 +74,7 @@ func show_options(options: Array) -> void:
 		child.queue_free()
 	option_buttons.clear()
 	pending_mobile_confirm_button = null
+	pending_mobile_confirm_started_msec = 0
 
 	for option in options:
 		var button := Button.new()
@@ -95,13 +98,12 @@ func show_options(options: Array) -> void:
 func _on_upgrade_pressed(upgrade: Dictionary) -> void:
 	if MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size):
 		var pressed_button := _button_for_option(upgrade)
-		if pressed_button != null and pressed_button != pending_mobile_confirm_button:
+		var now_msec := Time.get_ticks_msec()
+		if pressed_button != null and pressed_button == pending_mobile_confirm_button and now_msec - pending_mobile_confirm_started_msec <= MOBILE_CONFIRM_WINDOW_MSEC:
 			_reset_pending_mobile_confirm()
-			pending_mobile_confirm_button = pressed_button
-			pressed_button.text = "再次點擊確認\n\n" + str(pressed_button.get_meta("base_text", pressed_button.text))
+		else:
+			_set_pending_mobile_confirm(pressed_button, now_msec)
 			return
-		if pressed_button != null:
-			_reset_pending_mobile_confirm()
 	root.visible = false
 	upgrade_selected.emit(upgrade)
 
@@ -132,8 +134,41 @@ func _option_key(option: Dictionary) -> String:
 
 func _reset_pending_mobile_confirm() -> void:
 	if pending_mobile_confirm_button != null and is_instance_valid(pending_mobile_confirm_button):
-		pending_mobile_confirm_button.text = str(pending_mobile_confirm_button.get_meta("base_text", pending_mobile_confirm_button.text))
+		if bool(pending_mobile_confirm_button.get_meta("confirm_had_normal_override", false)):
+			var base_style := pending_mobile_confirm_button.get_meta("confirm_base_normal_style") as StyleBox
+			pending_mobile_confirm_button.add_theme_stylebox_override("normal", base_style)
+		else:
+			pending_mobile_confirm_button.remove_theme_stylebox_override("normal")
+		pending_mobile_confirm_button.remove_meta("confirm_had_normal_override")
+		pending_mobile_confirm_button.remove_meta("confirm_base_normal_style")
 	pending_mobile_confirm_button = null
+	pending_mobile_confirm_started_msec = 0
+	if title_label != null:
+		title_label.text = "選擇升級"
+
+
+func _set_pending_mobile_confirm(button: Button, now_msec: int) -> void:
+	_reset_pending_mobile_confirm()
+	if button == null:
+		return
+	pending_mobile_confirm_button = button
+	pending_mobile_confirm_started_msec = now_msec
+	button.set_meta("confirm_had_normal_override", button.has_theme_stylebox_override("normal"))
+	button.set_meta("confirm_base_normal_style", button.get_theme_stylebox("normal").duplicate())
+	var highlight := StyleBoxFlat.new()
+	highlight.bg_color = Color(0.08, 0.18, 0.24, 0.98)
+	highlight.border_color = Color(0.42, 0.96, 1.0, 1.0)
+	highlight.set_border_width_all(4)
+	highlight.set_corner_radius_all(8)
+	highlight.shadow_color = Color(0.2, 0.88, 1.0, 0.35)
+	highlight.shadow_size = 8
+	highlight.content_margin_left = 12.0
+	highlight.content_margin_right = 12.0
+	highlight.content_margin_top = 12.0
+	highlight.content_margin_bottom = 12.0
+	button.add_theme_stylebox_override("normal", highlight)
+	if title_label != null:
+		title_label.text = "再點高亮卡確認 · 點別張切換"
 
 
 func _is_evolution_option(option: Dictionary) -> bool:

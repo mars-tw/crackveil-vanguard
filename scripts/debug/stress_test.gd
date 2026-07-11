@@ -98,12 +98,13 @@ func _initialize_stress() -> void:
 	frame_times_ms.clear()
 	measured_frames = 0
 	last_frame_tick_usec = Time.get_ticks_usec()
-	print("STRESS_SCENARIO mobile_lod=%s viewport=%s particle_multiplier=%.2f damage_cap=%d hazard_tick=%.3f death_burst_cap=%d corpse_cap=%d" % [
+	print("STRESS_SCENARIO mobile_lod=%s viewport=%s particle_multiplier=%.2f damage_cap=%d hazard_tick=%.3f hazard_visual_redraw=%.4f death_burst_cap=%d corpse_cap=%d" % [
 		str(mobile_lod_scenario),
 		str(get_viewport().get_visible_rect().size),
 		MOBILE_TUNING.lod_particle_multiplier(get_viewport().get_visible_rect().size, mobile_lod_scenario),
 		MOBILE_TUNING.damage_number_cap(get_viewport().get_visible_rect().size, EntityFactory.DAMAGE_NUMBER_CAP, mobile_lod_scenario),
 		MOBILE_TUNING.hazard_tick_interval(get_viewport().get_visible_rect().size, 0.24, mobile_lod_scenario),
+		MOBILE_TUNING.hazard_visual_redraw_interval(get_viewport().get_visible_rect().size, 0.05, mobile_lod_scenario),
 		MOBILE_TUNING.death_burst_cap(get_viewport().get_visible_rect().size, EntityFactory.DEATH_BURST_CAP, mobile_lod_scenario),
 		MOBILE_TUNING.corpse_ghost_cap(get_viewport().get_visible_rect().size, EntityFactory.CORPSE_GHOST_CAP, mobile_lod_scenario)
 	])

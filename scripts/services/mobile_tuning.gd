@@ -13,7 +13,7 @@ const MOBILE_BACKGROUND_DECOR_MULTIPLIER := 0.72
 const MOBILE_DAMAGE_NUMBER_MERGE_RADIUS := 82.0
 const MOBILE_DAMAGE_NUMBER_MERGE_AGE := 0.34
 const MOBILE_DAMAGE_NUMBER_CAP := 30
-const MOBILE_HAZARD_TICK_INTERVAL_MULTIPLIER := 1.55
+const MOBILE_HAZARD_VISUAL_REDRAW_MULTIPLIER := 1.55
 const MOBILE_CORPSE_GHOST_CAP := 12
 const MOBILE_DEATH_BURST_CAP := 12
 const MOBILE_JOYSTICK_HEAT_ZONE_MULTIPLIER := 1.24
@@ -134,10 +134,19 @@ static func ability_button_rect(viewport_size: Vector2, force_mobile: bool = fal
 	return Rect2(ability_button_position(size, force_mobile), Vector2.ONE * button_size)
 
 
-static func mobile_lod_enabled(viewport_size: Vector2, force_mobile: bool = false) -> bool:
+static func mobile_lod_enabled(viewport_size: Vector2, force_mobile: bool = false, device_hints: Dictionary = {}) -> bool:
 	if bool(ProjectSettings.get_setting(FORCE_MOBILE_LOD_SETTING, false)):
 		return true
-	return use_mobile_ui(viewport_size, force_mobile)
+	if force_mobile:
+		return true
+	return mobile_device_detected(device_hints)
+
+
+static func mobile_device_detected(device_hints: Dictionary = {}) -> bool:
+	var hints := device_hints if not device_hints.is_empty() else _runtime_device_hints()
+	if bool(hints.get("mobile_os", false)) or bool(hints.get("ua_mobile", false)):
+		return true
+	return bool(hints.get("touch_available", false)) and not bool(hints.get("mouse_available", true))
 
 
 static func set_force_mobile_lod_for_tests(enabled: bool) -> void:
@@ -184,8 +193,13 @@ static func damage_number_font_size(viewport_size: Vector2, requested_size: int 
 
 
 static func hazard_tick_interval(viewport_size: Vector2, base_interval: float, force_mobile: bool = false) -> float:
+	# Gameplay cadence must be platform invariant. LOD may only change presentation.
+	return max(0.01, base_interval)
+
+
+static func hazard_visual_redraw_interval(viewport_size: Vector2, base_interval: float, force_mobile: bool = false) -> float:
 	var safe_interval: float = max(0.01, base_interval)
-	return safe_interval * MOBILE_HAZARD_TICK_INTERVAL_MULTIPLIER if mobile_lod_enabled(viewport_size, force_mobile) else safe_interval
+	return safe_interval * MOBILE_HAZARD_VISUAL_REDRAW_MULTIPLIER if mobile_lod_enabled(viewport_size, force_mobile) else safe_interval
 
 
 static func corpse_ghost_cap(viewport_size: Vector2, base_cap: int, force_mobile: bool = false) -> int:
@@ -274,3 +288,25 @@ static func _safe_viewport_size(viewport_size: Vector2) -> Vector2:
 	if window_size.x > 0 and window_size.y > 0:
 		return Vector2(window_size)
 	return Vector2(1280.0, 720.0)
+
+
+static func _runtime_device_hints() -> Dictionary:
+	var mobile_os := OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios")
+	var touch_available := false
+	if DisplayServer.has_method("is_touchscreen_available"):
+		touch_available = DisplayServer.call("is_touchscreen_available") == true
+	var ua_mobile := false
+	var mouse_available := not mobile_os
+	if OS.has_feature("web"):
+		var web_hints: Variant = JavaScriptBridge.eval("({uaMobile:/Android|webOS|iPhone|iPad|iPod|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent||''),touch:(navigator.maxTouchPoints||0)>0,mouse:!!(window.matchMedia&&window.matchMedia('(any-pointer: fine)').matches)})", true)
+		if web_hints is JavaScriptObject:
+			var web_object := web_hints as JavaScriptObject
+			ua_mobile = bool(web_object.uaMobile)
+			touch_available = touch_available or bool(web_object.touch)
+			mouse_available = bool(web_object.mouse)
+	return {
+		"mobile_os": mobile_os,
+		"ua_mobile": ua_mobile,
+		"touch_available": touch_available,
+		"mouse_available": mouse_available
+	}
