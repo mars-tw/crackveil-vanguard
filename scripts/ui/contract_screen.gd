@@ -154,13 +154,19 @@ func show_options(options: Array) -> void:
 	option_buttons.clear()
 	pending_mobile_confirm_button = null
 
-	for option in options:
+	for index in range(options.size()):
+		var option: Dictionary = options[index]
 		var button := Button.new()
-		button.text = "%s\n\n%s" % [str(option.get("name", "契約")), str(option.get("description", ""))]
+		button.text = "裂隙契約 · %s\n%s\n\n%s" % [
+			["I", "II", "III", "IV"][index % 4],
+			str(option.get("name", "契約")),
+			str(option.get("description", ""))
+		]
 		button.set_meta("base_text", button.text)
 		button.set_meta("option_key", _option_key(option))
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		button.add_theme_font_size_override("font_size", 20)
+		_apply_contract_card_style(button, index)
 		button.pressed.connect(_on_contract_pressed.bind(option))
 		card_grid.add_child(button)
 		option_buttons.append(button)
@@ -168,6 +174,35 @@ func show_options(options: Array) -> void:
 	_refresh_meta_panel()
 	_apply_responsive_layout()
 	root.visible = true
+
+
+func _apply_contract_card_style(button: Button, index: int) -> void:
+	var accents: Array[Color] = [
+		Color(0.34, 0.9, 1.0),
+		Color(0.72, 0.5, 1.0),
+		Color(1.0, 0.58, 0.38),
+		Color(0.38, 1.0, 0.72)
+	]
+	var accent: Color = accents[index % accents.size()]
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.04, 0.065, 0.13, 0.98).lerp(Color(accent.r, accent.g, accent.b, 1.0), 0.055)
+	normal.border_color = Color(accent.r, accent.g, accent.b, 0.92)
+	normal.set_border_width_all(3)
+	normal.set_corner_radius_all(12)
+	normal.shadow_color = Color(accent.r, accent.g, accent.b, 0.25)
+	normal.shadow_size = 9
+	normal.content_margin_left = 14.0
+	normal.content_margin_right = 14.0
+	normal.content_margin_top = 14.0
+	normal.content_margin_bottom = 14.0
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = normal.bg_color.lightened(0.08)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = normal.bg_color.darkened(0.14)
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", hover)
+	button.add_theme_stylebox_override("pressed", pressed)
+	button.add_theme_color_override("font_color", Color(0.9, 0.96, 1.0))
 
 
 func _on_contract_pressed(contract: Dictionary) -> void:
@@ -294,6 +329,7 @@ func _apply_responsive_layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = Vector2(1280.0, 720.0)
+	viewport_size = MOBILE_TUNING.apply_web_canvas_scale(self, viewport_size, root)
 	var portrait := viewport_size.y > viewport_size.x
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
 	var compact_landscape := mobile and not portrait
@@ -382,3 +418,16 @@ func _apply_responsive_layout() -> void:
 		button.custom_minimum_size = Vector2(card_width, card_height)
 		button.add_theme_font_size_override("font_size", 18 if portrait else 18 if mobile else 20)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
+	if mobile and OS.has_feature("web"):
+		logo_glow_label.add_theme_font_size_override("font_size", 30 if portrait else 18)
+		logo_label.add_theme_font_size_override("font_size", 30 if portrait else 18)
+		title_label.add_theme_font_size_override("font_size", 22 if portrait else 20)
+		subtitle_label.add_theme_font_size_override("font_size", 13 if portrait else 11)
+		meta_label.add_theme_font_size_override("font_size", 13 if portrait else 11)
+		for button in meta_buttons.values():
+			button.add_theme_font_size_override("font_size", 13 if portrait else 11)
+		seed_input.add_theme_font_size_override("font_size", 15 if portrait else 13)
+		seed_paste_button.add_theme_font_size_override("font_size", 15 if portrait else 13)
+		seed_start_button.add_theme_font_size_override("font_size", 15 if portrait else 13)
+		for button in option_buttons:
+			button.add_theme_font_size_override("font_size", 18 if portrait else 16)

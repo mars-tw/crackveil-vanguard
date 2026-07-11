@@ -12,6 +12,7 @@ var card_scroll: ScrollContainer
 var card_grid: GridContainer
 var skip_button: Button
 var option_buttons: Array[Button] = []
+var pending_mobile_purchase_button: Button = null
 
 
 func _ready() -> void:
@@ -86,6 +87,7 @@ func show_options(options: Array) -> void:
 	for child in card_grid.get_children():
 		child.queue_free()
 	option_buttons.clear()
+	pending_mobile_purchase_button = null
 	gold_label.text = "金幣 %d" % GameManager.gold
 
 	for option in options:
@@ -104,6 +106,15 @@ func show_options(options: Array) -> void:
 
 
 func _on_purchase_pressed(option: Dictionary) -> void:
+	if MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size):
+		var pressed_button := _button_for_option(option)
+		if pressed_button != null and pressed_button != pending_mobile_purchase_button:
+			_reset_pending_mobile_purchase()
+			pending_mobile_purchase_button = pressed_button
+			pressed_button.set_meta("shop_base_text", pressed_button.text)
+			pressed_button.text = "再次點擊購買\n\n" + pressed_button.text
+			return
+		_reset_pending_mobile_purchase()
 	purchase_selected.emit(option)
 
 
@@ -114,6 +125,20 @@ func _on_skip_pressed() -> void:
 func hide_screen() -> void:
 	if root != null:
 		root.visible = false
+	_reset_pending_mobile_purchase()
+
+
+func _button_for_option(option: Dictionary) -> Button:
+	for button in option_buttons:
+		if button != null and button.get_meta("shop_option", {}) == option:
+			return button
+	return null
+
+
+func _reset_pending_mobile_purchase() -> void:
+	if pending_mobile_purchase_button != null and is_instance_valid(pending_mobile_purchase_button):
+		pending_mobile_purchase_button.text = str(pending_mobile_purchase_button.get_meta("shop_base_text", pending_mobile_purchase_button.text))
+	pending_mobile_purchase_button = null
 
 
 func _on_stats_changed(stats: Dictionary) -> void:
@@ -128,7 +153,8 @@ func _on_stats_changed(stats: Dictionary) -> void:
 		gold_label.text = "金幣 %d" % current_gold
 	for button in option_buttons:
 		var option: Dictionary = button.get_meta("shop_option", {})
-		button.text = _option_text(option, current_gold)
+		if button != pending_mobile_purchase_button:
+			button.text = _option_text(option, current_gold)
 		button.disabled = _option_disabled(option, current_gold)
 
 
@@ -139,6 +165,7 @@ func _apply_responsive_layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = Vector2(1280.0, 720.0)
+	viewport_size = MOBILE_TUNING.apply_web_canvas_scale(self, viewport_size, root)
 	var portrait := viewport_size.y > viewport_size.x
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
 	var compact_landscape := mobile and not portrait
@@ -190,6 +217,12 @@ func _apply_responsive_layout() -> void:
 	skip_button.offset_top = panel_height - (touch_height + 18.0 if mobile else 64.0)
 	skip_button.offset_bottom = skip_button.offset_top + (touch_height if mobile else 40.0)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
+	if mobile and OS.has_feature("web"):
+		title_label.add_theme_font_size_override("font_size", 24 if portrait else 22)
+		gold_label.add_theme_font_size_override("font_size", 16 if portrait else 15)
+		for button in option_buttons:
+			button.add_theme_font_size_override("font_size", 18 if portrait else 16)
+		skip_button.add_theme_font_size_override("font_size", 18 if portrait else 16)
 
 
 func _option_disabled(option: Dictionary, current_gold: int) -> bool:

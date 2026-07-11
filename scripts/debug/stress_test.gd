@@ -1,13 +1,16 @@
 extends Node
 
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 
 const ENEMY_COUNT := 150
 const PROJECTILE_COUNT := 80
+const STRESS_RUN_SEED := 52002
 const START_FRAME := 10
-const END_FRAME := 420
-const MAX_ENEMY_REFILL_PER_FRAME := 24
-const MAX_PROJECTILE_REFILL_PER_FRAME := 8
+const WARMUP_FRAME_COUNT := 180
+const MEASURED_FRAME_TARGET := 411
+const MAX_ENEMY_REFILL_PER_FRAME := 6
+const MAX_PROJECTILE_REFILL_PER_FRAME := 4
 const FULL_SQUAD_RECRUITS: Array[String] = [
 	"pulse_artificer",
 	"line_mender",
@@ -30,6 +33,13 @@ const EXPECTED_FULL_SQUAD_WEAPONS: Array[String] = [
 	"echo_singer:echo_hymn"
 ]
 const MOBILE_LOD_VIEWPORT_SIZE := Vector2i(390, 844)
+const DESKTOP_VIEWPORT_SIZE := Vector2i(1280, 720)
+const SPIKE_THRESHOLD_MS := 20.0
+const TRACKED_POOL_NAMES: Array[String] = [
+	"enemy", "projectile", "fork_projectile", "orbit_projectile",
+	"explosion", "hazard_zone", "xp_gem", "coin", "damage_number",
+	"death_burst", "corpse_ghost", "lightning_arc"
+]
 
 @export var mobile_lod_scenario: bool = false
 
@@ -38,20 +48,30 @@ var squad_manager: Node = null
 var leader: Node2D = null
 var frame_count: int = 0
 var initialized: bool = false
+var measuring: bool = false
 var measured_frames: int = 0
 var enemy_spawn_counter: int = 0
 var projectile_spawn_counter: int = 0
 var frame_times_ms: Array[float] = []
 var last_frame_tick_usec: int = 0
+var spike_records: Array[Dictionary] = []
+var previous_pool_stats: Dictionary = {}
+var previous_kills: int = 0
+var previous_texture_cache_size: int = 0
+var pending_enemy_refills: int = 0
+var pending_projectile_refills: int = 0
+var warmup_evolutions: int = 0
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	mobile_lod_scenario = mobile_lod_scenario or _has_stress_arg("--mobile-lod")
 	MOBILE_TUNING.set_force_mobile_lod_for_tests(mobile_lod_scenario)
-	if mobile_lod_scenario:
-		get_window().size = MOBILE_LOD_VIEWPORT_SIZE
+	var target_size := MOBILE_LOD_VIEWPORT_SIZE if mobile_lod_scenario else DESKTOP_VIEWPORT_SIZE
+	get_window().size = target_size
+	get_window().content_scale_size = target_size
 	arena = load("res://scenes/arena/Arena.tscn").instantiate()
+	arena.set("run_seed", STRESS_RUN_SEED)
 	add_child(arena)
 
 
@@ -62,12 +82,15 @@ func _process(_delta: float) -> void:
 		_initialize_stress()
 
 	if initialized:
-		_record_wall_frame_time()
+		if not measuring and frame_count >= START_FRAME + WARMUP_FRAME_COUNT:
+			_begin_measurement()
+		elif measuring:
+			_record_wall_frame_time()
 		_keep_run_unpaused()
 		_refill_enemies()
 		_refill_projectiles()
 
-	if frame_count >= END_FRAME:
+	if measuring and measured_frames >= MEASURED_FRAME_TARGET:
 		_finish_stress()
 
 
@@ -95,10 +118,9 @@ func _initialize_stress() -> void:
 	_refill_enemies(true)
 	_refill_projectiles(true)
 	_spawn_initial_vfx()
-	frame_times_ms.clear()
-	measured_frames = 0
-	last_frame_tick_usec = Time.get_ticks_usec()
-	print("STRESS_SCENARIO mobile_lod=%s viewport=%s particle_multiplier=%.2f damage_cap=%d hazard_tick=%.3f hazard_visual_redraw=%.4f death_burst_cap=%d corpse_cap=%d" % [
+	_capture_event_baseline()
+	print("STRESS_SCENARIO seed=%d mobile_lod=%s viewport=%s particle_multiplier=%.2f damage_cap=%d hazard_tick=%.3f hazard_visual_redraw=%.4f death_burst_cap=%d corpse_cap=%d" % [
+		STRESS_RUN_SEED,
 		str(mobile_lod_scenario),
 		str(get_viewport().get_visible_rect().size),
 		MOBILE_TUNING.lod_particle_multiplier(get_viewport().get_visible_rect().size, mobile_lod_scenario),
@@ -112,6 +134,29 @@ func _initialize_stress() -> void:
 		squad_manager.get_member_count(),
 		EntityFactory.get_enemy_live_count(),
 		EntityFactory.get_pool_live_count("projectile")
+	])
+	print("STRESS_WARMUP pools=%d textures=%d audio_runtime=%s evolutions=%d" % [
+		_count_pool_entries(previous_pool_stats),
+		previous_texture_cache_size,
+		str(AudioManager.audio_runtime_enabled if AudioManager != null else false),
+		warmup_evolutions
+	])
+
+
+func _begin_measurement() -> void:
+	measuring = true
+	frame_times_ms.clear()
+	spike_records.clear()
+	measured_frames = 0
+	last_frame_tick_usec = Time.get_ticks_usec()
+	GameManager.reset_combat_metrics(true)
+	EntityFactory.reset_debug_counters()
+	_capture_event_baseline()
+	print("STRESS_MEASURE_BEGIN warmup_frames=%d enemies=%d projectiles=%d textures=%d" % [
+		WARMUP_FRAME_COUNT,
+		EntityFactory.get_enemy_live_count(),
+		EntityFactory.get_pool_live_count("projectile"),
+		previous_texture_cache_size
 	])
 
 
@@ -144,6 +189,8 @@ func _apply_weapon_upgrades(hero: Node, weapon_id: String, upgrades: Array) -> v
 		return
 	for upgrade in upgrades:
 		weapon.apply_data_upgrade(str(upgrade))
+		if str(upgrade).begins_with("evo_"):
+			warmup_evolutions += 1
 
 
 func _prepare_heroes_for_stress() -> void:
@@ -174,6 +221,8 @@ func _refill_enemies(fill_all: bool = false) -> void:
 	var live_count := EntityFactory.get_enemy_live_count()
 	var missing: int = max(0, ENEMY_COUNT - live_count)
 	var spawn_count: int = missing if fill_all else min(missing, MAX_ENEMY_REFILL_PER_FRAME)
+	if initialized and not fill_all:
+		pending_enemy_refills += spawn_count
 	for _index in range(spawn_count):
 		_spawn_enemy_for_stress()
 
@@ -201,6 +250,8 @@ func _refill_projectiles(fill_all: bool = false) -> void:
 	var live_projectiles := EntityFactory.get_pool_live_count("projectile")
 	var missing: int = max(0, PROJECTILE_COUNT - live_projectiles)
 	var spawn_count: int = missing if fill_all else min(missing, MAX_PROJECTILE_REFILL_PER_FRAME)
+	if initialized and not fill_all:
+		pending_projectile_refills += spawn_count
 	for _index in range(spawn_count):
 		_spawn_projectile_for_stress()
 
@@ -327,6 +378,7 @@ func _finish_stress() -> void:
 	])
 	print("STRESS_POOL_STATS=" + JSON.stringify(pool_stats))
 	print("STRESS_WEAPON_TRIGGERS=" + JSON.stringify(squad_manager.get_weapon_trigger_counts()))
+	_print_spike_trace()
 
 	var validation_error := _validate_pool_stats(pool_stats)
 	if validation_error != "":
@@ -388,8 +440,81 @@ func _record_wall_frame_time() -> void:
 	var now_usec := Time.get_ticks_usec()
 	if last_frame_tick_usec > 0:
 		measured_frames += 1
-		frame_times_ms.append(float(now_usec - last_frame_tick_usec) / 1000.0)
+		var frame_ms := float(now_usec - last_frame_tick_usec) / 1000.0
+		frame_times_ms.append(frame_ms)
+		var kills_now := int(GameManager.kills)
+		var kills_delta := kills_now - previous_kills
+		previous_kills = kills_now
+		var texture_count := SPRITE_LOADER.texture_cache.size()
+		var texture_delta := texture_count - previous_texture_cache_size
+		previous_texture_cache_size = texture_count
+		if frame_ms > SPIKE_THRESHOLD_MS:
+			spike_records.append({
+				"frame": measured_frames,
+				"ms": frame_ms,
+				"enemy_refills": pending_enemy_refills,
+				"projectile_refills": pending_projectile_refills,
+				"kills_delta": kills_delta,
+				"texture_delta": texture_delta,
+				"elites_spawned": int(GameManager.elites_spawned),
+				"boss_spawned": bool(GameManager.boss_spawned)
+			})
+		_pending_refill_reset()
 	last_frame_tick_usec = now_usec
+
+
+func _capture_event_baseline() -> void:
+	previous_pool_stats = _capture_pool_live_counts()
+	previous_kills = int(GameManager.kills)
+	previous_texture_cache_size = SPRITE_LOADER.texture_cache.size()
+	_pending_refill_reset()
+
+
+func _format_spike_events(record: Dictionary) -> String:
+	var labels: Array[String] = []
+	var enemy_refills := int(record.get("enemy_refills", 0))
+	var projectile_refills := int(record.get("projectile_refills", 0))
+	var kills_delta := int(record.get("kills_delta", 0))
+	if enemy_refills > 0:
+		labels.append("spawn_wave:enemy+%d(pool_reuse)" % enemy_refills)
+	if projectile_refills > 0:
+		labels.append("spawn_wave:projectile+%d(pool_reuse)" % projectile_refills)
+	if kills_delta > 0:
+		labels.append("kills:+%d(drop_vfx/gc_pressure)" % kills_delta)
+	if int(record.get("elites_spawned", 0)) > 0:
+		labels.append("elite_spawn:active")
+	if bool(record.get("boss_spawned", false)):
+		labels.append("boss_spawn")
+	var texture_delta := int(record.get("texture_delta", 0))
+	if texture_delta > 0:
+		labels.append("texture_first_use:+%d" % texture_delta)
+	return "steady" if labels.is_empty() else ";".join(labels)
+
+
+func _pending_refill_reset() -> void:
+	pending_enemy_refills = 0
+	pending_projectile_refills = 0
+
+
+func _print_spike_trace() -> void:
+	print("STRESS_SPIKE_SUMMARY threshold_ms=%.1f count=%d" % [SPIKE_THRESHOLD_MS, spike_records.size()])
+	for record in spike_records:
+		print("STRESS_SPIKE frame=%d ms=%.3f events=%s" % [
+			int(record.get("frame", 0)),
+			float(record.get("ms", 0.0)),
+			_format_spike_events(record)
+		])
+
+
+func _count_pool_entries(pool_stats: Dictionary) -> int:
+	return pool_stats.size()
+
+
+func _capture_pool_live_counts() -> Dictionary:
+	var counts: Dictionary = {}
+	for pool_name in TRACKED_POOL_NAMES:
+		counts[pool_name] = EntityFactory.get_pool_live_count(pool_name)
+	return counts
 
 
 func _percentile(sorted_values: Array[float], percentile: float) -> float:

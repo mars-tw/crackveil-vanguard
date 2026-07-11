@@ -3,6 +3,7 @@ extends Node
 const NODE_POOL_SCRIPT: Script = preload("res://scripts/pooling/node_pool.gd")
 const ENEMY_SPATIAL_INDEX_SCRIPT: Script = preload("res://scripts/services/enemy_spatial_index.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 
 const ENEMY_SCENE: PackedScene = preload("res://scenes/enemies/Enemy.tscn")
 const HERO_SCENE: PackedScene = preload("res://scenes/heroes/Hero.tscn")
@@ -45,6 +46,10 @@ const LIGHTNING_ARC_CAP := 48
 const XP_GEM_CAP := 180
 const COIN_CAP := 180
 const ENEMY_GLOW_REFRESH_INTERVAL := 0.24
+const DEATH_VISUALS_PER_FRAME := 5
+const DEATH_VISUAL_QUEUE_CAP := 72
+const REGULAR_DROPS_PER_PHYSICS_FRAME := 6
+const REGULAR_DROP_QUEUE_CAP := 180
 
 var pools: Dictionary = {}
 var pool_root: Node = null
@@ -64,6 +69,10 @@ var elite_enemy_reclaims: int = 0
 var visible_xp_merges: int = 0
 var visible_xp_reclaims: int = 0
 var direct_xp_grants: int = 0
+var death_visual_queue: Array[Dictionary] = []
+var death_visual_queue_drops: int = 0
+var regular_drop_queue: Array[Dictionary] = []
+var regular_drop_queue_fallbacks: int = 0
 
 
 func _ready() -> void:
@@ -74,6 +83,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_drain_death_visual_queue()
 	if enemy_spatial_index == null or int(enemy_spatial_index.get("live_count")) <= 0:
 		return
 	enemy_glow_refresh_timer = max(enemy_glow_refresh_timer - delta, 0.0)
@@ -83,7 +93,12 @@ func _process(delta: float) -> void:
 	_refresh_enemy_crowd_glows()
 
 
+func _physics_process(_delta: float) -> void:
+	_drain_regular_drop_queue()
+
+
 func initialize_for_arena(arena: Node) -> void:
+	SPRITE_LOADER.prewarm_gameplay_textures()
 	if enemy_spatial_index != null and enemy_spatial_index.has_method("reset"):
 		enemy_spatial_index.reset()
 
@@ -103,6 +118,10 @@ func initialize_for_arena(arena: Node) -> void:
 	visible_xp_merges = 0
 	visible_xp_reclaims = 0
 	direct_xp_grants = 0
+	death_visual_queue.clear()
+	death_visual_queue_drops = 0
+	regular_drop_queue.clear()
+	regular_drop_queue_fallbacks = 0
 	pool_root = Node.new()
 	pool_root.name = "Pools"
 	arena.add_child(pool_root)
@@ -349,6 +368,34 @@ func spawn_gold_coin_burst(world_position: Vector2, total_amount: int, coin_coun
 		spawn_gold_coin(world_position + offset, int(pieces[index]), scatter_scale)
 
 
+func queue_regular_drop(xp_position: Vector2, xp_amount: int, coin_position: Vector2, gold_amount: int) -> void:
+	if xp_amount <= 0 and gold_amount <= 0:
+		return
+	if regular_drop_queue.size() >= REGULAR_DROP_QUEUE_CAP:
+		regular_drop_queue_fallbacks += 1
+		_grant_xp_direct(xp_amount)
+		_grant_gold_direct(gold_amount)
+		return
+	regular_drop_queue.append({
+		"xp_position": xp_position,
+		"xp_amount": xp_amount,
+		"coin_position": coin_position,
+		"gold_amount": gold_amount
+	})
+
+
+func _drain_regular_drop_queue() -> void:
+	var count := mini(REGULAR_DROPS_PER_PHYSICS_FRAME, regular_drop_queue.size())
+	for _index in range(count):
+		var request: Dictionary = regular_drop_queue.pop_front()
+		var xp_amount := int(request.get("xp_amount", 0))
+		var gold_amount := int(request.get("gold_amount", 0))
+		if xp_amount > 0:
+			spawn_xp_gem(request.get("xp_position", Vector2.ZERO), xp_amount, 1.0)
+		if gold_amount > 0:
+			spawn_gold_coin(request.get("coin_position", Vector2.ZERO), gold_amount, 1.0)
+
+
 func magnetize_xp_near(world_position: Vector2, radius: float) -> int:
 	_compact_active_xp_gems()
 	var collector := _nearest_living_hero(world_position)
@@ -433,6 +480,42 @@ func spawn_corpse_ghost(world_position: Vector2, corpse_sprite_path: String, cor
 		"rotation": sprite_rotation
 	})
 	return ghost
+
+
+func queue_death_visual(world_position: Vector2, corpse_sprite_path: String, corpse_color: Color, corpse_radius: float, corpse_sprite_scale: float, flip_h: bool, sprite_rotation: float, burst_scale: float, elite_gold_rain: bool = false) -> void:
+	if death_visual_queue.size() >= DEATH_VISUAL_QUEUE_CAP:
+		death_visual_queue_drops += 1
+		return
+	death_visual_queue.append({
+		"position": world_position,
+		"sprite_path": corpse_sprite_path,
+		"color": corpse_color,
+		"radius": corpse_radius,
+		"sprite_scale": corpse_sprite_scale,
+		"flip_h": flip_h,
+		"rotation": sprite_rotation,
+		"burst_scale": burst_scale,
+		"elite_gold_rain": elite_gold_rain
+	})
+
+
+func _drain_death_visual_queue() -> void:
+	var count := mini(DEATH_VISUALS_PER_FRAME, death_visual_queue.size())
+	for _index in range(count):
+		var request: Dictionary = death_visual_queue.pop_front()
+		var position: Vector2 = request.get("position", Vector2.ZERO)
+		spawn_corpse_ghost(
+			position,
+			str(request.get("sprite_path", "")),
+			request.get("color", Color.WHITE),
+			float(request.get("radius", 13.0)),
+			float(request.get("sprite_scale", 1.0)),
+			bool(request.get("flip_h", false)),
+			float(request.get("rotation", 0.0))
+		)
+		spawn_death_burst(position, request.get("color", Color.WHITE), float(request.get("burst_scale", 1.0)))
+		if bool(request.get("elite_gold_rain", false)):
+			spawn_death_burst(position + Vector2(0.0, -18.0), Color(1.0, 0.76, 0.18), 1.75, "gold_rain")
 
 
 func release_enemy(enemy: Node) -> void:
@@ -570,6 +653,10 @@ func get_pool_stats() -> Dictionary:
 	stats["visible_xp_merges"] = visible_xp_merges
 	stats["visible_xp_reclaims"] = visible_xp_reclaims
 	stats["direct_xp_grants"] = direct_xp_grants
+	stats["death_visual_queue"] = death_visual_queue.size()
+	stats["death_visual_queue_drops"] = death_visual_queue_drops
+	stats["regular_drop_queue"] = regular_drop_queue.size()
+	stats["regular_drop_queue_fallbacks"] = regular_drop_queue_fallbacks
 	return stats
 
 
@@ -605,13 +692,20 @@ func _try_merge_damage_number(value: Variant, world_position: Vector2, number_co
 		return null
 	var merge_radius := MOBILE_TUNING.damage_number_merge_radius(viewport_size, DAMAGE_NUMBER_MERGE_RADIUS, active_damage_numbers.size(), effective_cap)
 	var merge_age := MOBILE_TUNING.damage_number_merge_age(viewport_size, DAMAGE_NUMBER_MERGE_AGE)
+	var merge_target: Node = null
+	var best_distance_squared := INF
 	for number in active_damage_numbers:
 		if number == null or not is_instance_valid(number):
 			continue
 		if number.has_method("can_merge") and number.can_merge(world_position, merge_radius, merge_age):
-			if number.has_method("merge_value"):
-				number.merge_value(value, world_position, number_color)
-			return number
+			var number_position := (number as Node2D).global_position if number is Node2D else world_position
+			var distance_squared := number_position.distance_squared_to(world_position)
+			if distance_squared < best_distance_squared:
+				best_distance_squared = distance_squared
+				merge_target = number
+	if merge_target != null and merge_target.has_method("merge_value"):
+		merge_target.merge_value(value, world_position, number_color)
+		return merge_target
 	return null
 
 

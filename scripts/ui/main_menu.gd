@@ -3,10 +3,12 @@ extends Node
 const ARENA_SCENE_PATH := "res://scenes/arena/Arena.tscn"
 const BACKGROUND_SCRIPT := preload("res://scripts/arena/arena_background.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 
 var background: Node2D
 var ui_layer: CanvasLayer
 var root: Control
+var rift_accent: TextureRect
 var logo_glow_label: Label
 var logo_label: Label
 var menu_box: VBoxContainer
@@ -71,6 +73,14 @@ func _build_ui() -> void:
 	root.name = "Root"
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	ui_layer.add_child(root)
+
+	rift_accent = TextureRect.new()
+	rift_accent.name = "PortraitRiftAccent"
+	rift_accent.texture = SPRITE_LOADER.get_texture("res://assets/art/rift_cracks.png")
+	rift_accent.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rift_accent.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	rift_accent.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(rift_accent)
 
 	logo_glow_label = Label.new()
 	logo_glow_label.text = "CRACKVEIL VANGUARD"
@@ -164,6 +174,26 @@ func _make_menu_button(text_value: String) -> Button:
 	button.text = text_value
 	button.custom_minimum_size = Vector2(220.0, 48.0)
 	button.add_theme_font_size_override("font_size", 20)
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.045, 0.105, 0.15, 0.78)
+	normal.border_color = Color(0.34, 0.82, 0.94, 0.72)
+	normal.set_border_width_all(2)
+	normal.set_corner_radius_all(12)
+	normal.shadow_color = Color(0.05, 0.72, 0.9, 0.18)
+	normal.shadow_size = 7
+	normal.content_margin_left = 16.0
+	normal.content_margin_right = 16.0
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = Color(0.07, 0.18, 0.24, 0.92)
+	hover.border_color = Color(0.56, 0.96, 1.0, 0.96)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = Color(0.025, 0.075, 0.11, 0.96)
+	pressed.border_color = Color(0.78, 1.0, 1.0, 1.0)
+	pressed.content_margin_top = 4.0
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", hover)
+	button.add_theme_stylebox_override("pressed", pressed)
+	button.add_theme_color_override("font_color", Color(0.86, 0.97, 1.0))
 	return button
 
 
@@ -393,6 +423,7 @@ func _apply_responsive_layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = Vector2(1280.0, 720.0)
+	viewport_size = MOBILE_TUNING.apply_web_canvas_scale(ui_layer, viewport_size, root)
 	var portrait := viewport_size.y > viewport_size.x
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
 	var margin := 28.0 if not portrait else 18.0
@@ -401,6 +432,11 @@ func _apply_responsive_layout() -> void:
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
 	var button_height := touch_height if mobile else 48.0
 	var button_gap := 12.0 if mobile and portrait else 4.0 if mobile else 10.0
+	if rift_accent != null:
+		rift_accent.visible = mobile and portrait
+		rift_accent.position = Vector2(-22.0, 74.0)
+		rift_accent.size = Vector2(viewport_size.x + 44.0, min(690.0, viewport_size.y - 96.0))
+		rift_accent.modulate = Color(0.26, 0.84, 1.0, 0.24)
 
 	logo_glow_label.anchor_left = 0.0
 	logo_glow_label.anchor_right = 1.0
@@ -409,20 +445,20 @@ func _apply_responsive_layout() -> void:
 	var mobile_logo_text := "CRACKVEIL\nVANGUARD" if portrait else "CRACKVEIL VANGUARD"
 	logo_label.text = mobile_logo_text if mobile else "CRACKVEIL VANGUARD"
 	logo_glow_label.text = logo_label.text
-	var logo_top := 18.0 if mobile and portrait else 4.0 if mobile else (44.0 if not portrait else 29.0)
-	var logo_height := 168.0 if mobile and portrait else 46.0 if mobile else 66.0
+	var logo_top := 34.0 if mobile and portrait else 4.0 if mobile else (44.0 if not portrait else 29.0)
+	var logo_height := 142.0 if mobile and portrait else 46.0 if mobile else 66.0
 	logo_label.offset_top = logo_top
 	logo_label.offset_bottom = logo_top + logo_height
-	logo_label.add_theme_font_size_override("font_size", (34 if portrait else 20) if mobile else (48 if not portrait else 32))
+	logo_label.add_theme_font_size_override("font_size", (36 if portrait else 20) if mobile else (48 if not portrait else 32))
 
 	logo_glow_label.offset_top = logo_label.offset_top
 	logo_glow_label.offset_bottom = logo_label.offset_bottom
-	logo_glow_label.add_theme_font_size_override("font_size", (34 if portrait else 20) if mobile else (48 if not portrait else 32))
+	logo_glow_label.add_theme_font_size_override("font_size", (36 if portrait else 20) if mobile else (48 if not portrait else 32))
 
 	menu_box.add_theme_constant_override("separation", button_gap)
 	var menu_width: float = min(max(320.0, viewport_size.x * 0.9), viewport_size.x - margin * 2.0) if mobile and portrait else min(320.0, viewport_size.x * 0.42) if mobile else 270.0
 	var menu_x := (viewport_size.x - menu_width) * 0.5 if mobile and portrait else margin
-	var menu_y := logo_label.offset_bottom + 18.0 if mobile and portrait else logo_label.offset_bottom + 4.0 if mobile else 164.0 if not portrait else 108.0
+	var menu_y := logo_label.offset_bottom + 102.0 if mobile and portrait else logo_label.offset_bottom + 4.0 if mobile else 164.0 if not portrait else 108.0
 	menu_box.size = Vector2(menu_width, button_height * 4.0 + button_gap * 3.0)
 	menu_box.position = Vector2(menu_x, menu_y)
 	for child in menu_box.get_children():
@@ -482,6 +518,15 @@ func _apply_responsive_layout() -> void:
 	version_label.offset_top = -32.0
 	version_label.offset_bottom = -10.0
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
+	# Web CanvasLayer 已換算為 CSS 像素；在此鎖視覺字級，避免通用可讀性倍率二次放大。
+	if mobile and OS.has_feature("web"):
+		logo_label.add_theme_font_size_override("font_size", 36 if portrait else 22)
+		logo_glow_label.add_theme_font_size_override("font_size", 36 if portrait else 22)
+		for child in menu_box.get_children():
+			if child is Button:
+				(child as Button).add_theme_font_size_override("font_size", 25 if portrait else 18)
+		seed_input.add_theme_font_size_override("font_size", 18 if portrait else 16)
+		seed_start_button.add_theme_font_size_override("font_size", 18 if portrait else 16)
 
 
 func _build_version_text() -> String:

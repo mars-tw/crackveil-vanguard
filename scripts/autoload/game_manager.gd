@@ -193,6 +193,7 @@ var hit_stop_token: int = 0
 var time_scale_owner_tokens: Dictionary = {}
 var time_scale_owner_scales: Dictionary = {}
 var time_scale_next_token: int = 1
+var stats_emit_pending: bool = false
 var camera_threat_zoom_timer: float = 0.0
 var combo_count: int = 0
 var combo_last_kill_time: float = -999.0
@@ -425,6 +426,18 @@ func emit_stats() -> void:
 	stats_changed.emit(get_stats())
 
 
+func queue_stats_emit() -> void:
+	if stats_emit_pending:
+		return
+	stats_emit_pending = true
+	call_deferred("_flush_queued_stats_emit")
+
+
+func _flush_queued_stats_emit() -> void:
+	stats_emit_pending = false
+	emit_stats()
+
+
 func set_current_run_theme(theme_id: String, theme_name: String) -> void:
 	current_run_theme_id = theme_id
 	current_run_theme_name = theme_name
@@ -518,7 +531,7 @@ func add_kill(amount: int = 1) -> void:
 	_record_combo_kill(amount)
 	if AchievementProgress != null and AchievementProgress.has_method("record_kills"):
 		AchievementProgress.record_kills(kills)
-	emit_stats()
+	queue_stats_emit()
 
 
 func _record_combo_kill(amount: int) -> void:
@@ -586,7 +599,7 @@ func add_gold(amount: int) -> void:
 		return
 	gold += amount
 	gold_earned += max(0, amount)
-	emit_stats()
+	queue_stats_emit()
 
 
 func spend_gold(amount: int) -> bool:
@@ -608,7 +621,7 @@ func add_xp(amount: int) -> void:
 	while _try_request_pending_level_up():
 		pass
 
-	emit_stats()
+	queue_stats_emit()
 
 
 func _request_level_up() -> void:

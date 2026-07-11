@@ -223,6 +223,9 @@ func _build_ui() -> void:
 	active_ability_button.text = "裂"
 	active_ability_button.tooltip_text = "裂隙脈衝"
 	active_ability_button.pressed.connect(_on_active_ability_pressed)
+	active_ability_button.button_down.connect(_on_active_ability_button_down)
+	active_ability_button.button_up.connect(_on_active_ability_button_up)
+	_apply_active_ability_glass_style()
 	root.add_child(active_ability_button)
 
 	active_ability_cooldown_ring = COOLDOWN_RING_SCRIPT.new()
@@ -485,6 +488,7 @@ func _apply_responsive_layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = Vector2(1280.0, 720.0)
+	viewport_size = MOBILE_TUNING.apply_web_canvas_scale(self, viewport_size, root)
 	var portrait := viewport_size.y > viewport_size.x
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size) or force_touch_controls_visible
 	var margin := 16.0 if mobile else 14.0
@@ -802,6 +806,50 @@ func _on_active_ability_pressed() -> void:
 	var active_player := GameManager.player
 	if active_player != null and is_instance_valid(active_player) and active_player.has_method("try_cast_active_ability"):
 		active_player.try_cast_active_ability()
+
+
+func _apply_active_ability_glass_style() -> void:
+	if active_ability_button == null:
+		return
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.025, 0.09, 0.14, 0.72)
+	normal.border_color = Color(0.42, 0.9, 1.0, 0.9)
+	normal.set_border_width_all(3)
+	normal.set_corner_radius_all(46)
+	normal.shadow_color = Color(0.12, 0.78, 1.0, 0.3)
+	normal.shadow_size = 9
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = Color(0.06, 0.18, 0.24, 0.86)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = Color(0.02, 0.055, 0.09, 0.94)
+	pressed.border_color = Color(0.78, 1.0, 1.0, 1.0)
+	var disabled := normal.duplicate() as StyleBoxFlat
+	disabled.bg_color = Color(0.02, 0.045, 0.07, 0.54)
+	disabled.border_color = Color(0.3, 0.55, 0.64, 0.55)
+	active_ability_button.add_theme_stylebox_override("normal", normal)
+	active_ability_button.add_theme_stylebox_override("hover", hover)
+	active_ability_button.add_theme_stylebox_override("pressed", pressed)
+	active_ability_button.add_theme_stylebox_override("disabled", disabled)
+	active_ability_button.add_theme_color_override("font_color", Color(0.86, 0.98, 1.0))
+	active_ability_button.add_theme_color_override("font_pressed_color", Color.WHITE)
+
+
+func _on_active_ability_button_down() -> void:
+	_animate_active_ability_press(Vector2.ONE * 0.9, 0.055)
+
+
+func _on_active_ability_button_up() -> void:
+	_animate_active_ability_press(Vector2.ONE, 0.1)
+
+
+func _animate_active_ability_press(target_scale: Vector2, duration: float) -> void:
+	for control in [active_ability_button, active_ability_cooldown, active_ability_cooldown_ring, active_ability_label]:
+		if control == null:
+			continue
+		control.pivot_offset = control.size * 0.5
+		var tween := create_tween()
+		tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tween.tween_property(control, "scale", target_scale, duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _refresh_active_ability_button() -> void:

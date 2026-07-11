@@ -81,6 +81,8 @@ func show_options(options: Array) -> void:
 		var title := str(option.get("name", "升級"))
 		if _is_evolution_option(option):
 			title = "【武器進化】\n" + title
+		elif str(option.get("upgrade_category", "")) == "qualitative":
+			title = "【質變強化】\n" + title
 		button.text = "%s\n\n%s" % [title, str(option.get("description", ""))]
 		button.set_meta("base_text", button.text)
 		button.set_meta("option_key", _option_key(option))
@@ -176,29 +178,43 @@ func _is_evolution_option(option: Dictionary) -> bool:
 
 
 func _apply_card_style(button: Button, option: Dictionary) -> void:
-	if not _is_evolution_option(option):
-		return
 	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0.11, 0.07, 0.16, 0.96)
-	normal.border_color = Color(1.0, 0.68, 0.24, 1.0)
-	normal.set_border_width_all(3)
-	normal.set_corner_radius_all(8)
-	normal.shadow_color = Color(1.0, 0.46, 0.18, 0.22)
-	normal.shadow_size = 8
+	var category := str(option.get("upgrade_category", "standard"))
+	normal.bg_color = Color(0.035, 0.085, 0.13, 0.97)
+	normal.border_color = Color(0.28, 0.72, 0.88, 0.88)
+	normal.set_border_width_all(2)
+	normal.set_corner_radius_all(11)
+	normal.shadow_color = Color(0.08, 0.66, 0.86, 0.18)
+	normal.shadow_size = 7
+	if category == "qualitative":
+		normal.bg_color = Color(0.075, 0.055, 0.14, 0.98)
+		normal.border_color = Color(0.66, 0.48, 1.0, 0.96)
+		normal.shadow_color = Color(0.54, 0.3, 1.0, 0.25)
+	elif _is_evolution_option(option):
+		normal.bg_color = Color(0.12, 0.07, 0.025, 0.99)
+		normal.border_color = Color(1.0, 0.72, 0.22, 1.0)
+		normal.set_border_width_all(4)
+		normal.shadow_color = Color(1.0, 0.5, 0.12, 0.34)
+		normal.shadow_size = 11
 	normal.content_margin_left = 12.0
 	normal.content_margin_right = 12.0
 	normal.content_margin_top = 12.0
 	normal.content_margin_bottom = 12.0
 	var hover := normal.duplicate() as StyleBoxFlat
-	hover.bg_color = Color(0.18, 0.1, 0.24, 0.98)
-	hover.border_color = Color(1.0, 0.88, 0.46, 1.0)
+	hover.bg_color = normal.bg_color.lightened(0.08)
+	hover.border_color = normal.border_color.lightened(0.12)
 	var pressed := normal.duplicate() as StyleBoxFlat
-	pressed.bg_color = Color(0.08, 0.05, 0.12, 0.98)
+	pressed.bg_color = normal.bg_color.darkened(0.16)
 	button.add_theme_stylebox_override("normal", normal)
 	button.add_theme_stylebox_override("hover", hover)
 	button.add_theme_stylebox_override("pressed", pressed)
-	button.add_theme_color_override("font_color", Color(1.0, 0.91, 0.62))
-	button.add_theme_color_override("font_hover_color", Color(1.0, 0.96, 0.72))
+	var font_color := Color(0.84, 0.96, 1.0)
+	if category == "qualitative":
+		font_color = Color(0.9, 0.84, 1.0)
+	elif _is_evolution_option(option):
+		font_color = Color(1.0, 0.91, 0.58)
+	button.add_theme_color_override("font_color", font_color)
+	button.add_theme_color_override("font_hover_color", font_color.lightened(0.12))
 
 
 func _apply_responsive_layout() -> void:
@@ -208,6 +224,7 @@ func _apply_responsive_layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = Vector2(1280.0, 720.0)
+	viewport_size = MOBILE_TUNING.apply_web_canvas_scale(self, viewport_size, root)
 	var portrait := viewport_size.y > viewport_size.x
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
 	var outer_margin := 12.0 if mobile else 28.0
@@ -248,3 +265,7 @@ func _apply_responsive_layout() -> void:
 		button.custom_minimum_size = Vector2(card_width, card_height)
 		button.add_theme_font_size_override("font_size", 18 if portrait else 20)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
+	if mobile and OS.has_feature("web"):
+		title_label.add_theme_font_size_override("font_size", 24 if portrait else 22)
+		for button in option_buttons:
+			button.add_theme_font_size_override("font_size", 18 if portrait else 17)

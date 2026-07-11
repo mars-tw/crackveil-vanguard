@@ -26,7 +26,7 @@ const META_FONT_APPLIED_PREFIX := "r14_font_applied_"
 static func use_mobile_ui(viewport_size: Vector2, force_mobile: bool = false) -> bool:
 	if force_mobile:
 		return true
-	var size := _safe_viewport_size(viewport_size)
+	var size := ui_layout_size(viewport_size)
 	var short_side: float = min(size.x, size.y)
 	var long_side: float = max(size.x, size.y)
 	var portrait := size.y > size.x
@@ -41,6 +41,30 @@ static func use_mobile_ui(viewport_size: Vector2, force_mobile: bool = false) ->
 	if portrait and size.x <= 760.0 and size.y <= 1400.0:
 		return true
 	return false
+
+
+static func ui_layout_size(viewport_size: Vector2) -> Vector2:
+	var size := _safe_viewport_size(viewport_size)
+	if OS.has_feature("web"):
+		var window_size := DisplayServer.window_get_size()
+		if window_size.x > 0 and window_size.y > 0:
+			return Vector2(window_size)
+	return size
+
+
+static func apply_web_canvas_scale(layer: CanvasLayer, viewport_size: Vector2, root: Control = null) -> Vector2:
+	var layout_size := ui_layout_size(viewport_size)
+	if layer == null or not OS.has_feature("web"):
+		return layout_size
+	var safe_viewport := _safe_viewport_size(viewport_size)
+	var scale_factor: float = safe_viewport.x / maxf(1.0, layout_size.x)
+	layer.scale = Vector2.ONE * scale_factor
+	layer.offset = Vector2.ZERO
+	if root != null:
+		root.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		root.position = Vector2.ZERO
+		root.size = layout_size
+	return layout_size
 
 
 static func ui_scale(viewport_size: Vector2, force_mobile: bool = false) -> float:
@@ -163,6 +187,10 @@ static func background_dynamic_multiplier(viewport_size: Vector2, force_mobile: 
 
 static func background_decor_multiplier(viewport_size: Vector2, force_mobile: bool = false) -> float:
 	return MOBILE_BACKGROUND_DECOR_MULTIPLIER if mobile_lod_enabled(viewport_size, force_mobile) else 1.0
+
+
+static func battlefield_color_modulate(viewport_size: Vector2, force_mobile: bool = false) -> Color:
+	return Color(0.82, 0.86, 0.98, 1.0) if use_mobile_ui(viewport_size, force_mobile) else Color.WHITE
 
 
 static func damage_number_merge_radius(viewport_size: Vector2, base_radius: float, active_count: int, cap: int, force_mobile: bool = false) -> float:

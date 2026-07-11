@@ -104,6 +104,7 @@ func _apply_responsive_layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = Vector2(1280.0, 720.0)
+	viewport_size = MOBILE_TUNING.apply_web_canvas_scale(self, viewport_size, root)
 	var portrait := viewport_size.y > viewport_size.x
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
@@ -168,3 +169,8 @@ func _apply_responsive_layout() -> void:
 		start_button.offset_top = controls_top
 		start_button.offset_bottom = start_button.offset_top + (touch_height if mobile else 40.0)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
+	if mobile and OS.has_feature("web"):
+		title_label.add_theme_font_size_override("font_size", 24 if portrait else 20)
+		body_label.add_theme_font_size_override("font_size", 16 if portrait else 12)
+		dont_show_check.add_theme_font_size_override("font_size", 16 if portrait else 13)
+		start_button.add_theme_font_size_override("font_size", 18 if portrait else 14)

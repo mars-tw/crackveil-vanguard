@@ -2,6 +2,7 @@ extends Node2D
 
 const FIRST_RUN_GUIDE_SCRIPT := preload("res://scripts/ui/first_run_guide.gd")
 const RUN_THEME := preload("res://scripts/arena/run_theme.gd")
+const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 
 @export var run_seed: int = 0
 
@@ -13,11 +14,15 @@ const RUN_THEME := preload("res://scripts/arena/run_theme.gd")
 @onready var contract_screen: CanvasLayer = $ContractScreen
 
 var first_run_guide: CanvasLayer = null
+var mobile_color_grade: CanvasModulate = null
 
 
 func _ready() -> void:
 	_apply_run_seed()
+	_apply_mobile_color_grade()
 	_apply_background_theme()
+	if not get_viewport().size_changed.is_connected(_apply_mobile_color_grade):
+		get_viewport().size_changed.connect(_apply_mobile_color_grade)
 
 	var level_up_callable := Callable(level_up_screen, "show_options")
 	var game_over_callable := Callable(self, "_on_game_over_requested")
@@ -62,6 +67,17 @@ func _ready() -> void:
 		leader = squad_manager.start_squad()
 	GameManager.start_run(self, leader, squad_manager, false)
 	_attach_first_run_guide()
+
+
+func _apply_mobile_color_grade() -> void:
+	if mobile_color_grade == null:
+		mobile_color_grade = CanvasModulate.new()
+		mobile_color_grade.name = "MobileBattlefieldGrade"
+		add_child(mobile_color_grade)
+	var viewport_size := get_viewport().get_visible_rect().size
+	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
+	# 手機面板通常偏亮、偏豔：微壓亮度與紅色，留下冷青裂隙高光。
+	mobile_color_grade.color = MOBILE_TUNING.battlefield_color_modulate(viewport_size, mobile)
 
 
 func _on_restart_requested() -> void:

@@ -6,6 +6,8 @@ const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 const THREAT_GLOW_DENSITY_START := 80
 const THREAT_GLOW_DENSITY_FULL := 150
 
+static var animation_frames_cache: Dictionary = {}
+
 @export var type_id: String = "normal"
 @export var max_hp: float = 18.0
 @export var speed: float = 88.0
@@ -560,28 +562,35 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 	elif sprite != null:
 		corpse_flip = sprite.flip_h
 		corpse_rotation = sprite.rotation
-	EntityFactory.call_deferred("spawn_corpse_ghost", global_position, sprite_path, body_color, radius, sprite_scale, corpse_flip, corpse_rotation)
-	EntityFactory.call_deferred("spawn_death_burst", global_position, body_color, burst_scale)
-	if is_elite and not is_boss:
-		EntityFactory.call_deferred("spawn_death_burst", global_position + Vector2(0.0, -18.0), Color(1.0, 0.76, 0.18), 1.75, "gold_rain")
+	EntityFactory.queue_death_visual(
+		global_position,
+		sprite_path,
+		body_color,
+		radius,
+		sprite_scale,
+		corpse_flip,
+		corpse_rotation,
+		burst_scale,
+		is_elite and not is_boss
+	)
 
-	if xp_value > 0:
+	var magnetic_reclaim := GameManager.has_method("has_magnetic_reclaim") and GameManager.has_magnetic_reclaim()
+	var gold_drop := GameManager.get_gold_drop_amount(gold_value) if gold_value > 0 and GameManager.has_method("get_gold_drop_amount") else gold_value
+	if not is_elite and not is_boss and not magnetic_reclaim:
+		var coin_position := global_position + Vector2(randf_range(-10.0, 10.0), randf_range(-10.0, 10.0))
+		EntityFactory.queue_regular_drop(global_position, xp_value, coin_position, gold_drop)
+	elif xp_value > 0:
 		if is_elite or is_boss:
 			EntityFactory.call_deferred("spawn_xp_gem_burst", global_position, xp_value, 16 if is_boss else 7, 1.75 if is_boss else 1.35)
 		else:
 			EntityFactory.call_deferred("spawn_xp_gem", global_position, xp_value, 1.0)
 	if elite_bonus_xp > 0:
 		EntityFactory.call_deferred("spawn_visible_xp_gem_burst", global_position, elite_bonus_xp, 12 if is_boss else 6, 1.85 if is_boss else 1.45)
-	if gold_value > 0:
-		var gold_drop := GameManager.get_gold_drop_amount(gold_value) if GameManager.has_method("get_gold_drop_amount") else gold_value
-		if is_elite or is_boss:
-			EntityFactory.call_deferred("spawn_gold_coin_burst", global_position, gold_drop, 10 if is_boss else 5, 1.7 if is_boss else 1.3)
-		else:
-			var coin_position := global_position + Vector2(randf_range(-10.0, 10.0), randf_range(-10.0, 10.0))
-			EntityFactory.call_deferred("spawn_gold_coin", coin_position, gold_drop, 1.0)
+	if gold_value > 0 and (is_elite or is_boss):
+		EntityFactory.call_deferred("spawn_gold_coin_burst", global_position, gold_drop, 10 if is_boss else 5, 1.7 if is_boss else 1.3)
 	if spawns_on_death:
 		_spawn_death_children()
-	if GameManager.has_method("has_magnetic_reclaim") and GameManager.has_magnetic_reclaim():
+	if magnetic_reclaim:
 		EntityFactory.call_deferred("magnetize_xp_near", global_position, 155.0)
 	if is_elite or is_boss:
 		var shake := 9.0 if is_boss else 5.6
@@ -884,13 +893,34 @@ func _setup_animation_frames(target_diameter: float, scale_multiplier: float) ->
 	current_animation_name = ""
 	if animated_sprite == null:
 		return
-	var frames := SpriteFrames.new()
-	var idle_frames := _load_generated_frames("idle", 1)
-	var walk_frames := _load_generated_frames("walk", 2)
-	if idle_frames.is_empty() or walk_frames.size() < 2:
+	var cached: Dictionary = animation_frames_cache.get(sprite_path, {})
+	if cached.is_empty():
+		cached = _build_animation_frames_cache_entry()
+		animation_frames_cache[sprite_path] = cached
+	var frames: SpriteFrames = cached.get("frames") as SpriteFrames
+	if frames == null:
 		animated_sprite.visible = false
 		sprite.visible = true
 		return
+	animated_sprite.sprite_frames = frames
+	animated_sprite.animation = "idle"
+	animated_sprite.modulate = body_color
+	animated_sprite.play()
+	animation_frames_ready = true
+	animated_sprite.visible = true
+	sprite.visible = false
+	var max_size := float(cached.get("max_size", 0.0))
+	var scale_value := 1.0 if max_size <= 0.0 else target_diameter / max_size * scale_multiplier
+	animated_sprite_base_scale = Vector2.ONE * scale_value
+	sprite_base_scale = animated_sprite_base_scale
+
+
+func _build_animation_frames_cache_entry() -> Dictionary:
+	var idle_frames := _load_generated_frames("idle", 1)
+	var walk_frames := _load_generated_frames("walk", 2)
+	if idle_frames.is_empty() or walk_frames.size() < 2:
+		return {"frames": null, "max_size": 0.0}
+	var frames := SpriteFrames.new()
 	frames.add_animation("idle")
 	frames.set_animation_loop("idle", true)
 	frames.set_animation_speed("idle", 2.2)
@@ -901,17 +931,7 @@ func _setup_animation_frames(target_diameter: float, scale_multiplier: float) ->
 	frames.set_animation_speed("walk", 7.0)
 	for texture in walk_frames:
 		frames.add_frame("walk", texture)
-	animated_sprite.sprite_frames = frames
-	animated_sprite.animation = "idle"
-	animated_sprite.modulate = body_color
-	animated_sprite.play()
-	animation_frames_ready = true
-	animated_sprite.visible = true
-	sprite.visible = false
-	var max_size := _max_animation_frame_size(idle_frames + walk_frames)
-	var scale_value := 1.0 if max_size <= 0.0 else target_diameter / max_size * scale_multiplier
-	animated_sprite_base_scale = Vector2.ONE * scale_value
-	sprite_base_scale = animated_sprite_base_scale
+	return {"frames": frames, "max_size": _max_animation_frame_size(idle_frames + walk_frames)}
 
 
 func _max_animation_frame_size(frames: Array[Texture2D]) -> float:

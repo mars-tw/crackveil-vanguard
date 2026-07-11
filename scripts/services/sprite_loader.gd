@@ -3,6 +3,24 @@ extends RefCounted
 
 static var texture_cache: Dictionary = {}
 
+const GAMEPLAY_PREWARM_PATHS: Array[String] = [
+	"res://assets/sprites/enemy_grunt.png",
+	"res://assets/sprites/enemy_fast.png",
+	"res://assets/sprites/enemy_tank.png",
+	"res://assets/sprites/hero_captain.png",
+	"res://assets/sprites/hero_guardian.png",
+	"res://assets/sprites/hero_scout.png",
+	"res://assets/sprites/proj_bullet.png",
+	"res://assets/sprites/proj_blade.png",
+	"res://assets/sprites/proj_lightning.png",
+	"res://assets/sprites/fx_explosion.png",
+	"res://assets/sprites/gem_xp.png",
+	"res://assets/sprites/coin.png",
+	"res://assets/art/radial_glow.png",
+	"res://assets/art/ellipse_shadow.png",
+	"res://assets/art/particle_core.png"
+]
+
 
 static func get_texture(path: String) -> Texture2D:
 	if path == "":
@@ -25,6 +43,21 @@ static func get_texture(path: String) -> Texture2D:
 
 	texture_cache[path] = texture
 	return texture
+
+
+static func prewarm_gameplay_textures() -> int:
+	var loaded_count := 0
+	for path in GAMEPLAY_PREWARM_PATHS:
+		if get_texture(path) != null:
+			loaded_count += 1
+	for base_name in ["enemy_grunt", "enemy_fast", "enemy_tank", "hero_captain", "hero_guardian", "hero_scout"]:
+		for animation_name in ["idle", "walk"]:
+			var frame_count := 2 if animation_name == "walk" else 1
+			for index in range(frame_count):
+				var path := "res://assets/sprites/generated/%s_%s_%d.png" % [base_name, animation_name, index]
+				if get_texture(path) != null:
+					loaded_count += 1
+	return loaded_count
 
 
 static func fit_sprite(sprite: Sprite2D, texture: Texture2D, target_diameter: float, scale_multiplier: float = 1.0) -> void:
