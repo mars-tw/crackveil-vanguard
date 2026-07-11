@@ -69,7 +69,7 @@ func _make_overload_stats() -> Dictionary:
 		"source_weapon_id": get_weapon_id(),
 		"area_radius": max(42.0, data_float("chain_radius", 170.0) * 0.32),
 		"effect_lifetime": 0.22,
-		"explosion_sprite_path": "res://assets/sprites/fx_explosion.png",
+		"explosion_sprite_path": "res://assets/vfx/kenney_particle/burst_fire_cyan.png",
 		"color": data_color("color", Color(0.6, 0.9, 1.0)),
 		"sprite_scale": 0.72
 	}
@@ -81,7 +81,7 @@ func _make_nova_stats() -> Dictionary:
 		"source_weapon_id": get_weapon_id(),
 		"area_radius": max(68.0, data_float("chain_radius", 170.0) * 0.42),
 		"effect_lifetime": 0.28,
-		"explosion_sprite_path": "res://assets/sprites/fx_explosion.png",
+		"explosion_sprite_path": "res://assets/vfx/kenney_particle/burst_fire_cyan.png",
 		"color": data_color("color", Color(0.72, 1.0, 0.92)),
 		"sprite_scale": 0.86
 	}

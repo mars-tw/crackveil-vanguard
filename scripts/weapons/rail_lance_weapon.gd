@@ -98,7 +98,7 @@ func _make_tail_flash_stats(base_damage: float, beam_width: float) -> Dictionary
 		"source_weapon_id": get_weapon_id(),
 		"area_radius": max(46.0, beam_width * 5.8),
 		"effect_lifetime": 0.18,
-		"explosion_sprite_path": "res://assets/sprites/fx_explosion.png",
+		"explosion_sprite_path": "res://assets/vfx/kenney_particle/burst_fire_cyan.png",
 		"color": data_color("color", Color(0.72, 0.96, 1.0)),
 		"sprite_scale": 0.72
 	}

@@ -64,7 +64,7 @@ func _test_explosion_damage_survives_visual_cap() -> bool:
 		"damage": 0.0,
 		"area_radius": 1.0,
 		"effect_lifetime": 30.0,
-		"explosion_sprite_path": "res://assets/sprites/fx_explosion.png"
+		"explosion_sprite_path": "res://assets/vfx/kenney_particle/burst_fire_ember.png"
 	}
 	for index in range(EXPLOSION_CAP_TEST):
 		EntityFactory.spawn_explosion(leader.global_position + Vector2(3000.0 + float(index) * 12.0, 3000.0), harmless_stats, leader)
@@ -83,7 +83,7 @@ func _test_explosion_damage_survives_visual_cap() -> bool:
 		"damage": 18.0,
 		"area_radius": 64.0,
 		"effect_lifetime": 0.35,
-		"explosion_sprite_path": "res://assets/sprites/fx_explosion.png"
+		"explosion_sprite_path": "res://assets/vfx/kenney_particle/burst_fire_ember.png"
 	}
 	var visual := EntityFactory.spawn_explosion(enemy.global_position, damaging_stats, leader)
 	if visual != null:

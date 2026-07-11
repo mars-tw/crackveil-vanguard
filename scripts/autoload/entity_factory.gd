@@ -228,6 +228,9 @@ func spawn_orbit_projectile(player_node: Node2D, weapon_node: Node, stats: Dicti
 
 func spawn_explosion(world_position: Vector2, stats: Dictionary, source: Node) -> Node:
 	_apply_explosion_damage(world_position, stats, source)
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		var radius := float(stats.get("area_radius", 82.0))
+		AudioManager.play_sfx("explosion", false, -6.0, clamp(0.82 + radius / 520.0, 0.82, 1.18))
 	if get_pool_live_count("explosion") >= EXPLOSION_CAP:
 		return null
 	var explosion := _acquire("explosion")

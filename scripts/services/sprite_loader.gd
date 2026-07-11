@@ -13,12 +13,23 @@ const GAMEPLAY_PREWARM_PATHS: Array[String] = [
 	"res://assets/sprites/proj_bullet.png",
 	"res://assets/sprites/proj_blade.png",
 	"res://assets/sprites/proj_lightning.png",
-	"res://assets/sprites/fx_explosion.png",
 	"res://assets/sprites/gem_xp.png",
 	"res://assets/sprites/coin.png",
 	"res://assets/art/radial_glow.png",
 	"res://assets/art/ellipse_shadow.png",
-	"res://assets/art/particle_core.png"
+	"res://assets/art/particle_core.png",
+	"res://assets/vfx/kenney_particle/burst_fire_cyan.png",
+	"res://assets/vfx/kenney_particle/burst_fire_ember.png",
+	"res://assets/vfx/kenney_particle/burst_arc_cyan.png",
+	"res://assets/vfx/kenney_particle/burst_arc_ember.png",
+	"res://assets/vfx/kenney_particle/smoke_ring_cyan.png",
+	"res://assets/vfx/kenney_particle/smoke_ring_ember.png",
+	"res://assets/vfx/kenney_particle/flare_cyan.png",
+	"res://assets/vfx/kenney_particle/flare_ember.png",
+	"res://assets/vfx/kenney_particle/level_column_cyan.png",
+	"res://assets/vfx/kenney_particle/level_column_ember.png",
+	"res://assets/vfx/kenney_particle/shockwave_cyan.png",
+	"res://assets/vfx/kenney_particle/shockwave_ember.png"
 ]
 
 

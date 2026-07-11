@@ -20,7 +20,9 @@ const SFX_PATHS: Dictionary = {
 	"footstep": "res://assets/audio/footstep.wav",
 	"boss_roar": "res://assets/audio/boss_roar.wav",
 	"combo_milestone": "res://assets/audio/combo_milestone.wav",
-	"boomerang_catch": "res://assets/audio/boomerang_catch.wav"
+	"boomerang_catch": "res://assets/audio/boomerang_catch.wav",
+	"explosion": "res://assets/audio/explosion.wav",
+	"ui_click": "res://assets/audio/ui_click.wav"
 }
 const SFX_COOLDOWNS: Dictionary = {
 	"fire": 0.07,
@@ -36,7 +38,9 @@ const SFX_COOLDOWNS: Dictionary = {
 	"footstep": 0.045,
 	"boss_roar": 1.2,
 	"combo_milestone": 0.8,
-	"boomerang_catch": 0.12
+	"boomerang_catch": 0.12,
+	"explosion": 0.11,
+	"ui_click": 0.035
 }
 
 var master_volume: float = 0.75
@@ -59,6 +63,8 @@ func _ready() -> void:
 	_load_streams()
 	_build_player_pool()
 	_apply_bus_settings()
+	get_tree().node_added.connect(_on_scene_node_added)
+	call_deferred("_bind_existing_ui_buttons")
 
 
 func _input(event: InputEvent) -> void:
@@ -208,3 +214,32 @@ func _is_unlock_event(event: InputEvent) -> bool:
 	if event is InputEventJoypadButton:
 		return event.pressed
 	return false
+
+
+func _on_scene_node_added(node: Node) -> void:
+	_bind_ui_button(node)
+
+
+func _bind_existing_ui_buttons() -> void:
+	var root := get_tree().root
+	if root == null:
+		return
+	_bind_ui_buttons_recursive(root)
+
+
+func _bind_ui_buttons_recursive(node: Node) -> void:
+	_bind_ui_button(node)
+	for child in node.get_children():
+		_bind_ui_buttons_recursive(child)
+
+
+func _bind_ui_button(node: Node) -> void:
+	if not node is BaseButton:
+		return
+	var button := node as BaseButton
+	if not button.pressed.is_connected(_on_ui_button_pressed):
+		button.pressed.connect(_on_ui_button_pressed)
+
+
+func _on_ui_button_pressed() -> void:
+	play_sfx("ui_click", false, -8.0)

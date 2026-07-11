@@ -93,6 +93,8 @@ Web 版內嵌 `assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf`，由 Noto Sans
 ## 素材 Credits
 
 - 廢土農野地形與部分 decor 裁切/改色自同作者 MIT 開源專案 `pixel-idle-farm-skill` 的農場像素素材；本 repo 僅收錄 R12 需要的小裁片，不包含原始大型 atlas。
+- M3 VFX 與實體音效精選自 Kenney Particle Pack、Impact Sounds、Sci-Fi Sounds、Digital Audio 與 UI Pack，均為 CC0 1.0；成品僅收錄 12 張 128px 主題色衍生紋理與 7 個 44.1kHz/16-bit/mono WAV。
+- 完整來源連結、逐檔替換表、修改方式與授權聲明見 [`assets/CREDITS.md`](assets/CREDITS.md)。
 
 ## License
 

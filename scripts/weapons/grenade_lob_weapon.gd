@@ -74,7 +74,7 @@ func _make_explosion_stats(effect_stats: Dictionary) -> Dictionary:
 		"source_weapon_id": get_weapon_id(),
 		"area_radius": float(effect_stats.get("area_radius", data_float("area_radius", 82.0))),
 		"effect_lifetime": data_float("effect_lifetime", 0.34),
-		"explosion_sprite_path": data_string("explosion_sprite_path", "res://assets/sprites/fx_explosion.png"),
+		"explosion_sprite_path": data_string("explosion_sprite_path", "res://assets/vfx/kenney_particle/burst_fire_ember.png"),
 		"color": effect_stats.get("color", data_color("color", Color(1.0, 0.48, 0.18))),
 		"sprite_scale": data_float("sprite_scale", 1.0)
 	}

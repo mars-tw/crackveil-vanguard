@@ -66,7 +66,7 @@ func _make_ember_well_delayed_explosion_stats(effect_stats: Dictionary) -> Dicti
 		"source_weapon_id": str(effect_stats.get("source_weapon_id", get_weapon_id())),
 		"area_radius": float(effect_stats.get("area_radius", 82.0)) * 0.82,
 		"effect_lifetime": 0.24,
-		"explosion_sprite_path": str(effect_stats.get("explosion_sprite_path", "res://assets/sprites/fx_explosion.png")),
+		"explosion_sprite_path": str(effect_stats.get("explosion_sprite_path", "res://assets/vfx/kenney_particle/burst_fire_ember.png")),
 		"color": Color(1.0, 0.52, 0.2),
 		"sprite_scale": float(effect_stats.get("sprite_scale", 1.0)) * 0.82
 	}

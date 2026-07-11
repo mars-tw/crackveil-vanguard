@@ -2,6 +2,7 @@ extends Node2D
 
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
+const VFX_ROOT := "res://assets/vfx/kenney_particle/"
 
 var burst_color: Color = Color(1.0, 0.4, 0.4)
 var burst_scale: float = 1.0
@@ -148,7 +149,7 @@ func _ensure_sprite() -> void:
 
 func _apply_sprite() -> void:
 	_ensure_sprite()
-	var texture: Texture2D = SPRITE_LOADER.get_texture("res://assets/sprites/fx_explosion.png")
+	var texture: Texture2D = SPRITE_LOADER.get_texture(_style_texture_path())
 	if texture == null:
 		sprite.visible = false
 		return
@@ -176,7 +177,7 @@ func _update_sprite_state() -> void:
 		SPRITE_LOADER.fit_sprite(sprite, texture, base_size * burst_scale, 1.0)
 	sprite.rotation += 1.8 * get_process_delta_time()
 	var sprite_alpha := (1.0 - t) * _sprite_alpha_multiplier()
-	sprite.modulate = Color(burst_color.r, burst_color.g, burst_color.b, sprite_alpha)
+	sprite.modulate = Color(1.0, 1.0, 1.0, sprite_alpha)
 	if glow != null:
 		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), _glow_base_size(t) * burst_scale)
 		glow.modulate = Color(burst_color.r, burst_color.g, burst_color.b, (1.0 - t) * _glow_alpha_multiplier())
@@ -200,11 +201,12 @@ func _emit_particles() -> void:
 
 
 func _configure_particles_for_style() -> void:
+	particles.texture = SPRITE_LOADER.get_texture(_particle_texture_path())
 	particles.gravity = Vector2.ZERO
 	particles.direction = Vector2.RIGHT
 	particles.spread = 180.0
 	particles.emission_sphere_radius = 7.0 * burst_scale
-	particles.color = Color(burst_color.r, burst_color.g, burst_color.b, 0.88)
+	particles.color = Color(1.0, 1.0, 1.0, 0.88)
 	match burst_style:
 		"spark":
 			particles.amount = _scaled_particle_amount(12.0, 8.0, 24.0)
@@ -220,7 +222,7 @@ func _configure_particles_for_style() -> void:
 			particles.initial_velocity_max = 105.0 * burst_scale
 			particles.scale_amount_min = 0.38 * burst_scale
 			particles.scale_amount_max = 0.92 * burst_scale
-			particles.color = Color(burst_color.r, burst_color.g, burst_color.b, 0.42)
+			particles.color = Color(1.0, 1.0, 1.0, 0.42)
 		"gold_rain":
 			particles.amount = _scaled_particle_amount(30.0, 18.0, 54.0)
 			particles.lifetime = 0.48
@@ -318,3 +320,27 @@ func _circle_points(circle_radius: float, segments: int) -> PackedVector2Array:
 	for index in range(safe_segments):
 		points.append(Vector2.RIGHT.rotated(TAU * float(index) / float(safe_segments)) * circle_radius)
 	return points
+
+
+func _style_texture_path() -> String:
+	var suffix := "ember.png" if _uses_ember_palette() else "cyan.png"
+	match burst_style:
+		"spark":
+			return VFX_ROOT + "burst_arc_" + suffix
+		"smoke_ring":
+			return VFX_ROOT + "smoke_ring_" + suffix
+		"gold_rain":
+			return VFX_ROOT + "flare_" + suffix
+		"level_column":
+			return VFX_ROOT + "level_column_" + suffix
+		_:
+			return VFX_ROOT + "burst_fire_" + suffix
+
+
+func _particle_texture_path() -> String:
+	var suffix := "ember.png" if _uses_ember_palette() else "cyan.png"
+	return VFX_ROOT + ("flare_" if burst_style == "gold_rain" else "burst_arc_") + suffix
+
+
+func _uses_ember_palette() -> bool:
+	return burst_color.r > burst_color.b * 1.08 and burst_color.r > burst_color.g * 0.94
