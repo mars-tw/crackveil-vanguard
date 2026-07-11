@@ -110,7 +110,7 @@ func _apply_responsive_layout() -> void:
 	var panel_width: float = min(viewport_size.x - (24.0 if mobile else 32.0), 600.0 if not portrait else 430.0)
 	var panel_height: float = 360.0 if not portrait else 440.0
 	if mobile:
-		panel_height = min(viewport_size.y - 24.0, 472.0 if portrait else 350.0)
+		panel_height = min(viewport_size.y - 24.0, 520.0 if portrait else 366.0)
 
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5
@@ -121,27 +121,50 @@ func _apply_responsive_layout() -> void:
 	panel.offset_top = -panel_height * 0.5
 	panel.offset_bottom = panel_height * 0.5
 
-	title_label.offset_top = 20.0 if mobile else 22.0
-	title_label.offset_bottom = title_label.offset_top + (50.0 if mobile else 40.0)
-	title_label.add_theme_font_size_override("font_size", (24 if portrait else 26) if mobile else (26 if portrait else 28))
+	for control in [title_label, body_label, dont_show_check, start_button]:
+		control.anchor_top = 0.0
+		control.anchor_bottom = 0.0
+
+	title_label.offset_top = 20.0 if mobile and portrait else 14.0 if mobile else 22.0
+	title_label.offset_bottom = title_label.offset_top + (52.0 if mobile and portrait else 38.0 if mobile else 40.0)
+	title_label.add_theme_font_size_override("font_size", (24 if portrait else 20) if mobile else (26 if portrait else 28))
 
 	body_label.offset_left = 22.0 if mobile else 30.0
 	body_label.offset_right = -body_label.offset_left
 	body_label.offset_top = title_label.offset_bottom + (12.0 if mobile else 14.0)
-	body_label.offset_bottom = panel_height - (touch_height * 2.0 + 38.0 if mobile else 116.0)
-	body_label.add_theme_font_size_override("font_size", (17 if portrait else 18) if mobile else (18 if portrait else 20))
+	var controls_top := panel_height - (touch_height + 14.0 if mobile else 54.0)
+	if mobile and not portrait:
+		body_label.offset_bottom = controls_top - 12.0
+		body_label.add_theme_font_size_override("font_size", 12)
 
-	dont_show_check.anchor_left = 0.5
-	dont_show_check.anchor_right = 0.5
-	dont_show_check.offset_left = -118.0 if mobile else -82.0
-	dont_show_check.offset_right = 118.0 if mobile else 82.0
-	dont_show_check.offset_top = panel_height - (touch_height * 2.0 + 24.0 if mobile else 96.0)
-	dont_show_check.offset_bottom = dont_show_check.offset_top + (touch_height if mobile else 38.0)
+		dont_show_check.anchor_left = 0.0
+		dont_show_check.anchor_right = 0.5
+		dont_show_check.offset_left = 24.0
+		dont_show_check.offset_right = -8.0
+		dont_show_check.offset_top = controls_top
+		dont_show_check.offset_bottom = controls_top + touch_height
 
-	start_button.anchor_left = 0.5
-	start_button.anchor_right = 0.5
-	start_button.offset_left = -122.0 if mobile else -92.0
-	start_button.offset_right = 122.0 if mobile else 92.0
-	start_button.offset_top = panel_height - (touch_height + 14.0 if mobile else 54.0)
-	start_button.offset_bottom = start_button.offset_top + (touch_height if mobile else 40.0)
+		start_button.anchor_left = 0.5
+		start_button.anchor_right = 1.0
+		start_button.offset_left = 8.0
+		start_button.offset_right = -24.0
+		start_button.offset_top = controls_top
+		start_button.offset_bottom = controls_top + touch_height
+	else:
+		body_label.offset_bottom = panel_height - (touch_height * 2.0 + 38.0 if mobile else 116.0)
+		body_label.add_theme_font_size_override("font_size", 12 if mobile else (18 if portrait else 20))
+
+		dont_show_check.anchor_left = 0.5
+		dont_show_check.anchor_right = 0.5
+		dont_show_check.offset_left = -132.0 if mobile else -82.0
+		dont_show_check.offset_right = 132.0 if mobile else 82.0
+		dont_show_check.offset_top = panel_height - (touch_height * 2.0 + 24.0 if mobile else 96.0)
+		dont_show_check.offset_bottom = dont_show_check.offset_top + (touch_height if mobile else 38.0)
+
+		start_button.anchor_left = 0.5
+		start_button.anchor_right = 0.5
+		start_button.offset_left = -136.0 if mobile else -92.0
+		start_button.offset_right = 136.0 if mobile else 92.0
+		start_button.offset_top = controls_top
+		start_button.offset_bottom = start_button.offset_top + (touch_height if mobile else 40.0)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)

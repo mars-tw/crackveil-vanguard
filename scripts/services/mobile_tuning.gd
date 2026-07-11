@@ -5,6 +5,7 @@ const DESKTOP_CAMERA_ZOOM := Vector2(1.28, 1.28)
 const DESKTOP_THREAT_CAMERA_ZOOM := Vector2(1.12, 1.12)
 const MOBILE_CAMERA_ZOOM := Vector2(1.56, 1.56)
 const MOBILE_THREAT_CAMERA_ZOOM := Vector2(1.36, 1.36)
+const MOBILE_VIEWPORT_WIDTH_TRIGGER := 700.0
 
 const META_FONT_BASE_PREFIX := "r14_font_base_"
 const META_FONT_HAD_PREFIX := "r14_font_had_"
@@ -22,6 +23,8 @@ static func use_mobile_ui(viewport_size: Vector2, force_mobile: bool = false) ->
 		return true
 	if DisplayServer.has_method("is_touchscreen_available") and DisplayServer.call("is_touchscreen_available") == true:
 		return true
+	if size.x < MOBILE_VIEWPORT_WIDTH_TRIGGER:
+		return true
 	if short_side <= 520.0 and long_side <= 980.0:
 		return true
 	if portrait and size.x <= 760.0 and size.y <= 1400.0:
@@ -36,14 +39,16 @@ static func ui_scale(viewport_size: Vector2, force_mobile: bool = false) -> floa
 	var short_side: float = min(size.x, size.y)
 	var portrait := size.y > size.x
 	if short_side <= 430.0:
-		return 1.78 if portrait else 1.68
+		return 1.96 if portrait else 1.86
+	if size.x < MOBILE_VIEWPORT_WIDTH_TRIGGER:
+		return 1.84
 	if portrait:
-		return 1.62
-	return 1.6
+		return 1.86
+	return 1.8
 
 
 static func spacing_scale(viewport_size: Vector2, force_mobile: bool = false) -> float:
-	return 1.18 if use_mobile_ui(viewport_size, force_mobile) else 1.0
+	return 1.32 if use_mobile_ui(viewport_size, force_mobile) else 1.0
 
 
 static func font_size(base_size: int, viewport_size: Vector2, force_mobile: bool = false) -> int:
@@ -55,7 +60,10 @@ static func touch_target(viewport_size: Vector2, force_mobile: bool = false) -> 
 		return 48.0
 	var safe_size := _safe_viewport_size(viewport_size)
 	var short_side: float = min(safe_size.x, safe_size.y)
-	return 60.0 if short_side <= 430.0 else 54.0
+	var portrait := safe_size.y > safe_size.x
+	if short_side <= 430.0:
+		return 76.0 if portrait else 68.0
+	return 72.0
 
 
 static func leader_camera_zoom(viewport_size: Vector2, force_mobile: bool = false) -> Vector2:

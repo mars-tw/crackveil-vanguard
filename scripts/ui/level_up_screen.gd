@@ -7,6 +7,7 @@ signal upgrade_selected(upgrade: Dictionary)
 var root: Control
 var panel: Panel
 var title_label: Label
+var card_scroll: ScrollContainer
 var card_grid: GridContainer
 var option_buttons: Array[Button] = []
 
@@ -47,15 +48,21 @@ func _build_ui() -> void:
 	title_label.add_theme_constant_override("outline_size", 2)
 	panel.add_child(title_label)
 
+	card_scroll = ScrollContainer.new()
+	card_scroll.name = "CardScroll"
+	card_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	card_scroll.anchor_left = 0.0
+	card_scroll.anchor_right = 1.0
+	card_scroll.anchor_top = 0.0
+	card_scroll.anchor_bottom = 1.0
+	panel.add_child(card_scroll)
+
 	card_grid = GridContainer.new()
 	card_grid.name = "CardGrid"
-	card_grid.anchor_left = 0.0
-	card_grid.anchor_right = 1.0
-	card_grid.anchor_top = 0.0
-	card_grid.anchor_bottom = 1.0
+	card_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	card_grid.add_theme_constant_override("h_separation", 18)
 	card_grid.add_theme_constant_override("v_separation", 14)
-	panel.add_child(card_grid)
+	card_scroll.add_child(card_grid)
 	_apply_responsive_layout()
 
 
@@ -150,14 +157,18 @@ func _apply_responsive_layout() -> void:
 	title_label.add_theme_font_size_override("font_size", (24 if portrait else 28) if mobile else (28 if portrait else 30))
 
 	card_grid.columns = 1 if portrait else 3
-	card_grid.offset_left = 20.0 if mobile else 26.0
-	card_grid.offset_right = -card_grid.offset_left
-	card_grid.offset_top = title_label.offset_bottom + (14.0 if mobile else 18.0)
-	card_grid.offset_bottom = -20.0 if mobile else -26.0
+	if card_scroll != null:
+		card_scroll.offset_left = 20.0 if mobile else 26.0
+		card_scroll.offset_right = -card_scroll.offset_left
+		card_scroll.offset_top = title_label.offset_bottom + (14.0 if mobile else 18.0)
+		card_scroll.offset_bottom = -20.0 if mobile else -26.0
+		card_grid.custom_minimum_size = Vector2(max(1.0, panel_width - card_scroll.offset_left * 2.0), 0.0)
 
 	var side_padding := 40.0 if mobile else 52.0
 	var card_width: float = panel_width - side_padding if portrait else max(190.0, (panel_width - side_padding - 36.0) / 3.0)
-	var card_height: float = 204.0 if mobile and portrait else 165.0 if portrait else max(214.0 if mobile else 190.0, panel_height - 120.0)
+	var card_scroll_top := card_scroll.offset_top if card_scroll != null else title_label.offset_bottom + 14.0
+	var available_card_height := panel_height - card_scroll_top - (20.0 if mobile else 26.0)
+	var card_height: float = 252.0 if mobile and portrait else 165.0 if portrait else max(214.0 if mobile else 190.0, available_card_height)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
 		button.add_theme_font_size_override("font_size", 18 if portrait else 20)

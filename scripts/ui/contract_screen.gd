@@ -258,6 +258,7 @@ func _apply_responsive_layout() -> void:
 		viewport_size = Vector2(1280.0, 720.0)
 	var portrait := viewport_size.y > viewport_size.x
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
+	var compact_landscape := mobile and not portrait
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
 	var outer_margin := 12.0 if mobile else 28.0
 	var panel_width: float = min(viewport_size.x - outer_margin * 2.0, 920.0 if not portrait else 620.0)
@@ -276,28 +277,29 @@ func _apply_responsive_layout() -> void:
 
 	if logo_glow_label != null:
 		logo_glow_label.text = "CRACKVEIL\nVANGUARD" if mobile and portrait else "CRACKVEIL VANGUARD"
-		logo_glow_label.offset_top = 8.0
-		logo_glow_label.offset_bottom = 82.0 if mobile and portrait else 50.0
-		logo_glow_label.add_theme_font_size_override("font_size", (24 if portrait else 30) if mobile else (30 if portrait else 34))
+		logo_glow_label.offset_top = 8.0 if not compact_landscape else 4.0
+		logo_glow_label.offset_bottom = 96.0 if mobile and portrait else 34.0 if compact_landscape else 50.0
+		logo_glow_label.add_theme_font_size_override("font_size", (30 if portrait else 18) if mobile else (30 if portrait else 34))
 	if logo_label != null:
 		logo_label.text = logo_glow_label.text if logo_glow_label != null else "CRACKVEIL VANGUARD"
-		logo_label.offset_top = 10.0
-		logo_label.offset_bottom = 84.0 if mobile and portrait else 50.0
-		logo_label.add_theme_font_size_override("font_size", (24 if portrait else 28) if mobile else (28 if portrait else 31))
+		logo_label.offset_top = 10.0 if not compact_landscape else 5.0
+		logo_label.offset_bottom = 98.0 if mobile and portrait else 34.0 if compact_landscape else 50.0
+		logo_label.add_theme_font_size_override("font_size", (30 if portrait else 18) if mobile else (28 if portrait else 31))
 
-	var title_top := 90.0 if mobile and portrait else 56.0
+	var title_top := 104.0 if mobile and portrait else 36.0 if compact_landscape else 56.0
 	title_label.offset_top = title_top
-	title_label.offset_bottom = title_top + (46.0 if mobile else 34.0)
-	title_label.add_theme_font_size_override("font_size", (24 if portrait else 28) if mobile else (28 if portrait else 30))
+	title_label.offset_bottom = title_top + (48.0 if mobile and portrait else 32.0 if compact_landscape else 46.0 if mobile else 34.0)
+	title_label.add_theme_font_size_override("font_size", (22 if portrait else 20) if mobile else (28 if portrait else 30))
 
 	subtitle_label.offset_top = title_label.offset_bottom + 2.0
-	subtitle_label.offset_bottom = subtitle_label.offset_top + (36.0 if mobile else 26.0)
-	subtitle_label.add_theme_font_size_override("font_size", (13 if portrait else 15) if mobile else (14 if portrait else 16))
+	subtitle_label.offset_bottom = subtitle_label.offset_top + (42.0 if mobile and portrait else 24.0 if compact_landscape else 36.0 if mobile else 26.0)
+	subtitle_label.add_theme_font_size_override("font_size", (13 if portrait else 10) if mobile else (14 if portrait else 16))
 
 	meta_label.offset_top = subtitle_label.offset_bottom + 2.0
-	meta_label.offset_bottom = meta_label.offset_top + (34.0 if mobile else 26.0)
-	meta_label.add_theme_font_size_override("font_size", (13 if portrait else 15) if mobile else (14 if portrait else 16))
+	meta_label.offset_bottom = meta_label.offset_top + (38.0 if mobile and portrait else 24.0 if compact_landscape else 34.0 if mobile else 26.0)
+	meta_label.add_theme_font_size_override("font_size", (13 if portrait else 10) if mobile else (14 if portrait else 16))
 
+	meta_grid.visible = not compact_landscape
 	meta_grid.columns = 1 if portrait else 3
 	meta_grid.offset_left = 20.0 if mobile else 26.0
 	meta_grid.offset_right = -meta_grid.offset_left
@@ -309,9 +311,10 @@ func _apply_responsive_layout() -> void:
 	var meta_button_height := touch_height if mobile else 52.0
 	for button in meta_buttons.values():
 		button.custom_minimum_size = Vector2(meta_button_width, meta_button_height)
-		button.add_theme_font_size_override("font_size", 13 if portrait else 14)
+		button.add_theme_font_size_override("font_size", 13 if portrait else 12)
 
 	if seed_row != null:
+		seed_row.visible = not compact_landscape
 		seed_row.offset_left = 20.0 if mobile else 26.0
 		seed_row.offset_right = -seed_row.offset_left
 		seed_row.offset_top = meta_grid.offset_bottom + 10.0
@@ -327,14 +330,15 @@ func _apply_responsive_layout() -> void:
 	if card_scroll != null:
 		card_scroll.offset_left = 20.0 if mobile else 26.0
 		card_scroll.offset_right = -card_scroll.offset_left
-		card_scroll.offset_top = seed_row.offset_bottom + 12.0 if seed_row != null else 386.0
-		card_scroll.offset_bottom = -20.0 if mobile else -26.0
+		card_scroll.offset_top = meta_label.offset_bottom + 10.0 if compact_landscape else seed_row.offset_bottom + 12.0 if seed_row != null else 386.0
+		card_scroll.offset_bottom = -12.0 if compact_landscape else -20.0 if mobile else -26.0
 		card_grid.custom_minimum_size = Vector2(max(1.0, panel_width - card_scroll.offset_left * 2.0), 0.0)
 
 	var column_count: int = max(1, card_grid.columns)
 	var card_width: float = panel_width - (40.0 if mobile else 52.0) if portrait else max(170.0, (panel_width - (40.0 if mobile else 52.0) - 18.0 * float(column_count - 1)) / float(column_count))
-	var card_height: float = 188.0 if mobile and portrait else 160.0 if portrait else max(190.0, panel_height - 318.0)
+	var available_card_height := panel_height - (card_scroll.offset_top if card_scroll != null else 0.0) - (12.0 if compact_landscape else 20.0)
+	var card_height: float = 240.0 if mobile and portrait else 160.0 if portrait else max(190.0, available_card_height)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
-		button.add_theme_font_size_override("font_size", 18 if portrait else 20)
+		button.add_theme_font_size_override("font_size", 18 if portrait else 18 if mobile else 20)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)

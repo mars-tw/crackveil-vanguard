@@ -444,8 +444,8 @@ func _apply_responsive_layout() -> void:
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size, force_touch_controls_visible)
 
 	if hud_panel != null:
-		hud_panel.position = Vector2(8.0, 58.0) if mobile and portrait else Vector2(8.0, 8.0)
-		hud_panel.size = Vector2(min(viewport_size.x - 16.0, 370.0), 118.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.72 if portrait else 0.38), 370.0 if mobile else 340.0), 122.0 if mobile else 108.0)
+		hud_panel.position = Vector2(8.0, 66.0) if mobile and portrait else Vector2(8.0, 8.0)
+		hud_panel.size = Vector2(min(viewport_size.x - 16.0, 382.0), 150.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.72 if portrait else 0.38), 390.0 if mobile else 340.0), 126.0 if mobile else 108.0)
 	if score_panel != null:
 		if mobile and portrait:
 			score_panel.anchor_left = 0.0
@@ -461,52 +461,53 @@ func _apply_responsive_layout() -> void:
 			score_panel.position = Vector2.ZERO
 			score_panel.offset_left = -358.0 if not portrait else -276.0
 			score_panel.offset_right = -margin
-			score_panel.offset_top = 8.0 if not portrait else 48.0
+			score_panel.offset_top = 84.0 if mobile and not portrait else 8.0 if not portrait else 48.0
 			score_panel.offset_bottom = score_panel.offset_top + (52.0 if mobile else 46.0)
 	if hp_icon != null:
 		hp_icon.anchor_left = 0.0
 		hp_icon.anchor_right = 0.0
-		hp_icon.position = Vector2(margin + 2.0, 68.0) if mobile and portrait else Vector2(margin + 2.0, 14.0)
-		hp_icon.size = Vector2(32.0, 32.0) if mobile else Vector2(26.0, 26.0)
+		hp_icon.position = Vector2(margin + 2.0, 80.0) if mobile and portrait else Vector2(margin + 2.0, 14.0)
+		hp_icon.size = Vector2(36.0, 36.0) if mobile and portrait else Vector2(32.0, 32.0) if mobile else Vector2(26.0, 26.0)
 	if xp_icon != null:
 		xp_icon.anchor_left = 0.0
 		xp_icon.anchor_right = 0.0
-		xp_icon.position = Vector2(margin + 2.0, 104.0) if mobile and portrait else Vector2(margin + 2.0, 44.0)
-		xp_icon.size = Vector2(30.0, 30.0) if mobile else Vector2(24.0, 24.0)
+		xp_icon.position = Vector2(margin + 2.0, 124.0) if mobile and portrait else Vector2(margin + 2.0, 44.0)
+		xp_icon.size = Vector2(34.0, 34.0) if mobile and portrait else Vector2(30.0, 30.0) if mobile else Vector2(24.0, 24.0)
 	if gold_icon != null:
 		if mobile and portrait:
 			gold_icon.anchor_left = 0.0
 			gold_icon.anchor_right = 0.0
 			gold_icon.offset_left = margin + 2.0
 			gold_icon.offset_right = gold_icon.offset_left + 30.0
-			gold_icon.offset_top = 192.0
+			gold_icon.offset_top = 224.0
 			gold_icon.offset_bottom = gold_icon.offset_top + 30.0
 		else:
 			gold_icon.anchor_left = 1.0
 			gold_icon.anchor_right = 1.0
 			gold_icon.offset_left = -336.0 if not portrait else -258.0
 			gold_icon.offset_right = gold_icon.offset_left + (30.0 if mobile else 26.0)
-			gold_icon.offset_top = 20.0 if not portrait else 60.0
+			gold_icon.offset_top = 94.0 if mobile and not portrait else 20.0 if not portrait else 60.0
 			gold_icon.offset_bottom = gold_icon.offset_top + (30.0 if mobile else 26.0)
 
-	hp_label.position = Vector2(margin + 42.0, 64.0) if mobile and portrait else Vector2(margin + 36.0, 10.0)
-	hp_label.add_theme_font_size_override("font_size", (17 if portrait else 18) if mobile else (18 if portrait else 20))
-	level_label.position = Vector2(margin + 42.0, 100.0) if mobile and portrait else Vector2(margin + 36.0, 38.0)
-	level_label.add_theme_font_size_override("font_size", (13 if portrait else 15) if mobile else (14 if portrait else 16))
-	xp_bar.position = Vector2(margin + 42.0, 134.0) if mobile and portrait else Vector2(margin + 36.0, 66.0)
-	xp_bar.size = Vector2(min(viewport_size.x - margin * 2.0 - 50.0, 292.0), 18.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.5 if portrait else 0.28), 286.0 if mobile else 260.0), 16.0 if mobile else 14.0)
+	hp_label.position = Vector2(margin + 48.0, 76.0) if mobile and portrait else Vector2(margin + 36.0, 10.0)
+	hp_label.add_theme_font_size_override("font_size", (18 if portrait else 18) if mobile else (18 if portrait else 20))
+	level_label.position = Vector2(margin + 48.0, 122.0) if mobile and portrait else Vector2(margin + 36.0, 38.0)
+	level_label.add_theme_font_size_override("font_size", (16 if portrait else 15) if mobile else (14 if portrait else 16))
+	xp_bar.position = Vector2(margin + 48.0, 166.0) if mobile and portrait else Vector2(margin + 36.0, 66.0)
+	xp_bar.size = Vector2(min(viewport_size.x - margin * 2.0 - 58.0, 306.0), 20.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.5 if portrait else 0.28), 286.0 if mobile else 260.0), 16.0 if mobile else 14.0)
 	if theme_label != null:
-		theme_label.position = Vector2(margin + 42.0, 154.0) if mobile and portrait else Vector2(margin + 36.0, 86.0 if mobile else 82.0)
-		theme_label.size = Vector2(min(viewport_size.x - margin * 2.0 - 50.0, 292.0), 26.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.55 if portrait else 0.3), 286.0 if mobile else 276.0), 26.0 if mobile else 22.0)
-		theme_label.add_theme_font_size_override("font_size", (11 if portrait else 12) if mobile else (12 if portrait else 13))
+		theme_label.position = Vector2(margin + 48.0, 190.0) if mobile and portrait else Vector2(margin + 36.0, 86.0 if mobile else 82.0)
+		theme_label.size = Vector2(min(viewport_size.x - margin * 2.0 - 58.0, 306.0), 26.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.55 if portrait else 0.3), 286.0 if mobile else 276.0), 26.0 if mobile else 22.0)
+		theme_label.add_theme_font_size_override("font_size", (13 if portrait else 12) if mobile else (12 if portrait else 13))
 
-	time_label.anchor_left = 0.5
-	time_label.anchor_right = 0.5
-	time_label.offset_left = -92.0 if mobile else -78.0
-	time_label.offset_right = 92.0 if mobile else 78.0
+	time_label.anchor_left = 0.0 if mobile and portrait else 0.5
+	time_label.anchor_right = 0.0 if mobile and portrait else 0.5
+	time_label.offset_left = margin if mobile and portrait else -92.0 if mobile else -78.0
+	time_label.offset_right = margin + 168.0 if mobile and portrait else 92.0 if mobile else 78.0
 	time_label.offset_top = 8.0 if mobile else 10.0
 	time_label.offset_bottom = time_label.offset_top + (46.0 if mobile else 32.0)
-	time_label.add_theme_font_size_override("font_size", (21 if portrait else 23) if mobile else (22 if portrait else 24))
+	time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if mobile and portrait else HORIZONTAL_ALIGNMENT_CENTER
+	time_label.add_theme_font_size_override("font_size", (22 if portrait else 23) if mobile else (22 if portrait else 24))
 
 	score_label.anchor_left = 1.0
 	score_label.anchor_right = 1.0
@@ -515,16 +516,16 @@ func _apply_responsive_layout() -> void:
 		score_label.anchor_right = 1.0
 		score_label.offset_left = margin + 42.0
 		score_label.offset_right = -14.0
-		score_label.offset_top = 190.0
-		score_label.offset_bottom = 226.0
+		score_label.offset_top = 222.0
+		score_label.offset_bottom = 262.0
 		score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	else:
 		score_label.offset_left = -338.0 if not portrait else -258.0
 		score_label.offset_right = -104.0 if not portrait else -14.0
-		score_label.offset_top = 17.0 if not portrait else 54.0
+		score_label.offset_top = 92.0 if mobile and not portrait else 17.0 if not portrait else 54.0
 		score_label.offset_bottom = score_label.offset_top + (34.0 if mobile else 30.0)
 		score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	score_label.add_theme_font_size_override("font_size", (13 if portrait else 16) if mobile else (16 if portrait else 18))
+	score_label.add_theme_font_size_override("font_size", (14 if portrait else 16) if mobile else (16 if portrait else 18))
 
 	version_label.anchor_left = 1.0
 	version_label.anchor_right = 1.0
@@ -538,7 +539,7 @@ func _apply_responsive_layout() -> void:
 
 	pause_button.anchor_left = 1.0
 	pause_button.anchor_right = 1.0
-	var pause_width: float = max(touch_height, 116.0) if mobile else 74.0
+	var pause_width: float = max(touch_height, 104.0) if mobile and portrait else max(touch_height, 116.0) if mobile else 74.0
 	pause_button.offset_left = -(pause_width + margin) if mobile else -88.0
 	pause_button.offset_right = -margin
 	pause_button.offset_top = 8.0 if mobile else 10.0

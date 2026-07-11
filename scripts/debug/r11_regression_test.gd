@@ -311,19 +311,22 @@ func _test_procedural_animation_changes_transforms() -> bool:
 	var enemy := EntityFactory.spawn_enemy("r11_anim_fast", _moving_enemy_config(), leader.global_position + Vector2(220.0, 0.0))
 	var enemy_sprite: Sprite2D = enemy.get("sprite")
 	var enemy_start_y := enemy_sprite.position.y
+	var enemy_max_bob := 0.0
 	for _index in range(18):
 		await get_tree().physics_frame
 		await get_tree().process_frame
+		enemy_max_bob = maxf(enemy_max_bob, abs(enemy_sprite.position.y - enemy_start_y))
 	var enemy_moved_y := enemy_sprite.position.y
-	if abs(enemy_moved_y - enemy_start_y) < 0.05:
+	if enemy_max_bob < 0.05:
 		_fail("enemy procedural animation did not bob")
 		return false
-	print("R11_ANIMATION leader_y %.2f->%.2f tilt=%.3f enemy_y %.2f->%.2f" % [
+	print("R11_ANIMATION leader_y %.2f->%.2f tilt=%.3f enemy_y %.2f->%.2f max_bob=%.2f" % [
 		start_y,
 		moved_y,
 		moved_rotation,
 		enemy_start_y,
-		enemy_moved_y
+		enemy_moved_y,
+		enemy_max_bob
 	])
 	return true
 

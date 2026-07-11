@@ -20,6 +20,7 @@ var seed_start_button: Button
 var side_panel: Panel
 var side_title: Label
 var side_close_button: Button
+var side_scroll: ScrollContainer
 var side_content: VBoxContainer
 var version_label: Label
 var meta_buttons: Dictionary = {}
@@ -139,10 +140,16 @@ func _build_ui() -> void:
 	side_close_button.pressed.connect(_on_close_panel_pressed)
 	side_panel.add_child(side_close_button)
 
+	side_scroll = ScrollContainer.new()
+	side_scroll.name = "SideScroll"
+	side_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	side_panel.add_child(side_scroll)
+
 	side_content = VBoxContainer.new()
 	side_content.name = "SideContent"
 	side_content.add_theme_constant_override("separation", 10)
-	side_panel.add_child(side_content)
+	side_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	side_scroll.add_child(side_content)
 
 	version_label = Label.new()
 	version_label.text = _build_version_text()
@@ -390,10 +397,10 @@ func _apply_responsive_layout() -> void:
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
 	var margin := 28.0 if not portrait else 18.0
 	if mobile:
-		margin = 18.0 if portrait else 20.0
+		margin = 18.0 if portrait else 16.0
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
 	var button_height := touch_height if mobile else 48.0
-	var button_gap := 12.0 if mobile else 10.0
+	var button_gap := 12.0 if mobile and portrait else 4.0 if mobile else 10.0
 
 	logo_glow_label.anchor_left = 0.0
 	logo_glow_label.anchor_right = 1.0
@@ -402,31 +409,36 @@ func _apply_responsive_layout() -> void:
 	var mobile_logo_text := "CRACKVEIL\nVANGUARD" if portrait else "CRACKVEIL VANGUARD"
 	logo_label.text = mobile_logo_text if mobile else "CRACKVEIL VANGUARD"
 	logo_glow_label.text = logo_label.text
-	logo_label.offset_top = (24.0 if portrait else 24.0) if mobile else (44.0 if not portrait else 29.0)
-	logo_label.offset_bottom = logo_label.offset_top + (118.0 if mobile and portrait else (86.0 if mobile else 66.0))
-	logo_label.add_theme_font_size_override("font_size", (32 if portrait else 38) if mobile else (48 if not portrait else 32))
+	var logo_top := 18.0 if mobile and portrait else 4.0 if mobile else (44.0 if not portrait else 29.0)
+	var logo_height := 168.0 if mobile and portrait else 46.0 if mobile else 66.0
+	logo_label.offset_top = logo_top
+	logo_label.offset_bottom = logo_top + logo_height
+	logo_label.add_theme_font_size_override("font_size", (34 if portrait else 20) if mobile else (48 if not portrait else 32))
 
 	logo_glow_label.offset_top = logo_label.offset_top
 	logo_glow_label.offset_bottom = logo_label.offset_bottom
-	logo_glow_label.add_theme_font_size_override("font_size", (32 if portrait else 38) if mobile else (48 if not portrait else 32))
+	logo_glow_label.add_theme_font_size_override("font_size", (34 if portrait else 20) if mobile else (48 if not portrait else 32))
 
 	menu_box.add_theme_constant_override("separation", button_gap)
-	var menu_width: float = min(360.0 if mobile and portrait else 286.0 if mobile else 270.0, viewport_size.x - margin * 2.0)
-	menu_box.position = Vector2(margin, 148.0 if mobile and portrait else 112.0 if mobile else 164.0 if not portrait else 108.0)
+	var menu_width: float = min(max(320.0, viewport_size.x * 0.9), viewport_size.x - margin * 2.0) if mobile and portrait else min(320.0, viewport_size.x * 0.42) if mobile else 270.0
+	var menu_x := (viewport_size.x - menu_width) * 0.5 if mobile and portrait else margin
+	var menu_y := logo_label.offset_bottom + 18.0 if mobile and portrait else logo_label.offset_bottom + 4.0 if mobile else 164.0 if not portrait else 108.0
 	menu_box.size = Vector2(menu_width, button_height * 4.0 + button_gap * 3.0)
+	menu_box.position = Vector2(menu_x, menu_y)
 	for child in menu_box.get_children():
 		if child is Button:
 			(child as Button).custom_minimum_size = Vector2(menu_width, button_height)
+			(child as Button).add_theme_font_size_override("font_size", 22 if mobile and portrait else 16 if mobile else 20)
 
 	var seed_height := touch_height if mobile else 42.0
 	if mobile and not portrait:
-		var seed_width: float = min(360.0, viewport_size.x - menu_width - margin * 3.0)
-		seed_row.position = Vector2(viewport_size.x - seed_width - margin, 140.0)
+		var seed_width: float = max(280.0, viewport_size.x - menu_width - margin * 3.0)
+		seed_row.position = Vector2(menu_box.position.x + menu_width + margin, menu_y)
 		seed_row.size = Vector2(seed_width, seed_height)
 		seed_input.custom_minimum_size = Vector2(max(150.0, seed_width - 144.0), seed_height)
 		seed_start_button.custom_minimum_size = Vector2(132.0, seed_height)
 	else:
-		seed_row.position = menu_box.position + Vector2(0.0, menu_box.size.y + 16.0)
+		seed_row.position = menu_box.position + Vector2(0.0, menu_box.size.y + (16.0 if mobile else 16.0))
 		seed_row.size = Vector2(menu_width, seed_height)
 		seed_input.custom_minimum_size = Vector2(max(140.0, menu_width - (140.0 if mobile else 116.0)), seed_height)
 		seed_start_button.custom_minimum_size = Vector2(132.0 if mobile else 108.0, seed_height)
@@ -434,24 +446,32 @@ func _apply_responsive_layout() -> void:
 	var panel_width: float = min(viewport_size.x - margin * 2.0, 520.0 if not portrait else viewport_size.x - margin * 2.0)
 	var panel_height: float = min(viewport_size.y - margin * 2.0, 520.0 if not portrait else viewport_size.y - 430.0)
 	var panel_y := 154.0 if not portrait else 398.0
+	var panel_x := viewport_size.x - panel_width - margin
 	if mobile:
 		if portrait:
-			panel_y = 318.0
-			panel_height = max(300.0, viewport_size.y - panel_y - margin)
+			panel_width = viewport_size.x - margin * 2.0
+			panel_x = margin
+			panel_y = max(126.0, logo_label.offset_top + 112.0)
+			panel_height = max(360.0, viewport_size.y - panel_y - margin)
 		else:
-			panel_width = min(500.0, max(300.0, viewport_size.x - menu_width - margin * 3.0))
-			panel_y = 204.0
-			panel_height = max(164.0, viewport_size.y - panel_y - margin)
+			panel_width = max(300.0, viewport_size.x - menu_width - margin * 3.0)
+			panel_x = menu_box.position.x + menu_width + margin
+			panel_y = seed_row.position.y + seed_height + 10.0
+			panel_height = max(190.0, viewport_size.y - panel_y - margin)
 	panel_height = max(panel_height, 260.0 if not mobile else 164.0)
-	side_panel.position = Vector2(viewport_size.x - panel_width - margin, panel_y)
+	side_panel.position = Vector2(panel_x, panel_y)
 	side_panel.size = Vector2(panel_width, panel_height)
 
 	side_title.position = Vector2(22.0, 18.0)
-	side_title.size = Vector2(panel_width - 132.0, 42.0 if mobile else 34.0)
-	side_close_button.position = Vector2(panel_width - (108.0 if mobile else 92.0), 14.0)
-	side_close_button.size = Vector2(86.0 if mobile else 70.0, touch_height if mobile else 36.0)
-	side_content.position = Vector2(24.0 if mobile else 28.0, 78.0 if mobile else 70.0)
-	side_content.size = Vector2(panel_width - (48.0 if mobile else 56.0), panel_height - (98.0 if mobile else 92.0))
+	side_title.size = Vector2(panel_width - (154.0 if mobile else 132.0), 52.0 if mobile else 34.0)
+	side_title.add_theme_font_size_override("font_size", 22 if mobile else 24)
+	side_close_button.position = Vector2(panel_width - (126.0 if mobile else 92.0), 14.0)
+	side_close_button.size = Vector2(104.0 if mobile else 70.0, touch_height if mobile else 36.0)
+	if side_scroll != null:
+		side_scroll.position = Vector2(24.0 if mobile else 28.0, 86.0 if mobile else 70.0)
+		side_scroll.size = Vector2(panel_width - (48.0 if mobile else 56.0), panel_height - (104.0 if mobile else 92.0))
+	if side_content != null:
+		side_content.custom_minimum_size = Vector2(max(240.0, panel_width - (48.0 if mobile else 56.0)), 0.0)
 
 	version_label.anchor_left = 1.0
 	version_label.anchor_right = 1.0
