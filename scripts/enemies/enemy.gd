@@ -3,6 +3,7 @@ extends CharacterBody2D
 
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
+const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 const THREAT_GLOW_DENSITY_START := 80
 const THREAT_GLOW_DENSITY_FULL := 150
 
@@ -820,7 +821,8 @@ func _apply_shadow_and_glow() -> void:
 			ART_RESOURCES.fit_sprite(boss_inner_glow, ART_RESOURCES.get_radial_glow(), radius * 5.1)
 			boss_inner_glow.modulate = Color(0.38, 0.12, 0.92, 0.52)
 	if boss_core_glow != null:
-		boss_core_glow.visible = is_boss
+		var mobile_boss_lod := MOBILE_TUNING.mobile_lod_enabled(get_viewport_rect().size)
+		boss_core_glow.visible = is_boss and not mobile_boss_lod
 		if is_boss:
 			ART_RESOURCES.fit_sprite(boss_core_glow, ART_RESOURCES.get_radial_glow(), radius * 2.35)
 			boss_core_glow.modulate = Color(1.0, 0.42, 0.92, 0.48)

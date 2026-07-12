@@ -61,10 +61,14 @@ var previous_texture_cache_size: int = 0
 var pending_enemy_refills: int = 0
 var pending_projectile_refills: int = 0
 var warmup_evolutions: int = 0
+var baseline_source: String = "UNSPECIFIED"
+var machine_condition: String = "UNSPECIFIED"
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	baseline_source = _stress_arg_value("--baseline-source=", "UNSPECIFIED")
+	machine_condition = _stress_arg_value("--machine-condition=", "UNSPECIFIED")
 	mobile_lod_scenario = mobile_lod_scenario or _has_stress_arg("--mobile-lod")
 	MOBILE_TUNING.set_force_mobile_lod_for_tests(mobile_lod_scenario)
 	var target_size := MOBILE_LOD_VIEWPORT_SIZE if mobile_lod_scenario else DESKTOP_VIEWPORT_SIZE
@@ -119,16 +123,27 @@ func _initialize_stress() -> void:
 	_refill_projectiles(true)
 	_spawn_initial_vfx()
 	_capture_event_baseline()
-	print("STRESS_SCENARIO seed=%d mobile_lod=%s viewport=%s particle_multiplier=%.2f damage_cap=%d hazard_tick=%.3f hazard_visual_redraw=%.4f death_burst_cap=%d corpse_cap=%d" % [
+	var viewport_size := get_viewport().get_visible_rect().size
+	var death_burst_live := EntityFactory.get_pool_live_count("death_burst")
+	var composite_layers := MOBILE_TUNING.vfx_composite_layer_count(
+		viewport_size,
+		mobile_lod_scenario,
+		EntityFactory.get_enemy_live_count(),
+		death_burst_live
+	)
+	print("STRESS_PROVENANCE baseline_source=%s machine_condition=%s" % [baseline_source, machine_condition])
+	print("STRESS_SCENARIO seed=%d mobile_lod=%s viewport=%s composite_layers=%d vfx_live=%d particle_multiplier=%.2f damage_cap=%d hazard_tick=%.3f hazard_visual_redraw=%.4f death_burst_cap=%d corpse_cap=%d" % [
 		STRESS_RUN_SEED,
 		str(mobile_lod_scenario),
-		str(get_viewport().get_visible_rect().size),
-		MOBILE_TUNING.lod_particle_multiplier(get_viewport().get_visible_rect().size, mobile_lod_scenario),
-		MOBILE_TUNING.damage_number_cap(get_viewport().get_visible_rect().size, EntityFactory.DAMAGE_NUMBER_CAP, mobile_lod_scenario),
-		MOBILE_TUNING.hazard_tick_interval(get_viewport().get_visible_rect().size, 0.24, mobile_lod_scenario),
-		MOBILE_TUNING.hazard_visual_redraw_interval(get_viewport().get_visible_rect().size, 0.05, mobile_lod_scenario),
-		MOBILE_TUNING.death_burst_cap(get_viewport().get_visible_rect().size, EntityFactory.DEATH_BURST_CAP, mobile_lod_scenario),
-		MOBILE_TUNING.corpse_ghost_cap(get_viewport().get_visible_rect().size, EntityFactory.CORPSE_GHOST_CAP, mobile_lod_scenario)
+		str(viewport_size),
+		composite_layers,
+		death_burst_live,
+		MOBILE_TUNING.lod_particle_multiplier(viewport_size, mobile_lod_scenario),
+		MOBILE_TUNING.damage_number_cap(viewport_size, EntityFactory.DAMAGE_NUMBER_CAP, mobile_lod_scenario),
+		MOBILE_TUNING.hazard_tick_interval(viewport_size, 0.24, mobile_lod_scenario),
+		MOBILE_TUNING.hazard_visual_redraw_interval(viewport_size, 0.05, mobile_lod_scenario),
+		MOBILE_TUNING.death_burst_cap(viewport_size, EntityFactory.DEATH_BURST_CAP, mobile_lod_scenario),
+		MOBILE_TUNING.corpse_ghost_cap(viewport_size, EntityFactory.CORPSE_GHOST_CAP, mobile_lod_scenario)
 	])
 	print("STRESS_INIT members=%d enemies=%d projectiles=%d" % [
 		squad_manager.get_member_count(),
@@ -356,7 +371,9 @@ func _finish_stress() -> void:
 	var queries_per_frame: float = float(enemy_queries) / max(1.0, float(measured_frames))
 	var group_scans_per_frame: float = float(enemy_group_scans) / max(1.0, float(measured_frames))
 
-	print("STRESS_RESULT enemies=%d projectiles=%d measured_frames=%d avg_ms=%.3f p95_ms=%.3f max_ms=%.3f avg_fps=%.2f p95_fps=%.2f min_fps=%.2f" % [
+	print("STRESS_RESULT baseline_source=%s machine_condition=%s enemies=%d projectiles=%d measured_frames=%d avg_ms=%.3f p95_ms=%.3f max_ms=%.3f avg_fps=%.2f p95_fps=%.2f min_fps=%.2f" % [
+		baseline_source,
+		machine_condition,
 		EntityFactory.get_enemy_live_count(),
 		int(pool_stats.get("projectile", {}).get("live", 0)),
 		measured_frames,
@@ -404,6 +421,15 @@ func _has_stress_arg(flag: String) -> bool:
 		if str(argument) == flag:
 			return true
 	return false
+
+
+func _stress_arg_value(prefix: String, fallback: String) -> String:
+	for argument in OS.get_cmdline_args():
+		var value := str(argument)
+		if value.begins_with(prefix):
+			var parsed := value.trim_prefix(prefix).strip_edges().replace(" ", "_")
+			return parsed if parsed != "" else fallback
+	return fallback
 
 
 func _calculate_frame_stats() -> Dictionary:

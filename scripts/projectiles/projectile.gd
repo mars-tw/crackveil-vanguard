@@ -468,7 +468,7 @@ func _apply_sprite() -> void:
 		return
 	sprite.visible = true
 	sprite.modulate = _projectile_display_color()
-	var growth := 1.0 + float(visual_level) * 0.07 + (0.28 if evolved_visual else 0.0)
+	var growth := _visual_growth(0.035, 0.14)
 	SPRITE_LOADER.fit_sprite(sprite, texture, radius * 4.0 * growth, sprite_scale)
 	match source_weapon_id:
 		"riftline_emitter":
@@ -508,7 +508,7 @@ func _configure_projectile_vfx() -> void:
 			ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), radius * 10.8)
 		else:
 			glow.modulate = Color(vfx_color.r, vfx_color.g, vfx_color.b, glow_alpha)
-			var glow_growth := 1.0 + float(visual_level) * 0.045 + (0.24 if evolved_visual else 0.0)
+			var glow_growth := _visual_growth(0.0225, 0.12)
 			var glow_size := radius * (9.6 if source_weapon_id == "boss_ring" else (8.6 if motion_mode == "boomerang" else 7.8)) * glow_growth
 			ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), glow_size)
 	if trail != null:
@@ -516,7 +516,7 @@ func _configure_projectile_vfx() -> void:
 			active_trail_nodes += 1
 			trail_registered = true
 		trail.visible = trail_registered
-		var trail_growth := 1.0 + float(visual_level) * 0.05 + (0.28 if evolved_visual else 0.0)
+		var trail_growth := _visual_growth(0.025, 0.14)
 		trail.width = clamp(radius * (1.65 if motion_mode == "boomerang" else 1.45) * trail_growth, 3.0, 14.0)
 		var alpha: float = 0.52 if target_group != "heroes" else 0.42
 		if fork_depth > 0:
@@ -528,7 +528,8 @@ func _configure_projectile_vfx() -> void:
 		if enemy_projectile and mobile_readability:
 			alpha = max(alpha, 0.66)
 		if source_weapon_id == "riftline_emitter":
-			trail.width = clamp(2.4 + float(visual_level) * 0.42 + (2.2 if evolved_visual else 0.0), 2.4, 8.0)
+			var riftline_growth := 0.0 if mobile_readability else float(visual_level) * 0.21 + (1.1 if evolved_visual else 0.0)
+			trail.width = clamp(2.4 + riftline_growth, 2.4, 6.8)
 			alpha = 0.82
 		elif source_weapon_id == "rift_seeker_missiles":
 			trail.width = clamp(radius * 1.9 * trail_growth, 5.0, 15.0)
@@ -544,16 +545,25 @@ func _configure_projectile_vfx() -> void:
 		var trail_time := 0.1 if source_weapon_id == "riftline_emitter" else (0.085 if source_weapon_id == "rift_seeker_missiles" else (0.072 if motion_mode == "boomerang" else 0.06))
 		var max_length := 72.0
 		if source_weapon_id == "riftline_emitter":
-			max_length = 128.0
+			max_length = 72.0 if mobile_readability else 96.0
 		elif source_weapon_id == "rift_seeker_missiles":
-			max_length = 92.0
-		var length: float = clamp(speed * trail_time * (1.18 if evolved_visual else 1.0), 20.0, max_length)
+			max_length = 56.0 if mobile_readability else 72.0
+		var evolved_length_multiplier := 1.0 if mobile_readability else (1.09 if evolved_visual else 1.0)
+		var length: float = clamp(speed * trail_time * evolved_length_multiplier, 20.0, max_length)
 		trail.points = PackedVector2Array([Vector2(-length, 0.0), Vector2(-length * 0.32, 0.0), Vector2.ZERO])
 	if muzzle_flash != null:
 		muzzle_flash.visible = true
 		muzzle_flash.modulate = Color(vfx_color.r, vfx_color.g, vfx_color.b, 0.72)
 		ART_RESOURCES.fit_sprite(muzzle_flash, ART_RESOURCES.get_radial_glow(), radius * 8.5)
 		muzzle_flash_base_scale = muzzle_flash.scale
+
+
+func _visual_growth(level_step: float, evolved_bonus: float) -> float:
+	# Mobile retains each weapon's color/shape language without increasing its
+	# fill footprint as it levels. Desktop keeps a deliberately shallower ramp.
+	if MOBILE_TUNING.mobile_lod_enabled(_viewport_size_for_lod()):
+		return 1.0
+	return 1.0 + float(visual_level) * level_step + (evolved_bonus if evolved_visual else 0.0)
 
 
 func _projectile_display_color() -> Color:

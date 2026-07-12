@@ -2,6 +2,7 @@ extends Node2D
 
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
+const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 const VFX_ROOT := "res://assets/vfx/kenney_particle/"
 
 var stats: Dictionary = {}
@@ -167,7 +168,10 @@ func _update_sprite_state() -> void:
 	var lifetime: float = max(0.001, float(stats.get("effect_lifetime", 0.32)))
 	var t: float = clamp(age / lifetime, 0.0, 1.0)
 	var radius: float = float(stats.get("area_radius", 82.0))
-	var upgrade_scale: float = 1.0 + min(8, int(stats.get("visual_level", 0))) * 0.055 + (0.24 if bool(stats.get("evolved_visual", false)) else 0.0)
+	var mobile_lod := MOBILE_TUNING.mobile_lod_enabled(get_viewport_rect().size)
+	var upgrade_scale: float = 1.0
+	if not mobile_lod:
+		upgrade_scale += min(8, int(stats.get("visual_level", 0))) * 0.0275 + (0.12 if bool(stats.get("evolved_visual", false)) else 0.0)
 	radius *= upgrade_scale
 	var texture := sprite.texture
 	if texture != null:
@@ -200,6 +204,11 @@ func _emit_debris() -> void:
 		return
 	var radius: float = float(stats.get("area_radius", 82.0))
 	var particle_multiplier: float = float(stats.get("particle_multiplier", 1.0))
+	var visual_level: int = mini(8, int(stats.get("visual_level", 0)))
+	var growth_tier_multiplier: float = 0.55 if visual_level < 3 else (0.7 if visual_level < 6 else 0.85)
+	if bool(stats.get("evolved_visual", false)):
+		growth_tier_multiplier = min(0.9, growth_tier_multiplier + 0.1)
+	particle_multiplier *= growth_tier_multiplier
 	debris_particles.texture = SPRITE_LOADER.get_texture(VFX_ROOT + ("burst_arc_ember.png" if _uses_ember_palette() else "burst_arc_cyan.png"))
 	debris_particles.amount = max(4, int(round(clamp(radius / 5.5, 12.0, 30.0) * particle_multiplier)))
 	debris_particles.lifetime = max(0.28, float(stats.get("effect_lifetime", 0.32)) * 1.18)

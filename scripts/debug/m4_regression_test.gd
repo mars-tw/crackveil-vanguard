@@ -26,7 +26,9 @@ func _ready() -> void:
 
 func _test_mobile_composite_contract() -> void:
 	MOBILE_TUNING.set_force_mobile_lod_for_tests(false)
-	_assert(MOBILE_TUNING.vfx_composite_layer_count(Vector2(1280.0, 720.0)) == 4, "desktop composite must keep four layers")
+	_assert(MOBILE_TUNING.vfx_composite_layer_count(Vector2(1280.0, 720.0)) == 3, "desktop routine composite must default to three layers")
+	_assert(MOBILE_TUNING.vfx_composite_layer_count(Vector2(1280.0, 720.0), false, 150) == 2, "desktop crowd pressure must drop routine composites to two layers")
+	_assert(MOBILE_TUNING.vfx_composite_layer_count(Vector2(1280.0, 720.0), false, 150, 20, true) == 4, "desktop boss/elite deaths must preserve four layers")
 	MOBILE_TUNING.set_force_mobile_lod_for_tests(true)
 	_assert(MOBILE_TUNING.vfx_composite_layer_count(Vector2(390.0, 844.0)) == 2, "mobile composite must drop to two detail layers")
 	MOBILE_TUNING.set_force_mobile_lod_for_tests(false)
@@ -76,6 +78,10 @@ func _test_boss_volume_and_projectile() -> void:
 	boss.pool_on_acquire()
 	boss.pool_reset({"position": Vector2.ZERO, "enemy_id": "boss_test", "spawn_token": 1, "config": {"max_hp": 100.0, "radius": 42.0, "color": Color(0.7, 0.22, 0.86), "sprite_path": "res://assets/sprites/enemy_tank.png", "behavior_id": "boss", "is_boss": true}})
 	_assert(boss.get_node("BossInnerGlow").visible and boss.get_node("BossCoreGlow").visible, "boss volume glows inactive")
+	MOBILE_TUNING.set_force_mobile_lod_for_tests(true)
+	boss.call("_apply_shadow_and_glow")
+	_assert(boss.get_node("BossInnerGlow").visible and not boss.get_node("BossCoreGlow").visible, "mobile boss must collapse to one volume glow")
+	MOBILE_TUNING.set_force_mobile_lod_for_tests(false)
 	var projectile_stats: Dictionary = boss.call("_enemy_projectile_stats")
 	_assert(str(projectile_stats.get("source_weapon_id", "")) == "boss_ring", "boss ring projectile lacks dedicated style id")
 	_assert(str(projectile_stats.get("projectile_sprite_path", "")).contains("kenney_particle"), "boss ring projectile lacks dedicated texture")

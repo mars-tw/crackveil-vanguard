@@ -15,8 +15,12 @@ const MOBILE_DAMAGE_NUMBER_MERGE_AGE := 0.34
 const MOBILE_DAMAGE_NUMBER_CAP := 30
 const MOBILE_HAZARD_VISUAL_REDRAW_MULTIPLIER := 1.55
 const MOBILE_CORPSE_GHOST_CAP := 12
-const MOBILE_DEATH_BURST_CAP := 12
+const MOBILE_DEATH_BURST_CAP := 8
 const MOBILE_VFX_COMPOSITE_LAYERS := 2
+const DESKTOP_VFX_COMPOSITE_LAYERS := 3
+const DESKTOP_VFX_FEATURE_LAYERS := 4
+const VFX_HIGH_CROWD_THRESHOLD := 120
+const VFX_HIGH_BURST_THRESHOLD := 12
 const MOBILE_JOYSTICK_HEAT_ZONE_MULTIPLIER := 1.24
 
 const META_FONT_BASE_PREFIX := "r14_font_base_"
@@ -239,9 +243,16 @@ static func death_burst_cap(viewport_size: Vector2, base_cap: int, force_mobile:
 	return min(base_cap, MOBILE_DEATH_BURST_CAP) if mobile_lod_enabled(viewport_size, force_mobile) else base_cap
 
 
-static func vfx_composite_layer_count(viewport_size: Vector2, force_mobile: bool = false) -> int:
-	# Gameplay VFX keep their silhouette on mobile, while smoke/debris are dropped.
-	return MOBILE_VFX_COMPOSITE_LAYERS if mobile_lod_enabled(viewport_size, force_mobile) else 4
+static func vfx_composite_layer_count(viewport_size: Vector2, force_mobile: bool = false, live_enemy_count: int = 0, live_burst_count: int = 0, preserve_feature_layers: bool = false) -> int:
+	# Mobile keeps only silhouette + impact ring. Desktop feature deaths may retain
+	# debris, while routine effects shed additive layers as the arena fills.
+	if mobile_lod_enabled(viewport_size, force_mobile):
+		return MOBILE_VFX_COMPOSITE_LAYERS
+	if preserve_feature_layers:
+		return DESKTOP_VFX_FEATURE_LAYERS
+	if live_enemy_count >= VFX_HIGH_CROWD_THRESHOLD or live_burst_count >= VFX_HIGH_BURST_THRESHOLD:
+		return MOBILE_VFX_COMPOSITE_LAYERS
+	return DESKTOP_VFX_COMPOSITE_LAYERS
 
 
 static func leader_camera_zoom(viewport_size: Vector2, force_mobile: bool = false) -> Vector2:

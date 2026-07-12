@@ -279,7 +279,7 @@ func _test_mobile_lod_profile() -> bool:
 	if MOBILE_TUNING.damage_number_cap(portrait, EntityFactory.DAMAGE_NUMBER_CAP, true) != 30:
 		_fail("mobile damage number cap drifted")
 		return false
-	if MOBILE_TUNING.death_burst_cap(portrait, EntityFactory.DEATH_BURST_CAP, true) != 12:
+	if MOBILE_TUNING.death_burst_cap(portrait, EntityFactory.DEATH_BURST_CAP, true) != 8:
 		_fail("mobile death burst cap drifted")
 		return false
 	if MOBILE_TUNING.corpse_ghost_cap(portrait, EntityFactory.CORPSE_GHOST_CAP, true) != 12:

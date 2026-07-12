@@ -237,8 +237,14 @@ func spawn_explosion(world_position: Vector2, stats: Dictionary, source: Node) -
 	if explosion == null:
 		return null
 	var visual_stats := stats.duplicate(true)
-	visual_stats["composite_layers"] = MOBILE_TUNING.vfx_composite_layer_count(_viewport_size_for_lod())
-	visual_stats["particle_multiplier"] = MOBILE_TUNING.lod_particle_multiplier(_viewport_size_for_lod())
+	var viewport_size := _viewport_size_for_lod()
+	visual_stats["composite_layers"] = MOBILE_TUNING.vfx_composite_layer_count(
+		viewport_size,
+		false,
+		get_enemy_live_count(),
+		get_pool_live_count("death_burst")
+	)
+	visual_stats["particle_multiplier"] = MOBILE_TUNING.lod_particle_multiplier(viewport_size)
 	explosion.pool_reset({
 		"position": world_position,
 		"stats": visual_stats,
@@ -459,13 +465,20 @@ func spawn_death_burst(world_position: Vector2, burst_color: Color, burst_scale:
 	var burst := _acquire("death_burst")
 	if burst == null:
 		return null
+	var preserve_feature_layers := burst_style == "elite_death" or burst_style == "boss_phase" or burst_style == "boss_death"
 	burst.pool_reset({
 		"position": world_position,
 		"color": burst_color,
 		"scale": burst_scale,
 		"style": burst_style,
 		"particle_multiplier": MOBILE_TUNING.lod_particle_multiplier(viewport_size),
-		"composite_layers": MOBILE_TUNING.vfx_composite_layer_count(viewport_size)
+		"composite_layers": MOBILE_TUNING.vfx_composite_layer_count(
+			viewport_size,
+			false,
+			get_enemy_live_count(),
+			get_pool_live_count("death_burst"),
+			preserve_feature_layers
+		)
 	})
 	return burst
 

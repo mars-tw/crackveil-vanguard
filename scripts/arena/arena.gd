@@ -103,9 +103,11 @@ func _update_leader_light() -> void:
 		return
 	var viewport_size := get_viewport().get_visible_rect().size
 	var mobile_lod := MOBILE_TUNING.mobile_lod_enabled(viewport_size)
-	var diameter := 390.0 if mobile_lod else 620.0
+	# The light follows as a child transform; refreshes remain event-driven on
+	# attach/viewport changes rather than becoming a per-frame position update.
+	var diameter := 240.0 if mobile_lod else 420.0
 	ART_RESOURCES.fit_sprite(leader_light, ART_RESOURCES.get_radial_glow(), diameter)
-	leader_light.modulate = Color(0.22, 0.72, 1.0, 0.12 if mobile_lod else 0.16)
+	leader_light.modulate = Color(0.22, 0.72, 1.0, 0.08 if mobile_lod else 0.12)
 
 
 func _on_restart_requested() -> void:
