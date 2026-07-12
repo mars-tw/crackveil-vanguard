@@ -76,7 +76,9 @@ func _make_explosion_stats(effect_stats: Dictionary) -> Dictionary:
 		"effect_lifetime": data_float("effect_lifetime", 0.34),
 		"explosion_sprite_path": data_string("explosion_sprite_path", "res://assets/vfx/kenney_particle/burst_fire_ember.png"),
 		"color": effect_stats.get("color", data_color("color", Color(1.0, 0.48, 0.18))),
-		"sprite_scale": data_float("sprite_scale", 1.0)
+		"sprite_scale": data_float("sprite_scale", 1.0),
+		"visual_level": int(effect_stats.get("visual_level", 0)),
+		"evolved_visual": bool(effect_stats.get("evolved_visual", false))
 	}
 
 

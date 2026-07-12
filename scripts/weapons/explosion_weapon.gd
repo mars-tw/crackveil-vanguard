@@ -68,5 +68,7 @@ func _make_ember_well_delayed_explosion_stats(effect_stats: Dictionary) -> Dicti
 		"effect_lifetime": 0.24,
 		"explosion_sprite_path": str(effect_stats.get("explosion_sprite_path", "res://assets/vfx/kenney_particle/burst_fire_ember.png")),
 		"color": Color(1.0, 0.52, 0.2),
-		"sprite_scale": float(effect_stats.get("sprite_scale", 1.0)) * 0.82
+		"sprite_scale": float(effect_stats.get("sprite_scale", 1.0)) * 0.82,
+		"visual_level": int(effect_stats.get("visual_level", 0)),
+		"evolved_visual": bool(effect_stats.get("evolved_visual", false))
 	}

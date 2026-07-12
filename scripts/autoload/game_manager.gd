@@ -14,6 +14,7 @@ signal combo_pulse_requested(combo_count: int)
 signal combo_milestone_requested(combo_count: int)
 signal combo_break_requested(combo_count: int)
 signal boss_intro_requested(boss_name: String)
+signal boss_phase_transition_requested
 signal captain_ability_hit_flash_requested
 
 const SHOP_FIRST_TIME := 75.0
@@ -1469,6 +1470,7 @@ func set_boss_active(value: bool) -> void:
 func record_boss_phase_two() -> void:
 	if boss_phase_two_time < 0.0:
 		boss_phase_two_time = elapsed_time
+		boss_phase_transition_requested.emit()
 
 
 func record_boss_kill() -> void:

@@ -87,7 +87,8 @@ func _hit_key_for(body: Node) -> int:
 
 func _spawn_hymn_visuals(radius: float, stats: Dictionary, evolved: bool) -> void:
 	var color: Color = stats.get("color", data_color("color", Color(1.0, 0.86, 0.46)))
-	EntityFactory.spawn_death_burst(owner_player.global_position, color, 1.25 if evolved else 0.95, "level_column")
+	var visual_level := int(stats.get("visual_level", 0))
+	EntityFactory.spawn_death_burst(owner_player.global_position, color, (1.25 if evolved else 0.95) * (1.0 + float(visual_level) * 0.045), "level_column")
 	var members: Array = []
 	if GameManager.squad_manager != null and is_instance_valid(GameManager.squad_manager) and GameManager.squad_manager.has_method("get_members"):
 		members = GameManager.squad_manager.get_members()

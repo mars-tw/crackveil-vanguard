@@ -15,6 +15,8 @@ var main_menu_button: Button
 var copy_seed_button: Button
 var summary_label: Label
 var achievements_label: RichTextLabel
+var summary_tween: Tween = null
+var displayed_summary: Dictionary = {}
 
 
 func _ready() -> void:
@@ -103,8 +105,25 @@ func _build_ui() -> void:
 
 
 func show_summary(summary: Dictionary) -> void:
+	displayed_summary = summary.duplicate(true)
+	_update_summary_count(0.0)
+	if summary_tween != null and summary_tween.is_valid():
+		summary_tween.kill()
+	summary_tween = create_tween()
+	summary_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	summary_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	summary_tween.tween_method(_update_summary_count, 0.0, 1.0, 0.85)
+	if achievements_label != null:
+		achievements_label.text = _achievement_text(summary)
+	root.visible = true
+
+
+func _update_summary_count(progress_ratio: float) -> void:
+	var summary := displayed_summary.duplicate(true)
+	for key in ["level", "gold", "kills", "elites_killed", "elites_spawned"]:
+		summary[key] = int(round(float(displayed_summary.get(key, 0)) * progress_ratio))
 	var progress: Dictionary = summary.get("echo_progress", {})
-	var elapsed := float(summary.get("elapsed_time", 0.0))
+	var elapsed := float(displayed_summary.get("elapsed_time", 0.0)) * progress_ratio
 	summary_label.text = "%s\n存活 %s　等級 %d　金幣 %d\n%s\n%s\n契約：%s\n%s" % [
 		_survival_rating(elapsed),
 		GameManager.format_time(elapsed),
@@ -115,9 +134,6 @@ func show_summary(summary: Dictionary) -> void:
 		str(summary.get("contract_name", "無契約")),
 		_echo_destination_text(summary, progress)
 	]
-	if achievements_label != null:
-		achievements_label.text = _achievement_text(summary)
-	root.visible = true
 
 
 func _on_restart_pressed() -> void:

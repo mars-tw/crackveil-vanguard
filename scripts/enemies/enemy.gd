@@ -67,6 +67,8 @@ var hp_bar_bg: Line2D = null
 var hp_bar_fg: Line2D = null
 var shadow: Sprite2D = null
 var threat_glow: Sprite2D = null
+var boss_inner_glow: Sprite2D = null
+var boss_core_glow: Sprite2D = null
 var hit_flash_timer: float = 0.0
 var threat_glow_base_alpha: float = 0.18
 var visual_walk_phase: float = 0.0
@@ -136,6 +138,10 @@ func pool_on_release() -> void:
 		shadow.visible = false
 	if threat_glow != null:
 		threat_glow.visible = false
+	if boss_inner_glow != null:
+		boss_inner_glow.visible = false
+	if boss_core_glow != null:
+		boss_core_glow.visible = false
 	hit_flash_timer = 0.0
 	hit_squash_timer = 0.0
 	visual_walk_phase = 0.0
@@ -397,15 +403,19 @@ func _enemy_projectile_stats(damage_multiplier: float = 1.0) -> Dictionary:
 		"projectile_speed": ranged_projectile_speed,
 		"projectile_radius": ranged_projectile_radius,
 		"pierce": 0,
-		"color": Color(1.0, 0.35, 0.24),
-		"projectile_sprite_path": "res://assets/sprites/proj_bullet.png",
-		"sprite_scale": 1.0,
+		"color": Color(0.94, 0.42, 1.0) if is_boss else Color(1.0, 0.35, 0.24),
+		"projectile_sprite_path": "res://assets/vfx/kenney_particle/flare_cyan.png" if is_boss else "res://assets/sprites/proj_bullet.png",
+		"sprite_scale": 1.12 if is_boss else 1.0,
+		"source_weapon_id": "boss_ring" if is_boss else "enemy_shot",
+		"visual_level": 5 if is_boss else 0,
+		"evolved_visual": boss_phase_two_triggered if is_boss else false,
 		"target_group": "heroes"
 	}
 
 
 func _trigger_boss_phase_two() -> void:
 	boss_phase_two_triggered = true
+	EntityFactory.spawn_death_burst(global_position, Color(0.82, 0.42, 1.0), 3.1, "boss_phase")
 	_fire_ring_projectiles(14)
 	_spawn_boss_dashers(4)
 	if GameManager.has_method("record_boss_phase_two"):
@@ -571,7 +581,8 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 		corpse_flip,
 		corpse_rotation,
 		burst_scale,
-		is_elite and not is_boss
+		is_elite and not is_boss,
+		"boss_death" if is_boss else ("elite_death" if is_elite else "burst")
 	)
 
 	var magnetic_reclaim := GameManager.has_method("has_magnetic_reclaim") and GameManager.has_magnetic_reclaim()
@@ -780,10 +791,13 @@ func _set_sprite_modulate(color: Color) -> void:
 
 
 func _apply_shadow_and_glow() -> void:
+	if is_boss:
+		_ensure_boss_volume_nodes()
 	if shadow != null:
 		shadow.visible = true
 		shadow.position = Vector2(0.0, radius * 0.86)
-		ART_RESOURCES.fit_sprite(shadow, ART_RESOURCES.get_ellipse_shadow(), radius * 3.2)
+		ART_RESOURCES.fit_sprite(shadow, ART_RESOURCES.get_ellipse_shadow(), radius * (5.4 if is_boss else 3.2))
+		shadow.modulate.a = 0.84 if is_boss else 0.68
 		shadow_base_scale = shadow.scale
 	if threat_glow != null:
 		threat_glow.visible = true
@@ -800,6 +814,40 @@ func _apply_shadow_and_glow() -> void:
 		threat_glow_base_alpha = glow_alpha
 		var enemy_count: int = EntityFactory.get_enemy_live_count() if EntityFactory != null and EntityFactory.has_method("get_enemy_live_count") else 0
 		update_threat_glow_for_crowd_count(enemy_count)
+	if boss_inner_glow != null:
+		boss_inner_glow.visible = is_boss
+		if is_boss:
+			ART_RESOURCES.fit_sprite(boss_inner_glow, ART_RESOURCES.get_radial_glow(), radius * 5.1)
+			boss_inner_glow.modulate = Color(0.38, 0.12, 0.92, 0.52)
+	if boss_core_glow != null:
+		boss_core_glow.visible = is_boss
+		if is_boss:
+			ART_RESOURCES.fit_sprite(boss_core_glow, ART_RESOURCES.get_radial_glow(), radius * 2.35)
+			boss_core_glow.modulate = Color(1.0, 0.42, 0.92, 0.48)
+
+
+func _ensure_boss_volume_nodes() -> void:
+	if boss_inner_glow == null:
+		boss_inner_glow = get_node_or_null("BossInnerGlow") as Sprite2D
+	if boss_inner_glow == null:
+		boss_inner_glow = Sprite2D.new()
+		boss_inner_glow.name = "BossInnerGlow"
+		add_child(boss_inner_glow)
+	boss_inner_glow.texture = ART_RESOURCES.get_radial_glow()
+	boss_inner_glow.centered = true
+	boss_inner_glow.material = ART_RESOURCES.get_additive_material()
+	boss_inner_glow.z_index = -2
+
+	if boss_core_glow == null:
+		boss_core_glow = get_node_or_null("BossCoreGlow") as Sprite2D
+	if boss_core_glow == null:
+		boss_core_glow = Sprite2D.new()
+		boss_core_glow.name = "BossCoreGlow"
+		add_child(boss_core_glow)
+	boss_core_glow.texture = ART_RESOURCES.get_radial_glow()
+	boss_core_glow.centered = true
+	boss_core_glow.material = ART_RESOURCES.get_additive_material()
+	boss_core_glow.z_index = 1
 
 
 func update_threat_glow_for_crowd_count(enemy_count: int) -> void:
@@ -885,7 +933,13 @@ func _update_procedural_visual(delta: float) -> void:
 	if shadow != null:
 		shadow.scale = shadow_base_scale * (1.0 - abs(bob) * 0.012)
 	if threat_glow != null:
-		threat_glow.scale = threat_glow_base_scale * (1.0 + sin(visual_idle_phase + 0.2) * 0.012)
+		threat_glow.scale = threat_glow_base_scale * (1.0 + sin(visual_idle_phase + 0.2) * (0.07 if is_boss else 0.012))
+	if is_boss and boss_inner_glow != null and boss_core_glow != null:
+		var boss_pulse := 0.5 + 0.5 * sin(visual_idle_phase * (1.5 if boss_phase_two_triggered else 1.0))
+		boss_inner_glow.scale = Vector2.ONE * lerpf(0.82, 1.12, boss_pulse) * threat_glow_base_scale.length() * 0.7
+		boss_inner_glow.modulate.a = lerpf(0.34, 0.64, boss_pulse)
+		boss_core_glow.scale = Vector2.ONE * lerpf(0.72, 1.18, 1.0 - boss_pulse) * threat_glow_base_scale.length() * 0.34
+		boss_core_glow.modulate.a = lerpf(0.32, 0.62, 1.0 - boss_pulse)
 
 
 func _setup_animation_frames(target_diameter: float, scale_multiplier: float) -> void:

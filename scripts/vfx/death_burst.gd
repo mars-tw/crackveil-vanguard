@@ -8,6 +8,7 @@ var burst_color: Color = Color(1.0, 0.4, 0.4)
 var burst_scale: float = 1.0
 var burst_style: String = "burst"
 var particle_multiplier: float = 1.0
+var composite_layers: int = 4
 var age: float = 0.0
 var lifetime: float = 0.32
 var is_active: bool = false
@@ -16,6 +17,9 @@ var glow: Sprite2D = null
 var particles: CPUParticles2D = null
 var column: Line2D = null
 var shockwave: Line2D = null
+var core_flash: Sprite2D = null
+var impact_ring: Sprite2D = null
+var smoke: Sprite2D = null
 
 
 func _ready() -> void:
@@ -45,9 +49,16 @@ func pool_on_release() -> void:
 		column.visible = false
 	if shockwave != null:
 		shockwave.visible = false
+	if core_flash != null:
+		core_flash.visible = false
+	if impact_ring != null:
+		impact_ring.visible = false
+	if smoke != null:
+		smoke.visible = false
 	burst_scale = 1.0
 	burst_style = "burst"
 	particle_multiplier = 1.0
+	composite_layers = 4
 
 
 func pool_reset(args: Dictionary) -> void:
@@ -56,16 +67,18 @@ func pool_reset(args: Dictionary) -> void:
 		args.get("color", Color.WHITE),
 		float(args.get("scale", 1.0)),
 		str(args.get("style", "burst")),
-		float(args.get("particle_multiplier", 1.0))
+		float(args.get("particle_multiplier", 1.0)),
+		int(args.get("composite_layers", 4))
 	)
 
 
-func setup(world_position: Vector2, color_value: Color, scale_value: float = 1.0, style_value: String = "burst", particle_multiplier_value: float = 1.0) -> void:
+func setup(world_position: Vector2, color_value: Color, scale_value: float = 1.0, style_value: String = "burst", particle_multiplier_value: float = 1.0, layer_count: int = 4) -> void:
 	global_position = world_position
 	burst_color = color_value
 	burst_scale = clamp(scale_value, 0.75, 3.4)
 	burst_style = style_value
 	particle_multiplier = clamp(particle_multiplier_value, 0.2, 1.0)
+	composite_layers = clamp(layer_count, 2, 4)
 	lifetime = _lifetime_for_style()
 	age = 0.0
 	rotation = 0.0
@@ -96,6 +109,33 @@ func _ensure_sprite() -> void:
 	glow.centered = true
 	glow.material = ART_RESOURCES.get_additive_material()
 	glow.z_index = -2
+
+	core_flash = get_node_or_null("CoreFlash") as Sprite2D
+	if core_flash == null:
+		core_flash = Sprite2D.new()
+		core_flash.name = "CoreFlash"
+		add_child(core_flash)
+	core_flash.texture = ART_RESOURCES.get_radial_glow()
+	core_flash.centered = true
+	core_flash.material = ART_RESOURCES.get_additive_material()
+	core_flash.z_index = 5
+
+	impact_ring = get_node_or_null("ImpactRing") as Sprite2D
+	if impact_ring == null:
+		impact_ring = Sprite2D.new()
+		impact_ring.name = "ImpactRing"
+		add_child(impact_ring)
+	impact_ring.centered = true
+	impact_ring.material = ART_RESOURCES.get_additive_material()
+	impact_ring.z_index = 1
+
+	smoke = get_node_or_null("Smoke") as Sprite2D
+	if smoke == null:
+		smoke = Sprite2D.new()
+		smoke.name = "Smoke"
+		add_child(smoke)
+	smoke.centered = true
+	smoke.z_index = 2
 
 	particles = get_node_or_null("BurstParticles") as CPUParticles2D
 	if particles == null:
@@ -155,13 +195,22 @@ func _apply_sprite() -> void:
 		return
 	sprite.visible = true
 	if glow != null:
-		glow.visible = true
+		glow.visible = composite_layers >= 3
+	var suffix := "ember.png" if _uses_ember_palette() else "cyan.png"
+	if core_flash != null:
+		core_flash.visible = composite_layers >= 3
+	if impact_ring != null:
+		impact_ring.texture = SPRITE_LOADER.get_texture(VFX_ROOT + "shockwave_" + suffix)
+		impact_ring.visible = impact_ring.texture != null
+	if smoke != null:
+		smoke.texture = SPRITE_LOADER.get_texture(VFX_ROOT + "smoke_ring_" + suffix)
+		smoke.visible = composite_layers >= 3 and smoke.texture != null
 	if column != null:
 		column.visible = burst_style == "level_column"
 		column.width = 18.0 * burst_scale
 		column.default_color = Color(burst_color.r, burst_color.g, burst_color.b, 0.92)
 	if shockwave != null:
-		shockwave.visible = burst_style == "level_column" or burst_style == "smoke_ring"
+		shockwave.visible = burst_style == "level_column" or burst_style == "smoke_ring" or burst_style == "boss_phase"
 		shockwave.width = 5.0 * burst_scale
 		shockwave.default_color = Color(burst_color.r, burst_color.g, burst_color.b, 0.62)
 	_update_sprite_state()
@@ -176,24 +225,41 @@ func _update_sprite_state() -> void:
 	if texture != null:
 		SPRITE_LOADER.fit_sprite(sprite, texture, base_size * burst_scale, 1.0)
 	sprite.rotation += 1.8 * get_process_delta_time()
-	var sprite_alpha := (1.0 - t) * _sprite_alpha_multiplier()
+	var sprite_alpha := (1.0 - smoothstep(0.3, 1.0, t)) * _sprite_alpha_multiplier()
 	sprite.modulate = Color(1.0, 1.0, 1.0, sprite_alpha)
-	if glow != null:
+	if glow != null and glow.visible:
 		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), _glow_base_size(t) * burst_scale)
 		glow.modulate = Color(burst_color.r, burst_color.g, burst_color.b, (1.0 - t) * _glow_alpha_multiplier())
+	if core_flash != null and core_flash.visible:
+		var flash_t: float = clamp(t / _core_flash_fraction(), 0.0, 1.0)
+		ART_RESOURCES.fit_sprite(core_flash, ART_RESOURCES.get_radial_glow(), _core_flash_size(flash_t) * burst_scale)
+		core_flash.modulate = Color(1.0, 0.98, 0.86, (1.0 - flash_t) * 0.96)
+	if impact_ring != null and impact_ring.visible and impact_ring.texture != null:
+		var ring_t: float = clamp(t / (0.92 if burst_style == "boss_phase" else 0.76), 0.0, 1.0)
+		SPRITE_LOADER.fit_sprite(impact_ring, impact_ring.texture, _ring_size(ring_t) * burst_scale)
+		impact_ring.modulate = Color(1.0, 1.0, 1.0, (1.0 - ring_t) * _ring_alpha())
+	if smoke != null and smoke.visible and smoke.texture != null:
+		var smoke_t: float = clamp((t - 0.16) / 0.84, 0.0, 1.0)
+		SPRITE_LOADER.fit_sprite(smoke, smoke.texture, _smoke_size(smoke_t) * burst_scale)
+		smoke.rotation = -0.18 + smoke_t * 0.34
+		smoke.modulate = Color(0.48, 0.43, 0.52, sin(smoke_t * PI) * _smoke_alpha())
 	if column != null and column.visible:
 		var height := lerpf(76.0, 228.0, min(1.0, t * 1.45)) * burst_scale
 		column.width = lerpf(24.0, 4.0, t) * burst_scale
 		column.default_color = Color(burst_color.r, burst_color.g, burst_color.b, (1.0 - t) * 0.86)
 		column.points = PackedVector2Array([Vector2(0.0, 12.0), Vector2(0.0, -height)])
 	if shockwave != null and shockwave.visible:
-		var ring_radius := lerpf(18.0, 86.0 if burst_style == "level_column" else 54.0, t) * burst_scale
-		shockwave.default_color = Color(burst_color.r, burst_color.g, burst_color.b, (1.0 - t) * (0.58 if burst_style == "level_column" else 0.32))
+		var max_radius := 310.0 if burst_style == "boss_phase" else (86.0 if burst_style == "level_column" else 54.0)
+		var ring_radius := lerpf(18.0, max_radius, t) * burst_scale
+		var line_alpha := 0.82 if burst_style == "boss_phase" else (0.58 if burst_style == "level_column" else 0.32)
+		shockwave.default_color = Color(burst_color.r, burst_color.g, burst_color.b, (1.0 - t) * line_alpha)
 		shockwave.points = _circle_points(ring_radius, 36)
 
 
 func _emit_particles() -> void:
-	if particles == null:
+	if particles == null or composite_layers < 4:
+		if particles != null:
+			particles.emitting = false
 		return
 	_configure_particles_for_style()
 	particles.restart()
@@ -208,6 +274,20 @@ func _configure_particles_for_style() -> void:
 	particles.emission_sphere_radius = 7.0 * burst_scale
 	particles.color = Color(1.0, 1.0, 1.0, 0.88)
 	match burst_style:
+		"boss_phase", "boss_death":
+			particles.amount = _scaled_particle_amount(44.0, 22.0, 72.0)
+			particles.lifetime = 0.68
+			particles.initial_velocity_min = 150.0 * burst_scale
+			particles.initial_velocity_max = 380.0 * burst_scale
+			particles.scale_amount_min = 0.18 * burst_scale
+			particles.scale_amount_max = 0.58 * burst_scale
+		"elite_death":
+			particles.amount = _scaled_particle_amount(32.0, 18.0, 58.0)
+			particles.lifetime = 0.5
+			particles.initial_velocity_min = 105.0 * burst_scale
+			particles.initial_velocity_max = 285.0 * burst_scale
+			particles.scale_amount_min = 0.16 * burst_scale
+			particles.scale_amount_max = 0.48 * burst_scale
 		"spark":
 			particles.amount = _scaled_particle_amount(12.0, 8.0, 24.0)
 			particles.lifetime = 0.22
@@ -266,6 +346,12 @@ func _lifetime_for_style() -> float:
 			return 0.56
 		"level_column":
 			return 0.62
+		"elite_death":
+			return 0.58
+		"boss_phase":
+			return 0.92
+		"boss_death":
+			return 0.82
 		_:
 			return 0.32
 
@@ -280,6 +366,10 @@ func _sprite_base_size(t: float) -> float:
 			return 48.0 + 30.0 * t
 		"level_column":
 			return 68.0 + 42.0 * t
+		"elite_death":
+			return 76.0 + 62.0 * t
+		"boss_phase", "boss_death":
+			return 108.0 + 92.0 * t
 		_:
 			return 56.0 + 34.0 * t
 
@@ -294,6 +384,10 @@ func _glow_base_size(t: float) -> float:
 			return 132.0 + 70.0 * t
 		"level_column":
 			return 154.0 + 94.0 * t
+		"elite_death":
+			return 168.0 + 118.0 * t
+		"boss_phase", "boss_death":
+			return 260.0 + 210.0 * t
 		_:
 			return 104.0 + 58.0 * t
 
@@ -310,6 +404,10 @@ func _glow_alpha_multiplier() -> float:
 			return 0.30
 		"level_column":
 			return 0.68
+		"elite_death":
+			return 0.7
+		"boss_phase", "boss_death":
+			return 0.82
 		_:
 			return 0.56
 
@@ -333,6 +431,10 @@ func _style_texture_path() -> String:
 			return VFX_ROOT + "flare_" + suffix
 		"level_column":
 			return VFX_ROOT + "level_column_" + suffix
+		"elite_death", "boss_death":
+			return VFX_ROOT + "flare_" + suffix
+		"boss_phase":
+			return VFX_ROOT + "shockwave_" + suffix
 		_:
 			return VFX_ROOT + "burst_fire_" + suffix
 
@@ -344,3 +446,30 @@ func _particle_texture_path() -> String:
 
 func _uses_ember_palette() -> bool:
 	return burst_color.r > burst_color.b * 1.08 and burst_color.r > burst_color.g * 0.94
+
+
+func _core_flash_fraction() -> float:
+	return 0.34 if burst_style in ["boss_phase", "boss_death"] else 0.24
+
+
+func _core_flash_size(t: float) -> float:
+	var maximum := 220.0 if burst_style in ["boss_phase", "boss_death"] else (138.0 if burst_style == "elite_death" else 96.0)
+	return lerpf(maximum * 0.45, maximum, t)
+
+
+func _ring_size(t: float) -> float:
+	var maximum := 720.0 if burst_style == "boss_phase" else (340.0 if burst_style == "boss_death" else (230.0 if burst_style == "elite_death" else 146.0))
+	return lerpf(maximum * 0.18, maximum, t)
+
+
+func _ring_alpha() -> float:
+	return 0.9 if burst_style == "boss_phase" else (0.78 if burst_style in ["elite_death", "boss_death"] else 0.66)
+
+
+func _smoke_size(t: float) -> float:
+	var maximum := 410.0 if burst_style in ["boss_phase", "boss_death"] else (260.0 if burst_style == "elite_death" else 184.0)
+	return lerpf(maximum * 0.42, maximum, t)
+
+
+func _smoke_alpha() -> float:
+	return 0.5 if burst_style in ["elite_death", "boss_death"] else 0.36

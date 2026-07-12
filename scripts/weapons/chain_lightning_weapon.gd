@@ -46,6 +46,8 @@ func _cast_chain(first_target: Node2D) -> void:
 		damage_value *= data_float("chain_damage_falloff", 0.86)
 
 	var effect_stats := data_effect_stats()
+	var visual_level := int(effect_stats.get("visual_level", 0))
+	var evolved_visual := bool(effect_stats.get("evolved_visual", false))
 	if int(effect_stats.get("evo_overload_nova_level", 0)) > 0 and has_final_target:
 		EntityFactory.spawn_explosion(final_target_position, _make_nova_stats(), owner_player)
 		_cast_overload_nova(final_target_position, used_ids)
@@ -54,10 +56,10 @@ func _cast_chain(first_target: Node2D) -> void:
 
 	EntityFactory.spawn_lightning_arc(
 		points,
-		data_color("color", Color(0.6, 0.9, 1.0)).lerp(Color.WHITE, 0.28),
+		data_color("color", Color(0.82, 0.68, 1.0)).lerp(Color.WHITE, 0.32),
 		data_float("effect_lifetime", 0.22) + 0.04,
 		data_string("lightning_sprite_path", "res://assets/sprites/proj_lightning.png"),
-		34.0
+		34.0 + float(visual_level) * 1.5 + (9.0 if evolved_visual else 0.0)
 	)
 	if has_final_target:
 		EntityFactory.spawn_death_burst(final_target_position, data_color("color", Color(0.72, 1.0, 0.92)), 0.78, "spark")
@@ -71,7 +73,9 @@ func _make_overload_stats() -> Dictionary:
 		"effect_lifetime": 0.22,
 		"explosion_sprite_path": "res://assets/vfx/kenney_particle/burst_fire_cyan.png",
 		"color": data_color("color", Color(0.6, 0.9, 1.0)),
-		"sprite_scale": 0.72
+		"sprite_scale": 0.72,
+		"visual_level": int(data_effect_stats().get("visual_level", 0)),
+		"evolved_visual": bool(data_effect_stats().get("evolved_visual", false))
 	}
 
 
@@ -83,7 +87,9 @@ func _make_nova_stats() -> Dictionary:
 		"effect_lifetime": 0.28,
 		"explosion_sprite_path": "res://assets/vfx/kenney_particle/burst_fire_cyan.png",
 		"color": data_color("color", Color(0.72, 1.0, 0.92)),
-		"sprite_scale": 0.86
+		"sprite_scale": 0.86,
+		"visual_level": int(data_effect_stats().get("visual_level", 0)),
+		"evolved_visual": true
 	}
 
 

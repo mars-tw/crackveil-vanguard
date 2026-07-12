@@ -140,6 +140,8 @@ var evolution_interval: float = 75.0
 var last_evolution_step: int = -1
 var boss_flash_timer: float = 0.0
 var boss_flash_duration: float = 0.42
+var boss_phase_wave_timer: float = 0.0
+var boss_phase_wave_duration: float = 0.92
 var next_lightning_time: float = 28.0
 var lightning_timer: float = 0.0
 var lightning_token: int = 0
@@ -184,6 +186,8 @@ func _ready() -> void:
 	_apply_visual_lod_state(_mobile_lod_active(), true)
 	if GameManager.has_signal("boss_intro_requested") and not GameManager.boss_intro_requested.is_connected(_on_boss_intro_requested):
 		GameManager.boss_intro_requested.connect(_on_boss_intro_requested)
+	if GameManager.has_signal("boss_phase_transition_requested") and not GameManager.boss_phase_transition_requested.is_connected(_on_boss_phase_transition_requested):
+		GameManager.boss_phase_transition_requested.connect(_on_boss_phase_transition_requested)
 	queue_redraw()
 
 
@@ -228,6 +232,8 @@ func _process(delta: float) -> void:
 	time_accum += delta
 	if boss_flash_timer > 0.0:
 		boss_flash_timer = max(boss_flash_timer - delta, 0.0)
+	if boss_phase_wave_timer > 0.0:
+		boss_phase_wave_timer = max(boss_phase_wave_timer - delta, 0.0)
 	var center := _get_center()
 	global_position = center
 	var center_cell := Vector2i(floori(center.x / 48.0), floori(center.y / 48.0))
@@ -277,6 +283,42 @@ func _draw() -> void:
 		var from := Vector2(x, y)
 		var to := from + Vector2(length, 0.0).rotated(0.62 + float(index) * 0.73)
 		draw_line(from, to, Color(draw_rift.r, draw_rift.g, draw_rift.b, alpha * 1.35), 1.0)
+	_draw_theme_moment(viewport_size, draw_rift, dynamic_multiplier)
+	_draw_boss_phase_wave(viewport_size)
+
+
+func _draw_theme_moment(viewport_size: Vector2, draw_rift: Color, dynamic_multiplier: float) -> void:
+	if dynamic_multiplier < 1.0:
+		return
+	var pulse := pow(maxf(0.0, sin(time_accum * 0.19 + float(run_seed % 17))), 10.0)
+	if pulse <= 0.015:
+		return
+	if current_theme_id == "ember_rift":
+		var spark_count := 6 if dynamic_multiplier < 1.0 else 14
+		for index in range(spark_count):
+			var x := lerpf(-viewport_size.x * 0.58, viewport_size.x * 0.58, _hash01(index, run_seed, 611))
+			var travel := fposmod(time_accum * lerpf(90.0, 180.0, _hash01(index, run_seed, 612)) + _hash01(index, run_seed, 613) * viewport_size.y, viewport_size.y * 1.25)
+			var from := Vector2(x, -viewport_size.y * 0.62 + travel)
+			var length := lerpf(10.0, 34.0, _hash01(index, run_seed, 614))
+			draw_line(from, from + Vector2(-length * 0.22, length), Color(1.0, 0.42, 0.08, pulse * 0.78), 2.0)
+	elif current_theme_id == "rift_void":
+		var ring_count := 2 if dynamic_multiplier < 1.0 else 4
+		for index in range(ring_count):
+			var center := Vector2(
+				lerpf(-viewport_size.x * 0.46, viewport_size.x * 0.46, _hash01(index, run_seed, 621)),
+				lerpf(-viewport_size.y * 0.4, viewport_size.y * 0.4, _hash01(index, run_seed, 622))
+			)
+			var radius := lerpf(18.0, 82.0, pulse) * (0.7 + float(index) * 0.16)
+			draw_arc(center, radius, 0.0, TAU, 28, Color(draw_rift.r, draw_rift.g, draw_rift.b, pulse * 0.24), 2.0)
+
+
+func _draw_boss_phase_wave(viewport_size: Vector2) -> void:
+	if boss_phase_wave_timer <= 0.0:
+		return
+	var t := 1.0 - boss_phase_wave_timer / boss_phase_wave_duration
+	var color: Color = current_theme.get("boss_flash_color", Color(0.82, 0.42, 1.0, 1.0))
+	var radius := lerpf(24.0, viewport_size.length() * 0.62, t)
+	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 64, Color(color.r, color.g, color.b, (1.0 - t) * 0.86), lerpf(10.0, 2.0, t))
 
 
 func _draw_theme_ground(center: Vector2, draw_size: Vector2) -> void:
@@ -464,6 +506,8 @@ func _apply_visual_lod_state(mobile_lod: bool, force_refresh: bool = false) -> v
 		return
 	applied_mobile_lod = mobile_lod
 	mobile_lod_initialized = true
+	if vignette_rect != null:
+		vignette_rect.modulate = Color(1.0, 1.0, 1.0, 0.6 if mobile_lod else 0.72)
 	if dust_particles != null:
 		dust_particles.amount = max(0, int(round(float(dust_amount) * float(current_theme.get("dust_amount_multiplier", 1.0)) * MOBILE_TUNING.lod_particle_multiplier(_viewport_size()))))
 		_update_dust_bounds()
@@ -758,7 +802,7 @@ func _ensure_vignette() -> void:
 	vignette_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	vignette_rect.stretch_mode = TextureRect.STRETCH_SCALE
 	vignette_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	vignette_rect.modulate = Color(1.0, 1.0, 1.0, 0.62)
+	vignette_rect.modulate = Color(1.0, 1.0, 1.0, 0.72)
 	vignette_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(vignette_rect)
 
@@ -790,6 +834,7 @@ func _reset_environment_timers() -> void:
 	evolution_interval = 60.0 + _hash01(run_seed, 0, 503) * 30.0
 	last_evolution_step = -1
 	boss_flash_timer = 0.0
+	boss_phase_wave_timer = 0.0
 	lightning_token = 0
 	meteor_token = 0
 	lightning_timer = 0.0
@@ -868,6 +913,12 @@ func get_mobile_lod_debug_state() -> Dictionary:
 
 func _on_boss_intro_requested(_boss_name: String) -> void:
 	boss_flash_timer = boss_flash_duration
+	queue_redraw()
+
+
+func _on_boss_phase_transition_requested() -> void:
+	boss_flash_timer = boss_flash_duration * 1.75
+	boss_phase_wave_timer = boss_phase_wave_duration
 	queue_redraw()
 
 

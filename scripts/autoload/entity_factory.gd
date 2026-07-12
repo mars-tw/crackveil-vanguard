@@ -236,9 +236,12 @@ func spawn_explosion(world_position: Vector2, stats: Dictionary, source: Node) -
 	var explosion := _acquire("explosion")
 	if explosion == null:
 		return null
+	var visual_stats := stats.duplicate(true)
+	visual_stats["composite_layers"] = MOBILE_TUNING.vfx_composite_layer_count(_viewport_size_for_lod())
+	visual_stats["particle_multiplier"] = MOBILE_TUNING.lod_particle_multiplier(_viewport_size_for_lod())
 	explosion.pool_reset({
 		"position": world_position,
-		"stats": stats,
+		"stats": visual_stats,
 		"source": source
 	})
 	return explosion
@@ -461,7 +464,8 @@ func spawn_death_burst(world_position: Vector2, burst_color: Color, burst_scale:
 		"color": burst_color,
 		"scale": burst_scale,
 		"style": burst_style,
-		"particle_multiplier": MOBILE_TUNING.lod_particle_multiplier(viewport_size)
+		"particle_multiplier": MOBILE_TUNING.lod_particle_multiplier(viewport_size),
+		"composite_layers": MOBILE_TUNING.vfx_composite_layer_count(viewport_size)
 	})
 	return burst
 
@@ -485,7 +489,7 @@ func spawn_corpse_ghost(world_position: Vector2, corpse_sprite_path: String, cor
 	return ghost
 
 
-func queue_death_visual(world_position: Vector2, corpse_sprite_path: String, corpse_color: Color, corpse_radius: float, corpse_sprite_scale: float, flip_h: bool, sprite_rotation: float, burst_scale: float, elite_gold_rain: bool = false) -> void:
+func queue_death_visual(world_position: Vector2, corpse_sprite_path: String, corpse_color: Color, corpse_radius: float, corpse_sprite_scale: float, flip_h: bool, sprite_rotation: float, burst_scale: float, elite_gold_rain: bool = false, composite_style: String = "burst") -> void:
 	if death_visual_queue.size() >= DEATH_VISUAL_QUEUE_CAP:
 		death_visual_queue_drops += 1
 		return
@@ -498,7 +502,8 @@ func queue_death_visual(world_position: Vector2, corpse_sprite_path: String, cor
 		"flip_h": flip_h,
 		"rotation": sprite_rotation,
 		"burst_scale": burst_scale,
-		"elite_gold_rain": elite_gold_rain
+		"elite_gold_rain": elite_gold_rain,
+		"composite_style": composite_style
 	})
 
 
@@ -516,9 +521,12 @@ func _drain_death_visual_queue() -> void:
 			bool(request.get("flip_h", false)),
 			float(request.get("rotation", 0.0))
 		)
-		spawn_death_burst(position, request.get("color", Color.WHITE), float(request.get("burst_scale", 1.0)))
-		if bool(request.get("elite_gold_rain", false)):
-			spawn_death_burst(position + Vector2(0.0, -18.0), Color(1.0, 0.76, 0.18), 1.75, "gold_rain")
+		spawn_death_burst(
+			position,
+			request.get("color", Color.WHITE),
+			float(request.get("burst_scale", 1.0)),
+			str(request.get("composite_style", "burst"))
+		)
 
 
 func release_enemy(enemy: Node) -> void:

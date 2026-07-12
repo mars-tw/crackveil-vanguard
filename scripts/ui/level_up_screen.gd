@@ -90,11 +90,16 @@ func show_options(options: Array) -> void:
 		button.add_theme_font_size_override("font_size", 20)
 		_apply_card_style(button, option)
 		button.pressed.connect(_on_upgrade_pressed.bind(option))
+		button.mouse_entered.connect(_on_card_focus.bind(button, true))
+		button.mouse_exited.connect(_on_card_focus.bind(button, false))
+		button.focus_entered.connect(_on_card_focus.bind(button, true))
+		button.focus_exited.connect(_on_card_focus.bind(button, false))
 		card_grid.add_child(button)
 		option_buttons.append(button)
 
 	_apply_responsive_layout()
 	root.visible = true
+	call_deferred("_animate_cards_in")
 
 
 func _on_upgrade_pressed(upgrade: Dictionary) -> void:
@@ -136,6 +141,7 @@ func _option_key(option: Dictionary) -> String:
 
 func _reset_pending_mobile_confirm() -> void:
 	if pending_mobile_confirm_button != null and is_instance_valid(pending_mobile_confirm_button):
+		_kill_card_tween(pending_mobile_confirm_button, "selection_tween")
 		if bool(pending_mobile_confirm_button.get_meta("confirm_had_normal_override", false)):
 			var base_style := pending_mobile_confirm_button.get_meta("confirm_base_normal_style") as StyleBox
 			pending_mobile_confirm_button.add_theme_stylebox_override("normal", base_style)
@@ -169,6 +175,7 @@ func _set_pending_mobile_confirm(button: Button, now_msec: int) -> void:
 	highlight.content_margin_top = 12.0
 	highlight.content_margin_bottom = 12.0
 	button.add_theme_stylebox_override("normal", highlight)
+	_start_selected_glow(button, highlight)
 	if title_label != null:
 		title_label.text = "再點高亮卡確認 · 點別張切換"
 
@@ -269,3 +276,61 @@ func _apply_responsive_layout() -> void:
 		title_label.add_theme_font_size_override("font_size", 24 if portrait else 22)
 		for button in option_buttons:
 			button.add_theme_font_size_override("font_size", 18 if portrait else 17)
+
+
+func _animate_cards_in() -> void:
+	for index in range(option_buttons.size()):
+		var button := option_buttons[index]
+		if button == null or not is_instance_valid(button):
+			continue
+		button.pivot_offset = button.size * 0.5
+		var target_position := button.position
+		button.position = target_position + Vector2(0.0, 54.0)
+		button.scale = Vector2.ONE * 0.9
+		button.modulate.a = 0.0
+		var tween := create_tween().set_parallel(true)
+		tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(button, "position", target_position, 0.42).set_delay(float(index) * 0.08)
+		tween.tween_property(button, "scale", Vector2.ONE, 0.42).set_delay(float(index) * 0.08)
+		tween.tween_property(button, "modulate:a", 1.0, 0.24).set_delay(float(index) * 0.08)
+
+
+func _on_card_focus(button: Button, focused: bool) -> void:
+	if button == null or not is_instance_valid(button) or button == pending_mobile_confirm_button:
+		return
+	_kill_card_tween(button, "focus_tween")
+	button.pivot_offset = button.size * 0.5
+	var tween := create_tween().set_parallel(true)
+	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(button, "scale", Vector2.ONE * (1.035 if focused else 1.0), 0.14)
+	tween.tween_property(button, "modulate", Color(1.12, 1.12, 1.16, 1.0) if focused else Color.WHITE, 0.14)
+	button.set_meta("focus_tween", tween)
+
+
+func _start_selected_glow(button: Button, style: StyleBoxFlat) -> void:
+	_kill_card_tween(button, "selection_tween")
+	button.pivot_offset = button.size * 0.5
+	var tween := create_tween().set_loops().set_parallel(true)
+	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(style, "border_color", Color(0.86, 1.0, 1.0, 1.0), 0.46)
+	tween.tween_property(style, "shadow_color", Color(0.28, 0.92, 1.0, 0.62), 0.46)
+	tween.tween_property(button, "scale", Vector2.ONE * 1.035, 0.46)
+	tween.chain().set_parallel(true)
+	tween.tween_property(style, "border_color", Color(0.42, 0.96, 1.0, 1.0), 0.46)
+	tween.tween_property(style, "shadow_color", Color(0.2, 0.88, 1.0, 0.35), 0.46)
+	tween.tween_property(button, "scale", Vector2.ONE, 0.46)
+	button.set_meta("selection_tween", tween)
+
+
+func _kill_card_tween(button: Button, meta_key: String) -> void:
+	if button == null or not button.has_meta(meta_key):
+		return
+	var tween: Variant = button.get_meta(meta_key)
+	if tween is Tween and (tween as Tween).is_valid():
+		(tween as Tween).kill()
+	button.remove_meta(meta_key)
+	button.scale = Vector2.ONE
+	button.modulate = Color.WHITE

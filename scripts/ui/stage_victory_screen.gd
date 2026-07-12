@@ -13,6 +13,8 @@ var summary_label: Label
 var copy_seed_button: Button
 var continue_button: Button
 var main_menu_button: Button
+var summary_tween: Tween = null
+var displayed_summary: Dictionary = {}
 
 
 func _ready() -> void:
@@ -87,19 +89,31 @@ func _build_ui() -> void:
 
 
 func show_summary(summary: Dictionary) -> void:
+	displayed_summary = summary.duplicate(true)
+	_update_summary_count(0.0)
+	if summary_tween != null and summary_tween.is_valid():
+		summary_tween.kill()
+	summary_tween = create_tween()
+	summary_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	summary_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	summary_tween.tween_method(_update_summary_count, 0.0, 1.0, 0.9)
+	root.visible = true
+
+
+func _update_summary_count(progress_ratio: float) -> void:
+	var summary := displayed_summary
 	var progress: Dictionary = summary.get("echo_progress", {})
 	summary_label.text = "擊破守門者·帷幕\n存活  %s\n擊殺  %d\n精英擊殺  %d\n金幣  %d\n契約  %s\n殘響  +%d（本局 %d / 持有 %d）\n新成就  %s" % [
-		GameManager.format_time(float(summary.get("elapsed_time", 0.0))),
-		int(summary.get("kills", 0)),
-		int(summary.get("elites_killed", 0)),
-		int(summary.get("gold", 0)),
+		GameManager.format_time(float(summary.get("elapsed_time", 0.0)) * progress_ratio),
+		int(round(float(summary.get("kills", 0)) * progress_ratio)),
+		int(round(float(summary.get("elites_killed", 0)) * progress_ratio)),
+		int(round(float(summary.get("gold", 0)) * progress_ratio)),
 		str(summary.get("contract_name", "無契約")),
-		int(summary.get("echo_shards_earned", 0)),
-		int(summary.get("echo_shards_run_total", 0)),
-		int(progress.get("shards", 0)),
+		int(round(float(summary.get("echo_shards_earned", 0)) * progress_ratio)),
+		int(round(float(summary.get("echo_shards_run_total", 0)) * progress_ratio)),
+		int(round(float(progress.get("shards", 0)) * progress_ratio)),
 		_new_achievement_text(summary)
 	]
-	root.visible = true
 
 
 func _on_continue_pressed() -> void:

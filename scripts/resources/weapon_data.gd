@@ -384,7 +384,9 @@ func to_projectile_stats() -> Dictionary:
 		"evo_hunter_swarm_level": get_modifier_level("evo_hunter_swarm"),
 		"grenade_cluster_level": get_modifier_level("grenade_cluster"),
 		"evo_cinder_barrage_level": get_modifier_level("evo_cinder_barrage"),
-		"fork_depth": 0
+		"fork_depth": 0,
+		"visual_level": _visual_upgrade_level(),
+		"evolved_visual": is_evolved()
 	}
 
 
@@ -431,5 +433,15 @@ func to_effect_stats() -> Dictionary:
 		"evo_cinder_barrage_level": get_modifier_level("evo_cinder_barrage"),
 		"evo_event_horizon_level": get_modifier_level("evo_event_horizon"),
 		"evo_star_piercer_level": get_modifier_level("evo_star_piercer"),
-		"evo_resonant_chorus_level": get_modifier_level("evo_resonant_chorus")
+		"evo_resonant_chorus_level": get_modifier_level("evo_resonant_chorus"),
+		"visual_level": _visual_upgrade_level(),
+		"evolved_visual": is_evolved()
 	}
+
+
+func _visual_upgrade_level() -> int:
+	var total := 0
+	for modifier_id in modifier_levels.keys():
+		if not str(modifier_id).begins_with("evo_"):
+			total += int(modifier_levels[modifier_id])
+	return min(total, 8)

@@ -3,6 +3,7 @@ extends Node2D
 const FIRST_RUN_GUIDE_SCRIPT := preload("res://scripts/ui/first_run_guide.gd")
 const RUN_THEME := preload("res://scripts/arena/run_theme.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 
 @export var run_seed: int = 0
 
@@ -15,6 +16,7 @@ const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 
 var first_run_guide: CanvasLayer = null
 var mobile_color_grade: CanvasModulate = null
+var leader_light: Sprite2D = null
 
 
 func _ready() -> void:
@@ -65,6 +67,7 @@ func _ready() -> void:
 	var leader: Node = null
 	if squad_manager != null and squad_manager.has_method("start_squad"):
 		leader = squad_manager.start_squad()
+	_attach_leader_light(leader as Node2D)
 	GameManager.start_run(self, leader, squad_manager, false)
 	_attach_first_run_guide()
 
@@ -78,6 +81,31 @@ func _apply_mobile_color_grade() -> void:
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
 	# 手機面板通常偏亮、偏豔：微壓亮度與紅色，留下冷青裂隙高光。
 	mobile_color_grade.color = MOBILE_TUNING.battlefield_color_modulate(viewport_size, mobile)
+	_update_leader_light()
+
+
+func _attach_leader_light(leader: Node2D) -> void:
+	if leader == null or not is_instance_valid(leader):
+		return
+	leader_light = Sprite2D.new()
+	leader_light.name = "SquadSoftLight"
+	leader_light.texture = ART_RESOURCES.get_radial_glow()
+	leader_light.centered = true
+	leader_light.show_behind_parent = true
+	leader_light.z_index = -12
+	leader_light.material = ART_RESOURCES.get_additive_material()
+	leader.add_child(leader_light)
+	_update_leader_light()
+
+
+func _update_leader_light() -> void:
+	if leader_light == null or not is_instance_valid(leader_light):
+		return
+	var viewport_size := get_viewport().get_visible_rect().size
+	var mobile_lod := MOBILE_TUNING.mobile_lod_enabled(viewport_size)
+	var diameter := 390.0 if mobile_lod else 620.0
+	ART_RESOURCES.fit_sprite(leader_light, ART_RESOURCES.get_radial_glow(), diameter)
+	leader_light.modulate = Color(0.22, 0.72, 1.0, 0.12 if mobile_lod else 0.16)
 
 
 func _on_restart_requested() -> void:

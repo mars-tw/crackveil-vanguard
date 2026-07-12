@@ -28,6 +28,7 @@ func _fire_lance(target: Node2D) -> void:
 	var effect_stats := data_effect_stats().duplicate(true)
 	var focus_level := int(effect_stats.get("rail_focus_level", 0))
 	var evolved := int(effect_stats.get("evo_star_piercer_level", 0)) > 0
+	var visual_level := int(effect_stats.get("visual_level", 0))
 	var passive_bonus := owner_passive_value() if owner_passive_id() == "rift_sniper" else 0.0
 	var beam_range := data_float("range", 760.0)
 	var beam_width := data_float("projectile_radius", 7.0) + float(focus_level) * 1.4 + (2.0 if evolved else 0.0)
@@ -60,7 +61,7 @@ func _fire_lance(target: Node2D) -> void:
 		data_color("color", Color(0.72, 0.96, 1.0)).lerp(Color.WHITE, 0.24),
 		data_float("effect_lifetime", 0.18),
 		data_string("lightning_sprite_path", "res://assets/sprites/proj_lightning.png"),
-		beam_width * (4.6 if evolved else 3.7)
+		beam_width * (4.6 if evolved else 3.7) * (1.0 + float(visual_level) * 0.045)
 	)
 	if evolved and hits.size() > 0:
 		EntityFactory.spawn_explosion(final_hit_position, _make_tail_flash_stats(base_damage, beam_width), owner_player)
@@ -100,7 +101,9 @@ func _make_tail_flash_stats(base_damage: float, beam_width: float) -> Dictionary
 		"effect_lifetime": 0.18,
 		"explosion_sprite_path": "res://assets/vfx/kenney_particle/burst_fire_cyan.png",
 		"color": data_color("color", Color(0.72, 0.96, 1.0)),
-		"sprite_scale": 0.72
+		"sprite_scale": 0.72,
+		"visual_level": int(data_effect_stats().get("visual_level", 0)),
+		"evolved_visual": bool(data_effect_stats().get("evolved_visual", false))
 	}
 
 
