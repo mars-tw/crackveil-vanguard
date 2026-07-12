@@ -503,10 +503,14 @@ func _configure_projectile_vfx() -> void:
 	if glow != null:
 		glow.visible = true
 		glow.position = Vector2.ZERO
-		if enemy_projectile and mobile_readability and source_weapon_id != "boss_ring":
-			glow.modulate = Color(0.01, 0.014, 0.018, 0.84)
-			ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), radius * 10.8)
+		if enemy_projectile and source_weapon_id != "boss_ring":
+			# A dark, normal-blended silhouette is the CVD-safe second channel for
+			# enemy ember shots; player ember weapons keep their additive halo.
+			glow.material = null
+			glow.modulate = Color(0.008, 0.012, 0.02, 0.88 if mobile_readability else 0.76)
+			ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), radius * (10.8 if mobile_readability else 9.8))
 		else:
+			glow.material = ART_RESOURCES.get_additive_material()
 			glow.modulate = Color(vfx_color.r, vfx_color.g, vfx_color.b, glow_alpha)
 			var glow_growth := _visual_growth(0.0225, 0.12)
 			var glow_size := radius * (9.6 if source_weapon_id == "boss_ring" else (8.6 if motion_mode == "boomerang" else 7.8)) * glow_growth
@@ -531,6 +535,9 @@ func _configure_projectile_vfx() -> void:
 			var riftline_growth := 0.0 if mobile_readability else float(visual_level) * 0.21 + (1.1 if evolved_visual else 0.0)
 			trail.width = clamp(2.4 + riftline_growth, 2.4, 6.8)
 			alpha = 0.82
+		elif source_weapon_id == "rail_lance":
+			trail.width = clamp(radius * 0.92, 2.6, 5.2)
+			alpha = 0.92
 		elif source_weapon_id == "rift_seeker_missiles":
 			trail.width = clamp(radius * 1.9 * trail_growth, 5.0, 15.0)
 			vfx_color = Color(0.58, 0.66, 0.68, 1.0)
@@ -538,6 +545,9 @@ func _configure_projectile_vfx() -> void:
 		elif source_weapon_id == "grenade_lob":
 			vfx_color = Color(1.0, 0.38, 0.08, 1.0)
 			alpha = 0.74
+		elif source_weapon_id == "rift_shield_boomerang":
+			trail.width = clamp(radius * 2.05 * trail_growth, 6.5, 16.0)
+			alpha = 0.64
 		elif source_weapon_id == "boss_ring":
 			trail.width = clamp(radius * 1.15, 4.0, 10.0)
 			alpha = 0.76

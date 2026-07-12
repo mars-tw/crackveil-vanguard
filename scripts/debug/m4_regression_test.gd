@@ -3,6 +3,7 @@ extends Node
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 const DEATH_BURST_SCENE := preload("res://scenes/vfx/DeathBurst.tscn")
 const EXPLOSION_SCENE := preload("res://scenes/projectiles/ExplosionArea.tscn")
+const PROJECTILE_SCENE := preload("res://scenes/projectiles/Projectile.tscn")
 const ENEMY_SCENE := preload("res://scenes/enemies/Enemy.tscn")
 const LEVEL_UP_SCENE := preload("res://scenes/ui/LevelUpScreen.tscn")
 const STAGE_VICTORY_SCENE := preload("res://scenes/ui/StageVictoryScreen.tscn")
@@ -14,6 +15,7 @@ func _ready() -> void:
 	_test_death_composites()
 	_test_explosion_composite()
 	_test_weapon_growth_stats()
+	_test_weapon_readability()
 	_test_boss_volume_and_projectile()
 	_test_ui_motion()
 	if failed:
@@ -43,6 +45,10 @@ func _test_death_composites() -> void:
 	_assert(burst.get_node_or_null("ImpactRing") != null, "death composite missing ring")
 	_assert(burst.get_node_or_null("Smoke") != null and burst.get_node("Smoke").visible, "desktop death composite missing smoke")
 	_assert(burst.get_node_or_null("BurstParticles") != null and burst.get_node("BurstParticles").emitting, "desktop death composite missing debris")
+	_assert(float(burst.get("lifetime")) > float(burst.get("main_lifetime")) * 1.4, "death smoke does not linger beyond the main burst")
+	burst.set("age", float(burst.get("main_lifetime")) * 1.08)
+	burst.call("_update_sprite_state")
+	_assert(burst.get_node("Smoke").modulate.a > 0.0 and burst.get_node("Sprite2D").modulate.a <= 0.001, "death smoke tail does not outlive the main silhouette")
 	burst.pool_on_release()
 	burst.pool_on_acquire()
 	burst.pool_reset({"position": Vector2.ZERO, "color": Color.ORANGE, "scale": 1.0, "style": "elite_death", "particle_multiplier": 0.6, "composite_layers": 2})
@@ -58,6 +64,23 @@ func _test_explosion_composite() -> void:
 	for child_name in ["CoreFlash", "ShockwaveSprite", "Smoke", "Debris"]:
 		_assert(explosion.get_node_or_null(child_name) != null, "explosion composite missing %s" % child_name)
 	_assert(explosion.get_node("Smoke").visible and explosion.get_node("Debris").emitting, "desktop explosion layers inactive")
+	var ring := explosion.get_node("ShockwaveSprite") as Sprite2D
+	explosion.set("age", 0.04)
+	explosion.call("_update_sprite_state")
+	var early_size := ring.scale.length()
+	explosion.set("age", 0.08)
+	explosion.call("_update_sprite_state")
+	var early_step := ring.scale.length() - early_size
+	explosion.set("age", 0.28)
+	explosion.call("_update_sprite_state")
+	var late_size := ring.scale.length()
+	explosion.set("age", 0.32)
+	explosion.call("_update_sprite_state")
+	var late_step := ring.scale.length() - late_size
+	_assert(early_step > late_step, "explosion impact ring is not ease-out")
+	explosion.set("age", 0.44)
+	explosion.call("_update_sprite_state")
+	_assert(explosion.get_node("Smoke").modulate.a > 0.0 and explosion.get_node("Sprite2D").modulate.a <= 0.001, "explosion smoke tail does not outlive the main silhouette")
 	explosion.queue_free()
 
 
@@ -72,12 +95,32 @@ func _test_weapon_growth_stats() -> void:
 	_assert(upgraded_stats.has("evolved_visual"), "weapon evolution visual flag missing")
 
 
+func _test_weapon_readability() -> void:
+	var orbit_color: Color = load("res://resources/weapons/orbit_blades.tres").color
+	var rail_color: Color = load("res://resources/weapons/rail_lance.tres").color
+	_assert(Vector3(orbit_color.r, orbit_color.g, orbit_color.b).distance_to(Vector3(rail_color.r, rail_color.g, rail_color.b)) > 0.35, "ice-cyan weapon luminance separation collapsed")
+	var enemy_shot := PROJECTILE_SCENE.instantiate()
+	add_child(enemy_shot)
+	enemy_shot.pool_on_acquire()
+	enemy_shot.pool_reset({"position": Vector2.ZERO, "direction": Vector2.RIGHT, "stats": {"source_weapon_id": "enemy_test", "target_group": "heroes", "projectile_radius": 6.0, "color": Color(1.0, 0.35, 0.24), "projectile_sprite_path": "res://assets/sprites/proj_bullet.png"}, "source": null})
+	_assert(enemy_shot.get_node("Glow").material == null and enemy_shot.get_node("Glow").modulate.r < 0.02, "enemy ember projectile lacks dark silhouette channel")
+	enemy_shot.queue_free()
+
+
 func _test_boss_volume_and_projectile() -> void:
 	var boss := ENEMY_SCENE.instantiate()
 	add_child(boss)
 	boss.pool_on_acquire()
 	boss.pool_reset({"position": Vector2.ZERO, "enemy_id": "boss_test", "spawn_token": 1, "config": {"max_hp": 100.0, "radius": 42.0, "color": Color(0.7, 0.22, 0.86), "sprite_path": "res://assets/sprites/enemy_tank.png", "behavior_id": "boss", "is_boss": true}})
 	_assert(boss.get_node("BossInnerGlow").visible and boss.get_node("BossCoreGlow").visible, "boss volume glows inactive")
+	boss.call("_update_procedural_visual", 1.0 / 60.0)
+	_assert(boss.get_node("BossInnerGlow").modulate.a <= 0.4 and boss.get_node("BossCoreGlow").modulate.a >= 0.68, "boss outer/core alpha staircase collapsed")
+	boss.set("boss_phase_two_triggered", true)
+	boss.call("_update_procedural_visual", 1.0 / 60.0)
+	var phase_two_core: Color = boss.get_node("BossCoreGlow").modulate
+	_assert(phase_two_core.r > phase_two_core.b + 0.5, "boss phase two core is not red-hot")
+	boss.call("_trigger_hit_micro_feedback")
+	_assert(float(boss.get("hit_flash_timer")) >= 0.079 and float(boss.get("hit_squash_timer")) >= 0.099, "unified hit micro-feedback timing missing")
 	MOBILE_TUNING.set_force_mobile_lod_for_tests(true)
 	boss.call("_apply_shadow_and_glow")
 	_assert(boss.get_node("BossInnerGlow").visible and not boss.get_node("BossCoreGlow").visible, "mobile boss must collapse to one volume glow")

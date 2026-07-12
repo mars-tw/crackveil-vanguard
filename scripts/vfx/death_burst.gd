@@ -3,6 +3,7 @@ extends Node2D
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 const VFX_ROOT := "res://assets/vfx/kenney_particle/"
+const SMOKE_LIFETIME_MULTIPLIER := 1.42
 
 var burst_color: Color = Color(1.0, 0.4, 0.4)
 var burst_scale: float = 1.0
@@ -11,6 +12,7 @@ var particle_multiplier: float = 1.0
 var composite_layers: int = 4
 var age: float = 0.0
 var lifetime: float = 0.32
+var main_lifetime: float = 0.32
 var is_active: bool = false
 var sprite: Sprite2D = null
 var glow: Sprite2D = null
@@ -59,6 +61,8 @@ func pool_on_release() -> void:
 	burst_style = "burst"
 	particle_multiplier = 1.0
 	composite_layers = 4
+	main_lifetime = 0.32
+	lifetime = 0.32
 
 
 func pool_reset(args: Dictionary) -> void:
@@ -79,7 +83,8 @@ func setup(world_position: Vector2, color_value: Color, scale_value: float = 1.0
 	burst_style = style_value
 	particle_multiplier = clamp(particle_multiplier_value, 0.2, 1.0)
 	composite_layers = clamp(layer_count, 2, 4)
-	lifetime = _lifetime_for_style()
+	main_lifetime = _lifetime_for_style()
+	lifetime = main_lifetime * (SMOKE_LIFETIME_MULTIPLIER if composite_layers >= 3 else 1.0)
 	age = 0.0
 	rotation = 0.0
 	_apply_sprite()
@@ -219,7 +224,7 @@ func _apply_sprite() -> void:
 func _update_sprite_state() -> void:
 	if sprite == null:
 		return
-	var t: float = clamp(age / lifetime, 0.0, 1.0)
+	var t: float = clamp(age / main_lifetime, 0.0, 1.0)
 	var texture := sprite.texture
 	var base_size := _sprite_base_size(t)
 	if texture != null:
@@ -236,13 +241,16 @@ func _update_sprite_state() -> void:
 		core_flash.modulate = Color(1.0, 0.98, 0.86, (1.0 - flash_t) * 0.96)
 	if impact_ring != null and impact_ring.visible and impact_ring.texture != null:
 		var ring_t: float = clamp(t / (0.92 if burst_style == "boss_phase" else 0.76), 0.0, 1.0)
-		SPRITE_LOADER.fit_sprite(impact_ring, impact_ring.texture, _ring_size(ring_t) * burst_scale)
-		impact_ring.modulate = Color(1.0, 1.0, 1.0, (1.0 - ring_t) * _ring_alpha())
+		var ring_ease: float = 1.0 - pow(1.0 - ring_t, 2.5)
+		SPRITE_LOADER.fit_sprite(impact_ring, impact_ring.texture, _ring_size(ring_ease) * burst_scale)
+		impact_ring.modulate = Color(1.0, 1.0, 1.0, (1.0 - pow(ring_t, 1.6)) * _ring_alpha())
 	if smoke != null and smoke.visible and smoke.texture != null:
-		var smoke_t: float = clamp((t - 0.16) / 0.84, 0.0, 1.0)
+		var smoke_start: float = main_lifetime * 0.16
+		var smoke_t: float = clamp((age - smoke_start) / maxf(0.001, lifetime - smoke_start), 0.0, 1.0)
 		SPRITE_LOADER.fit_sprite(smoke, smoke.texture, _smoke_size(smoke_t) * burst_scale)
 		smoke.rotation = -0.18 + smoke_t * 0.34
-		smoke.modulate = Color(0.48, 0.43, 0.52, sin(smoke_t * PI) * _smoke_alpha())
+		var smoke_alpha: float = sin(pow(smoke_t, 0.82) * PI) * pow(1.0 - smoke_t, 0.28) * _smoke_alpha() * 1.14
+		smoke.modulate = Color(0.48, 0.43, 0.52, smoke_alpha)
 	if column != null and column.visible:
 		var height := lerpf(76.0, 228.0, min(1.0, t * 1.45)) * burst_scale
 		column.width = lerpf(24.0, 4.0, t) * burst_scale
@@ -250,9 +258,10 @@ func _update_sprite_state() -> void:
 		column.points = PackedVector2Array([Vector2(0.0, 12.0), Vector2(0.0, -height)])
 	if shockwave != null and shockwave.visible:
 		var max_radius := 310.0 if burst_style == "boss_phase" else (86.0 if burst_style == "level_column" else 54.0)
-		var ring_radius := lerpf(18.0, max_radius, t) * burst_scale
+		var shockwave_ease: float = 1.0 - pow(1.0 - t, 2.5)
+		var ring_radius := lerpf(18.0, max_radius, shockwave_ease) * burst_scale
 		var line_alpha := 0.82 if burst_style == "boss_phase" else (0.58 if burst_style == "level_column" else 0.32)
-		shockwave.default_color = Color(burst_color.r, burst_color.g, burst_color.b, (1.0 - t) * line_alpha)
+		shockwave.default_color = Color(burst_color.r, burst_color.g, burst_color.b, (1.0 - pow(t, 1.6)) * line_alpha)
 		shockwave.points = _circle_points(ring_radius, 36)
 
 

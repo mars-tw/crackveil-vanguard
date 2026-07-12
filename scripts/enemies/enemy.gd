@@ -6,6 +6,12 @@ const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 const THREAT_GLOW_DENSITY_START := 80
 const THREAT_GLOW_DENSITY_FULL := 150
+const HIT_FLASH_DURATION := 0.08
+const HIT_SQUASH_DURATION := 0.1
+const BOSS_OUTER_COLOR := Color(0.38, 0.12, 0.92, 1.0)
+const BOSS_OUTER_PHASE_TWO_COLOR := Color(0.72, 0.1, 0.58, 1.0)
+const BOSS_CORE_COLOR := Color(1.0, 0.42, 0.92, 1.0)
+const BOSS_CORE_PHASE_TWO_COLOR := Color(1.0, 0.16, 0.3, 1.0)
 
 static var animation_frames_cache: Dictionary = {}
 
@@ -80,6 +86,8 @@ var sprite_base_scale: Vector2 = Vector2.ONE
 var animated_sprite_base_scale: Vector2 = Vector2.ONE
 var shadow_base_scale: Vector2 = Vector2.ONE
 var threat_glow_base_scale: Vector2 = Vector2.ONE
+var boss_inner_glow_base_scale: Vector2 = Vector2.ONE
+var boss_core_glow_base_scale: Vector2 = Vector2.ONE
 var visual_bob_frequency: float = 7.2
 var visual_bob_amplitude: float = 2.4
 var visual_tilt_amount: float = 0.085
@@ -538,14 +546,19 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 	var number_position := global_position + Vector2(randf_range(-8.0, 8.0), -radius - 10.0)
 	EntityFactory.spawn_damage_number(final_amount, number_position, Color(1.0, 0.96, 0.72))
 	hp_bar_timer = 0.55
-	hit_flash_timer = 0.075
-	hit_squash_timer = 0.11
+	_trigger_hit_micro_feedback()
 	_update_hp_bar()
 	_set_hp_bar_visible(true)
 
 	if hp <= 0.0:
 		_die(source_position)
 	return final_amount
+
+
+func _trigger_hit_micro_feedback() -> void:
+	# Every damage route (projectile, orbit, chain, hazard, hymn) converges here.
+	hit_flash_timer = maxf(hit_flash_timer, HIT_FLASH_DURATION)
+	hit_squash_timer = maxf(hit_squash_timer, HIT_SQUASH_DURATION)
 
 
 func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
@@ -818,14 +831,16 @@ func _apply_shadow_and_glow() -> void:
 	if boss_inner_glow != null:
 		boss_inner_glow.visible = is_boss
 		if is_boss:
-			ART_RESOURCES.fit_sprite(boss_inner_glow, ART_RESOURCES.get_radial_glow(), radius * 5.1)
-			boss_inner_glow.modulate = Color(0.38, 0.12, 0.92, 0.52)
+			ART_RESOURCES.fit_sprite(boss_inner_glow, ART_RESOURCES.get_radial_glow(), radius * 5.85)
+			boss_inner_glow_base_scale = boss_inner_glow.scale
+			boss_inner_glow.modulate = Color(BOSS_OUTER_COLOR.r, BOSS_OUTER_COLOR.g, BOSS_OUTER_COLOR.b, 0.3)
 	if boss_core_glow != null:
 		var mobile_boss_lod := MOBILE_TUNING.mobile_lod_enabled(get_viewport_rect().size)
 		boss_core_glow.visible = is_boss and not mobile_boss_lod
 		if is_boss:
-			ART_RESOURCES.fit_sprite(boss_core_glow, ART_RESOURCES.get_radial_glow(), radius * 2.35)
-			boss_core_glow.modulate = Color(1.0, 0.42, 0.92, 0.48)
+			ART_RESOURCES.fit_sprite(boss_core_glow, ART_RESOURCES.get_radial_glow(), radius * 1.95)
+			boss_core_glow_base_scale = boss_core_glow.scale
+			boss_core_glow.modulate = Color(BOSS_CORE_COLOR.r, BOSS_CORE_COLOR.g, BOSS_CORE_COLOR.b, 0.78)
 
 
 func _ensure_boss_volume_nodes() -> void:
@@ -886,8 +901,9 @@ func _tick_hit_flash(delta: float) -> void:
 	if hit_flash_timer <= 0.0 or sprite == null:
 		return
 	hit_flash_timer = max(hit_flash_timer - delta, 0.0)
-	var ratio := hit_flash_timer / 0.075
-	var flash_color := Color(1.0, 0.98, 0.9, 1.0).lerp(body_color, 1.0 - ratio)
+	var ratio := hit_flash_timer / HIT_FLASH_DURATION
+	var flash_weight := pow(ratio, 0.65)
+	var flash_color := body_color.lerp(Color(1.0, 0.98, 0.9, 1.0), flash_weight)
 	sprite.modulate = flash_color
 	if animated_sprite != null:
 		animated_sprite.modulate = flash_color
@@ -922,7 +938,7 @@ func _update_procedural_visual(delta: float) -> void:
 	var bob: float = (-step_lift * visual_bob_amplitude + step_land * visual_bob_amplitude * 0.24) if moving else sin(visual_walk_phase) * visual_bob_amplitude * 0.18
 	var lateral_offset: float = foot_sign * step_lift * visual_bob_amplitude * 0.22 if moving else 0.0
 	var breath := 1.0 + sin(visual_idle_phase) * (0.01 if moving else 0.022)
-	var squash := hit_squash_timer / 0.11 if hit_squash_timer > 0.0 else 0.0
+	var squash := hit_squash_timer / HIT_SQUASH_DURATION if hit_squash_timer > 0.0 else 0.0
 	var squash_x := 1.0 + squash * 0.18 + step_land * 0.035
 	var squash_y := 1.0 - squash * 0.14 - step_land * 0.025
 	var tilt: float = (foot_sign * step_lift * visual_tilt_amount + clamp(last_visual_direction.x, -1.0, 1.0) * visual_tilt_amount * 0.25) if moving else 0.0
@@ -938,10 +954,12 @@ func _update_procedural_visual(delta: float) -> void:
 		threat_glow.scale = threat_glow_base_scale * (1.0 + sin(visual_idle_phase + 0.2) * (0.07 if is_boss else 0.012))
 	if is_boss and boss_inner_glow != null and boss_core_glow != null:
 		var boss_pulse := 0.5 + 0.5 * sin(visual_idle_phase * (1.5 if boss_phase_two_triggered else 1.0))
-		boss_inner_glow.scale = Vector2.ONE * lerpf(0.82, 1.12, boss_pulse) * threat_glow_base_scale.length() * 0.7
-		boss_inner_glow.modulate.a = lerpf(0.34, 0.64, boss_pulse)
-		boss_core_glow.scale = Vector2.ONE * lerpf(0.72, 1.18, 1.0 - boss_pulse) * threat_glow_base_scale.length() * 0.34
-		boss_core_glow.modulate.a = lerpf(0.32, 0.62, 1.0 - boss_pulse)
+		var outer_color := BOSS_OUTER_PHASE_TWO_COLOR if boss_phase_two_triggered else BOSS_OUTER_COLOR
+		var core_color := BOSS_CORE_PHASE_TWO_COLOR if boss_phase_two_triggered else BOSS_CORE_COLOR
+		boss_inner_glow.scale = boss_inner_glow_base_scale * lerpf(0.9, 1.16, boss_pulse)
+		boss_inner_glow.modulate = Color(outer_color.r, outer_color.g, outer_color.b, lerpf(0.22, 0.38, boss_pulse))
+		boss_core_glow.scale = boss_core_glow_base_scale * lerpf(0.82, 1.08, 1.0 - boss_pulse)
+		boss_core_glow.modulate = Color(core_color.r, core_color.g, core_color.b, lerpf(0.68, 0.9, 1.0 - boss_pulse))
 
 
 func _setup_animation_frames(target_diameter: float, scale_multiplier: float) -> void:

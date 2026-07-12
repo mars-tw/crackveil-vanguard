@@ -4,6 +4,7 @@ const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 const VFX_ROOT := "res://assets/vfx/kenney_particle/"
+const SMOKE_LIFETIME_MULTIPLIER := 1.42
 
 var stats: Dictionary = {}
 var source: Node = null
@@ -68,7 +69,7 @@ func _process(delta: float) -> void:
 	if not is_active:
 		return
 	age += delta
-	if age >= float(stats.get("effect_lifetime", 0.32)):
+	if age >= _visual_lifetime():
 		is_active = false
 		EntityFactory.release_explosion(self)
 	else:
@@ -183,8 +184,9 @@ func _update_sprite_state() -> void:
 	sprite.rotation = t * 0.32
 	if shockwave_sprite != null and shockwave_sprite.texture != null:
 		var ring_t: float = clamp(t / 0.82, 0.0, 1.0)
-		SPRITE_LOADER.fit_sprite(shockwave_sprite, shockwave_sprite.texture, radius * lerpf(1.2, 3.65, ring_t))
-		shockwave_sprite.modulate = Color(1.0, 1.0, 1.0, (1.0 - ring_t) * 0.82)
+		var ring_ease: float = 1.0 - pow(1.0 - ring_t, 2.5)
+		SPRITE_LOADER.fit_sprite(shockwave_sprite, shockwave_sprite.texture, radius * lerpf(1.15, 3.8, ring_ease))
+		shockwave_sprite.modulate = Color(1.0, 1.0, 1.0, (1.0 - pow(ring_t, 1.6)) * 0.85)
 	if glow != null and glow.visible:
 		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), radius * (3.15 + t * 0.7))
 		glow.modulate = Color(color.r, color.g, color.b, (1.0 - t) * 0.5)
@@ -193,10 +195,17 @@ func _update_sprite_state() -> void:
 		ART_RESOURCES.fit_sprite(core_flash, ART_RESOURCES.get_radial_glow(), radius * lerpf(1.15, 2.4, flash_t))
 		core_flash.modulate = Color(1.0, 0.97, 0.82, (1.0 - flash_t) * 0.96)
 	if smoke_sprite != null and smoke_sprite.visible and smoke_sprite.texture != null:
-		var smoke_t: float = clamp((t - 0.18) / 0.82, 0.0, 1.0)
+		var smoke_start: float = lifetime * 0.18
+		var smoke_t: float = clamp((age - smoke_start) / maxf(0.001, _visual_lifetime() - smoke_start), 0.0, 1.0)
 		SPRITE_LOADER.fit_sprite(smoke_sprite, smoke_sprite.texture, radius * lerpf(1.35, 3.05, smoke_t))
 		smoke_sprite.rotation = -0.16 + smoke_t * 0.3
-		smoke_sprite.modulate = Color(0.52, 0.46, 0.5, sin(smoke_t * PI) * 0.44)
+		var smoke_alpha: float = sin(pow(smoke_t, 0.82) * PI) * pow(1.0 - smoke_t, 0.28) * 0.5
+		smoke_sprite.modulate = Color(0.52, 0.46, 0.5, smoke_alpha)
+
+
+func _visual_lifetime() -> float:
+	var base_lifetime: float = maxf(0.001, float(stats.get("effect_lifetime", 0.32)))
+	return base_lifetime * (SMOKE_LIFETIME_MULTIPLIER if int(stats.get("composite_layers", 4)) >= 3 else 1.0)
 
 
 func _emit_debris() -> void:
