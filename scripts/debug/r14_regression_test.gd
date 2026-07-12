@@ -39,6 +39,9 @@ func _run_tests() -> void:
 	current_phase = "background"
 	if not await _test_background_evolution_determinism():
 		return
+	current_phase = "press_capture"
+	if not await _test_press_capture_contract():
+		return
 
 	current_phase = "done"
 	print("R14_REGRESSION_PASS")
@@ -503,6 +506,37 @@ func _test_background_evolution_determinism() -> bool:
 		_fail("boss flash ratio did not peak")
 		return false
 	print("R14_BACKGROUND interval=%.2f sig_len=%d" % [interval, sig_a.length()])
+	return true
+
+
+func _test_press_capture_contract() -> bool:
+	var viewport := _make_ui_viewport(Vector2(1280.0, 720.0))
+	var hud := HUD_SCRIPT.new()
+	viewport.add_child(hud)
+	await get_tree().process_frame
+	hud._on_boss_phase_transition_requested()
+	if not hud.boss_intro_label.visible or "PHASE II" not in hud.boss_intro_label.text:
+		_fail("Boss phase-two danger banner missing")
+		return false
+	if hud.boss_intro_label.modulate.r <= hud.boss_intro_label.modulate.b:
+		_fail("Boss phase-two danger banner is not heat-red")
+		return false
+
+	var adaptive_layers := EntityFactory.get_visual_composite_layer_count(Vector2(1280.0, 720.0), false)
+	hud.set_screenshot_beauty_mode(true)
+	if hud.root.visible or not bool(GameManager.get("screenshot_beauty_mode")):
+		_fail("F12 beauty mode did not hide HUD or set capture flag")
+		return false
+	var beauty_layers := EntityFactory.get_visual_composite_layer_count(Vector2(1280.0, 720.0), false)
+	if beauty_layers != 4:
+		_fail("beauty mode did not force four VFX layers")
+		return false
+	hud.set_screenshot_beauty_mode(false)
+	if not hud.root.visible or bool(GameManager.get("screenshot_beauty_mode")):
+		_fail("beauty mode did not restore HUD and adaptive LOD")
+		return false
+	viewport.queue_free()
+	print("R14_PRESS_CAPTURE phase_banner=heat_red adaptive_layers=%d beauty_layers=%d" % [adaptive_layers, beauty_layers])
 	return true
 
 

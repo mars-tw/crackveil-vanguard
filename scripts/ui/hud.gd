@@ -63,6 +63,7 @@ var combo_pulse_tween: Tween = null
 var milestone_tween: Tween = null
 var combo_break_tween: Tween = null
 var boss_intro_tween: Tween = null
+var screenshot_beauty_active: bool = false
 
 
 func _ready() -> void:
@@ -90,6 +91,8 @@ func _ready() -> void:
 		GameManager.combo_break_requested.connect(_on_combo_break_requested)
 	if GameManager.has_signal("boss_intro_requested") and not GameManager.boss_intro_requested.is_connected(_on_boss_intro_requested):
 		GameManager.boss_intro_requested.connect(_on_boss_intro_requested)
+	if GameManager.has_signal("boss_phase_transition_requested") and not GameManager.boss_phase_transition_requested.is_connected(_on_boss_phase_transition_requested):
+		GameManager.boss_phase_transition_requested.connect(_on_boss_phase_transition_requested)
 	if AudioManager != null and AudioManager.has_signal("settings_changed") and not AudioManager.settings_changed.is_connected(_sync_audio_controls):
 		AudioManager.settings_changed.connect(_sync_audio_controls)
 	if AudioManager != null and AudioManager.has_signal("audio_unlocked") and not AudioManager.audio_unlocked.is_connected(_refresh_audio_prompt):
@@ -104,6 +107,8 @@ func _ready() -> void:
 	_sync_settings_controls()
 	_refresh_achievement_list()
 	_drain_pending_toasts()
+	if OS.is_debug_build() and OS.get_cmdline_args().has("--screenshot-beauty"):
+		set_screenshot_beauty_mode(true)
 
 
 func _process(_delta: float) -> void:
@@ -112,6 +117,10 @@ func _process(_delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_F12 and OS.is_debug_build():
+			set_screenshot_beauty_mode(not screenshot_beauty_active)
+			get_viewport().set_input_as_handled()
+			return
 		if event.keycode == KEY_ESCAPE or event.keycode == KEY_P:
 			GameManager.toggle_pause()
 			get_viewport().set_input_as_handled()
@@ -1002,28 +1011,52 @@ func _on_combo_break_requested(combo_count: int) -> void:
 
 
 func _on_boss_intro_requested(boss_name: String) -> void:
+	_play_boss_banner(boss_name, false)
+
+
+func _on_boss_phase_transition_requested() -> void:
+	_play_boss_banner("裂隙過熱  |  BOSS PHASE II", true)
+
+
+func _play_boss_banner(message: String, phase_two: bool) -> void:
 	if boss_intro_rect == null or boss_intro_label == null:
 		return
 	if boss_intro_tween != null and boss_intro_tween.is_valid():
 		boss_intro_tween.kill()
-	boss_intro_label.text = boss_name
+	boss_intro_label.text = message
 	boss_intro_label.visible = true
 	boss_intro_rect.color = Color(0.0, 0.0, 0.0, 0.0)
-	boss_intro_label.modulate = Color(1.0, 0.72, 0.34, 0.0)
+	var label_color := Color(1.0, 0.28, 0.36, 0.0) if phase_two else Color(1.0, 0.72, 0.34, 0.0)
+	var dim_color := Color(0.24, 0.0, 0.045, 0.34) if phase_two else Color(0.0, 0.0, 0.0, 0.44)
+	boss_intro_label.modulate = label_color
 	boss_intro_label.scale = Vector2.ONE * 0.9
 	boss_intro_tween = create_tween()
 	boss_intro_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	boss_intro_tween.set_parallel(true)
-	boss_intro_tween.tween_property(boss_intro_rect, "color", Color(0.0, 0.0, 0.0, 0.44), 0.16)
-	boss_intro_tween.tween_property(boss_intro_label, "modulate", Color(1.0, 0.72, 0.34, 1.0), 0.16)
+	boss_intro_tween.tween_property(boss_intro_rect, "color", dim_color, 0.16)
+	boss_intro_tween.tween_property(boss_intro_label, "modulate", Color(label_color.r, label_color.g, label_color.b, 1.0), 0.16)
 	boss_intro_tween.tween_property(boss_intro_label, "scale", Vector2.ONE, 0.18)
-	boss_intro_tween.chain().tween_interval(0.56)
+	boss_intro_tween.chain().tween_interval(0.78 if phase_two else 0.56)
 	boss_intro_tween.chain().tween_property(boss_intro_rect, "color", Color(0.0, 0.0, 0.0, 0.0), 0.28)
-	boss_intro_tween.parallel().tween_property(boss_intro_label, "modulate", Color(1.0, 0.72, 0.34, 0.0), 0.28)
+	boss_intro_tween.parallel().tween_property(boss_intro_label, "modulate", Color(label_color.r, label_color.g, label_color.b, 0.0), 0.28)
 	boss_intro_tween.chain().tween_callback(func() -> void:
 		if boss_intro_label != null:
 			boss_intro_label.visible = false
 	)
+
+
+func set_screenshot_beauty_mode(enabled: bool) -> void:
+	if enabled and not OS.is_debug_build():
+		return
+	screenshot_beauty_active = enabled
+	GameManager.screenshot_beauty_mode = enabled
+	if root != null:
+		root.visible = not enabled
+	print("SCREENSHOT_BEAUTY_%s hud_hidden=%s vfx_layers=%s" % [
+		"ON" if enabled else "OFF",
+		str(enabled),
+		"4" if enabled else "adaptive"
+	])
 
 
 func _refresh_audio_prompt() -> void:

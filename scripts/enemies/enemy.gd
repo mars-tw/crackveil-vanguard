@@ -1110,14 +1110,14 @@ func _apply_affix_visuals() -> void:
 	match affix_id:
 		"affix_split":
 			ring_color = Color(0.58, 1.0, 0.62, 0.78)
-			marker_points = _triangle_marker_points(radius * 0.78)
+			marker_points = _triangle_marker_points(radius * 0.92)
 		"affix_field":
 			ring_radius = max(affix_field_radius, radius * 1.4)
 			ring_color = Color(0.36, 0.92, 1.0, 0.42)
-			marker_points = _square_marker_points(radius * 0.58)
+			marker_points = _square_marker_points(radius * 0.7)
 		"affix_swift":
 			ring_color = Color(1.0, 0.66, 0.24, 0.74)
-			marker_points = _double_arrow_marker_points(radius * 0.64)
+			marker_points = _double_arrow_marker_points(radius * 0.78)
 			marker_closed = false
 		_:
 			if not is_elite and not is_boss:
@@ -1126,6 +1126,7 @@ func _apply_affix_visuals() -> void:
 	affix_ring.points = _circle_points(ring_radius, 40)
 	affix_ring.visible = true
 	if affix_marker != null:
+		affix_marker.width = 4.0 if affix_id != "" else 3.0
 		affix_marker.default_color = Color(ring_color.r, ring_color.g, ring_color.b, 0.96)
 		affix_marker.closed = marker_closed
 		affix_marker.points = marker_points

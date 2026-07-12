@@ -204,6 +204,9 @@ var upgrade_entry_token: int = 0
 var combat_metrics_enabled: bool = false
 var combat_damage_by_weapon: Dictionary = {}
 var combat_damage_total: float = 0.0
+# Debug-build capture aid. Runtime systems may read this flag only to raise
+# presentation LOD; gameplay cadence and release builds must remain unchanged.
+var screenshot_beauty_mode: bool = false
 
 const META_HP_APPLIED_KEY := "_cv_meta_hp_multiplier_applied"
 const META_PICKUP_APPLIED_KEY := "_cv_meta_pickup_bonus_applied"

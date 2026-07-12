@@ -238,11 +238,9 @@ func spawn_explosion(world_position: Vector2, stats: Dictionary, source: Node) -
 		return null
 	var visual_stats := stats.duplicate(true)
 	var viewport_size := _viewport_size_for_lod()
-	visual_stats["composite_layers"] = MOBILE_TUNING.vfx_composite_layer_count(
+	visual_stats["composite_layers"] = get_visual_composite_layer_count(
 		viewport_size,
-		false,
-		get_enemy_live_count(),
-		get_pool_live_count("death_burst")
+		false
 	)
 	visual_stats["particle_multiplier"] = MOBILE_TUNING.lod_particle_multiplier(viewport_size)
 	explosion.pool_reset({
@@ -472,15 +470,26 @@ func spawn_death_burst(world_position: Vector2, burst_color: Color, burst_scale:
 		"scale": burst_scale,
 		"style": burst_style,
 		"particle_multiplier": MOBILE_TUNING.lod_particle_multiplier(viewport_size),
-		"composite_layers": MOBILE_TUNING.vfx_composite_layer_count(
+		"composite_layers": get_visual_composite_layer_count(
 			viewport_size,
-			false,
-			get_enemy_live_count(),
-			get_pool_live_count("death_burst"),
 			preserve_feature_layers
 		)
 	})
 	return burst
+
+
+func get_visual_composite_layer_count(viewport_size: Vector2, preserve_feature_layers: bool = false) -> int:
+	# Capture mode is intentionally debug-only. It makes newly spawned showcase
+	# effects retain all four visual layers without weakening normal crowd LOD.
+	if OS.is_debug_build() and GameManager != null and bool(GameManager.get("screenshot_beauty_mode")):
+		return 4
+	return MOBILE_TUNING.vfx_composite_layer_count(
+		viewport_size,
+		false,
+		get_enemy_live_count(),
+		get_pool_live_count("death_burst"),
+		preserve_feature_layers
+	)
 
 
 func spawn_corpse_ghost(world_position: Vector2, corpse_sprite_path: String, corpse_color: Color, corpse_radius: float, corpse_sprite_scale: float, flip_h: bool = false, sprite_rotation: float = 0.0) -> Node:
