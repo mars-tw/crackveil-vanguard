@@ -1,5 +1,7 @@
 # Crackveil Vanguard
 
+![cover](assets/art/cover.png)
+
 Crackveil Vanguard 是一款 Godot 4.x / GDScript 製作的 2D squad-survivors roguelite 原型。玩家操作裂隙隊長與小隊，在競技場中移動、升級武器、收集經驗與金幣，並盡可能撐過敵潮。
 
 ## 線上遊玩
