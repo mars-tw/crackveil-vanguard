@@ -6,6 +6,12 @@ const DESKTOP_THREAT_CAMERA_ZOOM := Vector2(1.12, 1.12)
 const MOBILE_CAMERA_ZOOM := Vector2(1.56, 1.56)
 const MOBILE_THREAT_CAMERA_ZOOM := Vector2(1.36, 1.36)
 const MOBILE_VIEWPORT_WIDTH_TRIGGER := 700.0
+const TABLET_SHORT_SIDE_MAX := 1100.0
+const DESKTOP_VIEWPORT_WIDTH_TRIGGER := 1100.0
+const TABLET_UI_SCALE := 1.25
+const TABLET_SPACING_SCALE := 1.12
+const TABLET_TOUCH_TARGET := 44.0
+const SEED_ROW_MAX_WIDTH := 400.0
 const FORCE_MOBILE_LOD_SETTING := "crackveil/debug/force_mobile_lod"
 const MOBILE_LOD_PARTICLE_MULTIPLIER := 0.6
 const MOBILE_BACKGROUND_DYNAMIC_MULTIPLIER := 0.6
@@ -26,26 +32,53 @@ const MOBILE_JOYSTICK_HEAT_ZONE_MULTIPLIER := 1.24
 const META_FONT_BASE_PREFIX := "r14_font_base_"
 const META_FONT_HAD_PREFIX := "r14_font_had_"
 const META_FONT_APPLIED_PREFIX := "r14_font_applied_"
+const META_MIN_HEIGHT_BASE := "formfactor_min_height_base"
+const META_MIN_HEIGHT_APPLIED := "formfactor_min_height_applied"
+
+enum LayoutTier {
+	PHONE,
+	TABLET,
+	DESKTOP
+}
+
+static var _device_hints_override: Dictionary = {}
 
 
-static func use_mobile_ui(viewport_size: Vector2, force_mobile: bool = false) -> bool:
-	if force_mobile:
-		return true
+static func set_device_hints_override_for_tests(device_hints: Dictionary = {}) -> void:
+	_device_hints_override = device_hints.duplicate(true)
+
+
+static func layout_tier(viewport_size: Vector2, force_phone: bool = false, device_hints: Dictionary = {}) -> int:
+	if force_phone:
+		return LayoutTier.PHONE
 	var size := ui_layout_size(viewport_size)
 	var short_side: float = min(size.x, size.y)
-	var long_side: float = max(size.x, size.y)
-	var portrait := size.y > size.x
-	if OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios"):
-		return true
-	if DisplayServer.has_method("is_touchscreen_available") and DisplayServer.call("is_touchscreen_available") == true:
-		return true
-	if size.x < MOBILE_VIEWPORT_WIDTH_TRIGGER:
-		return true
-	if short_side <= 520.0 and long_side <= 980.0:
-		return true
-	if portrait and size.x <= 760.0 and size.y <= 1400.0:
-		return true
-	return false
+	var hints := device_hints if not device_hints.is_empty() else _runtime_device_hints()
+	var handset_ua := bool(hints.get("ua_phone", false)) or (bool(hints.get("ua_mobile", false)) and not bool(hints.get("ua_tablet", false)))
+	if short_side < MOBILE_VIEWPORT_WIDTH_TRIGGER or handset_ua:
+		return LayoutTier.PHONE
+	if short_side >= TABLET_SHORT_SIDE_MAX or (size.x >= DESKTOP_VIEWPORT_WIDTH_TRIGGER and not bool(hints.get("ua_tablet", false))):
+		return LayoutTier.DESKTOP
+	var touch_available := bool(hints.get("touch_available", false)) or bool(hints.get("mobile_os", false))
+	return LayoutTier.TABLET if touch_available else LayoutTier.DESKTOP
+
+
+static func layout_tier_name(viewport_size: Vector2, force_phone: bool = false, device_hints: Dictionary = {}) -> String:
+	match layout_tier(viewport_size, force_phone, device_hints):
+		LayoutTier.PHONE:
+			return "phone"
+		LayoutTier.TABLET:
+			return "tablet"
+		_:
+			return "desktop"
+
+
+static func use_mobile_ui(viewport_size: Vector2, force_mobile: bool = false, device_hints: Dictionary = {}) -> bool:
+	return layout_tier(viewport_size, force_mobile, device_hints) == LayoutTier.PHONE
+
+
+static func use_tablet_ui(viewport_size: Vector2, device_hints: Dictionary = {}) -> bool:
+	return layout_tier(viewport_size, false, device_hints) == LayoutTier.TABLET
 
 
 static func ui_layout_size(viewport_size: Vector2) -> Vector2:
@@ -72,9 +105,12 @@ static func apply_web_canvas_scale(layer: CanvasLayer, viewport_size: Vector2, r
 	return layout_size
 
 
-static func ui_scale(viewport_size: Vector2, force_mobile: bool = false) -> float:
-	if not use_mobile_ui(viewport_size, force_mobile):
+static func ui_scale(viewport_size: Vector2, force_mobile: bool = false, device_hints: Dictionary = {}) -> float:
+	var tier := layout_tier(viewport_size, force_mobile, device_hints)
+	if tier == LayoutTier.DESKTOP:
 		return 1.0
+	if tier == LayoutTier.TABLET:
+		return TABLET_UI_SCALE
 	var size := _safe_viewport_size(viewport_size)
 	var short_side: float = min(size.x, size.y)
 	var portrait := size.y > size.x
@@ -87,17 +123,26 @@ static func ui_scale(viewport_size: Vector2, force_mobile: bool = false) -> floa
 	return 1.8
 
 
-static func spacing_scale(viewport_size: Vector2, force_mobile: bool = false) -> float:
-	return 1.32 if use_mobile_ui(viewport_size, force_mobile) else 1.0
+static func spacing_scale(viewport_size: Vector2, force_mobile: bool = false, device_hints: Dictionary = {}) -> float:
+	match layout_tier(viewport_size, force_mobile, device_hints):
+		LayoutTier.PHONE:
+			return 1.32
+		LayoutTier.TABLET:
+			return TABLET_SPACING_SCALE
+		_:
+			return 1.0
 
 
-static func font_size(base_size: int, viewport_size: Vector2, force_mobile: bool = false) -> int:
-	return maxi(base_size, int(round(float(base_size) * ui_scale(viewport_size, force_mobile))))
+static func font_size(base_size: int, viewport_size: Vector2, force_mobile: bool = false, device_hints: Dictionary = {}) -> int:
+	return maxi(base_size, int(round(float(base_size) * ui_scale(viewport_size, force_mobile, device_hints))))
 
 
-static func touch_target(viewport_size: Vector2, force_mobile: bool = false) -> float:
-	if not use_mobile_ui(viewport_size, force_mobile):
+static func touch_target(viewport_size: Vector2, force_mobile: bool = false, device_hints: Dictionary = {}) -> float:
+	var tier := layout_tier(viewport_size, force_mobile, device_hints)
+	if tier == LayoutTier.DESKTOP:
 		return 48.0
+	if tier == LayoutTier.TABLET:
+		return TABLET_TOUCH_TARGET
 	var safe_size := _safe_viewport_size(viewport_size)
 	var short_side: float = min(safe_size.x, safe_size.y)
 	var portrait := safe_size.y > safe_size.x
@@ -161,6 +206,14 @@ static func ability_button_rect(viewport_size: Vector2, force_mobile: bool = fal
 	var size := _safe_viewport_size(viewport_size)
 	var button_size := ability_button_size(size, force_mobile)
 	return Rect2(ability_button_position(size, force_mobile), Vector2.ONE * button_size)
+
+
+static func should_show_virtual_joystick(viewport_size: Vector2, force_visible: bool = false, device_hints: Dictionary = {}) -> bool:
+	if force_visible:
+		return true
+	var hints := device_hints if not device_hints.is_empty() else _runtime_device_hints()
+	var touch_available := bool(hints.get("touch_available", false)) or bool(hints.get("mobile_os", false))
+	return touch_available and layout_tier(viewport_size, false, hints) != LayoutTier.DESKTOP
 
 
 static func mobile_lod_enabled(viewport_size: Vector2, force_mobile: bool = false, device_hints: Dictionary = {}) -> bool:
@@ -263,32 +316,54 @@ static func leader_threat_camera_zoom(viewport_size: Vector2, force_mobile: bool
 	return MOBILE_THREAT_CAMERA_ZOOM if use_mobile_ui(viewport_size, force_mobile) else DESKTOP_THREAT_CAMERA_ZOOM
 
 
-static func apply_control_tree(root: Control, viewport_size: Vector2, force_mobile: bool = false) -> void:
+static func apply_control_tree(root: Control, viewport_size: Vector2, force_mobile: bool = false, device_hints: Dictionary = {}) -> void:
 	if root == null:
 		return
-	var mobile := use_mobile_ui(viewport_size, force_mobile)
-	var scale := ui_scale(viewport_size, force_mobile)
-	var min_touch := touch_target(viewport_size, force_mobile)
-	_apply_control(root, scale, min_touch, mobile)
+	var tier := layout_tier(viewport_size, force_mobile, device_hints)
+	var scaled_layout := tier != LayoutTier.DESKTOP
+	var scale := ui_scale(viewport_size, force_mobile, device_hints)
+	var min_touch := touch_target(viewport_size, force_mobile, device_hints)
+	_apply_control(root, scale, min_touch, scaled_layout)
 
 
-static func _apply_control(control: Control, scale: float, min_touch: float, mobile: bool) -> void:
+static func _apply_control(control: Control, scale: float, min_touch: float, scaled_layout: bool) -> void:
 	if control == null:
 		return
 	if control is RichTextLabel:
-		_scale_font_key(control, "normal_font_size", 16, scale, mobile)
+		_scale_font_key(control, "normal_font_size", 16, scale, scaled_layout)
 	elif control is Label or control is BaseButton or control is LineEdit:
-		_scale_font_key(control, "font_size", 16, scale, mobile)
+		_scale_font_key(control, "font_size", 16, scale, scaled_layout)
 
-	if mobile:
-		if control is BaseButton or control is LineEdit:
-			control.custom_minimum_size.y = max(control.custom_minimum_size.y, min_touch)
-		elif control is HSlider:
-			control.custom_minimum_size.y = max(control.custom_minimum_size.y, min_touch * 0.72)
+	if control is BaseButton or control is LineEdit:
+		_apply_minimum_height(control, min_touch, scaled_layout)
+	elif control is HSlider:
+		_apply_minimum_height(control, min_touch * 0.72, scaled_layout)
 
 	for child in control.get_children():
 		if child is Control:
-			_apply_control(child as Control, scale, min_touch, mobile)
+			_apply_control(child as Control, scale, min_touch, scaled_layout)
+
+
+static func _apply_minimum_height(control: Control, minimum_height: float, scaled_layout: bool) -> void:
+	var current_height := control.custom_minimum_size.y
+	if scaled_layout:
+		var should_capture := not control.has_meta(META_MIN_HEIGHT_BASE)
+		if control.has_meta(META_MIN_HEIGHT_APPLIED):
+			should_capture = absf(float(control.get_meta(META_MIN_HEIGHT_APPLIED)) - current_height) > 0.01
+		if should_capture:
+			control.set_meta(META_MIN_HEIGHT_BASE, current_height)
+		var applied_height := maxf(float(control.get_meta(META_MIN_HEIGHT_BASE)), minimum_height)
+		control.custom_minimum_size.y = applied_height
+		control.set_meta(META_MIN_HEIGHT_APPLIED, applied_height)
+		return
+	if control.has_meta(META_MIN_HEIGHT_BASE):
+		var restored_height := float(control.get_meta(META_MIN_HEIGHT_BASE))
+		if control.has_meta(META_MIN_HEIGHT_APPLIED) and absf(float(control.get_meta(META_MIN_HEIGHT_APPLIED)) - current_height) > 0.01:
+			restored_height = current_height
+		control.custom_minimum_size.y = restored_height
+		control.remove_meta(META_MIN_HEIGHT_BASE)
+	if control.has_meta(META_MIN_HEIGHT_APPLIED):
+		control.remove_meta(META_MIN_HEIGHT_APPLIED)
 
 
 static func _scale_font_key(control: Control, key: String, fallback_size: int, scale: float, mobile: bool) -> void:
@@ -316,7 +391,10 @@ static func _scale_font_key(control: Control, key: String, fallback_size: int, s
 	if not control.has_meta(base_meta):
 		return
 	var restored_size := int(control.get_meta(base_meta))
-	if bool(control.get_meta(had_meta)):
+	var responsive_override_supplied := control.has_meta(applied_meta) and has_override and int(control.get_meta(applied_meta)) != current_size
+	if responsive_override_supplied:
+		control.add_theme_font_size_override(key, current_size)
+	elif bool(control.get_meta(had_meta)):
 		control.add_theme_font_size_override(key, restored_size)
 	else:
 		control.remove_theme_font_size_override(key)
@@ -336,22 +414,30 @@ static func _safe_viewport_size(viewport_size: Vector2) -> Vector2:
 
 
 static func _runtime_device_hints() -> Dictionary:
+	if not _device_hints_override.is_empty():
+		return _device_hints_override
 	var mobile_os := OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios")
 	var touch_available := false
 	if DisplayServer.has_method("is_touchscreen_available"):
 		touch_available = DisplayServer.call("is_touchscreen_available") == true
 	var ua_mobile := false
+	var ua_phone := false
+	var ua_tablet := false
 	var mouse_available := not mobile_os
 	if OS.has_feature("web"):
-		var web_hints: Variant = JavaScriptBridge.eval("({uaMobile:/Android|webOS|iPhone|iPad|iPod|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent||''),touch:(navigator.maxTouchPoints||0)>0,mouse:!!(window.matchMedia&&window.matchMedia('(any-pointer: fine)').matches)})", true)
+		var web_hints: Variant = JavaScriptBridge.eval("(()=>{const ua=navigator.userAgent||'';return {uaMobile:/Android|webOS|iPhone|iPad|iPod|IEMobile|Opera Mini|Mobile/i.test(ua),uaPhone:/iPhone|iPod|IEMobile|Opera Mini|Android.+Mobile|webOS.+Mobile/i.test(ua),uaTablet:/iPad|Tablet|Android(?!.*Mobile)/i.test(ua),touch:(navigator.maxTouchPoints||0)>0,mouse:!!(window.matchMedia&&window.matchMedia('(any-pointer: fine)').matches)}})()", true)
 		if web_hints is JavaScriptObject:
 			var web_object := web_hints as JavaScriptObject
 			ua_mobile = bool(web_object.uaMobile)
+			ua_phone = bool(web_object.uaPhone)
+			ua_tablet = bool(web_object.uaTablet)
 			touch_available = touch_available or bool(web_object.touch)
 			mouse_available = bool(web_object.mouse)
 	return {
 		"mobile_os": mobile_os,
 		"ua_mobile": ua_mobile,
+		"ua_phone": ua_phone,
+		"ua_tablet": ua_tablet,
 		"touch_available": touch_available,
 		"mouse_available": mouse_available
 	}

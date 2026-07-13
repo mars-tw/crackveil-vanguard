@@ -241,6 +241,8 @@ func _test_mobile_lod_profile() -> bool:
 	var desktop := Vector2(1280.0, 720.0)
 	var narrow_desktop := Vector2(620.0, 900.0)
 	var portrait := Vector2(390.0, 844.0)
+	var tablet := Vector2(1024.0, 768.0)
+	var touch_desktop := Vector2(1920.0, 1080.0)
 	MOBILE_TUNING.set_force_mobile_lod_for_tests(false)
 	if MOBILE_TUNING.mobile_lod_enabled(desktop, false):
 		_fail("desktop unexpectedly uses mobile LOD")
@@ -255,6 +257,20 @@ func _test_mobile_lod_profile() -> bool:
 	var touch_desktop_hints := {"mobile_os": false, "ua_mobile": false, "touch_available": true, "mouse_available": true}
 	var touch_only_hints := {"mobile_os": false, "ua_mobile": false, "touch_available": true, "mouse_available": false}
 	var mobile_ua_hints := {"mobile_os": false, "ua_mobile": true, "touch_available": true, "mouse_available": true}
+	var tablet_hints := {"mobile_os": false, "ua_mobile": true, "ua_phone": false, "ua_tablet": true, "touch_available": true, "mouse_available": false}
+	var touch_desktop_formfactor_hints := {"mobile_os": false, "ua_mobile": false, "ua_phone": false, "ua_tablet": false, "touch_available": true, "mouse_available": true}
+	if MOBILE_TUNING.layout_tier_name(portrait, false, mobile_ua_hints) != "phone":
+		_fail("390x844 form factor stopped being phone")
+		return false
+	if MOBILE_TUNING.layout_tier_name(tablet, false, tablet_hints) != "tablet":
+		_fail("1024x768 touch form factor stopped being tablet")
+		return false
+	if MOBILE_TUNING.layout_tier_name(touch_desktop, false, touch_desktop_formfactor_hints) != "desktop":
+		_fail("1920x1080 touch desktop form factor was downgraded")
+		return false
+	if MOBILE_TUNING.mobile_lod_enabled(touch_desktop, false, touch_desktop_formfactor_hints):
+		_fail("touch desktop form-factor fix changed M1 LOD semantics")
+		return false
 	if MOBILE_TUNING.mobile_lod_enabled(narrow_desktop, false, desktop_mouse_hints):
 		_fail("narrow mouse desktop unexpectedly uses mobile LOD")
 		return false

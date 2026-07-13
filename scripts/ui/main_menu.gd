@@ -30,6 +30,7 @@ var volume_slider: HSlider
 var mute_check: CheckBox
 var damage_numbers_check: CheckBox
 var screen_shake_check: CheckBox
+var force_joystick_check: CheckBox
 var syncing_settings: bool = false
 var syncing_audio: bool = false
 var active_panel_id: String = "meta"
@@ -329,6 +330,11 @@ func _build_settings_panel() -> void:
 	screen_shake_check.text = "螢幕震動"
 	screen_shake_check.toggled.connect(_on_screen_shake_toggled)
 	side_content.add_child(screen_shake_check)
+
+	force_joystick_check = CheckBox.new()
+	force_joystick_check.text = "強制顯示搖桿"
+	force_joystick_check.toggled.connect(_on_force_joystick_toggled)
+	side_content.add_child(force_joystick_check)
 	_sync_audio_controls()
 	_sync_settings_controls()
 
@@ -390,6 +396,8 @@ func _sync_settings_controls() -> void:
 		damage_numbers_check.button_pressed = bool(PlayerSettings.get("damage_numbers_enabled"))
 	if screen_shake_check != null:
 		screen_shake_check.button_pressed = bool(PlayerSettings.get("screen_shake_enabled"))
+	if force_joystick_check != null:
+		force_joystick_check.button_pressed = bool(PlayerSettings.get("force_joystick_visible"))
 	syncing_settings = false
 
 
@@ -415,6 +423,12 @@ func _on_screen_shake_toggled(value: bool) -> void:
 	if syncing_settings or PlayerSettings == null:
 		return
 	PlayerSettings.set_screen_shake_enabled(value)
+
+
+func _on_force_joystick_toggled(value: bool) -> void:
+	if syncing_settings or PlayerSettings == null:
+		return
+	PlayerSettings.set_force_joystick_visible(value)
 
 
 func _apply_responsive_layout() -> void:
@@ -468,15 +482,16 @@ func _apply_responsive_layout() -> void:
 
 	var seed_height := touch_height if mobile else 42.0
 	if mobile and not portrait:
-		var seed_width: float = max(280.0, viewport_size.x - menu_width - margin * 3.0)
+		var seed_width: float = min(MOBILE_TUNING.SEED_ROW_MAX_WIDTH, max(280.0, viewport_size.x - menu_width - margin * 3.0))
 		seed_row.position = Vector2(menu_box.position.x + menu_width + margin, menu_y)
 		seed_row.size = Vector2(seed_width, seed_height)
 		seed_input.custom_minimum_size = Vector2(max(150.0, seed_width - 144.0), seed_height)
 		seed_start_button.custom_minimum_size = Vector2(132.0, seed_height)
 	else:
 		seed_row.position = menu_box.position + Vector2(0.0, menu_box.size.y + (16.0 if mobile else 16.0))
-		seed_row.size = Vector2(menu_width, seed_height)
-		seed_input.custom_minimum_size = Vector2(max(140.0, menu_width - (140.0 if mobile else 116.0)), seed_height)
+		var seed_width: float = min(MOBILE_TUNING.SEED_ROW_MAX_WIDTH, menu_width)
+		seed_row.size = Vector2(seed_width, seed_height)
+		seed_input.custom_minimum_size = Vector2(max(140.0, seed_width - (140.0 if mobile else 116.0)), seed_height)
 		seed_start_button.custom_minimum_size = Vector2(132.0 if mobile else 108.0, seed_height)
 
 	var panel_width: float = min(viewport_size.x - margin * 2.0, 520.0 if not portrait else viewport_size.x - margin * 2.0)
@@ -517,6 +532,8 @@ func _apply_responsive_layout() -> void:
 	version_label.offset_right = -margin
 	version_label.offset_top = -32.0
 	version_label.offset_bottom = -10.0
+	seed_input.add_theme_font_size_override("font_size", 14)
+	seed_start_button.add_theme_font_size_override("font_size", 14)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
 	# Web CanvasLayer 已換算為 CSS 像素；在此鎖視覺字級，避免通用可讀性倍率二次放大。
 	if mobile and OS.has_feature("web"):

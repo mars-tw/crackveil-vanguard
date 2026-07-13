@@ -70,7 +70,7 @@ func force_direction_for_test(new_direction: Vector2) -> void:
 	queue_redraw()
 
 
-func configure_for_viewport(viewport_size: Vector2, mobile: bool, size_index: int = 1) -> Vector2:
+func configure_for_viewport(viewport_size: Vector2, mobile: bool, size_index: int = 1, tablet: bool = false) -> Vector2:
 	var safe_size: Vector2 = viewport_size
 	if safe_size.x <= 0.0 or safe_size.y <= 0.0:
 		safe_size = Vector2(390.0, 844.0)
@@ -83,6 +83,9 @@ func configure_for_viewport(viewport_size: Vector2, mobile: bool, size_index: in
 		var base_axis: float = safe_size.x if portrait else min(safe_size.x, safe_size.y)
 		var ratio: float = float(portrait_ratios[clamped_index] if portrait else landscape_ratios[clamped_index])
 		radius = max(70.0 if portrait else 64.0, base_axis * ratio)
+	elif tablet:
+		var tablet_radii := [74.0, 86.0, 98.0] if portrait else [70.0, 82.0, 94.0]
+		radius = tablet_radii[clamped_index]
 	else:
 		var desktop_radii: Array[float] = [58.0, 66.0, 76.0]
 		radius = desktop_radii[clamped_index]

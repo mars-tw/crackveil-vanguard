@@ -41,6 +41,7 @@ var pause_volume_slider: HSlider
 var pause_mute_check: CheckBox
 var pause_damage_numbers_check: CheckBox
 var pause_screen_shake_check: CheckBox
+var pause_force_joystick_check: CheckBox
 var pause_joystick_size_label: Label
 var pause_joystick_size_slider: HSlider
 var pause_seed_button: Button
@@ -411,6 +412,11 @@ func _build_pause_overlay() -> void:
 	pause_screen_shake_check.toggled.connect(_on_screen_shake_toggled)
 	pause_content.add_child(pause_screen_shake_check)
 
+	pause_force_joystick_check = CheckBox.new()
+	pause_force_joystick_check.text = "強制顯示搖桿"
+	pause_force_joystick_check.toggled.connect(_on_force_joystick_toggled)
+	pause_content.add_child(pause_force_joystick_check)
+
 	pause_joystick_size_label = Label.new()
 	pause_joystick_size_label.text = "搖桿大小：中"
 	pause_joystick_size_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -499,10 +505,12 @@ func _apply_responsive_layout() -> void:
 		viewport_size = Vector2(1280.0, 720.0)
 	viewport_size = MOBILE_TUNING.apply_web_canvas_scale(self, viewport_size, root)
 	var portrait := viewport_size.y > viewport_size.x
-	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size) or force_touch_controls_visible
+	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
+	var layout_tier := MOBILE_TUNING.layout_tier(viewport_size)
+	var tablet := layout_tier == MOBILE_TUNING.LayoutTier.TABLET
 	var margin := 16.0 if mobile else 14.0
-	var touch_height := MOBILE_TUNING.touch_target(viewport_size, force_touch_controls_visible)
-	var safe_top := MOBILE_TUNING.safe_top_padding(viewport_size, force_touch_controls_visible)
+	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
+	var safe_top := MOBILE_TUNING.safe_top_padding(viewport_size)
 
 	if hud_panel != null:
 		hud_panel.position = Vector2(8.0, safe_top + 58.0) if mobile and portrait else Vector2(8.0, safe_top + 8.0 if mobile else 8.0)
@@ -664,8 +672,8 @@ func _apply_responsive_layout() -> void:
 		audio_prompt_button.offset_bottom = -34.0
 
 	if active_ability_button != null:
-		var ability_size := MOBILE_TUNING.ability_button_size(viewport_size, force_touch_controls_visible)
-		var ability_position := MOBILE_TUNING.ability_button_position(viewport_size, force_touch_controls_visible)
+		var ability_size := MOBILE_TUNING.ability_button_size(viewport_size)
+		var ability_position := MOBILE_TUNING.ability_button_position(viewport_size)
 		active_ability_button.anchor_left = 0.0
 		active_ability_button.anchor_right = 0.0
 		active_ability_button.anchor_top = 0.0
@@ -730,21 +738,24 @@ func _apply_responsive_layout() -> void:
 		var joystick_size_index: int = int(PlayerSettings.get("joystick_size_index")) if PlayerSettings != null else 1
 		var joystick_size: Vector2 = Vector2(188.0, 188.0)
 		if virtual_joystick.has_method("configure_for_viewport"):
-			joystick_size = virtual_joystick.configure_for_viewport(viewport_size, mobile, joystick_size_index)
+			joystick_size = virtual_joystick.configure_for_viewport(viewport_size, mobile, joystick_size_index, tablet)
 		else:
 			var fallback_size: float = 188.0 if mobile and portrait else 170.0 if mobile else 164.0 if portrait else 150.0
 			joystick_size = Vector2(fallback_size, fallback_size)
 		virtual_joystick.size = joystick_size
-		var joystick_target := MOBILE_TUNING.joystick_rect(viewport_size, joystick_size, force_touch_controls_visible)
+		var joystick_target := MOBILE_TUNING.joystick_rect(viewport_size, joystick_size)
 		virtual_joystick.position = joystick_target.position
 		virtual_joystick.visible = _should_show_touch_controls()
-	MOBILE_TUNING.apply_control_tree(root, viewport_size, force_touch_controls_visible)
+		if not virtual_joystick.visible:
+			GameManager.set_touch_move_vector(Vector2.ZERO)
+	MOBILE_TUNING.apply_control_tree(root, viewport_size)
 
 
 func _should_show_touch_controls() -> bool:
-	if force_touch_controls_visible:
-		return true
-	return MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size)
+	var forced := force_touch_controls_visible
+	if PlayerSettings != null:
+		forced = forced or bool(PlayerSettings.get("force_joystick_visible"))
+	return MOBILE_TUNING.should_show_virtual_joystick(get_viewport().get_visible_rect().size, forced)
 
 
 func set_touch_controls_forced_visible(value: bool) -> void:
@@ -765,9 +776,9 @@ func _on_stats_changed(stats: Dictionary) -> void:
 	var theme_name := str(stats.get("run_theme_name", ""))
 	if theme_label != null:
 		theme_label.text = "地圖：%s" % theme_name if theme_name != "" else ""
-		theme_label.visible = theme_name != "" and not MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size, force_touch_controls_visible)
+		theme_label.visible = theme_name != "" and not MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size)
 	time_label.text = GameManager.format_time(float(stats.get("elapsed_time", 0.0)))
-	var mobile := MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size, force_touch_controls_visible)
+	var mobile := MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size)
 	var kills := int(stats.get("kills", 0))
 	var gold := int(stats.get("gold", 0))
 	var echo_shards := int(stats.get("echo_shards", 0))
@@ -1094,6 +1105,8 @@ func _sync_settings_controls() -> void:
 		pause_damage_numbers_check.button_pressed = bool(PlayerSettings.get("damage_numbers_enabled"))
 	if pause_screen_shake_check != null:
 		pause_screen_shake_check.button_pressed = bool(PlayerSettings.get("screen_shake_enabled"))
+	if pause_force_joystick_check != null:
+		pause_force_joystick_check.button_pressed = bool(PlayerSettings.get("force_joystick_visible"))
 	if pause_joystick_size_slider != null:
 		pause_joystick_size_slider.value = float(PlayerSettings.get("joystick_size_index"))
 	if pause_joystick_size_label != null:
@@ -1111,6 +1124,13 @@ func _on_screen_shake_toggled(value: bool) -> void:
 	if syncing_settings_controls or PlayerSettings == null:
 		return
 	PlayerSettings.set_screen_shake_enabled(value)
+
+
+func _on_force_joystick_toggled(value: bool) -> void:
+	if syncing_settings_controls or PlayerSettings == null:
+		return
+	PlayerSettings.set_force_joystick_visible(value)
+	_apply_responsive_layout()
 
 
 func _on_joystick_size_slider_changed(value: float) -> void:

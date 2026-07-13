@@ -10,7 +10,19 @@ var leader: Node2D = null
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	get_window().size = Vector2i(720, 1280)
+	# Phone layout comes from the viewport. The force flag below only guarantees
+	# joystick availability and must never be used to scale a desktop layout.
+	get_window().size = Vector2i(390, 844)
+	# The project stretch canvas keeps a 720px logical short side in headless;
+	# inject a handset UA so this remains a faithful Web phone scenario.
+	MOBILE_TUNING.set_device_hints_override_for_tests({
+		"mobile_os": false,
+		"ua_mobile": true,
+		"ua_phone": true,
+		"ua_tablet": false,
+		"touch_available": true,
+		"mouse_available": false
+	})
 	arena = ARENA_SCENE.instantiate()
 	add_child(arena)
 	call_deferred("_run_test")
@@ -43,6 +55,7 @@ func _run_test() -> void:
 		return
 
 	print("MOBILE_INPUT_SMOKE_PASS")
+	MOBILE_TUNING.set_device_hints_override_for_tests()
 	get_tree().quit(0)
 
 
@@ -174,5 +187,6 @@ func _rect_inside(rect: Rect2, viewport_size: Vector2) -> bool:
 
 
 func _fail(message: String) -> void:
+	MOBILE_TUNING.set_device_hints_override_for_tests()
 	printerr("MOBILE_INPUT_SMOKE_FAIL: " + message)
 	get_tree().quit(1)

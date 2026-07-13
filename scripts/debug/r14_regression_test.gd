@@ -23,12 +23,15 @@ func _ready() -> void:
 
 
 func _watchdog() -> void:
-	await get_tree().create_timer(12.0, true).timeout
+	await get_tree().create_timer(20.0, true).timeout
 	if current_phase != "done":
 		_fail("watchdog timeout at phase: " + current_phase)
 
 
 func _run_tests() -> void:
+	current_phase = "formfactor"
+	if not await _test_formfactor_matrix_and_live_switch():
+		return
 	current_phase = "mobile_ui"
 	var mobile_ok := await _test_mobile_ui_scaling()
 	if not mobile_ok:
@@ -46,6 +49,126 @@ func _run_tests() -> void:
 	current_phase = "done"
 	print("R14_REGRESSION_PASS")
 	get_tree().quit(0)
+
+
+func _test_formfactor_matrix_and_live_switch() -> bool:
+	var phone := Vector2(390.0, 844.0)
+	var tablet := Vector2(1024.0, 768.0)
+	var touch_desktop := Vector2(1920.0, 1080.0)
+	var desktop := Vector2(1536.0, 864.0)
+	var phone_hints := {"mobile_os": false, "ua_mobile": true, "ua_phone": true, "ua_tablet": false, "touch_available": true, "mouse_available": false}
+	var tablet_hints := {"mobile_os": false, "ua_mobile": true, "ua_phone": false, "ua_tablet": true, "touch_available": true, "mouse_available": false}
+	var touch_desktop_hints := {"mobile_os": false, "ua_mobile": false, "ua_phone": false, "ua_tablet": false, "touch_available": true, "mouse_available": true}
+	var desktop_hints := {"mobile_os": false, "ua_mobile": false, "ua_phone": false, "ua_tablet": false, "touch_available": false, "mouse_available": true}
+	var cases := [
+		{"size": phone, "hints": phone_hints, "tier": "phone", "joystick": true},
+		{"size": tablet, "hints": tablet_hints, "tier": "tablet", "joystick": true},
+		{"size": touch_desktop, "hints": touch_desktop_hints, "tier": "desktop", "joystick": false},
+		{"size": desktop, "hints": desktop_hints, "tier": "desktop", "joystick": false},
+		# Layout remains phone-sized on a narrow mouse window, but input capability
+		# must not invent a virtual joystick when no touch source exists.
+		{"size": phone, "hints": desktop_hints, "tier": "phone", "joystick": false}
+	]
+	for formfactor_case in cases:
+		var size: Vector2 = formfactor_case.size
+		var hints: Dictionary = formfactor_case.hints
+		var expected_tier: String = formfactor_case.tier
+		if MOBILE_TUNING.layout_tier_name(size, false, hints) != expected_tier:
+			_fail("form-factor tier mismatch for %s: expected %s got %s" % [str(size), expected_tier, MOBILE_TUNING.layout_tier_name(size, false, hints)])
+			return false
+		if MOBILE_TUNING.should_show_virtual_joystick(size, false, hints) != bool(formfactor_case.joystick):
+			_fail("joystick matrix mismatch for %s" % str(size))
+			return false
+	if absf(MOBILE_TUNING.ui_scale(phone, false, phone_hints) - 1.96) > 0.001:
+		_fail("phone scale drifted")
+		return false
+	if absf(MOBILE_TUNING.ui_scale(tablet, false, tablet_hints) - MOBILE_TUNING.TABLET_UI_SCALE) > 0.001 or MOBILE_TUNING.touch_target(tablet, false, tablet_hints) < 44.0:
+		_fail("tablet scale or touch target drifted")
+		return false
+	if absf(MOBILE_TUNING.ui_scale(touch_desktop, false, touch_desktop_hints) - 1.0) > 0.001:
+		_fail("touch desktop scale drifted")
+		return false
+	if not MOBILE_TUNING.should_show_virtual_joystick(touch_desktop, true, touch_desktop_hints):
+		_fail("forced desktop joystick did not become available")
+		return false
+	PlayerSettings.debug_use_save_path("user://formfactor_settings_test.cfg", true)
+	PlayerSettings.set_force_joystick_visible(true)
+	PlayerSettings.load_settings()
+	if not bool(PlayerSettings.get("force_joystick_visible")):
+		_fail("force joystick setting did not persist")
+		return false
+	PlayerSettings.set_force_joystick_visible(false)
+	if not await _test_seed_width_for_tier(tablet, tablet_hints, "tablet"):
+		return false
+	if not await _test_seed_width_for_tier(touch_desktop, touch_desktop_hints, "touch desktop"):
+		return false
+	if not await _test_seed_width_for_tier(desktop, desktop_hints, "desktop"):
+		return false
+
+	MOBILE_TUNING.set_device_hints_override_for_tests(phone_hints)
+	var viewport := _make_ui_viewport(phone)
+	var hud := HUD_SCRIPT.new()
+	viewport.add_child(hud)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if not hud.virtual_joystick.visible:
+		_fail("live phone HUD hid joystick")
+		return false
+	if hud.pause_force_joystick_check == null:
+		_fail("pause settings missing force joystick toggle")
+		return false
+	MOBILE_TUNING.set_device_hints_override_for_tests(tablet_hints)
+	viewport.size = Vector2i(1024, 768)
+	hud._apply_responsive_layout()
+	await get_tree().process_frame
+	if MOBILE_TUNING.layout_tier_name(tablet) != "tablet" or not hud.virtual_joystick.visible:
+		_fail("live phone-to-tablet switch failed")
+		return false
+	if float(hud.virtual_joystick.get("stick_radius")) > 100.0:
+		_fail("tablet joystick kept phone-sized radius")
+		return false
+	MOBILE_TUNING.set_device_hints_override_for_tests(touch_desktop_hints)
+	viewport.size = Vector2i(1920, 1080)
+	hud._apply_responsive_layout()
+	await get_tree().process_frame
+	if MOBILE_TUNING.layout_tier_name(touch_desktop) != "desktop" or hud.virtual_joystick.visible:
+		_fail("live tablet-to-touch-desktop switch failed")
+		return false
+	if hud.hp_label.get_theme_font_size("font_size") != 20:
+		_fail("live desktop switch did not restore desktop HUD font")
+		return false
+	hud.set_touch_controls_forced_visible(true)
+	await get_tree().process_frame
+	if not hud.virtual_joystick.visible or absf(MOBILE_TUNING.ui_scale(touch_desktop) - 1.0) > 0.001:
+		_fail("force joystick changed desktop layout or remained hidden")
+		return false
+	hud.set_touch_controls_forced_visible(false)
+	viewport.queue_free()
+	MOBILE_TUNING.set_device_hints_override_for_tests()
+	print("R14_FORMFACTOR phone=phone tablet=tablet touch_desktop=desktop desktop=desktop seed_max=%.0f" % MOBILE_TUNING.SEED_ROW_MAX_WIDTH)
+	return true
+
+
+func _test_seed_width_for_tier(size: Vector2, hints: Dictionary, label: String) -> bool:
+	MOBILE_TUNING.set_device_hints_override_for_tests(hints)
+	var viewport := _make_ui_viewport(size)
+	var menu := MAIN_MENU_SCRIPT.new()
+	viewport.add_child(menu)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if menu.seed_row.size.x > MOBILE_TUNING.SEED_ROW_MAX_WIDTH + 0.5:
+		_fail("%s main menu seed row exceeded max width: %.1f" % [label, menu.seed_row.size.x])
+		return false
+	var contract := CONTRACT_SCREEN_SCRIPT.new()
+	viewport.add_child(contract)
+	await get_tree().process_frame
+	contract.show_options(_sample_options())
+	await get_tree().process_frame
+	if contract.seed_row.size.x > MOBILE_TUNING.SEED_ROW_MAX_WIDTH + 0.5:
+		_fail("%s contract seed row exceeded max width: %.1f" % [label, contract.seed_row.size.x])
+		return false
+	viewport.queue_free()
+	return true
 
 
 func _test_mobile_ui_scaling() -> bool:
@@ -140,6 +263,9 @@ func _test_main_menu_mobile_layout(size: Vector2) -> bool:
 		return false
 	if not _control_inside_viewport(menu.menu_box, size, "main menu button stack"):
 		return false
+	if menu.seed_row.size.x > MOBILE_TUNING.SEED_ROW_MAX_WIDTH + 0.5:
+		_fail("main menu seed row exceeded max width: %.1f" % menu.seed_row.size.x)
+		return false
 	if menu.start_button.custom_minimum_size.y < 56.0:
 		_fail("main menu button height below 56px")
 		return false
@@ -151,6 +277,9 @@ func _test_main_menu_mobile_layout(size: Vector2) -> bool:
 		return false
 	menu._show_panel("settings")
 	await get_tree().process_frame
+	if menu.force_joystick_check == null:
+		_fail("main menu settings missing force joystick toggle")
+		return false
 	if not _control_inside_viewport(menu.side_panel, size, "main menu settings panel"):
 		return false
 	if menu.side_scroll == null or menu.side_scroll.size.y <= 0.0:
@@ -171,6 +300,9 @@ func _test_contract_mobile_layout(size: Vector2) -> bool:
 	if not _control_inside_viewport(screen.panel, size, "contract panel"):
 		return false
 	if not _control_inside_viewport(screen.card_scroll, size, "contract card scroll"):
+		return false
+	if screen.seed_row.size.x > MOBILE_TUNING.SEED_ROW_MAX_WIDTH + 0.5:
+		_fail("contract seed row exceeded max width: %.1f" % screen.seed_row.size.x)
 		return false
 	if portrait and screen.card_grid.columns != 1:
 		_fail("contract portrait cards are not single column")
@@ -545,5 +677,6 @@ func DECOR_OFFSET() -> float:
 
 
 func _fail(message: String) -> void:
+	MOBILE_TUNING.set_device_hints_override_for_tests()
 	printerr("R14_REGRESSION_FAIL: " + message)
 	get_tree().quit(1)

@@ -125,7 +125,7 @@ func _build_ui() -> void:
 	seed_row.add_child(seed_paste_button)
 
 	seed_start_button = Button.new()
-	seed_start_button.text = "用種子開局"
+	seed_start_button.text = "種子開局"
 	seed_start_button.pressed.connect(_on_seed_start_pressed)
 	seed_row.add_child(seed_start_button)
 
@@ -389,12 +389,17 @@ func _apply_responsive_layout() -> void:
 
 	if seed_row != null:
 		seed_row.visible = not compact_landscape
-		seed_row.offset_left = 20.0 if mobile else 26.0
-		seed_row.offset_right = -seed_row.offset_left
+		var seed_row_width: float = min(MOBILE_TUNING.SEED_ROW_MAX_WIDTH - 4.0, panel_width - (40.0 if mobile else 52.0))
+		seed_row.anchor_left = 0.5
+		seed_row.anchor_right = 0.5
+		seed_row.offset_left = -seed_row_width * 0.5
+		seed_row.offset_right = seed_row_width * 0.5
 		seed_row.offset_top = meta_grid.offset_bottom + 10.0
 		seed_row.offset_bottom = seed_row.offset_top + (touch_height if mobile else 42.0)
 	if seed_input != null:
-		seed_input.custom_minimum_size = Vector2(154.0 if portrait else 280.0, touch_height if mobile else 38.0)
+		var row_width: float = min(MOBILE_TUNING.SEED_ROW_MAX_WIDTH - 4.0, panel_width - (40.0 if mobile else 52.0))
+		var button_widths := (72.0 if mobile else 58.0) + (128.0 if mobile else 116.0) + 16.0
+		seed_input.custom_minimum_size = Vector2(max(84.0, row_width - button_widths), touch_height if mobile else 38.0)
 	if seed_paste_button != null:
 		seed_paste_button.custom_minimum_size = Vector2(72.0 if mobile else 58.0, touch_height if mobile else 38.0)
 	if seed_start_button != null:
@@ -417,6 +422,12 @@ func _apply_responsive_layout() -> void:
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
 		button.add_theme_font_size_override("font_size", 18 if portrait else 18 if mobile else 20)
+	if seed_input != null:
+		seed_input.add_theme_font_size_override("font_size", 13)
+	if seed_paste_button != null:
+		seed_paste_button.add_theme_font_size_override("font_size", 13)
+	if seed_start_button != null:
+		seed_start_button.add_theme_font_size_override("font_size", 13)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
 	if mobile and OS.has_feature("web"):
 		logo_glow_label.add_theme_font_size_override("font_size", 30 if portrait else 18)
