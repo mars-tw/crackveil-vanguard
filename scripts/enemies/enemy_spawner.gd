@@ -108,6 +108,12 @@ const ELITE_AFFIX_IDS: Array[String] = [
 	"affix_field",
 	"affix_swift"
 ]
+const ELITE_SPRITE_PATHS: Dictionary = {
+	"affix_split": "res://assets/sprites/enemy_elite_split.png",
+	"affix_field": "res://assets/sprites/enemy_elite_field.png",
+	"affix_swift": "res://assets/sprites/enemy_elite_swift.png"
+}
+const BOSS_SPRITE_PATH := "res://assets/sprites/enemy_boss.png"
 
 @export var max_enemies: int = 150
 @export var spawn_margin: float = 110.0
@@ -211,7 +217,7 @@ func _spawn_boss() -> void:
 		"gold": 16,
 		"radius": 34.0,
 		"color": Color(0.42, 0.18, 0.74),
-		"sprite_path": "res://assets/sprites/enemy_tank.png",
+		"sprite_path": BOSS_SPRITE_PATH,
 		"sprite_scale": 2.08,
 		"attack_cooldown": 1.15,
 		"behavior_id": "boss",
@@ -270,6 +276,7 @@ func _apply_elite_affix(config: Dictionary, affix_id: String) -> void:
 		"affix_split":
 			config["max_hp"] = float(config.get("max_hp", 174.0)) * 0.92
 			config["color"] = Color(0.55, 1.0, 0.58)
+			config["sprite_path"] = ELITE_SPRITE_PATHS["affix_split"]
 			config["sprite_scale"] = 1.5
 			config["spawns_on_death"] = true
 			config["death_spawn_id"] = "affix_split_spawnling"
@@ -278,6 +285,7 @@ func _apply_elite_affix(config: Dictionary, affix_id: String) -> void:
 		"affix_field":
 			config["speed"] = float(config.get("speed", 54.0)) * 0.86
 			config["color"] = Color(0.34, 0.88, 1.0)
+			config["sprite_path"] = ELITE_SPRITE_PATHS["affix_field"]
 			config["sprite_scale"] = 1.58
 			config["affix_field_radius"] = 128.0
 			config["affix_field_slow_strength"] = 0.22
@@ -287,6 +295,7 @@ func _apply_elite_affix(config: Dictionary, affix_id: String) -> void:
 			config["damage"] = float(config.get("damage", 18.2)) * 0.9
 			config["radius"] = 25.0
 			config["color"] = Color(1.0, 0.62, 0.22)
+			config["sprite_path"] = ELITE_SPRITE_PATHS["affix_swift"]
 			config["sprite_scale"] = 1.48
 			config["attack_cooldown"] = 1.05
 			config["behavior_id"] = "dasher"

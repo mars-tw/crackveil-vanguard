@@ -77,11 +77,57 @@ applies its existing player pool, per-cue cooldowns, volume, and pitch limits.
 - The UI Pack's bright visual skins were evaluated but not distributed because
   they conflict with the game's dark rift interface; only its click sound is used.
 
+## OpenGameArt CC0 animated enemies
+
+All enemy sources in this section are released under Creative Commons Zero
+1.0 Universal (CC0 1.0):
+<https://creativecommons.org/publicdomain/zero/1.0/>. Attribution is not
+required, but the authors, exact source pages, original filenames, hashes, and
+distributed derivatives are retained here for provenance.
+
+### Top Down Cultist Creature / Top Down Tentacle Creature
+
+- Author: Sean Noonan
+- Sources:
+  - <https://opengameart.org/content/top-down-cultist-creature>
+  - <https://opengameart.org/content/top-down-tentacle-creature>
+- License shown on both source pages: CC0
+
+| Upstream file (SHA-256) | Distributed derivatives |
+| --- | --- |
+| `roaming_cultist.png` (`88FA37A7AD7E2BCD085EECB29369DE420E3F62286C75A31EB3204E2BF72745C9`) | `enemy_grunt.png` and its generated idle/walk frames |
+| `monster_flesh_eye_sheet.png` (`F74F0465E4B413CB1D45F64FA80E7F2F8B0BB5429F53DBC9E24B7DD1BC5BAAD5`) | `enemy_tank.png` and its generated idle/walk frames |
+| `monster_flesh_teeth_sheet.png` (`0CB17ED4E2CC68397C50372CCF107AE84F0F65E04B4812E19CE7DB468FAC235B`) | `enemy_boss.png` and its generated idle/walk frames |
+
+### Animated Walk-Cycle Monsters + Hijabi from Eman Quest
+
+- Author: Night Blade
+- Source: <https://opengameart.org/content/animated-walk-cycle-monsters-hijabi-from-eman-quest>
+- License shown on source page: CC0
+
+| Upstream file (SHA-256) | Distributed derivatives |
+| --- | --- |
+| `beetle2.png` (`E373EDB2186B96DD93288FA52E5506BD99608C39F33BCC880A1C3D5BCA2F94BA`) | `enemy_fast.png` and its generated idle/walk frames |
+| `crystal_2.png` (`4CFB9F8ED288CEB476AA0122D68690C528BD3AD5D3AC50FBFD2B20153C0CCAE5`) | `enemy_elite_split.png` and its generated idle/walk frames |
+| `mushroom_9.png` (`8D373D0A5A5CBF54F4CAACA1450BF424AF5A643B0BEDD88090976FAC70A56222`) | `enemy_elite_field.png` and its generated idle/walk frames |
+| `crab2.png` (`6418DB574A4E5B5A304C6A1640AAE631AE51E9FDDE3F720E365F853C074E35E9`) | `enemy_elite_swift.png` and its generated idle/walk frames |
+
+Changes to every distributed enemy derivative: selected real source animation
+frames were alpha-cleaned, union-cropped, resized onto a transparent 96x96
+canvas, luminance-graded to a neutral rift ramp, given a two-pixel dark-plum
+outline, and palettized to at most 48 colors. Runtime `body_color` then applies
+the existing threat tint: regular enemies remain in the dark red/ember family,
+affix elites retain their green/cyan/orange glow coding, and the dedicated Boss
+silhouette is enlarged with the existing violet volume glow. Rebuild with
+`python tools/process_enemy_cc0_assets.py`; ignored originals remain under
+`tools/asset_sources/` and are not included in the game package.
+
 ## Other project assets
 
 - The Traditional Chinese UI font is a subset of Noto Sans CJK TC Regular,
   licensed under SIL Open Font License 1.1. See `assets/fonts/OFL.txt`.
 - Wasteland-farm ground and decor cuts were adapted from the same author's MIT
   project `pixel-idle-farm-skill`; only the small, game-ready cuts are present.
-- Hero and enemy character art was produced specifically for this project and
-  is not replaced by the stylistically different Kenney character packs.
+- Hero character art was produced specifically for this project. Enemy art uses
+  the compact CC0 derivatives documented above; unused candidate packs and raw
+  archives are not distributed.

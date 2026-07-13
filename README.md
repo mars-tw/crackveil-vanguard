@@ -101,3 +101,8 @@ Web 版內嵌 `assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf`，由 Noto Sans
 ## License
 
 MIT License. See [LICENSE](LICENSE).
+
+Bundled third-party assets include CC0 enemy/VFX/audio derivatives and the
+OFL-licensed Traditional Chinese font subset. Exact upstream pages, authors,
+source hashes, transformations, and derivative mappings are recorded in
+[assets/CREDITS.md](assets/CREDITS.md).

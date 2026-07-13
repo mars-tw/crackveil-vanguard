@@ -14,6 +14,7 @@ const BOSS_CORE_COLOR := Color(1.0, 0.42, 0.92, 1.0)
 const BOSS_CORE_PHASE_TWO_COLOR := Color(1.0, 0.16, 0.3, 1.0)
 
 static var animation_frames_cache: Dictionary = {}
+static var animation_runtime_mobile_lod_cache: int = -1
 
 @export var type_id: String = "normal"
 @export var max_hp: float = 18.0
@@ -94,6 +95,7 @@ var visual_tilt_amount: float = 0.085
 var visual_step_interval: float = 0.3
 var animation_frames_ready: bool = false
 var current_animation_name: String = ""
+var animation_mobile_lod: bool = false
 
 
 func _ready() -> void:
@@ -155,6 +157,7 @@ func pool_on_release() -> void:
 	hit_squash_timer = 0.0
 	visual_walk_phase = 0.0
 	visual_idle_phase = 0.0
+	animation_mobile_lod = false
 	last_visual_direction = Vector2.RIGHT
 	threat_glow_base_alpha = 0.18
 	if affix_ring != null:
@@ -967,10 +970,18 @@ func _setup_animation_frames(target_diameter: float, scale_multiplier: float) ->
 	current_animation_name = ""
 	if animated_sprite == null:
 		return
-	var cached: Dictionary = animation_frames_cache.get(sprite_path, {})
+	var high_detail_unit := is_elite or is_boss
+	animation_mobile_lod = false
+	var cache_key := sprite_path
+	if high_detail_unit:
+		animation_mobile_lod = _animation_mobile_lod_enabled()
+		cache_key = "%s|%s" % [sprite_path, "mobile" if animation_mobile_lod else "desktop"]
+	var cached: Dictionary = animation_frames_cache.get(cache_key, {})
 	if cached.is_empty():
-		cached = _build_animation_frames_cache_entry()
-		animation_frames_cache[sprite_path] = cached
+		var idle_limit := 2 if high_detail_unit and not animation_mobile_lod else 1
+		var walk_limit := 6 if high_detail_unit and not animation_mobile_lod else 2
+		cached = _build_animation_frames_cache_entry(idle_limit, walk_limit, animation_mobile_lod)
+		animation_frames_cache[cache_key] = cached
 	var frames: SpriteFrames = cached.get("frames") as SpriteFrames
 	if frames == null:
 		animated_sprite.visible = false
@@ -989,20 +1000,32 @@ func _setup_animation_frames(target_diameter: float, scale_multiplier: float) ->
 	sprite_base_scale = animated_sprite_base_scale
 
 
-func _build_animation_frames_cache_entry() -> Dictionary:
-	var idle_frames := _load_generated_frames("idle", 1)
-	var walk_frames := _load_generated_frames("walk", 2)
+func _animation_mobile_lod_enabled() -> bool:
+	# Device class is stable for a run. Cache the complete decision so pooled
+	# respawns never query ProjectSettings, DisplayServer, or the web UA.
+	if animation_runtime_mobile_lod_cache < 0:
+		animation_runtime_mobile_lod_cache = 1 if MOBILE_TUNING.mobile_lod_enabled(get_viewport_rect().size) else 0
+	return animation_runtime_mobile_lod_cache == 1
+
+
+static func reset_animation_lod_cache_for_tests() -> void:
+	animation_runtime_mobile_lod_cache = -1
+
+
+func _build_animation_frames_cache_entry(idle_limit: int = 1, walk_limit: int = 2, mobile_lod: bool = false) -> Dictionary:
+	var idle_frames := _load_generated_frames("idle", idle_limit)
+	var walk_frames := _load_generated_frames("walk", walk_limit)
 	if idle_frames.is_empty() or walk_frames.size() < 2:
 		return {"frames": null, "max_size": 0.0}
 	var frames := SpriteFrames.new()
 	frames.add_animation("idle")
 	frames.set_animation_loop("idle", true)
-	frames.set_animation_speed("idle", 2.2)
+	frames.set_animation_speed("idle", 1.4 if mobile_lod else 2.2)
 	for texture in idle_frames:
 		frames.add_frame("idle", texture)
 	frames.add_animation("walk")
 	frames.set_animation_loop("walk", true)
-	frames.set_animation_speed("walk", 7.0)
+	frames.set_animation_speed("walk", 5.0 if mobile_lod else 7.0)
 	for texture in walk_frames:
 		frames.add_frame("walk", texture)
 	return {"frames": frames, "max_size": _max_animation_frame_size(idle_frames + walk_frames)}
@@ -1024,6 +1047,8 @@ func _load_generated_frames(animation_name: String, frame_count: int) -> Array[T
 		return frames
 	for index in range(frame_count):
 		var path := "res://assets/sprites/generated/%s_%s_%d.png" % [base_name, animation_name, index]
+		if not ResourceLoader.exists(path):
+			break
 		var texture := SPRITE_LOADER.get_texture(path)
 		if texture == null:
 			break
@@ -1044,6 +1069,22 @@ func _update_animation_state(moving: bool) -> void:
 		animated_sprite.speed_scale = clamp(speed_ratio * 1.08, 0.65, 1.95)
 	else:
 		animated_sprite.speed_scale = 1.0
+
+
+func get_enemy_art_lod_debug_state() -> Dictionary:
+	var idle_frame_count := 0
+	var walk_frame_count := 0
+	var walk_fps := 0.0
+	if animated_sprite != null and animated_sprite.sprite_frames != null:
+		idle_frame_count = animated_sprite.sprite_frames.get_frame_count("idle")
+		walk_frame_count = animated_sprite.sprite_frames.get_frame_count("walk")
+		walk_fps = animated_sprite.sprite_frames.get_animation_speed("walk")
+	return {
+		"mobile_lod": animation_mobile_lod,
+		"idle_frames": idle_frame_count,
+		"walk_frames": walk_frame_count,
+		"walk_fps": walk_fps
+	}
 
 
 func _apply_visual_transform(new_position: Vector2, new_rotation: float, new_scale: Vector2) -> void:

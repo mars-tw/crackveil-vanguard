@@ -18,11 +18,11 @@ HEROES = [
     "hero_guardian",
     "hero_scout",
 ]
-ENEMIES = [
-    "enemy_grunt",
-    "enemy_fast",
-    "enemy_tank",
-]
+# Enemy animation frames now come from real multi-frame CC0 sheets and are
+# rebuilt by process_enemy_cc0_assets.py.  Keep this generator focused on hero
+# articulation so a routine hero rebuild cannot overwrite the licensed enemy
+# walk cycles with the old two-frame lean fallback.
+ENEMIES: list[str] = []
 
 
 def alpha_bbox(image: Image.Image) -> tuple[int, int, int, int]:

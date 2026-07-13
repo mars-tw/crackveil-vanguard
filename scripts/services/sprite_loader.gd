@@ -61,6 +61,9 @@ static func prewarm_gameplay_textures() -> int:
 	for path in GAMEPLAY_PREWARM_PATHS:
 		if get_texture(path) != null:
 			loaded_count += 1
+	# High-density regular enemies stay on their two real source walk frames.
+	# Elite/Boss animation frames are loaded lazily because they are rare; eagerly
+	# retaining every special frame regresses the 150-enemy stress profile.
 	for base_name in ["enemy_grunt", "enemy_fast", "enemy_tank", "hero_captain", "hero_guardian", "hero_scout"]:
 		for animation_name in ["idle", "walk"]:
 			var frame_count := 2 if animation_name == "walk" else 1
