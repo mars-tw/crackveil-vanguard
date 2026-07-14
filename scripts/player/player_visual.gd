@@ -1,9 +1,15 @@
 extends Node2D
 
+signal attack_impact
+signal attack_finished
+signal death_finished
+
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
-const STEP_INTERVAL := 0.25
+const TRUE_ANIMATION_LIBRARY := preload("res://scripts/animation/true_animation_library.gd")
 const STEP_DUST_POOL_SIZE := 8
+const ATTACK_IMPACT_FRAME := 2
+const WALK_CONTACT_FRAMES := [1, 5]
 
 @export var body_radius: float = 15.0
 @export var body_color: Color = Color(0.35, 0.78, 1.0)
@@ -16,36 +22,24 @@ var animated_sprite: AnimatedSprite2D = null
 var shadow: Sprite2D = null
 var aura: Sprite2D = null
 var facing_direction: Vector2 = Vector2.RIGHT
-var walk_phase: float = 0.0
-var idle_phase: float = 0.0
-var step_timer: float = 0.0
+var current_animation_name: StringName = &"idle"
+var animation_frames_ready: bool = false
+var attack_impact_emitted: bool = false
 var step_index: int = 0
-var hit_squash_timer: float = 0.0
-var turn_squash_timer: float = 0.0
-var last_facing_sign: int = 1
-var sprite_base_scale: Vector2 = Vector2.ONE
-var animated_sprite_base_scale: Vector2 = Vector2.ONE
-var shadow_base_scale: Vector2 = Vector2.ONE
-var aura_base_scale: Vector2 = Vector2.ONE
 var step_dust_pool: Array[CPUParticles2D] = []
 var next_step_dust_index: int = 0
 var step_dust_emit_count: int = 0
 var footstep_tick_count: int = 0
-var animation_frames_ready: bool = false
-var current_animation_name: String = ""
 
 
 func _ready() -> void:
 	_ensure_sprite()
 	_ensure_step_dust_pool()
 	_apply_sprite()
-	set_process(true)
 
 
-func _process(delta: float) -> void:
-	if shadow != null:
-		shadow.global_rotation = 0.0
-	_update_procedural_motion(delta)
+func _process(_delta: float) -> void:
+	_update_locomotion_state()
 
 
 func configure_visual(
@@ -64,21 +58,56 @@ func configure_visual(
 
 
 func set_facing_direction(direction: Vector2) -> void:
-	if direction.length_squared() > 0.001:
-		var previous_sign := _facing_sign()
-		facing_direction = direction.normalized()
-		var next_sign := _facing_sign()
-		if previous_sign != 0 and next_sign != 0 and previous_sign != next_sign:
-			turn_squash_timer = 0.1
+	if direction.length_squared() <= 0.001:
+		return
+	facing_direction = direction.normalized()
+	var flip := facing_direction.x < -0.05
+	if animated_sprite != null:
+		animated_sprite.flip_h = flip
+	if sprite != null:
+		sprite.flip_h = flip
+
+
+func play_attack() -> bool:
+	if not animation_frames_ready or current_animation_name in [&"attack", &"death"]:
+		return false
+	attack_impact_emitted = false
+	_play_state(&"attack", true)
+	return true
+
+
+func play_hurt(_source_position: Vector2 = Vector2.ZERO) -> bool:
+	if not animation_frames_ready or current_animation_name == &"death":
+		return false
+	attack_impact_emitted = true
+	_play_state(&"hurt", true)
+	return true
+
+
+func play_death() -> bool:
+	if not animation_frames_ready:
+		return false
+	if current_animation_name == &"death":
+		return true
+	attack_impact_emitted = true
+	_play_state(&"death", true)
+	return true
 
 
 func trigger_hit_squash() -> void:
-	hit_squash_timer = 0.12
+	# Compatibility API: hurt is now a real three-pose reaction, never a scale squash.
+	play_hurt()
+
+
+func is_attack_hitbox_active() -> bool:
+	return current_animation_name == &"attack" and animated_sprite != null and animated_sprite.frame == ATTACK_IMPACT_FRAME
+
+
+func get_animation_state() -> StringName:
+	return current_animation_name
 
 
 func _ensure_sprite() -> void:
-	if sprite != null and is_instance_valid(sprite):
-		return
 	shadow = get_node_or_null("Shadow") as Sprite2D
 	if shadow == null:
 		shadow = Sprite2D.new()
@@ -106,6 +135,9 @@ func _ensure_sprite() -> void:
 		add_child(sprite)
 	sprite.centered = true
 	sprite.z_index = 1
+	sprite.position = Vector2.ZERO
+	sprite.rotation = 0.0
+
 	animated_sprite = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 	if animated_sprite == null:
 		animated_sprite = AnimatedSprite2D.new()
@@ -113,159 +145,106 @@ func _ensure_sprite() -> void:
 		add_child(animated_sprite)
 	animated_sprite.centered = true
 	animated_sprite.z_index = 1
-	_ensure_step_dust_pool()
+	animated_sprite.position = Vector2.ZERO
+	animated_sprite.rotation = 0.0
+	if not animated_sprite.frame_changed.is_connected(_on_animation_frame_changed):
+		animated_sprite.frame_changed.connect(_on_animation_frame_changed)
+	if not animated_sprite.animation_finished.is_connected(_on_animation_finished):
+		animated_sprite.animation_finished.connect(_on_animation_finished)
 
 
 func _apply_sprite() -> void:
 	_ensure_sprite()
-	var texture: Texture2D = SPRITE_LOADER.get_texture(sprite_path)
-	if texture == null:
+	animation_frames_ready = false
+	if sprite_path == "":
 		sprite.visible = false
+		animated_sprite.visible = false
 		return
-	sprite.visible = true
-	sprite.modulate = _hero_tint()
-	SPRITE_LOADER.fit_sprite(sprite, texture, body_radius * 3.1, sprite_scale)
-	sprite_base_scale = sprite.scale
-	_setup_animation_frames(body_radius * 3.1, sprite_scale)
+	var frames: SpriteFrames = TRUE_ANIMATION_LIBRARY.get_sprite_frames(sprite_path)
+	if frames == null:
+		# A static fallback is only an error marker; it is never procedurally animated.
+		var texture: Texture2D = SPRITE_LOADER.get_texture(sprite_path)
+		sprite.visible = texture != null
+		if texture != null:
+			SPRITE_LOADER.fit_sprite(sprite, texture, body_radius * 3.1, sprite_scale)
+		animated_sprite.visible = false
+		push_error("Missing articulated animation frames for %s" % sprite_path)
+		return
+	animated_sprite.sprite_frames = frames
+	animated_sprite.scale = Vector2.ONE * (body_radius * 3.1 / float(TRUE_ANIMATION_LIBRARY.CELL_SIZE)) * sprite_scale
+	animated_sprite.modulate = Color.WHITE
+	animated_sprite.visible = true
+	sprite.visible = false
+	animation_frames_ready = true
+	current_animation_name = &"idle"
+	animated_sprite.play(&"idle")
+
 	if shadow != null:
 		ART_RESOURCES.fit_sprite(shadow, ART_RESOURCES.get_ellipse_shadow(), body_radius * 3.2)
-		shadow_base_scale = shadow.scale
 		shadow.position = Vector2(0.0, body_radius * 0.82)
 	if aura != null:
 		ART_RESOURCES.fit_sprite(aura, ART_RESOURCES.get_radial_glow(), body_radius * 5.2)
-		aura_base_scale = aura.scale
 		aura.modulate = Color(core_color.r * 0.62 + body_color.r * 0.24, core_color.g * 0.62 + body_color.g * 0.24, core_color.b * 0.72 + 0.22, 0.38)
 
 
-func _update_procedural_motion(delta: float) -> void:
-	if sprite == null:
+func _update_locomotion_state() -> void:
+	if not animation_frames_ready or animated_sprite == null:
+		return
+	if current_animation_name in [&"attack", &"hurt", &"death"]:
 		return
 	var motion := _current_motion_velocity()
 	var moving := motion.length_squared() > 9.0
-	_update_animation_state(moving, motion)
-	idle_phase += delta * 2.4
 	if moving:
-		step_timer += delta
-		while step_timer >= STEP_INTERVAL:
-			step_timer -= STEP_INTERVAL
-			step_index += 1
-			_trigger_footstep(motion.normalized())
-		walk_phase = (step_timer / STEP_INTERVAL) * TAU
+		set_facing_direction(motion)
+		_play_state(&"walk")
+		var speed_ratio: float = motion.length() / max(1.0, _movement_speed_for_animation())
+		animated_sprite.speed_scale = clamp(speed_ratio, 0.65, 1.8)
 	else:
-		step_timer = 0.0
-		walk_phase += delta * 3.0
-	if hit_squash_timer > 0.0:
-		hit_squash_timer = max(hit_squash_timer - delta, 0.0)
-	if turn_squash_timer > 0.0:
-		turn_squash_timer = max(turn_squash_timer - delta, 0.0)
-
-	var foot_sign: float = -1.0 if step_index % 2 == 0 else 1.0
-	var step_lift: float = maxf(0.0, sin(walk_phase))
-	var step_land: float = pow(maxf(0.0, cos(walk_phase)), 8.0) if moving else 0.0
-	var bob: float = (-step_lift * 5.0 + step_land * 1.15) if moving else sin(walk_phase) * 0.7
-	var lateral_offset: float = foot_sign * sin(walk_phase) * 1.15 if moving else 0.0
-	var breath := 1.0 + sin(idle_phase) * (0.012 if moving else 0.026)
-	var hit_squash := hit_squash_timer / 0.12 if hit_squash_timer > 0.0 else 0.0
-	var turn_squash := turn_squash_timer / 0.1 if turn_squash_timer > 0.0 else 0.0
-	var squash_x := 1.0 + hit_squash * 0.16 + turn_squash * 0.12 + step_land * 0.045
-	var squash_y := 1.0 - hit_squash * 0.12 - turn_squash * 0.09 - step_land * 0.028
-	var tilt := 0.0
-	if moving:
-		var direction := motion.normalized()
-		set_facing_direction(direction)
-		tilt = foot_sign * step_lift * 0.13 + clamp(direction.x, -1.0, 1.0) * 0.045
-	if abs(facing_direction.x) > 0.05:
-		var sign := _facing_sign()
-		if last_facing_sign != 0 and sign != 0 and sign != last_facing_sign:
-			turn_squash_timer = max(turn_squash_timer, 0.1)
-		if sign != 0:
-			last_facing_sign = sign
-		sprite.flip_h = sign < 0
-		if animated_sprite != null:
-			animated_sprite.flip_h = sign < 0
-
-	_apply_visual_transform(
-		Vector2(lateral_offset, bob),
-		tilt,
-		Vector2(sprite_base_scale.x * breath * squash_x, sprite_base_scale.y * breath * squash_y)
-	)
-	if shadow != null:
-		shadow.scale = shadow_base_scale * (1.0 - abs(bob) * 0.012)
-	if aura != null:
-		aura.scale = aura_base_scale * (1.0 + sin(idle_phase + 0.4) * 0.018)
+		_play_state(&"idle")
+		animated_sprite.speed_scale = 1.0
 
 
-func _setup_animation_frames(target_diameter: float, scale_multiplier: float) -> void:
-	animation_frames_ready = false
-	current_animation_name = ""
-	if animated_sprite == null:
-		return
-	var frames := SpriteFrames.new()
-	var idle_frames := _load_generated_frames("idle", 2)
-	var walk_frames := _load_generated_frames("walk", 4)
-	if idle_frames.is_empty() or walk_frames.size() < 3:
-		animated_sprite.visible = false
-		sprite.visible = true
-		return
-	frames.add_animation("idle")
-	frames.set_animation_loop("idle", true)
-	frames.set_animation_speed("idle", 3.2)
-	for texture in idle_frames:
-		frames.add_frame("idle", texture)
-	frames.add_animation("walk")
-	frames.set_animation_loop("walk", true)
-	frames.set_animation_speed("walk", 10.0)
-	for texture in walk_frames:
-		frames.add_frame("walk", texture)
-	animated_sprite.sprite_frames = frames
-	animated_sprite.animation = "idle"
-	animated_sprite.modulate = _hero_tint()
-	animated_sprite.play()
-	animation_frames_ready = true
-	animated_sprite.visible = true
-	sprite.visible = false
-	var max_size := _max_animation_frame_size(idle_frames + walk_frames)
-	var scale_value := 1.0 if max_size <= 0.0 else target_diameter / max_size * scale_multiplier
-	animated_sprite_base_scale = Vector2.ONE * scale_value
-	sprite_base_scale = animated_sprite_base_scale
-
-
-func _max_animation_frame_size(frames: Array[Texture2D]) -> float:
-	var max_size := 0.0
-	for texture in frames:
-		if texture == null:
-			continue
-		max_size = maxf(max_size, maxf(float(texture.get_width()), float(texture.get_height())))
-	return max_size
-
-
-func _load_generated_frames(animation_name: String, frame_count: int) -> Array[Texture2D]:
-	var frames: Array[Texture2D] = []
-	var base_name := sprite_path.get_file().get_basename()
-	if base_name == "":
-		return frames
-	for index in range(frame_count):
-		var path := "res://assets/sprites/generated/%s_%s_%d.png" % [base_name, animation_name, index]
-		var texture := SPRITE_LOADER.get_texture(path)
-		if texture == null:
-			break
-		frames.append(texture)
-	return frames
-
-
-func _update_animation_state(moving: bool, motion: Vector2) -> void:
+func _play_state(next_state: StringName, restart: bool = false) -> void:
 	if not animation_frames_ready or animated_sprite == null:
 		return
-	var next_animation := "walk" if moving else "idle"
-	if current_animation_name != next_animation:
-		current_animation_name = next_animation
-		animated_sprite.animation = next_animation
-		animated_sprite.play(next_animation)
-	if moving:
-		var speed_ratio: float = motion.length() / max(1.0, _movement_speed_for_animation())
-		animated_sprite.speed_scale = clamp(speed_ratio * 1.18, 0.72, 1.85)
-	else:
-		animated_sprite.speed_scale = 1.0
+	if current_animation_name == next_state and not restart:
+		return
+	# Guard frame_changed while Godot swaps animations; otherwise an old walk
+	# frame index of 2 can masquerade as the new attack impact frame.
+	current_animation_name = &"transition"
+	animated_sprite.stop()
+	animated_sprite.animation = next_state
+	animated_sprite.set_frame_and_progress(0, 0.0)
+	current_animation_name = next_state
+	animated_sprite.speed_scale = 1.0
+	animated_sprite.play()
+
+
+func _on_animation_frame_changed() -> void:
+	if animated_sprite == null:
+		return
+	if current_animation_name == &"attack" and animated_sprite.frame == ATTACK_IMPACT_FRAME and not attack_impact_emitted:
+		attack_impact_emitted = true
+		attack_impact.emit()
+	elif current_animation_name == &"walk" and animated_sprite.frame in WALK_CONTACT_FRAMES:
+		step_index += 1
+		_trigger_footstep(_current_motion_velocity().normalized())
+
+
+func _on_animation_finished() -> void:
+	match current_animation_name:
+		&"attack":
+			attack_finished.emit()
+			_resume_locomotion()
+		&"hurt":
+			_resume_locomotion()
+		&"death":
+			death_finished.emit()
+
+
+func _resume_locomotion() -> void:
+	var moving := _current_motion_velocity().length_squared() > 9.0
+	_play_state(&"walk" if moving else &"idle", true)
 
 
 func _movement_speed_for_animation() -> float:
@@ -276,17 +255,6 @@ func _movement_speed_for_animation() -> float:
 	if typeof(move_speed_value) == TYPE_FLOAT or typeof(move_speed_value) == TYPE_INT:
 		return float(move_speed_value)
 	return 220.0
-
-
-func _apply_visual_transform(new_position: Vector2, new_rotation: float, new_scale: Vector2) -> void:
-	if sprite != null:
-		sprite.position = new_position
-		sprite.rotation = new_rotation
-		sprite.scale = new_scale
-	if animated_sprite != null:
-		animated_sprite.position = new_position
-		animated_sprite.rotation = new_rotation
-		animated_sprite.scale = new_scale
 
 
 func _current_motion_velocity() -> Vector2:
@@ -370,18 +338,6 @@ func _can_play_footstep_audio() -> bool:
 	return parent != null and parent.is_in_group("heroes")
 
 
-func _facing_sign() -> int:
-	if facing_direction.x > 0.05:
-		return 1
-	if facing_direction.x < -0.05:
-		return -1
-	return 0
-
-
-func _hero_tint() -> Color:
-	return Color.WHITE.lerp(body_color, 0.42)
-
-
 func get_step_dust_pool_size() -> int:
 	return step_dust_pool.size()
 
@@ -395,4 +351,4 @@ func get_footstep_tick_count() -> int:
 
 
 func get_turn_squash_timer() -> float:
-	return turn_squash_timer
+	return 0.0

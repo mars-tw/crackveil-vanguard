@@ -4,16 +4,17 @@ extends CharacterBody2D
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+const TRUE_ANIMATION_LIBRARY := preload("res://scripts/animation/true_animation_library.gd")
 const THREAT_GLOW_DENSITY_START := 80
 const THREAT_GLOW_DENSITY_FULL := 150
 const HIT_FLASH_DURATION := 0.08
-const HIT_SQUASH_DURATION := 0.1
+const ATTACK_IMPACT_FRAME := 2
+const KNOCKBACK_DECELERATION := 1050.0
 const BOSS_OUTER_COLOR := Color(0.38, 0.12, 0.92, 1.0)
 const BOSS_OUTER_PHASE_TWO_COLOR := Color(0.72, 0.1, 0.58, 1.0)
 const BOSS_CORE_COLOR := Color(1.0, 0.42, 0.92, 1.0)
 const BOSS_CORE_PHASE_TWO_COLOR := Color(1.0, 0.16, 0.3, 1.0)
 
-static var animation_frames_cache: Dictionary = {}
 static var animation_runtime_mobile_lod_cache: int = -1
 
 @export var type_id: String = "normal"
@@ -79,23 +80,19 @@ var boss_inner_glow: Sprite2D = null
 var boss_core_glow: Sprite2D = null
 var hit_flash_timer: float = 0.0
 var threat_glow_base_alpha: float = 0.18
-var visual_walk_phase: float = 0.0
-var visual_idle_phase: float = 0.0
-var hit_squash_timer: float = 0.0
 var last_visual_direction: Vector2 = Vector2.RIGHT
-var sprite_base_scale: Vector2 = Vector2.ONE
-var animated_sprite_base_scale: Vector2 = Vector2.ONE
-var shadow_base_scale: Vector2 = Vector2.ONE
-var threat_glow_base_scale: Vector2 = Vector2.ONE
-var boss_inner_glow_base_scale: Vector2 = Vector2.ONE
-var boss_core_glow_base_scale: Vector2 = Vector2.ONE
-var visual_bob_frequency: float = 7.2
-var visual_bob_amplitude: float = 2.4
-var visual_tilt_amount: float = 0.085
-var visual_step_interval: float = 0.3
 var animation_frames_ready: bool = false
-var current_animation_name: String = ""
+var current_animation_name: StringName = &"idle"
 var animation_mobile_lod: bool = false
+var is_dying: bool = false
+var death_finalized: bool = false
+var pending_attack_target: WeakRef = null
+var pending_attack_kind: StringName = &"contact"
+var pending_attack_damage_multiplier: float = 1.0
+var attack_hitbox_active: bool = false
+var attack_hit_registry: Dictionary = {}
+var attack_impact_count: int = 0
+var knockback_velocity: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -154,10 +151,17 @@ func pool_on_release() -> void:
 	if boss_core_glow != null:
 		boss_core_glow.visible = false
 	hit_flash_timer = 0.0
-	hit_squash_timer = 0.0
-	visual_walk_phase = 0.0
-	visual_idle_phase = 0.0
 	animation_mobile_lod = false
+	current_animation_name = &"idle"
+	is_dying = false
+	death_finalized = false
+	pending_attack_target = null
+	pending_attack_kind = &"contact"
+	pending_attack_damage_multiplier = 1.0
+	attack_hitbox_active = false
+	attack_hit_registry.clear()
+	attack_impact_count = 0
+	knockback_velocity = Vector2.ZERO
 	last_visual_direction = Vector2.RIGHT
 	threat_glow_base_alpha = 0.18
 	if affix_ring != null:
@@ -225,8 +229,14 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	boss_ability_timer = float(config.get("boss_ability_cooldown", 4.8))
 	rotation = 0.0
 	hit_flash_timer = 0.0
+	is_dying = false
+	death_finalized = false
+	pending_attack_target = null
+	attack_hitbox_active = false
+	attack_hit_registry.clear()
+	attack_impact_count = 0
+	knockback_velocity = Vector2.ZERO
 	_apply_shape()
-	_apply_visual_motion_profile()
 	_apply_sprite()
 	_apply_affix_visuals()
 	_update_hp_bar()
@@ -235,9 +245,9 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 
 
 func _process(delta: float) -> void:
-	if not is_active:
-		return
-	_update_procedural_visual(delta)
+	if is_active:
+		_update_visual_state()
+		_tick_hit_flash(delta)
 
 
 func get_hit_token() -> int:
@@ -249,12 +259,22 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_tick_status_effects(delta)
+	attack_timer = max(attack_timer - delta, 0.0)
+	if current_animation_name == &"hurt":
+		velocity = knockback_velocity
+		move_and_slide()
+		knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, delta * KNOCKBACK_DECELERATION)
+		_tick_affix(delta)
+		_tick_hp_bar(delta)
+		return
+	if current_animation_name == &"attack":
+		velocity = Vector2.ZERO
+		_tick_affix(delta)
+		_tick_hp_bar(delta)
+		return
 	var target := _find_nearest_hero()
 	if target == null or not is_instance_valid(target):
-		_tick_hit_flash(delta)
 		return
-
-	attack_timer = max(attack_timer - delta, 0.0)
 
 	match behavior_id:
 		"ranged":
@@ -268,7 +288,6 @@ func _physics_process(delta: float) -> void:
 
 	_tick_affix(delta)
 	_tick_hp_bar(delta)
-	_tick_hit_flash(delta)
 
 
 func _physics_chaser(target: Node2D) -> void:
@@ -282,18 +301,6 @@ func _physics_chaser(target: Node2D) -> void:
 
 
 func _physics_ranged(delta: float, target: Node2D) -> void:
-	if behavior_state == "windup":
-		behavior_timer = max(behavior_timer - delta, 0.0)
-		velocity = Vector2.ZERO
-		_move_and_face()
-		_set_sprite_modulate(Color(1.0, 0.88, 0.36))
-		if behavior_timer <= 0.0:
-			_fire_ranged_projectile(target)
-			behavior_state = "chase"
-			attack_timer = attack_cooldown
-			_set_sprite_modulate(body_color)
-		return
-
 	var to_target: Vector2 = target.global_position - global_position
 	var distance_squared := to_target.length_squared()
 	var preferred := ranged_preferred_distance
@@ -304,10 +311,10 @@ func _physics_ranged(delta: float, target: Node2D) -> void:
 	else:
 		velocity = Vector2.ZERO
 		if attack_timer <= 0.0:
-			behavior_state = "windup"
-			behavior_timer = ranged_windup
+			_start_attack(target, 1.0, &"ranged")
 	_move_and_face()
-	_try_contact_attack(target)
+	if distance_squared < (radius + _get_target_hit_radius(target) + 8.0) ** 2:
+		_try_contact_attack(target)
 
 
 func _physics_dasher(delta: float, target: Node2D) -> void:
@@ -320,7 +327,7 @@ func _physics_dasher(delta: float, target: Node2D) -> void:
 			if behavior_timer <= 0.0:
 				behavior_state = "dash"
 				behavior_timer = dash_duration
-				_set_sprite_modulate(body_color)
+				_set_sprite_modulate(Color.WHITE)
 		"dash":
 			behavior_timer = max(behavior_timer - delta, 0.0)
 			velocity = dash_direction * dash_speed
@@ -362,8 +369,8 @@ func _physics_boss(delta: float, target: Node2D) -> void:
 	_try_contact_attack(target, 1.15)
 
 	boss_ability_timer -= delta
-	if boss_ability_timer <= 0.0:
-		_fire_ring_projectiles(10)
+	if boss_ability_timer <= 0.0 and current_animation_name != &"attack":
+		_start_attack(target, 0.82, &"ring")
 		boss_ability_timer = 5.4
 
 	if not boss_phase_two_triggered and hp <= max_hp * 0.5:
@@ -383,9 +390,50 @@ func _try_contact_attack(target: Node2D, damage_multiplier: float = 1.0) -> void
 		return
 	if attack_timer > 0.0:
 		return
+	_start_attack(target, damage_multiplier, &"contact")
+
+
+func _start_attack(target: Node2D, damage_multiplier: float, attack_kind: StringName) -> bool:
+	if not is_active or is_dying or current_animation_name in [&"attack", &"hurt", &"death"]:
+		return false
+	pending_attack_target = weakref(target) if target != null else null
+	pending_attack_kind = attack_kind
+	pending_attack_damage_multiplier = damage_multiplier
+	attack_hit_registry.clear()
+	attack_hitbox_active = false
 	attack_timer = attack_cooldown
-	if target.has_method("take_damage"):
-		target.take_damage(damage * damage_multiplier, global_position)
+	_play_animation_state(&"attack", true)
+	return true
+
+
+func _apply_attack_impact() -> void:
+	if not is_active or is_dying or current_animation_name != &"attack":
+		return
+	attack_hitbox_active = true
+	attack_impact_count += 1
+	var target := pending_attack_target.get_ref() as Node2D if pending_attack_target != null else null
+	match pending_attack_kind:
+		&"ranged":
+			_fire_ranged_projectile(target)
+		&"ring":
+			_fire_ring_projectiles(10)
+		_:
+			_apply_contact_impact(target)
+	attack_hitbox_active = false
+
+
+func _apply_contact_impact(target: Node2D) -> void:
+	if target == null or not is_instance_valid(target) or not target.has_method("take_damage"):
+		return
+	var hit_key := int(target.get_instance_id())
+	if attack_hit_registry.has(hit_key):
+		return
+	var target_hit_radius: float = _get_target_hit_radius(target)
+	var active_distance: float = radius + target_hit_radius + 8.0
+	if global_position.distance_squared_to(target.global_position) > active_distance * active_distance:
+		return
+	attack_hit_registry[hit_key] = true
+	target.take_damage(damage * pending_attack_damage_multiplier, global_position)
 
 
 func _fire_ranged_projectile(target: Node2D) -> void:
@@ -427,11 +475,19 @@ func _enemy_projectile_stats(damage_multiplier: float = 1.0) -> Dictionary:
 
 func _trigger_boss_phase_two() -> void:
 	boss_phase_two_triggered = true
+	_apply_boss_phase_visuals()
 	EntityFactory.spawn_death_burst(global_position, Color(0.82, 0.42, 1.0), 3.1, "boss_phase")
 	_fire_ring_projectiles(14)
 	_spawn_boss_dashers(4)
 	if GameManager.has_method("record_boss_phase_two"):
 		GameManager.record_boss_phase_two()
+
+
+func _apply_boss_phase_visuals() -> void:
+	if boss_inner_glow != null:
+		boss_inner_glow.modulate = Color(BOSS_OUTER_PHASE_TWO_COLOR.r, BOSS_OUTER_PHASE_TWO_COLOR.g, BOSS_OUTER_PHASE_TWO_COLOR.b, 0.36)
+	if boss_core_glow != null:
+		boss_core_glow.modulate = Color(BOSS_CORE_PHASE_TWO_COLOR.r, BOSS_CORE_PHASE_TWO_COLOR.g, BOSS_CORE_PHASE_TWO_COLOR.b, 0.84)
 
 
 func _spawn_boss_dashers(count: int) -> void:
@@ -508,7 +564,15 @@ func apply_knockback(source_position: Vector2, strength: float) -> void:
 	var direction := global_position - source_position
 	if direction.length_squared() <= 0.001:
 		direction = Vector2.RIGHT
-	global_position += direction.normalized() * strength
+	# Convert the legacy displacement-strength contract into a decelerating
+	# physics impulse: v^2 / (2a) ~= strength.  This keeps the collider/root
+	# authoritative while preserving the former 4-8 px weapon feel.
+	var impulse_speed := sqrt(2.0 * KNOCKBACK_DECELERATION * strength)
+	var impulse := direction.normalized() * impulse_speed
+	if impulse.length_squared() > knockback_velocity.length_squared():
+		knockback_velocity = impulse
+	if current_animation_name != &"death":
+		_play_animation_state(&"hurt", true)
 
 
 func _tick_status_effects(delta: float) -> void:
@@ -555,21 +619,40 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 
 	if hp <= 0.0:
 		_die(source_position)
+	else:
+		var recoil_direction := global_position - source_position
+		if recoil_direction.length_squared() > 0.001:
+			knockback_velocity = recoil_direction.normalized() * 72.0
+		_play_animation_state(&"hurt", true)
 	return final_amount
 
 
 func _trigger_hit_micro_feedback() -> void:
 	# Every damage route (projectile, orbit, chain, hazard, hymn) converges here.
 	hit_flash_timer = maxf(hit_flash_timer, HIT_FLASH_DURATION)
-	hit_squash_timer = maxf(hit_squash_timer, HIT_SQUASH_DURATION)
 
 
 func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
-	if not is_active:
+	if not is_active or is_dying:
 		return
+	is_dying = true
 	is_active = false
+	velocity = Vector2.ZERO
+	knockback_velocity = Vector2.ZERO
+	attack_hitbox_active = false
+	pending_attack_target = null
 	status_timers.clear()
 	status_strengths.clear()
+	_set_hp_bar_visible(false)
+	if collision_shape != null:
+		collision_shape.set_deferred("disabled", true)
+	_play_animation_state(&"death", true)
+
+
+func _finalize_death() -> void:
+	if death_finalized:
+		return
+	death_finalized = true
 	GameManager.add_kill()
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
 		var thump_pitch := 0.68 if is_boss else (0.78 if is_elite else 0.92)
@@ -581,24 +664,10 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 	if is_boss and GameManager.has_method("record_boss_kill"):
 		GameManager.record_boss_kill()
 	var burst_scale := 2.25 if is_boss else (1.55 if is_elite else 1.0)
-	var corpse_flip := false
-	var corpse_rotation := 0.0
-	if animated_sprite != null and animated_sprite.visible:
-		corpse_flip = animated_sprite.flip_h
-		corpse_rotation = animated_sprite.rotation
-	elif sprite != null:
-		corpse_flip = sprite.flip_h
-		corpse_rotation = sprite.rotation
-	EntityFactory.queue_death_visual(
+	EntityFactory.spawn_death_burst(
 		global_position,
-		sprite_path,
 		body_color,
-		radius,
-		sprite_scale,
-		corpse_flip,
-		corpse_rotation,
 		burst_scale,
-		is_elite and not is_boss,
 		"boss_death" if is_boss else ("elite_death" if is_elite else "burst")
 	)
 
@@ -743,6 +812,12 @@ func _ensure_visual_nodes() -> void:
 		add_child(animated_sprite)
 	animated_sprite.centered = true
 	animated_sprite.z_index = 0
+	animated_sprite.position = Vector2.ZERO
+	animated_sprite.rotation = 0.0
+	if not animated_sprite.frame_changed.is_connected(_on_enemy_animation_frame_changed):
+		animated_sprite.frame_changed.connect(_on_enemy_animation_frame_changed)
+	if not animated_sprite.animation_finished.is_connected(_on_enemy_animation_finished):
+		animated_sprite.animation_finished.connect(_on_enemy_animation_finished)
 
 	affix_ring = get_node_or_null("AffixRing") as Line2D
 	if affix_ring == null:
@@ -785,18 +860,16 @@ func _ensure_visual_nodes() -> void:
 
 func _apply_sprite() -> void:
 	_ensure_visual_nodes()
-	var texture: Texture2D = SPRITE_LOADER.get_texture(sprite_path)
-	if texture == null:
-		sprite.visible = false
-		return
-	sprite.visible = true
-	sprite.modulate = body_color
 	sprite.rotation = 0.0
 	sprite.position = Vector2.ZERO
 	sprite.flip_h = false
-	SPRITE_LOADER.fit_sprite(sprite, texture, radius * 3.0, sprite_scale)
-	sprite_base_scale = sprite.scale
 	_setup_animation_frames(radius * 3.0, sprite_scale)
+	if not animation_frames_ready:
+		var texture: Texture2D = SPRITE_LOADER.get_texture(sprite_path)
+		sprite.visible = texture != null
+		if texture != null:
+			SPRITE_LOADER.fit_sprite(sprite, texture, radius * 3.0, sprite_scale)
+		push_error("Missing articulated enemy animation frames for %s" % sprite_path)
 	_apply_shadow_and_glow()
 
 
@@ -815,7 +888,6 @@ func _apply_shadow_and_glow() -> void:
 		shadow.position = Vector2(0.0, radius * 0.86)
 		ART_RESOURCES.fit_sprite(shadow, ART_RESOURCES.get_ellipse_shadow(), radius * (5.4 if is_boss else 3.2))
 		shadow.modulate.a = 0.84 if is_boss else 0.68
-		shadow_base_scale = shadow.scale
 	if threat_glow != null:
 		threat_glow.visible = true
 		var glow_diameter := radius * 4.2
@@ -827,7 +899,6 @@ func _apply_shadow_and_glow() -> void:
 			glow_diameter = radius * 7.2
 			glow_alpha = 0.46
 		ART_RESOURCES.fit_sprite(threat_glow, ART_RESOURCES.get_radial_glow(), glow_diameter)
-		threat_glow_base_scale = threat_glow.scale
 		threat_glow_base_alpha = glow_alpha
 		var enemy_count: int = EntityFactory.get_enemy_live_count() if EntityFactory != null and EntityFactory.has_method("get_enemy_live_count") else 0
 		update_threat_glow_for_crowd_count(enemy_count)
@@ -835,14 +906,12 @@ func _apply_shadow_and_glow() -> void:
 		boss_inner_glow.visible = is_boss
 		if is_boss:
 			ART_RESOURCES.fit_sprite(boss_inner_glow, ART_RESOURCES.get_radial_glow(), radius * 5.85)
-			boss_inner_glow_base_scale = boss_inner_glow.scale
 			boss_inner_glow.modulate = Color(BOSS_OUTER_COLOR.r, BOSS_OUTER_COLOR.g, BOSS_OUTER_COLOR.b, 0.3)
 	if boss_core_glow != null:
 		var mobile_boss_lod := MOBILE_TUNING.mobile_lod_enabled(get_viewport_rect().size)
 		boss_core_glow.visible = is_boss and not mobile_boss_lod
 		if is_boss:
 			ART_RESOURCES.fit_sprite(boss_core_glow, ART_RESOURCES.get_radial_glow(), radius * 1.95)
-			boss_core_glow_base_scale = boss_core_glow.scale
 			boss_core_glow.modulate = Color(BOSS_CORE_COLOR.r, BOSS_CORE_COLOR.g, BOSS_CORE_COLOR.b, 0.78)
 
 
@@ -911,93 +980,49 @@ func _tick_hit_flash(delta: float) -> void:
 	if animated_sprite != null:
 		animated_sprite.modulate = flash_color
 	if hit_flash_timer <= 0.0:
-		sprite.modulate = body_color
+		sprite.modulate = Color.WHITE
 		if animated_sprite != null:
-			animated_sprite.modulate = body_color
+			animated_sprite.modulate = Color.WHITE
 
 
-func _update_procedural_visual(delta: float) -> void:
-	if sprite == null:
+func _update_visual_state() -> void:
+	if not animation_frames_ready or animated_sprite == null:
 		return
-	var visual_delta := maxf(delta, 1.0 / 120.0)
-	var moving := velocity.length_squared() > 4.0
-	visual_idle_phase += visual_delta * 2.0
-	visual_walk_phase += visual_delta * (TAU / max(0.08, visual_step_interval) if moving else max(2.0, visual_bob_frequency * 0.34))
-	if hit_squash_timer > 0.0:
-		hit_squash_timer = max(hit_squash_timer - delta, 0.0)
-
-	if moving:
+	if velocity.length_squared() > 4.0 and current_animation_name not in [&"attack", &"hurt", &"death"]:
 		last_visual_direction = velocity.normalized()
 	if abs(last_visual_direction.x) > 0.05:
-		sprite.flip_h = last_visual_direction.x < 0.0
-		if animated_sprite != null:
-			animated_sprite.flip_h = sprite.flip_h
-	_update_animation_state(moving)
-
-	var step_phase := fposmod(visual_walk_phase, TAU)
-	var foot_sign: float = -1.0 if int(floor(visual_walk_phase / TAU)) % 2 == 0 else 1.0
-	var step_lift: float = maxf(0.0, sin(step_phase))
-	var step_land: float = pow(maxf(0.0, cos(step_phase)), 8.0) if moving else 0.0
-	var bob: float = (-step_lift * visual_bob_amplitude + step_land * visual_bob_amplitude * 0.24) if moving else sin(visual_walk_phase) * visual_bob_amplitude * 0.18
-	var lateral_offset: float = foot_sign * step_lift * visual_bob_amplitude * 0.22 if moving else 0.0
-	var breath := 1.0 + sin(visual_idle_phase) * (0.01 if moving else 0.022)
-	var squash := hit_squash_timer / HIT_SQUASH_DURATION if hit_squash_timer > 0.0 else 0.0
-	var squash_x := 1.0 + squash * 0.18 + step_land * 0.035
-	var squash_y := 1.0 - squash * 0.14 - step_land * 0.025
-	var tilt: float = (foot_sign * step_lift * visual_tilt_amount + clamp(last_visual_direction.x, -1.0, 1.0) * visual_tilt_amount * 0.25) if moving else 0.0
-
-	_apply_visual_transform(
-		Vector2(lateral_offset, bob),
-		tilt,
-		Vector2(sprite_base_scale.x * breath * squash_x, sprite_base_scale.y * breath * squash_y)
-	)
-	if shadow != null:
-		shadow.scale = shadow_base_scale * (1.0 - abs(bob) * 0.012)
-	if threat_glow != null:
-		threat_glow.scale = threat_glow_base_scale * (1.0 + sin(visual_idle_phase + 0.2) * (0.07 if is_boss else 0.012))
-	if is_boss and boss_inner_glow != null and boss_core_glow != null:
-		var boss_pulse := 0.5 + 0.5 * sin(visual_idle_phase * (1.5 if boss_phase_two_triggered else 1.0))
-		var outer_color := BOSS_OUTER_PHASE_TWO_COLOR if boss_phase_two_triggered else BOSS_OUTER_COLOR
-		var core_color := BOSS_CORE_PHASE_TWO_COLOR if boss_phase_two_triggered else BOSS_CORE_COLOR
-		boss_inner_glow.scale = boss_inner_glow_base_scale * lerpf(0.9, 1.16, boss_pulse)
-		boss_inner_glow.modulate = Color(outer_color.r, outer_color.g, outer_color.b, lerpf(0.22, 0.38, boss_pulse))
-		boss_core_glow.scale = boss_core_glow_base_scale * lerpf(0.82, 1.08, 1.0 - boss_pulse)
-		boss_core_glow.modulate = Color(core_color.r, core_color.g, core_color.b, lerpf(0.68, 0.9, 1.0 - boss_pulse))
+		var flip := last_visual_direction.x < 0.0
+		animated_sprite.flip_h = flip
+		sprite.flip_h = flip
+	if current_animation_name in [&"attack", &"hurt", &"death"]:
+		return
+	var moving := velocity.length_squared() > 4.0
+	_play_animation_state(&"walk" if moving else &"idle")
+	if moving:
+		var speed_ratio: float = velocity.length() / max(1.0, speed)
+		animated_sprite.speed_scale = clamp(speed_ratio, 0.6, 1.9)
+	else:
+		animated_sprite.speed_scale = 1.0
 
 
 func _setup_animation_frames(target_diameter: float, scale_multiplier: float) -> void:
 	animation_frames_ready = false
-	current_animation_name = ""
+	current_animation_name = &"idle"
 	if animated_sprite == null:
 		return
-	var high_detail_unit := is_elite or is_boss
-	animation_mobile_lod = false
-	var cache_key := sprite_path
-	if high_detail_unit:
-		animation_mobile_lod = _animation_mobile_lod_enabled()
-		cache_key = "%s|%s" % [sprite_path, "mobile" if animation_mobile_lod else "desktop"]
-	var cached: Dictionary = animation_frames_cache.get(cache_key, {})
-	if cached.is_empty():
-		var idle_limit := 2 if high_detail_unit and not animation_mobile_lod else 1
-		var walk_limit := 6 if high_detail_unit and not animation_mobile_lod else 2
-		cached = _build_animation_frames_cache_entry(idle_limit, walk_limit, animation_mobile_lod)
-		animation_frames_cache[cache_key] = cached
-	var frames: SpriteFrames = cached.get("frames") as SpriteFrames
+	animation_mobile_lod = _animation_mobile_lod_enabled()
+	var frames: SpriteFrames = TRUE_ANIMATION_LIBRARY.get_sprite_frames(sprite_path)
 	if frames == null:
 		animated_sprite.visible = false
 		sprite.visible = true
 		return
 	animated_sprite.sprite_frames = frames
-	animated_sprite.animation = "idle"
-	animated_sprite.modulate = body_color
-	animated_sprite.play()
+	animated_sprite.modulate = Color.WHITE
+	animated_sprite.scale = Vector2.ONE * (target_diameter / float(TRUE_ANIMATION_LIBRARY.CELL_SIZE)) * scale_multiplier
+	animated_sprite.play(&"idle")
 	animation_frames_ready = true
 	animated_sprite.visible = true
 	sprite.visible = false
-	var max_size := float(cached.get("max_size", 0.0))
-	var scale_value := 1.0 if max_size <= 0.0 else target_diameter / max_size * scale_multiplier
-	animated_sprite_base_scale = Vector2.ONE * scale_value
-	sprite_base_scale = animated_sprite_base_scale
 
 
 func _animation_mobile_lod_enabled() -> bool:
@@ -1012,118 +1037,57 @@ static func reset_animation_lod_cache_for_tests() -> void:
 	animation_runtime_mobile_lod_cache = -1
 
 
-func _build_animation_frames_cache_entry(idle_limit: int = 1, walk_limit: int = 2, mobile_lod: bool = false) -> Dictionary:
-	var idle_frames := _load_generated_frames("idle", idle_limit)
-	var walk_frames := _load_generated_frames("walk", walk_limit)
-	if idle_frames.is_empty() or walk_frames.size() < 2:
-		return {"frames": null, "max_size": 0.0}
-	var frames := SpriteFrames.new()
-	frames.add_animation("idle")
-	frames.set_animation_loop("idle", true)
-	frames.set_animation_speed("idle", 1.4 if mobile_lod else 2.2)
-	for texture in idle_frames:
-		frames.add_frame("idle", texture)
-	frames.add_animation("walk")
-	frames.set_animation_loop("walk", true)
-	frames.set_animation_speed("walk", 5.0 if mobile_lod else 7.0)
-	for texture in walk_frames:
-		frames.add_frame("walk", texture)
-	return {"frames": frames, "max_size": _max_animation_frame_size(idle_frames + walk_frames)}
-
-
-func _max_animation_frame_size(frames: Array[Texture2D]) -> float:
-	var max_size := 0.0
-	for texture in frames:
-		if texture == null:
-			continue
-		max_size = maxf(max_size, maxf(float(texture.get_width()), float(texture.get_height())))
-	return max_size
-
-
-func _load_generated_frames(animation_name: String, frame_count: int) -> Array[Texture2D]:
-	var frames: Array[Texture2D] = []
-	var base_name := sprite_path.get_file().get_basename()
-	if base_name == "":
-		return frames
-	for index in range(frame_count):
-		var path := "res://assets/sprites/generated/%s_%s_%d.png" % [base_name, animation_name, index]
-		if not ResourceLoader.exists(path):
-			break
-		var texture := SPRITE_LOADER.get_texture(path)
-		if texture == null:
-			break
-		frames.append(texture)
-	return frames
-
-
-func _update_animation_state(moving: bool) -> void:
+func _play_animation_state(next_state: StringName, restart: bool = false) -> void:
 	if not animation_frames_ready or animated_sprite == null:
 		return
-	var next_animation := "walk" if moving else "idle"
-	if current_animation_name != next_animation:
-		current_animation_name = next_animation
-		animated_sprite.animation = next_animation
-		animated_sprite.play(next_animation)
-	if moving:
-		var speed_ratio: float = velocity.length() / max(1.0, speed)
-		animated_sprite.speed_scale = clamp(speed_ratio * 1.08, 0.65, 1.95)
-	else:
-		animated_sprite.speed_scale = 1.0
+	if current_animation_name == next_state and not restart:
+		return
+	# Prevent the previous locomotion frame from firing a combat event during
+	# AnimatedSprite2D's animation swap.
+	current_animation_name = &"transition"
+	animated_sprite.stop()
+	animated_sprite.animation = next_state
+	animated_sprite.set_frame_and_progress(0, 0.0)
+	current_animation_name = next_state
+	animated_sprite.speed_scale = 1.0
+	animated_sprite.play()
+
+
+func _on_enemy_animation_frame_changed() -> void:
+	if current_animation_name == &"attack" and animated_sprite != null and animated_sprite.frame == ATTACK_IMPACT_FRAME:
+		_apply_attack_impact()
+
+
+func _on_enemy_animation_finished() -> void:
+	match current_animation_name:
+		&"attack":
+			pending_attack_target = null
+			attack_hitbox_active = false
+			if is_active:
+				_play_animation_state(&"idle", true)
+		&"hurt":
+			knockback_velocity = Vector2.ZERO
+			if is_active:
+				_play_animation_state(&"idle", true)
+		&"death":
+			_finalize_death()
 
 
 func get_enemy_art_lod_debug_state() -> Dictionary:
-	var idle_frame_count := 0
-	var walk_frame_count := 0
-	var walk_fps := 0.0
+	var state_counts := {}
 	if animated_sprite != null and animated_sprite.sprite_frames != null:
-		idle_frame_count = animated_sprite.sprite_frames.get_frame_count("idle")
-		walk_frame_count = animated_sprite.sprite_frames.get_frame_count("walk")
-		walk_fps = animated_sprite.sprite_frames.get_animation_speed("walk")
+		for state in TRUE_ANIMATION_LIBRARY.STATE_ORDER:
+			state_counts[state] = animated_sprite.sprite_frames.get_frame_count(state)
 	return {
 		"mobile_lod": animation_mobile_lod,
-		"idle_frames": idle_frame_count,
-		"walk_frames": walk_frame_count,
-		"walk_fps": walk_fps
+		"idle_frames": int(state_counts.get(&"idle", 0)),
+		"walk_frames": int(state_counts.get(&"walk", 0)),
+		"attack_frames": int(state_counts.get(&"attack", 0)),
+		"hurt_frames": int(state_counts.get(&"hurt", 0)),
+		"death_frames": int(state_counts.get(&"death", 0)),
+		"walk_fps": animated_sprite.sprite_frames.get_animation_speed(&"walk") if animated_sprite != null and animated_sprite.sprite_frames != null else 0.0,
+		"atlas_instance_id": TRUE_ANIMATION_LIBRARY.get_shared_atlas_instance_id()
 	}
-
-
-func _apply_visual_transform(new_position: Vector2, new_rotation: float, new_scale: Vector2) -> void:
-	if sprite != null:
-		sprite.position = new_position
-		sprite.rotation = new_rotation
-		sprite.scale = new_scale
-	if animated_sprite != null:
-		animated_sprite.position = new_position
-		animated_sprite.rotation = new_rotation
-		animated_sprite.scale = new_scale
-
-
-func _apply_visual_motion_profile() -> void:
-	if is_boss:
-		visual_step_interval = 0.46
-		visual_bob_frequency = TAU / visual_step_interval
-		visual_bob_amplitude = 2.1
-		visual_tilt_amount = 0.045
-	elif type_id.contains("tank") or type_id.contains("elite") or is_elite:
-		visual_step_interval = 0.38
-		visual_bob_frequency = TAU / visual_step_interval
-		visual_bob_amplitude = 2.2
-		visual_tilt_amount = 0.055
-	elif type_id.contains("fast") or behavior_id == "dasher":
-		visual_step_interval = 0.18
-		visual_bob_frequency = TAU / visual_step_interval
-		visual_bob_amplitude = 3.2
-		visual_tilt_amount = 0.13
-	elif behavior_id == "ranged":
-		visual_step_interval = 0.32
-		visual_bob_frequency = TAU / visual_step_interval
-		visual_bob_amplitude = 2.0
-		visual_tilt_amount = 0.075
-	else:
-		visual_step_interval = 0.28
-		visual_bob_frequency = TAU / visual_step_interval
-		visual_bob_amplitude = 2.4
-		visual_tilt_amount = 0.085
 
 
 func _apply_affix_visuals() -> void:

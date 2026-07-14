@@ -10,6 +10,7 @@ const GAMEPLAY_PREWARM_PATHS: Array[String] = [
 	"res://assets/sprites/hero_captain.png",
 	"res://assets/sprites/hero_guardian.png",
 	"res://assets/sprites/hero_scout.png",
+	"res://assets/sprites/true_character_atlas.png",
 	"res://assets/sprites/proj_bullet.png",
 	"res://assets/sprites/proj_blade.png",
 	"res://assets/sprites/proj_lightning.png",
@@ -61,16 +62,6 @@ static func prewarm_gameplay_textures() -> int:
 	for path in GAMEPLAY_PREWARM_PATHS:
 		if get_texture(path) != null:
 			loaded_count += 1
-	# High-density regular enemies stay on their two real source walk frames.
-	# Elite/Boss animation frames are loaded lazily because they are rare; eagerly
-	# retaining every special frame regresses the 150-enemy stress profile.
-	for base_name in ["enemy_grunt", "enemy_fast", "enemy_tank", "hero_captain", "hero_guardian", "hero_scout"]:
-		for animation_name in ["idle", "walk"]:
-			var frame_count := 2 if animation_name == "walk" else 1
-			for index in range(frame_count):
-				var path := "res://assets/sprites/generated/%s_%s_%d.png" % [base_name, animation_name, index]
-				if get_texture(path) != null:
-					loaded_count += 1
 	return loaded_count
 
 

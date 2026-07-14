@@ -108,25 +108,25 @@ func _test_step_visual_pool() -> bool:
 		return false
 
 	var sprite: Sprite2D = visual.get("sprite")
-	if sprite == null:
-		_fail("step visual sprite missing")
+	var animated_sprite: AnimatedSprite2D = visual.get("animated_sprite")
+	if sprite == null or animated_sprite == null or not animated_sprite.visible:
+		_fail("articulated step visual missing")
 		return false
 	host.velocity = Vector2(190.0, 0.0)
-	var min_y := 9999.0
-	var max_y := -9999.0
-	var max_rotation := 0.0
-	for _index in range(18):
-		visual._process(0.05)
-		min_y = minf(min_y, sprite.position.y)
-		max_y = maxf(max_y, sprite.position.y)
-		max_rotation = maxf(max_rotation, abs(sprite.rotation))
+	var seen_walk_frames := {}
+	for _index in range(30):
+		await get_tree().create_timer(0.1).timeout
+		seen_walk_frames[animated_sprite.frame] = true
 	host.velocity = Vector2.ZERO
-
-	if max_y - min_y < 3.0:
-		_fail("step hop did not move sprite enough")
+	await get_tree().create_timer(0.15).timeout
+	if seen_walk_frames.size() < 6:
+		_fail("three-second walk did not visit enough articulated limb poses")
 		return false
-	if max_rotation < 0.035:
-		_fail("alternating step tilt too small")
+	if visual.get_animation_state() != &"idle":
+		_fail("stopping movement did not return to idle")
+		return false
+	if sprite.position != Vector2.ZERO or not is_zero_approx(sprite.rotation) or animated_sprite.position != Vector2.ZERO or not is_zero_approx(animated_sprite.rotation):
+		_fail("whole-sprite translation/rotation returned")
 		return false
 	if int(visual.get_step_dust_emit_count()) < 2:
 		_fail("step dust did not emit from pool")
@@ -136,15 +136,14 @@ func _test_step_visual_pool() -> bool:
 		return false
 
 	visual.set_facing_direction(Vector2.LEFT)
-	if float(visual.get_turn_squash_timer()) <= 0.0:
-		_fail("turn squash was not triggered")
+	if not animated_sprite.flip_h or not is_zero_approx(float(visual.get_turn_squash_timer())):
+		_fail("facing did not mirror frames cleanly without scale squash")
 		return false
-	print("R12_STEPS dust_pool=%d dust_emits=%d ticks=%d hop_delta=%.2f tilt=%.3f" % [
+	print("R12_TRUE_STEPS dust_pool=%d dust_emits=%d ticks=%d unique_walk_frames=%d idle=true static_root=true" % [
 		int(visual.get_step_dust_pool_size()),
 		int(visual.get_step_dust_emit_count()),
 		int(visual.get_footstep_tick_count()),
-		max_y - min_y,
-		max_rotation
+		seen_walk_frames.size()
 	])
 	return true
 

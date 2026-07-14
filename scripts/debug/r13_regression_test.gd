@@ -30,7 +30,7 @@ func _run_tests() -> void:
 	if not _test_boss_intro_signal():
 		return
 	current_phase = "weapon_feedback"
-	if not _test_weapon_hit_feedback():
+	if not await _test_weapon_hit_feedback():
 		return
 	current_phase = "level_ritual"
 	if not _test_level_up_ritual():
@@ -110,6 +110,8 @@ func _test_weapon_hit_feedback() -> bool:
 		_fail("failed to spawn riftline projectile")
 		return false
 	projectile._on_body_entered(enemy)
+	for _frame in range(12):
+		await get_tree().physics_frame
 	var pushed_distance := before_position.distance_to(enemy.global_position)
 	if pushed_distance < 3.8 or pushed_distance > 8.4:
 		_fail("riftline knockback outside 4-8px range: %.2f" % pushed_distance)

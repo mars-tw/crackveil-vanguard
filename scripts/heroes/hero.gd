@@ -49,6 +49,9 @@ var screen_shake_duration: float = 0.0
 var screen_shake_strength: float = 0.0
 var active_ability_cooldown_timer: float = 0.0
 var active_ability_cast_count: int = 0
+var active_ability_pending: bool = false
+var pending_active_ability_direction: Vector2 = Vector2.RIGHT
+var death_finalized: bool = false
 
 @onready var visual: Node2D = $Visual
 @onready var weapons_root: Node2D = $Weapons
@@ -58,6 +61,18 @@ var active_ability_cast_count: int = 0
 
 func _ready() -> void:
 	add_to_group("heroes")
+	_connect_visual_animation_signals()
+
+
+func _connect_visual_animation_signals() -> void:
+	if visual == null:
+		return
+	var impact_callback := Callable(self, "_on_visual_attack_impact")
+	if visual.has_signal("attack_impact") and not visual.is_connected("attack_impact", impact_callback):
+		visual.connect("attack_impact", impact_callback)
+	var death_callback := Callable(self, "_on_visual_death_finished")
+	if visual.has_signal("death_finished") and not visual.is_connected("death_finished", death_callback):
+		visual.connect("death_finished", death_callback)
 
 
 func setup(new_hero_data: Resource, new_squad_manager: Node, leader_flag: bool, slot_index: int) -> void:
@@ -125,9 +140,14 @@ func reset_for_run() -> void:
 	screen_shake_strength = 0.0
 	active_ability_cooldown_timer = 0.0
 	active_ability_cast_count = 0
+	active_ability_pending = false
+	pending_active_ability_direction = Vector2.RIGHT
+	death_finalized = false
 	movement_slow_timer = 0.0
 	movement_slow_strength = 0.0
 	is_alive = true
+	if collision_shape != null:
+		collision_shape.set_deferred("disabled", false)
 	if not is_in_group("heroes"):
 		add_to_group("heroes")
 	if is_leader and not is_in_group("players"):
@@ -135,6 +155,8 @@ func reset_for_run() -> void:
 	if visual != null:
 		visual.visible = true
 		visual.modulate = Color.WHITE
+		if visual.has_method("_resume_locomotion"):
+			visual.call("_resume_locomotion")
 	if camera != null:
 		camera.offset = Vector2.ZERO
 		if is_leader:
@@ -251,15 +273,30 @@ func try_cast_active_ability() -> bool:
 		return false
 
 	var forward := _active_ability_direction()
+	if visual == null or not visual.has_method("play_attack"):
+		push_error("Active ability requires the articulated attack animation")
+		return false
+	if not bool(visual.call("play_attack")):
+		return false
+	if visual.has_method("set_facing_direction"):
+		visual.call("set_facing_direction", forward)
 	active_ability_cooldown_timer = RIFT_PULSE_COOLDOWN
 	active_ability_cast_count += 1
-	_cast_rift_pulse_damage(forward)
-	_spawn_rift_pulse_visuals(forward)
+	active_ability_pending = true
+	pending_active_ability_direction = forward
+	GameManager.emit_stats()
+	return true
+
+
+func _on_visual_attack_impact() -> void:
+	if not active_ability_pending or not is_alive:
+		return
+	active_ability_pending = false
+	_cast_rift_pulse_damage(pending_active_ability_direction)
+	_spawn_rift_pulse_visuals(pending_active_ability_direction)
 	request_screen_shake(3.0, 0.12)
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("pulse")
-	GameManager.emit_stats()
-	return true
 
 
 func can_cast_active_ability() -> bool:
@@ -414,8 +451,8 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> bool
 	if source_position != Vector2.ZERO:
 		number_position += (global_position - source_position).normalized() * 8.0
 	EntityFactory.spawn_damage_number(final_incoming, number_position, Color(1.0, 0.28, 0.22))
-	if visual != null and visual.has_method("trigger_hit_squash"):
-		visual.trigger_hit_squash()
+	if visual != null and visual.has_method("play_hurt"):
+		visual.call("play_hurt", source_position)
 
 	GameManager.emit_stats()
 	if current_hp <= 0.0:
@@ -490,10 +527,31 @@ func add_temporary_shield(amount: float, duration: float) -> void:
 
 func _die() -> void:
 	is_alive = false
+	active_ability_pending = false
 	remove_from_group("heroes")
+	set_physics_process(false)
+	velocity = Vector2.ZERO
+	if collision_shape != null:
+		collision_shape.set_deferred("disabled", true)
+	if weapons_root != null:
+		for child in weapons_root.get_children():
+			child.set_process(false)
+			child.set_physics_process(false)
+	if visual != null and visual.has_method("play_death") and bool(visual.call("play_death")):
+		return
+	_finalize_death()
+
+
+func _on_visual_death_finished() -> void:
+	_finalize_death()
+
+
+func _finalize_death() -> void:
+	if death_finalized:
+		return
+	death_finalized = true
 	if is_leader:
 		set_process(false)
-		set_physics_process(false)
 		if camera != null:
 			camera.enabled = false
 		GameManager.player_died()

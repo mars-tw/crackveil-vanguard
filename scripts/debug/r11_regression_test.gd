@@ -53,7 +53,7 @@ func _run_tests() -> void:
 	if not _test_upgrade_choices_keep_non_leader_card():
 		return
 	current_phase = "animation"
-	if not await _test_procedural_animation_changes_transforms():
+	if not await _test_true_animation_changes_poses():
 		return
 	current_phase = "group_scan"
 	var pool_stats: Dictionary = EntityFactory.get_pool_stats()
@@ -288,7 +288,7 @@ func _test_upgrade_choices_keep_non_leader_card() -> bool:
 	return true
 
 
-func _test_procedural_animation_changes_transforms() -> bool:
+func _test_true_animation_changes_poses() -> bool:
 	var visual := leader.get_node_or_null("Visual")
 	if visual == null:
 		_fail("leader visual missing")
@@ -298,51 +298,50 @@ func _test_procedural_animation_changes_transforms() -> bool:
 		_fail("leader sprite missing")
 		return false
 	var animated_sprite: AnimatedSprite2D = visual.get("animated_sprite")
-	if animated_sprite == null or animated_sprite.sprite_frames == null or animated_sprite.sprite_frames.get_frame_count("walk") < 3:
+	if animated_sprite == null or not animated_sprite.visible or animated_sprite.sprite_frames == null or animated_sprite.sprite_frames.get_frame_count("walk") != 8:
 		_fail("leader animated walk frames missing")
 		return false
-	var start_y := sprite.position.y
+	var leader_walk_frames := {}
 	GameManager.set_touch_move_vector(Vector2.RIGHT)
 	for _index in range(18):
 		await get_tree().physics_frame
 		await get_tree().process_frame
-	var moved_y := sprite.position.y
-	var moved_rotation := sprite.rotation
+		leader_walk_frames[animated_sprite.frame] = true
 	GameManager.set_touch_move_vector(Vector2.ZERO)
 	leader.set_desired_velocity(Vector2.ZERO)
-	if abs(moved_y - start_y) < 0.05 and abs(moved_rotation) < 0.01:
-		_fail("leader procedural animation did not change transform")
+	if leader_walk_frames.size() < 3:
+		_fail("leader walk did not change articulated poses")
 		return false
-	if str(animated_sprite.animation) != "walk":
+	if StringName(visual.call("get_animation_state")) != &"walk":
 		_fail("leader animated sprite did not switch to walk")
+		return false
+	if sprite.position != Vector2.ZERO or not is_zero_approx(sprite.rotation) or animated_sprite.position != Vector2.ZERO or not is_zero_approx(animated_sprite.rotation):
+		_fail("leader whole-sprite transform animation returned")
 		return false
 
 	var enemy := EntityFactory.spawn_enemy("r11_anim_fast", _moving_enemy_config(), leader.global_position + Vector2(220.0, 0.0))
 	var enemy_sprite: Sprite2D = enemy.get("sprite")
 	var enemy_animated_sprite: AnimatedSprite2D = enemy.get("animated_sprite")
-	if enemy_animated_sprite == null or enemy_animated_sprite.sprite_frames == null or enemy_animated_sprite.sprite_frames.get_frame_count("walk") < 2:
+	if enemy_animated_sprite == null or not enemy_animated_sprite.visible or enemy_animated_sprite.sprite_frames == null or enemy_animated_sprite.sprite_frames.get_frame_count("walk") != 8:
 		_fail("enemy animated walk frames missing")
 		return false
-	var enemy_start_y := enemy_sprite.position.y
-	var enemy_max_bob := 0.0
+	var enemy_walk_frames := {}
 	for _index in range(18):
 		await get_tree().physics_frame
 		await get_tree().process_frame
-		enemy_max_bob = maxf(enemy_max_bob, abs(enemy_sprite.position.y - enemy_start_y))
-	var enemy_moved_y := enemy_sprite.position.y
-	if enemy_max_bob < 0.05:
-		_fail("enemy procedural animation did not bob")
+		enemy_walk_frames[enemy_animated_sprite.frame] = true
+	if enemy_walk_frames.size() < 3:
+		_fail("enemy walk did not change articulated poses")
 		return false
 	if str(enemy_animated_sprite.animation) != "walk":
 		_fail("enemy animated sprite did not switch to walk")
 		return false
-	print("R11_ANIMATION leader_y %.2f->%.2f tilt=%.3f enemy_y %.2f->%.2f max_bob=%.2f" % [
-		start_y,
-		moved_y,
-		moved_rotation,
-		enemy_start_y,
-		enemy_moved_y,
-		enemy_max_bob
+	if enemy_sprite.position != Vector2.ZERO or not is_zero_approx(enemy_sprite.rotation) or enemy_animated_sprite.position != Vector2.ZERO or not is_zero_approx(enemy_animated_sprite.rotation):
+		_fail("enemy whole-sprite bob/rotation returned")
+		return false
+	print("R11_TRUE_ANIMATION leader_poses=%d enemy_poses=%d static_visual_roots=true" % [
+		leader_walk_frames.size(),
+		enemy_walk_frames.size()
 	])
 	return true
 

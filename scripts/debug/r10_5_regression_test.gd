@@ -88,13 +88,18 @@ func _test_active_ability_damage_and_cooldown() -> bool:
 	if leader == null or not is_instance_valid(leader):
 		_fail("leader missing for active ability")
 		return false
+	_disable_all_weapons()
 	var enemy: Node = EntityFactory.spawn_enemy("r10_pulse_target", _target_config(120.0), leader.global_position + Vector2(126.0, 0.0))
 	if enemy == null:
 		_fail("active ability target spawn failed")
 		return false
 	var hp_before: float = float(enemy.get("hp"))
 	var cast_ok: bool = bool(leader.call("try_cast_active_ability"))
-	await get_tree().physics_frame
+	await get_tree().create_timer(0.11).timeout
+	if float(enemy.get("hp")) < hp_before:
+		_fail("rift pulse damaged before the impact frame")
+		return false
+	await get_tree().create_timer(0.12).timeout
 	var hp_after: float = float(enemy.get("hp"))
 	var cooldown_remaining: float = float(leader.call("get_active_ability_cooldown_remaining"))
 	if not cast_ok or hp_after >= hp_before:
@@ -108,6 +113,18 @@ func _test_active_ability_damage_and_cooldown() -> bool:
 		return false
 	print("R10_5_ACTIVE_ABILITY hp %.2f->%.2f cooldown=%.2f" % [hp_before, hp_after, cooldown_remaining])
 	return true
+
+
+func _disable_all_weapons() -> void:
+	var members: Array = squad_manager.get_members() if squad_manager != null and squad_manager.has_method("get_members") else []
+	for member in members:
+		if member == null or not is_instance_valid(member):
+			continue
+		var member_weapons: Dictionary = member.get("weapons")
+		for weapon in member_weapons.values():
+			if weapon != null and is_instance_valid(weapon):
+				weapon.set_process(false)
+				weapon.set_physics_process(false)
 
 
 func _test_orbit_blade_hits_static_target() -> bool:

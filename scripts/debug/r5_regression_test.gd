@@ -116,7 +116,22 @@ func _test_magnetic_reclaim_run_flag() -> bool:
 		return false
 	enemy.take_damage(5.0, leader.global_position)
 
-	await get_tree().process_frame
+	await get_tree().create_timer(0.45).timeout
+	if bool(gem.get("magnetized")):
+		_fail("magnetic reclaim resolved before enemy death animation completed")
+		return false
+	if not is_instance_valid(enemy) or not bool(enemy.get("is_dying")) or not enemy.visible:
+		_fail("magnetic target was recycled before death animation completed")
+		return false
+	var death_wait_frames := 0
+	while enemy.visible and death_wait_frames < 30:
+		await get_tree().process_frame
+		death_wait_frames += 1
+	if enemy.visible:
+		_fail("magnetic target death animation did not finish")
+		return false
+	# _finalize_death queues magnetic reclaim after the animation_finished
+	# callback; sample on the following frame before the forced gem is collected.
 	await get_tree().process_frame
 
 	if not bool(gem.get("magnetized")):

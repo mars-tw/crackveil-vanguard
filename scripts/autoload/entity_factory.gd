@@ -19,7 +19,10 @@ const CORPSE_GHOST_SCENE: PackedScene = preload("res://scenes/vfx/CorpseGhost.ts
 const LIGHTNING_ARC_SCENE: PackedScene = preload("res://scenes/vfx/LightningArc.tscn")
 
 const PREWARM_COUNTS: Dictionary = {
-	"enemy": 220,
+	# 150 active enemies plus the 0.6 s articulated death cohort.  The atlas is
+	# shared, so this headroom keeps full death reactions without duplicating
+	# textures or instantiating enemies on the hot path.
+	"enemy": 320,
 	"projectile": 320,
 	"fork_projectile": 56,
 	"orbit_projectile": 56,

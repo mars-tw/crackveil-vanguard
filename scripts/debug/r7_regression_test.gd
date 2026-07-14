@@ -252,7 +252,7 @@ func _test_affix_split_and_cap() -> bool:
 		_fail("split elite affix id missing")
 		return false
 	split_elite.take_damage(999999.0, leader.global_position)
-	await get_tree().process_frame
+	await get_tree().create_timer(0.68).timeout
 	if _count_active_type("affix_split_spawnling") != 2:
 		_fail("split elite did not create two spawnlings with available cap")
 		return false
@@ -269,7 +269,7 @@ func _test_affix_split_and_cap() -> bool:
 		_fail("split elite missing after cap replacement")
 		return false
 	split_elite.take_damage(999999.0, leader.global_position)
-	await get_tree().process_frame
+	await get_tree().create_timer(0.68).timeout
 	var active_after_split := EntityFactory.get_enemy_active_count()
 	if active_after_split > 4:
 		_fail("split spawnlings exceeded enemy cap")
