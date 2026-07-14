@@ -10,6 +10,22 @@ const THREAT_GLOW_DENSITY_FULL := 150
 const HIT_FLASH_DURATION := 0.08
 const ATTACK_IMPACT_FRAME := 2
 const KNOCKBACK_DECELERATION := 1050.0
+const ANIMATION_LOD_NEAR_DISTANCE := 180.0
+const ANIMATION_LOD_MID_DISTANCE := 320.0
+const ANIMATION_LOD_FAR_DISTANCE := 560.0
+const REGULAR_LOCOMOTION_FPS_SCALE := 0.6
+const MOBILE_ANIMATION_FPS_SCALE := 0.5
+const MID_ANIMATION_FPS_SCALE := 0.5
+const FAR_ANIMATION_FPS_SCALE := 0.25
+const DEATH_CROWD_THRESHOLD := 120
+const SIMPLIFIED_DEATH_FPS := 10.0
+const IDLE_FRAME_SEQUENCE: Array[int] = [0, 1, 2, 3]
+const WALK_FRAME_SEQUENCE: Array[int] = [0, 1, 2, 3, 4, 5, 6, 7]
+const REGULAR_WALK_FRAME_SEQUENCE: Array[int] = [0, 2, 4, 6]
+const ATTACK_FRAME_SEQUENCE: Array[int] = [0, 1, 2, 3, 4, 5]
+const HURT_FRAME_SEQUENCE: Array[int] = [0, 1, 2]
+const DEATH_FRAME_SEQUENCE: Array[int] = [0, 1, 2, 3, 4, 5]
+const SIMPLIFIED_DEATH_FRAME_SEQUENCE: Array[int] = [0, 5]
 const BOSS_OUTER_COLOR := Color(0.38, 0.12, 0.92, 1.0)
 const BOSS_OUTER_PHASE_TWO_COLOR := Color(0.72, 0.1, 0.58, 1.0)
 const BOSS_CORE_COLOR := Color(1.0, 0.42, 0.92, 1.0)
@@ -84,8 +100,16 @@ var last_visual_direction: Vector2 = Vector2.RIGHT
 var animation_frames_ready: bool = false
 var current_animation_name: StringName = &"idle"
 var animation_mobile_lod: bool = false
+var animation_tick_elapsed: float = 0.0
+var animation_sequence: Array[int] = []
+var animation_sequence_index: int = 0
+var animation_locomotion_speed_scale: float = 1.0
+var animation_effective_fps: float = 0.0
+var animation_lod_tier: StringName = &"near"
+var animation_frozen: bool = false
 var is_dying: bool = false
 var death_finalized: bool = false
+var death_animation_profile: StringName = &"none"
 var pending_attack_target: WeakRef = null
 var pending_attack_kind: StringName = &"contact"
 var pending_attack_damage_multiplier: float = 1.0
@@ -103,8 +127,10 @@ func _ready() -> void:
 func pool_on_acquire() -> void:
 	is_active = true
 	visible = true
-	set_process(true)
+	set_process(false)
 	set_physics_process(true)
+	if EntityFactory.has_method("register_enemy_animation_client"):
+		EntityFactory.register_enemy_animation_client(self)
 	if not is_in_group("enemies"):
 		add_to_group("enemies")
 	var shape_node := get_node_or_null("CollisionShape2D") as CollisionShape2D
@@ -113,6 +139,9 @@ func pool_on_acquire() -> void:
 
 
 func pool_on_release() -> void:
+	_release_death_animation_profile()
+	if EntityFactory.has_method("unregister_enemy_animation_client"):
+		EntityFactory.unregister_enemy_animation_client(self)
 	is_active = false
 	visible = false
 	set_process(false)
@@ -139,6 +168,7 @@ func pool_on_release() -> void:
 		sprite.rotation = 0.0
 		sprite.position = Vector2.ZERO
 	if animated_sprite != null:
+		animated_sprite.stop()
 		animated_sprite.rotation = 0.0
 		animated_sprite.position = Vector2.ZERO
 		animated_sprite.visible = false
@@ -153,8 +183,16 @@ func pool_on_release() -> void:
 	hit_flash_timer = 0.0
 	animation_mobile_lod = false
 	current_animation_name = &"idle"
+	animation_tick_elapsed = 0.0
+	animation_sequence = []
+	animation_sequence_index = 0
+	animation_locomotion_speed_scale = 1.0
+	animation_effective_fps = 0.0
+	animation_lod_tier = &"near"
+	animation_frozen = false
 	is_dying = false
 	death_finalized = false
+	death_animation_profile = &"none"
 	pending_attack_target = null
 	pending_attack_kind = &"contact"
 	pending_attack_damage_multiplier = 1.0
@@ -231,6 +269,13 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	hit_flash_timer = 0.0
 	is_dying = false
 	death_finalized = false
+	death_animation_profile = &"none"
+	animation_tick_elapsed = 0.0
+	animation_sequence_index = 0
+	animation_locomotion_speed_scale = 1.0
+	animation_effective_fps = 0.0
+	animation_lod_tier = &"near"
+	animation_frozen = false
 	pending_attack_target = null
 	attack_hitbox_active = false
 	attack_hit_registry.clear()
@@ -244,12 +289,6 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	_request_camera_pressure_on_spawn()
 
 
-func _process(delta: float) -> void:
-	if is_active:
-		_update_visual_state()
-		_tick_hit_flash(delta)
-
-
 func get_hit_token() -> int:
 	return spawn_token
 
@@ -257,6 +296,7 @@ func get_hit_token() -> int:
 func _physics_process(delta: float) -> void:
 	if not is_active:
 		return
+	_tick_hit_flash(delta)
 
 	_tick_status_effects(delta)
 	attack_timer = max(attack_timer - delta, 0.0)
@@ -571,7 +611,7 @@ func apply_knockback(source_position: Vector2, strength: float) -> void:
 	var impulse := direction.normalized() * impulse_speed
 	if impulse.length_squared() > knockback_velocity.length_squared():
 		knockback_velocity = impulse
-	if current_animation_name != &"death":
+	if current_animation_name not in [&"hurt", &"death"]:
 		_play_animation_state(&"hurt", true)
 
 
@@ -623,7 +663,11 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 		var recoil_direction := global_position - source_position
 		if recoil_direction.length_squared() > 0.001:
 			knockback_velocity = recoil_direction.normalized() * 72.0
-		_play_animation_state(&"hurt", true)
+		# Dense multi-hit weapons may damage the same enemy several times during
+		# one reaction.  Keep the in-flight hurt clip instead of restarting frame
+		# zero (and rebuilding its sequence) for every hit.
+		if current_animation_name != &"hurt":
+			_play_animation_state(&"hurt", true)
 	return final_amount
 
 
@@ -646,6 +690,11 @@ func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
 	_set_hp_bar_visible(false)
 	if collision_shape != null:
 		collision_shape.set_deferred("disabled", true)
+	if EntityFactory.has_method("acquire_enemy_death_animation_profile"):
+		var crowded := EntityFactory.get_enemy_live_count() >= DEATH_CROWD_THRESHOLD
+		death_animation_profile = EntityFactory.acquire_enemy_death_animation_profile(is_elite or is_boss, crowded)
+	else:
+		death_animation_profile = &"full"
 	_play_animation_state(&"death", true)
 
 
@@ -653,6 +702,7 @@ func _finalize_death() -> void:
 	if death_finalized:
 		return
 	death_finalized = true
+	_release_death_animation_profile()
 	GameManager.add_kill()
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
 		var thump_pitch := 0.68 if is_boss else (0.78 if is_elite else 0.92)
@@ -814,10 +864,9 @@ func _ensure_visual_nodes() -> void:
 	animated_sprite.z_index = 0
 	animated_sprite.position = Vector2.ZERO
 	animated_sprite.rotation = 0.0
-	if not animated_sprite.frame_changed.is_connected(_on_enemy_animation_frame_changed):
-		animated_sprite.frame_changed.connect(_on_enemy_animation_frame_changed)
-	if not animated_sprite.animation_finished.is_connected(_on_enemy_animation_finished):
-		animated_sprite.animation_finished.connect(_on_enemy_animation_finished)
+	# Enemy frames are advanced by EntityFactory's shared 50 ms ticker.  Keeping
+	# this child disabled prevents one internal AnimatedSprite process per enemy.
+	animated_sprite.process_mode = Node.PROCESS_MODE_DISABLED
 
 	affix_ring = get_node_or_null("AffixRing") as Line2D
 	if affix_ring == null:
@@ -1000,9 +1049,9 @@ func _update_visual_state() -> void:
 	_play_animation_state(&"walk" if moving else &"idle")
 	if moving:
 		var speed_ratio: float = velocity.length() / max(1.0, speed)
-		animated_sprite.speed_scale = clamp(speed_ratio, 0.6, 1.9)
+		animation_locomotion_speed_scale = clamp(speed_ratio, 0.6, 1.9)
 	else:
-		animated_sprite.speed_scale = 1.0
+		animation_locomotion_speed_scale = 1.0
 
 
 func _setup_animation_frames(target_diameter: float, scale_multiplier: float) -> void:
@@ -1019,10 +1068,10 @@ func _setup_animation_frames(target_diameter: float, scale_multiplier: float) ->
 	animated_sprite.sprite_frames = frames
 	animated_sprite.modulate = Color.WHITE
 	animated_sprite.scale = Vector2.ONE * (target_diameter / float(TRUE_ANIMATION_LIBRARY.CELL_SIZE)) * scale_multiplier
-	animated_sprite.play(&"idle")
 	animation_frames_ready = true
 	animated_sprite.visible = true
 	sprite.visible = false
+	_play_animation_state(&"idle", true)
 
 
 func _animation_mobile_lod_enabled() -> bool:
@@ -1049,8 +1098,122 @@ func _play_animation_state(next_state: StringName, restart: bool = false) -> voi
 	animated_sprite.animation = next_state
 	animated_sprite.set_frame_and_progress(0, 0.0)
 	current_animation_name = next_state
-	animated_sprite.speed_scale = 1.0
-	animated_sprite.play()
+	animated_sprite.speed_scale = 0.0
+	animation_tick_elapsed = 0.0
+	animation_sequence = _animation_sequence_for_state(next_state)
+	animation_sequence_index = 0
+	animation_frozen = false
+
+
+func tick_shared_enemy_animation(delta: float, focus_position: Vector2, focus_valid: bool) -> void:
+	if not animation_frames_ready or animated_sprite == null or not visible:
+		return
+	if is_active:
+		_update_visual_state()
+	elif not is_dying:
+		return
+	var playback_fps := _shared_animation_playback_fps(focus_position, focus_valid)
+	animation_effective_fps = playback_fps
+	if playback_fps <= 0.0:
+		return
+	animation_tick_elapsed += delta
+	var frame_duration := 1.0 / playback_fps
+	var frame_steps := int(floor(animation_tick_elapsed / frame_duration))
+	if frame_steps <= 0:
+		return
+	animation_tick_elapsed -= float(frame_steps) * frame_duration
+	for _step in range(frame_steps):
+		if not _advance_shared_animation_frame():
+			break
+
+
+func _shared_animation_playback_fps(focus_position: Vector2, focus_valid: bool) -> float:
+	if animated_sprite == null or animated_sprite.sprite_frames == null:
+		return 0.0
+	var base_fps := _base_animation_fps(current_animation_name)
+	if current_animation_name == &"death":
+		animation_lod_tier = &"death_full" if death_animation_profile != &"simplified" else &"death_simplified"
+		animation_frozen = false
+		return base_fps if death_animation_profile != &"simplified" else SIMPLIFIED_DEATH_FPS
+	if current_animation_name in [&"attack", &"hurt"]:
+		animation_lod_tier = &"combat"
+		animation_frozen = false
+		return base_fps
+	var distance_squared := 0.0 if not focus_valid else global_position.distance_squared_to(focus_position)
+	var lod_scale := 1.0
+	if focus_valid and distance_squared > ANIMATION_LOD_FAR_DISTANCE * ANIMATION_LOD_FAR_DISTANCE:
+		animation_lod_tier = &"frozen"
+		animation_frozen = true
+		return 0.0
+	elif focus_valid and distance_squared > ANIMATION_LOD_MID_DISTANCE * ANIMATION_LOD_MID_DISTANCE:
+		animation_lod_tier = &"far"
+		lod_scale = FAR_ANIMATION_FPS_SCALE
+	elif focus_valid and distance_squared > ANIMATION_LOD_NEAR_DISTANCE * ANIMATION_LOD_NEAR_DISTANCE:
+		animation_lod_tier = &"mid"
+		lod_scale = MID_ANIMATION_FPS_SCALE
+	else:
+		animation_lod_tier = &"near"
+	animation_frozen = false
+	var archetype_scale := 1.0 if is_elite or is_boss else REGULAR_LOCOMOTION_FPS_SCALE
+	var device_scale := MOBILE_ANIMATION_FPS_SCALE if animation_mobile_lod else 1.0
+	var motion_scale := animation_locomotion_speed_scale if current_animation_name == &"walk" else 1.0
+	return base_fps * archetype_scale * device_scale * lod_scale * motion_scale
+
+
+func _base_animation_fps(state: StringName) -> float:
+	match state:
+		&"idle":
+			return 4.0
+		&"walk":
+			return 10.0
+		&"attack", &"hurt":
+			return 12.0
+		&"death":
+			return 10.0
+	return 0.0
+
+
+func _animation_sequence_for_state(state: StringName) -> Array[int]:
+	if state == &"death" and death_animation_profile == &"simplified" and not is_elite and not is_boss:
+		return SIMPLIFIED_DEATH_FRAME_SEQUENCE
+	if state == &"walk" and not is_elite and not is_boss:
+		return REGULAR_WALK_FRAME_SEQUENCE
+	match state:
+		&"idle":
+			return IDLE_FRAME_SEQUENCE
+		&"walk":
+			return WALK_FRAME_SEQUENCE
+		&"attack":
+			return ATTACK_FRAME_SEQUENCE
+		&"hurt":
+			return HURT_FRAME_SEQUENCE
+		&"death":
+			return DEATH_FRAME_SEQUENCE
+	return []
+
+
+func _advance_shared_animation_frame() -> bool:
+	if animation_sequence.is_empty() or animated_sprite == null:
+		return false
+	var next_index := animation_sequence_index + 1
+	if next_index >= animation_sequence.size():
+		if current_animation_name in [&"idle", &"walk"]:
+			next_index = 0
+		else:
+			_on_enemy_animation_finished()
+			return false
+	animation_sequence_index = next_index
+	animated_sprite.set_frame_and_progress(animation_sequence[animation_sequence_index], 0.0)
+	_on_enemy_animation_frame_changed()
+	return true
+
+
+func _release_death_animation_profile() -> void:
+	if death_animation_profile == &"none":
+		return
+	if EntityFactory.has_method("release_enemy_death_animation_profile"):
+		EntityFactory.release_enemy_death_animation_profile(death_animation_profile)
+	death_animation_profile = &"none"
 
 
 func _on_enemy_animation_frame_changed() -> void:
@@ -1080,6 +1243,12 @@ func get_enemy_art_lod_debug_state() -> Dictionary:
 			state_counts[state] = animated_sprite.sprite_frames.get_frame_count(state)
 	return {
 		"mobile_lod": animation_mobile_lod,
+		"shared_ticker": animated_sprite != null and not animated_sprite.is_playing(),
+		"lod_tier": String(animation_lod_tier),
+		"effective_fps": animation_effective_fps,
+		"frozen_on_current_pose": animation_frozen,
+		"sequence_frames": animation_sequence.size(),
+		"death_profile": String(death_animation_profile),
 		"idle_frames": int(state_counts.get(&"idle", 0)),
 		"walk_frames": int(state_counts.get(&"walk", 0)),
 		"attack_frames": int(state_counts.get(&"attack", 0)),

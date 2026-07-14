@@ -289,6 +289,9 @@ func _test_upgrade_choices_keep_non_leader_card() -> bool:
 
 
 func _test_true_animation_changes_poses() -> bool:
+	# Isolate pose observation from the weapon hit tests that precede it.  A
+	# missile hurt interruption is valid gameplay, but not a locomotion sample.
+	_disable_all_weapons_except(null, "")
 	var visual := leader.get_node_or_null("Visual")
 	if visual == null:
 		_fail("leader visual missing")
@@ -325,16 +328,29 @@ func _test_true_animation_changes_poses() -> bool:
 	if enemy_animated_sprite == null or not enemy_animated_sprite.visible or enemy_animated_sprite.sprite_frames == null or enemy_animated_sprite.sprite_frames.get_frame_count("walk") != 8:
 		_fail("enemy animated walk frames missing")
 		return false
+	enemy.set_physics_process(false)
+	enemy.velocity = Vector2.RIGHT * float(enemy.get("speed"))
 	var enemy_walk_frames := {}
-	for _index in range(18):
-		await get_tree().physics_frame
-		await get_tree().process_frame
-		enemy_walk_frames[enemy_animated_sprite.frame] = true
+	var enemy_walk_state_observed := false
+	# Mid-distance regular enemies intentionally run at 3fps.  Use a real-time
+	# window instead of an unlocked headless frame count, which can complete
+	# before the shared ticker owes its next articulated pose.
+	for _index in range(20):
+		await get_tree().create_timer(0.12).timeout
+		if str(enemy_animated_sprite.animation) == "walk":
+			enemy_walk_state_observed = true
+			enemy_walk_frames[enemy_animated_sprite.frame] = true
 	if enemy_walk_frames.size() < 3:
+		print("R11_ANIMATION_DEBUG frames=%s art=%s velocity=%s distance=%.2f" % [
+			str(enemy_walk_frames.keys()),
+			JSON.stringify(enemy.get_enemy_art_lod_debug_state()),
+			str(enemy.velocity),
+			enemy.global_position.distance_to(leader.global_position)
+		])
 		_fail("enemy walk did not change articulated poses")
 		return false
-	if str(enemy_animated_sprite.animation) != "walk":
-		_fail("enemy animated sprite did not switch to walk")
+	if not enemy_walk_state_observed:
+		_fail("enemy animated sprite never switched to walk")
 		return false
 	if enemy_sprite.position != Vector2.ZERO or not is_zero_approx(enemy_sprite.rotation) or enemy_animated_sprite.position != Vector2.ZERO or not is_zero_approx(enemy_animated_sprite.rotation):
 		_fail("enemy whole-sprite bob/rotation returned")

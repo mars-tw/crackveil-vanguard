@@ -81,7 +81,7 @@ func _test_shared_atlas_and_player_events() -> void:
 func _test_enemy_impact_whiff_hurt_and_death() -> void:
 	var config := {
 		"max_hp": 80.0,
-		"speed": 0.0,
+		"speed": 88.0,
 		"damage": 12.0,
 		"xp": 0,
 		"gold": 0,
@@ -95,6 +95,32 @@ func _test_enemy_impact_whiff_hurt_and_death() -> void:
 	enemy.pool_on_acquire()
 	enemy.pool_reset({"enemy_id": "true_animation_test", "config": config, "position": Vector2.ZERO, "spawn_token": 9001})
 	enemy.set_physics_process(false)
+	var animated_sprite: AnimatedSprite2D = enemy.get("animated_sprite")
+	var art_state: Dictionary = enemy.get_enemy_art_lod_debug_state()
+	_assert(bool(art_state.get("shared_ticker", false)) and not animated_sprite.is_playing(), "enemy kept a per-instance AnimatedSprite clock")
+	enemy.velocity = Vector2.RIGHT * 88.0
+	enemy.tick_shared_enemy_animation(0.0, enemy.global_position, true)
+	art_state = enemy.get_enemy_art_lod_debug_state()
+	_assert(str(art_state.get("lod_tier", "")) == "near" and is_equal_approx(float(art_state.get("effective_fps", 0.0)), 6.0), "near regular locomotion LOD must use four poses at 6fps")
+	_assert(int(art_state.get("sequence_frames", 0)) == 4, "regular walk LOD did not retain four articulated limb poses")
+	enemy.tick_shared_enemy_animation(0.0, enemy.global_position + Vector2(220.0, 0.0), true)
+	art_state = enemy.get_enemy_art_lod_debug_state()
+	_assert(str(art_state.get("lod_tier", "")) == "mid" and is_equal_approx(float(art_state.get("effective_fps", 0.0)), 3.0), "mid animation LOD is not half-rate")
+	enemy.tick_shared_enemy_animation(0.0, enemy.global_position + Vector2(420.0, 0.0), true)
+	art_state = enemy.get_enemy_art_lod_debug_state()
+	_assert(str(art_state.get("lod_tier", "")) == "far" and is_equal_approx(float(art_state.get("effective_fps", 0.0)), 1.5), "far animation LOD is not quarter-rate")
+	var held_pose := animated_sprite.frame
+	enemy.tick_shared_enemy_animation(1.0, enemy.global_position + Vector2(620.0, 0.0), true)
+	art_state = enemy.get_enemy_art_lod_debug_state()
+	_assert(bool(art_state.get("frozen_on_current_pose", false)) and animated_sprite.frame == held_pose, "offscreen LOD did not hold the current articulated pose")
+	enemy.velocity = Vector2.ZERO
+	enemy.tick_shared_enemy_animation(0.0, Vector2.ZERO, false)
+	var simplified_profile: StringName = EntityFactory.acquire_enemy_death_animation_profile(false, true)
+	var feature_profile: StringName = EntityFactory.acquire_enemy_death_animation_profile(true, true)
+	_assert(simplified_profile == &"simplified", "crowded regular death did not select the shortened pose sequence")
+	_assert(feature_profile == &"full", "elite/boss death did not preserve its full pose sequence")
+	EntityFactory.release_enemy_death_animation_profile(simplified_profile)
+	EntityFactory.release_enemy_death_animation_profile(feature_profile)
 	var target := DamageTarget.new()
 	target.global_position = Vector2(24.0, 0.0)
 	add_child(target)
@@ -135,7 +161,7 @@ func _test_enemy_impact_whiff_hurt_and_death() -> void:
 	await get_tree().create_timer(0.22).timeout
 	_assert(not is_instance_valid(enemy) or not enemy.visible, "enemy was not recycled after death animation completed")
 	target.queue_free()
-	print("TRUE_ANIMATION_ENEMY impact_delayed=true whiff_damage=0 hurt_knockback=true death_delayed=true")
+	print("TRUE_ANIMATION_ENEMY impact_delayed=true whiff_damage=0 hurt_knockback=true death_delayed=true lod=6/3/1.5/freeze shared_ticker=true")
 
 
 func _on_player_attack_impact() -> void:

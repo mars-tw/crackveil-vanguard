@@ -417,19 +417,27 @@ func _finish_stress() -> void:
 
 
 func _has_stress_arg(flag: String) -> bool:
-	for argument in OS.get_cmdline_args():
+	for argument in _stress_arguments():
 		if str(argument) == flag:
 			return true
 	return false
 
 
 func _stress_arg_value(prefix: String, fallback: String) -> String:
-	for argument in OS.get_cmdline_args():
+	for argument in _stress_arguments():
 		var value := str(argument)
 		if value.begins_with(prefix):
 			var parsed := value.trim_prefix(prefix).strip_edges().replace(" ", "_")
 			return parsed if parsed != "" else fallback
 	return fallback
+
+
+func _stress_arguments() -> PackedStringArray:
+	var arguments := OS.get_cmdline_args()
+	for argument in OS.get_cmdline_user_args():
+		if not arguments.has(argument):
+			arguments.append(argument)
+	return arguments
 
 
 func _calculate_frame_stats() -> Dictionary:

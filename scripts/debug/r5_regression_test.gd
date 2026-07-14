@@ -130,11 +130,24 @@ func _test_magnetic_reclaim_run_flag() -> bool:
 	if enemy.visible:
 		_fail("magnetic target death animation did not finish")
 		return false
-	# _finalize_death queues magnetic reclaim after the animation_finished
-	# callback; sample on the following frame before the forced gem is collected.
-	await get_tree().process_frame
+	# Finalization and pool release are both deferred from the shared animation
+	# tick.  Allow the deferred reclaim queue a few frames, but sample as soon as
+	# the forced magnet flag appears so the gem cannot be collected first.
+	for _deferred_frame in range(6):
+		await get_tree().process_frame
+		if bool(gem.get("magnetized")):
+			break
 
 	if not bool(gem.get("magnetized")):
+		print("R5_MAGNETIC_DEBUG death_wait_frames=%d gem_active=%s gem_position=%s enemy_position=%s active_registry=%s forced_collector=%s run_flag=%s" % [
+			death_wait_frames,
+			str(gem.get("is_active")),
+			str(gem.global_position),
+			str(enemy.global_position),
+			str((EntityFactory.get("active_xp_gems") as Array).has(gem)),
+			str(gem.get("forced_collector") != null),
+			str(GameManager.has_magnetic_reclaim())
+		])
 		_fail("run-level magnetic reclaim did not magnetize xp")
 		return false
 

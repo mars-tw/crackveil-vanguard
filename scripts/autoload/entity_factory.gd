@@ -49,6 +49,9 @@ const LIGHTNING_ARC_CAP := 48
 const XP_GEM_CAP := 180
 const COIN_CAP := 180
 const ENEMY_GLOW_REFRESH_INTERVAL := 0.24
+const ENEMY_ANIMATION_TICK_INTERVAL := 0.05
+const ENEMY_ANIMATION_BUCKET_COUNT := 3
+const ENEMY_FULL_DEATH_ANIMATION_CAP := 24
 const DEATH_VISUALS_PER_FRAME := 5
 const DEATH_VISUAL_QUEUE_CAP := 72
 const REGULAR_DROPS_PER_PHYSICS_FRAME := 6
@@ -58,6 +61,15 @@ var pools: Dictionary = {}
 var pool_root: Node = null
 var enemy_spatial_index: Node = null
 var enemy_glow_refresh_timer: float = 0.0
+var enemy_animation_bucket_elapsed: PackedFloat32Array = PackedFloat32Array([0.0, 1.0 / 60.0, 2.0 / 60.0])
+var enemy_animation_clients: Array[Node] = []
+var enemy_animation_client_slots: Dictionary = {}
+var enemy_animation_free_client_slots: Array[int] = []
+var enemy_animation_shared_ticks: int = 0
+var enemy_full_death_animation_live: int = 0
+var enemy_full_death_animation_peak: int = 0
+var enemy_simplified_death_animation_live: int = 0
+var enemy_simplified_death_animation_total: int = 0
 var next_enemy_spawn_token: int = 1
 var enemy_group_scan_count: int = 0
 var active_damage_numbers: Array[Node] = []
@@ -87,6 +99,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_drain_death_visual_queue()
+	_tick_enemy_animation_clock(delta)
 	if enemy_spatial_index == null or int(enemy_spatial_index.get("live_count")) <= 0:
 		return
 	enemy_glow_refresh_timer = max(enemy_glow_refresh_timer - delta, 0.0)
@@ -113,6 +126,15 @@ func initialize_for_arena(arena: Node) -> void:
 	active_xp_gems.clear()
 	next_enemy_spawn_token = 1
 	enemy_glow_refresh_timer = 0.0
+	enemy_animation_bucket_elapsed = PackedFloat32Array([0.0, 1.0 / 60.0, 2.0 / 60.0])
+	enemy_animation_clients.clear()
+	enemy_animation_client_slots.clear()
+	enemy_animation_free_client_slots.clear()
+	enemy_animation_shared_ticks = 0
+	enemy_full_death_animation_live = 0
+	enemy_full_death_animation_peak = 0
+	enemy_simplified_death_animation_live = 0
+	enemy_simplified_death_animation_total = 0
 	enemy_group_scan_count = 0
 	enemy_projectile_reclaims = 0
 	fork_projectile_cap_skips = 0
@@ -693,7 +715,85 @@ func get_pool_stats() -> Dictionary:
 	stats["death_visual_queue_drops"] = death_visual_queue_drops
 	stats["regular_drop_queue"] = regular_drop_queue.size()
 	stats["regular_drop_queue_fallbacks"] = regular_drop_queue_fallbacks
+	stats["enemy_animation"] = {
+		"clients": enemy_animation_client_slots.size(),
+		"shared_ticks": enemy_animation_shared_ticks,
+		"tick_interval_ms": ENEMY_ANIMATION_TICK_INTERVAL * 1000.0,
+		"dispatch_buckets": ENEMY_ANIMATION_BUCKET_COUNT,
+		"full_death_live": enemy_full_death_animation_live,
+		"full_death_peak": enemy_full_death_animation_peak,
+		"full_death_cap": ENEMY_FULL_DEATH_ANIMATION_CAP,
+		"simplified_death_live": enemy_simplified_death_animation_live,
+		"simplified_death_total": enemy_simplified_death_animation_total
+	}
 	return stats
+
+
+func register_enemy_animation_client(enemy: Node) -> void:
+	if enemy == null or not is_instance_valid(enemy):
+		return
+	var instance_id := enemy.get_instance_id()
+	if enemy_animation_client_slots.has(instance_id):
+		return
+	var slot_index := enemy_animation_clients.size()
+	if not enemy_animation_free_client_slots.is_empty():
+		slot_index = enemy_animation_free_client_slots.pop_back()
+		enemy_animation_clients[slot_index] = enemy
+	else:
+		enemy_animation_clients.append(enemy)
+	enemy_animation_client_slots[instance_id] = slot_index
+
+
+func unregister_enemy_animation_client(enemy: Node) -> void:
+	if enemy == null:
+		return
+	var instance_id := enemy.get_instance_id()
+	if not enemy_animation_client_slots.has(instance_id):
+		return
+	var slot_index := int(enemy_animation_client_slots[instance_id])
+	enemy_animation_client_slots.erase(instance_id)
+	if slot_index >= 0 and slot_index < enemy_animation_clients.size():
+		enemy_animation_clients[slot_index] = null
+		enemy_animation_free_client_slots.append(slot_index)
+
+
+func acquire_enemy_death_animation_profile(preserve_full_sequence: bool, crowded: bool = false) -> StringName:
+	if preserve_full_sequence or (not crowded and enemy_full_death_animation_live < ENEMY_FULL_DEATH_ANIMATION_CAP):
+		enemy_full_death_animation_live += 1
+		enemy_full_death_animation_peak = maxi(enemy_full_death_animation_peak, enemy_full_death_animation_live)
+		return &"full"
+	enemy_simplified_death_animation_live += 1
+	enemy_simplified_death_animation_total += 1
+	return &"simplified"
+
+
+func release_enemy_death_animation_profile(profile: StringName) -> void:
+	if profile == &"full":
+		enemy_full_death_animation_live = maxi(0, enemy_full_death_animation_live - 1)
+	elif profile == &"simplified":
+		enemy_simplified_death_animation_live = maxi(0, enemy_simplified_death_animation_live - 1)
+
+
+func _tick_enemy_animation_clock(delta: float) -> void:
+	if get_tree().paused or enemy_animation_client_slots.is_empty():
+		return
+	var focus_position := Vector2.ZERO
+	var focus_valid := GameManager.player != null and is_instance_valid(GameManager.player)
+	if focus_valid:
+		focus_position = GameManager.player.global_position
+	for bucket_index in range(ENEMY_ANIMATION_BUCKET_COUNT):
+		enemy_animation_bucket_elapsed[bucket_index] += delta
+		if enemy_animation_bucket_elapsed[bucket_index] < ENEMY_ANIMATION_TICK_INTERVAL:
+			continue
+		var elapsed := enemy_animation_bucket_elapsed[bucket_index]
+		enemy_animation_bucket_elapsed[bucket_index] = fmod(elapsed, ENEMY_ANIMATION_TICK_INTERVAL)
+		enemy_animation_shared_ticks += 1
+		var client_index := bucket_index
+		while client_index < enemy_animation_clients.size():
+			var enemy := enemy_animation_clients[client_index]
+			if enemy != null and is_instance_valid(enemy):
+				enemy.tick_shared_enemy_animation(elapsed, focus_position, focus_valid)
+			client_index += ENEMY_ANIMATION_BUCKET_COUNT
 
 
 func reset_spatial_query_count() -> void:
