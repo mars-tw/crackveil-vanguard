@@ -186,6 +186,7 @@ func _report_probe() -> bool:
 	var elapsed: float = maxf(0.001, float(GameManager.elapsed_time))
 	var metrics: Dictionary = GameManager.get_combat_metrics()
 	var damage_by_weapon: Dictionary = metrics.get("damage_by_weapon", {})
+	var damage_by_component: Dictionary = metrics.get("damage_by_component", {})
 	var dps_by_weapon: Dictionary = {}
 	for key in damage_by_weapon.keys():
 		dps_by_weapon[key] = round(float(damage_by_weapon[key]) / elapsed * 100.0) / 100.0
@@ -208,6 +209,24 @@ func _report_probe() -> bool:
 		float(metrics.get("total_damage", 0.0))
 	])
 	print("ARENA_INSTRUMENT_DPS=" + JSON.stringify(dps_by_weapon))
+	var total_damage := maxf(0.001, float(metrics.get("total_damage", 0.0)))
+	var leader_damage := 0.0
+	for key in damage_by_weapon.keys():
+		if str(key).begins_with("rift_captain:"):
+			leader_damage += float(damage_by_weapon[key])
+	var shepherd_damage := float(damage_by_weapon.get("rift_shepherd:rift_constructs", 0.0))
+	var shatter_damage := float(damage_by_component.get("rift_shepherd:rift_constructs:shatter", 0.0))
+	var leader_share := leader_damage / total_damage
+	var shepherd_share := shepherd_damage / total_damage
+	var shatter_share := shatter_damage / maxf(0.001, shepherd_damage)
+	print("HERO10_BALANCE_INSTRUMENT leader_dps_share=%.4f shepherd_weapon_share=%.4f shatter_share=%.4f leader_damage=%.1f shepherd_damage=%.1f shatter_damage=%.1f" % [
+		leader_share,
+		shepherd_share,
+		shatter_share,
+		leader_damage,
+		shepherd_damage,
+		shatter_damage
+	])
 	print("ARENA_INSTRUMENT_TRIGGERS=" + JSON.stringify(trigger_counts))
 	print("ARENA_INSTRUMENT_POOL_STATS=" + JSON.stringify(pool_stats))
 	if float(metrics.get("total_damage", 0.0)) <= 0.0:

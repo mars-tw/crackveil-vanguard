@@ -203,6 +203,7 @@ var last_combo_milestone_count: int = 0
 var upgrade_entry_token: int = 0
 var combat_metrics_enabled: bool = false
 var combat_damage_by_weapon: Dictionary = {}
+var combat_damage_by_component: Dictionary = {}
 var combat_damage_total: float = 0.0
 # Debug-build capture aid. Runtime systems may read this flag only to raise
 # presentation LOD; gameplay cadence and release builds must remain unchanged.
@@ -1031,6 +1032,9 @@ func get_kill_thump_pitch(base_pitch: float) -> float:
 	return clamp(base_pitch + lift, 0.55, 1.28)
 
 
+const DAMAGE_TAKEN_SOFT_CAP_MIN := 0.85
+
+
 func get_incoming_damage_multiplier(target: Node = null) -> float:
 	var reduction_multiplier := 1.0
 	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("has_active_bond"):
@@ -1039,17 +1043,24 @@ func get_incoming_damage_multiplier(target: Node = null) -> float:
 	if target != null and is_instance_valid(target) and str(target.get("passive_id")) == "shepherd":
 		var construct_count := mini(4, EntityFactory.get_rift_construct_count_for_owner(target))
 		reduction_multiplier *= 1.0 - float(construct_count) * 0.02
-	reduction_multiplier = max(0.85, reduction_multiplier)
-	return float(contract_modifiers.get("incoming_damage_multiplier", 1.0)) * reduction_multiplier
+	var all_sources_multiplier := float(contract_modifiers.get("incoming_damage_multiplier", 1.0)) * reduction_multiplier
+	return apply_damage_taken_soft_cap(all_sources_multiplier)
+
+
+func apply_damage_taken_soft_cap(multiplier: float) -> float:
+	# DESIGN_hero10 §4.3: clamp after every incoming-damage source has
+	# participated, so later bonds/contracts cannot bypass the global -15% cap.
+	return max(DAMAGE_TAKEN_SOFT_CAP_MIN, multiplier)
 
 
 func reset_combat_metrics(enabled: bool = true) -> void:
 	combat_metrics_enabled = enabled
 	combat_damage_by_weapon.clear()
+	combat_damage_by_component.clear()
 	combat_damage_total = 0.0
 
 
-func record_weapon_damage(source: Node, weapon_id: String, amount: float) -> void:
+func record_weapon_damage(source: Node, weapon_id: String, amount: float, component_id: String = "") -> void:
 	if not combat_metrics_enabled or amount <= 0.0:
 		return
 	var hero_id := "unknown"
@@ -1059,6 +1070,9 @@ func record_weapon_damage(source: Node, weapon_id: String, amount: float) -> voi
 		weapon_id = "unknown"
 	var key := hero_id + ":" + weapon_id
 	combat_damage_by_weapon[key] = float(combat_damage_by_weapon.get(key, 0.0)) + amount
+	if component_id != "":
+		var component_key := key + ":" + component_id
+		combat_damage_by_component[component_key] = float(combat_damage_by_component.get(component_key, 0.0)) + amount
 	combat_damage_total += amount
 
 
@@ -1066,7 +1080,8 @@ func get_combat_metrics() -> Dictionary:
 	return {
 		"enabled": combat_metrics_enabled,
 		"total_damage": combat_damage_total,
-		"damage_by_weapon": combat_damage_by_weapon.duplicate(true)
+		"damage_by_weapon": combat_damage_by_weapon.duplicate(true),
+		"damage_by_component": combat_damage_by_component.duplicate(true)
 	}
 
 

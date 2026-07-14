@@ -1,5 +1,6 @@
 extends Node
 
+const HERO10_WEAPON := preload("res://resources/weapons/rift_constructs.tres")
 const MOCK_SEED := 424242
 const RUN_SECONDS := 245
 const LEVEL_TIMES: Array[int] = [14, 28, 44, 62, 82, 104, 128, 152, 176, 198, 218, 236]
@@ -170,13 +171,44 @@ func _run_mock() -> void:
 		boss_phase_two_time,
 		boss_kill_time
 	])
+	var hero10_balance_ok := _report_hero10_max_build(leader_dps, squad_dps)
 	var curve_pass: bool = min_hp_before_90 < 0.82 and leader_share >= 0.34 and leader_share <= 0.62 and elites_spawned >= 3 and boss_phase_two_time >= BOSS_SPAWN_TIME and boss_kill_time > BOSS_SPAWN_TIME
-	if not curve_pass:
+	if not curve_pass or not hero10_balance_ok:
 		printerr("BALANCE_MOCK_FAIL: curve target missed")
 		get_tree().quit(1)
 		return
 	print("BALANCE_MOCK_PASS")
 	get_tree().quit(0)
+
+
+func _report_hero10_max_build(leader_budget: float, squad_budget: float) -> bool:
+	# Full squad replacement envelope: the shepherd replaces one existing
+	# 21-DPS follower slot. Evolution prerequisites include damage L3,
+	# construct_anchor L2, cap 6, and the captain bond. Fixed constructs use a
+	# conservative 10.5% two-target coverage duty; the shatter budget uses 2.2
+	# effective targets at the measured FIFO cadence. The separate arena pressure
+	# probe reports the un-normalized extreme-density result.
+	var evolved_damage := float(HERO10_WEAPON.get("damage")) + float(HERO10_WEAPON.get("damage_upgrade")) * 3.0
+	var evolved_interval := float(HERO10_WEAPON.get("hit_interval")) * 0.9
+	var active_constructs := mini(int(HERO10_WEAPON.get("hard_cap_global")), int(HERO10_WEAPON.get("projectile_count")) + 3)
+	var tick_dps := evolved_damage / evolved_interval * float(HERO10_WEAPON.get("max_targets_per_tick")) * float(active_constructs) * 0.105
+	var shatter_dps := evolved_damage * 0.55 * 2.2 * 0.58
+	var shepherd_dps := tick_dps + shatter_dps
+	var replaced_follower_budget := 21.0
+	var total_with_shepherd := leader_budget + maxf(0.0, squad_budget - replaced_follower_budget) + shepherd_dps
+	var leader_share := leader_budget / maxf(1.0, total_with_shepherd)
+	var shepherd_share := shepherd_dps / maxf(1.0, total_with_shepherd)
+	var shatter_share := shatter_dps / maxf(1.0, shepherd_dps)
+	print("HERO10_BALANCE_MOCK build=full_squad+anchor_l2+evolution+damage_l3 cap=%d leader_dps_share=%.4f shepherd_weapon_share=%.4f shatter_share=%.4f shepherd_tick_dps=%.2f shepherd_shatter_dps=%.2f total_dps=%.2f" % [
+		active_constructs,
+		leader_share,
+		shepherd_share,
+		shatter_share,
+		tick_dps,
+		shatter_dps,
+		total_with_shepherd
+	])
+	return leader_share >= 0.38 and leader_share <= 0.48 and shepherd_share >= 0.12 and shepherd_share <= 0.16 and shepherd_share < 0.20
 
 
 func _choose_upgrade() -> Dictionary:

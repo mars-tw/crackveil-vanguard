@@ -85,6 +85,10 @@ var enemy_projectile_reclaims: int = 0
 var fork_projectile_cap_skips: int = 0
 var hazard_zone_reclaims: int = 0
 var rift_construct_reclaims: int = 0
+var explosion_spawn_requests: int = 0
+var explosion_visual_rejections: int = 0
+var explosion_damage_hits: int = 0
+var rift_construct_shatter_requests: int = 0
 var elite_enemy_reclaims: int = 0
 var visible_xp_merges: int = 0
 var visible_xp_reclaims: int = 0
@@ -146,6 +150,10 @@ func initialize_for_arena(arena: Node) -> void:
 	fork_projectile_cap_skips = 0
 	hazard_zone_reclaims = 0
 	rift_construct_reclaims = 0
+	explosion_spawn_requests = 0
+	explosion_visual_rejections = 0
+	explosion_damage_hits = 0
+	rift_construct_shatter_requests = 0
 	elite_enemy_reclaims = 0
 	visible_xp_merges = 0
 	visible_xp_reclaims = 0
@@ -260,11 +268,15 @@ func spawn_orbit_projectile(player_node: Node2D, weapon_node: Node, stats: Dicti
 
 
 func spawn_explosion(world_position: Vector2, stats: Dictionary, source: Node) -> Node:
+	explosion_spawn_requests += 1
+	if str(stats.get("damage_component_id", "")) == "shatter":
+		rift_construct_shatter_requests += 1
 	_apply_explosion_damage(world_position, stats, source)
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
 		var radius := float(stats.get("area_radius", 82.0))
 		AudioManager.play_sfx("explosion", false, -6.0, clamp(0.82 + radius / 520.0, 0.82, 1.18))
 	if get_pool_live_count("explosion") >= EXPLOSION_CAP:
+		explosion_visual_rejections += 1
 		return null
 	var explosion := _acquire("explosion")
 	if explosion == null:
@@ -662,6 +674,19 @@ func release_rift_constructs_for_owner(owner: Node, trigger_shatter: bool = fals
 			release_rift_construct(construct)
 
 
+func trim_rift_constructs_for_owner(owner: Node, owner_cap: int, trigger_shatter: bool = true) -> int:
+	# Dynamic cap loss uses the same deterministic registry order as spawn-time
+	# FIFO. Owner death calls release_rift_constructs_for_owner(..., false)
+	# instead, so death cleanup never creates ghost shatter damage.
+	var safe_owner_cap := clampi(owner_cap, 0, RIFT_CONSTRUCT_CAP)
+	var reclaimed := 0
+	while get_rift_construct_count_for_owner(owner) > safe_owner_cap:
+		if not _reclaim_oldest_rift_construct(owner, trigger_shatter):
+			break
+		reclaimed += 1
+	return reclaimed
+
+
 func get_rift_construct_count_for_owner(owner: Node) -> int:
 	_compact_active_rift_constructs()
 	var count := 0
@@ -669,6 +694,15 @@ func get_rift_construct_count_for_owner(owner: Node) -> int:
 		if _rift_construct_belongs_to(construct, owner):
 			count += 1
 	return count
+
+
+func get_rift_constructs_for_owner(owner: Node) -> Array[Node]:
+	_compact_active_rift_constructs()
+	var owned: Array[Node] = []
+	for construct in active_rift_constructs:
+		if _rift_construct_belongs_to(construct, owner):
+			owned.append(construct)
+	return owned
 
 
 func has_rift_construct_neighbor(origin_construct: Node2D, radius: float) -> bool:
@@ -790,6 +824,10 @@ func get_pool_stats() -> Dictionary:
 	stats["hazard_zone_reclaims"] = hazard_zone_reclaims
 	stats["rift_construct_reclaims"] = rift_construct_reclaims
 	stats["rift_construct_live"] = active_rift_constructs.size()
+	stats["explosion_spawn_requests"] = explosion_spawn_requests
+	stats["explosion_visual_rejections"] = explosion_visual_rejections
+	stats["explosion_damage_hits"] = explosion_damage_hits
+	stats["rift_construct_shatter_requests"] = rift_construct_shatter_requests
 	stats["elite_enemy_reclaims"] = elite_enemy_reclaims
 	stats["visible_xp_merges"] = visible_xp_merges
 	stats["visible_xp_reclaims"] = visible_xp_reclaims
@@ -886,6 +924,10 @@ func reset_spatial_query_count() -> void:
 
 func reset_debug_counters() -> void:
 	enemy_group_scan_count = 0
+	explosion_spawn_requests = 0
+	explosion_visual_rejections = 0
+	explosion_damage_hits = 0
+	rift_construct_shatter_requests = 0
 	reset_spatial_query_count()
 
 
@@ -1062,14 +1104,14 @@ func _reclaim_oldest_hazard_zone() -> bool:
 	return true
 
 
-func _reclaim_oldest_rift_construct(owner: Node = null) -> bool:
+func _reclaim_oldest_rift_construct(owner: Node = null, trigger_shatter: bool = true) -> bool:
 	_compact_active_rift_constructs()
 	for construct in active_rift_constructs.duplicate():
 		if owner != null and not _rift_construct_belongs_to(construct, owner):
 			continue
 		rift_construct_reclaims += 1
 		if construct.has_method("expire"):
-			construct.expire(true)
+			construct.expire(trigger_shatter)
 		else:
 			release_rift_construct(construct)
 		return true
@@ -1193,6 +1235,7 @@ func _apply_explosion_damage(world_position: Vector2, stats: Dictionary, source:
 	var radius: float = float(stats.get("area_radius", 82.0))
 	var damage_value: float = float(stats.get("damage", 10.0))
 	var weapon_id := str(stats.get("source_weapon_id", ""))
+	var component_id := str(stats.get("damage_component_id", ""))
 
 	for enemy in get_enemies_in_radius(world_position, radius + 24.0):
 		if enemy == null or not is_instance_valid(enemy):
@@ -1205,7 +1248,9 @@ func _apply_explosion_damage(world_position: Vector2, stats: Dictionary, source:
 		if world_position.distance_squared_to(enemy.global_position) <= hit_distance * hit_distance:
 			if enemy.has_method("take_damage"):
 				var applied_damage: float = float(enemy.take_damage(damage_value, world_position))
-				GameManager.record_weapon_damage(source, weapon_id, applied_damage)
+				if applied_damage > 0.0:
+					explosion_damage_hits += 1
+				GameManager.record_weapon_damage(source, weapon_id, applied_damage, component_id)
 
 
 func _grant_xp_direct(amount: int) -> void:

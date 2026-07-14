@@ -6,6 +6,7 @@ const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 const ENEMY_COUNT := 150
 const PROJECTILE_COUNT := 80
 const STRESS_RUN_SEED := 52002
+const R19_BASELINE_AVG_MS := 15.028
 const START_FRAME := 10
 const WARMUP_FRAME_COUNT := 180
 const MEASURED_FRAME_TARGET := 411
@@ -63,12 +64,14 @@ var pending_projectile_refills: int = 0
 var warmup_evolutions: int = 0
 var baseline_source: String = "UNSPECIFIED"
 var machine_condition: String = "UNSPECIFIED"
+var hero10_perf_scenario: String = "DEFAULT"
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	baseline_source = _stress_arg_value("--baseline-source=", "UNSPECIFIED")
 	machine_condition = _stress_arg_value("--machine-condition=", "UNSPECIFIED")
+	hero10_perf_scenario = _stress_arg_value("--hero10-perf=", "DEFAULT").to_upper()
 	mobile_lod_scenario = mobile_lod_scenario or _has_stress_arg("--mobile-lod")
 	MOBILE_TUNING.set_force_mobile_lod_for_tests(mobile_lod_scenario)
 	var target_size := MOBILE_LOD_VIEWPORT_SIZE if mobile_lod_scenario else DESKTOP_VIEWPORT_SIZE
@@ -122,6 +125,8 @@ func _initialize_stress() -> void:
 	_refill_enemies(true)
 	_refill_projectiles(true)
 	_spawn_initial_vfx()
+	if hero10_perf_scenario == "C":
+		_prime_explosion_visual_cap()
 	_capture_event_baseline()
 	var viewport_size := get_viewport().get_visible_rect().size
 	var death_burst_live := EntityFactory.get_pool_live_count("death_burst")
@@ -131,7 +136,7 @@ func _initialize_stress() -> void:
 		EntityFactory.get_enemy_live_count(),
 		death_burst_live
 	)
-	print("STRESS_PROVENANCE baseline_source=%s machine_condition=%s" % [baseline_source, machine_condition])
+	print("STRESS_PROVENANCE baseline_source=%s machine_condition=%s hero10_perf=%s" % [baseline_source, machine_condition, hero10_perf_scenario])
 	print("STRESS_SCENARIO seed=%d mobile_lod=%s viewport=%s composite_layers=%d vfx_live=%d particle_multiplier=%.2f damage_cap=%d hazard_tick=%.3f hazard_visual_redraw=%.4f death_burst_cap=%d corpse_cap=%d" % [
 		STRESS_RUN_SEED,
 		str(mobile_lod_scenario),
@@ -176,7 +181,10 @@ func _begin_measurement() -> void:
 
 
 func _prepare_full_squad_for_stress() -> void:
-	for hero_id in FULL_SQUAD_RECRUITS:
+	var recruits: Array[String] = FULL_SQUAD_RECRUITS.duplicate()
+	if hero10_perf_scenario == "B_OLD":
+		recruits = ["pulse_artificer", "line_mender", "ember_grenadier", "void_weaver", "rift_sniper", "echo_singer"]
+	for hero_id in recruits:
 		squad_manager.recruit_hero(hero_id)
 	_force_weapon_upgrades_for_stress()
 
@@ -188,7 +196,13 @@ func _force_weapon_upgrades_for_stress() -> void:
 	_apply_weapon_upgrades(squad_manager.get_member_by_id("orbit_guard"), "rift_shield_boomerang", ["weapon_damage", "weapon_projectiles", "boomerang_rebound", "boomerang_rebound", "evo_razor_bulwark"])
 	_apply_weapon_upgrades(squad_manager.get_member_by_id("arc_scout"), "rift_seeker_missiles", ["weapon_damage", "weapon_projectiles", "missile_guidance", "missile_guidance", "evo_hunter_swarm"])
 	_apply_weapon_upgrades(squad_manager.get_member_by_id("pulse_artificer"), "pulse_bloom", ["weapon_damage", "weapon_damage", "pulse_embers", "evo_ember_well"])
-	_apply_weapon_upgrades(squad_manager.get_member_by_id("rift_shepherd"), "rift_constructs", ["weapon_damage", "weapon_damage", "weapon_damage", "construct_anchor", "construct_anchor", "evo_mirror_flock"])
+	_apply_weapon_upgrades(squad_manager.get_member_by_id("rift_shepherd"), "rift_constructs", [
+		"weapon_damage", "weapon_damage", "weapon_damage", "weapon_damage", "weapon_damage",
+		"weapon_cooldown", "weapon_cooldown", "weapon_cooldown", "weapon_cooldown",
+		"weapon_projectiles", "weapon_projectiles", "weapon_projectiles",
+		"construct_anchor", "construct_anchor", "evo_mirror_flock"
+	])
+	_apply_weapon_upgrades(squad_manager.get_member_by_id("line_mender"), "riftline_emitter", ["weapon_damage", "weapon_damage", "weapon_damage", "riftline_fork", "riftline_fork", "evo_rift_fan"])
 	_apply_weapon_upgrades(squad_manager.get_member_by_id("ember_grenadier"), "grenade_lob", ["weapon_damage", "weapon_projectiles", "grenade_cluster", "grenade_cluster", "evo_cinder_barrage"])
 	_apply_weapon_upgrades(squad_manager.get_member_by_id("void_weaver"), "void_net", ["weapon_damage", "weapon_projectiles", "void_anchor", "evo_event_horizon"])
 	_apply_weapon_upgrades(squad_manager.get_member_by_id("rift_sniper"), "rail_lance", ["weapon_damage", "weapon_cooldown", "rail_focus", "rail_focus", "evo_star_piercer"])
@@ -299,6 +313,21 @@ func _spawn_initial_vfx() -> void:
 		EntityFactory.spawn_death_burst(position + Vector2(0.0, 18.0), Color(0.7, 0.9, 1.0))
 
 
+func _prime_explosion_visual_cap() -> void:
+	var harmless_stats := {
+		"damage": 0.0,
+		"source_weapon_id": "hero10_perf_cap_fill",
+		"area_radius": 8.0,
+		"effect_lifetime": 999.0,
+		"color": Color(0.2, 0.2, 0.24, 0.01),
+		"visual_level": 0
+	}
+	var index := 0
+	while EntityFactory.get_pool_live_count("explosion") < EntityFactory.EXPLOSION_CAP:
+		EntityFactory.spawn_explosion(_combat_center() + Vector2(4000.0 + float(index) * 16.0, 4000.0), harmless_stats, leader)
+		index += 1
+
+
 func _normal_enemy_config() -> Dictionary:
 	return {
 		"max_hp": 92.0,
@@ -400,6 +429,24 @@ func _finish_stress() -> void:
 	var construct_weapon: Node = shepherd_weapons.get("rift_constructs")
 	if construct_weapon != null and construct_weapon.has_method("get_debug_state"):
 		print("STRESS_SHEPHERD_DEBUG=" + JSON.stringify(construct_weapon.get_debug_state()))
+	var avg_ms := float(stats.get("avg_ms", 0.0))
+	var baseline_delta_pct := (avg_ms / R19_BASELINE_AVG_MS - 1.0) * 100.0
+	var damage_components: Dictionary = GameManager.get_combat_metrics().get("damage_by_component", {})
+	var shatter_damage := float(damage_components.get("rift_shepherd:rift_constructs:shatter", 0.0))
+	print("HERO10_PERF_RESULT scenario=%s avg_ms=%.3f p95_ms=%.3f r19_avg_ms=%.3f delta_pct=%+.2f within_plus_10=%s constructs=%d fifo=%d shatters=%d shatter_damage=%.1f explosion_rejects=%d queries_per_frame=%.2f" % [
+		hero10_perf_scenario,
+		avg_ms,
+		float(stats.get("p95_ms", 0.0)),
+		R19_BASELINE_AVG_MS,
+		baseline_delta_pct,
+		str(avg_ms <= R19_BASELINE_AVG_MS * 1.10),
+		int(pool_stats.get("rift_construct_live", 0)),
+		int(pool_stats.get("rift_construct_reclaims", 0)),
+		int(pool_stats.get("rift_construct_shatter_requests", 0)),
+		shatter_damage,
+		int(pool_stats.get("explosion_visual_rejections", 0)),
+		queries_per_frame
+	])
 	_print_spike_trace()
 
 	var validation_error := _validate_pool_stats(pool_stats)
@@ -415,6 +462,10 @@ func _finish_stress() -> void:
 	var trigger_validation := _validate_full_squad_triggers()
 	if trigger_validation != "":
 		_fail(trigger_validation)
+		return
+	var scenario_validation := _validate_hero10_perf_scenario(pool_stats)
+	if scenario_validation != "":
+		_fail(scenario_validation)
 		return
 
 	print("STRESS_PASS")
@@ -585,9 +636,31 @@ func _validate_full_squad_triggers() -> String:
 	if squad_manager == null or not squad_manager.has_method("get_weapon_trigger_counts"):
 		return "squad trigger counts unavailable"
 	var counts: Dictionary = squad_manager.get_weapon_trigger_counts()
-	for key in EXPECTED_FULL_SQUAD_WEAPONS:
+	var expected_weapons: Array[String] = EXPECTED_FULL_SQUAD_WEAPONS.duplicate()
+	if hero10_perf_scenario == "B_OLD":
+		expected_weapons.erase("rift_shepherd:rift_constructs")
+		expected_weapons.append("line_mender:riftline_emitter")
+	for key in expected_weapons:
 		if int(counts.get(key, 0)) <= 0:
 			return "full squad weapon did not trigger: " + key
+	return ""
+
+
+func _validate_hero10_perf_scenario(pool_stats: Dictionary) -> String:
+	if hero10_perf_scenario in ["A", "B_WITH", "C"]:
+		if int(pool_stats.get("rift_construct_live", 0)) != 6:
+			return "hero10 perf scenario did not hold construct cap 6"
+	if hero10_perf_scenario == "A":
+		if int(pool_stats.get("rift_construct_reclaims", 0)) <= 0 or int(pool_stats.get("rift_construct_shatter_requests", 0)) <= 0:
+			return "scenario A did not exercise FIFO shatter storm"
+	if hero10_perf_scenario == "B_OLD" and int(pool_stats.get("rift_construct_live", 0)) != 0:
+		return "scenario B old roster unexpectedly contains constructs"
+	if hero10_perf_scenario == "C":
+		if int(pool_stats.get("explosion_visual_rejections", 0)) <= 0:
+			return "scenario C did not contend for ExplosionArea cap"
+		var components: Dictionary = GameManager.get_combat_metrics().get("damage_by_component", {})
+		if float(components.get("rift_shepherd:rift_constructs:shatter", 0.0)) <= 0.0:
+			return "scenario C dropped shatter gameplay damage at visual cap"
 	return ""
 
 

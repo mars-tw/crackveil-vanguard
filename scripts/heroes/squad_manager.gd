@@ -494,6 +494,18 @@ func member_died(member: Node) -> void:
 
 
 func recompute_bonds() -> void:
+	# Bond timing specification (DESIGN §3.2 / GROK §3.3 closure):
+	# - membership events (start/recruit/death/reset) are the only flag recompute
+	#   triggers; there is no per-frame roster scan;
+	# - weapon modifiers are pull-based and read active_bonds at cast/tick time,
+	#   so qualitative upgrades, evolutions, and runtime rebuilds cannot cache a
+	#   stale radius/damage/heal modifier;
+	# - growth changes still rebuild each WeaponData stats cache normally;
+	# - a bond cap decrease is exceptional and eagerly syncs runtime limits in
+	#   this same event cycle;
+	# - excess constructs are reclaimed oldest-first (FIFO), shattering only
+	#   while their shepherd owner remains alive; owner death releases all with
+	#   trigger_shatter=false from Hero._die().
 	active_bonds.clear()
 	for definition in BOND_DEFINITIONS:
 		var enabled := true
@@ -504,9 +516,22 @@ func recompute_bonds() -> void:
 				break
 		if enabled:
 			active_bonds[str(definition.get("id", ""))] = definition
+	_sync_dynamic_bond_limits()
 	if OS.is_debug_build():
 		print("BONDS_ACTIVE=%s" % str(active_bonds.keys()))
 	GameManager.queue_stats_emit()
+
+
+func _sync_dynamic_bond_limits() -> void:
+	for member in members:
+		if member == null or not is_instance_valid(member):
+			continue
+		var weapons_value: Variant = member.get("weapons")
+		if typeof(weapons_value) != TYPE_DICTIONARY:
+			continue
+		for weapon in (weapons_value as Dictionary).values():
+			if weapon != null and is_instance_valid(weapon) and weapon.has_method("sync_dynamic_limits"):
+				weapon.sync_dynamic_limits(true)
 
 
 func has_active_bond(bond_id: String) -> bool:

@@ -12,6 +12,7 @@ class DamageTarget:
 	var hit_radius: float = 13.0
 	var is_alive: bool = true
 	var is_active: bool = true
+	var spawn_token: int = 1
 
 	func take_damage(amount: float, _source_position: Vector2 = Vector2.ZERO) -> bool:
 		hp = maxf(hp - amount, 0.0)
@@ -19,6 +20,9 @@ class DamageTarget:
 
 	func get_hit_radius() -> float:
 		return hit_radius
+
+	func get_hit_token() -> int:
+		return spawn_token
 
 var failed: bool = false
 var player_impact_count: int = 0
@@ -102,6 +106,7 @@ func _test_shepherd_weapon_impact_and_whiff() -> void:
 	_assert(weapon != null, "rift_shepherd did not equip rift_constructs")
 	if failed:
 		return
+	weapon.set_process(false)
 	var target := DamageTarget.new()
 	target.global_position = Vector2(120.0, 0.0)
 	add_child(target)
@@ -136,10 +141,78 @@ func _test_shepherd_weapon_impact_and_whiff() -> void:
 	_assert(int(weapon.get("trigger_count")) == trigger_before, "rift_constructs whiff registered a trigger")
 	await get_tree().create_timer(0.32).timeout
 	_assert(visual.get_animation_state() == &"idle", "rift_constructs whiff skipped recovery")
+
+	# Death/inactivation may retarget once, but only inside the cast-time target
+	# anchor radius. A living target that moved out of weapon range above already
+	# proved the no-retarget whiff branch.
+	var near_enemy: Node = EntityFactory.spawn_enemy("retarget_near", _retarget_enemy_config(), Vector2(190.0, 0.0))
+	near_enemy.set_process(false)
+	near_enemy.set_physics_process(false)
+	target.global_position = Vector2(120.0, 0.0)
+	target.is_active = true
+	_assert(bool(weapon.call("_begin_cast", target)), "death retarget did not enter anticipation")
+	await get_tree().create_timer(0.10).timeout
+	target.is_active = false
+	await get_tree().create_timer(0.15).timeout
+	_assert(EntityFactory.get_rift_construct_count_for_owner(shepherd) == 1, "nearby death retarget did not deploy")
+	EntityFactory.release_rift_constructs_for_owner(shepherd, false)
+	await get_tree().create_timer(0.32).timeout
+	EntityFactory.release_enemy(near_enemy)
+
+	var far_enemy: Node = EntityFactory.spawn_enemy("retarget_far", _retarget_enemy_config(), Vector2(260.5, 0.0))
+	far_enemy.set_process(false)
+	far_enemy.set_physics_process(false)
+	target.is_active = true
+	target.global_position = Vector2(120.0, 0.0)
+	_assert(bool(weapon.call("_begin_cast", target)), "far retarget did not enter anticipation")
+	await get_tree().create_timer(0.10).timeout
+	target.is_active = false
+	await get_tree().create_timer(0.15).timeout
+	_assert(EntityFactory.get_rift_construct_count_for_owner(shepherd) == 0, "retarget escaped the 120px original-target radius")
+	await get_tree().create_timer(0.32).timeout
+	EntityFactory.release_enemy(far_enemy)
+
+	# Pool generation change follows the same bounded path. L2 must issue one
+	# spatial snapshot and use it for both sibling constructs.
+	var pool_neighbor: Node = EntityFactory.spawn_enemy("retarget_generation", _retarget_enemy_config(), Vector2(170.0, 0.0))
+	pool_neighbor.set_process(false)
+	pool_neighbor.set_physics_process(false)
+	target.is_active = true
+	target.spawn_token = 10
+	target.global_position = Vector2(120.0, 0.0)
+	weapon.apply_data_upgrade("construct_anchor")
+	weapon.apply_data_upgrade("construct_anchor")
+	var queries_before := int(EntityFactory.get_pool_stats().get("enemy_queries", 0))
+	_assert(bool(weapon.call("_begin_cast", target)), "generation retarget did not enter anticipation")
+	await get_tree().create_timer(0.10).timeout
+	target.spawn_token = 11
+	await get_tree().create_timer(0.15).timeout
+	var queries_after := int(EntityFactory.get_pool_stats().get("enemy_queries", 0))
+	_assert(EntityFactory.get_rift_construct_count_for_owner(shepherd) == 2, "L2 generation retarget did not deploy two constructs")
+	_assert(queries_after - queries_before == 1, "L2 retarget issued more than one spatial snapshot")
+	var retarget_debug: Dictionary = weapon.get_debug_state()
+	_assert(int(retarget_debug.get("retarget_attempts", 0)) == 3 and int(retarget_debug.get("retarget_successes", 0)) == 2, "retarget branch counters drifted")
+	EntityFactory.release_rift_constructs_for_owner(shepherd, false)
+	EntityFactory.release_enemy(pool_neighbor)
 	weapon.release_owned_nodes()
 	shepherd.queue_free()
 	target.queue_free()
-	print("TRUE_ANIMATION_SHEPHERD impact_spawn=frame2 anticipation_spawn=0 whiff_damage=0 whiff_spawn=0 recovery=full cap=6 pool_errors=0")
+	print("TRUE_ANIMATION_SHEPHERD impact_spawn=frame2 anticipation_spawn=0 whiff_damage=0 whiff_spawn=0 recovery=full cap=6 retarget=death_or_generation radius=120 l2_queries=1 pool_errors=0")
+
+
+func _retarget_enemy_config() -> Dictionary:
+	return {
+		"max_hp": 9999.0,
+		"speed": 0.0,
+		"damage": 0.0,
+		"xp": 0,
+		"gold": 0,
+		"radius": 13.0,
+		"color": Color(0.5, 0.8, 1.0),
+		"sprite_path": "res://assets/sprites/enemy_grunt.png",
+		"sprite_scale": 1.0,
+		"attack_cooldown": 99.0
+	}
 
 
 func _test_enemy_impact_whiff_hurt_and_death() -> void:

@@ -118,7 +118,7 @@ func _test_hero10_content_and_bonds() -> bool:
 		_fail("bond did not deactivate immediately on member death")
 		return false
 	manager.queue_free()
-	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.13.0-r14":
+	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.13.1-r15":
 		_fail("hero10 release version drifted")
 		return false
 	print("R14_HERO10 roster=10/9 weapons=11 construct_cap=6 targets=2 bonds=4 impact=frame2")

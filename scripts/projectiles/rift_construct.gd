@@ -1,6 +1,6 @@
 extends Node2D
 
-const REDRAW_INTERVAL := 0.08
+const REDRAW_INTERVAL := 0.12
 
 var stats: Dictionary = {}
 var source: Node2D = null
@@ -91,19 +91,15 @@ func expire(trigger_shatter: bool = true) -> void:
 func _apply_tick_damage() -> void:
 	var radius := float(stats.get("area_radius", 54.0))
 	var candidates: Array[Node2D] = EntityFactory.get_enemies_in_radius(global_position, radius + 24.0)
-	candidates.sort_custom(func(a: Node2D, b: Node2D) -> bool:
-		var distance_a := global_position.distance_squared_to(a.global_position)
-		var distance_b := global_position.distance_squared_to(b.global_position)
-		if not is_equal_approx(distance_a, distance_b):
-			return distance_a < distance_b
-		return a.get_instance_id() < b.get_instance_id()
-	)
 	var damage_value := float(stats.get("damage", 7.0)) * _construct_damage_multiplier()
 	var max_targets := clampi(int(stats.get("max_targets_per_tick", 2)), 1, 2)
-	var hit_count := 0
+	var nearest: Node2D = null
+	var nearest_distance := INF
+	var nearest_id := 0x7FFFFFFFFFFFFFFF
+	var second: Node2D = null
+	var second_distance := INF
+	var second_id := 0x7FFFFFFFFFFFFFFF
 	for enemy in candidates:
-		if hit_count >= max_targets:
-			break
 		if enemy == null or not is_instance_valid(enemy):
 			continue
 		var active_value: Variant = enemy.get("is_active")
@@ -111,11 +107,26 @@ func _apply_tick_damage() -> void:
 			continue
 		var enemy_radius := float(enemy.get("radius"))
 		var hit_distance := radius + enemy_radius
-		if global_position.distance_squared_to(enemy.global_position) > hit_distance * hit_distance:
+		var distance_squared := global_position.distance_squared_to(enemy.global_position)
+		if distance_squared > hit_distance * hit_distance:
 			continue
-		if enemy.has_method("take_damage"):
+		var instance_id := enemy.get_instance_id()
+		if distance_squared < nearest_distance or (is_equal_approx(distance_squared, nearest_distance) and instance_id < nearest_id):
+			second = nearest
+			second_distance = nearest_distance
+			second_id = nearest_id
+			nearest = enemy
+			nearest_distance = distance_squared
+			nearest_id = instance_id
+		elif max_targets > 1 and (distance_squared < second_distance or (is_equal_approx(distance_squared, second_distance) and instance_id < second_id)):
+			second = enemy
+			second_distance = distance_squared
+			second_id = instance_id
+	var hit_count := 0
+	for enemy in [nearest, second] if max_targets > 1 else [nearest]:
+		if enemy != null and enemy.has_method("take_damage"):
 			var applied_damage := float(enemy.take_damage(damage_value, global_position))
-			GameManager.record_weapon_damage(source, str(stats.get("source_weapon_id", "rift_constructs")), applied_damage)
+			GameManager.record_weapon_damage(source, str(stats.get("source_weapon_id", "rift_constructs")), applied_damage, "construct_tick")
 			hit_count += 1
 	if hit_count > 0:
 		hit_flash_timer = 0.1
@@ -126,12 +137,18 @@ func _construct_damage_multiplier() -> float:
 	var squad := GameManager.squad_manager
 	if squad != null and is_instance_valid(squad):
 		var captain: Node2D = squad.get("leader") as Node2D
-		if captain != null and is_instance_valid(captain):
+		var captain_alive := captain != null and is_instance_valid(captain)
+		if captain_alive:
+			var alive_value: Variant = captain.get("is_alive")
+			captain_alive = alive_value == null or bool(alive_value)
+		if captain_alive:
 			var captain_range := float(captain.get("hit_radius")) + 140.0
 			if global_position.distance_squared_to(captain.global_position) <= captain_range * captain_range:
 				multiplier *= 1.16 if squad.has_method("has_active_bond") and squad.has_active_bond("bond_captain_shepherd") else 1.10
 	if int(stats.get("evo_mirror_flock_level", 0)) > 0 and EntityFactory.has_rift_construct_neighbor(self, 120.0):
 		multiplier *= 1.12
+	# DESIGN_hero10 §4.3: captain/bond/evolution are one construct-weapon
+	# damage namespace. Their multiplicative result may never exceed +25%.
 	return min(multiplier, 1.25)
 
 
@@ -139,8 +156,9 @@ func _spawn_shatter() -> void:
 	var color: Color = stats.get("color", Color(0.55, 0.82, 1.0))
 	if int(stats.get("evo_mirror_flock_level", 0)) > 0 and _source_is_alive():
 		EntityFactory.spawn_explosion(global_position, {
-			"damage": float(stats.get("damage", 7.0)) * 0.55,
+			"damage": float(stats.get("damage", 7.0)) * 0.55 * _construct_damage_multiplier(),
 			"source_weapon_id": str(stats.get("source_weapon_id", "rift_constructs")),
+			"damage_component_id": "shatter",
 			"area_radius": 70.0,
 			"effect_lifetime": 0.2,
 			"color": color,
