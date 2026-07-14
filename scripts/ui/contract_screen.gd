@@ -398,7 +398,8 @@ func _apply_responsive_layout() -> void:
 		seed_row.offset_bottom = seed_row.offset_top + (touch_height if mobile else 42.0)
 	if seed_input != null:
 		var row_width: float = min(MOBILE_TUNING.SEED_ROW_MAX_WIDTH - 4.0, panel_width - (40.0 if mobile else 52.0))
-		var button_widths := (72.0 if mobile else 58.0) + (128.0 if mobile else 116.0) + 16.0
+		var seed_gap: float = float(ceil(MOBILE_TUNING.BASE_CONTAINER_SEPARATION * MOBILE_TUNING.spacing_scale(viewport_size)))
+		var button_widths: float = (72.0 if mobile else 58.0) + (128.0 if mobile else 116.0) + seed_gap * 2.0
 		seed_input.custom_minimum_size = Vector2(max(84.0, row_width - button_widths), touch_height if mobile else 38.0)
 	if seed_paste_button != null:
 		seed_paste_button.custom_minimum_size = Vector2(72.0 if mobile else 58.0, touch_height if mobile else 38.0)

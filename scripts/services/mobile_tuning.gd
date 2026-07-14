@@ -12,6 +12,8 @@ const TABLET_UI_SCALE := 1.25
 const TABLET_SPACING_SCALE := 1.12
 const TABLET_TOUCH_TARGET := 44.0
 const SEED_ROW_MAX_WIDTH := 400.0
+const BASE_CONTAINER_SEPARATION := 12.0
+const BASE_CHECKBOX_TEXT_SEPARATION := 10.0
 const FORCE_MOBILE_LOD_SETTING := "crackveil/debug/force_mobile_lod"
 const MOBILE_LOD_PARTICLE_MULTIPLIER := 0.6
 const MOBILE_BACKGROUND_DYNAMIC_MULTIPLIER := 0.6
@@ -323,16 +325,29 @@ static func apply_control_tree(root: Control, viewport_size: Vector2, force_mobi
 	var scaled_layout := tier != LayoutTier.DESKTOP
 	var scale := ui_scale(viewport_size, force_mobile, device_hints)
 	var min_touch := touch_target(viewport_size, force_mobile, device_hints)
-	_apply_control(root, scale, min_touch, scaled_layout)
+	var layout_spacing := spacing_scale(viewport_size, force_mobile, device_hints)
+	_apply_control(root, scale, min_touch, layout_spacing, scaled_layout)
 
 
-static func _apply_control(control: Control, scale: float, min_touch: float, scaled_layout: bool) -> void:
+static func _apply_control(control: Control, scale: float, min_touch: float, layout_spacing: float, scaled_layout: bool) -> void:
 	if control == null:
 		return
 	if control is RichTextLabel:
 		_scale_font_key(control, "normal_font_size", 16, scale, scaled_layout)
 	elif control is Label or control is BaseButton or control is LineEdit:
 		_scale_font_key(control, "font_size", 16, scale, scaled_layout)
+
+	if control is BoxContainer:
+		var box_gap := maxi(control.get_theme_constant("separation"), int(ceil(BASE_CONTAINER_SEPARATION * layout_spacing)))
+		control.add_theme_constant_override("separation", box_gap)
+	elif control is GridContainer:
+		var grid_gap := maxi(int(ceil(BASE_CONTAINER_SEPARATION * layout_spacing)), control.get_theme_constant("h_separation"))
+		control.add_theme_constant_override("h_separation", grid_gap)
+		control.add_theme_constant_override("v_separation", maxi(grid_gap, control.get_theme_constant("v_separation")))
+
+	if control is CheckBox:
+		var checkbox_gap := maxi(control.get_theme_constant("h_separation"), int(ceil(BASE_CHECKBOX_TEXT_SEPARATION * layout_spacing)))
+		control.add_theme_constant_override("h_separation", checkbox_gap)
 
 	if control is BaseButton or control is LineEdit:
 		_apply_minimum_height(control, min_touch, scaled_layout)
@@ -341,7 +356,7 @@ static func _apply_control(control: Control, scale: float, min_touch: float, sca
 
 	for child in control.get_children():
 		if child is Control:
-			_apply_control(child as Control, scale, min_touch, scaled_layout)
+			_apply_control(child as Control, scale, min_touch, layout_spacing, scaled_layout)
 
 
 static func _apply_minimum_height(control: Control, minimum_height: float, scaled_layout: bool) -> void:

@@ -8,6 +8,7 @@ var root: Control
 var panel: Panel
 var title_label: Label
 var body_label: Label
+var actions_box: VBoxContainer
 var dont_show_check: CheckBox
 var start_button: Button
 
@@ -58,14 +59,21 @@ func _build_ui() -> void:
 	body_label.add_theme_font_size_override("font_size", 20)
 	panel.add_child(body_label)
 
+	actions_box = VBoxContainer.new()
+	actions_box.name = "GuideActions"
+	actions_box.add_theme_constant_override("separation", 14)
+	panel.add_child(actions_box)
+
 	dont_show_check = CheckBox.new()
 	dont_show_check.text = "不再顯示"
-	panel.add_child(dont_show_check)
+	dont_show_check.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	actions_box.add_child(dont_show_check)
 
 	start_button = Button.new()
 	start_button.text = "開始行動"
+	start_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	start_button.pressed.connect(_on_start_pressed)
-	panel.add_child(start_button)
+	actions_box.add_child(start_button)
 	_apply_responsive_layout()
 
 
@@ -122,7 +130,7 @@ func _apply_responsive_layout() -> void:
 	panel.offset_top = -panel_height * 0.5
 	panel.offset_bottom = panel_height * 0.5
 
-	for control in [title_label, body_label, dont_show_check, start_button]:
+	for control in [title_label, body_label, actions_box]:
 		control.anchor_top = 0.0
 		control.anchor_bottom = 0.0
 
@@ -133,41 +141,23 @@ func _apply_responsive_layout() -> void:
 	body_label.offset_left = 22.0 if mobile else 30.0
 	body_label.offset_right = -body_label.offset_left
 	body_label.offset_top = title_label.offset_bottom + (12.0 if mobile else 14.0)
-	var controls_top := panel_height - (touch_height + 14.0 if mobile else 54.0)
-	if mobile and not portrait:
-		body_label.offset_bottom = controls_top - 12.0
-		body_label.add_theme_font_size_override("font_size", 12)
-
-		dont_show_check.anchor_left = 0.0
-		dont_show_check.anchor_right = 0.5
-		dont_show_check.offset_left = 24.0
-		dont_show_check.offset_right = -8.0
-		dont_show_check.offset_top = controls_top
-		dont_show_check.offset_bottom = controls_top + touch_height
-
-		start_button.anchor_left = 0.5
-		start_button.anchor_right = 1.0
-		start_button.offset_left = 8.0
-		start_button.offset_right = -24.0
-		start_button.offset_top = controls_top
-		start_button.offset_bottom = controls_top + touch_height
-	else:
-		body_label.offset_bottom = panel_height - (touch_height * 2.0 + 38.0 if mobile else 116.0)
-		body_label.add_theme_font_size_override("font_size", 12 if mobile else (18 if portrait else 20))
-
-		dont_show_check.anchor_left = 0.5
-		dont_show_check.anchor_right = 0.5
-		dont_show_check.offset_left = -132.0 if mobile else -82.0
-		dont_show_check.offset_right = 132.0 if mobile else 82.0
-		dont_show_check.offset_top = panel_height - (touch_height * 2.0 + 24.0 if mobile else 96.0)
-		dont_show_check.offset_bottom = dont_show_check.offset_top + (touch_height if mobile else 38.0)
-
-		start_button.anchor_left = 0.5
-		start_button.anchor_right = 0.5
-		start_button.offset_left = -136.0 if mobile else -92.0
-		start_button.offset_right = 136.0 if mobile else 92.0
-		start_button.offset_top = controls_top
-		start_button.offset_bottom = start_button.offset_top + (touch_height if mobile else 40.0)
+	var control_height := touch_height if mobile else 44.0
+	var action_gap := 16.0 if mobile else 12.0
+	var action_height := control_height * 2.0 + action_gap
+	var action_width: float = min(panel_width - (48.0 if mobile else 72.0), 300.0 if mobile else 220.0)
+	var action_bottom_margin := 18.0 if mobile else 20.0
+	var actions_top := panel_height - action_height - action_bottom_margin
+	actions_box.add_theme_constant_override("separation", int(action_gap))
+	actions_box.anchor_left = 0.5
+	actions_box.anchor_right = 0.5
+	actions_box.offset_left = -action_width * 0.5
+	actions_box.offset_right = action_width * 0.5
+	actions_box.offset_top = actions_top
+	actions_box.offset_bottom = actions_top + action_height
+	dont_show_check.custom_minimum_size = Vector2(action_width, control_height)
+	start_button.custom_minimum_size = Vector2(action_width, control_height)
+	body_label.offset_bottom = actions_top - (14.0 if mobile else 16.0)
+	body_label.add_theme_font_size_override("font_size", 12 if mobile and not portrait else 16 if mobile else (18 if portrait else 20))
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
 	if mobile and OS.has_feature("web"):
 		title_label.add_theme_font_size_override("font_size", 24 if portrait else 20)

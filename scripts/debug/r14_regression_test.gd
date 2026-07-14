@@ -36,6 +36,9 @@ func _run_tests() -> void:
 	var mobile_ok := await _test_mobile_ui_scaling()
 	if not mobile_ok:
 		return
+	current_phase = "ui_spacing"
+	if not await _test_ui_spacing_matrix():
+		return
 	current_phase = "camera"
 	if not _test_camera_zoom_branch():
 		return
@@ -352,8 +355,12 @@ func _test_level_up_mobile_layout(size: Vector2) -> bool:
 	if first_button.get_theme_font_size("font_size") < 18:
 		_fail("level up card font below 18px")
 		return false
-	if portrait and first_button.custom_minimum_size.y < 240.0:
+	if portrait and first_button.custom_minimum_size.y < 200.0:
 		_fail("level up portrait card height below readable floor")
+		return false
+	var upgrade_icon := first_button.get_node_or_null("UpgradeIcon") as TextureRect
+	if upgrade_icon == null or upgrade_icon.texture == null or upgrade_icon.get_global_rect().size.x < 40.0:
+		_fail("level up card is missing its upper visual icon")
 		return false
 	viewport.queue_free()
 	return true
@@ -500,6 +507,119 @@ func _make_ui_viewport(size: Vector2) -> SubViewport:
 	viewport.disable_3d = true
 	add_child(viewport)
 	return viewport
+
+
+func _test_ui_spacing_matrix() -> bool:
+	var sizes := [Vector2(1920.0, 1080.0), Vector2(1024.0, 768.0), Vector2(390.0, 844.0)]
+	for size in sizes:
+		if not await _test_ui_spacing_at_size(size):
+			return false
+	print("R13_UI_SPACING viewports=1920x1080,1024x768,390x844 gap>=8 touch>=44")
+	return true
+
+
+func _test_ui_spacing_at_size(size: Vector2) -> bool:
+	var viewport := _make_ui_viewport(size)
+	var menu := MAIN_MENU_SCRIPT.new()
+	viewport.add_child(menu)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if not _assert_adjacent_gap([menu.start_button, menu.meta_button, menu.achievements_button, menu.settings_button], true, 8.0, "main menu %s" % str(size)):
+		return false
+	menu._show_panel("settings")
+	await get_tree().process_frame
+	if not _assert_adjacent_gap([menu.mute_check, menu.damage_numbers_check, menu.screen_shake_check, menu.force_joystick_check], true, 8.0, "settings checks %s" % str(size)):
+		return false
+	if size.x <= 430.0 and not _assert_touch_targets([menu.start_button, menu.mute_check, menu.damage_numbers_check, menu.screen_shake_check, menu.force_joystick_check], 44.0, "menu/settings %s" % str(size)):
+		return false
+	menu._show_panel("meta")
+	await get_tree().process_frame
+	var meta_controls: Array[Control] = []
+	for child in menu.side_content.get_children():
+		if child is Button:
+			meta_controls.append(child as Control)
+	if not _assert_adjacent_gap(meta_controls, true, 8.0, "echo upgrades %s" % str(size)):
+		return false
+
+	var guide := FIRST_RUN_GUIDE_SCRIPT.new()
+	viewport.add_child(guide)
+	await get_tree().process_frame
+	if not _assert_adjacent_gap([guide.dont_show_check, guide.start_button], true, 8.0, "briefing actions %s" % str(size)):
+		return false
+	if size.x <= 430.0 and not _assert_touch_targets([guide.dont_show_check, guide.start_button], 44.0, "briefing %s" % str(size)):
+		return false
+
+	var level_up := LEVEL_UP_SCREEN_SCRIPT.new()
+	viewport.add_child(level_up)
+	await get_tree().process_frame
+	level_up.show_options(_sample_options())
+	await get_tree().process_frame
+	if not _assert_adjacent_gap(level_up.option_buttons, level_up.card_grid.columns == 1, 8.0, "upgrade cards %s" % str(size)):
+		return false
+	for card in level_up.option_buttons:
+		var icon := (card as Button).get_node_or_null("UpgradeIcon") as TextureRect
+		if icon == null or icon.texture == null:
+			_fail("upgrade icon missing at %s" % str(size))
+			return false
+
+	var shop := RIFT_SHOP_SCRIPT.new()
+	viewport.add_child(shop)
+	await get_tree().process_frame
+	shop.show_options(_sample_shop_options())
+	await get_tree().process_frame
+	if not _assert_adjacent_gap(shop.option_buttons, shop.card_grid.columns == 1, 8.0, "shop cards %s" % str(size)):
+		return false
+
+	var contract := CONTRACT_SCREEN_SCRIPT.new()
+	viewport.add_child(contract)
+	await get_tree().process_frame
+	contract.show_options(_sample_options())
+	await get_tree().process_frame
+	if not _assert_adjacent_gap(contract.option_buttons, contract.card_grid.columns == 1, 8.0, "contract cards %s" % str(size)):
+		return false
+
+	var hud := HUD_SCRIPT.new()
+	viewport.add_child(hud)
+	await get_tree().process_frame
+	hud.pause_overlay.visible = true
+	await get_tree().process_frame
+	if not _assert_adjacent_gap([hud.pause_mute_check, hud.pause_damage_numbers_check, hud.pause_screen_shake_check, hud.pause_force_joystick_check], true, 8.0, "pause checks %s" % str(size)):
+		return false
+	if size.x <= 430.0 and not _assert_touch_targets([hud.pause_mute_check, hud.pause_damage_numbers_check, hud.pause_screen_shake_check, hud.pause_force_joystick_check, hud.pause_resume_button], 44.0, "pause %s" % str(size)):
+		return false
+	viewport.queue_free()
+	await get_tree().process_frame
+	return true
+
+
+func _assert_adjacent_gap(controls: Array, vertical: bool, minimum_gap: float, label: String) -> bool:
+	if controls.size() < 2:
+		return true
+	for index in range(1, controls.size()):
+		var previous := controls[index - 1] as Control
+		var current := controls[index] as Control
+		if previous == null or current == null:
+			_fail(label + " has a missing adjacent control")
+			return false
+		var previous_rect := previous.get_global_rect()
+		var current_rect := current.get_global_rect()
+		if previous_rect.intersects(current_rect):
+			_fail("%s controls overlap: %s / %s" % [label, str(previous_rect), str(current_rect)])
+			return false
+		var gap := current_rect.position.y - previous_rect.end.y if vertical else current_rect.position.x - previous_rect.end.x
+		if gap < minimum_gap - 0.5:
+			_fail("%s gap %.1f below %.1f" % [label, gap, minimum_gap])
+			return false
+	return true
+
+
+func _assert_touch_targets(controls: Array, minimum_height: float, label: String) -> bool:
+	for control_value in controls:
+		var control := control_value as Control
+		if control == null or control.get_global_rect().size.y < minimum_height - 0.5:
+			_fail("%s touch target below %.1f" % [label, minimum_height])
+			return false
+	return true
 
 
 func _sample_options() -> Array:

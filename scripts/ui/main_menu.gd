@@ -158,7 +158,7 @@ func _build_ui() -> void:
 
 	side_content = VBoxContainer.new()
 	side_content.name = "SideContent"
-	side_content.add_theme_constant_override("separation", 10)
+	side_content.add_theme_constant_override("separation", 12)
 	side_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	side_scroll.add_child(side_content)
 
@@ -481,18 +481,20 @@ func _apply_responsive_layout() -> void:
 			(child as Button).add_theme_font_size_override("font_size", 22 if mobile and portrait else 16 if mobile else 20)
 
 	var seed_height := touch_height if mobile else 42.0
+	var seed_gap: float = float(ceil(MOBILE_TUNING.BASE_CONTAINER_SEPARATION * MOBILE_TUNING.spacing_scale(viewport_size)))
 	if mobile and not portrait:
 		var seed_width: float = min(MOBILE_TUNING.SEED_ROW_MAX_WIDTH, max(280.0, viewport_size.x - menu_width - margin * 3.0))
 		seed_row.position = Vector2(menu_box.position.x + menu_width + margin, menu_y)
 		seed_row.size = Vector2(seed_width, seed_height)
-		seed_input.custom_minimum_size = Vector2(max(150.0, seed_width - 144.0), seed_height)
+		seed_input.custom_minimum_size = Vector2(max(140.0, seed_width - 132.0 - seed_gap), seed_height)
 		seed_start_button.custom_minimum_size = Vector2(132.0, seed_height)
 	else:
 		seed_row.position = menu_box.position + Vector2(0.0, menu_box.size.y + (16.0 if mobile else 16.0))
 		var seed_width: float = min(MOBILE_TUNING.SEED_ROW_MAX_WIDTH, menu_width)
 		seed_row.size = Vector2(seed_width, seed_height)
-		seed_input.custom_minimum_size = Vector2(max(140.0, seed_width - (140.0 if mobile else 116.0)), seed_height)
-		seed_start_button.custom_minimum_size = Vector2(132.0 if mobile else 108.0, seed_height)
+		var seed_button_width := 132.0 if mobile else 108.0
+		seed_input.custom_minimum_size = Vector2(max(140.0, seed_width - seed_button_width - seed_gap), seed_height)
+		seed_start_button.custom_minimum_size = Vector2(seed_button_width, seed_height)
 
 	var panel_width: float = min(viewport_size.x - margin * 2.0, 520.0 if not portrait else viewport_size.x - margin * 2.0)
 	var panel_height: float = min(viewport_size.y - margin * 2.0, 520.0 if not portrait else viewport_size.y - 430.0)

@@ -379,7 +379,7 @@ func _build_pause_overlay() -> void:
 
 	pause_content = VBoxContainer.new()
 	pause_content.name = "PauseContent"
-	pause_content.add_theme_constant_override("separation", 8)
+	pause_content.add_theme_constant_override("separation", 12)
 	pause_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	pause_scroll.add_child(pause_content)
 	pause_content.add_child(title)

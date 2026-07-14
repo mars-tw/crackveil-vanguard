@@ -69,7 +69,7 @@ func _build_ui() -> void:
 
 	body_content = VBoxContainer.new()
 	body_content.name = "BodyContent"
-	body_content.add_theme_constant_override("separation", 10)
+	body_content.add_theme_constant_override("separation", 12)
 	body_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body_scroll.add_child(body_content)
 

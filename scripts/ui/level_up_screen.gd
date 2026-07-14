@@ -2,6 +2,9 @@ extends CanvasLayer
 
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 const MOBILE_CONFIRM_WINDOW_MSEC := 350
+const ICON_XP := preload("res://assets/art/icon_xp.png")
+const ICON_HEALTH := preload("res://assets/art/icon_health.png")
+const ICON_GOLD := preload("res://assets/art/icon_gold.png")
 
 signal upgrade_selected(upgrade: Dictionary)
 
@@ -79,15 +82,10 @@ func show_options(options: Array) -> void:
 	for option in options:
 		var button := Button.new()
 		var title := str(option.get("name", "升級"))
-		if _is_evolution_option(option):
-			title = "【武器進化】\n" + title
-		elif str(option.get("upgrade_category", "")) == "qualitative":
-			title = "【質變強化】\n" + title
-		button.text = "%s\n\n%s" % [title, str(option.get("description", ""))]
-		button.set_meta("base_text", button.text)
+		button.text = ""
 		button.set_meta("option_key", _option_key(option))
-		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		button.add_theme_font_size_override("font_size", 20)
+		button.set_meta("upgrade_option", option)
+		_build_card_content(button, title, str(option.get("description", "")), option)
 		_apply_card_style(button, option)
 		button.pressed.connect(_on_upgrade_pressed.bind(option))
 		button.mouse_entered.connect(_on_card_focus.bind(button, true))
@@ -184,6 +182,114 @@ func _is_evolution_option(option: Dictionary) -> bool:
 	return str(option.get("upgrade_category", "")) == "evolution"
 
 
+func _build_card_content(button: Button, title: String, description: String, option: Dictionary) -> void:
+	button.clip_contents = true
+	var icon := TextureRect.new()
+	icon.name = "UpgradeIcon"
+	icon.texture = _upgrade_icon(option)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	button.add_child(icon)
+
+	var category := Label.new()
+	category.name = "CategoryLabel"
+	category.text = _upgrade_category_text(option)
+	category.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	category.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	category.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	category.add_theme_color_override("font_color", _upgrade_accent(option))
+	button.add_child(category)
+
+	var card_title := Label.new()
+	card_title.name = "CardTitle"
+	card_title.text = title
+	card_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	card_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	card_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	card_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card_title.add_theme_color_override("font_color", Color(0.94, 0.98, 1.0))
+	button.add_child(card_title)
+
+	var card_description := Label.new()
+	card_description.name = "CardDescription"
+	card_description.text = description
+	card_description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	card_description.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+	card_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	card_description.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card_description.add_theme_color_override("font_color", Color(0.78, 0.88, 0.94))
+	button.add_child(card_description)
+
+
+func _upgrade_icon(option: Dictionary) -> Texture2D:
+	var option_id := str(option.get("id", ""))
+	if "gold" in option_id:
+		return ICON_GOLD
+	if "heal" in option_id or "health" in option_id or "armor" in option_id or "hp" in option_id:
+		return ICON_HEALTH
+	return ICON_XP
+
+
+func _upgrade_category_text(option: Dictionary) -> String:
+	if _is_evolution_option(option):
+		return "武器進化"
+	match str(option.get("upgrade_category", "standard")):
+		"qualitative":
+			return "質變強化"
+		"fallback":
+			return "裂隙補給"
+		_:
+			return "戰術升級"
+
+
+func _upgrade_accent(option: Dictionary) -> Color:
+	if _is_evolution_option(option):
+		return Color(1.0, 0.78, 0.3)
+	if str(option.get("upgrade_category", "")) == "qualitative":
+		return Color(0.76, 0.62, 1.0)
+	return Color(0.42, 0.9, 1.0)
+
+
+func _layout_card_content(button: Button, portrait: bool, mobile: bool) -> void:
+	var icon := button.get_node_or_null("UpgradeIcon") as TextureRect
+	var category := button.get_node_or_null("CategoryLabel") as Label
+	var card_title := button.get_node_or_null("CardTitle") as Label
+	var description := button.get_node_or_null("CardDescription") as Label
+	if icon == null or category == null or card_title == null or description == null:
+		return
+	var icon_size := 58.0 if mobile and portrait else 48.0
+	var icon_top := 16.0 if mobile else 14.0
+	icon.anchor_left = 0.5
+	icon.anchor_right = 0.5
+	icon.offset_left = -icon_size * 0.5
+	icon.offset_right = icon_size * 0.5
+	icon.offset_top = icon_top
+	icon.offset_bottom = icon_top + icon_size
+	category.anchor_left = 0.0
+	category.anchor_right = 1.0
+	category.offset_left = 12.0
+	category.offset_right = -12.0
+	category.offset_top = icon.offset_bottom + 2.0
+	category.offset_bottom = category.offset_top + 24.0
+	category.add_theme_font_size_override("font_size", 14 if mobile and portrait else 12)
+	card_title.anchor_left = 0.0
+	card_title.anchor_right = 1.0
+	card_title.offset_left = 14.0
+	card_title.offset_right = -14.0
+	card_title.offset_top = category.offset_bottom + 2.0
+	card_title.offset_bottom = card_title.offset_top + (34.0 if mobile and portrait else 30.0)
+	card_title.add_theme_font_size_override("font_size", 19 if mobile and portrait else 17)
+	description.anchor_left = 0.0
+	description.anchor_right = 1.0
+	description.anchor_bottom = 1.0
+	description.offset_left = 16.0
+	description.offset_right = -16.0
+	description.offset_top = card_title.offset_bottom + 5.0
+	description.offset_bottom = -14.0
+	description.add_theme_font_size_override("font_size", 15 if mobile and portrait else 13 if mobile else 14)
+
+
 func _apply_card_style(button: Button, option: Dictionary) -> void:
 	var normal := StyleBoxFlat.new()
 	var category := str(option.get("upgrade_category", "standard"))
@@ -267,15 +373,14 @@ func _apply_responsive_layout() -> void:
 	var card_width: float = panel_width - side_padding if portrait else max(190.0, (panel_width - side_padding - 36.0) / 3.0)
 	var card_scroll_top := card_scroll.offset_top if card_scroll != null else title_label.offset_bottom + 14.0
 	var available_card_height := panel_height - card_scroll_top - (20.0 if mobile else 26.0)
-	var card_height: float = 252.0 if mobile and portrait else 165.0 if portrait else max(214.0 if mobile else 190.0, available_card_height)
+	var card_height: float = 224.0 if mobile and portrait else 180.0 if portrait else clamp(available_card_height, 190.0 if not mobile else 204.0, 244.0 if not mobile else 260.0)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
-		button.add_theme_font_size_override("font_size", 18 if portrait else 20)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
 	if mobile and OS.has_feature("web"):
 		title_label.add_theme_font_size_override("font_size", 24 if portrait else 22)
-		for button in option_buttons:
-			button.add_theme_font_size_override("font_size", 18 if portrait else 17)
+	for button in option_buttons:
+		_layout_card_content(button, portrait, mobile)
 
 
 func _animate_cards_in() -> void:
