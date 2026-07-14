@@ -10,6 +10,7 @@ var member_ids: Dictionary = {}
 var recruited_once: Dictionary = {}
 var dead_ids: Dictionary = {}
 var leader: Node = null
+var active_bonds: Dictionary = {}
 
 const NUMERIC_UPGRADE_MAX_LEVELS: Dictionary = {
 	"weapon_damage": 5,
@@ -36,6 +37,13 @@ const FORMATION_OFFSETS: Array[Vector2] = [
 	Vector2(-68.0, 170.0),
 	Vector2(0.0, 184.0),
 	Vector2(68.0, 170.0)
+]
+
+const BOND_DEFINITIONS: Array[Dictionary] = [
+	{"id": "bond_ember_pulse", "name": "燼脈聯爆", "hero_ids": ["ember_grenadier", "pulse_artificer"]},
+	{"id": "bond_void_rail", "name": "縫獵協議", "hero_ids": ["void_weaver", "rift_sniper"]},
+	{"id": "bond_guard_echo", "name": "星盾和聲", "hero_ids": ["orbit_guard", "echo_singer"]},
+	{"id": "bond_captain_shepherd", "name": "牧長裂約", "hero_ids": ["rift_captain", "rift_shepherd"]},
 ]
 
 const QUALITATIVE_UPGRADES: Dictionary = {
@@ -113,6 +121,13 @@ const QUALITATIVE_UPGRADES: Dictionary = {
 			"name": "漸強和聲",
 			"description": "治療量與增傷光環持續時間提升。"
 		}
+	],
+	"rift_construct": [
+		{
+			"upgrade_kind": "construct_anchor",
+			"name": "裂錨定駐",
+			"description": "第 1 級：壽命 +1.2 秒、半徑 +8；第 2 級：每次並肩投放 2 具，單具傷害 ×0.85。"
+		}
 	]
 }
 
@@ -130,6 +145,7 @@ func start_squad() -> Node:
 		if hero_data == null:
 			continue
 		_spawn_member(hero_data, index == 0)
+	recompute_bonds()
 
 	return leader
 
@@ -142,6 +158,7 @@ func clear_squad() -> void:
 	member_ids.clear()
 	recruited_once.clear()
 	dead_ids.clear()
+	active_bonds.clear()
 	leader = null
 
 
@@ -462,6 +479,7 @@ func recruit_hero(hero_id: String) -> bool:
 		GameManager.apply_current_meta_progress_to_member(hero)
 	if hero != null and AchievementProgress != null and AchievementProgress.has_method("record_squad_size"):
 		AchievementProgress.record_squad_size(get_member_count(), int(squad_data.get("max_members")))
+	recompute_bonds()
 	return true
 
 
@@ -472,6 +490,40 @@ func member_died(member: Node) -> void:
 		member_ids.erase(hero_id)
 		dead_ids[hero_id] = true
 	_reindex_formation()
+	recompute_bonds()
+
+
+func recompute_bonds() -> void:
+	active_bonds.clear()
+	for definition in BOND_DEFINITIONS:
+		var enabled := true
+		for hero_id_value in definition.get("hero_ids", []):
+			var member := get_member_by_id(str(hero_id_value))
+			if member == null or not is_instance_valid(member) or not bool(member.get("is_alive")):
+				enabled = false
+				break
+		if enabled:
+			active_bonds[str(definition.get("id", ""))] = definition
+	if OS.is_debug_build():
+		print("BONDS_ACTIVE=%s" % str(active_bonds.keys()))
+	GameManager.queue_stats_emit()
+
+
+func has_active_bond(bond_id: String) -> bool:
+	return active_bonds.has(bond_id)
+
+
+func get_active_bond_names() -> PackedStringArray:
+	var names := PackedStringArray()
+	for definition in BOND_DEFINITIONS:
+		var bond_id := str(definition.get("id", ""))
+		if active_bonds.has(bond_id):
+			names.append(str(definition.get("name", bond_id)))
+	return names
+
+
+func get_active_bond_count() -> int:
+	return active_bonds.size()
 
 
 func get_member_count() -> int:
@@ -581,6 +633,8 @@ func _get_count_upgrade_description(weapon_data: Resource) -> String:
 			return "+%d 貫通，射程 +%s" % [int(weapon_data.get("pierce_upgrade")), _format_number(float(weapon_data.get("range_upgrade")))]
 		"echo_hymn":
 			return "+%d 和聲層，脈衝半徑 +%s" % [int(weapon_data.get("projectile_count_upgrade")), _format_number(float(weapon_data.get("area_radius_upgrade")))]
+		"rift_construct":
+			return "裂傀壽命 +0.4 秒"
 		_:
 			return "強化武器參數"
 

@@ -138,6 +138,11 @@ func owner_passive_value() -> float:
 	return float(hero_data_resource.get("passive_value"))
 
 
+func squad_has_bond(bond_id: String) -> bool:
+	var squad := GameManager.squad_manager
+	return squad != null and is_instance_valid(squad) and squad.has_method("has_active_bond") and squad.has_active_bond(bond_id)
+
+
 func data_projectile_stats() -> Dictionary:
 	if stats_cache_dirty:
 		_rebuild_stats_cache()

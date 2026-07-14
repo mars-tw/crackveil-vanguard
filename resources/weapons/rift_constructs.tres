@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/RiftConstructWeapon.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_data")
+id = "rift_constructs"
+display_name = "裂傀編制"
+description = "在敵群前方投放固定站位的短命裂傀，週期近距打擊最多 2 名敵人。"
+behavior_id = "rift_construct"
+weapon_scene = ExtResource("2_scene")
+damage = 7.0
+cooldown = 2.4
+range = 420.0
+color = Color(0.55, 0.82, 1, 1)
+effect_lifetime = 5.5
+projectile_count = 3
+hit_interval = 0.55
+area_radius = 54.0
+spawn_offset = 72.0
+max_targets_per_tick = 2
+hard_cap_global = 6
+damage_upgrade = 2.0
+cooldown_upgrade_multiplier = 0.9
+projectile_count_upgrade = 0
+area_radius_upgrade = 0.0

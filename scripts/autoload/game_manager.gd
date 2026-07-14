@@ -450,11 +450,14 @@ func set_current_run_theme(theme_id: String, theme_name: String) -> void:
 func get_stats() -> Dictionary:
 	var hp_value := 0.0
 	var max_hp_value := 0.0
+	var active_bond_names := PackedStringArray()
 	if player != null and is_instance_valid(player):
 		if player.has_method("get_current_hp"):
 			hp_value = player.get_current_hp()
 		if player.has_method("get_max_hp"):
 			max_hp_value = player.get_max_hp()
+	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("get_active_bond_names"):
+		active_bond_names = squad_manager.get_active_bond_names()
 
 	return {
 		"hp": hp_value,
@@ -480,6 +483,8 @@ func get_stats() -> Dictionary:
 		"run_seed": current_run_seed,
 		"run_theme_id": current_run_theme_id,
 		"run_theme_name": current_run_theme_name,
+		"active_bond_names": active_bond_names,
+		"active_bond_count": active_bond_names.size(),
 		"temporary_squad_damage_timer": temporary_squad_damage_timer,
 		"combo_fire_rate_timer": combo_fire_rate_timer,
 		"is_game_over": is_game_over
@@ -1026,8 +1031,16 @@ func get_kill_thump_pitch(base_pitch: float) -> float:
 	return clamp(base_pitch + lift, 0.55, 1.28)
 
 
-func get_incoming_damage_multiplier() -> float:
-	return float(contract_modifiers.get("incoming_damage_multiplier", 1.0))
+func get_incoming_damage_multiplier(target: Node = null) -> float:
+	var reduction_multiplier := 1.0
+	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("has_active_bond"):
+		if squad_manager.has_active_bond("bond_guard_echo"):
+			reduction_multiplier *= 0.95
+	if target != null and is_instance_valid(target) and str(target.get("passive_id")) == "shepherd":
+		var construct_count := mini(4, EntityFactory.get_rift_construct_count_for_owner(target))
+		reduction_multiplier *= 1.0 - float(construct_count) * 0.02
+	reduction_multiplier = max(0.85, reduction_multiplier)
+	return float(contract_modifiers.get("incoming_damage_multiplier", 1.0)) * reduction_multiplier
 
 
 func reset_combat_metrics(enabled: bool = true) -> void:

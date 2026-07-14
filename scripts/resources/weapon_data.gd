@@ -4,7 +4,7 @@ extends Resource
 @export var id: String = ""
 @export var display_name: String = "未命名武器"
 @export_multiline var description: String = ""
-@export_enum("linear", "orbit", "explosion", "chain_lightning", "boomerang", "homing_missile", "grenade_lob", "void_net", "rail_lance", "echo_hymn") var behavior_id: String = "linear"
+@export_enum("linear", "orbit", "explosion", "chain_lightning", "boomerang", "homing_missile", "grenade_lob", "void_net", "rail_lance", "echo_hymn", "rift_construct") var behavior_id: String = "linear"
 @export var weapon_scene: PackedScene
 
 @export_group("共同數值")
@@ -35,6 +35,11 @@ extends Resource
 
 @export_group("範圍")
 @export var area_radius: float = 82.0
+
+@export_group("裂傀")
+@export var spawn_offset: float = 72.0
+@export var max_targets_per_tick: int = 2
+@export var hard_cap_global: int = 6
 
 @export_group("連鎖")
 @export var chain_count: int = 4
@@ -70,6 +75,7 @@ const QUALITATIVE_MAX_LEVELS: Dictionary = {
 	"void_anchor": 1,
 	"rail_focus": 2,
 	"echo_crescendo": 2,
+	"construct_anchor": 2,
 	"evo_rift_fan": 1,
 	"evo_shear_halo": 1,
 	"evo_ember_well": 1,
@@ -79,7 +85,8 @@ const QUALITATIVE_MAX_LEVELS: Dictionary = {
 	"evo_cinder_barrage": 1,
 	"evo_event_horizon": 1,
 	"evo_star_piercer": 1,
-	"evo_resonant_chorus": 1
+	"evo_resonant_chorus": 1,
+	"evo_mirror_flock": 1
 }
 
 const EVOLUTION_DEFINITIONS: Dictionary = {
@@ -172,6 +179,15 @@ const EVOLUTION_DEFINITIONS: Dictionary = {
 		"required_level": 2,
 		"required_damage_level": 3,
 		"run_level": 7
+	},
+	"rift_constructs": {
+		"evolution_id": "evo_mirror_flock",
+		"name": "鏡裂群牧",
+		"description": "裂傀碎裂時釋放裂片波；相距 120 內的裂傀共享 +12% 傷害（不疊層）。",
+		"required_modifier": "construct_anchor",
+		"required_level": 2,
+		"required_damage_level": 3,
+		"run_level": 7
 	}
 }
 
@@ -201,9 +217,9 @@ func apply_upgrade(upgrade_kind: String) -> void:
 			_increment_runtime_modifier("weapon_damage")
 			_increment_runtime_modifier("weapon_cooldown")
 			_increment_runtime_modifier("weapon_projectiles")
-		"evo_rift_fan", "evo_shear_halo", "evo_ember_well", "evo_overload_nova", "evo_razor_bulwark", "evo_hunter_swarm", "evo_cinder_barrage", "evo_event_horizon", "evo_star_piercer", "evo_resonant_chorus":
+		"evo_rift_fan", "evo_shear_halo", "evo_ember_well", "evo_overload_nova", "evo_razor_bulwark", "evo_hunter_swarm", "evo_cinder_barrage", "evo_event_horizon", "evo_star_piercer", "evo_resonant_chorus", "evo_mirror_flock":
 			_apply_evolution(upgrade_kind)
-		"riftline_fork", "orbit_resonance", "pulse_embers", "chain_overload", "magnetic_reclaim", "boomerang_rebound", "missile_guidance", "grenade_cluster", "void_anchor", "rail_focus", "echo_crescendo":
+		"riftline_fork", "orbit_resonance", "pulse_embers", "chain_overload", "magnetic_reclaim", "boomerang_rebound", "missile_guidance", "grenade_cluster", "void_anchor", "rail_focus", "echo_crescendo", "construct_anchor":
 			_increment_modifier(upgrade_kind)
 		_:
 			damage += damage_upgrade
@@ -323,6 +339,10 @@ func _apply_evolution(evolution_id: String) -> void:
 			projectile_count += 1
 			cooldown = max(0.24, cooldown * 0.88)
 			color = Color(1.0, 0.86, 0.46)
+		"evo_mirror_flock":
+			projectile_count = min(projectile_count + 1, hard_cap_global)
+			hit_interval = max(0.18, hit_interval * 0.9)
+			color = Color(0.82, 0.98, 1.0)
 
 
 func _apply_count_upgrade() -> void:
@@ -358,6 +378,8 @@ func _apply_count_upgrade() -> void:
 		"echo_hymn":
 			area_radius += area_radius_upgrade
 			projectile_count += projectile_count_upgrade
+		"rift_construct":
+			effect_lifetime += 0.4
 
 
 func to_projectile_stats() -> Dictionary:
@@ -382,6 +404,8 @@ func to_projectile_stats() -> Dictionary:
 		"missile_guidance_level": get_modifier_level("missile_guidance"),
 		"evo_razor_bulwark_level": get_modifier_level("evo_razor_bulwark"),
 		"evo_hunter_swarm_level": get_modifier_level("evo_hunter_swarm"),
+		"construct_anchor_level": get_modifier_level("construct_anchor"),
+		"evo_mirror_flock_level": get_modifier_level("evo_mirror_flock"),
 		"grenade_cluster_level": get_modifier_level("grenade_cluster"),
 		"evo_cinder_barrage_level": get_modifier_level("evo_cinder_barrage"),
 		"fork_depth": 0,
@@ -434,6 +458,11 @@ func to_effect_stats() -> Dictionary:
 		"evo_event_horizon_level": get_modifier_level("evo_event_horizon"),
 		"evo_star_piercer_level": get_modifier_level("evo_star_piercer"),
 		"evo_resonant_chorus_level": get_modifier_level("evo_resonant_chorus"),
+		"construct_anchor_level": get_modifier_level("construct_anchor"),
+		"evo_mirror_flock_level": get_modifier_level("evo_mirror_flock"),
+		"spawn_offset": spawn_offset,
+		"max_targets_per_tick": max_targets_per_tick,
+		"hard_cap_global": hard_cap_global,
 		"visual_level": _visual_upgrade_level(),
 		"evolved_visual": is_evolved()
 	}

@@ -13,7 +13,7 @@ const MAX_ENEMY_REFILL_PER_FRAME := 6
 const MAX_PROJECTILE_REFILL_PER_FRAME := 4
 const FULL_SQUAD_RECRUITS: Array[String] = [
 	"pulse_artificer",
-	"line_mender",
+	"rift_shepherd",
 	"ember_grenadier",
 	"void_weaver",
 	"rift_sniper",
@@ -26,7 +26,7 @@ const EXPECTED_FULL_SQUAD_WEAPONS: Array[String] = [
 	"orbit_guard:rift_shield_boomerang",
 	"arc_scout:rift_seeker_missiles",
 	"pulse_artificer:pulse_bloom",
-	"line_mender:riftline_emitter",
+	"rift_shepherd:rift_constructs",
 	"ember_grenadier:grenade_lob",
 	"void_weaver:void_net",
 	"rift_sniper:rail_lance",
@@ -37,7 +37,7 @@ const DESKTOP_VIEWPORT_SIZE := Vector2i(1280, 720)
 const SPIKE_THRESHOLD_MS := 20.0
 const TRACKED_POOL_NAMES: Array[String] = [
 	"enemy", "projectile", "fork_projectile", "orbit_projectile",
-	"explosion", "hazard_zone", "xp_gem", "coin", "damage_number",
+	"explosion", "hazard_zone", "rift_construct", "xp_gem", "coin", "damage_number",
 	"death_burst", "corpse_ghost", "lightning_arc"
 ]
 
@@ -188,7 +188,7 @@ func _force_weapon_upgrades_for_stress() -> void:
 	_apply_weapon_upgrades(squad_manager.get_member_by_id("orbit_guard"), "rift_shield_boomerang", ["weapon_damage", "weapon_projectiles", "boomerang_rebound", "boomerang_rebound", "evo_razor_bulwark"])
 	_apply_weapon_upgrades(squad_manager.get_member_by_id("arc_scout"), "rift_seeker_missiles", ["weapon_damage", "weapon_projectiles", "missile_guidance", "missile_guidance", "evo_hunter_swarm"])
 	_apply_weapon_upgrades(squad_manager.get_member_by_id("pulse_artificer"), "pulse_bloom", ["weapon_damage", "weapon_damage", "pulse_embers", "evo_ember_well"])
-	_apply_weapon_upgrades(squad_manager.get_member_by_id("line_mender"), "riftline_emitter", ["weapon_damage", "riftline_fork", "riftline_fork", "evo_rift_fan"])
+	_apply_weapon_upgrades(squad_manager.get_member_by_id("rift_shepherd"), "rift_constructs", ["weapon_damage", "weapon_damage", "weapon_damage", "construct_anchor", "construct_anchor", "evo_mirror_flock"])
 	_apply_weapon_upgrades(squad_manager.get_member_by_id("ember_grenadier"), "grenade_lob", ["weapon_damage", "weapon_projectiles", "grenade_cluster", "grenade_cluster", "evo_cinder_barrage"])
 	_apply_weapon_upgrades(squad_manager.get_member_by_id("void_weaver"), "void_net", ["weapon_damage", "weapon_projectiles", "void_anchor", "evo_event_horizon"])
 	_apply_weapon_upgrades(squad_manager.get_member_by_id("rift_sniper"), "rail_lance", ["weapon_damage", "weapon_cooldown", "rail_focus", "rail_focus", "evo_star_piercer"])
@@ -395,6 +395,11 @@ func _finish_stress() -> void:
 	])
 	print("STRESS_POOL_STATS=" + JSON.stringify(pool_stats))
 	print("STRESS_WEAPON_TRIGGERS=" + JSON.stringify(squad_manager.get_weapon_trigger_counts()))
+	var shepherd: Node = squad_manager.get_member_by_id("rift_shepherd")
+	var shepherd_weapons: Dictionary = shepherd.get("weapons") if shepherd != null and is_instance_valid(shepherd) else {}
+	var construct_weapon: Node = shepherd_weapons.get("rift_constructs")
+	if construct_weapon != null and construct_weapon.has_method("get_debug_state"):
+		print("STRESS_SHEPHERD_DEBUG=" + JSON.stringify(construct_weapon.get_debug_state()))
 	_print_spike_trace()
 
 	var validation_error := _validate_pool_stats(pool_stats)

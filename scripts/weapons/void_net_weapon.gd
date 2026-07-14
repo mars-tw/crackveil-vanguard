@@ -36,7 +36,7 @@ func _make_net_stats() -> Dictionary:
 		"damage_per_second": data_float("damage", 9.0) * GameManager.get_outgoing_damage_multiplier(owner_player) * (0.38 + float(anchor_level) * 0.08 + (0.1 if evolved else 0.0)),
 		"source_weapon_id": get_weapon_id(),
 		"area_radius": radius,
-		"duration": data_float("effect_lifetime", 2.6) + float(anchor_level) * 0.55 + (0.8 if evolved else 0.0),
+		"duration": data_float("effect_lifetime", 2.6) + float(anchor_level) * 0.55 + (0.8 if evolved else 0.0) + (0.4 if squad_has_bond("bond_void_rail") else 0.0),
 		"tick_interval": 0.32,
 		"color": stats.get("color", data_color("color", Color(0.58, 0.42, 1.0))),
 		"status_effect": "slow",

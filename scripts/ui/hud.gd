@@ -774,9 +774,11 @@ func _on_stats_changed(stats: Dictionary) -> void:
 	level_label.text = "等級 %d   經驗 %d/%d" % [current_level, xp, xp_required]
 	xp_bar.value = clamp(float(xp) / float(xp_required), 0.0, 1.0)
 	var theme_name := str(stats.get("run_theme_name", ""))
+	var bond_names: PackedStringArray = stats.get("active_bond_names", PackedStringArray())
 	if theme_label != null:
-		theme_label.text = "地圖：%s" % theme_name if theme_name != "" else ""
-		theme_label.visible = theme_name != "" and not MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size)
+		var bond_text := "　羈絆 %d/4　%s" % [bond_names.size(), " · ".join(bond_names)] if not bond_names.is_empty() else "　羈絆 0/4"
+		theme_label.text = ("地圖：%s" % theme_name if theme_name != "" else "") + bond_text
+		theme_label.visible = not MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size)
 	time_label.text = GameManager.format_time(float(stats.get("elapsed_time", 0.0)))
 	var mobile := MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size)
 	var kills := int(stats.get("kills", 0))
@@ -788,7 +790,8 @@ func _on_stats_changed(stats: Dictionary) -> void:
 		echo_shards
 	]
 	if pause_run_stats_label != null:
-		pause_run_stats_label.text = "本局：擊殺 %d   金幣 %d   殘響 %d" % [kills, gold, echo_shards]
+		var pause_bond_text := "\n羈絆 %d/4：%s" % [bond_names.size(), " · ".join(bond_names)] if not bond_names.is_empty() else "\n羈絆 0/4"
+		pause_run_stats_label.text = "本局：擊殺 %d   金幣 %d   殘響 %d%s" % [kills, gold, echo_shards, pause_bond_text]
 	_on_pause_changed(bool(stats.get("manual_pause_visible", bool(stats.get("manual_paused", false)))))
 
 

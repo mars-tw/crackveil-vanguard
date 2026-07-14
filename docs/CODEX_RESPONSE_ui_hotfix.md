@@ -1,6 +1,6 @@
 # ui_hotfix r13 實作報告
 
-版本：`v0.12.1-r13`
+版本：`v0.13.0-r14`（後續 hero10 release 統一版號）
 日期：2026-07-14
 目標：修復全 UI 控件互黏、CheckBox 內外距不足、簡報底部重疊，以及升級卡上半部空白。
 
@@ -21,7 +21,7 @@
 - 升級三選一：使用既有 `icon_xp.png`、`icon_health.png`、`icon_gold.png`；卡片內容改為圖示、分類、標題、描述的分層版面，卡高收斂至 180–260px，消除上半部大片空白。
 - 回歸：擴充 `R14RegressionTest`，在 1920×1080、1024×768、390×844 對主選單、設定、簡報、殘響、升級卡、裂隙商亭、契約、暫停列執行相鄰 Rect 不相交且 gap `>= 8px`；手機 touch target `>= 44px`；另驗證升級卡圖示存在。
 - 新增 `tools/capture_ui_hotfix.mjs`，以本地 Playwright/Chrome 對 Godot WebGL canvas 產生三視口九張驗收圖。
-- 版本更新為 `0.12.1-r13`、build date 更新為 `2026-07-14`。
+- 版本目前統一為 `0.13.0-r14`、build date 為 `2026-07-14`。
 - 未修改 `export_presets.cfg`，未碰角色動畫 runtime。
 
 ## 三視口截圖

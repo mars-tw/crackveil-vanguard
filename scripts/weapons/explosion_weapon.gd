@@ -34,13 +34,15 @@ func _process(delta: float) -> void:
 func _effect_stats_for_fire() -> Dictionary:
 	var stats := data_effect_stats().duplicate(true)
 	stats["damage"] = float(stats.get("damage", data_float("damage", 18.0))) * GameManager.get_outgoing_damage_multiplier(owner_player)
+	if str(owner_player.get("hero_id")) == "pulse_artificer" and squad_has_bond("bond_ember_pulse"):
+		stats["area_radius"] = float(stats.get("area_radius", data_float("area_radius", 82.0))) * 1.08
 	return stats
 
 
 func _make_ember_stats(effect_stats: Dictionary) -> Dictionary:
 	if int(effect_stats.get("evo_ember_well_level", 0)) > 0:
 		return {
-			"damage_per_second": float(effect_stats.get("damage", 18.0)) * 0.2,
+			"damage_per_second": float(effect_stats.get("damage", 18.0)) * 0.2 * (1.06 if squad_has_bond("bond_ember_pulse") else 1.0),
 			"source_weapon_id": str(effect_stats.get("source_weapon_id", get_weapon_id())),
 			"area_radius": float(effect_stats.get("area_radius", 82.0)) * 0.72,
 			"duration": 2.0,
@@ -51,7 +53,7 @@ func _make_ember_stats(effect_stats: Dictionary) -> Dictionary:
 			"status_strength": 0.18
 		}
 	return {
-		"damage_per_second": float(effect_stats.get("damage", 18.0)) * 0.22,
+		"damage_per_second": float(effect_stats.get("damage", 18.0)) * 0.22 * (1.06 if squad_has_bond("bond_ember_pulse") else 1.0),
 		"source_weapon_id": str(effect_stats.get("source_weapon_id", get_weapon_id())),
 		"area_radius": float(effect_stats.get("area_radius", 82.0)) * 0.64,
 		"duration": 1.2,

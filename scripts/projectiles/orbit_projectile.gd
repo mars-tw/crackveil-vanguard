@@ -101,6 +101,8 @@ func _physics_process(delta: float) -> void:
 		orbit_radius += sin(orbit_angle * 2.0 + float(orbit_index)) * 9.0
 	global_position = owner_player.global_position + Vector2.RIGHT.rotated(orbit_angle) * orbit_radius
 	rotation = orbit_angle + PI * 0.5
+	if str(owner_player.get("hero_id")) == "rift_captain":
+		EntityFactory.boost_rift_constructs_near(global_position, float(stats.get("projectile_radius", 8.0)) + 14.0, 1.0)
 
 	_tick_hit_cooldowns(delta)
 	spark_cooldown = max(spark_cooldown - delta, 0.0)

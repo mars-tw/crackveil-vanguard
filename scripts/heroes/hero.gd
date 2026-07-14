@@ -438,7 +438,7 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> bool
 	if invulnerability_timer > 0.0 or current_hp <= 0.0 or not is_alive:
 		return false
 
-	var final_incoming := amount * (GameManager.get_incoming_damage_multiplier() if GameManager.has_method("get_incoming_damage_multiplier") else 1.0)
+	var final_incoming := amount * (GameManager.get_incoming_damage_multiplier(self) if GameManager.has_method("get_incoming_damage_multiplier") else 1.0)
 	var remaining_damage := final_incoming
 	if temporary_shield_hp > 0.0:
 		var absorbed: float = min(temporary_shield_hp, remaining_damage)
@@ -528,6 +528,8 @@ func add_temporary_shield(amount: float, duration: float) -> void:
 func _die() -> void:
 	is_alive = false
 	active_ability_pending = false
+	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("recompute_bonds"):
+		squad_manager.recompute_bonds()
 	remove_from_group("heroes")
 	set_physics_process(false)
 	velocity = Vector2.ZERO
@@ -537,6 +539,8 @@ func _die() -> void:
 		for child in weapons_root.get_children():
 			child.set_process(false)
 			child.set_physics_process(false)
+			if child.has_method("release_owned_nodes"):
+				child.release_owned_nodes()
 	if visual != null and visual.has_method("play_death") and bool(visual.call("play_death")):
 		return
 	_finalize_death()

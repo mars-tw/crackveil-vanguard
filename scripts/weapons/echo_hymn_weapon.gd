@@ -23,6 +23,8 @@ func _cast_hymn() -> void:
 	var pulse_level: int = max(0, data_int("projectile_count", 1) - 1)
 	var radius: float = data_float("area_radius", 118.0) * (1.0 + passive_bonus * 0.8)
 	var heal_amount: float = data_float("damage", 10.0) * (0.42 + float(crescendo_level) * 0.08 + float(pulse_level) * 0.05 + passive_bonus + (0.16 if evolved else 0.0))
+	if squad_has_bond("bond_guard_echo"):
+		heal_amount *= 1.10
 	var aura_duration: float = 2.2 + float(crescendo_level) * 0.45 + float(pulse_level) * 0.22 + (1.1 if evolved else 0.0)
 
 	if GameManager.squad_manager != null and is_instance_valid(GameManager.squad_manager) and GameManager.squad_manager.has_method("heal_members"):

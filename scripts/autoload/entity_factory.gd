@@ -11,6 +11,7 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/projectiles/Projecti
 const ORBIT_PROJECTILE_SCENE: PackedScene = preload("res://scenes/projectiles/OrbitProjectile.tscn")
 const EXPLOSION_AREA_SCENE: PackedScene = preload("res://scenes/projectiles/ExplosionArea.tscn")
 const HAZARD_ZONE_SCENE: PackedScene = preload("res://scenes/projectiles/HazardZone.tscn")
+const RIFT_CONSTRUCT_SCENE: PackedScene = preload("res://scenes/projectiles/RiftConstruct.tscn")
 const XP_GEM_SCENE: PackedScene = preload("res://scenes/pickups/XPGem.tscn")
 const COIN_PICKUP_SCENE: PackedScene = preload("res://scenes/pickups/CoinPickup.tscn")
 const DAMAGE_NUMBER_SCENE: PackedScene = preload("res://scenes/vfx/DamageNumber.tscn")
@@ -28,6 +29,7 @@ const PREWARM_COUNTS: Dictionary = {
 	"orbit_projectile": 56,
 	"explosion": 112,
 	"hazard_zone": 18,
+	"rift_construct": 10,
 	"xp_gem": 220,
 	"coin": 220,
 	"damage_number": 96,
@@ -41,6 +43,7 @@ const DAMAGE_NUMBER_MERGE_RADIUS := 48.0
 const DAMAGE_NUMBER_MERGE_AGE := 0.24
 const EXPLOSION_CAP := 48
 const HAZARD_ZONE_CAP := 16
+const RIFT_CONSTRUCT_CAP := 6
 const FORK_PROJECTILE_CAP := 48
 const ENEMY_PROJECTILE_CAP := 72
 const DEATH_BURST_CAP := 20
@@ -76,10 +79,12 @@ var active_damage_numbers: Array[Node] = []
 var active_enemy_projectiles: Array[Node] = []
 var active_fork_projectiles: Array[Node] = []
 var active_hazard_zones: Array[Node] = []
+var active_rift_constructs: Array[Node] = []
 var active_xp_gems: Array[Node] = []
 var enemy_projectile_reclaims: int = 0
 var fork_projectile_cap_skips: int = 0
 var hazard_zone_reclaims: int = 0
+var rift_construct_reclaims: int = 0
 var elite_enemy_reclaims: int = 0
 var visible_xp_merges: int = 0
 var visible_xp_reclaims: int = 0
@@ -123,6 +128,7 @@ func initialize_for_arena(arena: Node) -> void:
 	active_enemy_projectiles.clear()
 	active_fork_projectiles.clear()
 	active_hazard_zones.clear()
+	active_rift_constructs.clear()
 	active_xp_gems.clear()
 	next_enemy_spawn_token = 1
 	enemy_glow_refresh_timer = 0.0
@@ -139,6 +145,7 @@ func initialize_for_arena(arena: Node) -> void:
 	enemy_projectile_reclaims = 0
 	fork_projectile_cap_skips = 0
 	hazard_zone_reclaims = 0
+	rift_construct_reclaims = 0
 	elite_enemy_reclaims = 0
 	visible_xp_merges = 0
 	visible_xp_reclaims = 0
@@ -157,6 +164,7 @@ func initialize_for_arena(arena: Node) -> void:
 	_create_pool("orbit_projectile", ORBIT_PROJECTILE_SCENE)
 	_create_pool("explosion", EXPLOSION_AREA_SCENE)
 	_create_pool("hazard_zone", HAZARD_ZONE_SCENE)
+	_create_pool("rift_construct", RIFT_CONSTRUCT_SCENE)
 	_create_pool("xp_gem", XP_GEM_SCENE)
 	_create_pool("coin", COIN_PICKUP_SCENE)
 	_create_pool("damage_number", DAMAGE_NUMBER_SCENE)
@@ -294,6 +302,28 @@ func spawn_hazard_zone(world_position: Vector2, stats: Dictionary, source: Node)
 	})
 	active_hazard_zones.append(hazard)
 	return hazard
+
+
+func spawn_rift_construct(world_position: Vector2, stats: Dictionary, source: Node2D, weapon: Node, owner_cap: int) -> Node:
+	_compact_active_rift_constructs()
+	var safe_owner_cap := clampi(owner_cap, 1, RIFT_CONSTRUCT_CAP)
+	while get_rift_construct_count_for_owner(source) >= safe_owner_cap:
+		if not _reclaim_oldest_rift_construct(source):
+			break
+	while active_rift_constructs.size() >= RIFT_CONSTRUCT_CAP:
+		if not _reclaim_oldest_rift_construct():
+			break
+	var construct := _acquire("rift_construct")
+	if construct == null:
+		return null
+	construct.pool_reset({
+		"position": world_position,
+		"stats": stats,
+		"source": source,
+		"weapon": weapon,
+	})
+	active_rift_constructs.append(construct)
+	return construct
 
 
 func apply_explosion_damage(world_position: Vector2, stats: Dictionary, source: Node) -> void:
@@ -616,6 +646,57 @@ func release_hazard_zone(hazard: Node) -> void:
 	_release("hazard_zone", hazard)
 
 
+func release_rift_construct(construct: Node) -> void:
+	_mark_inactive_for_release(construct)
+	active_rift_constructs.erase(construct)
+	_release("rift_construct", construct)
+
+
+func release_rift_constructs_for_owner(owner: Node, trigger_shatter: bool = false) -> void:
+	for construct in active_rift_constructs.duplicate():
+		if not _rift_construct_belongs_to(construct, owner):
+			continue
+		if construct.has_method("expire"):
+			construct.expire(trigger_shatter)
+		else:
+			release_rift_construct(construct)
+
+
+func get_rift_construct_count_for_owner(owner: Node) -> int:
+	_compact_active_rift_constructs()
+	var count := 0
+	for construct in active_rift_constructs:
+		if _rift_construct_belongs_to(construct, owner):
+			count += 1
+	return count
+
+
+func has_rift_construct_neighbor(origin_construct: Node2D, radius: float) -> bool:
+	if origin_construct == null or not is_instance_valid(origin_construct):
+		return false
+	var radius_squared := radius * radius
+	for construct in active_rift_constructs:
+		if construct == origin_construct or construct == null or not is_instance_valid(construct):
+			continue
+		if origin_construct.global_position.distance_squared_to(construct.global_position) < radius_squared:
+			return true
+	return false
+
+
+func boost_rift_constructs_near(world_position: Vector2, radius: float, duration: float = 1.0) -> int:
+	var radius_squared := radius * radius
+	var boosted := 0
+	for construct in active_rift_constructs:
+		if construct == null or not is_instance_valid(construct):
+			continue
+		if world_position.distance_squared_to(construct.global_position) > radius_squared:
+			continue
+		if construct.has_method("apply_orbit_speed_boost"):
+			construct.apply_orbit_speed_boost(duration)
+			boosted += 1
+	return boosted
+
+
 func release_xp_gem(gem: Node) -> void:
 	_mark_inactive_for_release(gem)
 	active_xp_gems.erase(gem)
@@ -707,6 +788,8 @@ func get_pool_stats() -> Dictionary:
 	stats["enemy_projectile_reclaims"] = enemy_projectile_reclaims
 	stats["fork_projectile_cap_skips"] = fork_projectile_cap_skips
 	stats["hazard_zone_reclaims"] = hazard_zone_reclaims
+	stats["rift_construct_reclaims"] = rift_construct_reclaims
+	stats["rift_construct_live"] = active_rift_constructs.size()
 	stats["elite_enemy_reclaims"] = elite_enemy_reclaims
 	stats["visible_xp_merges"] = visible_xp_merges
 	stats["visible_xp_reclaims"] = visible_xp_reclaims
@@ -893,6 +976,24 @@ func _compact_active_hazard_zones() -> void:
 	active_hazard_zones = compacted
 
 
+func _compact_active_rift_constructs() -> void:
+	var compacted: Array[Node] = []
+	for construct in active_rift_constructs:
+		if construct == null or not is_instance_valid(construct):
+			continue
+		var active_value: Variant = construct.get("is_active")
+		if active_value != null and not bool(active_value):
+			continue
+		compacted.append(construct)
+	active_rift_constructs = compacted
+
+
+func _rift_construct_belongs_to(construct: Node, owner: Node) -> bool:
+	if construct == null or not is_instance_valid(construct) or owner == null or not is_instance_valid(owner):
+		return false
+	return construct.has_method("get_source_owner") and construct.get_source_owner() == owner
+
+
 func _compact_active_xp_gems() -> void:
 	var compacted: Array[Node] = []
 	for gem in active_xp_gems:
@@ -959,6 +1060,20 @@ func _reclaim_oldest_hazard_zone() -> bool:
 	hazard_zone_reclaims += 1
 	release_hazard_zone(hazard)
 	return true
+
+
+func _reclaim_oldest_rift_construct(owner: Node = null) -> bool:
+	_compact_active_rift_constructs()
+	for construct in active_rift_constructs.duplicate():
+		if owner != null and not _rift_construct_belongs_to(construct, owner):
+			continue
+		rift_construct_reclaims += 1
+		if construct.has_method("expire"):
+			construct.expire(true)
+		else:
+			release_rift_construct(construct)
+		return true
+	return false
 
 
 func _reclaim_xp_gem_for_visible(world_position: Vector2) -> bool:
@@ -1171,6 +1286,8 @@ func _scene_for_pool(pool_name: String) -> PackedScene:
 			return EXPLOSION_AREA_SCENE
 		"hazard_zone":
 			return HAZARD_ZONE_SCENE
+		"rift_construct":
+			return RIFT_CONSTRUCT_SCENE
 		"xp_gem":
 			return XP_GEM_SCENE
 		"coin":

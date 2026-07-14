@@ -11,6 +11,19 @@ const HUD_SCRIPT := preload("res://scripts/ui/hud.gd")
 const RIFT_SHOP_SCRIPT := preload("res://scripts/ui/rift_shop_screen.gd")
 const STAGE_VICTORY_SCRIPT := preload("res://scripts/ui/stage_victory_screen.gd")
 const GAME_OVER_SCRIPT := preload("res://scripts/ui/game_over_screen.gd")
+const SQUAD_MANAGER_SCRIPT := preload("res://scripts/heroes/squad_manager.gd")
+const HERO10_DATA := preload("res://resources/heroes/rift_shepherd.tres")
+const HERO10_WEAPON := preload("res://resources/weapons/rift_constructs.tres")
+const DEFAULT_SQUAD := preload("res://resources/squads/default_squad.tres")
+const WEAPON_CATALOG := preload("res://resources/weapons/weapon_catalog.tres")
+
+class BondHero:
+	extends Node
+	var hero_id: String = ""
+	var is_alive: bool = true
+
+	func _init(new_hero_id: String) -> void:
+		hero_id = new_hero_id
 
 var current_phase: String = "boot"
 
@@ -32,6 +45,9 @@ func _run_tests() -> void:
 	current_phase = "formfactor"
 	if not await _test_formfactor_matrix_and_live_switch():
 		return
+	current_phase = "hero10"
+	if not _test_hero10_content_and_bonds():
+		return
 	current_phase = "mobile_ui"
 	var mobile_ok := await _test_mobile_ui_scaling()
 	if not mobile_ok:
@@ -52,6 +68,61 @@ func _run_tests() -> void:
 	current_phase = "done"
 	print("R14_REGRESSION_PASS")
 	get_tree().quit(0)
+
+
+func _test_hero10_content_and_bonds() -> bool:
+	if str(HERO10_DATA.get("id")) != "rift_shepherd" or str(HERO10_DATA.get("passive_id")) != "shepherd":
+		_fail("hero10 identity/passive contract drifted")
+		return false
+	if not is_equal_approx(float(HERO10_DATA.get("max_hp")), 96.0) or not is_equal_approx(float(HERO10_DATA.get("move_speed")), 218.0):
+		_fail("hero10 balance stats drifted")
+		return false
+	var available_heroes: Array = DEFAULT_SQUAD.get("available_heroes")
+	if available_heroes.size() != 10 or int(DEFAULT_SQUAD.get("max_members")) != 9:
+		_fail("hero10 roster must remain 10 choose 9")
+		return false
+	var available_weapons: Array = WEAPON_CATALOG.get("available_weapons")
+	if available_weapons.size() != 11 or str(HERO10_WEAPON.get("behavior_id")) != "rift_construct":
+		_fail("hero10 weapon catalog/behavior contract drifted")
+		return false
+	if not is_equal_approx(float(HERO10_WEAPON.get("damage")), 7.0) or not is_equal_approx(float(HERO10_WEAPON.get("cooldown")), 2.4):
+		_fail("rift_constructs baseline damage/cooldown drifted")
+		return false
+	if int(HERO10_WEAPON.get("projectile_count")) != 3 or int(HERO10_WEAPON.get("hard_cap_global")) != 6 or int(HERO10_WEAPON.get("max_targets_per_tick")) != 2:
+		_fail("rift_constructs cap/target budget drifted")
+		return false
+	var weapon_script_text := FileAccess.get_file_as_string("res://scripts/weapons/rift_construct_weapon.gd")
+	var construct_script_text := FileAccess.get_file_as_string("res://scripts/projectiles/rift_construct.gd")
+	if "get_nodes_in_group(\"enemies\")" in weapon_script_text or "get_nodes_in_group(\"enemies\")" in construct_script_text:
+		_fail("rift constructs introduced a forbidden enemies group scan")
+		return false
+	if "_on_attack_impact" not in weapon_script_text or "attack_impact" not in weapon_script_text:
+		_fail("rift constructs lost frame-2 impact lock")
+		return false
+
+	var manager := SQUAD_MANAGER_SCRIPT.new()
+	add_child(manager)
+	var bond_members: Array[Node] = []
+	for hero_id in ["ember_grenadier", "pulse_artificer", "void_weaver", "rift_sniper", "orbit_guard", "echo_singer", "rift_captain", "rift_shepherd"]:
+		var member := BondHero.new(hero_id)
+		manager.add_child(member)
+		bond_members.append(member)
+	manager.set("members", bond_members)
+	manager.recompute_bonds()
+	if manager.get_active_bond_count() != 4:
+		_fail("all four hero bonds did not activate")
+		return false
+	(bond_members[5] as BondHero).is_alive = false
+	manager.recompute_bonds()
+	if manager.has_active_bond("bond_guard_echo") or manager.get_active_bond_count() != 3:
+		_fail("bond did not deactivate immediately on member death")
+		return false
+	manager.queue_free()
+	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.13.0-r14":
+		_fail("hero10 release version drifted")
+		return false
+	print("R14_HERO10 roster=10/9 weapons=11 construct_cap=6 targets=2 bonds=4 impact=frame2")
+	return true
 
 
 func _test_formfactor_matrix_and_live_switch() -> bool:

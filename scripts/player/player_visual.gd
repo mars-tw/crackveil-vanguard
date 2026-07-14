@@ -77,7 +77,7 @@ func play_attack() -> bool:
 
 
 func play_hurt(_source_position: Vector2 = Vector2.ZERO) -> bool:
-	if not animation_frames_ready or current_animation_name == &"death":
+	if not animation_frames_ready or current_animation_name in [&"attack", &"death"]:
 		return false
 	attack_impact_emitted = true
 	_play_state(&"hurt", true)

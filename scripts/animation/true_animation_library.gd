@@ -22,13 +22,14 @@ const CHARACTER_INDEX := {
 	"hero_captain": 0,
 	"hero_guardian": 1,
 	"hero_scout": 2,
-	"enemy_grunt": 3,
-	"enemy_fast": 4,
-	"enemy_tank": 5,
-	"enemy_elite_field": 6,
-	"enemy_elite_split": 7,
-	"enemy_elite_swift": 8,
-	"enemy_boss": 9,
+	"hero_shepherd": 3,
+	"enemy_grunt": 4,
+	"enemy_fast": 5,
+	"enemy_tank": 6,
+	"enemy_elite_field": 7,
+	"enemy_elite_split": 8,
+	"enemy_elite_swift": 9,
+	"enemy_boss": 10,
 }
 
 static var _atlas: Texture2D = null

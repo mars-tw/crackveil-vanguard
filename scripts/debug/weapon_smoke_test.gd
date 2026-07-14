@@ -10,7 +10,7 @@ const EXPECTED_INITIAL_WEAPONS: Array[String] = [
 
 const RECRUIT_HERO_IDS: Array[String] = [
 	"pulse_artificer",
-	"line_mender",
+	"rift_shepherd",
 	"ember_grenadier",
 	"void_weaver",
 	"rift_sniper",
@@ -18,7 +18,7 @@ const RECRUIT_HERO_IDS: Array[String] = [
 ]
 const EXPECTED_RECRUIT_WEAPONS: Array[String] = [
 	"pulse_artificer:pulse_bloom",
-	"line_mender:riftline_emitter",
+	"rift_shepherd:rift_constructs",
 	"ember_grenadier:grenade_lob",
 	"void_weaver:void_net",
 	"rift_sniper:rail_lance",

@@ -6,7 +6,7 @@ const SAMPLE_SECONDS := 16.0
 const REAL_TIMEOUT_MSEC := 25000
 const FULL_SQUAD_RECRUITS: Array[String] = [
 	"pulse_artificer",
-	"line_mender",
+	"rift_shepherd",
 	"ember_grenadier",
 	"void_weaver",
 	"rift_sniper",
@@ -16,7 +16,7 @@ const EXPECTED_FULL_SQUAD_WEAPONS: Array[String] = [
 	"orbit_guard:rift_shield_boomerang",
 	"arc_scout:rift_seeker_missiles",
 	"pulse_artificer:pulse_bloom",
-	"line_mender:riftline_emitter",
+	"rift_shepherd:rift_constructs",
 	"ember_grenadier:grenade_lob",
 	"void_weaver:void_net",
 	"rift_sniper:rail_lance",
@@ -26,7 +26,7 @@ const EXPECTED_DAMAGE_WEAPONS: Array[String] = [
 	"orbit_guard:rift_shield_boomerang",
 	"arc_scout:rift_seeker_missiles",
 	"pulse_artificer:pulse_bloom",
-	"line_mender:riftline_emitter",
+	"rift_shepherd:rift_constructs",
 	"ember_grenadier:grenade_lob",
 	"void_weaver:void_net",
 	"rift_sniper:rail_lance"
@@ -146,6 +146,7 @@ func _force_new_weapon_evolutions() -> void:
 	var guard: Node = squad_manager.get_member_by_id("orbit_guard")
 	var scout: Node = squad_manager.get_member_by_id("arc_scout")
 	var pulse: Node = squad_manager.get_member_by_id("pulse_artificer")
+	var shepherd: Node = squad_manager.get_member_by_id("rift_shepherd")
 	var ember: Node = squad_manager.get_member_by_id("ember_grenadier")
 	var void_member: Node = squad_manager.get_member_by_id("void_weaver")
 	var sniper: Node = squad_manager.get_member_by_id("rift_sniper")
@@ -153,6 +154,7 @@ func _force_new_weapon_evolutions() -> void:
 	_apply_weapon_upgrades(guard, "rift_shield_boomerang", ["boomerang_rebound", "boomerang_rebound", "evo_razor_bulwark"])
 	_apply_weapon_upgrades(scout, "rift_seeker_missiles", ["missile_guidance", "missile_guidance", "evo_hunter_swarm"])
 	_apply_weapon_upgrades(pulse, "pulse_bloom", ["pulse_embers", "evo_ember_well"])
+	_apply_weapon_upgrades(shepherd, "rift_constructs", ["weapon_damage", "weapon_damage", "weapon_damage", "construct_anchor", "construct_anchor", "evo_mirror_flock"])
 	_apply_weapon_upgrades(ember, "grenade_lob", ["grenade_cluster", "grenade_cluster", "evo_cinder_barrage"])
 	_apply_weapon_upgrades(void_member, "void_net", ["void_anchor", "evo_event_horizon"])
 	_apply_weapon_upgrades(sniper, "rail_lance", ["rail_focus", "rail_focus", "evo_star_piercer"])

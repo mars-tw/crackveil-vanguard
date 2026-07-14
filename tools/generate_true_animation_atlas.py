@@ -20,6 +20,7 @@ from mathutils import Matrix, Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "assets" / "sprites" / "true_character_atlas.png"
+SHEPHERD_REFERENCE_OUTPUT = ROOT / "assets" / "sprites" / "hero_shepherd.png"
 CELL_PIXELS = 64
 COLUMNS = 8
 CELL_WORLD = 2.8
@@ -36,6 +37,7 @@ CHARACTERS = (
     ("hero_captain", "hero", "blade", (0.05, 0.20, 0.34, 1.0), (0.12, 0.82, 1.0, 1.0), (0.86, 0.96, 1.0, 1.0), 1.00),
     ("hero_guardian", "hero", "shield", (0.07, 0.18, 0.32, 1.0), (0.20, 0.56, 0.94, 1.0), (1.0, 0.72, 0.18, 1.0), 1.04),
     ("hero_scout", "hero", "spear", (0.06, 0.25, 0.23, 1.0), (0.18, 0.86, 0.62, 1.0), (1.0, 0.45, 0.16, 1.0), 0.94),
+    ("hero_shepherd", "hero", "lantern", (0.10, 0.12, 0.28, 1.0), (0.42, 0.72, 0.88, 1.0), (0.92, 0.98, 1.0, 1.0), 0.98),
     ("enemy_grunt", "enemy", "club", (0.22, 0.04, 0.12, 1.0), (0.86, 0.16, 0.28, 1.0), (1.0, 0.52, 0.18, 1.0), 0.94),
     ("enemy_fast", "enemy", "claw", (0.18, 0.03, 0.24, 1.0), (0.74, 0.16, 0.92, 1.0), (0.35, 0.95, 1.0, 1.0), 0.88),
     ("enemy_tank", "enemy", "hammer", (0.18, 0.08, 0.05, 1.0), (0.76, 0.26, 0.10, 1.0), (1.0, 0.76, 0.20, 1.0), 1.10),
@@ -136,7 +138,7 @@ def rotate_point(point: Vector, pivot: Vector, angle: float) -> Vector:
     return Vector((pivot.x + dx * math.cos(angle) + dz * math.sin(angle), point.y, pivot.z - dx * math.sin(angle) + dz * math.cos(angle)))
 
 
-def pose(animation: str, frame: int, kind: str) -> dict[str, Vector | float]:
+def pose(animation: str, frame: int, kind: str, weapon: str) -> dict[str, Vector | float]:
     hip = Vector((0.0, 0.0, -0.12))
     chest = Vector((0.03, 0.0, 0.54))
     head = Vector((0.08, -0.01, 1.10))
@@ -249,6 +251,54 @@ def pose(animation: str, frame: int, kind: str) -> dict[str, Vector | float]:
         shoulder_back.z -= 0.04
         shoulder_front.z -= 0.04
 
+    # The shepherd is not a recolor of another hero.  Its lantern-casting rig
+    # has its own planted stance: every state changes articulated limbs and the
+    # held lantern, while the physics root remains at the cell origin.
+    if weapon == "lantern":
+        if animation == "idle":
+            phase = frame * math.tau / 4.0
+            sway = math.sin(phase)
+            knee_front.x += sway * 0.045
+            knee_back.x -= sway * 0.035
+            foot_front.x += sway * 0.025
+            foot_back.x -= sway * 0.020
+            elbow_back += Vector((-0.04 * sway, 0.0, 0.035 * sway))
+            hand_back += Vector((-0.06 * sway, 0.0, 0.045 * sway))
+            weapon_tip = hand_front + Vector((0.18 + 0.04 * sway, -0.04, -0.42 - 0.035 * sway))
+        elif animation == "walk":
+            phase = frame * math.tau / 8.0
+            lantern_swing = math.sin(phase + math.pi * 0.35)
+            chest.x += lantern_swing * 0.025
+            head.x += lantern_swing * 0.018
+            weapon_tip = hand_front + Vector((0.16 + lantern_swing * 0.12, -0.04, -0.43 + abs(lantern_swing) * 0.06))
+        elif animation == "attack":
+            lantern_attack = (
+                ((-0.54, 0.78), (-0.72, 0.92), (-0.88, 1.18), -0.10, -0.12),
+                ((-0.62, 0.96), (-0.82, 1.10), (-0.98, 1.38), -0.16, -0.16),
+                ((0.50, 0.66), (0.82, 0.58), (1.20, 0.54), 0.18, 0.28),
+                ((0.58, 0.48), (0.88, 0.34), (1.14, 0.06), 0.14, 0.34),
+                ((0.34, 0.52), (0.58, 0.28), (0.82, -0.10), 0.04, 0.14),
+                ((0.40, 0.34), (0.52, 0.04), (0.70, -0.30), 0.00, 0.00),
+            )
+            elbow, hand, tip, lean, step = lantern_attack[frame]
+            elbow_front = Vector((elbow[0], -0.18, elbow[1]))
+            hand_front = Vector((hand[0], -0.22, hand[1]))
+            weapon_tip = Vector((tip[0], -0.26, tip[1]))
+            elbow_back = Vector((hand_front.x - 0.30, 0.10, hand_front.z + 0.14))
+            hand_back = Vector((hand_front.x - 0.10, 0.02, hand_front.z - 0.04))
+            chest.x += lean
+            head.x += lean * 1.18
+            knee_front.x += step * 0.72
+            foot_front.x += step
+            knee_back.x -= step * 0.20
+            foot_back.x -= step * 0.10
+        elif animation == "hurt":
+            stagger = (0.08, -0.12, 0.05)[frame]
+            knee_front.x += stagger
+            foot_front.x += stagger * 1.35
+            knee_back.x -= stagger * 0.55
+            weapon_tip = hand_front + Vector((0.12 - stagger, -0.04, -0.43 + abs(stagger) * 0.24))
+
     return locals()
 
 
@@ -256,6 +306,22 @@ def add_weapon(prefix: str, weapon: str, hand_front: Vector, hand_back: Vector, 
     if weapon == "shield":
         sphere(prefix + "Shield", hand_back + Vector((-0.05, -0.14, 0.06)), (0.34, 0.09, 0.40), accent)
         bone(prefix + "Sword", hand_front, tip, 0.055, dark)
+    elif weapon == "lantern":
+        # Two hands brace the articulated rift lantern.  The cage, core, grip,
+        # and hanging vane all inherit the per-frame hand/tip pose.
+        bone(prefix + "LanternBrace", hand_back, hand_front, 0.045, dark)
+        bone(prefix + "LanternGrip", hand_front, tip, 0.052, dark)
+        direction = (tip - hand_front).normalized()
+        side = Vector((-direction.z, 0.0, direction.x))
+        core = tip + direction * 0.05
+        sphere(prefix + "LanternCore", core, (0.16, 0.10, 0.18), accent)
+        for index in (-1, 1):
+            cage_start = core + side * index * 0.18 + direction * 0.16
+            cage_end = core + side * index * 0.18 - direction * 0.16
+            bone(prefix + f"LanternCage{index}", cage_start, cage_end, 0.035, dark)
+        bone(prefix + "LanternCrossbar", core - side * 0.22, core + side * 0.22, 0.032, dark)
+        vane_tip = core - direction * 0.30 + side * 0.08
+        bone(prefix + "LanternVane", core - direction * 0.14, vane_tip, 0.038, accent)
     elif weapon == "axes":
         bone(prefix + "AxeA", hand_front, tip, 0.065, dark)
         box(prefix + "AxeHeadA", tip, (0.18, 0.07, 0.12), accent, 0.35)
@@ -287,7 +353,7 @@ def add_weapon(prefix: str, weapon: str, hand_front: Vector, hand_back: Vector, 
 
 def build_character(cell_x: float, cell_z: float, spec: tuple, animation: str, frame: int) -> None:
     char_id, kind, weapon, dark_color, body_color, accent_color, size = spec
-    p = pose(animation, frame, kind)
+    p = pose(animation, frame, kind, weapon)
     origin = Vector((cell_x, 0.0, cell_z + 0.05))
 
     def at(name: str) -> Vector:
@@ -376,8 +442,35 @@ def finalize_atlas_mesh() -> None:
     bpy.context.collection.objects.link(atlas_object)
 
 
+def save_shepherd_reference(rows: int) -> None:
+    """Crop idle frame 0 into the unique resource key used by Godot.
+
+    Runtime animation reads the shared atlas; this tiny reference image exists
+    so editor/export validation also sees a real, replaceable shepherd asset.
+    """
+    atlas = bpy.data.images.load(str(OUTPUT), check_existing=False)
+    shepherd_index = next(index for index, spec in enumerate(CHARACTERS) if spec[0] == "hero_shepherd")
+    atlas_row = shepherd_index * len(ANIMATIONS)
+    source_y = int(atlas.size[1]) - (atlas_row + 1) * CELL_PIXELS
+    source_pixels = list(atlas.pixels)
+    cropped_pixels: list[float] = []
+    for y in range(CELL_PIXELS):
+        row_start = ((source_y + y) * int(atlas.size[0])) * 4
+        for x in range(CELL_PIXELS):
+            pixel_start = row_start + x * 4
+            cropped_pixels.extend(source_pixels[pixel_start:pixel_start + 4])
+    reference = bpy.data.images.new("HeroShepherdReference", width=CELL_PIXELS, height=CELL_PIXELS, alpha=True)
+    reference.pixels.foreach_set(cropped_pixels)
+    reference.file_format = "PNG"
+    reference.filepath_raw = str(SHEPHERD_REFERENCE_OUTPUT)
+    reference.save()
+    bpy.data.images.remove(atlas)
+    print(f"TRUE_ANIMATION_REFERENCE {SHEPHERD_REFERENCE_OUTPUT} {CELL_PIXELS}x{CELL_PIXELS}", flush=True)
+
+
 def build() -> None:
     rows = len(CHARACTERS) * len(ANIMATIONS)
+    bpy.context.preferences.filepaths.save_version = 0
     configure_scene(rows)
     for character_index, spec in enumerate(CHARACTERS):
         for animation_index, (animation, frame_count) in enumerate(ANIMATIONS):
@@ -394,6 +487,7 @@ def build() -> None:
     bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "tools" / "true_character_rig.blend"), compress=True)
     bpy.ops.render.render(write_still=True)
     print(f"TRUE_ANIMATION_ATLAS {OUTPUT} {COLUMNS * CELL_PIXELS}x{rows * CELL_PIXELS}")
+    save_shepherd_reference(rows)
 
 
 if __name__ == "__main__":

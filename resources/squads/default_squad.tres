@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SquadData" load_steps=11 format=3]
+[gd_resource type="Resource" script_class="SquadData" load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/squad_data.gd" id="1_data"]
 [ext_resource type="Resource" path="res://resources/heroes/rift_captain.tres" id="2_leader"]
@@ -10,9 +10,10 @@
 [ext_resource type="Resource" path="res://resources/heroes/void_weaver.tres" id="8_void"]
 [ext_resource type="Resource" path="res://resources/heroes/rift_sniper.tres" id="9_sniper"]
 [ext_resource type="Resource" path="res://resources/heroes/echo_singer.tres" id="10_echo"]
+[ext_resource type="Resource" path="res://resources/heroes/rift_shepherd.tres" id="11_shepherd"]
 
 [resource]
 script = ExtResource("1_data")
 max_members = 9
 starting_heroes = Array[Resource]([ExtResource("2_leader"), ExtResource("3_orbit"), ExtResource("4_arc")])
-available_heroes = Array[Resource]([ExtResource("2_leader"), ExtResource("3_orbit"), ExtResource("4_arc"), ExtResource("5_pulse"), ExtResource("6_line"), ExtResource("7_ember"), ExtResource("8_void"), ExtResource("9_sniper"), ExtResource("10_echo")])
+available_heroes = Array[Resource]([ExtResource("2_leader"), ExtResource("3_orbit"), ExtResource("4_arc"), ExtResource("5_pulse"), ExtResource("6_line"), ExtResource("7_ember"), ExtResource("8_void"), ExtResource("9_sniper"), ExtResource("10_echo"), ExtResource("11_shepherd")])

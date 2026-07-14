@@ -3,12 +3,15 @@ extends Node
 const PLAYER_VISUAL_SCRIPT := preload("res://scripts/player/player_visual.gd")
 const TRUE_ANIMATION_LIBRARY := preload("res://scripts/animation/true_animation_library.gd")
 const ENEMY_SCENE := preload("res://scenes/enemies/Enemy.tscn")
+const HERO_SCENE := preload("res://scenes/heroes/Hero.tscn")
+const SHEPHERD_DATA := preload("res://resources/heroes/rift_shepherd.tres")
 
 class DamageTarget:
 	extends Node2D
 	var hp: float = 100.0
 	var hit_radius: float = 13.0
 	var is_alive: bool = true
+	var is_active: bool = true
 
 	func take_damage(amount: float, _source_position: Vector2 = Vector2.ZERO) -> bool:
 		hp = maxf(hp - amount, 0.0)
@@ -32,6 +35,9 @@ func _ready() -> void:
 	await _test_shared_atlas_and_player_events()
 	if failed:
 		return
+	await _test_shepherd_weapon_impact_and_whiff()
+	if failed:
+		return
 	await _test_enemy_impact_whiff_hurt_and_death()
 	if failed:
 		return
@@ -41,8 +47,9 @@ func _ready() -> void:
 
 func _test_shared_atlas_and_player_events() -> void:
 	var captain_frames := TRUE_ANIMATION_LIBRARY.get_sprite_frames("res://assets/sprites/hero_captain.png")
+	var shepherd_frames := TRUE_ANIMATION_LIBRARY.get_sprite_frames("res://assets/sprites/hero_shepherd.png")
 	var enemy_frames := TRUE_ANIMATION_LIBRARY.get_sprite_frames("res://assets/sprites/enemy_grunt.png")
-	_assert(captain_frames != null and enemy_frames != null, "shared atlas frames failed to load")
+	_assert(captain_frames != null and shepherd_frames != null and enemy_frames != null, "shared atlas frames failed to load")
 	if failed:
 		return
 	_assert(captain_frames.get_frame_count(&"idle") == 4, "idle must have four articulated poses")
@@ -50,16 +57,19 @@ func _test_shared_atlas_and_player_events() -> void:
 	_assert(captain_frames.get_frame_count(&"attack") == 6, "attack must have anticipation/impact/recovery poses")
 	_assert(captain_frames.get_frame_count(&"hurt") == 3, "hurt must have three reaction poses")
 	_assert(captain_frames.get_frame_count(&"death") == 6, "death must have six fall poses")
+	for state in TRUE_ANIMATION_LIBRARY.STATE_ORDER:
+		_assert(shepherd_frames.get_frame_count(state) == int(TRUE_ANIMATION_LIBRARY.FRAME_COUNTS[state]), "rift_shepherd %s pose count drifted" % state)
 	var hero_atlas: Texture2D = (captain_frames.get_frame_texture(&"walk", 0) as AtlasTexture).atlas
+	var shepherd_atlas: Texture2D = (shepherd_frames.get_frame_texture(&"attack", 2) as AtlasTexture).atlas
 	var enemy_atlas: Texture2D = (enemy_frames.get_frame_texture(&"walk", 0) as AtlasTexture).atlas
-	_assert(hero_atlas == enemy_atlas, "hero and enemy frames do not share one atlas texture")
+	_assert(hero_atlas == shepherd_atlas and hero_atlas == enemy_atlas, "captain, shepherd, and enemy frames do not share one atlas texture")
 
 	var host := CharacterBody2D.new()
 	host.add_to_group("heroes")
 	add_child(host)
 	var visual := PLAYER_VISUAL_SCRIPT.new()
 	host.add_child(visual)
-	visual.configure_visual("res://assets/sprites/hero_captain.png", 1.0, 15.0)
+	visual.configure_visual("res://assets/sprites/hero_shepherd.png", 1.0, 14.0)
 	observed_player_visual = visual
 	visual.attack_impact.connect(_on_player_attack_impact)
 	_assert(visual.play_attack(), "player attack animation did not start")
@@ -75,7 +85,61 @@ func _test_shared_atlas_and_player_events() -> void:
 	_assert(visual.get_animation_state() == &"hurt", "player hurt state did not play")
 	_assert((visual.get("animated_sprite") as AnimatedSprite2D).position == Vector2.ZERO, "visual root moved during hurt")
 	host.queue_free()
-	print("TRUE_ANIMATION_PLAYER impact_frame=2 duplicate_hits=0 shared_atlas=%d" % TRUE_ANIMATION_LIBRARY.get_shared_atlas_instance_id())
+	print("TRUE_ANIMATION_PLAYER hero=rift_shepherd poses=4/8/6/3/6 impact_frame=2 duplicate_hits=0 shared_atlas=%d" % TRUE_ANIMATION_LIBRARY.get_shared_atlas_instance_id())
+
+
+func _test_shepherd_weapon_impact_and_whiff() -> void:
+	GameManager.game_running = true
+	var shepherd := HERO_SCENE.instantiate()
+	add_child(shepherd)
+	shepherd.setup(SHEPHERD_DATA, null, false, 0)
+	shepherd.set_physics_process(false)
+	var controller := shepherd.get_node_or_null("FollowerController")
+	if controller != null:
+		controller.set_process(false)
+		controller.set_physics_process(false)
+	var weapon: Node = (shepherd.get("weapons") as Dictionary).get("rift_constructs")
+	_assert(weapon != null, "rift_shepherd did not equip rift_constructs")
+	if failed:
+		return
+	var target := DamageTarget.new()
+	target.global_position = Vector2(120.0, 0.0)
+	add_child(target)
+
+	var live_before := EntityFactory.get_rift_construct_count_for_owner(shepherd)
+	_assert(bool(weapon.call("_begin_cast", target)), "rift_constructs attack did not enter anticipation")
+	await get_tree().create_timer(0.11).timeout
+	_assert(EntityFactory.get_rift_construct_count_for_owner(shepherd) == live_before, "rift construct spawned during anticipation")
+	await get_tree().create_timer(0.12).timeout
+	_assert(EntityFactory.get_rift_construct_count_for_owner(shepherd) == live_before + 1, "rift construct did not spawn on frame 2")
+	await get_tree().create_timer(0.34).timeout
+	var visual: Node = shepherd.get_node("Visual")
+	_assert(visual.get_animation_state() == &"idle", "rift_shepherd attack did not finish recovery")
+	EntityFactory.release_rift_constructs_for_owner(shepherd, false)
+	var construct_stats: Dictionary = weapon.call("_construct_stats")
+	for index in range(7):
+		EntityFactory.spawn_rift_construct(Vector2(float(index) * 24.0, 80.0), construct_stats, shepherd, weapon, 6)
+	_assert(EntityFactory.get_rift_construct_count_for_owner(shepherd) == 6, "rift construct global hard cap exceeded or underfilled")
+	var pool_stats: Dictionary = EntityFactory.get_pool_stats().get("rift_construct", {})
+	_assert(int(pool_stats.get("exhausted", 0)) == 0 and int(pool_stats.get("duplicate_releases", 0)) == 0 and int(pool_stats.get("foreign_releases", 0)) == 0, "rift construct pool contract failed")
+	EntityFactory.release_rift_constructs_for_owner(shepherd, false)
+
+	var trigger_before := int(weapon.get("trigger_count"))
+	var hp_before := target.hp
+	target.global_position = Vector2(120.0, 0.0)
+	_assert(bool(weapon.call("_begin_cast", target)), "rift_constructs whiff did not enter anticipation")
+	await get_tree().create_timer(0.10).timeout
+	target.global_position = Vector2(900.0, 0.0)
+	await get_tree().create_timer(0.15).timeout
+	_assert(EntityFactory.get_rift_construct_count_for_owner(shepherd) == 0, "rift_constructs whiff spawned a construct")
+	_assert(is_equal_approx(target.hp, hp_before), "rift_constructs whiff dealt damage")
+	_assert(int(weapon.get("trigger_count")) == trigger_before, "rift_constructs whiff registered a trigger")
+	await get_tree().create_timer(0.32).timeout
+	_assert(visual.get_animation_state() == &"idle", "rift_constructs whiff skipped recovery")
+	weapon.release_owned_nodes()
+	shepherd.queue_free()
+	target.queue_free()
+	print("TRUE_ANIMATION_SHEPHERD impact_spawn=frame2 anticipation_spawn=0 whiff_damage=0 whiff_spawn=0 recovery=full cap=6 pool_errors=0")
 
 
 func _test_enemy_impact_whiff_hurt_and_death() -> void:

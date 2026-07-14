@@ -46,7 +46,8 @@ func _fire_lance(target: Node2D) -> void:
 		final_hit_position = enemy.global_position
 		hit_points.append(enemy.global_position)
 		if enemy.has_method("take_damage"):
-			var applied_damage: float = float(enemy.take_damage(damage_value, origin))
+			var slow_bond_multiplier := 1.12 if squad_has_bond("bond_void_rail") and enemy.has_method("has_status_effect") and enemy.has_status_effect("slow") else 1.0
+			var applied_damage: float = float(enemy.take_damage(damage_value * slow_bond_multiplier, origin))
 			GameManager.record_weapon_damage(owner_player, get_weapon_id(), applied_damage)
 		if evolved and enemy.has_method("apply_status_effect"):
 			enemy.apply_status_effect("vulnerable", 0.55, 0.16)

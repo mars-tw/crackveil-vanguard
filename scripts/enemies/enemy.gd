@@ -598,6 +598,10 @@ func apply_status_effect(effect_id: String, duration: float, strength: float) ->
 	status_strengths[effect_id] = strength
 
 
+func has_status_effect(effect_id: String) -> bool:
+	return status_timers.has(effect_id) and float(status_timers.get(effect_id, 0.0)) > 0.0
+
+
 func apply_knockback(source_position: Vector2, strength: float) -> void:
 	if not is_active or strength <= 0.0:
 		return

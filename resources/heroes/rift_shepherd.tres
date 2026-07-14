@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/hero_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = "rift_shepherd"
+display_name = "裂隙牧者"
+description = "短命裂隙建構體的牧養者。可與裂隙隊長觸發羈絆：牧長裂約。"
+body_color = Color(0.42, 0.72, 0.88, 1)
+core_color = Color(0.92, 0.98, 1, 1)
+sprite_path = "res://assets/sprites/hero_shepherd.png"
+sprite_scale = 1.22
+max_hp = 96.0
+move_speed = 218.0
+hit_radius = 12.0
+pickup_radius = 74.0
+starting_weapon_ids = PackedStringArray("rift_constructs")
+passive_id = "shepherd"
+passive_value = 1.0
+passive_description = "裂牧心法：每具存活裂傀使自身受到傷害 -2%，最多 -8%。"

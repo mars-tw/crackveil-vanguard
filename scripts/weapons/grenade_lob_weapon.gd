@@ -65,6 +65,8 @@ func _effect_stats_for_fire() -> Dictionary:
 	var passive_bonus := owner_passive_value() if owner_passive_id() == "ember_grenadier" else 0.0
 	stats["damage"] = float(stats.get("damage", data_float("damage", 18.0))) * GameManager.get_outgoing_damage_multiplier(owner_player) * (1.0 + passive_bonus)
 	stats["area_radius"] = float(stats.get("area_radius", data_float("area_radius", 82.0))) * (1.0 + passive_bonus * 0.7)
+	if str(owner_player.get("hero_id")) == "ember_grenadier" and squad_has_bond("bond_ember_pulse"):
+		stats["area_radius"] = float(stats["area_radius"]) * 1.08
 	return stats
 
 
@@ -85,7 +87,7 @@ func _make_explosion_stats(effect_stats: Dictionary) -> Dictionary:
 func _make_burn_stats(effect_stats: Dictionary) -> Dictionary:
 	var evolved := int(effect_stats.get("evo_cinder_barrage_level", 0)) > 0
 	return {
-		"damage_per_second": float(effect_stats.get("damage", data_float("damage", 18.0))) * (0.22 if evolved else 0.16),
+		"damage_per_second": float(effect_stats.get("damage", data_float("damage", 18.0))) * (0.22 if evolved else 0.16) * (1.06 if squad_has_bond("bond_ember_pulse") else 1.0),
 		"source_weapon_id": get_weapon_id(),
 		"area_radius": float(effect_stats.get("area_radius", data_float("area_radius", 82.0))) * (0.64 if evolved else 0.48),
 		"duration": 1.8 if evolved else 1.15,
