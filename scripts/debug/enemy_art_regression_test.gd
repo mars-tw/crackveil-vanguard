@@ -24,7 +24,7 @@ func _ready() -> void:
 		print("ENEMY_ART_REGRESSION_FAIL")
 		get_tree().quit(1)
 	else:
-		print("ENEMY_ART_ASSETS=7 source_canvas=96x96 atlas=512x3200 states=4/8/6/3/6 shared=true")
+		print("ENEMY_ART_ASSETS=7 source_canvas=96x96 atlas=512x3712 states=4/8/6/3/6 shared=true heroes=10 packed=true")
 		print("ENEMY_ART_REGRESSION_PASS")
 		get_tree().quit(0)
 
@@ -32,7 +32,7 @@ func _ready() -> void:
 func _test_compact_assets_and_real_frames() -> void:
 	SPRITE_LOADER.prewarm_gameplay_textures()
 	var atlas := load("res://assets/sprites/true_character_atlas.png") as Texture2D
-	_assert(atlas != null and atlas.get_width() == 512 and atlas.get_height() == 3200, "true animation atlas dimensions drifted")
+	_assert(atlas != null and atlas.get_width() == 512 and atlas.get_height() == 3712, "true animation atlas dimensions drifted")
 	_assert(SPRITE_LOADER.texture_cache.has("res://assets/sprites/true_character_atlas.png"), "true animation atlas was not prewarmed")
 	for base_name in ENEMY_ART_IDS:
 		var base_path := "res://assets/sprites/%s.png" % base_name

@@ -5,6 +5,18 @@ const TRUE_ANIMATION_LIBRARY := preload("res://scripts/animation/true_animation_
 const ENEMY_SCENE := preload("res://scenes/enemies/Enemy.tscn")
 const HERO_SCENE := preload("res://scenes/heroes/Hero.tscn")
 const SHEPHERD_DATA := preload("res://resources/heroes/rift_shepherd.tres")
+const HERO_SPRITE_PATHS: Array[String] = [
+	"res://assets/sprites/hero_captain.png",
+	"res://assets/sprites/hero_rift_sniper.png",
+	"res://assets/sprites/hero_void_weaver.png",
+	"res://assets/sprites/hero_arc_scout.png",
+	"res://assets/sprites/hero_echo_singer.png",
+	"res://assets/sprites/hero_ember_grenadier.png",
+	"res://assets/sprites/hero_line_mender.png",
+	"res://assets/sprites/hero_orbit_guard.png",
+	"res://assets/sprites/hero_pulse_artificer.png",
+	"res://assets/sprites/hero_shepherd.png",
+]
 
 class DamageTarget:
 	extends Node2D
@@ -67,6 +79,25 @@ func _test_shared_atlas_and_player_events() -> void:
 	var shepherd_atlas: Texture2D = (shepherd_frames.get_frame_texture(&"attack", 2) as AtlasTexture).atlas
 	var enemy_atlas: Texture2D = (enemy_frames.get_frame_texture(&"walk", 0) as AtlasTexture).atlas
 	_assert(hero_atlas == shepherd_atlas and hero_atlas == enemy_atlas, "captain, shepherd, and enemy frames do not share one atlas texture")
+	var observed_hero_cells := {}
+	for hero_index in range(HERO_SPRITE_PATHS.size()):
+		var sprite_path := HERO_SPRITE_PATHS[hero_index]
+		var hero_frames := TRUE_ANIMATION_LIBRARY.get_sprite_frames(sprite_path)
+		_assert(hero_frames != null, "missing R16 hero frames: " + sprite_path)
+		if failed:
+			return
+		for state in TRUE_ANIMATION_LIBRARY.STATE_ORDER:
+			_assert(hero_frames.get_frame_count(state) == int(TRUE_ANIMATION_LIBRARY.FRAME_COUNTS[state]), "%s %s frame contract drifted" % [sprite_path, state])
+		var idle_texture := hero_frames.get_frame_texture(&"idle", 0) as AtlasTexture
+		var expected_cell: int = hero_index * TRUE_ANIMATION_LIBRARY.FRAMES_PER_CHARACTER
+		var expected_position := Vector2(
+			(expected_cell % TRUE_ANIMATION_LIBRARY.ATLAS_COLUMNS) * TRUE_ANIMATION_LIBRARY.CELL_SIZE,
+			(expected_cell / TRUE_ANIMATION_LIBRARY.ATLAS_COLUMNS) * TRUE_ANIMATION_LIBRARY.CELL_SIZE
+		)
+		_assert(idle_texture != null and idle_texture.atlas == hero_atlas, "R16 hero escaped the shared atlas: " + sprite_path)
+		_assert(idle_texture.region.position == expected_position, "R16 hero atlas cell drifted: " + sprite_path)
+		observed_hero_cells[expected_position] = true
+	_assert(observed_hero_cells.size() == HERO_SPRITE_PATHS.size(), "R16 heroes reused an atlas character cell")
 
 	var host := CharacterBody2D.new()
 	host.add_to_group("heroes")
@@ -89,7 +120,7 @@ func _test_shared_atlas_and_player_events() -> void:
 	_assert(visual.get_animation_state() == &"hurt", "player hurt state did not play")
 	_assert((visual.get("animated_sprite") as AnimatedSprite2D).position == Vector2.ZERO, "visual root moved during hurt")
 	host.queue_free()
-	print("TRUE_ANIMATION_PLAYER hero=rift_shepherd poses=4/8/6/3/6 impact_frame=2 duplicate_hits=0 shared_atlas=%d" % TRUE_ANIMATION_LIBRARY.get_shared_atlas_instance_id())
+	print("TRUE_ANIMATION_PLAYER heroes=10 unique_cells=10 hero=rift_shepherd poses=4/8/6/3/6 impact_frame=2 duplicate_hits=0 shared_atlas=%d" % TRUE_ANIMATION_LIBRARY.get_shared_atlas_instance_id())
 
 
 func _test_shepherd_weapon_impact_and_whiff() -> void:

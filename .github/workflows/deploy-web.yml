@@ -35,11 +35,11 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Install font tools
+      - name: Install asset tools
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m pip install --upgrade fonttools
+          python3 -m pip install --upgrade fonttools pillow
 
       - name: Cache Godot export templates
         id: cache-templates
@@ -94,6 +94,12 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/build_font_subset.py
+
+      - name: Check sprite luminance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/check_sprite_luminance.py
 
       - name: Inject build date
         shell: bash

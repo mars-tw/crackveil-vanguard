@@ -1,12 +1,13 @@
-"""Blender 5.1 headless builder for Crackveil Vanguard character animation.
+"""Blender 5.1 headless art builder for Crackveil Vanguard R16.
 
-This script builds every atlas frame from separately articulated low-poly body
-parts.  It must be executed by Blender, not CPython:
+Every atlas frame is assembled from separately articulated body parts.  The
+Godot physics root and collider never enter this Blender scene.  Run with:
 
     blender --background --python tools/generate_true_animation_atlas.py
 
-The runtime mirrors the right-facing render for left-facing movement.  Frame
-counts are kept in sync with true_animation_library.gd.
+The runtime mirrors the right-facing render for left-facing movement.  The
+shared-atlas contract is fixed at idle4/walk8/attack6/hurt3/death6 and attack
+frame 2 remains the active impact pose.
 """
 
 from __future__ import annotations
@@ -20,7 +21,6 @@ from mathutils import Matrix, Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "assets" / "sprites" / "true_character_atlas.png"
-SHEPHERD_REFERENCE_OUTPUT = ROOT / "assets" / "sprites" / "hero_shepherd.png"
 CELL_PIXELS = 64
 COLUMNS = 8
 CELL_WORLD = 2.8
@@ -32,24 +32,34 @@ ANIMATIONS = (
     ("hurt", 3),
     ("death", 6),
 )
+FRAMES_PER_CHARACTER = sum(frame_count for _animation, frame_count in ANIMATIONS)
 
+# dark / body / secondary / highlight are the four authored palette slots.
+# All three main swatches keep HSV value in the 0.35-0.85 R16 albedo band.
 CHARACTERS = (
-    ("hero_captain", "hero", "blade", (0.05, 0.20, 0.34, 1.0), (0.12, 0.82, 1.0, 1.0), (0.86, 0.96, 1.0, 1.0), 1.00),
-    ("hero_guardian", "hero", "shield", (0.07, 0.18, 0.32, 1.0), (0.20, 0.56, 0.94, 1.0), (1.0, 0.72, 0.18, 1.0), 1.04),
-    ("hero_scout", "hero", "spear", (0.06, 0.25, 0.23, 1.0), (0.18, 0.86, 0.62, 1.0), (1.0, 0.45, 0.16, 1.0), 0.94),
-    ("hero_shepherd", "hero", "lantern", (0.10, 0.12, 0.28, 1.0), (0.42, 0.72, 0.88, 1.0), (0.92, 0.98, 1.0, 1.0), 0.98),
-    ("enemy_grunt", "enemy", "club", (0.22, 0.04, 0.12, 1.0), (0.86, 0.16, 0.28, 1.0), (1.0, 0.52, 0.18, 1.0), 0.94),
-    ("enemy_fast", "enemy", "claw", (0.18, 0.03, 0.24, 1.0), (0.74, 0.16, 0.92, 1.0), (0.35, 0.95, 1.0, 1.0), 0.88),
-    ("enemy_tank", "enemy", "hammer", (0.18, 0.08, 0.05, 1.0), (0.76, 0.26, 0.10, 1.0), (1.0, 0.76, 0.20, 1.0), 1.10),
-    ("enemy_elite_field", "enemy", "staff", (0.10, 0.04, 0.24, 1.0), (0.45, 0.18, 0.90, 1.0), (0.25, 0.95, 1.0, 1.0), 1.02),
-    ("enemy_elite_split", "enemy", "axes", (0.22, 0.03, 0.10, 1.0), (0.95, 0.18, 0.42, 1.0), (1.0, 0.70, 0.18, 1.0), 1.00),
-    ("enemy_elite_swift", "enemy", "claw", (0.05, 0.16, 0.22, 1.0), (0.16, 0.74, 0.90, 1.0), (0.74, 0.98, 1.0, 1.0), 0.92),
-    ("enemy_boss", "enemy", "greatblade", (0.14, 0.02, 0.22, 1.0), (0.52, 0.10, 0.82, 1.0), (1.0, 0.20, 0.62, 1.0), 1.14),
+    {"id": "hero_captain", "kind": "hero", "style": "captain", "weapon": "captain_blade", "palette": ((0.08, 0.25, 0.42, 1), (0.12, 0.58, 0.72, 1), (0.56, 0.76, 0.82, 1), (0.85, 0.48, 0.12, 1)), "skin": (0.78, 0.55, 0.43, 1), "iris": (0.12, 0.68, 0.85, 1), "size": 1.00},
+    {"id": "hero_rift_sniper", "kind": "hero", "style": "sniper", "weapon": "rail_rifle", "palette": ((0.16, 0.24, 0.40, 1), (0.18, 0.55, 0.58, 1), (0.66, 0.76, 0.78, 1), (0.72, 0.85, 0.22, 1)), "skin": (0.76, 0.52, 0.40, 1), "iris": (0.68, 0.85, 0.22, 1), "size": 0.98},
+    {"id": "hero_void_weaver", "kind": "hero", "style": "weaver", "weapon": "void_staff", "palette": ((0.24, 0.16, 0.42, 1), (0.48, 0.26, 0.65, 1), (0.72, 0.52, 0.78, 1), (0.20, 0.82, 0.85, 1)), "skin": (0.71, 0.48, 0.51, 1), "iris": (0.20, 0.82, 0.85, 1), "size": 0.97},
+    {"id": "hero_arc_scout", "kind": "hero", "style": "arc_scout", "weapon": "arc_spear", "palette": ((0.10, 0.35, 0.31, 1), (0.14, 0.64, 0.50, 1), (0.54, 0.80, 0.68, 1), (0.85, 0.38, 0.12, 1)), "skin": (0.77, 0.54, 0.39, 1), "iris": (0.85, 0.38, 0.12, 1), "size": 0.94},
+    {"id": "hero_echo_singer", "kind": "hero", "style": "singer", "weapon": "tuning_staff", "palette": ((0.36, 0.22, 0.40, 1), (0.64, 0.40, 0.62, 1), (0.80, 0.67, 0.78, 1), (0.85, 0.73, 0.24, 1)), "skin": (0.79, 0.57, 0.46, 1), "iris": (0.85, 0.73, 0.24, 1), "size": 0.98},
+    {"id": "hero_ember_grenadier", "kind": "hero", "style": "grenadier", "weapon": "grenade_launcher", "palette": ((0.40, 0.20, 0.10, 1), (0.68, 0.30, 0.12, 1), (0.82, 0.60, 0.32, 1), (0.85, 0.82, 0.36, 1)), "skin": (0.77, 0.50, 0.35, 1), "iris": (0.85, 0.82, 0.36, 1), "size": 1.02},
+    {"id": "hero_line_mender", "kind": "hero", "style": "mender", "weapon": "needle_staff", "palette": ((0.18, 0.34, 0.40, 1), (0.30, 0.64, 0.62, 1), (0.72, 0.80, 0.70, 1), (0.85, 0.64, 0.20, 1)), "skin": (0.75, 0.52, 0.43, 1), "iris": (0.85, 0.64, 0.20, 1), "size": 0.96},
+    {"id": "hero_orbit_guard", "kind": "hero", "style": "orbit_guard", "weapon": "orbit_shield", "palette": ((0.24, 0.20, 0.40, 1), (0.42, 0.34, 0.65, 1), (0.72, 0.64, 0.82, 1), (0.22, 0.82, 0.85, 1)), "skin": (0.73, 0.50, 0.40, 1), "iris": (0.22, 0.82, 0.85, 1), "size": 1.04},
+    {"id": "hero_pulse_artificer", "kind": "hero", "style": "artificer", "weapon": "pulse_cannon", "palette": ((0.17, 0.31, 0.42, 1), (0.23, 0.58, 0.68, 1), (0.62, 0.76, 0.82, 1), (0.85, 0.38, 0.32, 1)), "skin": (0.78, 0.55, 0.39, 1), "iris": (0.85, 0.38, 0.32, 1), "size": 1.00},
+    {"id": "hero_shepherd", "kind": "hero", "style": "shepherd", "weapon": "rift_lantern", "palette": ((0.22, 0.18, 0.42, 1), (0.35, 0.60, 0.65, 1), (0.65, 0.76, 0.82, 1), (0.78, 0.85, 0.85, 1)), "skin": (0.72, 0.49, 0.44, 1), "iris": (0.62, 0.82, 0.85, 1), "size": 0.98},
+    {"id": "enemy_grunt", "kind": "enemy", "style": "grunt", "weapon": "club", "palette": ((0.38, 0.12, 0.18, 1), (0.62, 0.20, 0.26, 1), (0.72, 0.38, 0.28, 1), (0.85, 0.52, 0.18, 1)), "skin": (0.54, 0.34, 0.38, 1), "iris": (0.85, 0.52, 0.18, 1), "size": 0.94},
+    {"id": "enemy_fast", "kind": "enemy", "style": "fast", "weapon": "claw", "palette": ((0.30, 0.12, 0.40, 1), (0.58, 0.18, 0.68, 1), (0.72, 0.36, 0.74, 1), (0.22, 0.82, 0.85, 1)), "skin": (0.48, 0.28, 0.51, 1), "iris": (0.22, 0.82, 0.85, 1), "size": 0.88},
+    {"id": "enemy_tank", "kind": "enemy", "style": "tank", "weapon": "hammer", "palette": ((0.40, 0.18, 0.10, 1), (0.65, 0.28, 0.12, 1), (0.76, 0.48, 0.24, 1), (0.85, 0.72, 0.18, 1)), "skin": (0.55, 0.36, 0.29, 1), "iris": (0.85, 0.72, 0.18, 1), "size": 1.10},
+    {"id": "enemy_elite_field", "kind": "enemy", "style": "field", "weapon": "staff", "palette": ((0.28, 0.13, 0.40, 1), (0.50, 0.24, 0.70, 1), (0.68, 0.46, 0.78, 1), (0.24, 0.85, 0.70, 1)), "skin": (0.48, 0.31, 0.55, 1), "iris": (0.24, 0.85, 0.70, 1), "size": 1.02},
+    {"id": "enemy_elite_split", "kind": "enemy", "style": "split", "weapon": "axes", "palette": ((0.40, 0.10, 0.20, 1), (0.70, 0.18, 0.38, 1), (0.80, 0.42, 0.48, 1), (0.85, 0.68, 0.16, 1)), "skin": (0.56, 0.29, 0.38, 1), "iris": (0.85, 0.68, 0.16, 1), "size": 1.00},
+    {"id": "enemy_elite_swift", "kind": "enemy", "style": "swift", "weapon": "claw", "palette": ((0.10, 0.34, 0.40, 1), (0.14, 0.64, 0.72, 1), (0.42, 0.76, 0.80, 1), (0.78, 0.85, 0.85, 1)), "skin": (0.32, 0.51, 0.57, 1), "iris": (0.78, 0.85, 0.85, 1), "size": 0.92},
+    {"id": "enemy_boss", "kind": "enemy", "style": "boss", "weapon": "greatblade", "palette": ((0.34, 0.14, 0.44, 1), (0.64, 0.20, 0.75, 1), (0.82, 0.40, 0.72, 1), (0.85, 0.22, 0.52, 1)), "skin": (0.50, 0.30, 0.56, 1), "iris": (0.85, 0.22, 0.52, 1), "size": 1.14},
 )
 
 MESH_VERTICES: list[tuple[float, float, float]] = []
 MESH_FACES: list[tuple[int, ...]] = []
 MESH_FACE_MATERIALS: list[int] = []
+MESH_VERTEX_SHADES: list[tuple[float, float, float, float]] = []
 MATERIALS: list[bpy.types.Material] = []
 MATERIAL_INDEX: dict[str, int] = {}
 
@@ -75,16 +85,54 @@ CUBE_VERTICES = tuple(Vector(v) for v in (
 CUBE_FACES = ((0, 1, 2, 3), (4, 7, 6, 5), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (4, 0, 3, 7))
 
 
-def material(name: str, color: tuple[float, float, float, float]) -> bpy.types.Material:
+def material(name: str, color: tuple[float, float, float, float], glow: float = 0.0) -> bpy.types.Material:
+    """Create an AO + authored vertex-gradient material.
+
+    The cv_gradient point color is generated for every primitive, so the
+    volume ramp survives the atlas render without relying on runtime shaders.
+    """
     mat = bpy.data.materials.get(name)
     if mat is None:
         mat = bpy.data.materials.new(name)
         mat.diffuse_color = color
         mat.use_nodes = True
-        principled = mat.node_tree.nodes.get("Principled BSDF")
-        principled.inputs["Base Color"].default_value = color
-        principled.inputs["Roughness"].default_value = 0.72
-        principled.inputs["Metallic"].default_value = 0.08
+        nodes = mat.node_tree.nodes
+        links = mat.node_tree.links
+        nodes.clear()
+        output = nodes.new("ShaderNodeOutputMaterial")
+        principled = nodes.new("ShaderNodeBsdfPrincipled")
+        rgb = nodes.new("ShaderNodeRGB")
+        rgb.outputs[0].default_value = color
+        vertex = nodes.new("ShaderNodeVertexColor")
+        vertex.layer_name = "cv_gradient"
+        gradient_mix = nodes.new("ShaderNodeMixRGB")
+        gradient_mix.blend_type = "MULTIPLY"
+        gradient_mix.inputs[0].default_value = 1.0
+        links.new(rgb.outputs[0], gradient_mix.inputs[1])
+        links.new(vertex.outputs[0], gradient_mix.inputs[2])
+        shaded_output = gradient_mix.outputs[0]
+        try:
+            ao = nodes.new("ShaderNodeAmbientOcclusion")
+            ao.inputs["Distance"].default_value = 0.42
+            ao.samples = 8
+            ao_mix = nodes.new("ShaderNodeMixRGB")
+            ao_mix.blend_type = "MULTIPLY"
+            ao_mix.inputs[0].default_value = 0.42
+            links.new(shaded_output, ao_mix.inputs[1])
+            links.new(ao.outputs["Color"], ao_mix.inputs[2])
+            shaded_output = ao_mix.outputs[0]
+        except Exception:
+            pass
+        links.new(shaded_output, principled.inputs["Base Color"])
+        principled.inputs["Roughness"].default_value = 0.68
+        principled.inputs["Metallic"].default_value = 0.10
+        emission_color = principled.inputs.get("Emission Color") or principled.inputs.get("Emission")
+        emission_strength = principled.inputs.get("Emission Strength")
+        if glow > 0.0 and emission_color is not None:
+            links.new(shaded_output, emission_color)
+            if emission_strength is not None:
+                emission_strength.default_value = glow
+        links.new(principled.outputs["BSDF"], output.inputs["Surface"])
     if name not in MATERIAL_INDEX:
         MATERIAL_INDEX[name] = len(MATERIALS)
         MATERIALS.append(mat)
@@ -94,6 +142,12 @@ def material(name: str, color: tuple[float, float, float, float]) -> bpy.types.M
 def append_geometry(vertices: tuple[Vector, ...] | list[Vector], faces: tuple[tuple[int, ...], ...] | list[tuple[int, ...]], mat: bpy.types.Material) -> None:
     offset = len(MESH_VERTICES)
     MESH_VERTICES.extend((vertex.x, vertex.y, vertex.z) for vertex in vertices)
+    z_min = min(vertex.z for vertex in vertices)
+    z_max = max(vertex.z for vertex in vertices)
+    z_span = max(z_max - z_min, 0.001)
+    for vertex in vertices:
+        ramp = 0.74 + 0.34 * ((vertex.z - z_min) / z_span)
+        MESH_VERTEX_SHADES.append((ramp, ramp, ramp, 1.0))
     material_index = MATERIAL_INDEX[mat.name]
     for face in faces:
         MESH_FACES.append(tuple(offset + index for index in face))
@@ -109,6 +163,19 @@ def box(_name: str, position: Vector, scale: tuple[float, float, float], mat: bp
     rotation = Matrix.Rotation(angle, 4, "Y")
     vertices = tuple(position + rotation @ Vector((vertex.x * scale[0], vertex.y * scale[1], vertex.z * scale[2])) for vertex in CUBE_VERTICES)
     append_geometry(vertices, CUBE_FACES, mat)
+
+
+def prism(_name: str, points: list[Vector], depth: float, mat: bpy.types.Material) -> None:
+    """Extrude an authored x/z silhouette polygon along camera depth."""
+    half = depth * 0.5
+    vertices = [point + Vector((0.0, -half, 0.0)) for point in points]
+    vertices.extend(point + Vector((0.0, half, 0.0)) for point in points)
+    count = len(points)
+    faces: list[tuple[int, ...]] = [tuple(reversed(range(count))), tuple(range(count, count * 2))]
+    for index in range(count):
+        next_index = (index + 1) % count
+        faces.append((index, next_index, count + next_index, count + index))
+    append_geometry(vertices, faces, mat)
 
 
 def bone(_name: str, start: Vector, end: Vector, radius: float, mat: bpy.types.Material) -> None:
@@ -183,31 +250,36 @@ def pose(animation: str, frame: int, kind: str, weapon: str) -> dict[str, Vector
         hand_back.z += abs(stride) * 0.08
         weapon_tip = hand_front + Vector((0.22 + opposite * 0.15, -0.04, -0.34))
     elif animation == "attack":
+        # Two deep anticipation frames, active impact locked to frame 2, then a
+        # committed follow-through and two recovery poses.
         attack_poses = (
-            ((-0.42, 0.92), (-0.64, 0.62), (-0.82, 1.10), -0.08),
-            ((-0.58, 1.04), (-0.78, 0.74), (-0.98, 1.28), -0.12),
-            ((0.66, 0.54), (0.88, 0.36), (1.20, 0.12), 0.10),
-            ((0.72, 0.28), (0.92, 0.10), (1.04, -0.48), 0.13),
-            ((0.42, 0.42), (0.56, 0.16), (0.72, -0.28), 0.05),
-            ((0.40, 0.34), (0.52, 0.04), (0.70, -0.30), 0.0),
+            ((-0.58, 1.00), (-0.78, 0.88), (-1.05, 1.24), -0.18, -0.15),
+            ((-0.68, 1.16), (-0.88, 1.04), (-1.18, 1.34), -0.25, -0.22),
+            ((0.74, 0.64), (0.98, 0.42), (1.30, 0.06), 0.24, 0.34),
+            ((0.78, 0.30), (0.98, 0.08), (1.12, -0.52), 0.18, 0.30),
+            ((0.48, 0.46), (0.62, 0.18), (0.80, -0.30), 0.08, 0.12),
+            ((0.40, 0.34), (0.52, 0.04), (0.70, -0.30), 0.00, 0.00),
         )
-        elbow, hand, tip, lean = attack_poses[frame]
+        elbow, hand, tip, lean, step = attack_poses[frame]
         elbow_front = Vector((elbow[0], -0.18, elbow[1]))
         hand_front = Vector((hand[0], -0.22, hand[1]))
         weapon_tip = Vector((tip[0], -0.26, tip[1]))
-        elbow_back = Vector((hand_front.x - 0.26, 0.08, hand_front.z + 0.10))
-        hand_back = Vector((hand_front.x - 0.08, 0.02, hand_front.z - 0.06))
+        elbow_back = Vector((hand_front.x - 0.28, 0.08, hand_front.z + 0.12))
+        hand_back = Vector((hand_front.x - 0.10, 0.02, hand_front.z - 0.06))
         chest.x += lean
         head.x += lean * 1.25
+        hip.x += lean * 0.38
+        knee_front.x += step * 0.65
+        foot_front.x += step
+        knee_back.x -= step * 0.25
+        foot_back.x -= step * 0.36
         if frame <= 1:
-            hip.z -= 0.10
-            knee_front.z -= 0.05
-            knee_back.z -= 0.05
-        elif frame in (2, 3):
-            foot_front.x += 0.26
-            knee_front.x += 0.20
+            hip.z -= 0.14
+            chest.z -= 0.04
+            knee_front.z -= 0.08
+            knee_back.z -= 0.08
     elif animation == "hurt":
-        recoil = (0.18, 0.34, 0.22)[frame]
+        recoil = (0.20, 0.38, 0.24)[frame]
         chest.x -= recoil
         head.x -= recoil * 1.55
         head.z -= 0.04 * (frame + 1)
@@ -251,108 +323,237 @@ def pose(animation: str, frame: int, kind: str, weapon: str) -> dict[str, Vector
         shoulder_back.z -= 0.04
         shoulder_front.z -= 0.04
 
-    # The shepherd is not a recolor of another hero.  Its lantern-casting rig
-    # has its own planted stance: every state changes articulated limbs and the
-    # held lantern, while the physics root remains at the cell origin.
-    if weapon == "lantern":
-        if animation == "idle":
-            phase = frame * math.tau / 4.0
-            sway = math.sin(phase)
-            knee_front.x += sway * 0.045
-            knee_back.x -= sway * 0.035
-            foot_front.x += sway * 0.025
-            foot_back.x -= sway * 0.020
-            elbow_back += Vector((-0.04 * sway, 0.0, 0.035 * sway))
-            hand_back += Vector((-0.06 * sway, 0.0, 0.045 * sway))
-            weapon_tip = hand_front + Vector((0.18 + 0.04 * sway, -0.04, -0.42 - 0.035 * sway))
-        elif animation == "walk":
-            phase = frame * math.tau / 8.0
-            lantern_swing = math.sin(phase + math.pi * 0.35)
-            chest.x += lantern_swing * 0.025
-            head.x += lantern_swing * 0.018
-            weapon_tip = hand_front + Vector((0.16 + lantern_swing * 0.12, -0.04, -0.43 + abs(lantern_swing) * 0.06))
-        elif animation == "attack":
-            lantern_attack = (
-                ((-0.54, 0.78), (-0.72, 0.92), (-0.88, 1.18), -0.10, -0.12),
-                ((-0.62, 0.96), (-0.82, 1.10), (-0.98, 1.38), -0.16, -0.16),
-                ((0.50, 0.66), (0.82, 0.58), (1.20, 0.54), 0.18, 0.28),
-                ((0.58, 0.48), (0.88, 0.34), (1.14, 0.06), 0.14, 0.34),
-                ((0.34, 0.52), (0.58, 0.28), (0.82, -0.10), 0.04, 0.14),
-                ((0.40, 0.34), (0.52, 0.04), (0.70, -0.30), 0.00, 0.00),
-            )
-            elbow, hand, tip, lean, step = lantern_attack[frame]
-            elbow_front = Vector((elbow[0], -0.18, elbow[1]))
-            hand_front = Vector((hand[0], -0.22, hand[1]))
-            weapon_tip = Vector((tip[0], -0.26, tip[1]))
-            elbow_back = Vector((hand_front.x - 0.30, 0.10, hand_front.z + 0.14))
-            hand_back = Vector((hand_front.x - 0.10, 0.02, hand_front.z - 0.04))
-            chest.x += lean
-            head.x += lean * 1.18
-            knee_front.x += step * 0.72
-            foot_front.x += step
-            knee_back.x -= step * 0.20
-            foot_back.x -= step * 0.10
-        elif animation == "hurt":
-            stagger = (0.08, -0.12, 0.05)[frame]
-            knee_front.x += stagger
-            foot_front.x += stagger * 1.35
-            knee_back.x -= stagger * 0.55
-            weapon_tip = hand_front + Vector((0.12 - stagger, -0.04, -0.43 + abs(stagger) * 0.24))
+    if animation not in ("attack", "hurt", "death"):
+        if weapon in ("void_staff", "tuning_staff", "needle_staff", "rift_lantern", "staff"):
+            weapon_tip = hand_front + Vector((0.15, -0.04, 0.92))
+        elif weapon == "rail_rifle":
+            elbow_front = Vector((0.40, -0.18, 0.50))
+            hand_front = Vector((0.48, -0.20, 0.40))
+            hand_back = Vector((0.05, 0.04, 0.48))
+            weapon_tip = hand_front + Vector((0.76, -0.04, 0.14))
+        elif weapon in ("grenade_launcher", "pulse_cannon"):
+            hand_front.z += 0.24
+            elbow_front.z += 0.18
+            weapon_tip = hand_front + Vector((0.62, -0.04, 0.08))
 
     return locals()
 
 
-def add_weapon(prefix: str, weapon: str, hand_front: Vector, hand_back: Vector, tip: Vector, accent: bpy.types.Material, dark: bpy.types.Material) -> None:
-    if weapon == "shield":
-        sphere(prefix + "Shield", hand_back + Vector((-0.05, -0.14, 0.06)), (0.34, 0.09, 0.40), accent)
-        bone(prefix + "Sword", hand_front, tip, 0.055, dark)
-    elif weapon == "lantern":
-        # Two hands brace the articulated rift lantern.  The cage, core, grip,
-        # and hanging vane all inherit the per-frame hand/tip pose.
+def basis_from(chest: Vector, head: Vector) -> tuple[Vector, Vector, float]:
+    up = (head - chest).normalized()
+    right = Vector((up.z, 0.0, -up.x))
+    angle = math.atan2(up.x, up.z)
+    return right, up, angle
+
+
+def local_point(base: Vector, right: Vector, up: Vector, x: float, z: float, y: float = 0.0) -> Vector:
+    return base + right * x + up * z + Vector((0.0, y, 0.0))
+
+
+def add_rear_silhouette(prefix: str, style: str, chest: Vector, head: Vector, hip: Vector, shoulder_back: Vector, dark: bpy.types.Material, secondary: bpy.types.Material, accent: bpy.types.Material) -> None:
+    right, up, angle = basis_from(chest, head)
+    p = lambda base, x, z, y=0.0: local_point(base, right, up, x, z, y)
+    if style == "captain":
+        prism(prefix + "CommandCape", [p(shoulder_back, -0.16, 0.10, 0.16), p(chest, -0.30, 0.02, 0.16), p(hip, -0.36, -0.70, 0.16), p(hip, 0.02, -0.54, 0.16), p(chest, 0.10, -0.10, 0.16)], 0.08, dark)
+        bone(prefix + "HelmCrest", p(head, -0.04, 0.22, 0.02), p(head, -0.22, 0.48, 0.02), 0.055, accent)
+    elif style == "sniper":
+        box(prefix + "HatBrim", p(head, 0.0, 0.26, -0.02), (0.48, 0.18, 0.045), dark, angle)
+        prism(prefix + "HatCrown", [p(head, -0.20, 0.24), p(head, 0.17, 0.24), p(head, 0.11, 0.50), p(head, -0.12, 0.48)], 0.24, secondary)
+        prism(prefix + "LongCoat", [p(chest, -0.28, -0.08, 0.15), p(chest, 0.12, -0.06, 0.15), p(hip, 0.08, -0.72, 0.15), p(hip, -0.12, -0.50, 0.15), p(hip, -0.36, -0.74, 0.15)], 0.10, dark)
+    elif style == "weaver":
+        for side in (-1.0, 1.0):
+            start = p(head, side * 0.17, 0.12, 0.10)
+            mid = p(chest, side * 0.34, -0.08, 0.12)
+            end = p(hip, side * 0.48, -0.45, 0.12)
+            bone(prefix + f"VoidTress{side}", start, mid, 0.075, secondary)
+            bone(prefix + f"VoidTressTip{side}", mid, end, 0.050, accent)
+        prism(prefix + "Veil", [p(head, -0.22, 0.16, 0.16), p(head, 0.20, 0.16, 0.16), p(chest, 0.30, -0.36, 0.16), p(hip, 0.02, -0.28, 0.16), p(chest, -0.30, -0.34, 0.16)], 0.08, dark)
+    elif style == "arc_scout":
+        prism(prefix + "WindScarf", [p(chest, -0.22, 0.16, 0.14), p(chest, 0.02, 0.08, 0.14), p(chest, -0.48, -0.08, 0.14), p(hip, -0.64, -0.28, 0.14), p(chest, -0.34, 0.02, 0.14)], 0.08, accent)
+        for offset in (-0.16, 0.16):
+            bone(prefix + f"Antenna{offset}", p(head, offset, 0.22, 0.05), p(head, offset * 1.8, 0.48, 0.05), 0.035, secondary)
+    elif style == "singer":
+        prism(prefix + "FanHair", [p(head, -0.26, 0.12, 0.14), p(head, 0.16, 0.18, 0.14), p(chest, 0.28, -0.18, 0.14), p(hip, 0.20, -0.62, 0.14), p(hip, -0.26, -0.48, 0.14), p(chest, -0.38, -0.10, 0.14)], 0.12, dark)
+        sphere(prefix + "EchoSpeakerRear", p(chest, -0.36, 0.18, 0.10), (0.18, 0.08, 0.18), accent)
+        sphere(prefix + "EchoSpeakerFront", p(chest, 0.34, 0.18, 0.10), (0.18, 0.08, 0.18), accent)
+    elif style == "grenadier":
+        box(prefix + "BlastPack", p(chest, -0.30, -0.02, 0.16), (0.24, 0.18, 0.38), dark, angle)
+        bone(prefix + "PackChimney", p(chest, -0.38, 0.26, 0.16), p(head, -0.34, 0.35, 0.16), 0.06, secondary)
+        for index in range(3):
+            sphere(prefix + f"Grenade{index}", p(chest, -0.32 + index * 0.21, -0.20 - index * 0.02, -0.04), (0.095, 0.07, 0.105), accent)
+    elif style == "mender":
+        sphere(prefix + "ThreadSpool", p(chest, -0.30, -0.02, 0.16), (0.28, 0.10, 0.28), secondary)
+        sphere(prefix + "SpoolCore", p(chest, -0.30, -0.02, 0.05), (0.10, 0.06, 0.10), accent)
+        bone(prefix + "LooseThread", p(chest, -0.40, -0.14, 0.18), p(hip, -0.48, -0.58, 0.18), 0.025, accent)
+        prism(prefix + "MenderHood", [p(head, -0.30, 0.00, 0.10), p(head, -0.18, 0.32, 0.10), p(head, 0.08, 0.42, 0.10), p(head, 0.30, 0.04, 0.10), p(chest, 0.18, 0.18, 0.10), p(chest, -0.20, 0.16, 0.10)], 0.18, dark)
+    elif style == "orbit_guard":
+        bone(prefix + "HelmFin", p(head, 0.0, 0.22, 0.04), p(head, -0.12, 0.52, 0.04), 0.065, accent)
+        for side in (-1.0, 1.0):
+            center = p(chest, side * 0.48, 0.25, 0.08)
+            box(prefix + f"OrbitBlade{side}", center, (0.08, 0.08, 0.30), accent, angle + side * 0.35)
+    elif style == "artificer":
+        box(prefix + "CoilPack", p(chest, -0.30, -0.02, 0.16), (0.25, 0.18, 0.34), dark, angle)
+        for side in (-1.0, 1.0):
+            bone(prefix + f"CoilFork{side}", p(chest, -0.28, 0.22, 0.16), p(head, -0.20 + side * 0.18, 0.48, 0.16), 0.035, accent)
+        box(prefix + "GoggleBand", p(head, 0.0, 0.05, -0.01), (0.32, 0.20, 0.055), secondary, angle)
+    elif style == "shepherd":
+        prism(prefix + "ShepherdCloak", [p(head, -0.26, 0.12, 0.14), p(head, 0.22, 0.12, 0.14), p(chest, 0.32, -0.10, 0.14), p(hip, 0.20, -0.68, 0.14), p(hip, -0.34, -0.62, 0.14), p(chest, -0.40, -0.10, 0.14)], 0.12, dark)
+        prism(prefix + "LanternHood", [p(head, -0.32, -0.02, 0.08), p(head, -0.18, 0.34, 0.08), p(head, 0.02, 0.50, 0.08), p(head, 0.30, 0.02, 0.08), p(chest, 0.20, 0.20, 0.08), p(chest, -0.22, 0.18, 0.08)], 0.18, secondary)
+
+
+def add_enemy_silhouette(prefix: str, style: str, chest: Vector, head: Vector, hip: Vector, dark: bpy.types.Material, secondary: bpy.types.Material, accent: bpy.types.Material) -> None:
+    right, up, angle = basis_from(chest, head)
+    p = lambda base, x, z, y=0.0: local_point(base, right, up, x, z, y)
+    # Every enemy carries asymmetrical torn clothing and a readable wound.
+    prism(prefix + "TornSkirt", [p(hip, -0.30, 0.12, 0.14), p(hip, 0.30, 0.12, 0.14), p(hip, 0.25, -0.36, 0.14), p(hip, 0.02, -0.22, 0.14), p(hip, -0.12, -0.42, 0.14), p(hip, -0.32, -0.24, 0.14)], 0.10, dark)
+    if style in ("grunt", "swift"):
+        prism(prefix + "RagScarf", [p(chest, -0.22, 0.18, 0.14), p(chest, 0.16, 0.12, 0.14), p(chest, -0.34, -0.02, 0.14), p(hip, -0.62, -0.18, 0.14), p(chest, -0.38, 0.06, 0.14)], 0.08, secondary)
+    if style in ("fast", "swift"):
+        for index in range(3):
+            start = p(chest, -0.22, 0.18 - index * 0.20, 0.12)
+            end = p(chest, -0.48 - index * 0.08, 0.34 - index * 0.22, 0.12)
+            bone(prefix + f"BackQuill{index}", start, end, 0.045, accent)
+    if style == "tank":
+        for side in (-1.0, 1.0):
+            box(prefix + f"SlabPauldron{side}", p(chest, side * 0.36, 0.18, 0.04), (0.26, 0.20, 0.20), secondary, angle + side * 0.20)
+        box(prefix + "BrokenBackplate", p(chest, -0.16, -0.02, 0.12), (0.36, 0.18, 0.38), dark, angle)
+    if style == "field":
+        prism(prefix + "FieldMantle", [p(chest, -0.42, 0.18, 0.12), p(chest, 0.42, 0.18, 0.12), p(hip, 0.22, -0.34, 0.12), p(hip, -0.10, -0.20, 0.12), p(hip, -0.34, -0.44, 0.12)], 0.12, secondary)
+        for side in (-1.0, 1.0):
+            bone(prefix + f"FieldAntler{side}", p(head, side * 0.12, 0.20, 0.06), p(head, side * 0.35, 0.48, 0.06), 0.045, accent)
+    if style == "split":
+        for side in (-1.0, 1.0):
+            base = p(head, side * 0.12, 0.18, 0.04)
+            fork = p(head, side * 0.32, 0.42, 0.04)
+            bone(prefix + f"SplitHorn{side}", base, fork, 0.055, secondary)
+            bone(prefix + f"SplitHornFork{side}", fork, p(head, side * 0.46, 0.52, 0.04), 0.040, accent)
+    if style == "boss":
+        prism(prefix + "BossMantle", [p(head, -0.32, -0.04, 0.14), p(head, 0.30, -0.04, 0.14), p(chest, 0.48, -0.12, 0.14), p(hip, 0.34, -0.72, 0.14), p(hip, 0.02, -0.52, 0.14), p(hip, -0.42, -0.76, 0.14), p(chest, -0.52, -0.12, 0.14)], 0.14, dark)
+        for side in (-1.0, 0.0, 1.0):
+            base = p(head, side * 0.16, 0.18, 0.04)
+            tip = p(head, side * 0.36, 0.58 - abs(side) * 0.08, 0.04)
+            bone(prefix + f"CrownHorn{side}", base, tip, 0.065, accent)
+    # The wound lives on the camera-facing chest, independent of hit flash.
+    bone(prefix + "WoundSlashA", p(chest, -0.16, 0.12, -0.24), p(chest, 0.14, -0.10, -0.24), 0.035, accent)
+    bone(prefix + "WoundSlashB", p(chest, -0.08, 0.18, -0.245), p(chest, 0.20, -0.04, -0.245), 0.025, accent)
+
+
+def add_face(prefix: str, head: Vector, chest: Vector, skin: bpy.types.Material, sclera: bpy.types.Material, iris: bpy.types.Material, brow: bpy.types.Material, enemy: bool) -> None:
+    right, up, _angle = basis_from(chest, head)
+    y = -0.235
+    eye_z = 0.035 if not enemy else 0.015
+    for side in (-1.0, 1.0):
+        eye = local_point(head, right, up, side * 0.085, eye_z, y)
+        sphere(prefix + f"EyeWhite{side}", eye, (0.070, 0.025, 0.050), sclera)
+        pupil = eye + Vector((0.008 if enemy else 0.014, -0.030, -0.002))
+        sphere(prefix + f"Iris{side}", pupil, (0.031, 0.015, 0.032), iris)
+        brow_center = local_point(head, right, up, side * 0.085, eye_z + 0.085, y - 0.010)
+        brow_start = brow_center - right * 0.060 + up * (0.018 * side if enemy else 0.0)
+        brow_end = brow_center + right * 0.060 - up * (0.018 * side if enemy else 0.0)
+        bone(prefix + f"Brow{side}", brow_start, brow_end, 0.018, brow)
+    # Small nose plane preserves face value grouping after 64px minification.
+    sphere(prefix + "Nose", local_point(head, right, up, 0.14, -0.045, y - 0.004), (0.045, 0.018, 0.055), skin)
+
+
+def add_weapon(prefix: str, weapon: str, hand_front: Vector, hand_back: Vector, tip: Vector, dark: bpy.types.Material, secondary: bpy.types.Material, accent: bpy.types.Material) -> None:
+    delta = tip - hand_front
+    direction = delta.normalized() if delta.length > 0.001 else Vector((0.0, 0.0, 1.0))
+    side = Vector((-direction.z, 0.0, direction.x))
+    angle = math.atan2(direction.x, direction.z)
+    if weapon == "orbit_shield":
+        shield_center = hand_back + Vector((-0.10, -0.13, 0.08))
+        sphere(prefix + "OrbitShield", shield_center, (0.40, 0.08, 0.46), secondary)
+        sphere(prefix + "ShieldCore", shield_center + Vector((0.04, -0.09, 0.0)), (0.18, 0.035, 0.20), accent)
+        bone(prefix + "GuardBlade", hand_front, tip, 0.060, dark)
+        bone(prefix + "GuardBladeEdge", tip, tip + direction * 0.20, 0.095, accent)
+    elif weapon == "rift_lantern":
         bone(prefix + "LanternBrace", hand_back, hand_front, 0.045, dark)
-        bone(prefix + "LanternGrip", hand_front, tip, 0.052, dark)
-        direction = (tip - hand_front).normalized()
-        side = Vector((-direction.z, 0.0, direction.x))
-        core = tip + direction * 0.05
-        sphere(prefix + "LanternCore", core, (0.16, 0.10, 0.18), accent)
+        bone(prefix + "LanternStaff", hand_front, tip, 0.052, dark)
+        core = tip + direction * 0.04
+        sphere(prefix + "LanternCore", core, (0.17, 0.10, 0.19), accent)
         for index in (-1, 1):
-            cage_start = core + side * index * 0.18 + direction * 0.16
-            cage_end = core + side * index * 0.18 - direction * 0.16
-            bone(prefix + f"LanternCage{index}", cage_start, cage_end, 0.035, dark)
-        bone(prefix + "LanternCrossbar", core - side * 0.22, core + side * 0.22, 0.032, dark)
-        vane_tip = core - direction * 0.30 + side * 0.08
-        bone(prefix + "LanternVane", core - direction * 0.14, vane_tip, 0.038, accent)
+            cage_start = core + side * index * 0.19 + direction * 0.17
+            cage_end = core + side * index * 0.19 - direction * 0.17
+            bone(prefix + f"LanternCage{index}", cage_start, cage_end, 0.034, secondary)
+        bone(prefix + "LanternCrossbar", core - side * 0.23, core + side * 0.23, 0.032, secondary)
+        bone(prefix + "LanternVane", core - direction * 0.14, core - direction * 0.34 + side * 0.09, 0.038, accent)
+    elif weapon == "rail_rifle":
+        bone(prefix + "RailBarrel", hand_front, tip + direction * 0.12, 0.055, accent)
+        box(prefix + "RailReceiver", hand_front + direction * 0.24, (0.13, 0.12, 0.30), secondary, angle)
+        bone(prefix + "RailStock", hand_front, hand_back - direction * 0.16, 0.090, dark)
+        box(prefix + "RailScope", hand_front + direction * 0.28 + side * 0.13, (0.075, 0.07, 0.16), accent, angle)
+    elif weapon == "void_staff":
+        bone(prefix + "VoidStaff", hand_front, tip, 0.052, dark)
+        crown = tip + direction * 0.08
+        bone(prefix + "CrescentA", crown, crown + direction * 0.18 + side * 0.20, 0.055, secondary)
+        bone(prefix + "CrescentB", crown, crown + direction * 0.18 - side * 0.20, 0.055, secondary)
+        sphere(prefix + "VoidKnot", crown + direction * 0.16, (0.12, 0.08, 0.12), accent)
+    elif weapon == "arc_spear":
+        bone(prefix + "ArcSpearShaft", hand_front, tip, 0.048, dark)
+        spear_tip = tip + direction * 0.27
+        bone(prefix + "ArcSpearTip", tip, spear_tip, 0.080, accent)
+        bone(prefix + "ArcSpearForkA", tip, tip + direction * 0.12 + side * 0.14, 0.040, secondary)
+        bone(prefix + "ArcSpearForkB", tip, tip + direction * 0.12 - side * 0.14, 0.040, secondary)
+    elif weapon == "tuning_staff":
+        bone(prefix + "HymnStaff", hand_front, tip, 0.052, dark)
+        cross = tip + direction * 0.06
+        bone(prefix + "TuningCross", cross - side * 0.18, cross + side * 0.18, 0.042, secondary)
+        bone(prefix + "TuningForkA", cross - side * 0.18, cross - side * 0.18 + direction * 0.26, 0.045, accent)
+        bone(prefix + "TuningForkB", cross + side * 0.18, cross + side * 0.18 + direction * 0.26, 0.045, accent)
+    elif weapon == "grenade_launcher":
+        bone(prefix + "LauncherBarrel", hand_front, tip, 0.115, dark)
+        box(prefix + "LauncherMuzzle", tip, (0.16, 0.13, 0.16), secondary, angle)
+        sphere(prefix + "GrenadeDrum", hand_front + direction * 0.18 - side * 0.14, (0.16, 0.10, 0.17), accent)
+        bone(prefix + "LauncherBrace", hand_back, hand_front + direction * 0.18, 0.055, secondary)
+    elif weapon == "needle_staff":
+        bone(prefix + "NeedleStaff", hand_front, tip, 0.046, dark)
+        bone(prefix + "Needle", tip, tip + direction * 0.32, 0.045, accent)
+        sphere(prefix + "NeedleSpool", tip - direction * 0.06, (0.15, 0.08, 0.15), secondary)
+        bone(prefix + "ThreadTail", tip - side * 0.14, tip - side * 0.30 - direction * 0.10, 0.024, accent)
+    elif weapon == "pulse_cannon":
+        bone(prefix + "CannonBrace", hand_back, hand_front, 0.065, secondary)
+        bone(prefix + "PulseCannon", hand_front, tip, 0.135, dark)
+        sphere(prefix + "PulseMuzzle", tip, (0.18, 0.12, 0.18), accent)
+        for offset in (0.22, 0.46):
+            sphere(prefix + f"PulseCoil{offset}", hand_front + direction * offset, (0.15, 0.105, 0.07), secondary)
     elif weapon == "axes":
         bone(prefix + "AxeA", hand_front, tip, 0.065, dark)
-        box(prefix + "AxeHeadA", tip, (0.18, 0.07, 0.12), accent, 0.35)
+        box(prefix + "AxeHeadA", tip, (0.20, 0.08, 0.13), accent, angle + 0.35)
         second_tip = hand_back + Vector((-0.34, 0.0, 0.26))
-        bone(prefix + "AxeB", hand_back, second_tip, 0.06, dark)
-        box(prefix + "AxeHeadB", second_tip, (0.16, 0.07, 0.11), accent, -0.3)
+        bone(prefix + "AxeB", hand_back, second_tip, 0.060, dark)
+        box(prefix + "AxeHeadB", second_tip, (0.18, 0.08, 0.12), secondary, angle - 0.30)
     elif weapon == "claw":
-        direction = (tip - hand_front).normalized()
-        side = Vector((-direction.z, 0.0, direction.x))
         for index in (-1, 0, 1):
-            claw_tip = hand_front + direction * 0.38 + side * index * 0.09
+            claw_tip = hand_front + direction * 0.42 + side * index * 0.10
             bone(prefix + f"Claw{index}", hand_front, claw_tip, 0.035, accent)
     else:
-        thickness = 0.075 if weapon in ("hammer", "greatblade") else 0.052
+        thickness = 0.082 if weapon in ("hammer", "greatblade") else 0.052
         bone(prefix + "WeaponShaft", hand_front, tip, thickness, dark)
         if weapon == "hammer":
-            box(prefix + "HammerHead", tip, (0.28, 0.10, 0.16), accent, 0.25)
-        elif weapon in ("blade", "greatblade"):
-            blade_mid = tip + (tip - hand_front).normalized() * (0.14 if weapon == "blade" else 0.22)
-            bone(prefix + "Blade", tip, blade_mid, 0.10 if weapon == "greatblade" else 0.075, accent)
+            box(prefix + "HammerHead", tip, (0.32, 0.12, 0.18), secondary, angle + 0.25)
+            box(prefix + "BrokenHammerFace", tip + side * 0.18, (0.13, 0.14, 0.16), accent, angle - 0.15)
+        elif weapon in ("captain_blade", "greatblade"):
+            length = 0.24 if weapon == "captain_blade" else 0.34
+            blade_mid = tip + direction * length
+            bone(prefix + "Blade", tip, blade_mid, 0.11 if weapon == "greatblade" else 0.085, secondary)
+            bone(prefix + "BladeGlow", tip + direction * 0.04, blade_mid, 0.045, accent)
+            bone(prefix + "BladeGuard", hand_front - side * 0.14, hand_front + side * 0.14, 0.045, accent)
         elif weapon == "club":
-            sphere(prefix + "ClubHead", tip, (0.15, 0.10, 0.18), accent)
+            sphere(prefix + "ClubHead", tip, (0.17, 0.11, 0.20), secondary)
+            for spike in (-1.0, 1.0):
+                bone(prefix + f"ClubSpike{spike}", tip, tip + side * spike * 0.20 + direction * 0.08, 0.035, accent)
         elif weapon == "staff":
-            sphere(prefix + "StaffCore", tip, (0.14, 0.10, 0.14), accent)
-        elif weapon == "spear":
-            spear_tip = tip + (tip - hand_front).normalized() * 0.22
-            bone(prefix + "SpearTip", tip, spear_tip, 0.085, accent)
+            sphere(prefix + "StaffCore", tip, (0.15, 0.10, 0.15), accent)
+            bone(prefix + "StaffForkA", tip, tip + direction * 0.20 + side * 0.12, 0.045, secondary)
+            bone(prefix + "StaffForkB", tip, tip + direction * 0.20 - side * 0.12, 0.045, secondary)
 
 
-def build_character(cell_x: float, cell_z: float, spec: tuple, animation: str, frame: int) -> None:
-    char_id, kind, weapon, dark_color, body_color, accent_color, size = spec
+def build_character(cell_x: float, cell_z: float, spec: dict, animation: str, frame: int) -> None:
+    char_id = spec["id"]
+    kind = spec["kind"]
+    style = spec["style"]
+    weapon = spec["weapon"]
+    size = spec["size"]
     p = pose(animation, frame, kind, weapon)
     origin = Vector((cell_x, 0.0, cell_z + 0.05))
 
@@ -361,31 +562,44 @@ def build_character(cell_x: float, cell_z: float, spec: tuple, animation: str, f
         return origin + Vector((point.x * size, point.y, point.z * size))
 
     prefix = f"{char_id}_{animation}_{frame}_"
+    dark_color, body_color, secondary_color, accent_color = spec["palette"]
     dark = material(char_id + "_dark", dark_color)
     body = material(char_id + "_body", body_color)
-    accent = material(char_id + "_accent", accent_color)
+    secondary = material(char_id + "_secondary", secondary_color)
+    accent = material(char_id + "_highlight", accent_color, 0.18)
+    skin = material(char_id + "_skin", spec["skin"])
+    sclera = material("face_sclera", (0.82, 0.84, 0.80, 1.0))
+    iris = material(char_id + "_iris", spec["iris"], 0.12)
+    brow = material("face_brow", (0.10, 0.08, 0.12, 1.0))
 
-    # Rear limbs, torso, then front limbs establish a readable three-quarter silhouette.
+    if kind == "hero":
+        add_rear_silhouette(prefix, style, at("chest"), at("head"), at("hip"), at("shoulder_back"), dark, secondary, accent)
+    else:
+        add_enemy_silhouette(prefix, style, at("chest"), at("head"), at("hip"), dark, secondary, accent)
+
+    # Articulated rear limbs, torso, then front limbs establish a readable
+    # three-quarter silhouette.  No whole-sprite transform is used.
     bone(prefix + "BackThigh", at("hip") + Vector((-0.10, 0.13, 0.0)), at("knee_back"), 0.105 * size, dark)
     bone(prefix + "BackShin", at("knee_back"), at("foot_back"), 0.09 * size, body)
     bone(prefix + "BackUpperArm", at("shoulder_back"), at("elbow_back"), 0.085 * size, dark)
     bone(prefix + "BackForearm", at("elbow_back"), at("hand_back"), 0.075 * size, body)
     bone(prefix + "Torso", at("hip"), at("chest"), 0.30 * size, body)
-    sphere(prefix + "ChestArmor", at("chest") + Vector((0.02, -0.02, -0.08)), (0.34 * size, 0.20, 0.36 * size), dark)
-    sphere(prefix + "Head", at("head"), (0.28 * size, 0.22, 0.29 * size), body)
-    box(prefix + "Visor", at("head") + Vector((0.15 * size, -0.20, 0.02)), (0.16 * size, 0.035, 0.07 * size), accent, 0.0)
-    if kind == "enemy":
-        horn_start = at("head") + Vector((-0.10 * size, 0.02, 0.20 * size))
-        horn_tip = horn_start + Vector((-0.20 * size, 0.0, 0.20 * size))
-        bone(prefix + "Horn", horn_start, horn_tip, 0.045 * size, accent)
+    sphere(prefix + "ChestArmor", at("chest") + Vector((0.02, -0.02, -0.08)), (0.34 * size, 0.20, 0.36 * size), secondary)
+    sphere(prefix + "Head", at("head"), (0.28 * size, 0.22, 0.29 * size), skin)
+    add_face(prefix, at("head"), at("chest"), skin, sclera, iris, brow, kind == "enemy")
+    if kind == "enemy" and style not in ("split", "field", "boss"):
+        right, up, _angle = basis_from(at("chest"), at("head"))
+        horn_start = local_point(at("head"), right, up, -0.12 * size, 0.20 * size, 0.02)
+        horn_tip = local_point(at("head"), right, up, -0.34 * size, 0.45 * size, 0.02)
+        bone(prefix + "BrokenHorn", horn_start, horn_tip, 0.045 * size, accent)
     bone(prefix + "FrontThigh", at("hip") + Vector((0.11, -0.16, 0.0)), at("knee_front"), 0.115 * size, body)
-    bone(prefix + "FrontShin", at("knee_front"), at("foot_front"), 0.095 * size, accent)
+    bone(prefix + "FrontShin", at("knee_front"), at("foot_front"), 0.095 * size, secondary)
     sphere(prefix + "FrontBoot", at("foot_front") + Vector((0.08 * size, -0.01, 0.0)), (0.16 * size, 0.12, 0.09 * size), dark)
     sphere(prefix + "BackBoot", at("foot_back") + Vector((0.08 * size, 0.0, 0.0)), (0.15 * size, 0.11, 0.08 * size), dark)
     bone(prefix + "FrontUpperArm", at("shoulder_front"), at("elbow_front"), 0.095 * size, body)
-    bone(prefix + "FrontForearm", at("elbow_front"), at("hand_front"), 0.08 * size, accent)
-    sphere(prefix + "FrontHand", at("hand_front"), (0.10 * size, 0.08, 0.10 * size), body)
-    add_weapon(prefix, weapon, at("hand_front"), at("hand_back"), at("weapon_tip"), accent, dark)
+    bone(prefix + "FrontForearm", at("elbow_front"), at("hand_front"), 0.08 * size, secondary)
+    sphere(prefix + "FrontHand", at("hand_front"), (0.10 * size, 0.08, 0.10 * size), skin)
+    add_weapon(prefix, weapon, at("hand_front"), at("hand_back"), at("weapon_tip"), dark, secondary, accent)
 
 
 def configure_scene(rows: int) -> None:
@@ -403,7 +617,7 @@ def configure_scene(rows: int) -> None:
     scene.render.image_settings.color_depth = "8"
     scene.render.filepath = str(OUTPUT)
     scene.render.use_file_extension = True
-    scene.render.filter_size = 0.75
+    scene.render.filter_size = 0.72
     scene.view_settings.look = "AgX - Medium High Contrast"
 
     camera_data = bpy.data.cameras.new("AtlasCamera")
@@ -418,22 +632,34 @@ def configure_scene(rows: int) -> None:
 
     world = bpy.data.worlds.new("AtlasWorld") if bpy.data.worlds.get("AtlasWorld") is None else bpy.data.worlds["AtlasWorld"]
     world.use_nodes = True
-    world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.045, 0.055, 0.08, 1.0)
-    world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.8
+    world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.055, 0.070, 0.11, 1.0)
+    world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.72
     scene.world = world
 
-    sun_data = bpy.data.lights.new("AtlasSun", type="SUN")
-    sun_data.energy = 2.2
-    sun_data.angle = math.radians(25.0)
-    sun = bpy.data.objects.new("AtlasSun", sun_data)
-    bpy.context.collection.objects.link(sun)
-    sun.rotation_euler = (math.radians(35.0), math.radians(-20.0), math.radians(-35.0))
+    key_data = bpy.data.lights.new("AtlasKey", type="SUN")
+    key_data.energy = 2.6
+    key_data.angle = math.radians(22.0)
+    key_data.color = (1.0, 0.82, 0.68)
+    key = bpy.data.objects.new("AtlasKey", key_data)
+    bpy.context.collection.objects.link(key)
+    key.rotation_euler = (math.radians(35.0), math.radians(-20.0), math.radians(-35.0))
+
+    rim_data = bpy.data.lights.new("AtlasRim", type="SUN")
+    rim_data.energy = 2.0
+    rim_data.angle = math.radians(18.0)
+    rim_data.color = (0.22, 0.62, 1.0)
+    rim = bpy.data.objects.new("AtlasRim", rim_data)
+    bpy.context.collection.objects.link(rim)
+    rim.rotation_euler = (math.radians(-42.0), math.radians(35.0), math.radians(145.0))
 
 
 def finalize_atlas_mesh() -> None:
     mesh = bpy.data.meshes.new("TrueCharacterAtlasGeometry")
     mesh.from_pydata(MESH_VERTICES, [], MESH_FACES)
     mesh.update()
+    gradient = mesh.color_attributes.new(name="cv_gradient", type="FLOAT_COLOR", domain="POINT")
+    for entry, shade in zip(gradient.data, MESH_VERTEX_SHADES):
+        entry.color = shade
     for mat in MATERIALS:
         mesh.materials.append(mat)
     for polygon, material_index in zip(mesh.polygons, MESH_FACE_MATERIALS):
@@ -442,44 +668,51 @@ def finalize_atlas_mesh() -> None:
     bpy.context.collection.objects.link(atlas_object)
 
 
-def save_shepherd_reference(rows: int) -> None:
-    """Crop idle frame 0 into the unique resource key used by Godot.
-
-    Runtime animation reads the shared atlas; this tiny reference image exists
-    so editor/export validation also sees a real, replaceable shepherd asset.
-    """
+def save_hero_references(rows: int) -> None:
+    """Crop each hero idle frame into its unique Godot resource key."""
     atlas = bpy.data.images.load(str(OUTPUT), check_existing=False)
-    shepherd_index = next(index for index, spec in enumerate(CHARACTERS) if spec[0] == "hero_shepherd")
-    atlas_row = shepherd_index * len(ANIMATIONS)
-    source_y = int(atlas.size[1]) - (atlas_row + 1) * CELL_PIXELS
     source_pixels = list(atlas.pixels)
-    cropped_pixels: list[float] = []
-    for y in range(CELL_PIXELS):
-        row_start = ((source_y + y) * int(atlas.size[0])) * 4
-        for x in range(CELL_PIXELS):
-            pixel_start = row_start + x * 4
-            cropped_pixels.extend(source_pixels[pixel_start:pixel_start + 4])
-    reference = bpy.data.images.new("HeroShepherdReference", width=CELL_PIXELS, height=CELL_PIXELS, alpha=True)
-    reference.pixels.foreach_set(cropped_pixels)
-    reference.file_format = "PNG"
-    reference.filepath_raw = str(SHEPHERD_REFERENCE_OUTPUT)
-    reference.save()
+    for character_index, spec in enumerate(CHARACTERS):
+        if spec["kind"] != "hero":
+            continue
+        atlas_cell = character_index * FRAMES_PER_CHARACTER
+        source_x = (atlas_cell % COLUMNS) * CELL_PIXELS
+        atlas_row = atlas_cell // COLUMNS
+        source_y = int(atlas.size[1]) - (atlas_row + 1) * CELL_PIXELS
+        cropped_pixels: list[float] = []
+        for y in range(CELL_PIXELS):
+            row_start = ((source_y + y) * int(atlas.size[0])) * 4
+            for x in range(CELL_PIXELS):
+                pixel_start = row_start + (source_x + x) * 4
+                cropped_pixels.extend(source_pixels[pixel_start:pixel_start + 4])
+        reference_path = ROOT / "assets" / "sprites" / f"{spec['id']}.png"
+        reference = bpy.data.images.new(f"{spec['id']}_reference", width=CELL_PIXELS, height=CELL_PIXELS, alpha=True)
+        reference.pixels.foreach_set(cropped_pixels)
+        reference.file_format = "PNG"
+        reference.filepath_raw = str(reference_path)
+        reference.save()
+        bpy.data.images.remove(reference)
+        print(f"TRUE_ANIMATION_REFERENCE {reference_path} {CELL_PIXELS}x{CELL_PIXELS}", flush=True)
     bpy.data.images.remove(atlas)
-    print(f"TRUE_ANIMATION_REFERENCE {SHEPHERD_REFERENCE_OUTPUT} {CELL_PIXELS}x{CELL_PIXELS}", flush=True)
 
 
 def build() -> None:
-    rows = len(CHARACTERS) * len(ANIMATIONS)
+    total_cells = len(CHARACTERS) * FRAMES_PER_CHARACTER
+    rows = math.ceil(total_cells / COLUMNS)
     bpy.context.preferences.filepaths.save_version = 0
     configure_scene(rows)
     for character_index, spec in enumerate(CHARACTERS):
-        for animation_index, (animation, frame_count) in enumerate(ANIMATIONS):
-            row = character_index * len(ANIMATIONS) + animation_index
-            cell_z = (rows * 0.5 - row - 0.5) * CELL_WORLD
+        state_offset = 0
+        for animation, frame_count in ANIMATIONS:
             for frame in range(frame_count):
-                cell_x = (frame - COLUMNS * 0.5 + 0.5) * CELL_WORLD
+                atlas_cell = character_index * FRAMES_PER_CHARACTER + state_offset + frame
+                column = atlas_cell % COLUMNS
+                row = atlas_cell // COLUMNS
+                cell_x = (column - COLUMNS * 0.5 + 0.5) * CELL_WORLD
+                cell_z = (rows * 0.5 - row - 0.5) * CELL_WORLD
                 build_character(cell_x, cell_z, spec, animation, frame)
-        print(f"TRUE_ANIMATION_GEOMETRY {spec[0]}", flush=True)
+            state_offset += frame_count
+        print(f"TRUE_ANIMATION_GEOMETRY {spec['id']}", flush=True)
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     finalize_atlas_mesh()
@@ -487,7 +720,7 @@ def build() -> None:
     bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "tools" / "true_character_rig.blend"), compress=True)
     bpy.ops.render.render(write_still=True)
     print(f"TRUE_ANIMATION_ATLAS {OUTPUT} {COLUMNS * CELL_PIXELS}x{rows * CELL_PIXELS}")
-    save_shepherd_reference(rows)
+    save_hero_references(rows)
 
 
 if __name__ == "__main__":

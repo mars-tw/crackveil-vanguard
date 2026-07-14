@@ -3,6 +3,7 @@ extends RefCounted
 
 const ATLAS_PATH := "res://assets/sprites/true_character_atlas.png"
 const CELL_SIZE := 64
+const ATLAS_COLUMNS := 8
 const STATE_ORDER: Array[StringName] = [&"idle", &"walk", &"attack", &"hurt", &"death"]
 const FRAME_COUNTS := {
 	&"idle": 4,
@@ -11,6 +12,14 @@ const FRAME_COUNTS := {
 	&"hurt": 3,
 	&"death": 6,
 }
+const STATE_FRAME_OFFSETS := {
+	&"idle": 0,
+	&"walk": 4,
+	&"attack": 12,
+	&"hurt": 18,
+	&"death": 21,
+}
+const FRAMES_PER_CHARACTER := 27
 const STATE_FPS := {
 	&"idle": 4.0,
 	&"walk": 10.0,
@@ -20,16 +29,22 @@ const STATE_FPS := {
 }
 const CHARACTER_INDEX := {
 	"hero_captain": 0,
-	"hero_guardian": 1,
-	"hero_scout": 2,
-	"hero_shepherd": 3,
-	"enemy_grunt": 4,
-	"enemy_fast": 5,
-	"enemy_tank": 6,
-	"enemy_elite_field": 7,
-	"enemy_elite_split": 8,
-	"enemy_elite_swift": 9,
-	"enemy_boss": 10,
+	"hero_rift_sniper": 1,
+	"hero_void_weaver": 2,
+	"hero_arc_scout": 3,
+	"hero_echo_singer": 4,
+	"hero_ember_grenadier": 5,
+	"hero_line_mender": 6,
+	"hero_orbit_guard": 7,
+	"hero_pulse_artificer": 8,
+	"hero_shepherd": 9,
+	"enemy_grunt": 10,
+	"enemy_fast": 11,
+	"enemy_tank": 12,
+	"enemy_elite_field": 13,
+	"enemy_elite_split": 14,
+	"enemy_elite_swift": 15,
+	"enemy_boss": 16,
 }
 
 static var _atlas: Texture2D = null
@@ -60,16 +75,16 @@ static func get_sprite_frames(sprite_path: String) -> SpriteFrames:
 	var frames := SpriteFrames.new()
 	if frames.has_animation(&"default"):
 		frames.remove_animation(&"default")
-	var base_row: int = int(CHARACTER_INDEX[character_id]) * STATE_ORDER.size()
 	for state_index in range(STATE_ORDER.size()):
 		var state: StringName = STATE_ORDER[state_index]
 		frames.add_animation(state)
 		frames.set_animation_loop(state, state == &"idle" or state == &"walk")
 		frames.set_animation_speed(state, float(STATE_FPS[state]))
 		for frame_index in range(int(FRAME_COUNTS[state])):
+			var atlas_cell: int = int(CHARACTER_INDEX[character_id]) * FRAMES_PER_CHARACTER + int(STATE_FRAME_OFFSETS[state]) + frame_index
 			var frame_texture := AtlasTexture.new()
 			frame_texture.atlas = _atlas
-			frame_texture.region = Rect2(frame_index * CELL_SIZE, (base_row + state_index) * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+			frame_texture.region = Rect2((atlas_cell % ATLAS_COLUMNS) * CELL_SIZE, (atlas_cell / ATLAS_COLUMNS) * CELL_SIZE, CELL_SIZE, CELL_SIZE)
 			frames.add_frame(state, frame_texture)
 	_frames_cache[character_id] = frames
 	return frames
