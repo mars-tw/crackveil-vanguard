@@ -57,12 +57,14 @@ static func layout_tier(viewport_size: Vector2, force_phone: bool = false, devic
 	var short_side: float = min(size.x, size.y)
 	var hints := device_hints if not device_hints.is_empty() else _runtime_device_hints()
 	var handset_ua := bool(hints.get("ua_phone", false)) or (bool(hints.get("ua_mobile", false)) and not bool(hints.get("ua_tablet", false)))
-	if short_side < MOBILE_VIEWPORT_WIDTH_TRIGGER or handset_ua:
+	var confirmed_touch := has_confirmed_touch(hints)
+	# A short desktop browser window is still a desktop input surface.  Size may
+	# compact the layout, but it must never manufacture phone controls.
+	if handset_ua or (short_side < MOBILE_VIEWPORT_WIDTH_TRIGGER and confirmed_touch):
 		return LayoutTier.PHONE
 	if short_side >= TABLET_SHORT_SIDE_MAX or (size.x >= DESKTOP_VIEWPORT_WIDTH_TRIGGER and not bool(hints.get("ua_tablet", false))):
 		return LayoutTier.DESKTOP
-	var touch_available := bool(hints.get("touch_available", false)) or bool(hints.get("mobile_os", false))
-	return LayoutTier.TABLET if touch_available else LayoutTier.DESKTOP
+	return LayoutTier.TABLET if confirmed_touch else LayoutTier.DESKTOP
 
 
 static func layout_tier_name(viewport_size: Vector2, force_phone: bool = false, device_hints: Dictionary = {}) -> String:
@@ -210,17 +212,20 @@ static func ability_button_rect(viewport_size: Vector2, force_mobile: bool = fal
 	return Rect2(ability_button_position(size, force_mobile), Vector2.ONE * button_size)
 
 
-static func should_show_virtual_joystick(viewport_size: Vector2, force_visible: bool = false, device_hints: Dictionary = {}) -> bool:
-	if force_visible:
-		return true
+static func should_show_virtual_joystick(_viewport_size: Vector2, _force_visible: bool = false, device_hints: Dictionary = {}) -> bool:
 	var hints := device_hints if not device_hints.is_empty() else _runtime_device_hints()
-	var touch_available := bool(hints.get("touch_available", false)) or bool(hints.get("mobile_os", false))
-	if not touch_available:
-		return false
-	var tier := layout_tier(viewport_size, false, hints)
-	if tier != LayoutTier.DESKTOP:
+	# R19 fail-closed policy: even a persisted "force joystick" preference may
+	# not create touch controls on a fine-pointer, non-touch desktop.  Web touch
+	# is confirmed by the primary coarse pointer or a mobile UA; native touch-only
+	# devices retain the touchscreen-without-mouse fallback.
+	return has_confirmed_touch(hints)
+
+
+static func has_confirmed_touch(device_hints: Dictionary = {}) -> bool:
+	var hints := device_hints if not device_hints.is_empty() else _runtime_device_hints()
+	if bool(hints.get("mobile_os", false)) or bool(hints.get("ua_mobile", false)) or bool(hints.get("primary_coarse", false)):
 		return true
-	return not _has_explicit_desktop_input(hints)
+	return bool(hints.get("touch_available", false)) and not bool(hints.get("mouse_available", true))
 
 
 static func mobile_lod_enabled(viewport_size: Vector2, force_mobile: bool = false, device_hints: Dictionary = {}) -> bool:
@@ -384,6 +389,7 @@ static func _apply_minimum_height(control: Control, minimum_height: float, scale
 		control.remove_meta(META_MIN_HEIGHT_BASE)
 	if control.has_meta(META_MIN_HEIGHT_APPLIED):
 		control.remove_meta(META_MIN_HEIGHT_APPLIED)
+	control.custom_minimum_size.y = maxf(control.custom_minimum_size.y, minimum_height)
 
 
 static func _scale_font_key(control: Control, key: String, fallback_size: int, scale: float, mobile: bool) -> void:
@@ -433,10 +439,6 @@ static func _safe_viewport_size(viewport_size: Vector2) -> Vector2:
 	return Vector2(1280.0, 720.0)
 
 
-static func _has_explicit_desktop_input(hints: Dictionary) -> bool:
-	return not bool(hints.get("touch_available", false)) and not bool(hints.get("mobile_os", false)) and not bool(hints.get("ua_mobile", false)) and bool(hints.get("mouse_available", true))
-
-
 static func _runtime_device_hints() -> Dictionary:
 	if not _device_hints_override.is_empty():
 		return _device_hints_override
@@ -447,21 +449,27 @@ static func _runtime_device_hints() -> Dictionary:
 	var ua_mobile := false
 	var ua_phone := false
 	var ua_tablet := false
+	var primary_coarse := false
 	var mouse_available := not mobile_os
 	if OS.has_feature("web"):
-		var web_hints: Variant = JavaScriptBridge.eval("(()=>{const ua=navigator.userAgent||'';return {uaMobile:/Android|webOS|iPhone|iPad|iPod|IEMobile|Opera Mini|Mobile/i.test(ua),uaPhone:/iPhone|iPod|IEMobile|Opera Mini|Android.+Mobile|webOS.+Mobile/i.test(ua),uaTablet:/iPad|Tablet|Android(?!.*Mobile)/i.test(ua),touch:(navigator.maxTouchPoints||0)>0,mouse:!!(window.matchMedia&&window.matchMedia('(any-pointer: fine)').matches)}})()", true)
-		if web_hints is JavaScriptObject:
-			var web_object := web_hints as JavaScriptObject
-			ua_mobile = bool(web_object.uaMobile)
-			ua_phone = bool(web_object.uaPhone)
-			ua_tablet = bool(web_object.uaTablet)
-			touch_available = touch_available or bool(web_object.touch)
-			mouse_available = bool(web_object.mouse)
+		# JSON crosses the Web bridge reliably in release builds; direct property
+		# reads from JavaScriptObject have returned false negatives in Chromium.
+		var web_hints_json: Variant = JavaScriptBridge.eval("(()=>{const ua=navigator.userAgent||'';const mm=window.matchMedia?window.matchMedia.bind(window):null;return JSON.stringify({ua_mobile:/Android|webOS|iPhone|iPad|iPod|IEMobile|Opera Mini|Mobile/i.test(ua),ua_phone:/iPhone|iPod|IEMobile|Opera Mini|Android.+Mobile|webOS.+Mobile/i.test(ua),ua_tablet:/iPad|Tablet|Android(?!.*Mobile)/i.test(ua),touch:(navigator.maxTouchPoints||0)>0,primary_coarse:!!(mm&&mm('(pointer: coarse)').matches),mouse:!!(mm&&mm('(any-pointer: fine)').matches)})})()", true)
+		var parsed_hints: Variant = JSON.parse_string(str(web_hints_json))
+		if parsed_hints is Dictionary:
+			var web_hints := parsed_hints as Dictionary
+			ua_mobile = bool(web_hints.get("ua_mobile", false))
+			ua_phone = bool(web_hints.get("ua_phone", false))
+			ua_tablet = bool(web_hints.get("ua_tablet", false))
+			touch_available = touch_available or bool(web_hints.get("touch", false))
+			primary_coarse = bool(web_hints.get("primary_coarse", false))
+			mouse_available = bool(web_hints.get("mouse", mouse_available))
 	return {
 		"mobile_os": mobile_os,
 		"ua_mobile": ua_mobile,
 		"ua_phone": ua_phone,
 		"ua_tablet": ua_tablet,
 		"touch_available": touch_available,
+		"primary_coarse": primary_coarse,
 		"mouse_available": mouse_available
 	}

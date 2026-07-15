@@ -3,6 +3,7 @@ extends Node
 const ARENA_SCENE_PATH := "res://scenes/arena/Arena.tscn"
 const BACKGROUND_SCRIPT := preload("res://scripts/arena/arena_background.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+const WEB_REACHABILITY_PROBE := preload("res://scripts/services/web_reachability_probe.gd")
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 
 var background: Node2D
@@ -174,6 +175,7 @@ func _build_ui() -> void:
 	achievement_dialog.title = "成就"
 	achievement_dialog.ok_button_text = "關閉"
 	ui_layer.add_child(achievement_dialog)
+	achievement_dialog.get_ok_button().custom_minimum_size.y = 44.0
 	_apply_responsive_layout()
 
 
@@ -351,7 +353,13 @@ func _on_achievement_badge_pressed(row: Dictionary) -> void:
 	var status := "已解鎖" if bool(row.get("unlocked", false)) else "未解鎖"
 	achievement_dialog.title = "%s  %s" % [status, str(row.get("name", ""))]
 	achievement_dialog.dialog_text = str(row.get("description", ""))
-	achievement_dialog.popup_centered(Vector2i(360, 180))
+	var viewport_size := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
+	var dialog_size := Vector2i(
+		int(min(360.0, max(220.0, viewport_size.x - 24.0))),
+		int(min(180.0, max(132.0, viewport_size.y - 24.0)))
+	)
+	achievement_dialog.get_ok_button().custom_minimum_size.y = maxf(44.0, MOBILE_TUNING.touch_target(viewport_size))
+	achievement_dialog.popup_centered(dialog_size)
 
 
 func _achievement_text() -> String:
@@ -547,7 +555,7 @@ func _apply_responsive_layout() -> void:
 			(child as Button).custom_minimum_size = Vector2(menu_width, button_height)
 			(child as Button).add_theme_font_size_override("font_size", 22 if mobile and portrait else 16 if mobile else 20)
 
-	var seed_height := touch_height if mobile else 42.0
+	var seed_height := touch_height
 	var seed_gap: float = float(ceil(MOBILE_TUNING.BASE_CONTAINER_SEPARATION * MOBILE_TUNING.spacing_scale(viewport_size)))
 	if mobile and not portrait:
 		var seed_width: float = min(MOBILE_TUNING.SEED_ROW_MAX_WIDTH, max(280.0, viewport_size.x - menu_width - margin * 3.0))
@@ -578,7 +586,9 @@ func _apply_responsive_layout() -> void:
 			panel_x = menu_box.position.x + menu_width + margin
 			panel_y = seed_row.position.y + seed_height + 10.0
 			panel_height = max(190.0, viewport_size.y - panel_y - margin)
-	panel_height = max(panel_height, 260.0 if not mobile else 164.0)
+	var available_panel_height: float = max(1.0, viewport_size.y - panel_y - margin)
+	var minimum_panel_height: float = min(260.0 if not mobile else 164.0, available_panel_height)
+	panel_height = clamp(panel_height, minimum_panel_height, available_panel_height)
 	side_panel.position = Vector2(panel_x, panel_y)
 	side_panel.size = Vector2(panel_width, panel_height)
 
@@ -586,7 +596,7 @@ func _apply_responsive_layout() -> void:
 	side_title.size = Vector2(panel_width - (154.0 if mobile else 132.0), 52.0 if mobile else 34.0)
 	side_title.add_theme_font_size_override("font_size", 22 if mobile else 24)
 	side_close_button.position = Vector2(panel_width - (126.0 if mobile else 92.0), 14.0)
-	side_close_button.size = Vector2(104.0 if mobile else 70.0, touch_height if mobile else 36.0)
+	side_close_button.size = Vector2(104.0 if mobile else 82.0, touch_height)
 	if side_scroll != null:
 		side_scroll.position = Vector2(24.0 if mobile else 28.0, 86.0 if mobile else 70.0)
 		side_scroll.size = Vector2(panel_width - (48.0 if mobile else 56.0), panel_height - (104.0 if mobile else 92.0))
@@ -602,6 +612,8 @@ func _apply_responsive_layout() -> void:
 		for child in achievements_grid.get_children():
 			if child is Button:
 				(child as Button).custom_minimum_size = Vector2(badge_width, badge_height)
+	if force_joystick_check != null:
+		force_joystick_check.visible = MOBILE_TUNING.has_confirmed_touch()
 
 	version_label.anchor_left = 1.0
 	version_label.anchor_right = 1.0
@@ -623,6 +635,24 @@ func _apply_responsive_layout() -> void:
 				(child as Button).add_theme_font_size_override("font_size", 25 if portrait else 18)
 		seed_input.add_theme_font_size_override("font_size", 18 if portrait else 16)
 		seed_start_button.add_theme_font_size_override("font_size", 18 if portrait else 16)
+	_publish_reachability_probe(viewport_size)
+	call_deferred("_publish_reachability_probe", viewport_size)
+
+
+func _publish_reachability_probe(viewport_size: Vector2) -> void:
+	WEB_REACHABILITY_PROBE.publish("main_menu", viewport_size, {
+		"start": start_button,
+		"meta": meta_button,
+		"achievements": achievements_button,
+		"settings": settings_button,
+		"seed_input": seed_input,
+		"seed_start": seed_start_button,
+		"side_panel": side_panel,
+		"side_close": side_close_button
+	}, {
+		"side_panel_visible": side_panel != null and side_panel.visible,
+		"confirmed_touch": MOBILE_TUNING.has_confirmed_touch()
+	})
 
 
 func _build_version_text() -> String:

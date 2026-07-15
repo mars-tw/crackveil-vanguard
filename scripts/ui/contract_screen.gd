@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+const WEB_REACHABILITY_PROBE := preload("res://scripts/services/web_reachability_probe.gd")
 
 signal contract_selected(contract: Dictionary)
 signal seed_restart_requested(seed_text: String)
@@ -395,16 +396,16 @@ func _apply_responsive_layout() -> void:
 		seed_row.offset_left = -seed_row_width * 0.5
 		seed_row.offset_right = seed_row_width * 0.5
 		seed_row.offset_top = meta_grid.offset_bottom + 10.0
-		seed_row.offset_bottom = seed_row.offset_top + (touch_height if mobile else 42.0)
+		seed_row.offset_bottom = seed_row.offset_top + touch_height
 	if seed_input != null:
 		var row_width: float = min(MOBILE_TUNING.SEED_ROW_MAX_WIDTH - 4.0, panel_width - (40.0 if mobile else 52.0))
 		var seed_gap: float = float(ceil(MOBILE_TUNING.BASE_CONTAINER_SEPARATION * MOBILE_TUNING.spacing_scale(viewport_size)))
 		var button_widths: float = (72.0 if mobile else 58.0) + (128.0 if mobile else 116.0) + seed_gap * 2.0
-		seed_input.custom_minimum_size = Vector2(max(84.0, row_width - button_widths), touch_height if mobile else 38.0)
+		seed_input.custom_minimum_size = Vector2(max(84.0, row_width - button_widths), touch_height)
 	if seed_paste_button != null:
-		seed_paste_button.custom_minimum_size = Vector2(72.0 if mobile else 58.0, touch_height if mobile else 38.0)
+		seed_paste_button.custom_minimum_size = Vector2(72.0 if mobile else 58.0, touch_height)
 	if seed_start_button != null:
-		seed_start_button.custom_minimum_size = Vector2(128.0 if mobile else 116.0, touch_height if mobile else 38.0)
+		seed_start_button.custom_minimum_size = Vector2(128.0 if mobile else 116.0, touch_height)
 
 	card_grid.columns = 1 if portrait else min(4, max(1, option_buttons.size()))
 	card_grid.add_theme_constant_override("h_separation", 26 if mobile else 18)
@@ -443,3 +444,16 @@ func _apply_responsive_layout() -> void:
 		seed_start_button.add_theme_font_size_override("font_size", 15 if portrait else 13)
 		for button in option_buttons:
 			button.add_theme_font_size_override("font_size", 18 if portrait else 16)
+	call_deferred("_publish_reachability_probe", viewport_size)
+
+
+func _publish_reachability_probe(viewport_size: Vector2) -> void:
+	var first_option: Button = option_buttons[0] if not option_buttons.is_empty() else null
+	WEB_REACHABILITY_PROBE.publish("contract", viewport_size, {
+		"first_option": first_option,
+		"seed_input": seed_input,
+		"seed_start": seed_start_button
+	}, {
+		"visible": root != null and root.visible,
+		"confirmed_touch": MOBILE_TUNING.has_confirmed_touch()
+	})

@@ -118,8 +118,8 @@ func _test_hero10_content_and_bonds() -> bool:
 		_fail("bond did not deactivate immediately on member death")
 		return false
 	manager.queue_free()
-	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.14.2-r18":
-		_fail("R18 release version drifted")
+	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.14.3-r19":
+		_fail("R19 release version drifted")
 		return false
 	print("R14_HERO10 roster=10/9 weapons=11 construct_cap=6 targets=2 bonds=4 impact=frame2")
 	return true
@@ -130,18 +130,18 @@ func _test_formfactor_matrix_and_live_switch() -> bool:
 	var tablet := Vector2(1024.0, 768.0)
 	var touch_desktop := Vector2(1920.0, 1080.0)
 	var desktop := Vector2(1536.0, 864.0)
-	var phone_hints := {"mobile_os": false, "ua_mobile": true, "ua_phone": true, "ua_tablet": false, "touch_available": true, "mouse_available": false}
-	var tablet_hints := {"mobile_os": false, "ua_mobile": true, "ua_phone": false, "ua_tablet": true, "touch_available": true, "mouse_available": false}
-	var touch_desktop_hints := {"mobile_os": false, "ua_mobile": false, "ua_phone": false, "ua_tablet": false, "touch_available": true, "mouse_available": true}
-	var desktop_hints := {"mobile_os": false, "ua_mobile": false, "ua_phone": false, "ua_tablet": false, "touch_available": false, "mouse_available": true}
+	var phone_hints := {"mobile_os": false, "ua_mobile": true, "ua_phone": true, "ua_tablet": false, "touch_available": true, "primary_coarse": true, "mouse_available": false}
+	var tablet_hints := {"mobile_os": false, "ua_mobile": true, "ua_phone": false, "ua_tablet": true, "touch_available": true, "primary_coarse": true, "mouse_available": false}
+	var touch_desktop_hints := {"mobile_os": false, "ua_mobile": false, "ua_phone": false, "ua_tablet": false, "touch_available": true, "primary_coarse": true, "mouse_available": true}
+	var hybrid_desktop_hints := {"mobile_os": false, "ua_mobile": false, "ua_phone": false, "ua_tablet": false, "touch_available": true, "primary_coarse": false, "mouse_available": true}
+	var desktop_hints := {"mobile_os": false, "ua_mobile": false, "ua_phone": false, "ua_tablet": false, "touch_available": false, "primary_coarse": false, "mouse_available": true}
 	var cases := [
 		{"size": phone, "hints": phone_hints, "tier": "phone", "joystick": true},
 		{"size": tablet, "hints": tablet_hints, "tier": "tablet", "joystick": true},
 		{"size": touch_desktop, "hints": touch_desktop_hints, "tier": "desktop", "joystick": true},
+		{"size": touch_desktop, "hints": hybrid_desktop_hints, "tier": "desktop", "joystick": false},
 		{"size": desktop, "hints": desktop_hints, "tier": "desktop", "joystick": false},
-		# Layout remains phone-sized on a narrow mouse window, but input capability
-		# must not invent a virtual joystick when no touch source exists.
-		{"size": phone, "hints": desktop_hints, "tier": "phone", "joystick": false}
+		{"size": phone, "hints": desktop_hints, "tier": "desktop", "joystick": false}
 	]
 	for formfactor_case in cases:
 		var size: Vector2 = formfactor_case.size
@@ -162,8 +162,8 @@ func _test_formfactor_matrix_and_live_switch() -> bool:
 	if absf(MOBILE_TUNING.ui_scale(touch_desktop, false, touch_desktop_hints) - 1.0) > 0.001:
 		_fail("touch desktop scale drifted")
 		return false
-	if not MOBILE_TUNING.should_show_virtual_joystick(touch_desktop, true, touch_desktop_hints):
-		_fail("forced desktop joystick did not become available")
+	if MOBILE_TUNING.should_show_virtual_joystick(touch_desktop, true, desktop_hints):
+		_fail("forced preference invented touch controls on desktop")
 		return false
 	PlayerSettings.debug_use_save_path("user://formfactor_settings_test.cfg", true)
 	PlayerSettings.set_force_joystick_visible(true)
@@ -217,9 +217,18 @@ func _test_formfactor_matrix_and_live_switch() -> bool:
 		_fail("force joystick changed desktop layout or remained hidden")
 		return false
 	hud.set_touch_controls_forced_visible(false)
+	MOBILE_TUNING.set_device_hints_override_for_tests(desktop_hints)
+	viewport.size = Vector2i(1366, 600)
+	PlayerSettings.set_force_joystick_visible(true)
+	hud._apply_responsive_layout()
+	await get_tree().process_frame
+	if MOBILE_TUNING.layout_tier_name(Vector2(1366.0, 600.0)) != "desktop" or hud.virtual_joystick.visible:
+		_fail("non-touch 1366x600 desktop exposed mobile controls")
+		return false
+	PlayerSettings.set_force_joystick_visible(false)
 	viewport.queue_free()
 	MOBILE_TUNING.set_device_hints_override_for_tests()
-	print("R14_FORMFACTOR phone=phone tablet=tablet touch_desktop=desktop joystick_fallback=true desktop=desktop seed_max=%.0f" % MOBILE_TUNING.SEED_ROW_MAX_WIDTH)
+	print("R19_FORMFACTOR phone=touch tablet=touch coarse_desktop=touch fine_desktop=desktop fail_closed=true seed_max=%.0f" % MOBILE_TUNING.SEED_ROW_MAX_WIDTH)
 	return true
 
 
@@ -250,14 +259,17 @@ func _test_mobile_ui_scaling() -> bool:
 	var landscape := Vector2(844.0, 390.0)
 	var narrow_desktop := Vector2(680.0, 900.0)
 	var desktop := Vector2(1280.0, 720.0)
+	var phone_hints := {"mobile_os": false, "ua_mobile": true, "ua_phone": true, "ua_tablet": false, "touch_available": true, "primary_coarse": true, "mouse_available": false}
+	var desktop_hints := {"mobile_os": false, "ua_mobile": false, "ua_phone": false, "ua_tablet": false, "touch_available": false, "primary_coarse": false, "mouse_available": true}
+	MOBILE_TUNING.set_device_hints_override_for_tests(phone_hints)
 	if not MOBILE_TUNING.use_mobile_ui(portrait, false):
 		_fail("portrait viewport did not use mobile UI")
 		return false
 	if not MOBILE_TUNING.use_mobile_ui(landscape, false):
 		_fail("landscape viewport did not use mobile UI")
 		return false
-	if not MOBILE_TUNING.use_mobile_ui(narrow_desktop, false):
-		_fail("narrow desktop viewport did not use mobile UI")
+	if MOBILE_TUNING.use_mobile_ui(narrow_desktop, false, desktop_hints):
+		_fail("narrow fine-pointer desktop used mobile UI")
 		return false
 	if MOBILE_TUNING.ui_scale(portrait, true) < 1.9 or MOBILE_TUNING.ui_scale(landscape, true) < 1.8:
 		_fail("mobile UI scale below readability floor")
@@ -277,7 +289,7 @@ func _test_mobile_ui_scaling() -> bool:
 	if button.custom_minimum_size.y < 72.0:
 		_fail("touch target below mobile readability floor")
 		return false
-	MOBILE_TUNING.apply_control_tree(root, desktop, false)
+	MOBILE_TUNING.apply_control_tree(root, desktop, false, desktop_hints)
 	if button.get_theme_font_size("font_size") != 20:
 		_fail("desktop font override was not restored")
 		return false
@@ -314,6 +326,7 @@ func _test_mobile_ui_scaling() -> bool:
 		return false
 	if not await _test_game_over_mobile_layout(landscape):
 		return false
+	MOBILE_TUNING.set_device_hints_override_for_tests()
 	print("R14_MOBILE_UI portrait_scale=%.2f landscape_scale=%.2f font=%d touch=%.1f" % [
 		MOBILE_TUNING.ui_scale(portrait, true),
 		MOBILE_TUNING.ui_scale(landscape, true),
@@ -584,15 +597,20 @@ func _make_ui_viewport(size: Vector2) -> SubViewport:
 
 
 func _test_ui_spacing_matrix() -> bool:
-	var sizes := [Vector2(1920.0, 1080.0), Vector2(1024.0, 768.0), Vector2(390.0, 844.0)]
+	var sizes := [Vector2(1920.0, 1080.0), Vector2(1440.0, 780.0), Vector2(1366.0, 600.0), Vector2(1280.0, 640.0), Vector2(390.0, 844.0)]
 	for size in sizes:
 		if not await _test_ui_spacing_at_size(size):
 			return false
-	print("R13_UI_SPACING viewports=1920x1080,1024x768,390x844 gap>=8 touch>=44")
+	MOBILE_TUNING.set_device_hints_override_for_tests()
+	print("R19_CONTROLS_REACHABILITY viewports=1920x1080,1440x780,1366x600,1280x640,390x844 rect=inside hit>=44 canvas=internal")
 	return true
 
 
 func _test_ui_spacing_at_size(size: Vector2) -> bool:
+	var phone_hints := {"mobile_os": false, "ua_mobile": true, "ua_phone": true, "ua_tablet": false, "touch_available": true, "primary_coarse": true, "mouse_available": false}
+	var desktop_hints := {"mobile_os": false, "ua_mobile": false, "ua_phone": false, "ua_tablet": false, "touch_available": false, "primary_coarse": false, "mouse_available": true}
+	var touch_surface := size.x <= 430.0
+	MOBILE_TUNING.set_device_hints_override_for_tests(phone_hints if touch_surface else desktop_hints)
 	var viewport := _make_ui_viewport(size)
 	var menu := MAIN_MENU_SCRIPT.new()
 	viewport.add_child(menu)
@@ -600,11 +618,18 @@ func _test_ui_spacing_at_size(size: Vector2) -> bool:
 	await get_tree().process_frame
 	if not _assert_adjacent_gap([menu.start_button, menu.meta_button, menu.achievements_button, menu.settings_button], true, 8.0, "main menu %s" % str(size)):
 		return false
+	if not _assert_reachable([menu.start_button, menu.meta_button, menu.achievements_button, menu.settings_button, menu.seed_input, menu.seed_start_button], size, "main menu %s" % str(size)):
+		return false
 	menu._show_panel("settings")
 	await get_tree().process_frame
-	if not _assert_adjacent_gap([menu.mute_check, menu.damage_numbers_check, menu.screen_shake_check, menu.force_joystick_check], true, 8.0, "settings checks %s" % str(size)):
+	var menu_settings_controls: Array[Control] = [menu.mute_check, menu.damage_numbers_check, menu.screen_shake_check]
+	if menu.force_joystick_check.visible:
+		menu_settings_controls.append(menu.force_joystick_check)
+	if not _assert_adjacent_gap(menu_settings_controls, true, 8.0, "settings checks %s" % str(size)):
 		return false
-	if size.x <= 430.0 and not _assert_touch_targets([menu.start_button, menu.mute_check, menu.damage_numbers_check, menu.screen_shake_check, menu.force_joystick_check], 44.0, "menu/settings %s" % str(size)):
+	if not _control_inside_viewport(menu.side_panel, size, "main menu side panel %s" % str(size)):
+		return false
+	if not _assert_reachable([menu.side_close_button] + menu_settings_controls, size, "menu/settings %s" % str(size)):
 		return false
 	menu._show_panel("meta")
 	await get_tree().process_frame
@@ -614,14 +639,16 @@ func _test_ui_spacing_at_size(size: Vector2) -> bool:
 			meta_controls.append(child as Control)
 	if not _assert_adjacent_gap(meta_controls, true, 8.0, "echo upgrades %s" % str(size)):
 		return false
+	menu.root.visible = false
 
 	var guide := FIRST_RUN_GUIDE_SCRIPT.new()
 	viewport.add_child(guide)
 	await get_tree().process_frame
 	if not _assert_adjacent_gap([guide.dont_show_check, guide.start_button], true, 8.0, "briefing actions %s" % str(size)):
 		return false
-	if size.x <= 430.0 and not _assert_touch_targets([guide.dont_show_check, guide.start_button], 44.0, "briefing %s" % str(size)):
+	if not _assert_reachable([guide.dont_show_check, guide.start_button], size, "briefing %s" % str(size)):
 		return false
+	guide.root.visible = false
 
 	var level_up := LEVEL_UP_SCREEN_SCRIPT.new()
 	viewport.add_child(level_up)
@@ -635,6 +662,11 @@ func _test_ui_spacing_at_size(size: Vector2) -> bool:
 		if icon == null or icon.texture == null:
 			_fail("upgrade icon missing at %s" % str(size))
 			return false
+	if not _control_inside_viewport(level_up.panel, size, "level-up panel %s" % str(size)) or not _control_inside_viewport(level_up.card_scroll, size, "level-up scroll %s" % str(size)):
+		return false
+	if not level_up.option_buttons.is_empty() and not _assert_reachable([level_up.option_buttons[0]], size, "level-up first card %s" % str(size)):
+		return false
+	level_up.root.visible = false
 
 	var shop := RIFT_SHOP_SCRIPT.new()
 	viewport.add_child(shop)
@@ -643,6 +675,11 @@ func _test_ui_spacing_at_size(size: Vector2) -> bool:
 	await get_tree().process_frame
 	if not _assert_no_control_overlaps(shop.option_buttons, "shop cards %s" % str(size)):
 		return false
+	if not _control_inside_viewport(shop.card_scroll, size, "shop scroll %s" % str(size)) or not _assert_reachable([shop.skip_button], size, "shop leave %s" % str(size)):
+		return false
+	if not shop.option_buttons.is_empty() and not _assert_reachable([shop.option_buttons[0]], size, "shop first card %s" % str(size)):
+		return false
+	shop.root.visible = false
 
 	var contract := CONTRACT_SCREEN_SCRIPT.new()
 	viewport.add_child(contract)
@@ -651,18 +688,94 @@ func _test_ui_spacing_at_size(size: Vector2) -> bool:
 	await get_tree().process_frame
 	if not _assert_adjacent_gap(contract.option_buttons, contract.card_grid.columns == 1, 8.0, "contract cards %s" % str(size)):
 		return false
+	if not _control_inside_viewport(contract.card_scroll, size, "contract scroll %s" % str(size)):
+		return false
+	if not contract.option_buttons.is_empty() and not _assert_reachable([contract.option_buttons[0]], size, "contract first card %s" % str(size)):
+		return false
+	if contract.seed_row.visible and not _assert_reachable([contract.seed_input, contract.seed_paste_button, contract.seed_start_button], size, "contract seed row %s" % str(size)):
+		return false
+	contract.root.visible = false
 
 	var hud := HUD_SCRIPT.new()
 	viewport.add_child(hud)
 	await get_tree().process_frame
 	hud.pause_overlay.visible = true
 	await get_tree().process_frame
-	if not _assert_no_control_overlaps([hud.pause_mute_check, hud.pause_damage_numbers_check, hud.pause_screen_shake_check, hud.pause_force_joystick_check], "pause checks %s" % str(size)):
+	var pause_checks: Array[Control] = [hud.pause_mute_check, hud.pause_damage_numbers_check, hud.pause_screen_shake_check]
+	if hud.pause_force_joystick_check.visible:
+		pause_checks.append(hud.pause_force_joystick_check)
+	if not _assert_no_control_overlaps(pause_checks, "pause checks %s" % str(size)):
 		return false
-	if size.x <= 430.0 and not _assert_touch_targets([hud.pause_mute_check, hud.pause_damage_numbers_check, hud.pause_screen_shake_check, hud.pause_force_joystick_check, hud.pause_resume_button], 44.0, "pause %s" % str(size)):
+	if not _control_inside_viewport(hud.pause_overlay, size, "pause overlay %s" % str(size)) or not _control_inside_viewport(hud.pause_scroll, size, "pause scroll %s" % str(size)):
+		return false
+	if not _assert_reachable([hud.pause_settings_tab_button, hud.pause_achievements_tab_button, hud.pause_run_tab_button, hud.pause_resume_button] + pause_checks, size, "pause %s" % str(size)):
+		return false
+	if _controls_overlap(hud.pause_scroll, hud.pause_resume_button):
+		_fail("pause scroll overlaps pinned resume at %s" % str(size))
+		return false
+	if touch_surface != hud.virtual_joystick.visible:
+		_fail("touch controls visibility mismatch at %s" % str(size))
+		return false
+	if not touch_surface and hud.quick_joystick_size_button.visible:
+		_fail("desktop quick joystick control remained visible at %s" % str(size))
+		return false
+	hud.root.visible = false
+
+	var victory := STAGE_VICTORY_SCRIPT.new()
+	viewport.add_child(victory)
+	await get_tree().process_frame
+	victory.show_summary(_sample_summary())
+	await get_tree().process_frame
+	if not _control_inside_viewport(victory.panel, size, "victory panel %s" % str(size)):
+		return false
+	if not _assert_reachable([victory.copy_seed_button, victory.continue_button, victory.main_menu_button], size, "victory actions %s" % str(size)):
+		return false
+	if _controls_overlap(victory.summary_scroll, victory.continue_button):
+		_fail("victory scroll overlaps pinned continue at %s" % str(size))
+		return false
+	victory.root.visible = false
+
+	var game_over := GAME_OVER_SCRIPT.new()
+	viewport.add_child(game_over)
+	await get_tree().process_frame
+	game_over.show_summary(_sample_summary())
+	await get_tree().process_frame
+	if not _control_inside_viewport(game_over.panel, size, "game-over panel %s" % str(size)):
+		return false
+	if not _assert_reachable([game_over.copy_seed_button, game_over.restart_button, game_over.main_menu_button], size, "game-over actions %s" % str(size)):
+		return false
+	if _controls_overlap(game_over.body_scroll, game_over.restart_button):
+		_fail("game-over scroll overlaps pinned restart at %s" % str(size))
 		return false
 	viewport.queue_free()
 	await get_tree().process_frame
+	return true
+
+
+func _assert_reachable(controls: Array, size: Vector2, label: String) -> bool:
+	for control_value in controls:
+		var control := control_value as Control
+		if control == null or not control.is_visible_in_tree():
+			_fail(label + " has a missing or hidden control")
+			return false
+		var rect := control.get_global_rect()
+		if rect.size.x <= 0.0 or rect.size.y <= 0.0:
+			_fail(label + " has an empty hit rect")
+			return false
+		if rect.size.y < 44.0 - 0.5:
+			_fail("%s hit target %.1fpx below 44px: %s" % [label, rect.size.y, str(rect)])
+			return false
+		var center := rect.get_center()
+		if not Rect2(Vector2.ZERO, size).grow(0.75).has_point(center):
+			_fail("%s center outside viewport: %s size=%s" % [label, str(center), str(size)])
+			return false
+		var ancestor := control.get_parent()
+		while ancestor != null and ancestor is Control:
+			var ancestor_control := ancestor as Control
+			if (ancestor_control.clip_contents or ancestor_control is ScrollContainer) and not ancestor_control.get_global_rect().has_point(center):
+				_fail("%s center clipped by %s" % [label, ancestor_control.name])
+				return false
+			ancestor = ancestor_control.get_parent()
 	return true
 
 

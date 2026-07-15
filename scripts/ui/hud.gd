@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 const VIRTUAL_JOYSTICK_SCENE := preload("res://scripts/ui/virtual_joystick.gd")
+const WEB_REACHABILITY_PROBE := preload("res://scripts/services/web_reachability_probe.gd")
 const COOLDOWN_RING_SCRIPT := preload("res://scripts/ui/cooldown_ring.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
@@ -450,6 +451,7 @@ func _build_pause_overlay() -> void:
 	pause_achievement_dialog.title = "成就"
 	pause_achievement_dialog.ok_button_text = "關閉"
 	root.add_child(pause_achievement_dialog)
+	pause_achievement_dialog.get_ok_button().custom_minimum_size.y = 44.0
 
 	_show_pause_tab("settings")
 	_sync_audio_controls()
@@ -765,6 +767,7 @@ func _apply_responsive_layout() -> void:
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
 	var layout_tier := MOBILE_TUNING.layout_tier(viewport_size)
 	var tablet := layout_tier == MOBILE_TUNING.LayoutTier.TABLET
+	var show_touch_controls := _should_show_touch_controls()
 	var margin := 16.0 if mobile else 14.0
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
 	var safe_top := MOBILE_TUNING.safe_top_padding(viewport_size)
@@ -892,13 +895,13 @@ func _apply_responsive_layout() -> void:
 			pause_title_label.add_theme_font_size_override("font_size", 24 if not mobile else 22)
 		if pause_tab_bar != null:
 			pause_tab_bar.position = Vector2(18.0, 50.0)
-			pause_tab_bar.size = Vector2(max(1.0, overlay_width - 36.0), 42.0)
+			pause_tab_bar.size = Vector2(max(1.0, overlay_width - 36.0), 50.0 if mobile else 48.0)
 			var tab_width: float = max(78.0, (overlay_width - 48.0) / 3.0)
 			for child in pause_tab_bar.get_children():
 				if child is Button:
-					(child as Button).custom_minimum_size = Vector2(tab_width, 38.0 if mobile else 34.0)
+					(child as Button).custom_minimum_size = Vector2(tab_width, 50.0 if mobile else 44.0)
 		if pause_resume_button != null:
-			var resume_height: float = min(touch_height, 54.0) if mobile else 42.0
+			var resume_height: float = maxf(44.0, min(touch_height, 54.0)) if mobile else touch_height
 			var resume_width: float = min(overlay_width - 48.0, 190.0 if mobile else 160.0)
 			pause_resume_button.position = Vector2((overlay_width - resume_width) * 0.5, overlay_height - resume_height - 16.0)
 			pause_resume_button.size = Vector2(resume_width, resume_height)
@@ -907,7 +910,7 @@ func _apply_responsive_layout() -> void:
 	if pause_scroll != null:
 		var overlay_size: Vector2 = pause_overlay.size if pause_overlay != null else Vector2(430.0, 610.0)
 		var scroll_margin: float = 18.0 if mobile else 22.0
-		var scroll_top: float = 116.0 if mobile else 98.0
+		var scroll_top: float = 116.0 if mobile else 104.0
 		var scroll_bottom: float = 78.0 if mobile else 70.0
 		pause_scroll.position = Vector2(scroll_margin, scroll_top)
 		pause_scroll.size = Vector2(max(1.0, overlay_size.x - scroll_margin * 2.0), max(1.0, overlay_size.y - scroll_top - scroll_bottom))
@@ -938,17 +941,25 @@ func _apply_responsive_layout() -> void:
 		active_ability_button.size = Vector2(ability_size, ability_size)
 		active_ability_button.custom_minimum_size = Vector2(ability_size, ability_size)
 		active_ability_button.add_theme_font_size_override("font_size", (24 if portrait else 22) if mobile else 22 if portrait else 20)
+		if not show_touch_controls:
+			active_ability_button.visible = false
 	if active_ability_cooldown_ring != null and active_ability_button != null:
 		active_ability_cooldown_ring.position = active_ability_button.position
 		active_ability_cooldown_ring.size = active_ability_button.size
 		if active_ability_cooldown_ring.has_method("set_ring_width"):
 			active_ability_cooldown_ring.call("set_ring_width", 7.0 if mobile else 5.0)
+		if not show_touch_controls:
+			active_ability_cooldown_ring.visible = false
 	if active_ability_cooldown != null and active_ability_button != null:
 		active_ability_cooldown.position = active_ability_button.position
 		active_ability_cooldown.size = active_ability_button.size
+		if not show_touch_controls:
+			active_ability_cooldown.visible = false
 	if active_ability_label != null and active_ability_button != null:
 		active_ability_label.position = active_ability_button.position
 		active_ability_label.size = active_ability_button.size
+		if not show_touch_controls:
+			active_ability_label.visible = false
 
 	if toast_panel != null:
 		var toast_width: float = min(viewport_size.x - 32.0, 520.0)
@@ -1001,23 +1012,54 @@ func _apply_responsive_layout() -> void:
 		virtual_joystick.size = joystick_size
 		var joystick_target := MOBILE_TUNING.joystick_rect(viewport_size, joystick_size)
 		virtual_joystick.position = joystick_target.position
-		virtual_joystick.visible = _should_show_touch_controls()
+		virtual_joystick.visible = show_touch_controls
 		if not virtual_joystick.visible:
 			GameManager.set_touch_move_vector(Vector2.ZERO)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
 	_compact_pause_controls(mobile)
-	_layout_quick_controls(viewport_size, mobile, portrait, margin, safe_top, touch_height, pause_width)
+	if pause_force_joystick_check != null:
+		pause_force_joystick_check.visible = show_touch_controls
+	if pause_joystick_size_label != null:
+		pause_joystick_size_label.visible = show_touch_controls
+	if pause_joystick_size_slider != null:
+		pause_joystick_size_slider.visible = show_touch_controls
+	_layout_quick_controls(viewport_size, mobile, portrait, margin, safe_top, touch_height, pause_width, show_touch_controls)
+	call_deferred("_publish_reachability_probe", viewport_size)
 
 
-func _layout_quick_controls(viewport_size: Vector2, mobile: bool, portrait: bool, margin: float, safe_top: float, touch_height: float, pause_width: float) -> void:
+func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		viewport_size = MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
+	WEB_REACHABILITY_PROBE.publish("hud", viewport_size, {
+		"pause": pause_button,
+		"pause_overlay": pause_overlay,
+		"pause_settings_tab": pause_settings_tab_button,
+		"pause_achievements_tab": pause_achievements_tab_button,
+		"pause_run_tab": pause_run_tab_button,
+		"pause_resume": pause_resume_button,
+		"virtual_joystick": virtual_joystick,
+		"active_ability": active_ability_button
+	}, {
+		"paused": pause_overlay != null and pause_overlay.visible,
+		"confirmed_touch": MOBILE_TUNING.has_confirmed_touch(),
+		"touch_controls_visible": virtual_joystick != null and virtual_joystick.visible
+	})
+
+
+func _layout_quick_controls(viewport_size: Vector2, mobile: bool, portrait: bool, margin: float, safe_top: float, touch_height: float, pause_width: float, show_touch_controls: bool) -> void:
 	if quick_controls == null:
 		return
 	var icon_size: float = 46.0 if mobile else 36.0
 	var gap: float = 6.0
-	var buttons := [quick_mute_button, quick_screen_shake_button, quick_joystick_size_button]
+	var buttons: Array[Button] = [quick_mute_button, quick_screen_shake_button]
+	if quick_joystick_size_button != null:
+		quick_joystick_size_button.visible = show_touch_controls
+		if show_touch_controls:
+			buttons.append(quick_joystick_size_button)
 	var vertical := mobile and portrait
-	var total_width: float = icon_size if vertical else icon_size * 3.0 + gap * 2.0
-	var total_height: float = icon_size * 3.0 + gap * 2.0 if vertical else icon_size
+	var button_count := buttons.size()
+	var total_width: float = icon_size if vertical else icon_size * float(button_count) + gap * float(max(0, button_count - 1))
+	var total_height: float = icon_size * float(button_count) + gap * float(max(0, button_count - 1)) if vertical else icon_size
 	var x: float = viewport_size.x - margin - total_width
 	var y: float = safe_top + touch_height + 8.0 if vertical else safe_top + (2.0 if mobile else 12.0)
 	if not vertical:
@@ -1038,7 +1080,7 @@ func _layout_quick_controls(viewport_size: Vector2, mobile: bool, portrait: bool
 
 func _compact_pause_controls(mobile: bool) -> void:
 	var check_font_size: int = 20 if mobile else 15
-	var check_height: float = 54.0 if mobile else 34.0
+	var check_height: float = 54.0 if mobile else 44.0
 	for control in [pause_mute_check, pause_damage_numbers_check, pause_screen_shake_check, pause_force_joystick_check]:
 		var check := control as CheckBox
 		if check == null:
@@ -1054,7 +1096,7 @@ func _compact_pause_controls(mobile: bool) -> void:
 		if tab == null:
 			continue
 		tab.add_theme_font_size_override("font_size", 20 if mobile else 15)
-		tab.custom_minimum_size.y = 50.0 if mobile else 34.0
+		tab.custom_minimum_size.y = 50.0 if mobile else 44.0
 
 
 func _layout_pause_achievement_grid(content_width: float, mobile: bool) -> void:
@@ -1124,7 +1166,13 @@ func _on_achievement_badge_pressed(row: Dictionary) -> void:
 	var status := "已解鎖" if bool(row.get("unlocked", false)) else "未解鎖"
 	pause_achievement_dialog.title = "%s  %s" % [status, str(row.get("name", ""))]
 	pause_achievement_dialog.dialog_text = str(row.get("description", ""))
-	pause_achievement_dialog.popup_centered(Vector2i(360, 180))
+	var viewport_size := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
+	var dialog_size := Vector2i(
+		int(min(360.0, max(220.0, viewport_size.x - 24.0))),
+		int(min(180.0, max(132.0, viewport_size.y - 24.0)))
+	)
+	pause_achievement_dialog.get_ok_button().custom_minimum_size.y = maxf(44.0, MOBILE_TUNING.touch_target(viewport_size))
+	pause_achievement_dialog.popup_centered(dialog_size)
 
 
 func _on_quick_joystick_size_pressed() -> void:
@@ -1208,6 +1256,7 @@ func _on_pause_changed(is_paused: bool) -> void:
 		reset_meta_confirm_pending = false
 		if pause_reset_meta_button != null:
 			pause_reset_meta_button.text = "重置殘響"
+	call_deferred("_publish_reachability_probe")
 
 
 func _on_pause_changed_legacy_unused(is_paused: bool) -> void:
@@ -1294,7 +1343,7 @@ func _refresh_active_ability_button() -> void:
 	if active_ability_button == null:
 		return
 	var active_player := GameManager.player
-	var visible_for_player := active_player != null and is_instance_valid(active_player) and active_player.has_method("get_active_ability_cooldown_remaining")
+	var visible_for_player := _should_show_touch_controls() and active_player != null and is_instance_valid(active_player) and active_player.has_method("get_active_ability_cooldown_remaining")
 	active_ability_button.visible = visible_for_player
 	if active_ability_cooldown != null:
 		active_ability_cooldown.visible = visible_for_player

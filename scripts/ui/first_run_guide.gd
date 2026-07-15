@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+const WEB_REACHABILITY_PROBE := preload("res://scripts/services/web_reachability_probe.gd")
 
 const SAVE_PATH := "user://crackveil_guide.cfg"
 
@@ -116,6 +117,11 @@ func _apply_responsive_layout() -> void:
 	var portrait := viewport_size.y > viewport_size.x
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
+	body_label.text = (
+		"移動：左下搖桿\n隊長技：右下按鈕釋放裂隙脈衝\n武器會自動攻擊最近敵人\n收集藍色寶石升級，從三張卡選一張"
+		if MOBILE_TUNING.has_confirmed_touch()
+		else "移動：WASD / 方向鍵\n隊長技：空白鍵釋放裂隙脈衝\n武器會自動攻擊最近敵人\n收集藍色寶石升級，從三張卡選一張"
+	)
 	var panel_width: float = min(viewport_size.x - (24.0 if mobile else 32.0), 600.0 if not portrait else 430.0)
 	var panel_height: float = 360.0 if not portrait else 440.0
 	if mobile:
@@ -141,7 +147,7 @@ func _apply_responsive_layout() -> void:
 	body_label.offset_left = 22.0 if mobile else 30.0
 	body_label.offset_right = -body_label.offset_left
 	body_label.offset_top = title_label.offset_bottom + (12.0 if mobile else 14.0)
-	var control_height := touch_height if mobile else 44.0
+	var control_height := touch_height
 	var action_gap := 16.0 if mobile else 12.0
 	var action_height := control_height * 2.0 + action_gap
 	var action_width: float = min(panel_width - (48.0 if mobile else 72.0), 300.0 if mobile else 220.0)
@@ -164,3 +170,13 @@ func _apply_responsive_layout() -> void:
 		body_label.add_theme_font_size_override("font_size", 16 if portrait else 12)
 		dont_show_check.add_theme_font_size_override("font_size", 16 if portrait else 13)
 		start_button.add_theme_font_size_override("font_size", 18 if portrait else 14)
+	call_deferred("_publish_reachability_probe", viewport_size)
+
+
+func _publish_reachability_probe(viewport_size: Vector2) -> void:
+	WEB_REACHABILITY_PROBE.publish("guide", viewport_size, {
+		"start": start_button,
+		"dont_show": dont_show_check
+	}, {
+		"visible": root != null and root.visible
+	})

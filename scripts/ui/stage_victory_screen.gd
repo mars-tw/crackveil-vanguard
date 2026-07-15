@@ -141,6 +141,7 @@ func _apply_responsive_layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = Vector2(1280.0, 720.0)
+	viewport_size = MOBILE_TUNING.apply_web_canvas_scale(self, viewport_size, root)
 	var portrait := viewport_size.y > viewport_size.x
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
 	var compact_landscape := mobile and not portrait
@@ -165,9 +166,9 @@ func _apply_responsive_layout() -> void:
 	var button_width: float = 246.0 if compact_landscape else 260.0 if mobile else 196.0
 	var button_left: float = panel_width - button_width - 24.0 if compact_landscape else (panel_width - button_width) * 0.5
 	var button_gap: float = 12.0
-	var button_height: float = touch_height if mobile else 42.0
+	var button_height: float = touch_height
 	var button_stack_height: float = button_height * 3.0 + button_gap * 2.0
-	var button_top: float = max((title_label.offset_bottom + 14.0) if title_label != null else 72.0, (panel_height - button_stack_height) * 0.5) if compact_landscape else panel_height - ((touch_height + 12.0) * 3.0 + 12.0 if mobile else 178.0)
+	var button_top: float = max((title_label.offset_bottom + 14.0) if title_label != null else 72.0, (panel_height - button_stack_height) * 0.5) if compact_landscape else panel_height - button_stack_height - 18.0
 	var copy_top: float = button_top
 	var secondary_top: float = copy_top + button_height + button_gap
 	var primary_top: float = secondary_top + button_height + button_gap

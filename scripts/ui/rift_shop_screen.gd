@@ -220,7 +220,7 @@ func _apply_responsive_layout() -> void:
 		button.add_theme_font_size_override("font_size", 15 if mobile and portrait else 18 if portrait else 19)
 
 	var skip_width: float = 216.0 if mobile else 172.0
-	var skip_height: float = touch_height if mobile else 40.0
+	var skip_height: float = touch_height
 	skip_button.anchor_left = 0.0
 	skip_button.anchor_right = 0.0
 	skip_button.anchor_top = 0.0
