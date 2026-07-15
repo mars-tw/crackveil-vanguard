@@ -338,7 +338,7 @@ func _apply_evolution(evolution_id: String) -> void:
 			area_radius += 42.0
 			projectile_count += 1
 			cooldown = max(0.24, cooldown * 0.88)
-			color = Color(1.0, 0.86, 0.46)
+			color = Color(0.52, 0.96, 1.0)
 		"evo_mirror_flock":
 			projectile_count = min(projectile_count + 1, hard_cap_global)
 			hit_interval = max(0.18, hit_interval * 0.9)

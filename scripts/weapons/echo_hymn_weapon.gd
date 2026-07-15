@@ -88,7 +88,7 @@ func _hit_key_for(body: Node) -> int:
 
 
 func _spawn_hymn_visuals(radius: float, stats: Dictionary, evolved: bool) -> void:
-	var color: Color = stats.get("color", data_color("color", Color(1.0, 0.86, 0.46)))
+	var color: Color = stats.get("color", data_color("color", Color(0.52, 0.96, 1.0)))
 	var visual_level := int(stats.get("visual_level", 0))
 	EntityFactory.spawn_death_burst(owner_player.global_position, color, (1.25 if evolved else 0.95) * (1.0 + float(visual_level) * 0.045), "level_column")
 	var members: Array = []

@@ -56,13 +56,13 @@ func _cast_chain(first_target: Node2D) -> void:
 
 	EntityFactory.spawn_lightning_arc(
 		points,
-		data_color("color", Color(0.82, 0.68, 1.0)).lerp(Color.WHITE, 0.32),
+		data_color("color", Color(0.46, 0.94, 1.0)).lerp(Color.WHITE, 0.32),
 		data_float("effect_lifetime", 0.22) + 0.04,
 		data_string("lightning_sprite_path", "res://assets/sprites/proj_lightning.png"),
 		34.0 + float(visual_level) * 1.5 + (9.0 if evolved_visual else 0.0)
 	)
 	if has_final_target:
-		EntityFactory.spawn_death_burst(final_target_position, data_color("color", Color(0.72, 1.0, 0.92)), 0.78, "spark")
+		EntityFactory.spawn_death_burst(final_target_position, data_color("color", Color(0.46, 0.94, 1.0)), 0.78, "spark")
 
 
 func _make_overload_stats() -> Dictionary:

@@ -1,0 +1,51 @@
+{
+  "proj_lightning_base_mean_rgb": [
+    0.889,
+    0.889,
+    0.889
+  ],
+  "proj_lightning_neutral_max_channel_delta": 0.0,
+  "weapon_samples": {
+    "arc_chain": {
+      "mean_rgb": [
+        0.409,
+        0.8357,
+        0.889
+      ],
+      "green_over_red": 2.0435,
+      "blue_over_red": 2.1739,
+      "cyan_pass": true
+    },
+    "rail_lance": {
+      "mean_rgb": [
+        0.4978,
+        0.8535,
+        0.889
+      ],
+      "green_over_red": 1.7143,
+      "blue_over_red": 1.7858,
+      "cyan_pass": true
+    },
+    "echo_hymn": {
+      "mean_rgb": [
+        0.4623,
+        0.8535,
+        0.889
+      ],
+      "green_over_red": 1.8461,
+      "blue_over_red": 1.9231,
+      "cyan_pass": true
+    }
+  },
+  "enemy_ember_reference": {
+    "source": "scripts/enemies/enemy.gd::_enemy_projectile_stats",
+    "color": [
+      1.0,
+      0.35,
+      0.24,
+      1.0
+    ],
+    "uses_proj_lightning": false,
+    "ember_pass": true
+  }
+}
