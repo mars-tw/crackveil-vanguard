@@ -1,6 +1,7 @@
 # Godot local/editor cache
 .godot/
 .import/
+.mono/
 
 # Export and build outputs
 export/
@@ -17,6 +18,9 @@ dist/
 *.js
 *.worker.js
 *.zip
+*.dmg
+*.deb
+*.dSYM/
 
 # Temporary files and logs
 *.tmp
@@ -24,7 +28,20 @@ dist/
 *.bak
 *.log
 *.trace
+*.swp
+*.swo
+*~
 tools/asset_sources/
+
+# Python tooling cache and reports
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
 
 # Local secrets / machine-specific config
 .env

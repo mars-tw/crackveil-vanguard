@@ -4,6 +4,9 @@
 third-party assets below are compatible with that distribution; each source,
 license, and in-game derivative is recorded here.
 
+The consolidated third-party inventory, including the font and build-time
+character dataset, is available in [`../CREDITS.md`](../CREDITS.md).
+
 ## Kenney Particle Pack 1.1
 
 - Creator/distributor: Kenney Vleugels (Kenney.nl)
@@ -124,10 +127,16 @@ silhouette is enlarged with the existing violet volume glow. Rebuild with
 
 ## Other project assets
 
-- The Traditional Chinese UI font is a subset of Noto Sans CJK TC Regular,
+- The Traditional Chinese UI font is a subset of
+  [Noto Sans CJK TC Regular](https://github.com/notofonts/noto-cjk/tree/Sans2.004/Sans/OTF/TraditionalChinese),
   licensed under SIL Open Font License 1.1. See `assets/fonts/OFL.txt`.
+- The font build uses the first 2,800 characters from
+  [`agj/3000-traditional-hanzi`](https://github.com/agj/3000-traditional-hanzi/tree/855200d72670b8053096b6d706906d2cad265dbe)
+  as a safety set. The dataset is MIT-licensed and only its character selection
+  is represented in the generated subset and `.chars.txt` manifest.
 - Wasteland-farm ground and decor cuts were adapted from the same author's MIT
-  project `pixel-idle-farm-skill`; only the small, game-ready cuts are present.
+  project [`mars-tw/pixel-idle-farm-skill`](https://github.com/mars-tw/pixel-idle-farm-skill);
+  only the small, game-ready cuts are present.
 - Hero character art was produced specifically for this project. Enemy art uses
   the compact CC0 derivatives documented above; unused candidate packs and raw
   archives are not distributed.
