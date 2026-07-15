@@ -215,7 +215,12 @@ static func should_show_virtual_joystick(viewport_size: Vector2, force_visible: 
 		return true
 	var hints := device_hints if not device_hints.is_empty() else _runtime_device_hints()
 	var touch_available := bool(hints.get("touch_available", false)) or bool(hints.get("mobile_os", false))
-	return touch_available and layout_tier(viewport_size, false, hints) != LayoutTier.DESKTOP
+	if not touch_available:
+		return false
+	var tier := layout_tier(viewport_size, false, hints)
+	if tier != LayoutTier.DESKTOP:
+		return true
+	return not _has_explicit_desktop_input(hints)
 
 
 static func mobile_lod_enabled(viewport_size: Vector2, force_mobile: bool = false, device_hints: Dictionary = {}) -> bool:
@@ -426,6 +431,10 @@ static func _safe_viewport_size(viewport_size: Vector2) -> Vector2:
 	if window_size.x > 0 and window_size.y > 0:
 		return Vector2(window_size)
 	return Vector2(1280.0, 720.0)
+
+
+static func _has_explicit_desktop_input(hints: Dictionary) -> bool:
+	return not bool(hints.get("touch_available", false)) and not bool(hints.get("mobile_os", false)) and not bool(hints.get("ua_mobile", false)) and bool(hints.get("mouse_available", true))
 
 
 static func _runtime_device_hints() -> Dictionary:

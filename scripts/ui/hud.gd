@@ -18,6 +18,10 @@ var theme_label: Label
 var time_label: Label
 var score_label: Label
 var pause_button: Button
+var quick_controls: Control
+var quick_mute_button: Button
+var quick_screen_shake_button: Button
+var quick_joystick_size_button: Button
 var version_label: Label
 var audio_prompt_button: Button
 var active_ability_button: Button
@@ -36,6 +40,14 @@ var boss_intro_label: Label
 var pause_overlay: Panel
 var pause_scroll: ScrollContainer
 var pause_content: VBoxContainer
+var pause_title_label: Label
+var pause_tab_bar: HBoxContainer
+var pause_settings_tab_button: Button
+var pause_achievements_tab_button: Button
+var pause_run_tab_button: Button
+var pause_settings_page: VBoxContainer
+var pause_achievements_page: VBoxContainer
+var pause_run_page: VBoxContainer
 var pause_volume_label: Label
 var pause_volume_slider: HSlider
 var pause_mute_check: CheckBox
@@ -49,8 +61,11 @@ var pause_reset_meta_button: Button
 var pause_guide_button: Button
 var pause_run_stats_label: Label
 var pause_achievements_label: RichTextLabel
+var pause_achievements_grid: GridContainer
+var pause_achievement_dialog: AcceptDialog
 var pause_resume_button: Button
 var virtual_joystick: Control
+var pause_active_tab: String = "settings"
 var force_touch_controls_visible: bool = false
 var syncing_audio_controls: bool = false
 var syncing_settings_controls: bool = false
@@ -215,6 +230,8 @@ func _build_ui() -> void:
 	pause_button.pressed.connect(_on_pause_button_pressed)
 	root.add_child(pause_button)
 
+	_build_quick_controls()
+
 	version_label = Label.new()
 	version_label.name = "VersionLabel"
 	version_label.text = _build_version_text()
@@ -347,7 +364,247 @@ func _build_ui() -> void:
 	_apply_responsive_layout()
 
 
+func _build_quick_controls() -> void:
+	quick_controls = Control.new()
+	quick_controls.name = "QuickControls"
+	root.add_child(quick_controls)
+
+	quick_mute_button = _make_quick_icon_button("M", "靜音", true)
+	quick_mute_button.toggled.connect(_on_mute_toggled)
+	quick_controls.add_child(quick_mute_button)
+
+	quick_screen_shake_button = _make_quick_icon_button("S", "螢幕震動", true)
+	quick_screen_shake_button.toggled.connect(_on_screen_shake_toggled)
+	quick_controls.add_child(quick_screen_shake_button)
+
+	quick_joystick_size_button = _make_quick_icon_button("J", "搖桿大小", false)
+	quick_joystick_size_button.pressed.connect(_on_quick_joystick_size_pressed)
+	quick_controls.add_child(quick_joystick_size_button)
+
+
+func _make_quick_icon_button(text_value: String, tooltip_value: String, toggle: bool) -> Button:
+	var button := Button.new()
+	button.text = text_value
+	button.tooltip_text = tooltip_value
+	button.toggle_mode = toggle
+	button.focus_mode = Control.FOCUS_NONE
+	button.custom_minimum_size = Vector2(38.0, 38.0)
+	button.add_theme_font_size_override("font_size", 14)
+	_apply_quick_button_style(button, false)
+	return button
+
+
 func _build_pause_overlay() -> void:
+	pause_overlay = Panel.new()
+	pause_overlay.name = "PauseOverlay"
+	pause_overlay.visible = false
+	pause_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	pause_overlay.anchor_left = 0.5
+	pause_overlay.anchor_right = 0.5
+	pause_overlay.anchor_top = 0.5
+	pause_overlay.anchor_bottom = 0.5
+	root.add_child(pause_overlay)
+
+	pause_title_label = Label.new()
+	pause_title_label.text = "暫停"
+	pause_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pause_title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	pause_title_label.add_theme_font_size_override("font_size", 24)
+	pause_overlay.add_child(pause_title_label)
+
+	var tab_group := ButtonGroup.new()
+	pause_tab_bar = HBoxContainer.new()
+	pause_tab_bar.name = "PauseTabs"
+	pause_tab_bar.add_theme_constant_override("separation", 6)
+	pause_overlay.add_child(pause_tab_bar)
+
+	pause_settings_tab_button = _make_pause_tab_button("設定", "settings", tab_group)
+	pause_achievements_tab_button = _make_pause_tab_button("成就", "achievements", tab_group)
+	pause_run_tab_button = _make_pause_tab_button("本局", "run", tab_group)
+	pause_tab_bar.add_child(pause_settings_tab_button)
+	pause_tab_bar.add_child(pause_achievements_tab_button)
+	pause_tab_bar.add_child(pause_run_tab_button)
+
+	pause_scroll = ScrollContainer.new()
+	pause_scroll.name = "PausePageScroll"
+	pause_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	pause_overlay.add_child(pause_scroll)
+
+	pause_content = VBoxContainer.new()
+	pause_content.name = "PausePages"
+	pause_content.add_theme_constant_override("separation", 10)
+	pause_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_scroll.add_child(pause_content)
+
+	_build_pause_settings_page()
+	_build_pause_achievements_page()
+	_build_pause_run_page()
+
+	pause_resume_button = Button.new()
+	pause_resume_button.text = "繼續"
+	pause_resume_button.custom_minimum_size = Vector2(160.0, 42.0)
+	pause_resume_button.pressed.connect(_on_resume_button_pressed)
+	pause_overlay.add_child(pause_resume_button)
+
+	pause_achievement_dialog = AcceptDialog.new()
+	pause_achievement_dialog.title = "成就"
+	pause_achievement_dialog.ok_button_text = "關閉"
+	root.add_child(pause_achievement_dialog)
+
+	_show_pause_tab("settings")
+	_sync_audio_controls()
+	_sync_settings_controls()
+	_refresh_achievement_list()
+
+
+func _make_pause_tab_button(text_value: String, tab_id: String, tab_group: ButtonGroup) -> Button:
+	var button := Button.new()
+	button.text = text_value
+	button.toggle_mode = true
+	button.button_group = tab_group
+	button.custom_minimum_size = Vector2(96.0, 36.0)
+	button.pressed.connect(_show_pause_tab.bind(tab_id))
+	return button
+
+
+func _build_pause_settings_page() -> void:
+	pause_settings_page = VBoxContainer.new()
+	pause_settings_page.name = "SettingsPage"
+	pause_settings_page.add_theme_constant_override("separation", 10)
+	pause_settings_page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_content.add_child(pause_settings_page)
+
+	pause_volume_label = Label.new()
+	pause_volume_label.text = "音量"
+	pause_volume_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pause_settings_page.add_child(pause_volume_label)
+
+	pause_volume_slider = HSlider.new()
+	pause_volume_slider.min_value = 0.0
+	pause_volume_slider.max_value = 1.0
+	pause_volume_slider.step = 0.05
+	pause_volume_slider.custom_minimum_size = Vector2(240.0, 28.0)
+	pause_volume_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_volume_slider.value_changed.connect(_on_volume_slider_changed)
+	pause_settings_page.add_child(pause_volume_slider)
+
+	var toggle_grid := GridContainer.new()
+	toggle_grid.columns = 2
+	toggle_grid.add_theme_constant_override("h_separation", 12)
+	toggle_grid.add_theme_constant_override("v_separation", 8)
+	toggle_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_settings_page.add_child(toggle_grid)
+
+	pause_mute_check = CheckBox.new()
+	pause_mute_check.text = "靜音"
+	pause_mute_check.toggled.connect(_on_mute_toggled)
+	toggle_grid.add_child(pause_mute_check)
+
+	pause_damage_numbers_check = CheckBox.new()
+	pause_damage_numbers_check.text = "傷害數字"
+	pause_damage_numbers_check.toggled.connect(_on_damage_numbers_toggled)
+	toggle_grid.add_child(pause_damage_numbers_check)
+
+	pause_screen_shake_check = CheckBox.new()
+	pause_screen_shake_check.text = "螢幕震動"
+	pause_screen_shake_check.toggled.connect(_on_screen_shake_toggled)
+	toggle_grid.add_child(pause_screen_shake_check)
+
+	pause_force_joystick_check = CheckBox.new()
+	pause_force_joystick_check.text = "強制搖桿"
+	pause_force_joystick_check.toggled.connect(_on_force_joystick_toggled)
+	toggle_grid.add_child(pause_force_joystick_check)
+
+	pause_joystick_size_label = Label.new()
+	pause_joystick_size_label.text = "搖桿大小"
+	pause_joystick_size_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pause_settings_page.add_child(pause_joystick_size_label)
+
+	pause_joystick_size_slider = HSlider.new()
+	pause_joystick_size_slider.min_value = 0.0
+	pause_joystick_size_slider.max_value = 2.0
+	pause_joystick_size_slider.step = 1.0
+	pause_joystick_size_slider.tick_count = 3
+	pause_joystick_size_slider.ticks_on_borders = true
+	pause_joystick_size_slider.custom_minimum_size = Vector2(240.0, 28.0)
+	pause_joystick_size_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_joystick_size_slider.value_changed.connect(_on_joystick_size_slider_changed)
+	pause_settings_page.add_child(pause_joystick_size_slider)
+
+	var tool_row := HBoxContainer.new()
+	tool_row.add_theme_constant_override("separation", 8)
+	tool_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_settings_page.add_child(tool_row)
+
+	pause_seed_button = Button.new()
+	pause_seed_button.text = "複製種子"
+	pause_seed_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_seed_button.pressed.connect(_on_copy_seed_pressed)
+	tool_row.add_child(pause_seed_button)
+
+	pause_guide_button = Button.new()
+	pause_guide_button.text = "重看教學"
+	pause_guide_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_guide_button.pressed.connect(_on_rewatch_guide_pressed)
+	tool_row.add_child(pause_guide_button)
+
+
+func _build_pause_achievements_page() -> void:
+	pause_achievements_page = VBoxContainer.new()
+	pause_achievements_page.name = "AchievementsPage"
+	pause_achievements_page.add_theme_constant_override("separation", 10)
+	pause_achievements_page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_content.add_child(pause_achievements_page)
+
+	pause_achievements_grid = GridContainer.new()
+	pause_achievements_grid.name = "PauseAchievementGrid"
+	pause_achievements_grid.columns = 3
+	pause_achievements_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_achievements_grid.add_theme_constant_override("h_separation", 8)
+	pause_achievements_grid.add_theme_constant_override("v_separation", 8)
+	pause_achievements_page.add_child(pause_achievements_grid)
+
+
+func _build_pause_run_page() -> void:
+	pause_run_page = VBoxContainer.new()
+	pause_run_page.name = "RunPage"
+	pause_run_page.add_theme_constant_override("separation", 14)
+	pause_run_page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_content.add_child(pause_run_page)
+
+	pause_run_stats_label = Label.new()
+	pause_run_stats_label.name = "PauseRunStatsLabel"
+	pause_run_stats_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pause_run_stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	pause_run_stats_label.add_theme_font_size_override("font_size", 15)
+	pause_run_page.add_child(pause_run_stats_label)
+
+	pause_reset_meta_button = Button.new()
+	pause_reset_meta_button.text = "重置殘響"
+	pause_reset_meta_button.custom_minimum_size = Vector2(180.0, 44.0)
+	pause_reset_meta_button.pressed.connect(_on_reset_meta_pressed)
+	pause_run_page.add_child(pause_reset_meta_button)
+
+
+func _show_pause_tab(tab_id: String) -> void:
+	pause_active_tab = tab_id
+	if pause_settings_page != null:
+		pause_settings_page.visible = tab_id == "settings"
+	if pause_achievements_page != null:
+		pause_achievements_page.visible = tab_id == "achievements"
+	if pause_run_page != null:
+		pause_run_page.visible = tab_id == "run"
+	if pause_settings_tab_button != null:
+		pause_settings_tab_button.button_pressed = tab_id == "settings"
+	if pause_achievements_tab_button != null:
+		pause_achievements_tab_button.button_pressed = tab_id == "achievements"
+	if pause_run_tab_button != null:
+		pause_run_tab_button.button_pressed = tab_id == "run"
+	if pause_scroll != null:
+		pause_scroll.scroll_vertical = 0
+
+
+func _build_pause_overlay_legacy_unused() -> void:
 	pause_overlay = Panel.new()
 	pause_overlay.name = "PauseOverlay"
 	pause_overlay.visible = false
@@ -618,7 +875,7 @@ func _apply_responsive_layout() -> void:
 	pause_button.offset_bottom = pause_button.offset_top + (touch_height if mobile else 40.0)
 
 	if pause_overlay != null:
-		var overlay_width: float = min(viewport_size.x - (24.0 if mobile else 40.0), 430.0 if mobile else 380.0)
+		var overlay_width: float = min(viewport_size.x - (24.0 if mobile else 40.0), 520.0 if mobile else 540.0)
 		var overlay_height: float = min(viewport_size.y - (24.0 if mobile else 44.0), 680.0 if mobile else 610.0)
 		pause_overlay.anchor_left = 0.5
 		pause_overlay.anchor_right = 0.5
@@ -629,37 +886,36 @@ func _apply_responsive_layout() -> void:
 		pause_overlay.offset_top = -overlay_height * 0.5
 		pause_overlay.offset_bottom = overlay_height * 0.5
 
+		if pause_title_label != null:
+			pause_title_label.position = Vector2(18.0, 10.0)
+			pause_title_label.size = Vector2(max(1.0, overlay_width - 36.0), 34.0)
+			pause_title_label.add_theme_font_size_override("font_size", 24 if not mobile else 22)
+		if pause_tab_bar != null:
+			pause_tab_bar.position = Vector2(18.0, 50.0)
+			pause_tab_bar.size = Vector2(max(1.0, overlay_width - 36.0), 42.0)
+			var tab_width: float = max(78.0, (overlay_width - 48.0) / 3.0)
+			for child in pause_tab_bar.get_children():
+				if child is Button:
+					(child as Button).custom_minimum_size = Vector2(tab_width, 38.0 if mobile else 34.0)
+		if pause_resume_button != null:
+			var resume_height: float = min(touch_height, 54.0) if mobile else 42.0
+			var resume_width: float = min(overlay_width - 48.0, 190.0 if mobile else 160.0)
+			pause_resume_button.position = Vector2((overlay_width - resume_width) * 0.5, overlay_height - resume_height - 16.0)
+			pause_resume_button.size = Vector2(resume_width, resume_height)
+			pause_resume_button.custom_minimum_size = Vector2(resume_width, resume_height)
+
 	if pause_scroll != null:
-		pause_scroll.offset_left = 18.0 if mobile else 20.0
-		pause_scroll.offset_right = -pause_scroll.offset_left
-		pause_scroll.offset_top = 14.0 if mobile else 16.0
-		pause_scroll.offset_bottom = -pause_scroll.offset_top
+		var overlay_size: Vector2 = pause_overlay.size if pause_overlay != null else Vector2(430.0, 610.0)
+		var scroll_margin: float = 18.0 if mobile else 22.0
+		var scroll_top: float = 116.0 if mobile else 98.0
+		var scroll_bottom: float = 78.0 if mobile else 70.0
+		pause_scroll.position = Vector2(scroll_margin, scroll_top)
+		pause_scroll.size = Vector2(max(1.0, overlay_size.x - scroll_margin * 2.0), max(1.0, overlay_size.y - scroll_top - scroll_bottom))
 
 	if pause_content != null:
-		pause_content.custom_minimum_size = Vector2(max(280.0 if mobile else 260.0, min(viewport_size.x - 60.0, 386.0 if mobile else 340.0)), 0.0)
-
-	if pause_volume_label != null:
-		pause_volume_label.anchor_left = 0.0
-		pause_volume_label.anchor_right = 1.0
-		pause_volume_label.offset_top = 66.0
-		pause_volume_label.offset_bottom = 92.0
-		pause_volume_label.add_theme_font_size_override("font_size", 15)
-
-	if pause_volume_slider != null:
-		pause_volume_slider.anchor_left = 0.5
-		pause_volume_slider.anchor_right = 0.5
-		pause_volume_slider.offset_left = -112.0
-		pause_volume_slider.offset_right = 112.0
-		pause_volume_slider.offset_top = 100.0
-		pause_volume_slider.offset_bottom = 132.0
-
-	if pause_mute_check != null:
-		pause_mute_check.anchor_left = 0.5
-		pause_mute_check.anchor_right = 0.5
-		pause_mute_check.offset_left = -58.0
-		pause_mute_check.offset_right = 58.0
-		pause_mute_check.offset_top = 140.0
-		pause_mute_check.offset_bottom = 178.0
+		var content_width: float = max(260.0, (pause_scroll.size.x if pause_scroll != null else min(viewport_size.x - 60.0, 420.0)))
+		pause_content.custom_minimum_size = Vector2(content_width, 0.0)
+		_layout_pause_achievement_grid(content_width, mobile)
 
 	if audio_prompt_button != null:
 		audio_prompt_button.anchor_left = 0.5
@@ -749,6 +1005,150 @@ func _apply_responsive_layout() -> void:
 		if not virtual_joystick.visible:
 			GameManager.set_touch_move_vector(Vector2.ZERO)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
+	_compact_pause_controls(mobile)
+	_layout_quick_controls(viewport_size, mobile, portrait, margin, safe_top, touch_height, pause_width)
+
+
+func _layout_quick_controls(viewport_size: Vector2, mobile: bool, portrait: bool, margin: float, safe_top: float, touch_height: float, pause_width: float) -> void:
+	if quick_controls == null:
+		return
+	var icon_size: float = 46.0 if mobile else 36.0
+	var gap: float = 6.0
+	var buttons := [quick_mute_button, quick_screen_shake_button, quick_joystick_size_button]
+	var vertical := mobile and portrait
+	var total_width: float = icon_size if vertical else icon_size * 3.0 + gap * 2.0
+	var total_height: float = icon_size * 3.0 + gap * 2.0 if vertical else icon_size
+	var x: float = viewport_size.x - margin - total_width
+	var y: float = safe_top + touch_height + 8.0 if vertical else safe_top + (2.0 if mobile else 12.0)
+	if not vertical:
+		x = viewport_size.x - margin - pause_width - gap - total_width if mobile else viewport_size.x - margin - total_width
+		y = safe_top + touch_height + 8.0 if mobile else safe_top + 58.0
+	quick_controls.position = Vector2(max(margin, x), y)
+	quick_controls.size = Vector2(total_width, total_height)
+	quick_controls.visible = true
+	for index in range(buttons.size()):
+		var button := buttons[index] as Button
+		if button == null:
+			continue
+		button.position = Vector2(0.0, float(index) * (icon_size + gap)) if vertical else Vector2(float(index) * (icon_size + gap), 0.0)
+		button.size = Vector2(icon_size, icon_size)
+		button.custom_minimum_size = Vector2(icon_size, icon_size)
+		button.add_theme_font_size_override("font_size", 14 if mobile else 13)
+
+
+func _compact_pause_controls(mobile: bool) -> void:
+	var check_font_size: int = 20 if mobile else 15
+	var check_height: float = 54.0 if mobile else 34.0
+	for control in [pause_mute_check, pause_damage_numbers_check, pause_screen_shake_check, pause_force_joystick_check]:
+		var check := control as CheckBox
+		if check == null:
+			continue
+		check.add_theme_font_size_override("font_size", check_font_size)
+		check.custom_minimum_size = Vector2(0.0, check_height)
+	if pause_seed_button != null:
+		pause_seed_button.add_theme_font_size_override("font_size", 19 if mobile else 15)
+	if pause_guide_button != null:
+		pause_guide_button.add_theme_font_size_override("font_size", 19 if mobile else 15)
+	for control in [pause_settings_tab_button, pause_achievements_tab_button, pause_run_tab_button]:
+		var tab := control as Button
+		if tab == null:
+			continue
+		tab.add_theme_font_size_override("font_size", 20 if mobile else 15)
+		tab.custom_minimum_size.y = 50.0 if mobile else 34.0
+
+
+func _layout_pause_achievement_grid(content_width: float, mobile: bool) -> void:
+	if pause_achievements_grid == null:
+		return
+	var columns: int = 4 if content_width >= 430.0 else 3 if content_width >= 310.0 else 2
+	pause_achievements_grid.columns = columns
+	var gap: float = 8.0
+	var badge_width: float = max(86.0, floor((content_width - gap * float(columns - 1)) / float(columns)))
+	var badge_height: float = 70.0 if mobile else 62.0
+	for child in pause_achievements_grid.get_children():
+		if child is Button:
+			(child as Button).custom_minimum_size = Vector2(badge_width, badge_height)
+
+
+func _apply_quick_button_style(button: Button, active: bool) -> void:
+	if button == null:
+		return
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.025, 0.09, 0.12, 0.82) if active else Color(0.035, 0.055, 0.07, 0.76)
+	normal.border_color = Color(0.48, 0.95, 1.0, 0.86) if active else Color(0.28, 0.39, 0.45, 0.78)
+	normal.set_border_width_all(1)
+	normal.set_corner_radius_all(8)
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = Color(0.07, 0.17, 0.21, 0.94)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = Color(0.01, 0.045, 0.06, 0.96)
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", hover)
+	button.add_theme_stylebox_override("pressed", pressed)
+	button.add_theme_stylebox_override("focus", normal)
+	button.add_theme_color_override("font_color", Color(0.86, 0.98, 1.0, 1.0) if active else Color(0.56, 0.65, 0.7, 1.0))
+
+
+func _make_achievement_badge(row: Dictionary) -> Button:
+	var unlocked := bool(row.get("unlocked", false))
+	var button := Button.new()
+	button.text = "%s\n%s" % ["✓" if unlocked else "□", str(row.get("name", ""))]
+	button.tooltip_text = str(row.get("description", ""))
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	button.custom_minimum_size = Vector2(98.0, 62.0)
+	button.pressed.connect(_on_achievement_badge_pressed.bind(row))
+	_apply_achievement_badge_style(button, unlocked)
+	return button
+
+
+func _apply_achievement_badge_style(button: Button, unlocked: bool) -> void:
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.05, 0.16, 0.14, 0.9) if unlocked else Color(0.035, 0.04, 0.052, 0.82)
+	normal.border_color = Color(0.52, 1.0, 0.74, 0.88) if unlocked else Color(0.24, 0.29, 0.34, 0.88)
+	normal.set_border_width_all(1)
+	normal.set_corner_radius_all(8)
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = Color(0.07, 0.22, 0.2, 0.96) if unlocked else Color(0.06, 0.07, 0.09, 0.92)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = Color(0.025, 0.1, 0.095, 1.0) if unlocked else Color(0.025, 0.03, 0.04, 1.0)
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", hover)
+	button.add_theme_stylebox_override("pressed", pressed)
+	button.add_theme_color_override("font_color", Color(0.9, 1.0, 0.92, 1.0) if unlocked else Color(0.5, 0.56, 0.62, 1.0))
+	button.add_theme_font_size_override("font_size", 13)
+
+
+func _on_achievement_badge_pressed(row: Dictionary) -> void:
+	if pause_achievement_dialog == null:
+		return
+	var status := "已解鎖" if bool(row.get("unlocked", false)) else "未解鎖"
+	pause_achievement_dialog.title = "%s  %s" % [status, str(row.get("name", ""))]
+	pause_achievement_dialog.dialog_text = str(row.get("description", ""))
+	pause_achievement_dialog.popup_centered(Vector2i(360, 180))
+
+
+func _on_quick_joystick_size_pressed() -> void:
+	if PlayerSettings == null:
+		return
+	var next_index := (int(PlayerSettings.get("joystick_size_index")) + 1) % 3
+	_on_joystick_size_slider_changed(float(next_index))
+	_sync_settings_controls()
+
+
+func _refresh_quick_control_labels() -> void:
+	if quick_mute_button != null and AudioManager != null:
+		var muted := bool(AudioManager.get("muted"))
+		quick_mute_button.text = "M!" if muted else "M"
+		quick_mute_button.button_pressed = muted
+		_apply_quick_button_style(quick_mute_button, not muted)
+	if quick_screen_shake_button != null and PlayerSettings != null:
+		var shake_enabled := bool(PlayerSettings.get("screen_shake_enabled"))
+		quick_screen_shake_button.text = "S" if shake_enabled else "S!"
+		quick_screen_shake_button.button_pressed = shake_enabled
+		_apply_quick_button_style(quick_screen_shake_button, shake_enabled)
+	if quick_joystick_size_button != null and PlayerSettings != null:
+		quick_joystick_size_button.text = "J%d" % (int(PlayerSettings.get("joystick_size_index")) + 1)
+		_apply_quick_button_style(quick_joystick_size_button, true)
 
 
 func _should_show_touch_controls() -> bool:
@@ -796,6 +1196,21 @@ func _on_stats_changed(stats: Dictionary) -> void:
 
 
 func _on_pause_changed(is_paused: bool) -> void:
+	if pause_overlay != null:
+		pause_overlay.visible = is_paused
+	if pause_button != null:
+		pause_button.text = "繼續" if is_paused else "暫停"
+	if is_paused:
+		_sync_audio_controls()
+		_sync_settings_controls()
+		_refresh_achievement_list()
+		_show_pause_tab(pause_active_tab)
+		reset_meta_confirm_pending = false
+		if pause_reset_meta_button != null:
+			pause_reset_meta_button.text = "重置殘響"
+
+
+func _on_pause_changed_legacy_unused(is_paused: bool) -> void:
 	pause_overlay.visible = is_paused
 	pause_button.text = "繼續" if is_paused else "暫停"
 	if is_paused:
@@ -1080,6 +1495,18 @@ func _refresh_audio_prompt() -> void:
 
 
 func _sync_audio_controls() -> void:
+	if AudioManager == null:
+		return
+	syncing_audio_controls = true
+	if pause_volume_slider != null:
+		pause_volume_slider.value = float(AudioManager.get("master_volume"))
+	if pause_mute_check != null:
+		pause_mute_check.button_pressed = bool(AudioManager.get("muted"))
+	_refresh_quick_control_labels()
+	syncing_audio_controls = false
+
+
+func _sync_audio_controls_legacy_unused() -> void:
 	if pause_volume_slider == null or pause_mute_check == null or AudioManager == null:
 		return
 	syncing_audio_controls = true
@@ -1101,6 +1528,24 @@ func _on_mute_toggled(value: bool) -> void:
 
 
 func _sync_settings_controls() -> void:
+	if PlayerSettings == null:
+		return
+	syncing_settings_controls = true
+	if pause_damage_numbers_check != null:
+		pause_damage_numbers_check.button_pressed = bool(PlayerSettings.get("damage_numbers_enabled"))
+	if pause_screen_shake_check != null:
+		pause_screen_shake_check.button_pressed = bool(PlayerSettings.get("screen_shake_enabled"))
+	if pause_force_joystick_check != null:
+		pause_force_joystick_check.button_pressed = bool(PlayerSettings.get("force_joystick_visible"))
+	if pause_joystick_size_slider != null:
+		pause_joystick_size_slider.value = float(PlayerSettings.get("joystick_size_index"))
+	if pause_joystick_size_label != null:
+		pause_joystick_size_label.text = "搖桿大小：%s" % _joystick_size_label(int(PlayerSettings.get("joystick_size_index")))
+	_refresh_quick_control_labels()
+	syncing_settings_controls = false
+
+
+func _sync_settings_controls_legacy_unused() -> void:
 	if PlayerSettings == null:
 		return
 	syncing_settings_controls = true
@@ -1142,10 +1587,30 @@ func _on_joystick_size_slider_changed(value: float) -> void:
 	PlayerSettings.set_joystick_size_index(int(round(value)))
 	if pause_joystick_size_label != null:
 		pause_joystick_size_label.text = "搖桿大小：%s" % _joystick_size_label(int(round(value)))
+	_refresh_quick_control_labels()
+	_apply_responsive_layout()
+
+
+func _on_joystick_size_slider_changed_legacy_unused(value: float) -> void:
+	if syncing_settings_controls or PlayerSettings == null:
+		return
+	PlayerSettings.set_joystick_size_index(int(round(value)))
+	if pause_joystick_size_label != null:
+		pause_joystick_size_label.text = "搖桿大小：%s" % _joystick_size_label(int(round(value)))
 	_apply_responsive_layout()
 
 
 func _joystick_size_label(index: int) -> String:
+	match clamp(index, 0, 2):
+		0:
+			return "小"
+		2:
+			return "大"
+		_:
+			return "中"
+
+
+func _joystick_size_label_legacy_unused(index: int) -> String:
 	match clamp(index, 0, 2):
 		0:
 			return "小"
@@ -1169,6 +1634,25 @@ func _on_reset_meta_pressed() -> void:
 	if not reset_meta_confirm_pending:
 		reset_meta_confirm_pending = true
 		if pause_reset_meta_button != null:
+			pause_reset_meta_button.text = "再按一次確認重置"
+		GameManager.show_toast("再按一次會清空殘響進度")
+		return
+	reset_meta_confirm_pending = false
+	MetaProgress.reset_progress()
+	if GameManager.has_method("apply_current_meta_progress_to_squad"):
+		GameManager.apply_current_meta_progress_to_squad()
+	if pause_reset_meta_button != null:
+		pause_reset_meta_button.text = "重置殘響"
+	GameManager.show_toast("殘響進度已重置")
+	GameManager.emit_stats()
+
+
+func _on_reset_meta_pressed_legacy_unused() -> void:
+	if MetaProgress == null or not MetaProgress.has_method("reset_progress"):
+		return
+	if not reset_meta_confirm_pending:
+		reset_meta_confirm_pending = true
+		if pause_reset_meta_button != null:
 			pause_reset_meta_button.text = "再次按下確認重置"
 		GameManager.show_toast("再次按下以重置殘響進度。")
 		return
@@ -1187,6 +1671,18 @@ func _on_achievement_unlocked(_achievement: Dictionary) -> void:
 
 
 func _refresh_achievement_list() -> void:
+	if pause_achievements_grid == null or AchievementProgress == null or not AchievementProgress.has_method("get_display_rows"):
+		return
+	for child in pause_achievements_grid.get_children():
+		pause_achievements_grid.remove_child(child)
+		child.queue_free()
+	for row in AchievementProgress.get_display_rows():
+		pause_achievements_grid.add_child(_make_achievement_badge(row))
+	if pause_content != null:
+		_layout_pause_achievement_grid(pause_content.custom_minimum_size.x, MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size))
+
+
+func _refresh_achievement_list_legacy_unused() -> void:
 	if pause_achievements_label == null or AchievementProgress == null or not AchievementProgress.has_method("get_display_rows"):
 		return
 	var lines: Array[String] = []

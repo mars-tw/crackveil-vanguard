@@ -24,6 +24,8 @@ var side_title: Label
 var side_close_button: Button
 var side_scroll: ScrollContainer
 var side_content: VBoxContainer
+var achievements_grid: GridContainer
+var achievement_dialog: AcceptDialog
 var version_label: Label
 var meta_buttons: Dictionary = {}
 var volume_slider: HSlider
@@ -167,6 +169,11 @@ func _build_ui() -> void:
 	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	version_label.add_theme_font_size_override("font_size", 12)
 	root.add_child(version_label)
+
+	achievement_dialog = AcceptDialog.new()
+	achievement_dialog.title = "成就"
+	achievement_dialog.ok_button_text = "關閉"
+	ui_layer.add_child(achievement_dialog)
 	_apply_responsive_layout()
 
 
@@ -204,6 +211,7 @@ func _show_panel(panel_id: String) -> void:
 	for child in side_content.get_children():
 		child.queue_free()
 	meta_buttons.clear()
+	achievements_grid = null
 	match panel_id:
 		"achievements":
 			side_title.text = "成就"
@@ -278,6 +286,17 @@ func _unlock_text() -> String:
 
 
 func _build_achievements_panel() -> void:
+	achievements_grid = GridContainer.new()
+	achievements_grid.name = "AchievementsGrid"
+	achievements_grid.columns = 3
+	achievements_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	achievements_grid.add_theme_constant_override("h_separation", 8)
+	achievements_grid.add_theme_constant_override("v_separation", 8)
+	side_content.add_child(achievements_grid)
+	_refresh_achievement_grid()
+
+
+func _build_achievements_panel_legacy_unused() -> void:
 	var label := RichTextLabel.new()
 	label.bbcode_enabled = true
 	label.fit_content = true
@@ -285,6 +304,54 @@ func _build_achievements_panel() -> void:
 	label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	label.text = _achievement_text()
 	side_content.add_child(label)
+
+
+func _refresh_achievement_grid() -> void:
+	if achievements_grid == null or AchievementProgress == null or not AchievementProgress.has_method("get_display_rows"):
+		return
+	for child in achievements_grid.get_children():
+		achievements_grid.remove_child(child)
+		child.queue_free()
+	for row in AchievementProgress.get_display_rows():
+		achievements_grid.add_child(_make_achievement_badge(row))
+
+
+func _make_achievement_badge(row: Dictionary) -> Button:
+	var unlocked := bool(row.get("unlocked", false))
+	var button := Button.new()
+	button.text = "%s\n%s" % ["✓" if unlocked else "□", str(row.get("name", ""))]
+	button.tooltip_text = str(row.get("description", ""))
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	button.custom_minimum_size = Vector2(104.0, 64.0)
+	button.pressed.connect(_on_achievement_badge_pressed.bind(row))
+	_apply_achievement_badge_style(button, unlocked)
+	return button
+
+
+func _apply_achievement_badge_style(button: Button, unlocked: bool) -> void:
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.05, 0.16, 0.14, 0.9) if unlocked else Color(0.035, 0.04, 0.052, 0.82)
+	normal.border_color = Color(0.52, 1.0, 0.74, 0.88) if unlocked else Color(0.24, 0.29, 0.34, 0.88)
+	normal.set_border_width_all(1)
+	normal.set_corner_radius_all(8)
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = Color(0.07, 0.22, 0.2, 0.96) if unlocked else Color(0.06, 0.07, 0.09, 0.92)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = Color(0.025, 0.1, 0.095, 1.0) if unlocked else Color(0.025, 0.03, 0.04, 1.0)
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", hover)
+	button.add_theme_stylebox_override("pressed", pressed)
+	button.add_theme_color_override("font_color", Color(0.9, 1.0, 0.92, 1.0) if unlocked else Color(0.5, 0.56, 0.62, 1.0))
+	button.add_theme_font_size_override("font_size", 13)
+
+
+func _on_achievement_badge_pressed(row: Dictionary) -> void:
+	if achievement_dialog == null:
+		return
+	var status := "已解鎖" if bool(row.get("unlocked", false)) else "未解鎖"
+	achievement_dialog.title = "%s  %s" % [status, str(row.get("name", ""))]
+	achievement_dialog.dialog_text = str(row.get("description", ""))
+	achievement_dialog.popup_centered(Vector2i(360, 180))
 
 
 func _achievement_text() -> String:
@@ -525,6 +592,16 @@ func _apply_responsive_layout() -> void:
 		side_scroll.size = Vector2(panel_width - (48.0 if mobile else 56.0), panel_height - (104.0 if mobile else 92.0))
 	if side_content != null:
 		side_content.custom_minimum_size = Vector2(max(240.0, panel_width - (48.0 if mobile else 56.0)), 0.0)
+	if achievements_grid != null and is_instance_valid(achievements_grid):
+		var grid_width: float = max(240.0, side_content.custom_minimum_size.x if side_content != null else panel_width - 56.0)
+		var columns: int = 4 if grid_width >= 430.0 else 3 if grid_width >= 310.0 else 2
+		achievements_grid.columns = columns
+		var gap: float = 8.0
+		var badge_width: float = max(86.0, floor((grid_width - gap * float(columns - 1)) / float(columns)))
+		var badge_height: float = 72.0 if mobile else 64.0
+		for child in achievements_grid.get_children():
+			if child is Button:
+				(child as Button).custom_minimum_size = Vector2(badge_width, badge_height)
 
 	version_label.anchor_left = 1.0
 	version_label.anchor_right = 1.0

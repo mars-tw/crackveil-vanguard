@@ -118,8 +118,8 @@ func _test_hero10_content_and_bonds() -> bool:
 		_fail("bond did not deactivate immediately on member death")
 		return false
 	manager.queue_free()
-	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.14.0-r16":
-		_fail("R16 release version drifted")
+	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.14.1-r17":
+		_fail("R17 release version drifted")
 		return false
 	print("R14_HERO10 roster=10/9 weapons=11 construct_cap=6 targets=2 bonds=4 impact=frame2")
 	return true
@@ -137,7 +137,7 @@ func _test_formfactor_matrix_and_live_switch() -> bool:
 	var cases := [
 		{"size": phone, "hints": phone_hints, "tier": "phone", "joystick": true},
 		{"size": tablet, "hints": tablet_hints, "tier": "tablet", "joystick": true},
-		{"size": touch_desktop, "hints": touch_desktop_hints, "tier": "desktop", "joystick": false},
+		{"size": touch_desktop, "hints": touch_desktop_hints, "tier": "desktop", "joystick": true},
 		{"size": desktop, "hints": desktop_hints, "tier": "desktop", "joystick": false},
 		# Layout remains phone-sized on a narrow mouse window, but input capability
 		# must not invent a virtual joystick when no touch source exists.
@@ -205,7 +205,7 @@ func _test_formfactor_matrix_and_live_switch() -> bool:
 	viewport.size = Vector2i(1920, 1080)
 	hud._apply_responsive_layout()
 	await get_tree().process_frame
-	if MOBILE_TUNING.layout_tier_name(touch_desktop) != "desktop" or hud.virtual_joystick.visible:
+	if MOBILE_TUNING.layout_tier_name(touch_desktop) != "desktop" or not hud.virtual_joystick.visible:
 		_fail("live tablet-to-touch-desktop switch failed")
 		return false
 	if hud.hp_label.get_theme_font_size("font_size") != 20:
@@ -219,7 +219,7 @@ func _test_formfactor_matrix_and_live_switch() -> bool:
 	hud.set_touch_controls_forced_visible(false)
 	viewport.queue_free()
 	MOBILE_TUNING.set_device_hints_override_for_tests()
-	print("R14_FORMFACTOR phone=phone tablet=tablet touch_desktop=desktop desktop=desktop seed_max=%.0f" % MOBILE_TUNING.SEED_ROW_MAX_WIDTH)
+	print("R14_FORMFACTOR phone=phone tablet=tablet touch_desktop=desktop joystick_fallback=true desktop=desktop seed_max=%.0f" % MOBILE_TUNING.SEED_ROW_MAX_WIDTH)
 	return true
 
 
@@ -517,6 +517,9 @@ func _test_shop_mobile_layout(size: Vector2) -> bool:
 	if _controls_overlap(screen.card_scroll, screen.skip_button):
 		_fail("shop scroll viewport overlaps skip button")
 		return false
+	if size.y > size.x and screen.card_grid.columns != 2:
+		_fail("shop portrait did not use compact two columns")
+		return false
 	if size.x > size.y and screen.card_grid.columns != 3:
 		_fail("shop landscape did not use three columns")
 		return false
@@ -638,7 +641,7 @@ func _test_ui_spacing_at_size(size: Vector2) -> bool:
 	await get_tree().process_frame
 	shop.show_options(_sample_shop_options())
 	await get_tree().process_frame
-	if not _assert_adjacent_gap(shop.option_buttons, shop.card_grid.columns == 1, 8.0, "shop cards %s" % str(size)):
+	if not _assert_no_control_overlaps(shop.option_buttons, "shop cards %s" % str(size)):
 		return false
 
 	var contract := CONTRACT_SCREEN_SCRIPT.new()
@@ -654,7 +657,7 @@ func _test_ui_spacing_at_size(size: Vector2) -> bool:
 	await get_tree().process_frame
 	hud.pause_overlay.visible = true
 	await get_tree().process_frame
-	if not _assert_adjacent_gap([hud.pause_mute_check, hud.pause_damage_numbers_check, hud.pause_screen_shake_check, hud.pause_force_joystick_check], true, 8.0, "pause checks %s" % str(size)):
+	if not _assert_no_control_overlaps([hud.pause_mute_check, hud.pause_damage_numbers_check, hud.pause_screen_shake_check, hud.pause_force_joystick_check], "pause checks %s" % str(size)):
 		return false
 	if size.x <= 430.0 and not _assert_touch_targets([hud.pause_mute_check, hud.pause_damage_numbers_check, hud.pause_screen_shake_check, hud.pause_force_joystick_check, hud.pause_resume_button], 44.0, "pause %s" % str(size)):
 		return false
@@ -681,6 +684,25 @@ func _assert_adjacent_gap(controls: Array, vertical: bool, minimum_gap: float, l
 		if gap < minimum_gap - 0.5:
 			_fail("%s gap %.1f below %.1f" % [label, gap, minimum_gap])
 			return false
+	return true
+
+
+func _assert_no_control_overlaps(controls: Array, label: String) -> bool:
+	for index in range(controls.size()):
+		var a := controls[index] as Control
+		if a == null:
+			_fail(label + " has a missing control")
+			return false
+		var a_rect := a.get_global_rect()
+		for other_index in range(index + 1, controls.size()):
+			var b := controls[other_index] as Control
+			if b == null:
+				_fail(label + " has a missing control")
+				return false
+			var b_rect := b.get_global_rect()
+			if a_rect.intersects(b_rect):
+				_fail("%s controls overlap: %s / %s" % [label, str(a_rect), str(b_rect)])
+				return false
 	return true
 
 
