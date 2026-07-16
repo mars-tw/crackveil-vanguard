@@ -7,7 +7,7 @@
 
 Crackveil Vanguard 是一款以小隊編成為核心的 2D survivors roguelite。帶領裂隙先鋒穿越三種異變戰場，在自動武器火網中招募英雄、組合羈絆、選擇進化，撐過不斷加壓的敵潮。
 
-目前版本：**0.14.2-r18**（與 `project.godot` 一致）
+目前版本：**0.15.0-r20**（與 `project.godot` 一致）
 
 ## 線上遊玩
 
@@ -19,7 +19,7 @@ Web 版不需安裝。首次載入需下載 WebAssembly 與遊戲資源，行動
 
 - **10 位英雄、最多 9 人出擊**：隊長、火力、控場、治療與召喚定位皆有專屬武器與成長路線。
 - **真姿勢動畫**：10 位英雄與敵人皆採逐幀姿勢動畫；走路會改變四肢姿勢，攻擊包含預備、命中與收招，傷害鎖定 impact frame，並具受傷與死亡反應。
-- **角色藝術 r16 升級**：重製角色輪廓、服裝、色彩識別與共用 atlas，保留低成本 Web 渲染。
+- **角色藝術 R20 精品化**：十英雄以 3,000–6,000 tris stylized low-poly 重建，具完整臉部、角色專屬剪影道具、材質分層、暖亮冷暗與 64px 選擇性外框；仍以共用 2D atlas 維持低成本 Web 渲染。
 - **羈絆系統**：特定英雄同隊會啟用燼脈聯爆、縫獵協議、星盾和聲或牧長裂約；成員倒下時即時重算。
 - **UI 與跨裝置修復**：桌機、平板與手機版面分級，修正按鈕間距、勾選框、教學／簡報彈窗、升級卡與觸控目標。
 - **11 種武器與質變升級**：裂線、星環、雷鏈、飛彈、榴彈、虛空網、裂光、治療和聲與裂隙建構體等玩法。
@@ -28,9 +28,9 @@ Web 版不需安裝。首次載入需下載 WebAssembly 與遊戲資源，行動
 
 ## 畫面
 
-![裂隙虛空實機戰鬥](docs/evidence/art_r16/web_battle_rift_void.png)
+![R20 裂隙虛空實機戰鬥](docs/evidence/art_r20/web_battle_r20.png)
 
-![r16 十位英雄角色藝術與動作姿勢](docs/art_r16_character_atlas_proof.png)
+![R16 與 R20 十位英雄 idle／walk／attack 對照](docs/evidence/art_r20/before_after/all_heroes_r16_vs_r20.png)
 
 ![逐幀待機、行走、攻擊、受傷與死亡姿勢](docs/hero10_true_animation_proof.png)
 

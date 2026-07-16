@@ -1,4 +1,4 @@
-"""R16 luminance gate for the shared true-character atlas.
+"""R20 luminance gate for the shared true-character atlas.
 
 Only visible pixels participate in the measurement.  Each character owns five
 64px rows (idle/walk/attack/hurt/death); unused frame slots remain transparent.
