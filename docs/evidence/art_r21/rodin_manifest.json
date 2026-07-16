@@ -1,5 +1,5 @@
 {
-  "round": "cv art-r21",
+  "round": "cv art-r21.1",
   "generator": "Hyper3D Rodin via Blender MCP",
   "bbox_condition": [
     1,
@@ -82,17 +82,22 @@
     "line_mender": {
       "status": "passed",
       "attempts": 1,
-      "task_uuid": "fdd4aa9f-979a-4eb6-98d6-f773059b9b7a",
-      "prompt": "stylized fantasy game hero, hood, thread spool at belt, needle staff, single seamless connected full-body character standing in relaxed A-pose, head firmly attached to neck and shoulders, feet planted on ground, one continuous watertight body, teal and mint healer robes with amber trim, hand-painted stylized textures, arcane league of legends style, game character turnaround reference",
+      "task_uuid": "84def53b-d895-40ef-b1c4-1b2ea632980a",
+      "prompt": "stylized fantasy game healer hero, line mender, single seamless connected full-body character in relaxed A-pose, VISIBLE HEAD with kind face, short hair, hood resting DOWN on shoulders (not covering head), head firmly attached to neck, teal mint healer robes with amber trim, thread spool at belt, long needle staff, hand-painted stylized textures, arcane style",
+      "revision": "r21.1",
       "qc": "docs/evidence/art_r21/qc/line_mender.json",
       "glb": "assets/rodin/hero_line_mender.glb",
-      "bytes": 1932004,
+      "bytes": 1857752,
       "qc_summary": {
         "mesh_objects": 1,
         "loose_components": 2,
-        "main_component_ratio": 0.9248,
-        "main_reaches_head": true,
-        "main_reaches_feet": true,
+        "main_component_ratio": 0.9721,
+        "head_group_vertices": 913,
+        "minimum_head_vertices": 24,
+        "head_group_width_ratio": 0.3406,
+        "head_compact": true,
+        "head_present": true,
+        "head_connected_to_torso": true,
         "feet_planted": true,
         "failure_reasons": []
       }
@@ -154,5 +159,7 @@
   },
   "quota_exhausted": false,
   "missing": [],
-  "completed_at": "2026-07-16T04:41:08+00:00"
+  "completed_at": "2026-07-16T04:41:08+00:00",
+  "r21_1_started_at": "2026-07-16T05:21:14+00:00",
+  "r21_1_completed_at": "2026-07-16T05:22:05+00:00"
 }

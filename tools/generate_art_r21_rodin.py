@@ -7,6 +7,7 @@ The Blender add-on exposes the Hyper3D text generator over the socket as
 
 from __future__ import annotations
 
+import argparse
 import json
 import time
 from datetime import datetime, timezone
@@ -20,6 +21,13 @@ ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / "tools"
 EVIDENCE = ROOT / "docs" / "evidence" / "art_r21"
 MANIFEST_PATH = EVIDENCE / "rodin_manifest.json"
+LINE_MENDER_PROMPT = (
+    "stylized fantasy game healer hero, line mender, single seamless connected full-body "
+    "character in relaxed A-pose, VISIBLE HEAD with kind face, short hair, hood resting DOWN "
+    "on shoulders (not covering head), head firmly attached to neck, teal mint healer robes "
+    "with amber trim, thread spool at belt, long needle staff, hand-painted stylized textures, "
+    "arcane style"
+)
 
 HEROES = (
     (
@@ -132,6 +140,86 @@ def poll_until_done(subscription_key: str, hero_id: str) -> list[str]:
             raise RuntimeError(f"Rodin job failed: {statuses}")
         time.sleep(12.0)
     raise TimeoutError(f"Rodin job timed out for {hero_id}")
+
+
+def regenerate_line_mender() -> None:
+    """R21.1 targeted repair; never spends generation quota on other heroes."""
+    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8")) if MANIFEST_PATH.exists() else {
+        "round": "cv art-r21.1",
+        "generator": "Hyper3D Rodin via Blender MCP",
+        "bbox_condition": [1, 1, 2],
+        "heroes": {},
+    }
+    manifest["round"] = "cv art-r21.1"
+    manifest["r21_1_started_at"] = timestamp()
+    output = ROOT / "assets" / "rodin" / "hero_line_mender.glb"
+    qc_path = EVIDENCE / "qc" / "line_mender.json"
+    for attempt in range(1, 4):
+        prompt = LINE_MENDER_PROMPT
+        if attempt > 1:
+            prompt += (
+                ", anatomy correction retry: clearly modeled face, skull, hair and neck must occupy "
+                "the highest 15 percent of the body and remain fused to the torso, no headless robe"
+            )
+        print(f"RODIN_R21_1_GENERATE hero=line_mender attempt={attempt}", flush=True)
+        generated = result_of(send_command(
+            "create_rodin_job",
+            {"text_prompt": prompt, "bbox_condition": [1, 1, 2]},
+            response_timeout=900.0,
+        ))
+        task_uuid = str(generated.get("uuid", ""))
+        subscription_key = str(generated.get("jobs", {}).get("subscription_key", ""))
+        if not task_uuid or not subscription_key:
+            raise RuntimeError(f"Rodin response lacks job identifiers: {generated}")
+        entry = {
+            "status": "polling",
+            "attempts": attempt,
+            "task_uuid": task_uuid,
+            "prompt": prompt,
+            "revision": "r21.1",
+        }
+        manifest.setdefault("heroes", {})["line_mender"] = entry
+        save_manifest(manifest)
+        poll_until_done(subscription_key, "line_mender")
+        execute("ops.clear_scene()")
+        imported = result_of(send_command(
+            "import_generated_asset",
+            {"name": "hero_line_mender_rodin_r21_1", "task_uuid": task_uuid},
+            response_timeout=900.0,
+        ))
+        if not imported.get("succeed"):
+            entry.update({"status": "import_error", "error": imported.get("error", str(imported))})
+            save_manifest(manifest)
+            continue
+        execute("ops.qc_and_export('line_mender')")
+        qc = json.loads(qc_path.read_text(encoding="utf-8"))
+        entry.update({
+            "status": "passed" if qc.get("pass") else "qc_failed",
+            "qc": str(qc_path.relative_to(ROOT)).replace("\\", "/"),
+            "glb": str(output.relative_to(ROOT)).replace("\\", "/") if qc.get("pass") else None,
+            "bytes": output.stat().st_size if qc.get("pass") else None,
+            "qc_summary": {
+                key: qc.get(key) for key in (
+                    "mesh_objects", "loose_components", "main_component_ratio",
+                    "head_group_vertices", "minimum_head_vertices", "head_group_width_ratio",
+                    "head_compact", "head_present",
+                    "head_connected_to_torso", "feet_planted", "failure_reasons",
+                )
+            },
+        })
+        save_manifest(manifest)
+        if qc.get("pass"):
+            manifest["r21_1_completed_at"] = timestamp()
+            manifest["missing"] = [item for item in manifest.get("missing", []) if item != "line_mender"]
+            save_manifest(manifest)
+            print(
+                f"RODIN_R21_1_PASS hero=line_mender attempt={attempt} "
+                f"head_vertices={qc['head_group_vertices']} bytes={output.stat().st_size}",
+                flush=True,
+            )
+            return
+        print(f"RODIN_R21_1_QC_REJECT attempt={attempt} reasons={qc['failure_reasons']}", flush=True)
+    raise RuntimeError("line_mender failed head-presence QC after 3 Rodin attempts")
 
 
 def main() -> None:
@@ -268,4 +356,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--hero", choices=("all", "line_mender"), default="all")
+    args = parser.parse_args()
+    regenerate_line_mender() if args.hero == "line_mender" else main()

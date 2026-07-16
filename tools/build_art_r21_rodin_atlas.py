@@ -435,6 +435,39 @@ def export_rigged(runtime_id: str, mesh: bpy.types.Object, rig: bpy.types.Object
     return output
 
 
+def build_one(art_id: str = "line_mender") -> None:
+    """Rig/render one hero and replace only its existing manifest record."""
+    matches = [item for item in HEROES if item[0] == art_id]
+    if len(matches) != 1:
+        raise ValueError(f"Unknown R21 hero: {art_id}")
+    selected_art_id, runtime_id, filename = matches[0]
+    print(f"R21_RIG_START hero={runtime_id}", flush=True)
+    clear_scene()
+    mesh, height, record = import_and_normalize(ROOT / "assets" / "rodin" / filename, runtime_id)
+    rig = create_rig(height, runtime_id)
+    record.update({"art_id": selected_art_id, "runtime_id": runtime_id, "revision": "r21.1"})
+    record["binding"] = bind(mesh, rig)
+    camera, _lights = configure_scene(height)
+    record.update(render_animation(runtime_id, mesh, rig, height, camera))
+    record["threeviews"] = render_threeviews(runtime_id, rig, mesh, height, camera)
+    rigged = export_rigged(runtime_id, mesh, rig)
+    record["rigged_glb"] = str(rigged.relative_to(ROOT)).replace("\\", "/")
+    record["rigged_bytes"] = rigged.stat().st_size
+
+    records = json.loads(RIG_REPORT.read_text(encoding="utf-8")) if RIG_REPORT.exists() else []
+    records = [existing for existing in records if existing.get("runtime_id") != runtime_id]
+    hero_order = {hero[1]: index for index, hero in enumerate(HEROES)}
+    records.append(record)
+    records.sort(key=lambda existing: hero_order.get(str(existing.get("runtime_id")), len(HEROES)))
+    RIG_REPORT.parent.mkdir(parents=True, exist_ok=True)
+    RIG_REPORT.write_text(json.dumps(records, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(
+        f"R21_RIG_PASS hero={runtime_id} method={record['binding']['method']} "
+        f"coverage={record['binding']['coverage']:.2%} frames={record['frames']}",
+        flush=True,
+    )
+
+
 def render_current_pose_test(runtime_id: str, animation: str, frame: int, output_name: str) -> None:
     mesh = bpy.data.objects[runtime_id + "_mesh"]
     rig = bpy.data.objects[runtime_id + "_rig"]

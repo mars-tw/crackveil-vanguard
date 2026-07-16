@@ -2,81 +2,188 @@
   "asset": "line_mender",
   "pass": true,
   "mesh_objects": 1,
-  "vertices": 25719,
-  "welded_vertices": 11656,
+  "vertices": 24472,
+  "welded_vertices": 11658,
   "polygons": 23332,
   "loose_components": 2,
   "large_components": 2,
-  "main_component_ratio": 0.9248,
+  "main_component_ratio": 0.9721,
   "main_reaches_head": true,
+  "head_zone_fraction": 0.15,
+  "head_zone_min_z": 0.50781,
+  "head_group_vertices": 913,
+  "minimum_head_vertices": 24,
+  "head_group_width_ratio": 0.3406,
+  "head_compact": true,
+  "head_present": true,
+  "head_connected_to_torso": true,
   "main_reaches_feet": true,
   "feet_planted": true,
   "bbox_min": [
-    -0.4729,
-    -0.94717,
-    -0.47914
+    -0.47217,
+    -0.94815,
+    -0.7288
   ],
   "bbox_max": [
-    0.47283,
-    0.94783,
-    0.47475
+    0.47235,
+    0.94795,
+    0.72604
   ],
   "bbox_extent": [
-    0.94573,
-    1.895,
-    0.95389
+    0.94452,
+    1.89609,
+    1.45484
   ],
   "failure_reasons": [],
   "components": [
     {
-      "vertices": 10779,
+      "vertices": 11333,
       "bbox_min": [
-        -0.4614,
-        -0.45243,
-        -0.47914
+        -0.47217,
+        -0.94815,
+        -0.7288
       ],
       "bbox_max": [
-        0.47283,
-        0.94783,
-        0.47475
+        0.47235,
+        0.36592,
+        0.72604
       ],
       "center": [
-        0.00571,
-        0.2477,
-        -0.00219
+        9e-05,
+        -0.29111,
+        -0.00138
       ],
       "extent": [
-        0.93423,
-        1.40027,
-        0.95389
+        0.94452,
+        1.31407,
+        1.45484
       ],
-      "object": "hero_line_mender_rodin"
+      "top_zone_vertices": 913,
+      "top_zone_groups": [
+        {
+          "vertices": 913,
+          "bbox_min": [
+            -0.21511,
+            -0.13209,
+            0.50789
+          ],
+          "bbox_max": [
+            0.10663,
+            0.20201,
+            0.72604
+          ],
+          "extent": [
+            0.32174,
+            0.33409,
+            0.21815
+          ]
+        }
+      ],
+      "top_profiles": [
+        {
+          "height_fraction": 0.85,
+          "vertices": 913,
+          "extent": [
+            0.32174,
+            0.33409,
+            0.21815
+          ]
+        },
+        {
+          "height_fraction": 0.9,
+          "vertices": 565,
+          "extent": [
+            0.25809,
+            0.29885,
+            0.14523
+          ]
+        },
+        {
+          "height_fraction": 0.95,
+          "vertices": 249,
+          "extent": [
+            0.19836,
+            0.26576,
+            0.0725
+          ]
+        },
+        {
+          "height_fraction": 0.98,
+          "vertices": 91,
+          "extent": [
+            0.14033,
+            0.18365,
+            0.02861
+          ]
+        }
+      ],
+      "object": "hero_line_mender_rodin_r21_1"
     },
     {
-      "vertices": 877,
+      "vertices": 325,
       "bbox_min": [
-        -0.4729,
-        -0.94717,
-        0.13759
+        0.19763,
+        -0.11778,
+        -0.27983
       ],
       "bbox_max": [
-        -0.40279,
-        0.89652,
-        0.26182
+        0.21006,
+        0.94795,
+        -0.05144
       ],
       "center": [
-        -0.43784,
-        -0.02533,
-        0.1997
+        0.20384,
+        0.41509,
+        -0.16563
       ],
       "extent": [
-        0.07011,
-        1.84369,
-        0.12423
+        0.01243,
+        1.06572,
+        0.22838
       ],
-      "object": "hero_line_mender_rodin"
+      "top_zone_vertices": 0,
+      "top_zone_groups": [],
+      "top_profiles": [
+        {
+          "height_fraction": 0.85,
+          "vertices": 0,
+          "extent": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "height_fraction": 0.9,
+          "vertices": 0,
+          "extent": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "height_fraction": 0.95,
+          "vertices": 0,
+          "extent": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "height_fraction": 0.98,
+          "vertices": 0,
+          "extent": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "object": "hero_line_mender_rodin_r21_1"
     }
   ],
-  "export": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\assets\\rodin\\hero_line_mender.glb",
-  "export_bytes": 1932004
+  "source": "assets/rodin/hero_line_mender.glb",
+  "source_bytes": 1857752
 }
