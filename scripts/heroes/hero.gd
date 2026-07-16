@@ -453,6 +453,8 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> bool
 	EntityFactory.spawn_damage_number(final_incoming, number_position, Color(1.0, 0.28, 0.22))
 	if visual != null and visual.has_method("play_hurt"):
 		visual.call("play_hurt", source_position)
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("hurt", false, -10.0, 0.92 if is_leader else 1.08)
 
 	GameManager.emit_stats()
 	if current_hp <= 0.0:

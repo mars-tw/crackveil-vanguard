@@ -55,8 +55,11 @@ var pause_mute_check: CheckBox
 var pause_damage_numbers_check: CheckBox
 var pause_screen_shake_check: CheckBox
 var pause_force_joystick_check: CheckBox
+var pause_high_contrast_check: CheckBox
 var pause_joystick_size_label: Label
 var pause_joystick_size_slider: HSlider
+var pause_ui_scale_label: Label
+var pause_ui_scale_slider: HSlider
 var pause_seed_button: Button
 var pause_reset_meta_button: Button
 var pause_guide_button: Button
@@ -517,6 +520,27 @@ func _build_pause_settings_page() -> void:
 	pause_force_joystick_check.toggled.connect(_on_force_joystick_toggled)
 	toggle_grid.add_child(pause_force_joystick_check)
 
+	pause_high_contrast_check = CheckBox.new()
+	pause_high_contrast_check.text = "高對比"
+	pause_high_contrast_check.toggled.connect(_on_high_contrast_toggled)
+	toggle_grid.add_child(pause_high_contrast_check)
+
+	pause_ui_scale_label = Label.new()
+	pause_ui_scale_label.text = "介面大小"
+	pause_ui_scale_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pause_settings_page.add_child(pause_ui_scale_label)
+
+	pause_ui_scale_slider = HSlider.new()
+	pause_ui_scale_slider.min_value = 0.0
+	pause_ui_scale_slider.max_value = 2.0
+	pause_ui_scale_slider.step = 1.0
+	pause_ui_scale_slider.tick_count = 3
+	pause_ui_scale_slider.ticks_on_borders = true
+	pause_ui_scale_slider.custom_minimum_size = Vector2(240.0, 28.0)
+	pause_ui_scale_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_ui_scale_slider.value_changed.connect(_on_ui_scale_slider_changed)
+	pause_settings_page.add_child(pause_ui_scale_slider)
+
 	pause_joystick_size_label = Label.new()
 	pause_joystick_size_label.text = "搖桿大小"
 	pause_joystick_size_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -780,8 +804,8 @@ func _apply_responsive_layout() -> void:
 			score_panel.anchor_left = 0.5
 			score_panel.anchor_right = 0.5
 			score_panel.position = Vector2.ZERO
-			score_panel.offset_left = -52.0
-			score_panel.offset_right = 52.0
+			score_panel.offset_left = 2.0
+			score_panel.offset_right = 72.0
 			score_panel.offset_top = safe_top + 6.0
 			score_panel.offset_bottom = score_panel.offset_top + 44.0
 		else:
@@ -789,7 +813,7 @@ func _apply_responsive_layout() -> void:
 			score_panel.anchor_right = 1.0
 			score_panel.position = Vector2.ZERO
 			score_panel.offset_left = -358.0 if not portrait else -276.0
-			score_panel.offset_right = -margin
+			score_panel.offset_right = -150.0 if mobile and not portrait else -margin
 			score_panel.offset_top = safe_top + 76.0 if mobile and not portrait else 8.0 if not portrait else 48.0
 			score_panel.offset_bottom = score_panel.offset_top + (52.0 if mobile else 46.0)
 	if hp_icon != null:
@@ -834,7 +858,7 @@ func _apply_responsive_layout() -> void:
 	time_label.anchor_left = 0.0 if mobile and portrait else 0.5
 	time_label.anchor_right = 0.0 if mobile and portrait else 0.5
 	time_label.offset_left = margin if mobile and portrait else -92.0 if mobile else -78.0
-	time_label.offset_right = margin + 168.0 if mobile and portrait else 92.0 if mobile else 78.0
+	time_label.offset_right = margin + 150.0 if mobile and portrait else 92.0 if mobile else 78.0
 	time_label.offset_top = safe_top if mobile else 10.0
 	time_label.offset_bottom = time_label.offset_top + (46.0 if mobile else 32.0)
 	time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if mobile and portrait else HORIZONTAL_ALIGNMENT_CENTER
@@ -845,14 +869,14 @@ func _apply_responsive_layout() -> void:
 	if mobile and portrait:
 		score_label.anchor_left = 0.5
 		score_label.anchor_right = 0.5
-		score_label.offset_left = -48.0
-		score_label.offset_right = 48.0
+		score_label.offset_left = 6.0
+		score_label.offset_right = 68.0
 		score_label.offset_top = safe_top + 8.0
 		score_label.offset_bottom = score_label.offset_top + 38.0
 		score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	else:
 		score_label.offset_left = -338.0 if not portrait else -258.0
-		score_label.offset_right = -104.0 if not portrait else -14.0
+		score_label.offset_right = -150.0 if mobile and not portrait else -104.0 if not portrait else -14.0
 		score_label.offset_top = safe_top + 84.0 if mobile and not portrait else 17.0 if not portrait else 54.0
 		score_label.offset_bottom = score_label.offset_top + (34.0 if mobile else 30.0)
 		score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -876,6 +900,8 @@ func _apply_responsive_layout() -> void:
 	pause_button.offset_right = -margin
 	pause_button.offset_top = safe_top if mobile else 10.0
 	pause_button.offset_bottom = pause_button.offset_top + (touch_height if mobile else 40.0)
+	pause_button.visible = not (pause_overlay != null and pause_overlay.visible)
+	pause_button.disabled = pause_overlay != null and pause_overlay.visible
 
 	if pause_overlay != null:
 		var overlay_width: float = min(viewport_size.x - (24.0 if mobile else 40.0), 520.0 if mobile else 540.0)
@@ -1017,13 +1043,27 @@ func _apply_responsive_layout() -> void:
 			GameManager.set_touch_move_vector(Vector2.ZERO)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
 	_compact_pause_controls(mobile)
+	var compact_pause_landscape := mobile and not portrait
+	if pause_settings_page != null:
+		pause_settings_page.add_theme_constant_override("separation", 4 if compact_pause_landscape else 10)
+	if pause_volume_label != null:
+		pause_volume_label.visible = not compact_pause_landscape
+	if pause_volume_slider != null:
+		pause_volume_slider.visible = not compact_pause_landscape
 	if pause_force_joystick_check != null:
-		pause_force_joystick_check.visible = show_touch_controls
+		pause_force_joystick_check.visible = show_touch_controls and not compact_pause_landscape
+	if pause_high_contrast_check != null:
+		pause_high_contrast_check.visible = true
+	if pause_ui_scale_label != null:
+		pause_ui_scale_label.visible = true
+	if pause_ui_scale_slider != null:
+		pause_ui_scale_slider.visible = true
 	if pause_joystick_size_label != null:
-		pause_joystick_size_label.visible = show_touch_controls
+		pause_joystick_size_label.visible = show_touch_controls and not compact_pause_landscape
 	if pause_joystick_size_slider != null:
-		pause_joystick_size_slider.visible = show_touch_controls
+		pause_joystick_size_slider.visible = show_touch_controls and not compact_pause_landscape
 	_layout_quick_controls(viewport_size, mobile, portrait, margin, safe_top, touch_height, pause_width, show_touch_controls)
+	_apply_accessibility_palette()
 	call_deferred("_publish_reachability_probe", viewport_size)
 
 
@@ -1037,6 +1077,12 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"pause_achievements_tab": pause_achievements_tab_button,
 		"pause_run_tab": pause_run_tab_button,
 		"pause_resume": pause_resume_button,
+		"quick_controls": quick_controls,
+		"quick_mute": quick_mute_button,
+		"quick_screen_shake": quick_screen_shake_button,
+		"quick_joystick_size": quick_joystick_size_button,
+		"pause_high_contrast": pause_high_contrast_check,
+		"pause_ui_scale": pause_ui_scale_slider,
 		"virtual_joystick": virtual_joystick,
 		"active_ability": active_ability_button
 	}, {
@@ -1049,7 +1095,7 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 func _layout_quick_controls(viewport_size: Vector2, mobile: bool, portrait: bool, margin: float, safe_top: float, touch_height: float, pause_width: float, show_touch_controls: bool) -> void:
 	if quick_controls == null:
 		return
-	var icon_size: float = 46.0 if mobile else 36.0
+	var icon_size: float = maxf(46.0, touch_height) if mobile else 36.0
 	var gap: float = 6.0
 	var buttons: Array[Button] = [quick_mute_button, quick_screen_shake_button]
 	if quick_joystick_size_button != null:
@@ -1061,13 +1107,13 @@ func _layout_quick_controls(viewport_size: Vector2, mobile: bool, portrait: bool
 	var total_width: float = icon_size if vertical else icon_size * float(button_count) + gap * float(max(0, button_count - 1))
 	var total_height: float = icon_size * float(button_count) + gap * float(max(0, button_count - 1)) if vertical else icon_size
 	var x: float = viewport_size.x - margin - total_width
-	var y: float = safe_top + touch_height + 8.0 if vertical else safe_top + (2.0 if mobile else 12.0)
+	var y: float = min(viewport_size.y - total_height - 132.0, safe_top + 190.0) if vertical else safe_top + (2.0 if mobile else 12.0)
 	if not vertical:
 		x = viewport_size.x - margin - pause_width - gap - total_width if mobile else viewport_size.x - margin - total_width
-		y = safe_top + touch_height + 8.0 if mobile else safe_top + 58.0
+		y = safe_top + touch_height + 80.0 if mobile else safe_top + touch_height + 22.0 if show_touch_controls else safe_top + 58.0
 	quick_controls.position = Vector2(max(margin, x), y)
 	quick_controls.size = Vector2(total_width, total_height)
-	quick_controls.visible = true
+	quick_controls.visible = not (pause_overlay != null and pause_overlay.visible)
 	for index in range(buttons.size()):
 		var button := buttons[index] as Button
 		if button == null:
@@ -1079,23 +1125,30 @@ func _layout_quick_controls(viewport_size: Vector2, mobile: bool, portrait: bool
 
 
 func _compact_pause_controls(mobile: bool) -> void:
-	var check_font_size: int = 20 if mobile else 15
-	var check_height: float = 54.0 if mobile else 44.0
-	for control in [pause_mute_check, pause_damage_numbers_check, pause_screen_shake_check, pause_force_joystick_check]:
+	var ui_multiplier := _ui_scale_multiplier()
+	var viewport_size := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
+	var compact_landscape := mobile and viewport_size.x > viewport_size.y
+	var check_font_size: int = int(round(float(15 if compact_landscape else 20 if mobile else 15) * ui_multiplier))
+	var check_height: float = 44.0 if compact_landscape else 54.0 if mobile else 44.0
+	for control in [pause_mute_check, pause_damage_numbers_check, pause_screen_shake_check, pause_force_joystick_check, pause_high_contrast_check]:
 		var check := control as CheckBox
 		if check == null:
 			continue
 		check.add_theme_font_size_override("font_size", check_font_size)
 		check.custom_minimum_size = Vector2(0.0, check_height)
+	if pause_ui_scale_label != null:
+		pause_ui_scale_label.add_theme_font_size_override("font_size", int(round(float(14 if compact_landscape else 18 if mobile else 15) * ui_multiplier)))
+	if pause_ui_scale_slider != null:
+		pause_ui_scale_slider.custom_minimum_size = Vector2(240.0, 44.0 if compact_landscape else 46.0 if mobile else 44.0)
 	if pause_seed_button != null:
-		pause_seed_button.add_theme_font_size_override("font_size", 19 if mobile else 15)
+		pause_seed_button.add_theme_font_size_override("font_size", int(round(float(19 if mobile else 15) * ui_multiplier)))
 	if pause_guide_button != null:
-		pause_guide_button.add_theme_font_size_override("font_size", 19 if mobile else 15)
+		pause_guide_button.add_theme_font_size_override("font_size", int(round(float(19 if mobile else 15) * ui_multiplier)))
 	for control in [pause_settings_tab_button, pause_achievements_tab_button, pause_run_tab_button]:
 		var tab := control as Button
 		if tab == null:
 			continue
-		tab.add_theme_font_size_override("font_size", 20 if mobile else 15)
+		tab.add_theme_font_size_override("font_size", int(round(float(20 if mobile else 15) * ui_multiplier)))
 		tab.custom_minimum_size.y = 50.0 if mobile else 44.0
 
 
@@ -1129,6 +1182,37 @@ func _apply_quick_button_style(button: Button, active: bool) -> void:
 	button.add_theme_stylebox_override("pressed", pressed)
 	button.add_theme_stylebox_override("focus", normal)
 	button.add_theme_color_override("font_color", Color(0.86, 0.98, 1.0, 1.0) if active else Color(0.56, 0.65, 0.7, 1.0))
+
+
+func _ui_scale_multiplier() -> float:
+	if PlayerSettings != null and PlayerSettings.has_method("get_ui_scale_multiplier"):
+		return float(PlayerSettings.get_ui_scale_multiplier())
+	return 1.0
+
+
+func _apply_accessibility_palette() -> void:
+	var high_contrast := PlayerSettings != null and bool(PlayerSettings.get("high_contrast_enabled"))
+	var panel_alpha := 0.94 if high_contrast else 0.78
+	for panel_control in [hud_panel, score_panel, pause_overlay, toast_panel]:
+		var panel := panel_control as Panel
+		if panel == null:
+			continue
+		panel.modulate = Color(1.0, 1.0, 1.0, panel_alpha)
+	var labels: Array = [
+		hp_label, level_label, theme_label, time_label, score_label,
+		pause_title_label, pause_volume_label, pause_joystick_size_label,
+		pause_ui_scale_label, pause_run_stats_label, toast_label
+	]
+	for control in labels:
+		var label := control as Label
+		if label == null:
+			continue
+		if high_contrast:
+			label.add_theme_color_override("font_color", Color.WHITE)
+			label.add_theme_color_override("font_outline_color", Color.BLACK)
+			label.add_theme_constant_override("outline_size", 3)
+		else:
+			label.remove_theme_constant_override("outline_size")
 
 
 func _make_achievement_badge(row: Dictionary) -> Button:
@@ -1232,7 +1316,7 @@ func _on_stats_changed(stats: Dictionary) -> void:
 	var kills := int(stats.get("kills", 0))
 	var gold := int(stats.get("gold", 0))
 	var echo_shards := int(stats.get("echo_shards", 0))
-	score_label.text = "擊殺 %d" % kills if mobile else "擊殺 %d   金幣 %d   殘響 %d" % [
+	score_label.text = "K%d" % kills if mobile else "擊殺 %d   金幣 %d   殘響 %d" % [
 		kills,
 		gold,
 		echo_shards
@@ -1248,6 +1332,11 @@ func _on_pause_changed(is_paused: bool) -> void:
 		pause_overlay.visible = is_paused
 	if pause_button != null:
 		pause_button.text = "繼續" if is_paused else "暫停"
+		pause_button.visible = not is_paused
+		pause_button.disabled = is_paused
+	if quick_controls != null:
+		quick_controls.visible = not is_paused
+		quick_controls.mouse_filter = Control.MOUSE_FILTER_IGNORE if is_paused else Control.MOUSE_FILTER_PASS
 	if is_paused:
 		_sync_audio_controls()
 		_sync_settings_controls()
@@ -1604,11 +1693,18 @@ func _sync_settings_controls_legacy_unused() -> void:
 		pause_screen_shake_check.button_pressed = bool(PlayerSettings.get("screen_shake_enabled"))
 	if pause_force_joystick_check != null:
 		pause_force_joystick_check.button_pressed = bool(PlayerSettings.get("force_joystick_visible"))
+	if pause_high_contrast_check != null:
+		pause_high_contrast_check.button_pressed = bool(PlayerSettings.get("high_contrast_enabled"))
+	if pause_ui_scale_slider != null:
+		pause_ui_scale_slider.value = float(PlayerSettings.get("ui_scale_index"))
+	if pause_ui_scale_label != null:
+		pause_ui_scale_label.text = "介面大小：%s" % _ui_scale_label(int(PlayerSettings.get("ui_scale_index")))
 	if pause_joystick_size_slider != null:
 		pause_joystick_size_slider.value = float(PlayerSettings.get("joystick_size_index"))
 	if pause_joystick_size_label != null:
 		pause_joystick_size_label.text = "搖桿大小：%s" % _joystick_size_label(int(PlayerSettings.get("joystick_size_index")))
 	syncing_settings_controls = false
+	_apply_accessibility_palette()
 
 
 func _on_damage_numbers_toggled(value: bool) -> void:
@@ -1627,6 +1723,23 @@ func _on_force_joystick_toggled(value: bool) -> void:
 	if syncing_settings_controls or PlayerSettings == null:
 		return
 	PlayerSettings.set_force_joystick_visible(value)
+	_apply_responsive_layout()
+
+
+func _on_high_contrast_toggled(value: bool) -> void:
+	if syncing_settings_controls or PlayerSettings == null:
+		return
+	PlayerSettings.set_high_contrast_enabled(value)
+	_apply_responsive_layout()
+
+
+func _on_ui_scale_slider_changed(value: float) -> void:
+	if syncing_settings_controls or PlayerSettings == null:
+		return
+	var index := int(round(value))
+	PlayerSettings.set_ui_scale_index(index)
+	if pause_ui_scale_label != null:
+		pause_ui_scale_label.text = "介面大小：%s" % _ui_scale_label(index)
 	_apply_responsive_layout()
 
 
@@ -1657,6 +1770,16 @@ func _joystick_size_label(index: int) -> String:
 			return "大"
 		_:
 			return "中"
+
+
+func _ui_scale_label(index: int) -> String:
+	match clamp(index, 0, 2):
+		0:
+			return "精簡"
+		2:
+			return "大"
+		_:
+			return "標準"
 
 
 func _joystick_size_label_legacy_unused(index: int) -> String:

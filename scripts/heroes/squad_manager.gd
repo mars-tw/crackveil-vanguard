@@ -479,6 +479,8 @@ func recruit_hero(hero_id: String) -> bool:
 		GameManager.apply_current_meta_progress_to_member(hero)
 	if hero != null and AchievementProgress != null and AchievementProgress.has_method("record_squad_size"):
 		AchievementProgress.record_squad_size(get_member_count(), int(squad_data.get("max_members")))
+	if hero != null and AudioManager != null and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("recruit", false, -3.0, 1.06)
 	recompute_bonds()
 	return true
 

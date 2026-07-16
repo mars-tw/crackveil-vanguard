@@ -164,6 +164,7 @@ func show_options(options: Array) -> void:
 			str(option.get("description", ""))
 		]
 		button.set_meta("base_text", button.text)
+		button.set_meta("option_name", str(option.get("name", "契約")))
 		button.set_meta("option_key", _option_key(option))
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		button.add_theme_font_size_override("font_size", 20)
@@ -423,7 +424,17 @@ func _apply_responsive_layout() -> void:
 	var card_height: float = 240.0 if mobile and portrait else 160.0 if portrait else max(190.0, available_card_height)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
-		button.add_theme_font_size_override("font_size", 18 if portrait else 18 if mobile else 20)
+		if compact_landscape:
+			var option_index := option_buttons.find(button)
+			button.autowrap_mode = TextServer.AUTOWRAP_OFF
+			button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			button.text = "%s · %s\n點兩次確認" % [["I", "II", "III", "IV"][option_index % 4], str(button.get_meta("option_name", "契約"))]
+			button.add_theme_font_size_override("font_size", 14)
+		else:
+			button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			button.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
+			button.text = str(button.get_meta("base_text", button.text))
+			button.add_theme_font_size_override("font_size", 18 if portrait else 18 if mobile else 20)
 	if seed_input != null:
 		seed_input.add_theme_font_size_override("font_size", 13)
 	if seed_paste_button != null:

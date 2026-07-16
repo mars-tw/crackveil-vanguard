@@ -162,9 +162,10 @@ func _deploy_constructs(target: Node2D) -> void:
 	var spawn_count := 2 if anchor_level >= 2 else 1
 	var active_cap := _owner_active_cap(stats)
 	var spawn_offset := float(stats.get("spawn_offset", 72.0))
+	var target_anchor := target.global_position - direction * spawn_offset
 	for index in range(spawn_count):
 		var lane := float(index) - float(spawn_count - 1) * 0.5
-		var position := owner_player.global_position + direction * spawn_offset + side * lane * 30.0
+		var position := target_anchor + side * lane * 30.0
 		EntityFactory.spawn_rift_construct(position, stats, owner_player, self, active_cap)
 	register_trigger()
 	EntityFactory.spawn_death_burst(owner_player.global_position + direction * 30.0, stats.get("color", Color(0.55, 0.82, 1.0)), 0.76, "spark")

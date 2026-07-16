@@ -1,0 +1,13 @@
+R22_TEST_GATES version=0.17.0-r22
+R14RegressionTest PASS evidence=docs/evidence/R22/r14_regression.txt marker=R14_REGRESSION_PASS
+TrueAnimationRegressionTest PASS evidence=docs/evidence/R22/true_animation.txt marker=TRUE_ANIMATION_REGRESSION_PASS
+StressTest PASS evidence=docs/evidence/R22/stress_after.txt avg_ms=8.818 p95_ms=12.365 avg_fps=113.41 min_fps=45.20 marker=STRESS_PASS
+StressNegativeGate PASS evidence=docs/evidence/R22/stress_negative_gate.txt override=--perf-gate-max-p95-ms=1.0 actual_exit=1 marker=NEGATIVE_GATE_PASS
+StressMobileLodProbe PASS evidence=docs/evidence/R22/stress_mobile_lod_probe.txt avg_ms=8.708 p95_ms=12.429 avg_fps=114.83 marker=STRESS_PASS
+BalanceMockRun PASS evidence=docs/evidence/R22/balance_mock_after.txt shepherd_weapon_share=0.1651 leader_dps_share=0.3904 marker=BALANCE_MOCK_PASS
+ArenaInstrumentationRun PASS evidence=docs/evidence/R22/arena_instrumentation_after.txt shepherd_weapon_share=0.1502 leader_dps_share=0.1248 marker=ARENA_INSTRUMENT_PASS
+Hero10BalanceInstrument PASS evidence=docs/evidence/R22/hero10_balance_pressure.txt raw_shepherd_weapon_share=0.0420 diagnostic_top_weapon=ember_grenadier:grenade_lob top_share=0.5142 marker=HERO10_PRESSURE_PASS
+WebExport PASS evidence=docs/evidence/R22/web_export.txt marker=[ DONE ] savepack
+ControlsReachability PASS evidence=docs/evidence/R22/controls_reachability.txt marker=R22_CONTROLS_REACHABILITY_PASS viewports=1920x1080,1440x780,1366x600,1280x640,390x844_touch,844x390_touch,1024x768_touch,1366x600_coarse
+SecretScan PASS evidence=docs/evidence/R22/secret_scan.txt marker=SECRET_SCAN_PASS
+VersionGrep PASS evidence=docs/evidence/R22/version_grep.txt current=README.md/project.godot 0.17.0-r22 historical_r21_mentions_only=docs/CODEX_RESPONSE_art_r21.md

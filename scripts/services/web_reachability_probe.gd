@@ -30,5 +30,5 @@ static func publish(scope: String, viewport_size: Vector2, controls: Dictionary,
 		"flags": flags,
 		"timestamp_msec": Time.get_ticks_msec()
 	}
-	var script := "if(new URLSearchParams(window.location.search).get('cv_r19_test')==='1'){window.__cvR19Controls=window.__cvR19Controls||{};window.__cvR19Controls[%s]=%s;}" % [JSON.stringify(scope), JSON.stringify(payload)]
+	var script := "(()=>{const q=new URLSearchParams(window.location.search);if(q.get('cv_r19_test')==='1'||q.get('cv_r22_test')==='1'){window.__cvR19Controls=window.__cvR19Controls||{};window.__cvR19Controls[%s]=%s;window.__cvR22Controls=window.__cvR22Controls||{};window.__cvR22Controls[%s]=%s;}})()" % [JSON.stringify(scope), JSON.stringify(payload), JSON.stringify(scope), JSON.stringify(payload)]
 	JavaScriptBridge.eval(script, true)

@@ -85,8 +85,8 @@ func _test_hero10_content_and_bonds() -> bool:
 	if available_weapons.size() != 11 or str(HERO10_WEAPON.get("behavior_id")) != "rift_construct":
 		_fail("hero10 weapon catalog/behavior contract drifted")
 		return false
-	if not is_equal_approx(float(HERO10_WEAPON.get("damage")), 7.0) or not is_equal_approx(float(HERO10_WEAPON.get("cooldown")), 2.4):
-		_fail("rift_constructs baseline damage/cooldown drifted")
+	if not is_equal_approx(float(HERO10_WEAPON.get("damage")), 8.5) or not is_equal_approx(float(HERO10_WEAPON.get("cooldown")), 1.35):
+		_fail("rift_constructs R22 damage/cooldown contract drifted")
 		return false
 	if int(HERO10_WEAPON.get("projectile_count")) != 3 or int(HERO10_WEAPON.get("hard_cap_global")) != 6 or int(HERO10_WEAPON.get("max_targets_per_tick")) != 2:
 		_fail("rift_constructs cap/target budget drifted")
@@ -118,8 +118,8 @@ func _test_hero10_content_and_bonds() -> bool:
 		_fail("bond did not deactivate immediately on member death")
 		return false
 	manager.queue_free()
-	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.16.0-r21":
-		_fail("R21 release version drifted")
+	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.17.0-r22":
+		_fail("R22 release version drifted")
 		return false
 	print("R14_HERO10 roster=10/9 weapons=11 construct_cap=6 targets=2 bonds=4 impact=frame2")
 	return true
@@ -597,35 +597,52 @@ func _make_ui_viewport(size: Vector2) -> SubViewport:
 
 
 func _test_ui_spacing_matrix() -> bool:
-	var sizes := [Vector2(1920.0, 1080.0), Vector2(1440.0, 780.0), Vector2(1366.0, 600.0), Vector2(1280.0, 640.0), Vector2(390.0, 844.0)]
-	for size in sizes:
-		if not await _test_ui_spacing_at_size(size):
+	var specs := [
+		{"size": Vector2(1920.0, 1080.0), "touch": false, "label": "desktop_full"},
+		{"size": Vector2(1440.0, 780.0), "touch": false, "label": "desktop_mid"},
+		{"size": Vector2(1366.0, 600.0), "touch": false, "label": "short_laptop"},
+		{"size": Vector2(1280.0, 640.0), "touch": false, "label": "short_desktop"},
+		{"size": Vector2(390.0, 844.0), "touch": true, "label": "phone_portrait"},
+		{"size": Vector2(844.0, 390.0), "touch": true, "label": "phone_landscape"},
+		{"size": Vector2(1024.0, 768.0), "touch": true, "label": "tablet_touch"},
+		{"size": Vector2(1366.0, 600.0), "touch": true, "label": "coarse_short_laptop"},
+	]
+	for spec in specs:
+		print("R22_CONTROLS_SPEC_BEGIN %s %s touch=%s" % [str(spec.get("label", "")), str(spec.get("size", Vector2.ZERO)), str(spec.get("touch", false))])
+		if not await _test_ui_spacing_at_size(spec):
 			return false
+		print("R22_CONTROLS_SPEC_PASS %s" % str(spec.get("label", "")))
 	MOBILE_TUNING.set_device_hints_override_for_tests()
-	print("R19_CONTROLS_REACHABILITY viewports=1920x1080,1440x780,1366x600,1280x640,390x844 rect=inside hit>=44 canvas=internal")
+	print("R22_CONTROLS_REACHABILITY viewports=1920x1080,1440x780,1366x600,1280x640,390x844_touch,844x390_touch,1024x768_touch,1366x600_coarse rect=inside hit>=44 no_overlap canvas=internal")
 	return true
 
 
-func _test_ui_spacing_at_size(size: Vector2) -> bool:
+func _test_ui_spacing_at_size(spec: Dictionary) -> bool:
+	var size: Vector2 = spec.get("size", Vector2(1280.0, 720.0))
+	var touch_surface := bool(spec.get("touch", false))
 	var phone_hints := {"mobile_os": false, "ua_mobile": true, "ua_phone": true, "ua_tablet": false, "touch_available": true, "primary_coarse": true, "mouse_available": false}
+	var tablet_hints := {"mobile_os": false, "ua_mobile": true, "ua_phone": false, "ua_tablet": true, "touch_available": true, "primary_coarse": true, "mouse_available": false}
+	var coarse_hints := {"mobile_os": false, "ua_mobile": false, "ua_phone": false, "ua_tablet": false, "touch_available": true, "primary_coarse": true, "mouse_available": false}
 	var desktop_hints := {"mobile_os": false, "ua_mobile": false, "ua_phone": false, "ua_tablet": false, "touch_available": false, "primary_coarse": false, "mouse_available": true}
-	var touch_surface := size.x <= 430.0
-	MOBILE_TUNING.set_device_hints_override_for_tests(phone_hints if touch_surface else desktop_hints)
+	var hints := desktop_hints
+	if touch_surface:
+		hints = tablet_hints if size.x >= 900.0 and size.y >= 700.0 else coarse_hints if str(spec.get("label", "")).begins_with("coarse") else phone_hints
+	MOBILE_TUNING.set_device_hints_override_for_tests(hints)
 	var viewport := _make_ui_viewport(size)
 	var menu := MAIN_MENU_SCRIPT.new()
 	viewport.add_child(menu)
 	await get_tree().process_frame
 	await get_tree().process_frame
-	if not _assert_adjacent_gap([menu.start_button, menu.meta_button, menu.achievements_button, menu.settings_button], true, 8.0, "main menu %s" % str(size)):
+	if not _assert_adjacent_gap([menu.start_button, menu.guide_button, menu.meta_button, menu.achievements_button, menu.settings_button], true, 8.0, "main menu %s" % str(size)):
 		return false
-	if not _assert_reachable([menu.start_button, menu.meta_button, menu.achievements_button, menu.settings_button, menu.seed_input, menu.seed_start_button], size, "main menu %s" % str(size)):
+	if not _assert_reachable([menu.start_button, menu.guide_button, menu.meta_button, menu.achievements_button, menu.settings_button, menu.seed_input, menu.seed_start_button], size, "main menu %s" % str(size)):
 		return false
 	menu._show_panel("settings")
 	await get_tree().process_frame
-	var menu_settings_controls: Array[Control] = [menu.mute_check, menu.damage_numbers_check, menu.screen_shake_check]
+	var menu_settings_controls: Array[Control] = [menu.mute_check, menu.damage_numbers_check, menu.screen_shake_check, menu.high_contrast_check, menu.ui_scale_slider]
 	if menu.force_joystick_check.visible:
 		menu_settings_controls.append(menu.force_joystick_check)
-	if not _assert_adjacent_gap(menu_settings_controls, true, 8.0, "settings checks %s" % str(size)):
+	if not _assert_no_control_overlaps(menu_settings_controls, "settings checks %s" % str(size)):
 		return false
 	if not _control_inside_viewport(menu.side_panel, size, "main menu side panel %s" % str(size)):
 		return false
@@ -699,9 +716,14 @@ func _test_ui_spacing_at_size(size: Vector2) -> bool:
 	var hud := HUD_SCRIPT.new()
 	viewport.add_child(hud)
 	await get_tree().process_frame
-	hud.pause_overlay.visible = true
+	var hud_top_controls: Array[Control] = [hud.xp_bar, hud.time_label, hud.score_label, hud.pause_button]
+	if hud.quick_controls.visible:
+		hud_top_controls.append(hud.quick_controls)
+	if not _assert_no_control_overlaps(hud_top_controls, "hud top controls %s" % str(size)):
+		return false
+	hud._on_pause_changed(true)
 	await get_tree().process_frame
-	var pause_checks: Array[Control] = [hud.pause_mute_check, hud.pause_damage_numbers_check, hud.pause_screen_shake_check]
+	var pause_checks: Array[Control] = [hud.pause_mute_check, hud.pause_damage_numbers_check, hud.pause_screen_shake_check, hud.pause_high_contrast_check, hud.pause_ui_scale_slider]
 	if hud.pause_force_joystick_check.visible:
 		pause_checks.append(hud.pause_force_joystick_check)
 	if not _assert_no_control_overlaps(pause_checks, "pause checks %s" % str(size)):
@@ -709,6 +731,12 @@ func _test_ui_spacing_at_size(size: Vector2) -> bool:
 	if not _control_inside_viewport(hud.pause_overlay, size, "pause overlay %s" % str(size)) or not _control_inside_viewport(hud.pause_scroll, size, "pause scroll %s" % str(size)):
 		return false
 	if not _assert_reachable([hud.pause_settings_tab_button, hud.pause_achievements_tab_button, hud.pause_run_tab_button, hud.pause_resume_button] + pause_checks, size, "pause %s" % str(size)):
+		return false
+	if hud.pause_button.visible:
+		_fail("pause button remained visible over pause overlay at %s" % str(size))
+		return false
+	if hud.quick_controls.visible:
+		_fail("quick controls remained visible over pause overlay at %s" % str(size))
 		return false
 	if _controls_overlap(hud.pause_scroll, hud.pause_resume_button):
 		_fail("pause scroll overlaps pinned resume at %s" % str(size))
@@ -773,7 +801,7 @@ func _assert_reachable(controls: Array, size: Vector2, label: String) -> bool:
 		while ancestor != null and ancestor is Control:
 			var ancestor_control := ancestor as Control
 			if (ancestor_control.clip_contents or ancestor_control is ScrollContainer) and not ancestor_control.get_global_rect().has_point(center):
-				_fail("%s center clipped by %s" % [label, ancestor_control.name])
+				_fail("%s %s center clipped by %s control_rect=%s clip_rect=%s" % [label, control.name, ancestor_control.name, str(rect), str(ancestor_control.get_global_rect())])
 				return false
 			ancestor = ancestor_control.get_parent()
 	return true

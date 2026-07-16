@@ -11,7 +11,32 @@ var title_label: Label
 var body_label: Label
 var actions_box: VBoxContainer
 var dont_show_check: CheckBox
+var previous_button: Button
 var start_button: Button
+var page_index: int = 0
+
+const DECISION_PAGES: Array[Dictionary] = [
+	{
+		"title": "契約",
+		"body": "開局先選契約。契約會改變本局風險、獎勵與升級節奏；先看紅字代價，再決定要穩定或高報酬。"
+	},
+	{
+		"title": "招募與隊長",
+		"body": "升級時可能出現招募。隊伍最多 9 人，10 名英雄無法全上；隊長死亡時全隊撤退，所以站位要保護隊長。"
+	},
+	{
+		"title": "羈絆",
+		"body": "特定英雄同隊會啟用羈絆。羈絆會改變武器、治療或防禦；成員死亡後效果會失效。"
+	},
+	{
+		"title": "進化",
+		"body": "武器進化需要本局等級 7、指定質變等級與武器傷害等級。先把核心武器升滿，再等進化卡進池。"
+	},
+	{
+		"title": "商亭與 Boss",
+		"body": "商亭會在 Boss 前後出現，可花金幣補血、改裝或刷新。三種戰場每局隨機抽選其一；擊敗 Boss 後可繼續無盡作戰。"
+	}
+]
 
 
 func _ready() -> void:
@@ -70,28 +95,70 @@ func _build_ui() -> void:
 	dont_show_check.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions_box.add_child(dont_show_check)
 
+	previous_button = Button.new()
+	previous_button.text = "上一頁"
+	previous_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	previous_button.pressed.connect(_on_previous_pressed)
+	actions_box.add_child(previous_button)
+
 	start_button = Button.new()
 	start_button.text = "開始行動"
 	start_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	start_button.pressed.connect(_on_start_pressed)
 	actions_box.add_child(start_button)
+	_refresh_page()
 	_apply_responsive_layout()
 
 
 func _on_start_pressed() -> void:
+	if page_index < DECISION_PAGES.size():
+		page_index += 1
+		_refresh_page()
+		_apply_responsive_layout()
+		return
 	if AudioManager != null and AudioManager.has_method("unlock_audio"):
 		AudioManager.unlock_audio()
 	if dont_show_check.button_pressed:
 		_save_disabled()
 	root.visible = false
+	_publish_reachability_probe(get_viewport().get_visible_rect().size)
+
+
+func _on_previous_pressed() -> void:
+	page_index = max(0, page_index - 1)
+	_refresh_page()
+	_apply_responsive_layout()
 
 
 func force_show() -> void:
 	if root == null:
 		return
+	page_index = 0
 	if dont_show_check != null:
 		dont_show_check.button_pressed = false
+	_refresh_page()
 	root.visible = true
+
+
+func _refresh_page() -> void:
+	if title_label == null or body_label == null or start_button == null:
+		return
+	if page_index <= 0:
+		title_label.text = "裂隙先鋒簡報 1/%d" % (DECISION_PAGES.size() + 1)
+		body_label.text = _controls_page_text()
+	else:
+		var page := DECISION_PAGES[page_index - 1]
+		title_label.text = "%s %d/%d" % [str(page.get("title", "")), page_index + 1, DECISION_PAGES.size() + 1]
+		body_label.text = str(page.get("body", ""))
+	start_button.text = "開始行動" if page_index >= DECISION_PAGES.size() else "下一頁"
+	if previous_button != null:
+		previous_button.visible = page_index > 0
+
+
+func _controls_page_text() -> String:
+	if MOBILE_TUNING.has_confirmed_touch():
+		return "移動：左下搖桿\n隊長技：右下按鈕釋放裂隙脈衝\n武器會自動攻擊最近敵人\n收集藍色寶石升級，從三張卡選一張"
+	return "移動：WASD / 方向鍵\n隊長技：空白鍵釋放裂隙脈衝\n武器會自動攻擊最近敵人\n收集藍色寶石升級，從三張卡選一張"
 
 
 func _is_disabled() -> bool:
@@ -104,7 +171,11 @@ func _is_disabled() -> bool:
 func _save_disabled() -> void:
 	var config := ConfigFile.new()
 	config.set_value("guide", "disabled", true)
-	config.save(SAVE_PATH)
+	var error := config.save(SAVE_PATH)
+	if error != OK:
+		printerr("GUIDE_SETTINGS_SAVE_FAIL: %s" % error)
+		if GameManager != null and GameManager.has_method("queue_toast"):
+			GameManager.queue_toast("教學偏好無法保存，請檢查瀏覽器儲存權限。")
 
 
 func _apply_responsive_layout() -> void:
@@ -117,15 +188,11 @@ func _apply_responsive_layout() -> void:
 	var portrait := viewport_size.y > viewport_size.x
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
-	body_label.text = (
-		"移動：左下搖桿\n隊長技：右下按鈕釋放裂隙脈衝\n武器會自動攻擊最近敵人\n收集藍色寶石升級，從三張卡選一張"
-		if MOBILE_TUNING.has_confirmed_touch()
-		else "移動：WASD / 方向鍵\n隊長技：空白鍵釋放裂隙脈衝\n武器會自動攻擊最近敵人\n收集藍色寶石升級，從三張卡選一張"
-	)
+	_refresh_page()
 	var panel_width: float = min(viewport_size.x - (24.0 if mobile else 32.0), 600.0 if not portrait else 430.0)
 	var panel_height: float = 360.0 if not portrait else 440.0
 	if mobile:
-		panel_height = min(viewport_size.y - 24.0, 520.0 if portrait else 366.0)
+		panel_height = min(viewport_size.y - 24.0, 560.0 if portrait else 384.0)
 
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5
@@ -149,7 +216,8 @@ func _apply_responsive_layout() -> void:
 	body_label.offset_top = title_label.offset_bottom + (12.0 if mobile else 14.0)
 	var control_height := touch_height
 	var action_gap := 16.0 if mobile else 12.0
-	var action_height := control_height * 2.0 + action_gap
+	var action_rows := 2.0 + (1.0 if previous_button != null and previous_button.visible else 0.0)
+	var action_height := control_height * action_rows + action_gap * (action_rows - 1.0)
 	var action_width: float = min(panel_width - (48.0 if mobile else 72.0), 300.0 if mobile else 220.0)
 	var action_bottom_margin := 18.0 if mobile else 20.0
 	var actions_top := panel_height - action_height - action_bottom_margin
@@ -161,22 +229,49 @@ func _apply_responsive_layout() -> void:
 	actions_box.offset_top = actions_top
 	actions_box.offset_bottom = actions_top + action_height
 	dont_show_check.custom_minimum_size = Vector2(action_width, control_height)
+	if previous_button != null:
+		previous_button.custom_minimum_size = Vector2(action_width, control_height)
 	start_button.custom_minimum_size = Vector2(action_width, control_height)
 	body_label.offset_bottom = actions_top - (14.0 if mobile else 16.0)
-	body_label.add_theme_font_size_override("font_size", 12 if mobile and not portrait else 16 if mobile else (18 if portrait else 20))
+	var ui_multiplier := _ui_scale_multiplier()
+	body_label.add_theme_font_size_override("font_size", int(round(float(16 if mobile else (18 if portrait else 20)) * ui_multiplier)))
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
 	if mobile and OS.has_feature("web"):
 		title_label.add_theme_font_size_override("font_size", 24 if portrait else 20)
-		body_label.add_theme_font_size_override("font_size", 16 if portrait else 12)
-		dont_show_check.add_theme_font_size_override("font_size", 16 if portrait else 13)
-		start_button.add_theme_font_size_override("font_size", 18 if portrait else 14)
+		body_label.add_theme_font_size_override("font_size", int(round(float(16 if portrait else 15) * ui_multiplier)))
+		dont_show_check.add_theme_font_size_override("font_size", int(round(float(16 if portrait else 15) * ui_multiplier)))
+		if previous_button != null:
+			previous_button.add_theme_font_size_override("font_size", int(round(float(17 if portrait else 15) * ui_multiplier)))
+		start_button.add_theme_font_size_override("font_size", int(round(float(18 if portrait else 16) * ui_multiplier)))
+	_apply_accessibility_palette()
 	call_deferred("_publish_reachability_probe", viewport_size)
 
 
 func _publish_reachability_probe(viewport_size: Vector2) -> void:
 	WEB_REACHABILITY_PROBE.publish("guide", viewport_size, {
 		"start": start_button,
-		"dont_show": dont_show_check
+		"dont_show": dont_show_check,
+		"previous": previous_button
 	}, {
 		"visible": root != null and root.visible
 	})
+
+
+func _ui_scale_multiplier() -> float:
+	if PlayerSettings != null and PlayerSettings.has_method("get_ui_scale_multiplier"):
+		return float(PlayerSettings.get_ui_scale_multiplier())
+	return 1.0
+
+
+func _apply_accessibility_palette() -> void:
+	var high_contrast := PlayerSettings != null and bool(PlayerSettings.get("high_contrast_enabled"))
+	panel.modulate = Color(1.0, 1.0, 1.0, 0.98 if high_contrast else 0.9)
+	for label in [title_label, body_label]:
+		if label == null:
+			continue
+		if high_contrast:
+			label.add_theme_color_override("font_color", Color.WHITE)
+			label.add_theme_color_override("font_outline_color", Color.BLACK)
+			label.add_theme_constant_override("outline_size", 3)
+		else:
+			label.remove_theme_constant_override("outline_size")

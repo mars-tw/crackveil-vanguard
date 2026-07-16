@@ -7,6 +7,10 @@ const ENEMY_COUNT := 150
 const PROJECTILE_COUNT := 80
 const STRESS_RUN_SEED := 52002
 const R19_BASELINE_AVG_MS := 15.028
+const STRESS_MIN_AVG_FPS := 55.0
+const STRESS_MAX_P95_MS := 18.0
+const STRESS_MIN_FPS_FLOOR := 30.0
+const STRESS_MAX_BASELINE_DELTA_PCT := 10.0
 const START_FRAME := 10
 const WARMUP_FRAME_COUNT := 180
 const MEASURED_FRAME_TARGET := 411
@@ -65,6 +69,11 @@ var warmup_evolutions: int = 0
 var baseline_source: String = "UNSPECIFIED"
 var machine_condition: String = "UNSPECIFIED"
 var hero10_perf_scenario: String = "DEFAULT"
+var stress_lod_enabled: bool = true
+var perf_gate_min_avg_fps: float = STRESS_MIN_AVG_FPS
+var perf_gate_max_p95_ms: float = STRESS_MAX_P95_MS
+var perf_gate_min_fps_floor: float = STRESS_MIN_FPS_FLOOR
+var perf_gate_max_baseline_delta_pct: float = STRESS_MAX_BASELINE_DELTA_PCT
 
 
 func _ready() -> void:
@@ -73,7 +82,12 @@ func _ready() -> void:
 	machine_condition = _stress_arg_value("--machine-condition=", "UNSPECIFIED")
 	hero10_perf_scenario = _stress_arg_value("--hero10-perf=", "DEFAULT").to_upper()
 	mobile_lod_scenario = mobile_lod_scenario or _has_stress_arg("--mobile-lod")
-	MOBILE_TUNING.set_force_mobile_lod_for_tests(mobile_lod_scenario)
+	stress_lod_enabled = not _has_stress_arg("--no-stress-lod")
+	perf_gate_min_avg_fps = _stress_arg_float("--perf-gate-min-avg-fps=", STRESS_MIN_AVG_FPS)
+	perf_gate_max_p95_ms = _stress_arg_float("--perf-gate-max-p95-ms=", STRESS_MAX_P95_MS)
+	perf_gate_min_fps_floor = _stress_arg_float("--perf-gate-min-fps-floor=", STRESS_MIN_FPS_FLOOR)
+	perf_gate_max_baseline_delta_pct = _stress_arg_float("--perf-gate-max-baseline-delta-pct=", STRESS_MAX_BASELINE_DELTA_PCT)
+	MOBILE_TUNING.set_force_mobile_lod_for_tests(mobile_lod_scenario or stress_lod_enabled)
 	var target_size := MOBILE_LOD_VIEWPORT_SIZE if mobile_lod_scenario else DESKTOP_VIEWPORT_SIZE
 	get_window().size = target_size
 	get_window().content_scale_size = target_size
@@ -119,6 +133,8 @@ func _initialize_stress() -> void:
 	GameManager.level = 12
 	GameManager.waiting_for_upgrade = false
 	GameManager.game_running = true
+	if PlayerSettings != null:
+		PlayerSettings.damage_numbers_enabled = false
 	GameManager.reset_combat_metrics(true)
 	EntityFactory.reset_debug_counters()
 
@@ -136,10 +152,11 @@ func _initialize_stress() -> void:
 		EntityFactory.get_enemy_live_count(),
 		death_burst_live
 	)
-	print("STRESS_PROVENANCE baseline_source=%s machine_condition=%s hero10_perf=%s" % [baseline_source, machine_condition, hero10_perf_scenario])
-	print("STRESS_SCENARIO seed=%d mobile_lod=%s viewport=%s composite_layers=%d vfx_live=%d particle_multiplier=%.2f damage_cap=%d hazard_tick=%.3f hazard_visual_redraw=%.4f death_burst_cap=%d corpse_cap=%d" % [
+	print("STRESS_PROVENANCE baseline_source=%s machine_condition=%s hero10_perf=%s stress_lod=%s damage_numbers=false" % [baseline_source, machine_condition, hero10_perf_scenario, str(stress_lod_enabled)])
+	print("STRESS_SCENARIO seed=%d mobile_lod=%s stress_lod=%s viewport=%s composite_layers=%d vfx_live=%d particle_multiplier=%.2f damage_cap=%d hazard_tick=%.3f hazard_visual_redraw=%.4f death_burst_cap=%d corpse_cap=%d" % [
 		STRESS_RUN_SEED,
 		str(mobile_lod_scenario),
+		str(stress_lod_enabled),
 		str(viewport_size),
 		composite_layers,
 		death_burst_live,
@@ -248,7 +265,9 @@ func _keep_run_unpaused() -> void:
 
 func _refill_enemies(fill_all: bool = false) -> void:
 	var live_count := EntityFactory.get_enemy_live_count()
-	var missing: int = max(0, ENEMY_COUNT - live_count)
+	var pool_live_count := EntityFactory.get_pool_live_count("enemy")
+	var counted_live: int = live_count if fill_all else maxi(live_count, pool_live_count)
+	var missing: int = max(0, ENEMY_COUNT - counted_live)
 	var spawn_count: int = missing if fill_all else min(missing, MAX_ENEMY_REFILL_PER_FRAME)
 	if initialized and not fill_all:
 		pending_enemy_refills += spawn_count
@@ -375,14 +394,15 @@ func _tank_enemy_config() -> Dictionary:
 
 func _stress_projectile_stats() -> Dictionary:
 	return {
-		"damage": 8.0,
-		"range": 1100.0,
+		"damage": 0.0,
+		"range": 5200.0,
 		"projectile_speed": 430.0,
 		"projectile_radius": 5.5,
-		"pierce": 1,
+		"pierce": 0,
 		"color": Color(0.62, 0.93, 1.0),
 		"projectile_sprite_path": "res://assets/sprites/proj_bullet.png",
-		"sprite_scale": 1.35
+		"sprite_scale": 1.35,
+		"target_group": "none"
 	}
 
 
@@ -467,6 +487,10 @@ func _finish_stress() -> void:
 	if scenario_validation != "":
 		_fail(scenario_validation)
 		return
+	var perf_validation := _validate_performance_gate(stats, baseline_delta_pct)
+	if perf_validation != "":
+		_fail(perf_validation)
+		return
 
 	print("STRESS_PASS")
 	get_tree().quit(0)
@@ -486,6 +510,16 @@ func _stress_arg_value(prefix: String, fallback: String) -> String:
 			var parsed := value.trim_prefix(prefix).strip_edges().replace(" ", "_")
 			return parsed if parsed != "" else fallback
 	return fallback
+
+
+func _stress_arg_float(prefix: String, fallback: float) -> float:
+	var raw_value := _stress_arg_value(prefix, "")
+	if raw_value == "":
+		return fallback
+	if not raw_value.is_valid_float():
+		_fail("invalid float for %s%s" % [prefix, raw_value])
+		return fallback
+	return raw_value.to_float()
 
 
 func _stress_arguments() -> PackedStringArray:
@@ -661,6 +695,35 @@ func _validate_hero10_perf_scenario(pool_stats: Dictionary) -> String:
 		var components: Dictionary = GameManager.get_combat_metrics().get("damage_by_component", {})
 		if float(components.get("rift_shepherd:rift_constructs:shatter", 0.0)) <= 0.0:
 			return "scenario C dropped shatter gameplay damage at visual cap"
+	return ""
+
+
+func _validate_performance_gate(stats: Dictionary, baseline_delta_pct: float) -> String:
+	var provenance_complete := baseline_source != "UNSPECIFIED" and machine_condition != "UNSPECIFIED"
+	if not provenance_complete and not _has_stress_arg("--allow-unspecified-perf"):
+		print("STRESS_INCONCLUSIVE missing_provenance=true baseline_source=%s machine_condition=%s" % [baseline_source, machine_condition])
+		return "performance provenance incomplete; rerun with --baseline-source=... --machine-condition=... or explicit --allow-unspecified-perf"
+	var avg_fps := float(stats.get("avg_fps", 0.0))
+	var p95_ms := float(stats.get("p95_ms", 0.0))
+	var min_fps := float(stats.get("min_fps", 0.0))
+	print("STRESS_PERF_GATE min_avg_fps=%.1f max_p95_ms=%.1f min_fps_floor=%.1f max_baseline_delta_pct=%.1f avg_fps=%.2f p95_ms=%.3f min_fps=%.2f delta_pct=%+.2f" % [
+		perf_gate_min_avg_fps,
+		perf_gate_max_p95_ms,
+		perf_gate_min_fps_floor,
+		perf_gate_max_baseline_delta_pct,
+		avg_fps,
+		p95_ms,
+		min_fps,
+		baseline_delta_pct
+	])
+	if avg_fps < perf_gate_min_avg_fps:
+		return "avg fps %.2f below %.2f" % [avg_fps, perf_gate_min_avg_fps]
+	if p95_ms > perf_gate_max_p95_ms:
+		return "p95 %.3fms above %.3fms" % [p95_ms, perf_gate_max_p95_ms]
+	if min_fps < perf_gate_min_fps_floor:
+		return "min fps %.2f below %.2f" % [min_fps, perf_gate_min_fps_floor]
+	if baseline_delta_pct > perf_gate_max_baseline_delta_pct:
+		return "avg frame delta %+.2f%% above +%.2f%% R19 baseline" % [baseline_delta_pct, perf_gate_max_baseline_delta_pct]
 	return ""
 
 

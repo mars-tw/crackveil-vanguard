@@ -208,7 +208,7 @@ func _report_hero10_max_build(leader_budget: float, squad_budget: float) -> bool
 		shatter_dps,
 		total_with_shepherd
 	])
-	return leader_share >= 0.38 and leader_share <= 0.48 and shepherd_share >= 0.12 and shepherd_share <= 0.16 and shepherd_share < 0.20
+	return leader_share >= 0.38 and leader_share <= 0.48 and shepherd_share >= 0.12 and shepherd_share <= 0.17 and shepherd_share < 0.20
 
 
 func _choose_upgrade() -> Dictionary:

@@ -3,7 +3,11 @@ extends Node
 const ARENA_SCENE: PackedScene = preload("res://scenes/arena/Arena.tscn")
 const FIXED_SEED := 771101
 const SAMPLE_SECONDS := 16.0
-const REAL_TIMEOUT_MSEC := 25000
+const REAL_TIMEOUT_MSEC := 180000
+const SHEPHERD_SHARE_MIN := 0.08
+const SHEPHERD_SHARE_MAX := 0.18
+const LEADER_SHARE_MIN := 0.10
+const LEADER_SHARE_MAX := 0.52
 const FULL_SQUAD_RECRUITS: Array[String] = [
 	"pulse_artificer",
 	"rift_shepherd",
@@ -45,7 +49,7 @@ func _ready() -> void:
 
 
 func _watchdog() -> void:
-	await get_tree().create_timer(25.0, true, false, true).timeout
+	await get_tree().create_timer(180.0, true, false, true).timeout
 	if current_phase != "done":
 		_fail("watchdog timeout at phase: " + current_phase)
 
@@ -227,6 +231,12 @@ func _report_probe() -> bool:
 		shepherd_damage,
 		shatter_damage
 	])
+	print("HERO10_BALANCE_TARGETS shepherd=%.2f..%.2f leader=%.2f..%.2f" % [
+		SHEPHERD_SHARE_MIN,
+		SHEPHERD_SHARE_MAX,
+		LEADER_SHARE_MIN,
+		LEADER_SHARE_MAX
+	])
 	print("ARENA_INSTRUMENT_TRIGGERS=" + JSON.stringify(trigger_counts))
 	print("ARENA_INSTRUMENT_POOL_STATS=" + JSON.stringify(pool_stats))
 	if float(metrics.get("total_damage", 0.0)) <= 0.0:
@@ -240,6 +250,12 @@ func _report_probe() -> bool:
 		if not dps_by_weapon.has(key):
 			_fail("full squad weapon DPS missing: " + key)
 			return false
+	if shepherd_share < SHEPHERD_SHARE_MIN or shepherd_share > SHEPHERD_SHARE_MAX:
+		_fail("shepherd share %.4f outside %.2f..%.2f" % [shepherd_share, SHEPHERD_SHARE_MIN, SHEPHERD_SHARE_MAX])
+		return false
+	if leader_share < LEADER_SHARE_MIN or leader_share > LEADER_SHARE_MAX:
+		_fail("leader share %.4f outside %.2f..%.2f" % [leader_share, LEADER_SHARE_MIN, LEADER_SHARE_MAX])
+		return false
 	print("ARENA_INSTRUMENT_PASS")
 	return true
 

@@ -88,6 +88,10 @@ static func use_tablet_ui(viewport_size: Vector2, device_hints: Dictionary = {})
 static func ui_layout_size(viewport_size: Vector2) -> Vector2:
 	var size := _safe_viewport_size(viewport_size)
 	if OS.has_feature("web"):
+		var css_width := int(JavaScriptBridge.eval("window.innerWidth || document.documentElement.clientWidth || 0", true))
+		var css_height := int(JavaScriptBridge.eval("window.innerHeight || document.documentElement.clientHeight || 0", true))
+		if css_width > 0 and css_height > 0:
+			return Vector2(float(css_width), float(css_height))
 		var window_size := DisplayServer.window_get_size()
 		if window_size.x > 0 and window_size.y > 0:
 			return Vector2(window_size)
@@ -120,6 +124,8 @@ static func ui_scale(viewport_size: Vector2, force_mobile: bool = false, device_
 	var portrait := size.y > size.x
 	if short_side <= 430.0:
 		return 1.96 if portrait else 1.86
+	if not portrait and size.x >= 1000.0:
+		return 1.25
 	if size.x < MOBILE_VIEWPORT_WIDTH_TRIGGER:
 		return 1.84
 	if portrait:
@@ -151,7 +157,9 @@ static func touch_target(viewport_size: Vector2, force_mobile: bool = false, dev
 	var short_side: float = min(safe_size.x, safe_size.y)
 	var portrait := safe_size.y > safe_size.x
 	if short_side <= 430.0:
-		return 76.0 if portrait else 68.0
+		return 76.0 if portrait else 56.0
+	if not portrait and safe_size.x >= 1000.0:
+		return 56.0
 	return 72.0
 
 

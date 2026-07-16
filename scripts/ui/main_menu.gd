@@ -14,6 +14,7 @@ var logo_glow_label: Label
 var logo_label: Label
 var menu_box: VBoxContainer
 var start_button: Button
+var guide_button: Button
 var meta_button: Button
 var achievements_button: Button
 var settings_button: Button
@@ -29,11 +30,15 @@ var achievements_grid: GridContainer
 var achievement_dialog: AcceptDialog
 var version_label: Label
 var meta_buttons: Dictionary = {}
+var volume_label: Label
 var volume_slider: HSlider
 var mute_check: CheckBox
 var damage_numbers_check: CheckBox
 var screen_shake_check: CheckBox
 var force_joystick_check: CheckBox
+var high_contrast_check: CheckBox
+var ui_scale_label: Label
+var ui_scale_slider: HSlider
 var syncing_settings: bool = false
 var syncing_audio: bool = false
 var active_panel_id: String = "meta"
@@ -110,6 +115,10 @@ func _build_ui() -> void:
 	start_button = _make_menu_button("開始出擊")
 	start_button.pressed.connect(_on_start_pressed)
 	menu_box.add_child(start_button)
+
+	guide_button = _make_menu_button("玩法")
+	guide_button.pressed.connect(_show_panel.bind("guide"))
+	menu_box.add_child(guide_button)
 
 	meta_button = _make_menu_button("殘響升級")
 	meta_button.pressed.connect(_show_panel.bind("meta"))
@@ -210,6 +219,15 @@ func _make_menu_button(text_value: String) -> Button:
 func _show_panel(panel_id: String) -> void:
 	active_panel_id = panel_id
 	side_panel.visible = true
+	volume_slider = null
+	volume_label = null
+	mute_check = null
+	damage_numbers_check = null
+	screen_shake_check = null
+	force_joystick_check = null
+	high_contrast_check = null
+	ui_scale_label = null
+	ui_scale_slider = null
 	for child in side_content.get_children():
 		child.queue_free()
 	meta_buttons.clear()
@@ -221,6 +239,9 @@ func _show_panel(panel_id: String) -> void:
 		"settings":
 			side_title.text = "設定"
 			_build_settings_panel()
+		"guide":
+			side_title.text = "玩法"
+			_build_guide_panel()
 		_:
 			active_panel_id = "meta"
 			side_title.text = "殘響升級"
@@ -380,7 +401,7 @@ func _achievement_text() -> String:
 
 
 func _build_settings_panel() -> void:
-	var volume_label := Label.new()
+	volume_label = Label.new()
 	volume_label.text = "音量"
 	side_content.add_child(volume_label)
 
@@ -388,30 +409,76 @@ func _build_settings_panel() -> void:
 	volume_slider.min_value = 0.0
 	volume_slider.max_value = 1.0
 	volume_slider.step = 0.05
+	volume_slider.custom_minimum_size = Vector2(240.0, 44.0)
 	volume_slider.value_changed.connect(_on_volume_slider_changed)
 	side_content.add_child(volume_slider)
+
+	var toggle_grid := GridContainer.new()
+	toggle_grid.columns = 2
+	toggle_grid.add_theme_constant_override("h_separation", 10)
+	toggle_grid.add_theme_constant_override("v_separation", 6)
+	toggle_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	side_content.add_child(toggle_grid)
 
 	mute_check = CheckBox.new()
 	mute_check.text = "靜音"
 	mute_check.toggled.connect(_on_mute_toggled)
-	side_content.add_child(mute_check)
+	toggle_grid.add_child(mute_check)
 
 	damage_numbers_check = CheckBox.new()
 	damage_numbers_check.text = "顯示傷害數字"
 	damage_numbers_check.toggled.connect(_on_damage_numbers_toggled)
-	side_content.add_child(damage_numbers_check)
+	toggle_grid.add_child(damage_numbers_check)
 
 	screen_shake_check = CheckBox.new()
 	screen_shake_check.text = "螢幕震動"
 	screen_shake_check.toggled.connect(_on_screen_shake_toggled)
-	side_content.add_child(screen_shake_check)
+	toggle_grid.add_child(screen_shake_check)
 
 	force_joystick_check = CheckBox.new()
 	force_joystick_check.text = "強制顯示搖桿"
 	force_joystick_check.toggled.connect(_on_force_joystick_toggled)
-	side_content.add_child(force_joystick_check)
+	toggle_grid.add_child(force_joystick_check)
+
+	high_contrast_check = CheckBox.new()
+	high_contrast_check.text = "高對比"
+	high_contrast_check.toggled.connect(_on_high_contrast_toggled)
+	toggle_grid.add_child(high_contrast_check)
+
+	ui_scale_label = Label.new()
+	ui_scale_label.text = "介面大小"
+	side_content.add_child(ui_scale_label)
+
+	ui_scale_slider = HSlider.new()
+	ui_scale_slider.min_value = 0.0
+	ui_scale_slider.max_value = 2.0
+	ui_scale_slider.step = 1.0
+	ui_scale_slider.tick_count = 3
+	ui_scale_slider.ticks_on_borders = true
+	ui_scale_slider.custom_minimum_size = Vector2(240.0, 44.0)
+	ui_scale_slider.value_changed.connect(_on_ui_scale_slider_changed)
+	side_content.add_child(ui_scale_slider)
 	_sync_audio_controls()
 	_sync_settings_controls()
+
+
+func _build_guide_panel() -> void:
+	var guide_text := Label.new()
+	guide_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	guide_text.text = "\n".join([
+		"每局會從裂隙虛空、廢土農野、餘燼裂原隨機抽選一個戰場；擊敗 Boss 後可繼續無盡作戰。",
+		"開局先選契約：契約會改變本局風險與獎勵。",
+		"招募會把隊伍擴到最多 9 人；隊長死亡時全隊撤退。",
+		"羈絆由特定成員組合啟用，會改變武器、治療或防禦。",
+		"武器進化需要本局等級 7、指定質變等級與武器傷害等級。",
+		"商亭會在 Boss 前後出現，花金幣補血、改裝或刷新選項。",
+	])
+	side_content.add_child(guide_text)
+
+	var tip_label := Label.new()
+	tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	tip_label.text = "進局後也可從暫停選單重看情境教學。"
+	side_content.add_child(tip_label)
 
 
 func _on_start_pressed() -> void:
@@ -473,7 +540,14 @@ func _sync_settings_controls() -> void:
 		screen_shake_check.button_pressed = bool(PlayerSettings.get("screen_shake_enabled"))
 	if force_joystick_check != null:
 		force_joystick_check.button_pressed = bool(PlayerSettings.get("force_joystick_visible"))
+	if high_contrast_check != null:
+		high_contrast_check.button_pressed = bool(PlayerSettings.get("high_contrast_enabled"))
+	if ui_scale_slider != null:
+		ui_scale_slider.value = float(PlayerSettings.get("ui_scale_index"))
+	if ui_scale_label != null:
+		ui_scale_label.text = "介面大小：%s" % _ui_scale_label(int(PlayerSettings.get("ui_scale_index")))
 	syncing_settings = false
+	_apply_accessibility_palette()
 
 
 func _on_volume_slider_changed(value: float) -> void:
@@ -504,6 +578,34 @@ func _on_force_joystick_toggled(value: bool) -> void:
 	if syncing_settings or PlayerSettings == null:
 		return
 	PlayerSettings.set_force_joystick_visible(value)
+	_apply_responsive_layout()
+
+
+func _on_high_contrast_toggled(value: bool) -> void:
+	if syncing_settings or PlayerSettings == null:
+		return
+	PlayerSettings.set_high_contrast_enabled(value)
+	_apply_responsive_layout()
+
+
+func _on_ui_scale_slider_changed(value: float) -> void:
+	if syncing_settings or PlayerSettings == null:
+		return
+	var index := int(round(value))
+	PlayerSettings.set_ui_scale_index(index)
+	if ui_scale_label != null:
+		ui_scale_label.text = "介面大小：%s" % _ui_scale_label(index)
+	_apply_responsive_layout()
+
+
+func _ui_scale_label(index: int) -> String:
+	match clamp(index, 0, 2):
+		0:
+			return "精簡"
+		2:
+			return "大"
+		_:
+			return "標準"
 
 
 func _apply_responsive_layout() -> void:
@@ -519,8 +621,9 @@ func _apply_responsive_layout() -> void:
 	if mobile:
 		margin = 18.0 if portrait else 16.0
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
-	var button_height := touch_height if mobile else 48.0
-	var button_gap := 12.0 if mobile and portrait else 4.0 if mobile else 10.0
+	var button_height := (56.0 if mobile and not portrait else touch_height) if mobile else 48.0
+	var button_gap := 12.0 if mobile and portrait else 8.0 if mobile else 10.0
+	var ui_multiplier := _ui_scale_multiplier()
 	if rift_accent != null:
 		rift_accent.visible = mobile and portrait
 		rift_accent.position = Vector2(-22.0, 74.0)
@@ -548,14 +651,15 @@ func _apply_responsive_layout() -> void:
 	var menu_width: float = min(max(320.0, viewport_size.x * 0.9), viewport_size.x - margin * 2.0) if mobile and portrait else min(320.0, viewport_size.x * 0.42) if mobile else 270.0
 	var menu_x := (viewport_size.x - menu_width) * 0.5 if mobile and portrait else margin
 	var menu_y := logo_label.offset_bottom + 102.0 if mobile and portrait else logo_label.offset_bottom + 4.0 if mobile else 164.0 if not portrait else 108.0
-	menu_box.size = Vector2(menu_width, button_height * 4.0 + button_gap * 3.0)
+	var menu_button_count := menu_box.get_child_count()
+	menu_box.size = Vector2(menu_width, button_height * float(menu_button_count) + button_gap * float(max(0, menu_button_count - 1)))
 	menu_box.position = Vector2(menu_x, menu_y)
 	for child in menu_box.get_children():
 		if child is Button:
 			(child as Button).custom_minimum_size = Vector2(menu_width, button_height)
-			(child as Button).add_theme_font_size_override("font_size", 22 if mobile and portrait else 16 if mobile else 20)
+			(child as Button).add_theme_font_size_override("font_size", int(round(float(22 if mobile and portrait else 16 if mobile else 20) * ui_multiplier)))
 
-	var seed_height := touch_height
+	var seed_height := 56.0 if mobile and not portrait else touch_height
 	var seed_gap: float = float(ceil(MOBILE_TUNING.BASE_CONTAINER_SEPARATION * MOBILE_TUNING.spacing_scale(viewport_size)))
 	if mobile and not portrait:
 		var seed_width: float = min(MOBILE_TUNING.SEED_ROW_MAX_WIDTH, max(280.0, viewport_size.x - menu_width - margin * 3.0))
@@ -574,6 +678,8 @@ func _apply_responsive_layout() -> void:
 	var panel_width: float = min(viewport_size.x - margin * 2.0, 520.0 if not portrait else viewport_size.x - margin * 2.0)
 	var panel_height: float = min(viewport_size.y - margin * 2.0, 520.0 if not portrait else viewport_size.y - 430.0)
 	var panel_y := 154.0 if not portrait else 398.0
+	if not mobile and not portrait and viewport_size.y <= 640.0:
+		panel_y = 96.0
 	var panel_x := viewport_size.x - panel_width - margin
 	if mobile:
 		if portrait:
@@ -584,7 +690,7 @@ func _apply_responsive_layout() -> void:
 		else:
 			panel_width = max(300.0, viewport_size.x - menu_width - margin * 3.0)
 			panel_x = menu_box.position.x + menu_width + margin
-			panel_y = seed_row.position.y + seed_height + 10.0
+			panel_y = menu_y
 			panel_height = max(190.0, viewport_size.y - panel_y - margin)
 	var available_panel_height: float = max(1.0, viewport_size.y - panel_y - margin)
 	var minimum_panel_height: float = min(260.0 if not mobile else 164.0, available_panel_height)
@@ -598,10 +704,16 @@ func _apply_responsive_layout() -> void:
 	side_close_button.position = Vector2(panel_width - (126.0 if mobile else 92.0), 14.0)
 	side_close_button.size = Vector2(104.0 if mobile else 82.0, touch_height)
 	if side_scroll != null:
-		side_scroll.position = Vector2(24.0 if mobile else 28.0, 86.0 if mobile else 70.0)
-		side_scroll.size = Vector2(panel_width - (48.0 if mobile else 56.0), panel_height - (104.0 if mobile else 92.0))
+		var scroll_y := 64.0 if mobile and not portrait else 76.0 if mobile else 70.0
+		var scroll_bottom := 0.0 if mobile and not portrait else 84.0 if mobile else 92.0
+		side_scroll.position = Vector2(24.0 if mobile else 28.0, scroll_y)
+		side_scroll.size = Vector2(panel_width - (48.0 if mobile else 56.0), panel_height - scroll_y - scroll_bottom)
 	if side_content != null:
 		side_content.custom_minimum_size = Vector2(max(240.0, panel_width - (48.0 if mobile else 56.0)), 0.0)
+	if volume_label != null:
+		volume_label.visible = not (mobile and not portrait)
+	if volume_slider != null:
+		volume_slider.visible = not (mobile and not portrait)
 	if achievements_grid != null and is_instance_valid(achievements_grid):
 		var grid_width: float = max(240.0, side_content.custom_minimum_size.x if side_content != null else panel_width - 56.0)
 		var columns: int = 4 if grid_width >= 430.0 else 3 if grid_width >= 310.0 else 2
@@ -613,7 +725,7 @@ func _apply_responsive_layout() -> void:
 			if child is Button:
 				(child as Button).custom_minimum_size = Vector2(badge_width, badge_height)
 	if force_joystick_check != null:
-		force_joystick_check.visible = MOBILE_TUNING.has_confirmed_touch()
+		force_joystick_check.visible = MOBILE_TUNING.has_confirmed_touch() and not (mobile and not portrait)
 
 	version_label.anchor_left = 1.0
 	version_label.anchor_right = 1.0
@@ -626,15 +738,24 @@ func _apply_responsive_layout() -> void:
 	seed_input.add_theme_font_size_override("font_size", 14)
 	seed_start_button.add_theme_font_size_override("font_size", 14)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
+	if mobile and not portrait:
+		menu_box.add_theme_constant_override("separation", int(button_gap))
+		for child in menu_box.get_children():
+			if child is Button:
+				(child as Button).custom_minimum_size = Vector2(menu_width, button_height)
+		seed_input.custom_minimum_size.y = seed_height
+		seed_start_button.custom_minimum_size.y = seed_height
+	_apply_accessibility_palette()
 	# Web CanvasLayer 已換算為 CSS 像素；在此鎖視覺字級，避免通用可讀性倍率二次放大。
 	if mobile and OS.has_feature("web"):
 		logo_label.add_theme_font_size_override("font_size", 36 if portrait else 22)
 		logo_glow_label.add_theme_font_size_override("font_size", 36 if portrait else 22)
 		for child in menu_box.get_children():
 			if child is Button:
-				(child as Button).add_theme_font_size_override("font_size", 25 if portrait else 18)
-		seed_input.add_theme_font_size_override("font_size", 18 if portrait else 16)
-		seed_start_button.add_theme_font_size_override("font_size", 18 if portrait else 16)
+				(child as Button).add_theme_font_size_override("font_size", int(round(float(25 if portrait else 18) * ui_multiplier)))
+		seed_input.add_theme_font_size_override("font_size", int(round(float(18 if portrait else 16) * ui_multiplier)))
+		seed_start_button.add_theme_font_size_override("font_size", int(round(float(18 if portrait else 16) * ui_multiplier)))
+	_apply_accessibility_palette()
 	_publish_reachability_probe(viewport_size)
 	call_deferred("_publish_reachability_probe", viewport_size)
 
@@ -642,6 +763,7 @@ func _apply_responsive_layout() -> void:
 func _publish_reachability_probe(viewport_size: Vector2) -> void:
 	WEB_REACHABILITY_PROBE.publish("main_menu", viewport_size, {
 		"start": start_button,
+		"guide": guide_button,
 		"meta": meta_button,
 		"achievements": achievements_button,
 		"settings": settings_button,
@@ -653,6 +775,42 @@ func _publish_reachability_probe(viewport_size: Vector2) -> void:
 		"side_panel_visible": side_panel != null and side_panel.visible,
 		"confirmed_touch": MOBILE_TUNING.has_confirmed_touch()
 	})
+
+
+func _ui_scale_multiplier() -> float:
+	if PlayerSettings != null and PlayerSettings.has_method("get_ui_scale_multiplier"):
+		return float(PlayerSettings.get_ui_scale_multiplier())
+	return 1.0
+
+
+func _apply_accessibility_palette() -> void:
+	var high_contrast := PlayerSettings != null and bool(PlayerSettings.get("high_contrast_enabled"))
+	if side_panel != null:
+		side_panel.modulate = Color(1.0, 1.0, 1.0, 0.98 if high_contrast else 0.88)
+	var labels: Array = [logo_label, logo_glow_label, side_title, version_label, ui_scale_label]
+	for control in labels:
+		var label := control as Label
+		if label == null:
+			continue
+		_apply_label_contrast(label, high_contrast)
+	if side_content != null:
+		_apply_label_contrast_recursive(side_content, high_contrast)
+
+
+func _apply_label_contrast_recursive(node: Node, high_contrast: bool) -> void:
+	for child in node.get_children():
+		if child is Label:
+			_apply_label_contrast(child as Label, high_contrast)
+		_apply_label_contrast_recursive(child, high_contrast)
+
+
+func _apply_label_contrast(label: Label, high_contrast: bool) -> void:
+	if high_contrast:
+		label.add_theme_color_override("font_color", Color.WHITE)
+		label.add_theme_color_override("font_outline_color", Color.BLACK)
+		label.add_theme_constant_override("outline_size", 3)
+	else:
+		label.remove_theme_constant_override("outline_size")
 
 
 func _build_version_text() -> String:

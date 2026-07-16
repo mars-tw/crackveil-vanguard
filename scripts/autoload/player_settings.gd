@@ -8,6 +8,8 @@ var damage_numbers_enabled: bool = true
 var screen_shake_enabled: bool = true
 var joystick_size_index: int = 1
 var force_joystick_visible: bool = false
+var ui_scale_index: int = 1
+var high_contrast_enabled: bool = false
 var save_path: String = SAVE_PATH
 
 
@@ -29,6 +31,8 @@ func load_settings() -> void:
 	screen_shake_enabled = bool(config.get_value("settings", "screen_shake_enabled", screen_shake_enabled))
 	joystick_size_index = clamp(int(config.get_value("settings", "joystick_size_index", joystick_size_index)), 0, 2)
 	force_joystick_visible = bool(config.get_value("settings", "force_joystick_visible", force_joystick_visible))
+	ui_scale_index = clamp(int(config.get_value("settings", "ui_scale_index", ui_scale_index)), 0, 2)
+	high_contrast_enabled = bool(config.get_value("settings", "high_contrast_enabled", high_contrast_enabled))
 
 
 func save_settings() -> void:
@@ -37,7 +41,13 @@ func save_settings() -> void:
 	config.set_value("settings", "screen_shake_enabled", screen_shake_enabled)
 	config.set_value("settings", "joystick_size_index", joystick_size_index)
 	config.set_value("settings", "force_joystick_visible", force_joystick_visible)
-	config.save(save_path)
+	config.set_value("settings", "ui_scale_index", ui_scale_index)
+	config.set_value("settings", "high_contrast_enabled", high_contrast_enabled)
+	var error := config.save(save_path)
+	if error != OK:
+		printerr("PLAYER_SETTINGS_SAVE_FAIL: %s" % error)
+		if GameManager != null and GameManager.has_method("queue_toast"):
+			GameManager.queue_toast("設定無法保存，請檢查瀏覽器儲存權限。")
 
 
 func set_damage_numbers_enabled(value: bool) -> void:
@@ -73,6 +83,33 @@ func set_force_joystick_visible(value: bool) -> void:
 	settings_changed.emit()
 
 
+func set_ui_scale_index(value: int) -> void:
+	var next_value: int = clamp(value, 0, 2)
+	if ui_scale_index == next_value:
+		return
+	ui_scale_index = next_value
+	save_settings()
+	settings_changed.emit()
+
+
+func set_high_contrast_enabled(value: bool) -> void:
+	if high_contrast_enabled == value:
+		return
+	high_contrast_enabled = value
+	save_settings()
+	settings_changed.emit()
+
+
+func get_ui_scale_multiplier() -> float:
+	match clamp(ui_scale_index, 0, 2):
+		0:
+			return 0.92
+		2:
+			return 1.16
+		_:
+			return 1.0
+
+
 func debug_use_save_path(path: String, reset: bool = true) -> void:
 	save_path = path if path != "" else SAVE_PATH
 	if reset:
@@ -88,6 +125,8 @@ func _reset_runtime_defaults() -> void:
 	screen_shake_enabled = true
 	joystick_size_index = 1
 	force_joystick_visible = false
+	ui_scale_index = 1
+	high_contrast_enabled = false
 
 
 func _queue_load_failure_toast() -> void:

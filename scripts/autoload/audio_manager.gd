@@ -24,6 +24,14 @@ const SFX_PATHS: Dictionary = {
 	"explosion": "res://assets/audio/explosion.wav",
 	"ui_click": "res://assets/audio/ui_click.wav"
 }
+const SFX_ALIASES: Dictionary = {
+	"attack_hit": "hit",
+	"level_up": "upgrade",
+	"recruit": "contract",
+	"hurt": "hit",
+	"boss": "boss_roar",
+	"ui": "ui_click"
+}
 const SFX_COOLDOWNS: Dictionary = {
 	"fire": 0.07,
 	"hit": 0.045,
@@ -98,18 +106,19 @@ func is_audio_unlocked() -> bool:
 func play_sfx(sfx_id: String, bypass_lock: bool = false, gain_db: float = 0.0, pitch_scale: float = 1.0) -> void:
 	if not audio_runtime_enabled:
 		return
-	if not sfx_streams.has(sfx_id):
+	var resolved_id := _resolve_sfx_id(sfx_id)
+	if not sfx_streams.has(resolved_id):
 		return
 	if OS.has_feature("web") and not unlocked and not bypass_lock:
 		return
 	if muted or master_volume <= 0.001:
 		return
-	if not _cooldown_ready(sfx_id):
+	if not _cooldown_ready(resolved_id):
 		return
 	var player := _acquire_player()
 	if player == null:
 		return
-	player.stream = sfx_streams[sfx_id] as AudioStream
+	player.stream = sfx_streams[resolved_id] as AudioStream
 	if player.stream == null:
 		return
 	player.volume_db = gain_db
@@ -150,8 +159,60 @@ func _load_streams() -> void:
 		var stream := load(path) as AudioStream
 		if stream == null:
 			stream = AudioStreamWAV.load_from_file(path)
+		if stream == null:
+			stream = _make_procedural_stream(str(sfx_id))
 		if stream != null:
 			sfx_streams[str(sfx_id)] = stream
+	for alias_id in SFX_ALIASES.keys():
+		var target_id := str(SFX_ALIASES[alias_id])
+		if not sfx_streams.has(alias_id) and sfx_streams.has(target_id):
+			sfx_streams[str(alias_id)] = sfx_streams[target_id]
+
+
+func _resolve_sfx_id(sfx_id: String) -> String:
+	if sfx_streams.has(sfx_id):
+		return sfx_id
+	return str(SFX_ALIASES.get(sfx_id, sfx_id))
+
+
+func _make_procedural_stream(sfx_id: String) -> AudioStream:
+	var sample_rate := 22050
+	var duration := 0.16
+	var base_freq := 520.0
+	match sfx_id:
+		"hit", "attack_hit", "hurt":
+			duration = 0.09
+			base_freq = 190.0
+		"upgrade", "level_up":
+			duration = 0.24
+			base_freq = 660.0
+		"contract", "recruit":
+			duration = 0.18
+			base_freq = 440.0
+		"boss_roar", "boss":
+			duration = 0.34
+			base_freq = 96.0
+		"ui_click", "ui":
+			duration = 0.045
+			base_freq = 880.0
+	var sample_count := int(float(sample_rate) * duration)
+	var data := PackedByteArray()
+	data.resize(sample_count * 2)
+	for index in range(sample_count):
+		var t := float(index) / float(sample_rate)
+		var decay := pow(1.0 - float(index) / maxf(1.0, float(sample_count)), 2.2)
+		var wave := sin(TAU * base_freq * t) * 0.52 + sin(TAU * base_freq * 1.51 * t) * 0.22
+		var value := int(clamp(wave * decay * 24000.0, -32768.0, 32767.0))
+		if value < 0:
+			value = 65536 + value
+		data[index * 2] = value & 0xFF
+		data[index * 2 + 1] = (value >> 8) & 0xFF
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = sample_rate
+	stream.stereo = false
+	stream.data = data
+	return stream
 
 
 func _acquire_player() -> AudioStreamPlayer:
@@ -197,7 +258,11 @@ func _save_settings() -> void:
 	var config := ConfigFile.new()
 	config.set_value("audio", "master_volume", master_volume)
 	config.set_value("audio", "muted", muted)
-	config.save(SAVE_PATH)
+	var error := config.save(SAVE_PATH)
+	if error != OK:
+		printerr("AUDIO_SETTINGS_SAVE_FAIL: %s" % error)
+		if GameManager != null and GameManager.has_method("queue_toast"):
+			GameManager.queue_toast("音量設定無法保存，請檢查瀏覽器儲存權限。")
 
 
 func _is_headless_runtime() -> bool:
