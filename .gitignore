@@ -33,6 +33,10 @@ dist/
 *~
 tools/asset_sources/
 
+# Hyper3D Rodin production sources are locally reproducible and excluded from
+# repository history; the shipped game consumes only the baked sprite atlas.
+assets/rodin/*.glb
+
 # Python tooling cache and reports
 __pycache__/
 *.py[cod]

@@ -1,0 +1,2732 @@
+[
+  {
+    "source": "assets/rodin/hero_captain.glb",
+    "vertices": 22727,
+    "polygons": 23332,
+    "bbox_extent": [
+      1.44235,
+      0.6278,
+      1.9001
+    ],
+    "height": 1.9001,
+    "art_id": "captain",
+    "runtime_id": "hero_captain",
+    "binding": {
+      "method": "manual_nearest_bone_segments",
+      "automatic_error": "automatic coverage 0.00%",
+      "coverage": 1.0,
+      "weighted_vertices": 22727,
+      "bone_count": 18,
+      "bones": [
+        "root",
+        "pelvis",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "upper_arm.L",
+        "forearm.L",
+        "hand.L",
+        "upper_arm.R",
+        "forearm.R",
+        "hand.R",
+        "thigh.L",
+        "shin.L",
+        "foot.L",
+        "thigh.R",
+        "shin.R",
+        "foot.R"
+      ]
+    },
+    "frames": 27,
+    "pose_audit": {
+      "idle": [
+        {},
+        {
+          "chest": 2.8,
+          "upper_arm.L": 2.2,
+          "upper_arm.R": -2.2,
+          "head": 1.8
+        },
+        {},
+        {
+          "chest": -2.8,
+          "upper_arm.L": -2.2,
+          "upper_arm.R": 2.2,
+          "head": -1.8
+        }
+      ],
+      "walk": [
+        {},
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {
+          "thigh.L": 10.0,
+          "thigh.R": -10.0,
+          "shin.L": -30.0,
+          "upper_arm.L": -26.0,
+          "upper_arm.R": 26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": -5.0
+        },
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {},
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        },
+        {
+          "thigh.L": -10.0,
+          "thigh.R": 10.0,
+          "shin.R": -30.0,
+          "upper_arm.L": 26.0,
+          "upper_arm.R": -26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": 5.0
+        },
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        }
+      ],
+      "attack": [
+        {
+          "root": -8,
+          "spine": -4.4,
+          "upper_arm.L": 8.36,
+          "upper_arm.R": -8.36,
+          "forearm.L": 28,
+          "forearm.R": 25.2,
+          "thigh.L": 5.76,
+          "thigh.R": -3.36
+        },
+        {
+          "root": -14,
+          "spine": -7.7,
+          "upper_arm.L": 12.76,
+          "upper_arm.R": -12.76,
+          "forearm.L": 45,
+          "forearm.R": 40.5,
+          "thigh.L": 10.08,
+          "thigh.R": -5.88
+        },
+        {
+          "root": 16,
+          "spine": 8.8,
+          "upper_arm.L": -15.84,
+          "upper_arm.R": 15.84,
+          "forearm.L": -52,
+          "forearm.R": -46.8,
+          "thigh.L": -11.52,
+          "thigh.R": 6.72
+        },
+        {
+          "root": 12,
+          "spine": 6.6,
+          "upper_arm.L": -19.36,
+          "upper_arm.R": 19.36,
+          "forearm.L": -65,
+          "forearm.R": -58.5,
+          "thigh.L": -8.64,
+          "thigh.R": 5.04
+        },
+        {
+          "root": 7,
+          "spine": 3.85,
+          "upper_arm.L": -8.36,
+          "upper_arm.R": 8.36,
+          "forearm.L": -28,
+          "forearm.R": -25.2,
+          "thigh.L": -5.04,
+          "thigh.R": 2.94
+        },
+        {
+          "root": 1,
+          "spine": 0.55,
+          "upper_arm.L": -1.98,
+          "upper_arm.R": 1.98,
+          "forearm.L": -7,
+          "forearm.R": -6.3,
+          "thigh.L": -0.72,
+          "thigh.R": 0.42
+        }
+      ],
+      "hurt": [
+        {
+          "root": -4.2,
+          "spine": -12.0,
+          "chest": -6.6,
+          "head": 5.4,
+          "upper_arm.L": -13.8,
+          "upper_arm.R": 13.8
+        },
+        {
+          "root": -8.75,
+          "spine": -25.0,
+          "chest": -13.75,
+          "head": 11.25,
+          "upper_arm.L": -28.75,
+          "upper_arm.R": 28.75
+        },
+        {
+          "root": -5.25,
+          "spine": -15.0,
+          "chest": -8.25,
+          "head": 6.75,
+          "upper_arm.L": -17.25,
+          "upper_arm.R": 17.25
+        }
+      ],
+      "death": [
+        {
+          "root_translate_x": -0.0
+        },
+        {
+          "root": 16.0,
+          "spine": -5.6,
+          "head": -4.48,
+          "upper_arm.L": 8.8,
+          "upper_arm.R": -10.4,
+          "thigh.L": 8.0,
+          "thigh.R": -5.12,
+          "root_translate_x": -0.00475
+        },
+        {
+          "root": 38.0,
+          "spine": -10.5,
+          "head": -10.64,
+          "upper_arm.L": 20.9,
+          "upper_arm.R": -24.7,
+          "thigh.L": 19.0,
+          "thigh.R": -12.16,
+          "root_translate_x": -0.019
+        },
+        {
+          "root": 62.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.04275
+        },
+        {
+          "root": 79.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.076
+        },
+        {
+          "root": 88.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.11876
+        }
+      ]
+    },
+    "threeviews": [
+      "export/art_r21_threeview_raw/hero_captain/front.png",
+      "export/art_r21_threeview_raw/hero_captain/side.png",
+      "export/art_r21_threeview_raw/hero_captain/back.png"
+    ],
+    "rigged_glb": "export/art_r21_rigged/hero_captain_rigged.glb",
+    "rigged_bytes": 2102828
+  },
+  {
+    "source": "assets/rodin/hero_rift_sniper.glb",
+    "vertices": 27729,
+    "polygons": 23332,
+    "bbox_extent": [
+      0.94567,
+      1.89211,
+      1.46156
+    ],
+    "height": 1.46156,
+    "art_id": "rift_sniper",
+    "runtime_id": "hero_rift_sniper",
+    "binding": {
+      "method": "manual_nearest_bone_segments",
+      "automatic_error": "automatic coverage 0.00%",
+      "coverage": 1.0,
+      "weighted_vertices": 27729,
+      "bone_count": 18,
+      "bones": [
+        "root",
+        "pelvis",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "upper_arm.L",
+        "forearm.L",
+        "hand.L",
+        "upper_arm.R",
+        "forearm.R",
+        "hand.R",
+        "thigh.L",
+        "shin.L",
+        "foot.L",
+        "thigh.R",
+        "shin.R",
+        "foot.R"
+      ]
+    },
+    "frames": 27,
+    "pose_audit": {
+      "idle": [
+        {},
+        {
+          "chest": 2.8,
+          "upper_arm.L": 2.2,
+          "upper_arm.R": -2.2,
+          "head": 1.8
+        },
+        {},
+        {
+          "chest": -2.8,
+          "upper_arm.L": -2.2,
+          "upper_arm.R": 2.2,
+          "head": -1.8
+        }
+      ],
+      "walk": [
+        {},
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {
+          "thigh.L": 10.0,
+          "thigh.R": -10.0,
+          "shin.L": -30.0,
+          "upper_arm.L": -26.0,
+          "upper_arm.R": 26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": -5.0
+        },
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {},
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        },
+        {
+          "thigh.L": -10.0,
+          "thigh.R": 10.0,
+          "shin.R": -30.0,
+          "upper_arm.L": 26.0,
+          "upper_arm.R": -26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": 5.0
+        },
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        }
+      ],
+      "attack": [
+        {
+          "root": -8,
+          "spine": -4.4,
+          "upper_arm.L": 8.36,
+          "upper_arm.R": -8.36,
+          "forearm.L": 28,
+          "forearm.R": 25.2,
+          "thigh.L": 5.76,
+          "thigh.R": -3.36
+        },
+        {
+          "root": -14,
+          "spine": -7.7,
+          "upper_arm.L": 12.76,
+          "upper_arm.R": -12.76,
+          "forearm.L": 45,
+          "forearm.R": 40.5,
+          "thigh.L": 10.08,
+          "thigh.R": -5.88
+        },
+        {
+          "root": 16,
+          "spine": 8.8,
+          "upper_arm.L": -15.84,
+          "upper_arm.R": 15.84,
+          "forearm.L": -52,
+          "forearm.R": -46.8,
+          "thigh.L": -11.52,
+          "thigh.R": 6.72
+        },
+        {
+          "root": 12,
+          "spine": 6.6,
+          "upper_arm.L": -19.36,
+          "upper_arm.R": 19.36,
+          "forearm.L": -65,
+          "forearm.R": -58.5,
+          "thigh.L": -8.64,
+          "thigh.R": 5.04
+        },
+        {
+          "root": 7,
+          "spine": 3.85,
+          "upper_arm.L": -8.36,
+          "upper_arm.R": 8.36,
+          "forearm.L": -28,
+          "forearm.R": -25.2,
+          "thigh.L": -5.04,
+          "thigh.R": 2.94
+        },
+        {
+          "root": 1,
+          "spine": 0.55,
+          "upper_arm.L": -1.98,
+          "upper_arm.R": 1.98,
+          "forearm.L": -7,
+          "forearm.R": -6.3,
+          "thigh.L": -0.72,
+          "thigh.R": 0.42
+        }
+      ],
+      "hurt": [
+        {
+          "root": -4.2,
+          "spine": -12.0,
+          "chest": -6.6,
+          "head": 5.4,
+          "upper_arm.L": -13.8,
+          "upper_arm.R": 13.8
+        },
+        {
+          "root": -8.75,
+          "spine": -25.0,
+          "chest": -13.75,
+          "head": 11.25,
+          "upper_arm.L": -28.75,
+          "upper_arm.R": 28.75
+        },
+        {
+          "root": -5.25,
+          "spine": -15.0,
+          "chest": -8.25,
+          "head": 6.75,
+          "upper_arm.L": -17.25,
+          "upper_arm.R": 17.25
+        }
+      ],
+      "death": [
+        {
+          "root_translate_x": -0.0
+        },
+        {
+          "root": 16.0,
+          "spine": -5.6,
+          "head": -4.48,
+          "upper_arm.L": 8.8,
+          "upper_arm.R": -10.4,
+          "thigh.L": 8.0,
+          "thigh.R": -5.12,
+          "root_translate_x": -0.00365
+        },
+        {
+          "root": 38.0,
+          "spine": -10.5,
+          "head": -10.64,
+          "upper_arm.L": 20.9,
+          "upper_arm.R": -24.7,
+          "thigh.L": 19.0,
+          "thigh.R": -12.16,
+          "root_translate_x": -0.01462
+        },
+        {
+          "root": 62.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.03289
+        },
+        {
+          "root": 79.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.05846
+        },
+        {
+          "root": 88.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.09135
+        }
+      ]
+    },
+    "threeviews": [
+      "export/art_r21_threeview_raw/hero_rift_sniper/front.png",
+      "export/art_r21_threeview_raw/hero_rift_sniper/side.png",
+      "export/art_r21_threeview_raw/hero_rift_sniper/back.png"
+    ],
+    "rigged_glb": "export/art_r21_rigged/hero_rift_sniper_rigged.glb",
+    "rigged_bytes": 2462976
+  },
+  {
+    "source": "assets/rodin/hero_void_weaver.glb",
+    "vertices": 27630,
+    "polygons": 23332,
+    "bbox_extent": [
+      0.94307,
+      1.89519,
+      0.96052
+    ],
+    "height": 0.96052,
+    "art_id": "void_weaver",
+    "runtime_id": "hero_void_weaver",
+    "binding": {
+      "method": "manual_nearest_bone_segments",
+      "automatic_error": "automatic coverage 0.00%",
+      "coverage": 1.0,
+      "weighted_vertices": 27630,
+      "bone_count": 18,
+      "bones": [
+        "root",
+        "pelvis",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "upper_arm.L",
+        "forearm.L",
+        "hand.L",
+        "upper_arm.R",
+        "forearm.R",
+        "hand.R",
+        "thigh.L",
+        "shin.L",
+        "foot.L",
+        "thigh.R",
+        "shin.R",
+        "foot.R"
+      ]
+    },
+    "frames": 27,
+    "pose_audit": {
+      "idle": [
+        {},
+        {
+          "chest": 2.8,
+          "upper_arm.L": 2.2,
+          "upper_arm.R": -2.2,
+          "head": 1.8
+        },
+        {},
+        {
+          "chest": -2.8,
+          "upper_arm.L": -2.2,
+          "upper_arm.R": 2.2,
+          "head": -1.8
+        }
+      ],
+      "walk": [
+        {},
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {
+          "thigh.L": 10.0,
+          "thigh.R": -10.0,
+          "shin.L": -30.0,
+          "upper_arm.L": -26.0,
+          "upper_arm.R": 26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": -5.0
+        },
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {},
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        },
+        {
+          "thigh.L": -10.0,
+          "thigh.R": 10.0,
+          "shin.R": -30.0,
+          "upper_arm.L": 26.0,
+          "upper_arm.R": -26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": 5.0
+        },
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        }
+      ],
+      "attack": [
+        {
+          "root": -8,
+          "spine": -4.4,
+          "upper_arm.L": 8.36,
+          "upper_arm.R": -8.36,
+          "forearm.L": 28,
+          "forearm.R": 25.2,
+          "thigh.L": 5.76,
+          "thigh.R": -3.36
+        },
+        {
+          "root": -14,
+          "spine": -7.7,
+          "upper_arm.L": 12.76,
+          "upper_arm.R": -12.76,
+          "forearm.L": 45,
+          "forearm.R": 40.5,
+          "thigh.L": 10.08,
+          "thigh.R": -5.88
+        },
+        {
+          "root": 16,
+          "spine": 8.8,
+          "upper_arm.L": -15.84,
+          "upper_arm.R": 15.84,
+          "forearm.L": -52,
+          "forearm.R": -46.8,
+          "thigh.L": -11.52,
+          "thigh.R": 6.72
+        },
+        {
+          "root": 12,
+          "spine": 6.6,
+          "upper_arm.L": -19.36,
+          "upper_arm.R": 19.36,
+          "forearm.L": -65,
+          "forearm.R": -58.5,
+          "thigh.L": -8.64,
+          "thigh.R": 5.04
+        },
+        {
+          "root": 7,
+          "spine": 3.85,
+          "upper_arm.L": -8.36,
+          "upper_arm.R": 8.36,
+          "forearm.L": -28,
+          "forearm.R": -25.2,
+          "thigh.L": -5.04,
+          "thigh.R": 2.94
+        },
+        {
+          "root": 1,
+          "spine": 0.55,
+          "upper_arm.L": -1.98,
+          "upper_arm.R": 1.98,
+          "forearm.L": -7,
+          "forearm.R": -6.3,
+          "thigh.L": -0.72,
+          "thigh.R": 0.42
+        }
+      ],
+      "hurt": [
+        {
+          "root": -4.2,
+          "spine": -12.0,
+          "chest": -6.6,
+          "head": 5.4,
+          "upper_arm.L": -13.8,
+          "upper_arm.R": 13.8
+        },
+        {
+          "root": -8.75,
+          "spine": -25.0,
+          "chest": -13.75,
+          "head": 11.25,
+          "upper_arm.L": -28.75,
+          "upper_arm.R": 28.75
+        },
+        {
+          "root": -5.25,
+          "spine": -15.0,
+          "chest": -8.25,
+          "head": 6.75,
+          "upper_arm.L": -17.25,
+          "upper_arm.R": 17.25
+        }
+      ],
+      "death": [
+        {
+          "root_translate_x": -0.0
+        },
+        {
+          "root": 16.0,
+          "spine": -5.6,
+          "head": -4.48,
+          "upper_arm.L": 8.8,
+          "upper_arm.R": -10.4,
+          "thigh.L": 8.0,
+          "thigh.R": -5.12,
+          "root_translate_x": -0.0024
+        },
+        {
+          "root": 38.0,
+          "spine": -10.5,
+          "head": -10.64,
+          "upper_arm.L": 20.9,
+          "upper_arm.R": -24.7,
+          "thigh.L": 19.0,
+          "thigh.R": -12.16,
+          "root_translate_x": -0.00961
+        },
+        {
+          "root": 62.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.02161
+        },
+        {
+          "root": 79.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.03842
+        },
+        {
+          "root": 88.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.06003
+        }
+      ]
+    },
+    "threeviews": [
+      "export/art_r21_threeview_raw/hero_void_weaver/front.png",
+      "export/art_r21_threeview_raw/hero_void_weaver/side.png",
+      "export/art_r21_threeview_raw/hero_void_weaver/back.png"
+    ],
+    "rigged_glb": "export/art_r21_rigged/hero_void_weaver_rigged.glb",
+    "rigged_bytes": 2439764
+  },
+  {
+    "source": "assets/rodin/hero_arc_scout.glb",
+    "vertices": 25723,
+    "polygons": 23332,
+    "bbox_extent": [
+      0.94277,
+      1.89227,
+      0.94684
+    ],
+    "height": 0.94684,
+    "art_id": "arc_scout",
+    "runtime_id": "hero_arc_scout",
+    "binding": {
+      "method": "manual_nearest_bone_segments",
+      "automatic_error": "automatic coverage 0.00%",
+      "coverage": 1.0,
+      "weighted_vertices": 25723,
+      "bone_count": 18,
+      "bones": [
+        "root",
+        "pelvis",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "upper_arm.L",
+        "forearm.L",
+        "hand.L",
+        "upper_arm.R",
+        "forearm.R",
+        "hand.R",
+        "thigh.L",
+        "shin.L",
+        "foot.L",
+        "thigh.R",
+        "shin.R",
+        "foot.R"
+      ]
+    },
+    "frames": 27,
+    "pose_audit": {
+      "idle": [
+        {},
+        {
+          "chest": 2.8,
+          "upper_arm.L": 2.2,
+          "upper_arm.R": -2.2,
+          "head": 1.8
+        },
+        {},
+        {
+          "chest": -2.8,
+          "upper_arm.L": -2.2,
+          "upper_arm.R": 2.2,
+          "head": -1.8
+        }
+      ],
+      "walk": [
+        {},
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {
+          "thigh.L": 10.0,
+          "thigh.R": -10.0,
+          "shin.L": -30.0,
+          "upper_arm.L": -26.0,
+          "upper_arm.R": 26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": -5.0
+        },
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {},
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        },
+        {
+          "thigh.L": -10.0,
+          "thigh.R": 10.0,
+          "shin.R": -30.0,
+          "upper_arm.L": 26.0,
+          "upper_arm.R": -26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": 5.0
+        },
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        }
+      ],
+      "attack": [
+        {
+          "root": -8,
+          "spine": -4.4,
+          "upper_arm.L": 8.36,
+          "upper_arm.R": -8.36,
+          "forearm.L": 28,
+          "forearm.R": 25.2,
+          "thigh.L": 5.76,
+          "thigh.R": -3.36
+        },
+        {
+          "root": -14,
+          "spine": -7.7,
+          "upper_arm.L": 12.76,
+          "upper_arm.R": -12.76,
+          "forearm.L": 45,
+          "forearm.R": 40.5,
+          "thigh.L": 10.08,
+          "thigh.R": -5.88
+        },
+        {
+          "root": 16,
+          "spine": 8.8,
+          "upper_arm.L": -15.84,
+          "upper_arm.R": 15.84,
+          "forearm.L": -52,
+          "forearm.R": -46.8,
+          "thigh.L": -11.52,
+          "thigh.R": 6.72
+        },
+        {
+          "root": 12,
+          "spine": 6.6,
+          "upper_arm.L": -19.36,
+          "upper_arm.R": 19.36,
+          "forearm.L": -65,
+          "forearm.R": -58.5,
+          "thigh.L": -8.64,
+          "thigh.R": 5.04
+        },
+        {
+          "root": 7,
+          "spine": 3.85,
+          "upper_arm.L": -8.36,
+          "upper_arm.R": 8.36,
+          "forearm.L": -28,
+          "forearm.R": -25.2,
+          "thigh.L": -5.04,
+          "thigh.R": 2.94
+        },
+        {
+          "root": 1,
+          "spine": 0.55,
+          "upper_arm.L": -1.98,
+          "upper_arm.R": 1.98,
+          "forearm.L": -7,
+          "forearm.R": -6.3,
+          "thigh.L": -0.72,
+          "thigh.R": 0.42
+        }
+      ],
+      "hurt": [
+        {
+          "root": -4.2,
+          "spine": -12.0,
+          "chest": -6.6,
+          "head": 5.4,
+          "upper_arm.L": -13.8,
+          "upper_arm.R": 13.8
+        },
+        {
+          "root": -8.75,
+          "spine": -25.0,
+          "chest": -13.75,
+          "head": 11.25,
+          "upper_arm.L": -28.75,
+          "upper_arm.R": 28.75
+        },
+        {
+          "root": -5.25,
+          "spine": -15.0,
+          "chest": -8.25,
+          "head": 6.75,
+          "upper_arm.L": -17.25,
+          "upper_arm.R": 17.25
+        }
+      ],
+      "death": [
+        {
+          "root_translate_x": -0.0
+        },
+        {
+          "root": 16.0,
+          "spine": -5.6,
+          "head": -4.48,
+          "upper_arm.L": 8.8,
+          "upper_arm.R": -10.4,
+          "thigh.L": 8.0,
+          "thigh.R": -5.12,
+          "root_translate_x": -0.00237
+        },
+        {
+          "root": 38.0,
+          "spine": -10.5,
+          "head": -10.64,
+          "upper_arm.L": 20.9,
+          "upper_arm.R": -24.7,
+          "thigh.L": 19.0,
+          "thigh.R": -12.16,
+          "root_translate_x": -0.00947
+        },
+        {
+          "root": 62.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.0213
+        },
+        {
+          "root": 79.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.03787
+        },
+        {
+          "root": 88.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.05918
+        }
+      ]
+    },
+    "threeviews": [
+      "export/art_r21_threeview_raw/hero_arc_scout/front.png",
+      "export/art_r21_threeview_raw/hero_arc_scout/side.png",
+      "export/art_r21_threeview_raw/hero_arc_scout/back.png"
+    ],
+    "rigged_glb": "export/art_r21_rigged/hero_arc_scout_rigged.glb",
+    "rigged_bytes": 2346100
+  },
+  {
+    "source": "assets/rodin/hero_echo_singer.glb",
+    "vertices": 28365,
+    "polygons": 23332,
+    "bbox_extent": [
+      0.94518,
+      1.89418,
+      1.4574
+    ],
+    "height": 1.4574,
+    "art_id": "echo_singer",
+    "runtime_id": "hero_echo_singer",
+    "binding": {
+      "method": "manual_nearest_bone_segments",
+      "automatic_error": "automatic coverage 0.00%",
+      "coverage": 1.0,
+      "weighted_vertices": 28365,
+      "bone_count": 18,
+      "bones": [
+        "root",
+        "pelvis",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "upper_arm.L",
+        "forearm.L",
+        "hand.L",
+        "upper_arm.R",
+        "forearm.R",
+        "hand.R",
+        "thigh.L",
+        "shin.L",
+        "foot.L",
+        "thigh.R",
+        "shin.R",
+        "foot.R"
+      ]
+    },
+    "frames": 27,
+    "pose_audit": {
+      "idle": [
+        {},
+        {
+          "chest": 2.8,
+          "upper_arm.L": 2.2,
+          "upper_arm.R": -2.2,
+          "head": 1.8
+        },
+        {},
+        {
+          "chest": -2.8,
+          "upper_arm.L": -2.2,
+          "upper_arm.R": 2.2,
+          "head": -1.8
+        }
+      ],
+      "walk": [
+        {},
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {
+          "thigh.L": 10.0,
+          "thigh.R": -10.0,
+          "shin.L": -30.0,
+          "upper_arm.L": -26.0,
+          "upper_arm.R": 26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": -5.0
+        },
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {},
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        },
+        {
+          "thigh.L": -10.0,
+          "thigh.R": 10.0,
+          "shin.R": -30.0,
+          "upper_arm.L": 26.0,
+          "upper_arm.R": -26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": 5.0
+        },
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        }
+      ],
+      "attack": [
+        {
+          "root": -8,
+          "spine": -4.4,
+          "upper_arm.L": 8.36,
+          "upper_arm.R": -8.36,
+          "forearm.L": 28,
+          "forearm.R": 25.2,
+          "thigh.L": 5.76,
+          "thigh.R": -3.36
+        },
+        {
+          "root": -14,
+          "spine": -7.7,
+          "upper_arm.L": 12.76,
+          "upper_arm.R": -12.76,
+          "forearm.L": 45,
+          "forearm.R": 40.5,
+          "thigh.L": 10.08,
+          "thigh.R": -5.88
+        },
+        {
+          "root": 16,
+          "spine": 8.8,
+          "upper_arm.L": -15.84,
+          "upper_arm.R": 15.84,
+          "forearm.L": -52,
+          "forearm.R": -46.8,
+          "thigh.L": -11.52,
+          "thigh.R": 6.72
+        },
+        {
+          "root": 12,
+          "spine": 6.6,
+          "upper_arm.L": -19.36,
+          "upper_arm.R": 19.36,
+          "forearm.L": -65,
+          "forearm.R": -58.5,
+          "thigh.L": -8.64,
+          "thigh.R": 5.04
+        },
+        {
+          "root": 7,
+          "spine": 3.85,
+          "upper_arm.L": -8.36,
+          "upper_arm.R": 8.36,
+          "forearm.L": -28,
+          "forearm.R": -25.2,
+          "thigh.L": -5.04,
+          "thigh.R": 2.94
+        },
+        {
+          "root": 1,
+          "spine": 0.55,
+          "upper_arm.L": -1.98,
+          "upper_arm.R": 1.98,
+          "forearm.L": -7,
+          "forearm.R": -6.3,
+          "thigh.L": -0.72,
+          "thigh.R": 0.42
+        }
+      ],
+      "hurt": [
+        {
+          "root": -4.2,
+          "spine": -12.0,
+          "chest": -6.6,
+          "head": 5.4,
+          "upper_arm.L": -13.8,
+          "upper_arm.R": 13.8
+        },
+        {
+          "root": -8.75,
+          "spine": -25.0,
+          "chest": -13.75,
+          "head": 11.25,
+          "upper_arm.L": -28.75,
+          "upper_arm.R": 28.75
+        },
+        {
+          "root": -5.25,
+          "spine": -15.0,
+          "chest": -8.25,
+          "head": 6.75,
+          "upper_arm.L": -17.25,
+          "upper_arm.R": 17.25
+        }
+      ],
+      "death": [
+        {
+          "root_translate_x": -0.0
+        },
+        {
+          "root": 16.0,
+          "spine": -5.6,
+          "head": -4.48,
+          "upper_arm.L": 8.8,
+          "upper_arm.R": -10.4,
+          "thigh.L": 8.0,
+          "thigh.R": -5.12,
+          "root_translate_x": -0.00364
+        },
+        {
+          "root": 38.0,
+          "spine": -10.5,
+          "head": -10.64,
+          "upper_arm.L": 20.9,
+          "upper_arm.R": -24.7,
+          "thigh.L": 19.0,
+          "thigh.R": -12.16,
+          "root_translate_x": -0.01457
+        },
+        {
+          "root": 62.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.03279
+        },
+        {
+          "root": 79.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.0583
+        },
+        {
+          "root": 88.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.09109
+        }
+      ]
+    },
+    "threeviews": [
+      "export/art_r21_threeview_raw/hero_echo_singer/front.png",
+      "export/art_r21_threeview_raw/hero_echo_singer/side.png",
+      "export/art_r21_threeview_raw/hero_echo_singer/back.png"
+    ],
+    "rigged_glb": "export/art_r21_rigged/hero_echo_singer_rigged.glb",
+    "rigged_bytes": 2572336
+  },
+  {
+    "source": "assets/rodin/hero_ember_grenadier.glb",
+    "vertices": 28490,
+    "polygons": 23332,
+    "bbox_extent": [
+      0.92074,
+      1.88957,
+      0.94817
+    ],
+    "height": 0.94817,
+    "art_id": "ember_grenadier",
+    "runtime_id": "hero_ember_grenadier",
+    "binding": {
+      "method": "manual_nearest_bone_segments",
+      "automatic_error": "automatic coverage 0.00%",
+      "coverage": 1.0,
+      "weighted_vertices": 28490,
+      "bone_count": 18,
+      "bones": [
+        "root",
+        "pelvis",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "upper_arm.L",
+        "forearm.L",
+        "hand.L",
+        "upper_arm.R",
+        "forearm.R",
+        "hand.R",
+        "thigh.L",
+        "shin.L",
+        "foot.L",
+        "thigh.R",
+        "shin.R",
+        "foot.R"
+      ]
+    },
+    "frames": 27,
+    "pose_audit": {
+      "idle": [
+        {},
+        {
+          "chest": 2.8,
+          "upper_arm.L": 2.2,
+          "upper_arm.R": -2.2,
+          "head": 1.8
+        },
+        {},
+        {
+          "chest": -2.8,
+          "upper_arm.L": -2.2,
+          "upper_arm.R": 2.2,
+          "head": -1.8
+        }
+      ],
+      "walk": [
+        {},
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {
+          "thigh.L": 10.0,
+          "thigh.R": -10.0,
+          "shin.L": -30.0,
+          "upper_arm.L": -26.0,
+          "upper_arm.R": 26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": -5.0
+        },
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {},
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        },
+        {
+          "thigh.L": -10.0,
+          "thigh.R": 10.0,
+          "shin.R": -30.0,
+          "upper_arm.L": 26.0,
+          "upper_arm.R": -26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": 5.0
+        },
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        }
+      ],
+      "attack": [
+        {
+          "root": -8,
+          "spine": -4.4,
+          "upper_arm.L": 8.36,
+          "upper_arm.R": -8.36,
+          "forearm.L": 28,
+          "forearm.R": 25.2,
+          "thigh.L": 5.76,
+          "thigh.R": -3.36
+        },
+        {
+          "root": -14,
+          "spine": -7.7,
+          "upper_arm.L": 12.76,
+          "upper_arm.R": -12.76,
+          "forearm.L": 45,
+          "forearm.R": 40.5,
+          "thigh.L": 10.08,
+          "thigh.R": -5.88
+        },
+        {
+          "root": 16,
+          "spine": 8.8,
+          "upper_arm.L": -15.84,
+          "upper_arm.R": 15.84,
+          "forearm.L": -52,
+          "forearm.R": -46.8,
+          "thigh.L": -11.52,
+          "thigh.R": 6.72
+        },
+        {
+          "root": 12,
+          "spine": 6.6,
+          "upper_arm.L": -19.36,
+          "upper_arm.R": 19.36,
+          "forearm.L": -65,
+          "forearm.R": -58.5,
+          "thigh.L": -8.64,
+          "thigh.R": 5.04
+        },
+        {
+          "root": 7,
+          "spine": 3.85,
+          "upper_arm.L": -8.36,
+          "upper_arm.R": 8.36,
+          "forearm.L": -28,
+          "forearm.R": -25.2,
+          "thigh.L": -5.04,
+          "thigh.R": 2.94
+        },
+        {
+          "root": 1,
+          "spine": 0.55,
+          "upper_arm.L": -1.98,
+          "upper_arm.R": 1.98,
+          "forearm.L": -7,
+          "forearm.R": -6.3,
+          "thigh.L": -0.72,
+          "thigh.R": 0.42
+        }
+      ],
+      "hurt": [
+        {
+          "root": -4.2,
+          "spine": -12.0,
+          "chest": -6.6,
+          "head": 5.4,
+          "upper_arm.L": -13.8,
+          "upper_arm.R": 13.8
+        },
+        {
+          "root": -8.75,
+          "spine": -25.0,
+          "chest": -13.75,
+          "head": 11.25,
+          "upper_arm.L": -28.75,
+          "upper_arm.R": 28.75
+        },
+        {
+          "root": -5.25,
+          "spine": -15.0,
+          "chest": -8.25,
+          "head": 6.75,
+          "upper_arm.L": -17.25,
+          "upper_arm.R": 17.25
+        }
+      ],
+      "death": [
+        {
+          "root_translate_x": -0.0
+        },
+        {
+          "root": 16.0,
+          "spine": -5.6,
+          "head": -4.48,
+          "upper_arm.L": 8.8,
+          "upper_arm.R": -10.4,
+          "thigh.L": 8.0,
+          "thigh.R": -5.12,
+          "root_translate_x": -0.00237
+        },
+        {
+          "root": 38.0,
+          "spine": -10.5,
+          "head": -10.64,
+          "upper_arm.L": 20.9,
+          "upper_arm.R": -24.7,
+          "thigh.L": 19.0,
+          "thigh.R": -12.16,
+          "root_translate_x": -0.00948
+        },
+        {
+          "root": 62.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.02133
+        },
+        {
+          "root": 79.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.03793
+        },
+        {
+          "root": 88.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.05926
+        }
+      ]
+    },
+    "threeviews": [
+      "export/art_r21_threeview_raw/hero_ember_grenadier/front.png",
+      "export/art_r21_threeview_raw/hero_ember_grenadier/side.png",
+      "export/art_r21_threeview_raw/hero_ember_grenadier/back.png"
+    ],
+    "rigged_glb": "export/art_r21_rigged/hero_ember_grenadier_rigged.glb",
+    "rigged_bytes": 2733656
+  },
+  {
+    "source": "assets/rodin/hero_line_mender.glb",
+    "vertices": 25721,
+    "polygons": 23332,
+    "bbox_extent": [
+      0.94573,
+      1.89501,
+      0.95389
+    ],
+    "height": 0.95389,
+    "art_id": "line_mender",
+    "runtime_id": "hero_line_mender",
+    "binding": {
+      "method": "manual_nearest_bone_segments",
+      "automatic_error": "automatic coverage 0.00%",
+      "coverage": 1.0,
+      "weighted_vertices": 25721,
+      "bone_count": 18,
+      "bones": [
+        "root",
+        "pelvis",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "upper_arm.L",
+        "forearm.L",
+        "hand.L",
+        "upper_arm.R",
+        "forearm.R",
+        "hand.R",
+        "thigh.L",
+        "shin.L",
+        "foot.L",
+        "thigh.R",
+        "shin.R",
+        "foot.R"
+      ]
+    },
+    "frames": 27,
+    "pose_audit": {
+      "idle": [
+        {},
+        {
+          "chest": 2.8,
+          "upper_arm.L": 2.2,
+          "upper_arm.R": -2.2,
+          "head": 1.8
+        },
+        {},
+        {
+          "chest": -2.8,
+          "upper_arm.L": -2.2,
+          "upper_arm.R": 2.2,
+          "head": -1.8
+        }
+      ],
+      "walk": [
+        {},
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {
+          "thigh.L": 10.0,
+          "thigh.R": -10.0,
+          "shin.L": -30.0,
+          "upper_arm.L": -26.0,
+          "upper_arm.R": 26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": -5.0
+        },
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {},
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        },
+        {
+          "thigh.L": -10.0,
+          "thigh.R": 10.0,
+          "shin.R": -30.0,
+          "upper_arm.L": 26.0,
+          "upper_arm.R": -26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": 5.0
+        },
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        }
+      ],
+      "attack": [
+        {
+          "root": -8,
+          "spine": -4.4,
+          "upper_arm.L": 8.36,
+          "upper_arm.R": -8.36,
+          "forearm.L": 28,
+          "forearm.R": 25.2,
+          "thigh.L": 5.76,
+          "thigh.R": -3.36
+        },
+        {
+          "root": -14,
+          "spine": -7.7,
+          "upper_arm.L": 12.76,
+          "upper_arm.R": -12.76,
+          "forearm.L": 45,
+          "forearm.R": 40.5,
+          "thigh.L": 10.08,
+          "thigh.R": -5.88
+        },
+        {
+          "root": 16,
+          "spine": 8.8,
+          "upper_arm.L": -15.84,
+          "upper_arm.R": 15.84,
+          "forearm.L": -52,
+          "forearm.R": -46.8,
+          "thigh.L": -11.52,
+          "thigh.R": 6.72
+        },
+        {
+          "root": 12,
+          "spine": 6.6,
+          "upper_arm.L": -19.36,
+          "upper_arm.R": 19.36,
+          "forearm.L": -65,
+          "forearm.R": -58.5,
+          "thigh.L": -8.64,
+          "thigh.R": 5.04
+        },
+        {
+          "root": 7,
+          "spine": 3.85,
+          "upper_arm.L": -8.36,
+          "upper_arm.R": 8.36,
+          "forearm.L": -28,
+          "forearm.R": -25.2,
+          "thigh.L": -5.04,
+          "thigh.R": 2.94
+        },
+        {
+          "root": 1,
+          "spine": 0.55,
+          "upper_arm.L": -1.98,
+          "upper_arm.R": 1.98,
+          "forearm.L": -7,
+          "forearm.R": -6.3,
+          "thigh.L": -0.72,
+          "thigh.R": 0.42
+        }
+      ],
+      "hurt": [
+        {
+          "root": -4.2,
+          "spine": -12.0,
+          "chest": -6.6,
+          "head": 5.4,
+          "upper_arm.L": -13.8,
+          "upper_arm.R": 13.8
+        },
+        {
+          "root": -8.75,
+          "spine": -25.0,
+          "chest": -13.75,
+          "head": 11.25,
+          "upper_arm.L": -28.75,
+          "upper_arm.R": 28.75
+        },
+        {
+          "root": -5.25,
+          "spine": -15.0,
+          "chest": -8.25,
+          "head": 6.75,
+          "upper_arm.L": -17.25,
+          "upper_arm.R": 17.25
+        }
+      ],
+      "death": [
+        {
+          "root_translate_x": -0.0
+        },
+        {
+          "root": 16.0,
+          "spine": -5.6,
+          "head": -4.48,
+          "upper_arm.L": 8.8,
+          "upper_arm.R": -10.4,
+          "thigh.L": 8.0,
+          "thigh.R": -5.12,
+          "root_translate_x": -0.00238
+        },
+        {
+          "root": 38.0,
+          "spine": -10.5,
+          "head": -10.64,
+          "upper_arm.L": 20.9,
+          "upper_arm.R": -24.7,
+          "thigh.L": 19.0,
+          "thigh.R": -12.16,
+          "root_translate_x": -0.00954
+        },
+        {
+          "root": 62.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.02146
+        },
+        {
+          "root": 79.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.03816
+        },
+        {
+          "root": 88.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.05962
+        }
+      ]
+    },
+    "threeviews": [
+      "export/art_r21_threeview_raw/hero_line_mender/front.png",
+      "export/art_r21_threeview_raw/hero_line_mender/side.png",
+      "export/art_r21_threeview_raw/hero_line_mender/back.png"
+    ],
+    "rigged_glb": "export/art_r21_rigged/hero_line_mender_rigged.glb",
+    "rigged_bytes": 2451592
+  },
+  {
+    "source": "assets/rodin/hero_orbit_guard.glb",
+    "vertices": 24907,
+    "polygons": 23332,
+    "bbox_extent": [
+      0.94552,
+      1.64532,
+      1.45699
+    ],
+    "height": 1.45699,
+    "art_id": "orbit_guard",
+    "runtime_id": "hero_orbit_guard",
+    "binding": {
+      "method": "manual_nearest_bone_segments",
+      "automatic_error": "automatic coverage 0.00%",
+      "coverage": 1.0,
+      "weighted_vertices": 24907,
+      "bone_count": 18,
+      "bones": [
+        "root",
+        "pelvis",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "upper_arm.L",
+        "forearm.L",
+        "hand.L",
+        "upper_arm.R",
+        "forearm.R",
+        "hand.R",
+        "thigh.L",
+        "shin.L",
+        "foot.L",
+        "thigh.R",
+        "shin.R",
+        "foot.R"
+      ]
+    },
+    "frames": 27,
+    "pose_audit": {
+      "idle": [
+        {},
+        {
+          "chest": 2.8,
+          "upper_arm.L": 2.2,
+          "upper_arm.R": -2.2,
+          "head": 1.8
+        },
+        {},
+        {
+          "chest": -2.8,
+          "upper_arm.L": -2.2,
+          "upper_arm.R": 2.2,
+          "head": -1.8
+        }
+      ],
+      "walk": [
+        {},
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {
+          "thigh.L": 10.0,
+          "thigh.R": -10.0,
+          "shin.L": -30.0,
+          "upper_arm.L": -26.0,
+          "upper_arm.R": 26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": -5.0
+        },
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {},
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        },
+        {
+          "thigh.L": -10.0,
+          "thigh.R": 10.0,
+          "shin.R": -30.0,
+          "upper_arm.L": 26.0,
+          "upper_arm.R": -26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": 5.0
+        },
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        }
+      ],
+      "attack": [
+        {
+          "root": -8,
+          "spine": -4.4,
+          "upper_arm.L": 8.36,
+          "upper_arm.R": -8.36,
+          "forearm.L": 28,
+          "forearm.R": 25.2,
+          "thigh.L": 5.76,
+          "thigh.R": -3.36
+        },
+        {
+          "root": -14,
+          "spine": -7.7,
+          "upper_arm.L": 12.76,
+          "upper_arm.R": -12.76,
+          "forearm.L": 45,
+          "forearm.R": 40.5,
+          "thigh.L": 10.08,
+          "thigh.R": -5.88
+        },
+        {
+          "root": 16,
+          "spine": 8.8,
+          "upper_arm.L": -15.84,
+          "upper_arm.R": 15.84,
+          "forearm.L": -52,
+          "forearm.R": -46.8,
+          "thigh.L": -11.52,
+          "thigh.R": 6.72
+        },
+        {
+          "root": 12,
+          "spine": 6.6,
+          "upper_arm.L": -19.36,
+          "upper_arm.R": 19.36,
+          "forearm.L": -65,
+          "forearm.R": -58.5,
+          "thigh.L": -8.64,
+          "thigh.R": 5.04
+        },
+        {
+          "root": 7,
+          "spine": 3.85,
+          "upper_arm.L": -8.36,
+          "upper_arm.R": 8.36,
+          "forearm.L": -28,
+          "forearm.R": -25.2,
+          "thigh.L": -5.04,
+          "thigh.R": 2.94
+        },
+        {
+          "root": 1,
+          "spine": 0.55,
+          "upper_arm.L": -1.98,
+          "upper_arm.R": 1.98,
+          "forearm.L": -7,
+          "forearm.R": -6.3,
+          "thigh.L": -0.72,
+          "thigh.R": 0.42
+        }
+      ],
+      "hurt": [
+        {
+          "root": -4.2,
+          "spine": -12.0,
+          "chest": -6.6,
+          "head": 5.4,
+          "upper_arm.L": -13.8,
+          "upper_arm.R": 13.8
+        },
+        {
+          "root": -8.75,
+          "spine": -25.0,
+          "chest": -13.75,
+          "head": 11.25,
+          "upper_arm.L": -28.75,
+          "upper_arm.R": 28.75
+        },
+        {
+          "root": -5.25,
+          "spine": -15.0,
+          "chest": -8.25,
+          "head": 6.75,
+          "upper_arm.L": -17.25,
+          "upper_arm.R": 17.25
+        }
+      ],
+      "death": [
+        {
+          "root_translate_x": -0.0
+        },
+        {
+          "root": 16.0,
+          "spine": -5.6,
+          "head": -4.48,
+          "upper_arm.L": 8.8,
+          "upper_arm.R": -10.4,
+          "thigh.L": 8.0,
+          "thigh.R": -5.12,
+          "root_translate_x": -0.00364
+        },
+        {
+          "root": 38.0,
+          "spine": -10.5,
+          "head": -10.64,
+          "upper_arm.L": 20.9,
+          "upper_arm.R": -24.7,
+          "thigh.L": 19.0,
+          "thigh.R": -12.16,
+          "root_translate_x": -0.01457
+        },
+        {
+          "root": 62.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.03278
+        },
+        {
+          "root": 79.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.05828
+        },
+        {
+          "root": 88.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.09106
+        }
+      ]
+    },
+    "threeviews": [
+      "export/art_r21_threeview_raw/hero_orbit_guard/front.png",
+      "export/art_r21_threeview_raw/hero_orbit_guard/side.png",
+      "export/art_r21_threeview_raw/hero_orbit_guard/back.png"
+    ],
+    "rigged_glb": "export/art_r21_rigged/hero_orbit_guard_rigged.glb",
+    "rigged_bytes": 2357256
+  },
+  {
+    "source": "assets/rodin/hero_pulse_artificer.glb",
+    "vertices": 27641,
+    "polygons": 23332,
+    "bbox_extent": [
+      0.78488,
+      1.52263,
+      0.95139
+    ],
+    "height": 0.95139,
+    "art_id": "pulse_artificer",
+    "runtime_id": "hero_pulse_artificer",
+    "binding": {
+      "method": "manual_nearest_bone_segments",
+      "automatic_error": "automatic coverage 0.00%",
+      "coverage": 1.0,
+      "weighted_vertices": 27641,
+      "bone_count": 18,
+      "bones": [
+        "root",
+        "pelvis",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "upper_arm.L",
+        "forearm.L",
+        "hand.L",
+        "upper_arm.R",
+        "forearm.R",
+        "hand.R",
+        "thigh.L",
+        "shin.L",
+        "foot.L",
+        "thigh.R",
+        "shin.R",
+        "foot.R"
+      ]
+    },
+    "frames": 27,
+    "pose_audit": {
+      "idle": [
+        {},
+        {
+          "chest": 2.8,
+          "upper_arm.L": 2.2,
+          "upper_arm.R": -2.2,
+          "head": 1.8
+        },
+        {},
+        {
+          "chest": -2.8,
+          "upper_arm.L": -2.2,
+          "upper_arm.R": 2.2,
+          "head": -1.8
+        }
+      ],
+      "walk": [
+        {},
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {
+          "thigh.L": 10.0,
+          "thigh.R": -10.0,
+          "shin.L": -30.0,
+          "upper_arm.L": -26.0,
+          "upper_arm.R": 26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": -5.0
+        },
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {},
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        },
+        {
+          "thigh.L": -10.0,
+          "thigh.R": 10.0,
+          "shin.R": -30.0,
+          "upper_arm.L": 26.0,
+          "upper_arm.R": -26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": 5.0
+        },
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        }
+      ],
+      "attack": [
+        {
+          "root": -8,
+          "spine": -4.4,
+          "upper_arm.L": 8.36,
+          "upper_arm.R": -8.36,
+          "forearm.L": 28,
+          "forearm.R": 25.2,
+          "thigh.L": 5.76,
+          "thigh.R": -3.36
+        },
+        {
+          "root": -14,
+          "spine": -7.7,
+          "upper_arm.L": 12.76,
+          "upper_arm.R": -12.76,
+          "forearm.L": 45,
+          "forearm.R": 40.5,
+          "thigh.L": 10.08,
+          "thigh.R": -5.88
+        },
+        {
+          "root": 16,
+          "spine": 8.8,
+          "upper_arm.L": -15.84,
+          "upper_arm.R": 15.84,
+          "forearm.L": -52,
+          "forearm.R": -46.8,
+          "thigh.L": -11.52,
+          "thigh.R": 6.72
+        },
+        {
+          "root": 12,
+          "spine": 6.6,
+          "upper_arm.L": -19.36,
+          "upper_arm.R": 19.36,
+          "forearm.L": -65,
+          "forearm.R": -58.5,
+          "thigh.L": -8.64,
+          "thigh.R": 5.04
+        },
+        {
+          "root": 7,
+          "spine": 3.85,
+          "upper_arm.L": -8.36,
+          "upper_arm.R": 8.36,
+          "forearm.L": -28,
+          "forearm.R": -25.2,
+          "thigh.L": -5.04,
+          "thigh.R": 2.94
+        },
+        {
+          "root": 1,
+          "spine": 0.55,
+          "upper_arm.L": -1.98,
+          "upper_arm.R": 1.98,
+          "forearm.L": -7,
+          "forearm.R": -6.3,
+          "thigh.L": -0.72,
+          "thigh.R": 0.42
+        }
+      ],
+      "hurt": [
+        {
+          "root": -4.2,
+          "spine": -12.0,
+          "chest": -6.6,
+          "head": 5.4,
+          "upper_arm.L": -13.8,
+          "upper_arm.R": 13.8
+        },
+        {
+          "root": -8.75,
+          "spine": -25.0,
+          "chest": -13.75,
+          "head": 11.25,
+          "upper_arm.L": -28.75,
+          "upper_arm.R": 28.75
+        },
+        {
+          "root": -5.25,
+          "spine": -15.0,
+          "chest": -8.25,
+          "head": 6.75,
+          "upper_arm.L": -17.25,
+          "upper_arm.R": 17.25
+        }
+      ],
+      "death": [
+        {
+          "root_translate_x": -0.0
+        },
+        {
+          "root": 16.0,
+          "spine": -5.6,
+          "head": -4.48,
+          "upper_arm.L": 8.8,
+          "upper_arm.R": -10.4,
+          "thigh.L": 8.0,
+          "thigh.R": -5.12,
+          "root_translate_x": -0.00238
+        },
+        {
+          "root": 38.0,
+          "spine": -10.5,
+          "head": -10.64,
+          "upper_arm.L": 20.9,
+          "upper_arm.R": -24.7,
+          "thigh.L": 19.0,
+          "thigh.R": -12.16,
+          "root_translate_x": -0.00951
+        },
+        {
+          "root": 62.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.02141
+        },
+        {
+          "root": 79.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.03806
+        },
+        {
+          "root": 88.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.05946
+        }
+      ]
+    },
+    "threeviews": [
+      "export/art_r21_threeview_raw/hero_pulse_artificer/front.png",
+      "export/art_r21_threeview_raw/hero_pulse_artificer/side.png",
+      "export/art_r21_threeview_raw/hero_pulse_artificer/back.png"
+    ],
+    "rigged_glb": "export/art_r21_rigged/hero_pulse_artificer_rigged.glb",
+    "rigged_bytes": 2708260
+  },
+  {
+    "source": "assets/rodin/hero_rift_shepherd.glb",
+    "vertices": 25432,
+    "polygons": 23332,
+    "bbox_extent": [
+      0.94314,
+      1.89347,
+      1.45027
+    ],
+    "height": 1.45027,
+    "art_id": "rift_shepherd",
+    "runtime_id": "hero_shepherd",
+    "binding": {
+      "method": "manual_nearest_bone_segments",
+      "automatic_error": "automatic coverage 0.00%",
+      "coverage": 1.0,
+      "weighted_vertices": 25432,
+      "bone_count": 18,
+      "bones": [
+        "root",
+        "pelvis",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "upper_arm.L",
+        "forearm.L",
+        "hand.L",
+        "upper_arm.R",
+        "forearm.R",
+        "hand.R",
+        "thigh.L",
+        "shin.L",
+        "foot.L",
+        "thigh.R",
+        "shin.R",
+        "foot.R"
+      ]
+    },
+    "frames": 27,
+    "pose_audit": {
+      "idle": [
+        {},
+        {
+          "chest": 2.8,
+          "upper_arm.L": 2.2,
+          "upper_arm.R": -2.2,
+          "head": 1.8
+        },
+        {},
+        {
+          "chest": -2.8,
+          "upper_arm.L": -2.2,
+          "upper_arm.R": 2.2,
+          "head": -1.8
+        }
+      ],
+      "walk": [
+        {},
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {
+          "thigh.L": 10.0,
+          "thigh.R": -10.0,
+          "shin.L": -30.0,
+          "upper_arm.L": -26.0,
+          "upper_arm.R": 26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": -5.0
+        },
+        {
+          "thigh.L": 7.071,
+          "thigh.R": -7.071,
+          "shin.L": -21.213,
+          "upper_arm.L": -18.385,
+          "upper_arm.R": 18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": -3.536
+        },
+        {},
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        },
+        {
+          "thigh.L": -10.0,
+          "thigh.R": 10.0,
+          "shin.R": -30.0,
+          "upper_arm.L": 26.0,
+          "upper_arm.R": -26.0,
+          "forearm.L": -12.0,
+          "forearm.R": -12.0,
+          "chest": 5.0
+        },
+        {
+          "thigh.L": -7.071,
+          "thigh.R": 7.071,
+          "shin.R": -21.213,
+          "upper_arm.L": 18.385,
+          "upper_arm.R": -18.385,
+          "forearm.L": -8.485,
+          "forearm.R": -8.485,
+          "chest": 3.536
+        }
+      ],
+      "attack": [
+        {
+          "root": -8,
+          "spine": -4.4,
+          "upper_arm.L": 8.36,
+          "upper_arm.R": -8.36,
+          "forearm.L": 28,
+          "forearm.R": 25.2,
+          "thigh.L": 5.76,
+          "thigh.R": -3.36
+        },
+        {
+          "root": -14,
+          "spine": -7.7,
+          "upper_arm.L": 12.76,
+          "upper_arm.R": -12.76,
+          "forearm.L": 45,
+          "forearm.R": 40.5,
+          "thigh.L": 10.08,
+          "thigh.R": -5.88
+        },
+        {
+          "root": 16,
+          "spine": 8.8,
+          "upper_arm.L": -15.84,
+          "upper_arm.R": 15.84,
+          "forearm.L": -52,
+          "forearm.R": -46.8,
+          "thigh.L": -11.52,
+          "thigh.R": 6.72
+        },
+        {
+          "root": 12,
+          "spine": 6.6,
+          "upper_arm.L": -19.36,
+          "upper_arm.R": 19.36,
+          "forearm.L": -65,
+          "forearm.R": -58.5,
+          "thigh.L": -8.64,
+          "thigh.R": 5.04
+        },
+        {
+          "root": 7,
+          "spine": 3.85,
+          "upper_arm.L": -8.36,
+          "upper_arm.R": 8.36,
+          "forearm.L": -28,
+          "forearm.R": -25.2,
+          "thigh.L": -5.04,
+          "thigh.R": 2.94
+        },
+        {
+          "root": 1,
+          "spine": 0.55,
+          "upper_arm.L": -1.98,
+          "upper_arm.R": 1.98,
+          "forearm.L": -7,
+          "forearm.R": -6.3,
+          "thigh.L": -0.72,
+          "thigh.R": 0.42
+        }
+      ],
+      "hurt": [
+        {
+          "root": -4.2,
+          "spine": -12.0,
+          "chest": -6.6,
+          "head": 5.4,
+          "upper_arm.L": -13.8,
+          "upper_arm.R": 13.8
+        },
+        {
+          "root": -8.75,
+          "spine": -25.0,
+          "chest": -13.75,
+          "head": 11.25,
+          "upper_arm.L": -28.75,
+          "upper_arm.R": 28.75
+        },
+        {
+          "root": -5.25,
+          "spine": -15.0,
+          "chest": -8.25,
+          "head": 6.75,
+          "upper_arm.L": -17.25,
+          "upper_arm.R": 17.25
+        }
+      ],
+      "death": [
+        {
+          "root_translate_x": -0.0
+        },
+        {
+          "root": 16.0,
+          "spine": -5.6,
+          "head": -4.48,
+          "upper_arm.L": 8.8,
+          "upper_arm.R": -10.4,
+          "thigh.L": 8.0,
+          "thigh.R": -5.12,
+          "root_translate_x": -0.00363
+        },
+        {
+          "root": 38.0,
+          "spine": -10.5,
+          "head": -10.64,
+          "upper_arm.L": 20.9,
+          "upper_arm.R": -24.7,
+          "thigh.L": 19.0,
+          "thigh.R": -12.16,
+          "root_translate_x": -0.0145
+        },
+        {
+          "root": 62.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.03263
+        },
+        {
+          "root": 79.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.05801
+        },
+        {
+          "root": 88.0,
+          "spine": -10.5,
+          "head": -12.6,
+          "upper_arm.L": 31.9,
+          "upper_arm.R": -37.7,
+          "thigh.L": 24.0,
+          "thigh.R": -15.36,
+          "root_translate_x": -0.09064
+        }
+      ]
+    },
+    "threeviews": [
+      "export/art_r21_threeview_raw/hero_shepherd/front.png",
+      "export/art_r21_threeview_raw/hero_shepherd/side.png",
+      "export/art_r21_threeview_raw/hero_shepherd/back.png"
+    ],
+    "rigged_glb": "export/art_r21_rigged/hero_shepherd_rigged.glb",
+    "rigged_bytes": 2448916
+  }
+]
