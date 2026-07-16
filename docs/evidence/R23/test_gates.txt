@@ -1,0 +1,35 @@
+R23_GATE_SUMMARY
+
+version=0.17.0-r23
+godot=4.7.stable.official.5b4e0cb0f
+
+dead_assets_removed:
+- assets/sprites/hero_guardian.png
+- assets/sprites/hero_guardian.png.import
+- assets/sprites/hero_scout.png
+- assets/sprites/hero_scout.png.import
+- assets/sprites/_atlas_all.png
+- assets/sprites/_atlas_all.png.import
+
+dead_asset_runtime_reference_scan=0
+dead_asset_export_log_scan=0
+dead_asset_pck_binary_scan=0
+
+pck_before_bytes=6570852
+pck_after_bytes=5713152
+pck_delta_bytes=-857700
+
+R14RegressionTest=PASS exit=0 evidence=docs/evidence/R23/r14_regression.txt marker=R14_REGRESSION_PASS
+TrueAnimationRegressionTest=PASS exit=0 evidence=docs/evidence/R23/true_animation.txt marker=TRUE_ANIMATION_REGRESSION_PASS
+SquadSmokeTest=PASS exit=0 evidence=docs/evidence/R23/squad_smoke.txt marker=WEAPON_SMOKE_PASS
+WeaponSmokeTest=PASS exit=0 evidence=docs/evidence/R23/weapon_smoke.txt marker=WEAPON_SMOKE_PASS
+WebExport=PASS exit=0 evidence=docs/evidence/R23/web_export.txt
+
+secret_scan_tooling:
+- gitleaks=not_installed
+- trufflehog=not_installed
+- git-secrets=not_installed
+- detect-secrets=not_installed
+secret_scan_regex_scope=repo_text_excluding_export_tools_asset_sources_git_godot_binary_globs
+secret_scan_regex_matches=0
+

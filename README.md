@@ -7,7 +7,7 @@
 
 Crackveil Vanguard 是一款以小隊編成為核心的 2D survivors roguelite。帶領裂隙先鋒進入每局隨機抽選的異變戰場，在自動武器火網中招募英雄、組合羈絆、選擇進化，撐過不斷加壓的敵潮。
 
-目前版本：**0.17.0-r22**（與 `project.godot` 一致）
+目前版本：**0.17.0-r23**（與 `project.godot` 一致）
 
 ## 線上遊玩
 
@@ -94,9 +94,14 @@ python tools/build_font_subset.py
 ```powershell
 & $godot --headless --fixed-fps 60 --path . res://scenes/debug/R14RegressionTest.tscn
 & $godot --headless --fixed-fps 60 --path . res://scenes/debug/TrueAnimationRegressionTest.tscn
+& $godot --headless --fixed-fps 60 --path . res://scenes/debug/PoolContractTest.tscn
+& $godot --headless --fixed-fps 60 --path . res://scenes/debug/GameplayCapTest.tscn
+& $godot --headless --fixed-fps 60 --path . res://scenes/debug/SquadSmokeTest.tscn
+& $godot --headless --fixed-fps 60 --path . res://scenes/debug/WeaponSmokeTest.tscn
+& $godot --headless --fixed-fps 60 --path . res://scenes/debug/EnemyArtRegressionTest.tscn
 ```
 
-成功時分別輸出 `R14_REGRESSION_PASS` 與 `TRUE_ANIMATION_REGRESSION_PASS`，並以 exit code 0 結束。
+R14 與 TrueAnimation 是核心回歸門檻；其餘場景覆蓋 pool、cap、小隊、武器與敵人美術契約。成功時各場景以 exit code 0 結束，並輸出對應 `*_PASS` 標記。
 
 ## Web 匯出
 
