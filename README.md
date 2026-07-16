@@ -7,7 +7,7 @@
 
 Crackveil Vanguard 是一款以小隊編成為核心的 2D survivors roguelite。帶領裂隙先鋒穿越三種異變戰場，在自動武器火網中招募英雄、組合羈絆、選擇進化，撐過不斷加壓的敵潮。
 
-目前版本：**0.15.0-r20**（與 `project.godot` 一致）
+目前版本：**0.15.1-r20.1**（與 `project.godot` 一致）
 
 ## 線上遊玩
 
@@ -28,9 +28,9 @@ Web 版不需安裝。首次載入需下載 WebAssembly 與遊戲資源，行動
 
 ## 畫面
 
-![R20 裂隙虛空實機戰鬥](docs/evidence/art_r20/web_battle_r20.png)
+![R20.1 裂隙虛空實機戰鬥](docs/evidence/art_r20_1/web_battle_r20_1.png)
 
-![R16 與 R20 十位英雄 idle／walk／attack 對照](docs/evidence/art_r20/before_after/all_heroes_r16_vs_r20.png)
+![R20 與 R20.1 十位英雄 native 64px 色彩對照](docs/evidence/art_r20_1/before_after/all_heroes_r20_vs_r20_1.png)
 
 ![逐幀待機、行走、攻擊、受傷與死亡姿勢](docs/hero10_true_animation_proof.png)
 

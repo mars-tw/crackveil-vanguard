@@ -1,4 +1,4 @@
-"""Blender 5.1 headless art builder for Crackveil Vanguard R20.
+"""Blender 5.1 headless art builder for Crackveil Vanguard R20.1.
 
 Every atlas frame is assembled from separately articulated body parts.  The
 Godot physics root and collider never enter this Blender scene.  Run with:
@@ -144,6 +144,33 @@ SURFACE_RESPONSE = {
     "lens": (0.24, 0.18),
 }
 
+# Standard preserves the authored hue separation, while these modest,
+# surface-specific boosts keep pale cloth, skin, and metal readable after the
+# final 64px downsample.  They affect only baked vertex color, never geometry.
+SURFACE_SATURATION_RESPONSE = {
+    "skin": 1.12,
+    "cloth": 1.28,
+    "leather": 1.32,
+    "hair": 1.28,
+    "metal": 1.25,
+    "lens": 1.18,
+}
+
+
+def _boost_saturation(
+    color: tuple[float, float, float, float],
+    factor: float,
+) -> tuple[float, float, float, float]:
+    """Increase linear-RGB chroma around luminance without changing value."""
+    red, green, blue, alpha = color
+    luma = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+    return (
+        max(0.0, min(1.0, luma + (red - luma) * factor)),
+        max(0.0, min(1.0, luma + (green - luma) * factor)),
+        max(0.0, min(1.0, luma + (blue - luma) * factor)),
+        alpha,
+    )
+
 
 def _gradient_swatches(color: tuple[float, float, float, float]) -> tuple[tuple[float, ...], tuple[float, ...]]:
     """Build warm top and cool lower swatches without crushing value range."""
@@ -215,6 +242,12 @@ def material(
         mat["cv_surface"] = surface
         mat["cv_gradient_top"] = top
         mat["cv_gradient_bottom"] = bottom
+        saturation_boost = SURFACE_SATURATION_RESPONSE.get(surface, 1.0)
+        # This mint secondary is intentionally pale in the R20 model.  At
+        # 64px it was the only large color block still falling below S=0.15.
+        if name.startswith("hero_line_mender_secondary"):
+            saturation_boost *= 1.75
+        mat["cv_saturation_boost"] = saturation_boost
     if name not in MATERIAL_INDEX:
         MATERIAL_INDEX[name] = len(MATERIALS)
         MATERIALS.append(mat)
@@ -232,9 +265,10 @@ def append_geometry(vertices: tuple[Vector, ...] | list[Vector], faces: tuple[tu
     for vertex in vertices:
         factor = (vertex.z - z_min) / z_span
         # Keep both ends inside the authored mid-tone range so outline and
-        # highlight remain the only extreme values after AgX conversion.
+        # highlight remain the only extreme values after display conversion.
         factor = 0.10 + factor * 0.90
         shade = tuple(bottom[channel] * (1.0 - factor) + top[channel] * factor for channel in range(4))
+        shade = _boost_saturation(shade, float(mat.get("cv_saturation_boost", 1.0)))
         MESH_VERTEX_SHADES.append(shade)
     material_index = MATERIAL_INDEX[mat.name]
     for face in faces:
@@ -910,17 +944,13 @@ def configure_scene(rows: int) -> None:
     scene.render.filepath = str(OUTPUT)
     scene.render.use_file_extension = True
     scene.render.filter_size = 0.62
-    scene.view_settings.view_transform = "AgX"
-    for neutral_look in ("AgX - Base Contrast", "None"):
-        try:
-            scene.view_settings.look = neutral_look
-            break
-        except TypeError:
-            continue
-    # Storm R8's +1.25 EV was authored for 384-512px portraits.  At 64px the
-    # same value clips palette separation, so R20 calibrates to +0.85 EV while
-    # retaining the identical AgX Base / warm-key / cool-fill response.
-    scene.view_settings.exposure = 0.85
+    scene.view_settings.view_transform = "Standard"
+    scene.view_settings.look = "None"
+    # R20's 6.98 total sun energy plus AgX/+0.85 EV pushed 64px mid-tones into
+    # highlight desaturation.  R20.1 uses Standard for palette fidelity,
+    # reduces the four-light total to 2.43, then restores display brightness
+    # with exposure after the colored surfaces have separated.
+    scene.view_settings.exposure = 1.30
     scene.view_settings.gamma = 1.0
 
     camera_data = bpy.data.cameras.new("AtlasCamera")
@@ -936,11 +966,11 @@ def configure_scene(rows: int) -> None:
     world = bpy.data.worlds.new("AtlasWorld") if bpy.data.worlds.get("AtlasWorld") is None else bpy.data.worlds["AtlasWorld"]
     world.use_nodes = True
     world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.070, 0.095, 0.15, 1.0)
-    world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.46
+    world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.18
     scene.world = world
 
     key_data = bpy.data.lights.new("AtlasKey", type="SUN")
-    key_data.energy = 2.85
+    key_data.energy = 1.10
     key_data.angle = math.radians(24.0)
     key_data.color = (1.0, 0.72, 0.46)
     key = bpy.data.objects.new("AtlasKey", key_data)
@@ -948,7 +978,7 @@ def configure_scene(rows: int) -> None:
     key.rotation_euler = (math.radians(32.0), math.radians(-18.0), math.radians(-38.0))
 
     fill_data = bpy.data.lights.new("AtlasFill", type="SUN")
-    fill_data.energy = 1.25
+    fill_data.energy = 0.38
     fill_data.angle = math.radians(30.0)
     fill_data.color = (0.32, 0.62, 0.90)
     fill = bpy.data.objects.new("AtlasFill", fill_data)
@@ -956,7 +986,7 @@ def configure_scene(rows: int) -> None:
     fill.rotation_euler = (math.radians(48.0), math.radians(18.0), math.radians(42.0))
 
     rim_data = bpy.data.lights.new("AtlasRim", type="SUN")
-    rim_data.energy = 2.20
+    rim_data.energy = 0.75
     rim_data.angle = math.radians(16.0)
     rim_data.color = (0.30, 0.72, 1.0)
     rim = bpy.data.objects.new("AtlasRim", rim_data)
@@ -964,7 +994,7 @@ def configure_scene(rows: int) -> None:
     rim.rotation_euler = (math.radians(-42.0), math.radians(35.0), math.radians(145.0))
 
     bounce_data = bpy.data.lights.new("AtlasBounce", type="SUN")
-    bounce_data.energy = 0.68
+    bounce_data.energy = 0.20
     bounce_data.angle = math.radians(38.0)
     bounce_data.color = (0.58, 0.72, 0.78)
     bounce = bpy.data.objects.new("AtlasBounce", bounce_data)

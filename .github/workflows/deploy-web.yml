@@ -95,7 +95,7 @@ jobs:
           set -euo pipefail
           python3 tools/build_font_subset.py
 
-      - name: Check sprite luminance
+      - name: Check sprite luminance and saturation
         shell: bash
         run: |
           set -euo pipefail
