@@ -9,6 +9,7 @@ const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 var background: Node2D
 var ui_layer: CanvasLayer
 var root: Control
+var key_art: TextureRect
 var rift_accent: TextureRect
 var logo_glow_label: Label
 var logo_label: Label
@@ -82,6 +83,15 @@ func _build_ui() -> void:
 	root.name = "Root"
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	ui_layer.add_child(root)
+
+	key_art = TextureRect.new()
+	key_art.name = "R24KeyArt"
+	key_art.texture = SPRITE_LOADER.get_texture("res://assets/art/r24/keyart/menu_keyart_desktop.png")
+	key_art.set_anchors_preset(Control.PRESET_FULL_RECT)
+	key_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	key_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	key_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(key_art)
 
 	rift_accent = TextureRect.new()
 	rift_accent.name = "PortraitRiftAccent"
@@ -624,8 +634,18 @@ func _apply_responsive_layout() -> void:
 	var button_height := (56.0 if mobile and not portrait else touch_height) if mobile else 48.0
 	var button_gap := 12.0 if mobile and portrait else 8.0 if mobile else 10.0
 	var ui_multiplier := _ui_scale_multiplier()
+	if key_art != null:
+		# Select the safe crop by aspect ratio as well as device class.  A narrow
+		# desktop browser must not fall back to the 16:9 composition simply because
+		# its pointer is fine-grained.
+		var key_art_path := "res://assets/art/r24/keyart/menu_keyart_mobile_safe.png" if portrait else "res://assets/art/r24/keyart/menu_keyart_desktop.png"
+		key_art.texture = SPRITE_LOADER.get_texture(key_art_path)
+		key_art.set_offsets_preset(Control.PRESET_FULL_RECT)
+		key_art.modulate = Color(1.0, 1.0, 1.0, 0.96 if mobile and portrait else 1.0)
 	if rift_accent != null:
-		rift_accent.visible = mobile and portrait
+		# R24 key art contains its own identity-locked rift; the legacy procedural
+		# accent stays hidden so it cannot double the focal point on portrait crop.
+		rift_accent.visible = false
 		rift_accent.position = Vector2(-22.0, 74.0)
 		rift_accent.size = Vector2(viewport_size.x + 44.0, min(690.0, viewport_size.y - 96.0))
 		rift_accent.modulate = Color(0.26, 0.84, 1.0, 0.24)

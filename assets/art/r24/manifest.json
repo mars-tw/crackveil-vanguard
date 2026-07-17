@@ -1,0 +1,224 @@
+{
+  "schema_version": "cv-r24-runtime-manifest.v1",
+  "release": "cv R24",
+  "game_version": "0.17.1-r24",
+  "date": "2026-07-17",
+  "model_slugs": {
+    "generation_requested": "gpt-image-2",
+    "generation_actual": "gpt-image-2",
+    "generation_provenance": "gpt-image/2.0",
+    "background_removal": "local-pilot-matte-decontamination-v1",
+    "calibration_pipeline": "wave0-calibration-v1.1"
+  },
+  "prompt_record": "docs/evidence/R24_art/prompts/R24_PROMPTS.md",
+  "manual_retouch_log": "docs/evidence/R24_art/manual_retouch_log.json",
+  "gate_summary": "docs/evidence/R24_art/art_gate_summary.json",
+  "all_art_gates_pass": true,
+  "cutouts": [
+    {
+      "id": "weapon_main_blade_a",
+      "kind": "weapon",
+      "prompt_id": "R24-P01",
+      "manual_edge_minutes_actual": 1.2,
+      "source_opaque": "docs/evidence/R24_art/generated_sources/weapon_main_blade_a_opaque.png",
+      "normalized_opaque": "docs/evidence/R24_art/masters_opaque/weapon_main_blade_a.png",
+      "matte_mask": "docs/evidence/R24_art/masks/weapon_main_blade_a_mask.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/weapon_main_blade_a.png",
+      "runtime_rgba": "assets/art/r24/weapons/weapon_main_blade_a.png",
+      "manual_qa": "docs/evidence/R24_art/manual_qa/weapon_main_blade_a_edge_review.png",
+      "sha256": {
+        "source_opaque": "984cb28d77db72598825e56f1b9483d054f99a416e634d6241885e001e874e21",
+        "normalized_opaque": "37d51a996e6961a34c6957b8efdb11055505a93eeb76961ed4a654d41e563437",
+        "matte_mask": "08939dd99fe4479240aa6478e4e80504cf140e450c3153885184674cdddf9448",
+        "master_rgba": "038b869f506f1480926b2e554583e90ce5e9c365579c306f3847cbddbcebcfbe",
+        "runtime_rgba": "0902871e163e9b65589f751089b25b020373119f71ca8cde760018fab38dddff"
+      }
+    },
+    {
+      "id": "weapon_main_blade_b",
+      "kind": "weapon",
+      "prompt_id": "R24-P02",
+      "manual_edge_minutes_actual": 1.2,
+      "source_opaque": "docs/evidence/R24_art/generated_sources/weapon_main_blade_b_opaque.png",
+      "normalized_opaque": "docs/evidence/R24_art/masters_opaque/weapon_main_blade_b.png",
+      "matte_mask": "docs/evidence/R24_art/masks/weapon_main_blade_b_mask.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/weapon_main_blade_b.png",
+      "runtime_rgba": "assets/art/r24/weapons/weapon_main_blade_b.png",
+      "manual_qa": "docs/evidence/R24_art/manual_qa/weapon_main_blade_b_edge_review.png",
+      "sha256": {
+        "source_opaque": "24a31fa4f7237a8761a47da5b10a2ba8e466fb37ac34859bb3ce4c6c2ed9ff25",
+        "normalized_opaque": "85055eafb951c7eb140d120fc5c1839ea22e19a0bcbfe639932e6ce015d3d688",
+        "matte_mask": "0e425f26586b21abc917d5bf1630520c1d614cf336a4c4f11130ced031f3d6ec",
+        "master_rgba": "36b8973a91e83a15cd890ba8e2106813fe804f559b5a0bf88257d4999a52ca7d",
+        "runtime_rgba": "ab64b14609c16980c942c174f07b01850988879edf6a8c19e6fb2c415d503e42"
+      }
+    },
+    {
+      "id": "weapon_far_blade_outbound",
+      "kind": "weapon",
+      "prompt_id": "R24-P03",
+      "manual_edge_minutes_actual": 1.4,
+      "source_opaque": "docs/evidence/R24_art/generated_sources/weapon_far_blade_outbound_opaque.png",
+      "normalized_opaque": "docs/evidence/R24_art/masters_opaque/weapon_far_blade_outbound.png",
+      "matte_mask": "docs/evidence/R24_art/masks/weapon_far_blade_outbound_mask.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/weapon_far_blade_outbound.png",
+      "runtime_rgba": "assets/art/r24/weapons/weapon_far_blade_outbound.png",
+      "manual_qa": "docs/evidence/R24_art/manual_qa/weapon_far_blade_outbound_edge_review.png",
+      "sha256": {
+        "source_opaque": "cb75f0767f78ce7128b2385fe126e88b5b0565678d2a8cf2da74d01cea260b2a",
+        "normalized_opaque": "46cd32ddbb7704685021a7a94fe96146fe663d44f748d0991139a959671a70a1",
+        "matte_mask": "a1be246958b9a9062e0fbb42a3a53433b913357786a61378347f33e6985fedd4",
+        "master_rgba": "93e29997275c2ba147969eb1eb6b201d1ad0abf46f9cbb5a6178b1bdec195728",
+        "runtime_rgba": "d476658fea37255aecb9a1f6a33dc9cd1a54baad12da4f7e7d308502b87f4d9f"
+      }
+    },
+    {
+      "id": "weapon_far_blade_return",
+      "kind": "weapon",
+      "prompt_id": "R24-P04",
+      "manual_edge_minutes_actual": 1.4,
+      "source_opaque": "docs/evidence/R24_art/generated_sources/weapon_far_blade_return_opaque.png",
+      "normalized_opaque": "docs/evidence/R24_art/masters_opaque/weapon_far_blade_return.png",
+      "matte_mask": "docs/evidence/R24_art/masks/weapon_far_blade_return_mask.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/weapon_far_blade_return.png",
+      "runtime_rgba": "assets/art/r24/weapons/weapon_far_blade_return.png",
+      "manual_qa": "docs/evidence/R24_art/manual_qa/weapon_far_blade_return_edge_review.png",
+      "sha256": {
+        "source_opaque": "536dfac346771a02207c2463985d9b2894f15ce4f3a06f71cbb18ddf61e28ec5",
+        "normalized_opaque": "4e3f69a35fb0f9796ea16914aa7769ad7522af4150fb48e571357ed9b34effe0",
+        "matte_mask": "0a19624807caee9aa82a1806bc267b44eeb7c025c1fbd1c384cbadb172e5d66b",
+        "master_rgba": "470aa09c40bec025b3784d3048c0d535e447544a16ab07f9ee3ecd20d364c2d3",
+        "runtime_rgba": "5298d9b68d9650534c2a547b0b4831deb7724279c195b54382b8b9a594611bbc"
+      }
+    },
+    {
+      "id": "vfx_orbit_impact",
+      "kind": "vfx",
+      "prompt_id": "R24-P05",
+      "manual_edge_minutes_actual": 2.5,
+      "source_opaque": "docs/evidence/R24_art/generated_sources/vfx_orbit_impact_opaque.png",
+      "normalized_opaque": "docs/evidence/R24_art/masters_opaque/vfx_orbit_impact.png",
+      "matte_mask": "docs/evidence/R24_art/masks/vfx_orbit_impact_mask.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/vfx_orbit_impact.png",
+      "runtime_rgba": "assets/art/r24/vfx/vfx_orbit_impact.png",
+      "manual_qa": "docs/evidence/R24_art/manual_qa/vfx_orbit_impact_edge_review.png",
+      "sha256": {
+        "source_opaque": "bda64652cc79f0029bf5eb1fec2470215190020b6619de05eb8cea3ab5138384",
+        "normalized_opaque": "d01f7ee17ff9b6454b5f62fcd17ad3ed86091838f53c659d47d152436fde5aa6",
+        "matte_mask": "bf73998209dc787ead03f0b8076d4a4e01ac68c83ad6e9156a5c74201c935cc5",
+        "master_rgba": "20e93a4fa9fba8aee25dab7b7c0e741cb54d1a5629a997f07b67d0d46d3cae48",
+        "runtime_rgba": "7de7b06b9bdb3843f633211ed97f2671ab760e5ab933cb8974c9f4fd3f9f9547"
+      }
+    },
+    {
+      "id": "vfx_boomerang_impact",
+      "kind": "vfx",
+      "prompt_id": "R24-P06",
+      "manual_edge_minutes_actual": 2.1,
+      "source_opaque": "docs/evidence/R24_art/generated_sources/vfx_boomerang_impact_opaque.png",
+      "normalized_opaque": "docs/evidence/R24_art/masters_opaque/vfx_boomerang_impact.png",
+      "matte_mask": "docs/evidence/R24_art/masks/vfx_boomerang_impact_mask.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/vfx_boomerang_impact.png",
+      "runtime_rgba": "assets/art/r24/vfx/vfx_boomerang_impact.png",
+      "manual_qa": "docs/evidence/R24_art/manual_qa/vfx_boomerang_impact_edge_review.png",
+      "sha256": {
+        "source_opaque": "3b805659b5eeccfc4b4e169576d7206fc232a826c327deb1ad090674c1b4610b",
+        "normalized_opaque": "12fc4fc06b6402359acf9daae2e24c548636b790206882f0a16444cb7c1ae1a8",
+        "matte_mask": "bf45d8c278618d6050222529ef4b6a8a4464be9411723deb7b319289b7e536a6",
+        "master_rgba": "d99039d7d92e2ef206f38b038047a5c17e005845fb2d997d30d9e06a4914073f",
+        "runtime_rgba": "e256bd6e13221d81a97871b081adaabf8e9d59343ca8d022cdd6bbf75e8e86fb"
+      }
+    },
+    {
+      "id": "vfx_orbit_trail",
+      "kind": "vfx",
+      "prompt_id": "R24-P07",
+      "manual_edge_minutes_actual": 3.0,
+      "source_opaque": "docs/evidence/R24_art/generated_sources/vfx_orbit_trail_opaque.png",
+      "normalized_opaque": "docs/evidence/R24_art/masters_opaque/vfx_orbit_trail.png",
+      "matte_mask": "docs/evidence/R24_art/masks/vfx_orbit_trail_mask.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/vfx_orbit_trail.png",
+      "runtime_rgba": "assets/art/r24/vfx/vfx_orbit_trail.png",
+      "manual_qa": "docs/evidence/R24_art/manual_qa/vfx_orbit_trail_edge_review.png",
+      "sha256": {
+        "source_opaque": "b5f81a48f75843948ce52f3d399b8028e513e4bb826ace309f1b21f237a0e979",
+        "normalized_opaque": "9693d04640ed166a354ab4781a545a8887a02dc906efb765bf9ff719e45a3b0d",
+        "matte_mask": "24da1a23ff3448436923d0457794b878f2f0282b95c9704352cb6875ef4d4a59",
+        "master_rgba": "c94450ff83bc2424a5c9777448b2471dc19b03707a08e1afb14f4276ecc1a684",
+        "runtime_rgba": "bd1ca831f6b29a44d1792bc20de746921271916f75e227c76271f61cd87968ab"
+      }
+    },
+    {
+      "id": "vfx_boomerang_trail",
+      "kind": "vfx",
+      "prompt_id": "R24-P08",
+      "manual_edge_minutes_actual": 3.0,
+      "source_opaque": "docs/evidence/R24_art/generated_sources/vfx_boomerang_trail_opaque.png",
+      "normalized_opaque": "docs/evidence/R24_art/masters_opaque/vfx_boomerang_trail.png",
+      "matte_mask": "docs/evidence/R24_art/masks/vfx_boomerang_trail_mask.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/vfx_boomerang_trail.png",
+      "runtime_rgba": "assets/art/r24/vfx/vfx_boomerang_trail.png",
+      "manual_qa": "docs/evidence/R24_art/manual_qa/vfx_boomerang_trail_edge_review.png",
+      "sha256": {
+        "source_opaque": "3aad32c279cb0850563e3ef0a1931c5284fe5a7dea896c396521cc18ae1eb6f5",
+        "normalized_opaque": "c43f3921a586910223ff34ad48af82d74ae6734fea76f45a42944098f11a7562",
+        "matte_mask": "c7561300d5c0f467d95af56ee1236b886b0e94143eb957250383ddadf303039c",
+        "master_rgba": "2e8daf58f7f25b2b23054b7ca1b2e04fd8efd857ce6c3e4a0ecbb5304c8b822b",
+        "runtime_rgba": "f3bc8f2ac7ee0a779d327b38a9c2aad1b5562839768ae48927ba52b59f1f71aa"
+      }
+    }
+  ],
+  "keyart": [
+    {
+      "id": "menu_keyart_desktop",
+      "path": "assets/art/r24/keyart/menu_keyart_desktop.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": {
+        "source_opaque": "0024dc5c22cac159ad671a712090bab54c85965a501003dff1839015e6d40086",
+        "runtime_rgb": "6d2540154b6afbbaa089e480ad06674cdad507a11f33436204f0f09416d03113"
+      },
+      "safe_crop": "desktop-left-ui/right-hero",
+      "prompt_id": "R24-K01",
+      "identity_lock_references": [
+        "docs/evidence/art_r21/threeview/hero_captain.png",
+        "docs/evidence/art_r21/threeview/hero_orbit_guard.png",
+        "docs/evidence/art_r21/threeview/hero_rift_sniper.png"
+      ],
+      "source_opaque": "docs/evidence/R24_art/generated_sources/keyart_desktop_opaque.png"
+    },
+    {
+      "id": "menu_keyart_mobile_safe",
+      "path": "assets/art/r24/keyart/menu_keyart_mobile_safe.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": {
+        "source_opaque": "893b0bb312cd8cbdfdea543f310043264393c371bde3588505386600f6f1ee31",
+        "runtime_rgb": "545d62a391039fed7baee44361636d02a9c0dca3e1d944317611d64a620573b5"
+      },
+      "safe_crop": "390x844 centered cover",
+      "crop_evidence": "docs/evidence/R24_art/after/menu_keyart_mobile_390x844_crop.png",
+      "prompt_id": "R24-K02",
+      "identity_lock_references": [
+        "docs/evidence/art_r21/threeview/hero_captain.png",
+        "docs/evidence/art_r21/threeview/hero_orbit_guard.png",
+        "docs/evidence/art_r21/threeview/hero_rift_sniper.png"
+      ],
+      "source_opaque": "docs/evidence/R24_art/generated_sources/keyart_mobile_safe_opaque.png"
+    }
+  ],
+  "integration": {
+    "orbit_blades": "resources/weapons/orbit_blades.tres",
+    "boomerang": "resources/weapons/rift_shield_boomerang.tres",
+    "projectile_rendering": [
+      "scripts/projectiles/orbit_projectile.gd",
+      "scripts/projectiles/projectile.gd",
+      "scripts/vfx/death_burst.gd"
+    ],
+    "main_menu": "scripts/ui/main_menu.gd"
+  }
+}

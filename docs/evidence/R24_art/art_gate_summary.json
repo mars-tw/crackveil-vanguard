@@ -1,0 +1,242 @@
+{
+  "schema_version": "cv-r24-art-gates.v1",
+  "release": "cv R24",
+  "pass": true,
+  "thresholds": {
+    "cutout_brightness": "mean 0.30..0.78 and p99 <= 0.97",
+    "cutout_saturation_palette": "mean HSV saturation >= 0.32 and cold-cyan fraction <= 0.02",
+    "keyart_brightness": "mean 0.025..0.35 and p99 <= 0.90",
+    "keyart_saturation_palette": "mean HSV saturation >= 0.40 and cold-cyan fraction <= 0.03"
+  },
+  "mobile_safe_crop_pass": true,
+  "assets": [
+    {
+      "id": "weapon_main_blade_a",
+      "profile": "cutout",
+      "pass": true,
+      "alpha_master_pass": true,
+      "alpha_runtime_pass": true,
+      "asset_contract_pass": true,
+      "brightness_gate_pass": true,
+      "saturation_palette_gate_pass": true,
+      "metrics": {
+        "path": "assets/art/r24/weapons/weapon_main_blade_a.png",
+        "mode": "RGBA",
+        "size": [
+          256,
+          256
+        ],
+        "mean_luminance": 0.530651,
+        "p99_luminance": 0.954031,
+        "mean_saturation": 0.425874,
+        "low_saturation_fraction": 0.149532,
+        "cold_cyan_fraction": 0.0
+      }
+    },
+    {
+      "id": "weapon_main_blade_b",
+      "profile": "cutout",
+      "pass": true,
+      "alpha_master_pass": true,
+      "alpha_runtime_pass": true,
+      "asset_contract_pass": true,
+      "brightness_gate_pass": true,
+      "saturation_palette_gate_pass": true,
+      "metrics": {
+        "path": "assets/art/r24/weapons/weapon_main_blade_b.png",
+        "mode": "RGBA",
+        "size": [
+          256,
+          256
+        ],
+        "mean_luminance": 0.567761,
+        "p99_luminance": 0.943542,
+        "mean_saturation": 0.426388,
+        "low_saturation_fraction": 0.223955,
+        "cold_cyan_fraction": 0.0
+      }
+    },
+    {
+      "id": "weapon_far_blade_outbound",
+      "profile": "cutout",
+      "pass": true,
+      "alpha_master_pass": true,
+      "alpha_runtime_pass": true,
+      "asset_contract_pass": true,
+      "brightness_gate_pass": true,
+      "saturation_palette_gate_pass": true,
+      "metrics": {
+        "path": "assets/art/r24/weapons/weapon_far_blade_outbound.png",
+        "mode": "RGBA",
+        "size": [
+          256,
+          256
+        ],
+        "mean_luminance": 0.496534,
+        "p99_luminance": 0.936327,
+        "mean_saturation": 0.416374,
+        "low_saturation_fraction": 0.208549,
+        "cold_cyan_fraction": 0.0
+      }
+    },
+    {
+      "id": "weapon_far_blade_return",
+      "profile": "cutout",
+      "pass": true,
+      "alpha_master_pass": true,
+      "alpha_runtime_pass": true,
+      "asset_contract_pass": true,
+      "brightness_gate_pass": true,
+      "saturation_palette_gate_pass": true,
+      "metrics": {
+        "path": "assets/art/r24/weapons/weapon_far_blade_return.png",
+        "mode": "RGBA",
+        "size": [
+          256,
+          256
+        ],
+        "mean_luminance": 0.507051,
+        "p99_luminance": 0.932675,
+        "mean_saturation": 0.458687,
+        "low_saturation_fraction": 0.172679,
+        "cold_cyan_fraction": 0.0
+      }
+    },
+    {
+      "id": "vfx_orbit_impact",
+      "profile": "cutout",
+      "pass": true,
+      "alpha_master_pass": true,
+      "alpha_runtime_pass": true,
+      "asset_contract_pass": true,
+      "brightness_gate_pass": true,
+      "saturation_palette_gate_pass": true,
+      "metrics": {
+        "path": "assets/art/r24/vfx/vfx_orbit_impact.png",
+        "mode": "RGBA",
+        "size": [
+          256,
+          256
+        ],
+        "mean_luminance": 0.618093,
+        "p99_luminance": 0.956863,
+        "mean_saturation": 0.466363,
+        "low_saturation_fraction": 0.247512,
+        "cold_cyan_fraction": 0.0
+      }
+    },
+    {
+      "id": "vfx_boomerang_impact",
+      "profile": "cutout",
+      "pass": true,
+      "alpha_master_pass": true,
+      "alpha_runtime_pass": true,
+      "asset_contract_pass": true,
+      "brightness_gate_pass": true,
+      "saturation_palette_gate_pass": true,
+      "metrics": {
+        "path": "assets/art/r24/vfx/vfx_boomerang_impact.png",
+        "mode": "RGBA",
+        "size": [
+          256,
+          256
+        ],
+        "mean_luminance": 0.60467,
+        "p99_luminance": 0.953182,
+        "mean_saturation": 0.443377,
+        "low_saturation_fraction": 0.194081,
+        "cold_cyan_fraction": 0.0
+      }
+    },
+    {
+      "id": "vfx_orbit_trail",
+      "profile": "cutout",
+      "pass": true,
+      "alpha_master_pass": true,
+      "alpha_runtime_pass": true,
+      "asset_contract_pass": true,
+      "brightness_gate_pass": true,
+      "saturation_palette_gate_pass": true,
+      "metrics": {
+        "path": "assets/art/r24/vfx/vfx_orbit_trail.png",
+        "mode": "RGBA",
+        "size": [
+          256,
+          256
+        ],
+        "mean_luminance": 0.712054,
+        "p99_luminance": 0.956863,
+        "mean_saturation": 0.361956,
+        "low_saturation_fraction": 0.522982,
+        "cold_cyan_fraction": 0.0
+      }
+    },
+    {
+      "id": "vfx_boomerang_trail",
+      "profile": "cutout",
+      "pass": true,
+      "alpha_master_pass": true,
+      "alpha_runtime_pass": true,
+      "asset_contract_pass": true,
+      "brightness_gate_pass": true,
+      "saturation_palette_gate_pass": true,
+      "metrics": {
+        "path": "assets/art/r24/vfx/vfx_boomerang_trail.png",
+        "mode": "RGBA",
+        "size": [
+          256,
+          256
+        ],
+        "mean_luminance": 0.572694,
+        "p99_luminance": 0.955164,
+        "mean_saturation": 0.521052,
+        "low_saturation_fraction": 0.302539,
+        "cold_cyan_fraction": 0.0
+      }
+    },
+    {
+      "id": "menu_keyart_desktop",
+      "profile": "opaque_rgb_keyart",
+      "pass": true,
+      "alpha_gate": "not_applicable: §8.1 requires pure backgrounds as RGB PNG/WebP",
+      "asset_contract_pass": true,
+      "brightness_gate_pass": true,
+      "saturation_palette_gate_pass": true,
+      "metrics": {
+        "path": "assets/art/r24/keyart/menu_keyart_desktop.png",
+        "mode": "RGB",
+        "size": [
+          1920,
+          1080
+        ],
+        "mean_luminance": 0.121482,
+        "p99_luminance": 0.654766,
+        "mean_saturation": 0.685299,
+        "low_saturation_fraction": 0.008793,
+        "cold_cyan_fraction": 0.015432
+      }
+    },
+    {
+      "id": "menu_keyart_mobile_safe",
+      "profile": "opaque_rgb_keyart",
+      "pass": true,
+      "alpha_gate": "not_applicable: §8.1 requires pure backgrounds as RGB PNG/WebP",
+      "asset_contract_pass": true,
+      "brightness_gate_pass": true,
+      "saturation_palette_gate_pass": true,
+      "metrics": {
+        "path": "assets/art/r24/keyart/menu_keyart_mobile_safe.png",
+        "mode": "RGB",
+        "size": [
+          1920,
+          1080
+        ],
+        "mean_luminance": 0.04157,
+        "p99_luminance": 0.214776,
+        "mean_saturation": 0.720419,
+        "low_saturation_fraction": 0.003484,
+        "cold_cyan_fraction": 0.001339
+      }
+    }
+  ]
+}

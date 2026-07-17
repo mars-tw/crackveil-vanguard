@@ -1,0 +1,104 @@
+{
+  "schema_version": "visual-refresh-r24-matte.v1",
+  "release": "cv R24",
+  "date": "2026-07-17",
+  "generation": {
+    "requested_model_slug": "gpt-image-2",
+    "actual_model_slug": "gpt-image-2",
+    "interface": "built-in image_gen",
+    "provenance_slug": "gpt-image/2.0",
+    "snapshot": null,
+    "pipeline_slug": "wave0-calibration-v1.1",
+    "matte_model_slug": "local-pilot-matte-decontamination-v1"
+  },
+  "samples": [
+    {
+      "id": "weapon_main_blade_a",
+      "category": "weapon_cutout",
+      "label": "環刃主刃 A",
+      "source_path": "generated_sources/weapon_main_blade_a_opaque.png",
+      "expected_size": [1024, 1024],
+      "gate_profile": "cutout",
+      "matte": "#ff00ff",
+      "forbid_matte_complement": true,
+      "prompt_id": "R24-P01"
+    },
+    {
+      "id": "weapon_main_blade_b",
+      "category": "weapon_cutout",
+      "label": "環刃主刃 B",
+      "source_path": "generated_sources/weapon_main_blade_b_opaque.png",
+      "expected_size": [1024, 1024],
+      "gate_profile": "cutout",
+      "matte": "#ff00ff",
+      "forbid_matte_complement": true,
+      "prompt_id": "R24-P02"
+    },
+    {
+      "id": "weapon_far_blade_outbound",
+      "category": "weapon_cutout",
+      "label": "迴旋刃遠刃出程",
+      "source_path": "generated_sources/weapon_far_blade_outbound_opaque.png",
+      "expected_size": [1024, 1024],
+      "gate_profile": "cutout",
+      "matte": "#ff00ff",
+      "forbid_matte_complement": true,
+      "prompt_id": "R24-P03"
+    },
+    {
+      "id": "weapon_far_blade_return",
+      "category": "weapon_cutout",
+      "label": "迴旋刃遠刃返程",
+      "source_path": "generated_sources/weapon_far_blade_return_opaque.png",
+      "expected_size": [1024, 1024],
+      "gate_profile": "cutout",
+      "matte": "#ff00ff",
+      "forbid_matte_complement": true,
+      "prompt_id": "R24-P04"
+    },
+    {
+      "id": "vfx_orbit_impact",
+      "category": "cutout_vfx",
+      "label": "環刃 impact",
+      "source_path": "generated_sources/vfx_orbit_impact_opaque.png",
+      "expected_size": [1024, 1024],
+      "gate_profile": "cutout",
+      "matte": "#ff00ff",
+      "forbid_matte_complement": true,
+      "prompt_id": "R24-P05"
+    },
+    {
+      "id": "vfx_boomerang_impact",
+      "category": "cutout_vfx",
+      "label": "迴旋刃 impact",
+      "source_path": "generated_sources/vfx_boomerang_impact_opaque.png",
+      "expected_size": [1024, 1024],
+      "gate_profile": "cutout",
+      "matte": "#ff00ff",
+      "forbid_matte_complement": true,
+      "prompt_id": "R24-P06"
+    },
+    {
+      "id": "vfx_orbit_trail",
+      "category": "cutout_vfx",
+      "label": "環刃 trail",
+      "source_path": "generated_sources/vfx_orbit_trail_opaque.png",
+      "expected_size": [1024, 1024],
+      "gate_profile": "cutout",
+      "matte": "#ff00ff",
+      "forbid_matte_complement": true,
+      "prompt_id": "R24-P07"
+    },
+    {
+      "id": "vfx_boomerang_trail",
+      "category": "cutout_vfx",
+      "label": "迴旋刃 trail",
+      "source_path": "generated_sources/vfx_boomerang_trail_opaque.png",
+      "expected_size": [1024, 1024],
+      "gate_profile": "cutout",
+      "matte": "#ff00ff",
+      "forbid_matte_complement": true,
+      "prompt_id": "R24-P08"
+    }
+  ]
+}

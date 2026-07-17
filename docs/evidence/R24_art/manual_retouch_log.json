@@ -1,0 +1,19 @@
+{
+  "schema_version": "cv-r24-manual-retouch.v1",
+  "release": "cv R24",
+  "date": "2026-07-17",
+  "method": "Wave 0 matte pipeline, per-asset complement-fringe repaint/alpha contraction, four-background visual review",
+  "timing_basis": "active operator minutes measured during the 07:39:58–07:56:32 +08:00 retouch/review window; shared tool execution time excluded and shared tuning time allocated to the affected asset",
+  "assets": [
+    {"id": "weapon_main_blade_a", "class": "weapon_cutout", "actual_minutes": 1.2},
+    {"id": "weapon_main_blade_b", "class": "weapon_cutout", "actual_minutes": 1.2},
+    {"id": "weapon_far_blade_outbound", "class": "weapon_cutout", "actual_minutes": 1.4},
+    {"id": "weapon_far_blade_return", "class": "weapon_cutout", "actual_minutes": 1.4},
+    {"id": "vfx_orbit_impact", "class": "vfx_hard", "actual_minutes": 2.5},
+    {"id": "vfx_boomerang_impact", "class": "vfx_hard", "actual_minutes": 2.1},
+    {"id": "vfx_orbit_trail", "class": "vfx_hard", "actual_minutes": 3.0},
+    {"id": "vfx_boomerang_trail", "class": "vfx_hard", "actual_minutes": 3.0}
+  ],
+  "total_actual_minutes": 15.8,
+  "budget_note": "The Wave 0 hard-VFX allowance was 10–25 minutes per image. Actual time was lower because this batch used hard-core/no-fog prompts and the calibrated repeatable edge-repair pass; the observed time is reported without padding."
+}

@@ -16,6 +16,9 @@ var max_range: float = 560.0
 var radius: float = 4.5
 var projectile_color: Color = Color(0.7, 0.96, 1.0)
 var sprite_path: String = ""
+var return_sprite_path: String = ""
+var trail_sprite_path: String = ""
+var impact_sprite_path: String = ""
 var sprite_scale: float = 1.0
 var pierce_left: int = 0
 var traveled: float = 0.0
@@ -60,6 +63,7 @@ var evolved_visual: bool = false
 var sprite: Sprite2D = null
 var glow: Sprite2D = null
 var trail: Line2D = null
+var trail_art: Sprite2D = null
 var muzzle_flash: Sprite2D = null
 
 
@@ -112,6 +116,9 @@ func pool_on_release() -> void:
 	boomerang_return_ratio = 0.52
 	boomerang_catch_radius = 30.0
 	boomerang_returning = false
+	return_sprite_path = ""
+	trail_sprite_path = ""
+	impact_sprite_path = ""
 	boomerang_rebound_level = 0
 	evo_razor_bulwark_level = 0
 	missile_guidance_level = 0
@@ -133,6 +140,8 @@ func pool_on_release() -> void:
 		glow.position = Vector2.ZERO
 	if trail != null:
 		trail.visible = false
+	if trail_art != null:
+		trail_art.visible = false
 	if trail_registered:
 		active_trail_nodes = max(0, active_trail_nodes - 1)
 		trail_registered = false
@@ -159,6 +168,9 @@ func setup(world_position: Vector2, projectile_direction: Vector2, projectile_st
 	radius = float(projectile_stats.get("projectile_radius", radius))
 	projectile_color = projectile_stats.get("color", projectile_color)
 	sprite_path = str(projectile_stats.get("projectile_sprite_path", "res://assets/sprites/proj_bullet.png"))
+	return_sprite_path = str(projectile_stats.get("projectile_return_sprite_path", ""))
+	trail_sprite_path = str(projectile_stats.get("trail_sprite_path", ""))
+	impact_sprite_path = str(projectile_stats.get("impact_sprite_path", ""))
 	sprite_scale = float(projectile_stats.get("sprite_scale", 1.0))
 	pierce_left = int(projectile_stats.get("pierce", pierce_left))
 	target_group = str(projectile_stats.get("target_group", "enemies"))
@@ -257,6 +269,7 @@ func _tick_homing(delta: float) -> void:
 func _tick_boomerang(delta: float) -> void:
 	if not boomerang_returning and traveled >= max_range * clamp(boomerang_return_ratio, 0.2, 0.82):
 		boomerang_returning = true
+		_apply_sprite()
 		if boomerang_rebound_level > 0 or evo_razor_bulwark_level > 0:
 			hit_bodies.clear()
 	if not boomerang_returning or source == null or not is_instance_valid(source):
@@ -323,6 +336,10 @@ func _apply_enemy_hit_feedback(body: Node) -> void:
 	if motion_mode == "homing":
 		EntityFactory.spawn_death_burst(global_position, Color(1.0, 0.48, 0.22), 0.82, "burst")
 		EntityFactory.spawn_death_burst(global_position, Color(0.48, 0.44, 0.38), 0.9, "smoke_ring")
+	elif source_weapon_id == "rift_shield_boomerang" and impact_sprite_path != "":
+		# The generated impact is emitted only after the active Area2D hit succeeds;
+		# visual feedback never advances the damage timing.
+		EntityFactory.spawn_death_burst(global_position, Color.WHITE, 0.82, "r24_weapon_impact", impact_sprite_path)
 
 
 func _play_boomerang_catch_feedback() -> void:
@@ -442,6 +459,15 @@ func _ensure_sprite() -> void:
 	trail.z_index = -3
 	trail.visible = false
 
+	trail_art = get_node_or_null("TrailArt") as Sprite2D
+	if trail_art == null:
+		trail_art = Sprite2D.new()
+		trail_art.name = "TrailArt"
+		add_child(trail_art)
+	trail_art.centered = true
+	trail_art.z_index = -1
+	trail_art.visible = false
+
 	muzzle_flash = get_node_or_null("MuzzleFlash") as Sprite2D
 	if muzzle_flash == null:
 		muzzle_flash = Sprite2D.new()
@@ -462,12 +488,13 @@ func _ensure_sprite() -> void:
 
 func _apply_sprite() -> void:
 	_ensure_sprite()
-	var texture: Texture2D = SPRITE_LOADER.get_texture(sprite_path)
+	var display_sprite_path := return_sprite_path if boomerang_returning and return_sprite_path != "" else sprite_path
+	var texture: Texture2D = SPRITE_LOADER.get_texture(display_sprite_path)
 	if texture == null:
 		sprite.visible = false
 		return
 	sprite.visible = true
-	sprite.modulate = _projectile_display_color()
+	sprite.modulate = Color.WHITE if source_weapon_id == "rift_shield_boomerang" else _projectile_display_color()
 	var growth := _visual_growth(0.035, 0.14)
 	SPRITE_LOADER.fit_sprite(sprite, texture, radius * 4.0 * growth, sprite_scale)
 	match source_weapon_id:
@@ -479,7 +506,26 @@ func _apply_sprite() -> void:
 			sprite.scale *= 1.16
 		"rift_shield_boomerang":
 			sprite.scale *= 1.12
+	_configure_r24_trail_art()
 	_configure_projectile_vfx()
+
+
+func _configure_r24_trail_art() -> void:
+	if trail_art == null:
+		return
+	if source_weapon_id != "rift_shield_boomerang" or trail_sprite_path == "":
+		trail_art.visible = false
+		return
+	var texture := SPRITE_LOADER.get_texture(trail_sprite_path)
+	if texture == null:
+		trail_art.visible = false
+		return
+	trail_art.visible = true
+	trail_art.texture = texture
+	trail_art.modulate = Color(1.0, 1.0, 1.0, 0.72)
+	trail_art.flip_h = false
+	trail_art.position = Vector2(-radius * 1.5, 0.0)
+	ART_RESOURCES.fit_sprite(trail_art, texture, radius * 7.2)
 
 
 func _configure_projectile_vfx() -> void:

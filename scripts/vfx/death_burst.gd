@@ -8,6 +8,7 @@ const SMOKE_LIFETIME_MULTIPLIER := 1.42
 var burst_color: Color = Color(1.0, 0.4, 0.4)
 var burst_scale: float = 1.0
 var burst_style: String = "burst"
+var custom_texture_path: String = ""
 var particle_multiplier: float = 1.0
 var composite_layers: int = 4
 var age: float = 0.0
@@ -59,6 +60,7 @@ func pool_on_release() -> void:
 		smoke.visible = false
 	burst_scale = 1.0
 	burst_style = "burst"
+	custom_texture_path = ""
 	particle_multiplier = 1.0
 	composite_layers = 4
 	main_lifetime = 0.32
@@ -72,15 +74,17 @@ func pool_reset(args: Dictionary) -> void:
 		float(args.get("scale", 1.0)),
 		str(args.get("style", "burst")),
 		float(args.get("particle_multiplier", 1.0)),
-		int(args.get("composite_layers", 4))
+		int(args.get("composite_layers", 4)),
+		str(args.get("custom_texture_path", ""))
 	)
 
 
-func setup(world_position: Vector2, color_value: Color, scale_value: float = 1.0, style_value: String = "burst", particle_multiplier_value: float = 1.0, layer_count: int = 4) -> void:
+func setup(world_position: Vector2, color_value: Color, scale_value: float = 1.0, style_value: String = "burst", particle_multiplier_value: float = 1.0, layer_count: int = 4, custom_texture: String = "") -> void:
 	global_position = world_position
 	burst_color = color_value
 	burst_scale = clamp(scale_value, 0.75, 3.4)
 	burst_style = style_value
+	custom_texture_path = custom_texture
 	particle_multiplier = clamp(particle_multiplier_value, 0.2, 1.0)
 	composite_layers = clamp(layer_count, 2, 4)
 	main_lifetime = _lifetime_for_style()
@@ -199,6 +203,24 @@ func _apply_sprite() -> void:
 		sprite.visible = false
 		return
 	sprite.visible = true
+	if custom_texture_path != "":
+		# R24 weapon impacts are already authored as complete hard-core effects.
+		# Disable generic secondary layers so they do not reintroduce cold bloom,
+		# change the silhouette, or obscure the exact active-impact art.
+		if glow != null:
+			glow.visible = false
+		if core_flash != null:
+			core_flash.visible = false
+		if impact_ring != null:
+			impact_ring.visible = false
+		if smoke != null:
+			smoke.visible = false
+		if column != null:
+			column.visible = false
+		if shockwave != null:
+			shockwave.visible = false
+		_update_sprite_state()
+		return
 	if glow != null:
 		glow.visible = composite_layers >= 3
 	var suffix := "ember.png" if _uses_ember_palette() else "cyan.png"
@@ -229,7 +251,8 @@ func _update_sprite_state() -> void:
 	var base_size := _sprite_base_size(t)
 	if texture != null:
 		SPRITE_LOADER.fit_sprite(sprite, texture, base_size * burst_scale, 1.0)
-	sprite.rotation += 1.8 * get_process_delta_time()
+	if custom_texture_path == "":
+		sprite.rotation += 1.8 * get_process_delta_time()
 	var sprite_alpha := (1.0 - smoothstep(0.3, 1.0, t)) * _sprite_alpha_multiplier()
 	sprite.modulate = Color(1.0, 1.0, 1.0, sprite_alpha)
 	if glow != null and glow.visible:
@@ -266,7 +289,7 @@ func _update_sprite_state() -> void:
 
 
 func _emit_particles() -> void:
-	if particles == null or composite_layers < 4:
+	if particles == null or composite_layers < 4 or custom_texture_path != "":
 		if particles != null:
 			particles.emitting = false
 		return
@@ -346,6 +369,8 @@ func _scaled_particle_amount(base_amount: float, min_amount: float, max_amount: 
 
 
 func _lifetime_for_style() -> float:
+	if custom_texture_path != "":
+		return 0.22
 	match burst_style:
 		"spark":
 			return 0.24
@@ -366,6 +391,8 @@ func _lifetime_for_style() -> float:
 
 
 func _sprite_base_size(t: float) -> float:
+	if custom_texture_path != "":
+		return 72.0 + 12.0 * t
 	match burst_style:
 		"spark":
 			return 32.0 + 20.0 * t
@@ -430,6 +457,8 @@ func _circle_points(circle_radius: float, segments: int) -> PackedVector2Array:
 
 
 func _style_texture_path() -> String:
+	if custom_texture_path != "":
+		return custom_texture_path
 	var suffix := "ember.png" if _uses_ember_palette() else "cyan.png"
 	match burst_style:
 		"spark":

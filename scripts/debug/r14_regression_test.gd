@@ -14,6 +14,8 @@ const GAME_OVER_SCRIPT := preload("res://scripts/ui/game_over_screen.gd")
 const SQUAD_MANAGER_SCRIPT := preload("res://scripts/heroes/squad_manager.gd")
 const HERO10_DATA := preload("res://resources/heroes/rift_shepherd.tres")
 const HERO10_WEAPON := preload("res://resources/weapons/rift_constructs.tres")
+const R24_ORBIT_WEAPON := preload("res://resources/weapons/orbit_blades.tres")
+const R24_BOOMERANG_WEAPON := preload("res://resources/weapons/rift_shield_boomerang.tres")
 const DEFAULT_SQUAD := preload("res://resources/squads/default_squad.tres")
 const WEAPON_CATALOG := preload("res://resources/weapons/weapon_catalog.tres")
 
@@ -118,10 +120,30 @@ func _test_hero10_content_and_bonds() -> bool:
 		_fail("bond did not deactivate immediately on member death")
 		return false
 	manager.queue_free()
-	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.17.0-r23":
-		_fail("R23 release version drifted")
+	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.17.1-r24":
+		_fail("R24 release version drifted")
 		return false
+	if not is_equal_approx(float(R24_ORBIT_WEAPON.get("sprite_scale")), 1.09) or not is_equal_approx(float(R24_BOOMERANG_WEAPON.get("sprite_scale")), 1.18):
+		_fail("R24 orbit/boomerang readability scale drifted")
+		return false
+	var r24_paths := [
+		str(R24_ORBIT_WEAPON.get("orbit_sprite_path")),
+		str(R24_ORBIT_WEAPON.get("orbit_alternate_sprite_path")),
+		str(R24_ORBIT_WEAPON.get("trail_sprite_path")),
+		str(R24_ORBIT_WEAPON.get("impact_sprite_path")),
+		str(R24_BOOMERANG_WEAPON.get("projectile_sprite_path")),
+		str(R24_BOOMERANG_WEAPON.get("projectile_return_sprite_path")),
+		str(R24_BOOMERANG_WEAPON.get("trail_sprite_path")),
+		str(R24_BOOMERANG_WEAPON.get("impact_sprite_path")),
+		"res://assets/art/r24/keyart/menu_keyart_desktop.png",
+		"res://assets/art/r24/keyart/menu_keyart_mobile_safe.png",
+	]
+	for path in r24_paths:
+		if not ResourceLoader.exists(path):
+			_fail("R24 visual asset missing: " + path)
+			return false
 	print("R14_HERO10 roster=10/9 weapons=11 construct_cap=6 targets=2 bonds=4 impact=frame2")
+	print("R24_VISUAL_ASSET_CONTRACT cutouts=8 keyart=2 orbit_scale=1.09 boomerang_scale=1.18")
 	return true
 
 

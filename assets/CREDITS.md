@@ -127,6 +127,14 @@ silhouette is enlarged with the existing violet volume glow. Rebuild with
 
 ## Other project assets
 
+- `assets/art/r24/` contains project-produced cv R24 weapon/VFX cutouts and
+  menu key art.  The recorded generation slug is `gpt-image-2`
+  (`gpt-image/2.0` PNG provenance); the local background-removal slug is
+  `local-pilot-matte-decontamination-v1`.  These are not third-party assets.
+- The R24 key art uses the approved R21 Hyper3D Rodin -> Blender renders for
+  Captain, Orbit Guard, and Rift Sniper as identity-only references.  The R21
+  runtime character atlas and animation contracts were not changed.
+
 - The Traditional Chinese UI font is a subset of
   [Noto Sans CJK TC Regular](https://github.com/notofonts/noto-cjk/tree/Sans2.004/Sans/OTF/TraditionalChinese),
   licensed under SIL Open Font License 1.1. See `assets/fonts/OFL.txt`.

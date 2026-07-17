@@ -18,6 +18,13 @@ Crackveil Vanguard 的程式與專案自有內容採根目錄 [MIT License](LICE
 | Top Down Tentacle Creature（Sean Noonan） | [OpenGameArt](https://opengameart.org/content/top-down-tentacle-creature) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | `enemy_tank.png`、`enemy_boss.png` 與對應逐幀姿勢的來源。 |
 | Animated Walk-Cycle Monsters + Hijabi from Eman Quest（Night Blade） | [OpenGameArt](https://opengameart.org/content/animated-walk-cycle-monsters-hijabi-from-eman-quest) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | `enemy_fast.png`、三種 elite 敵人與對應逐幀姿勢的來源。 |
 
+## R24 專案自製視覺資產
+
+- `assets/art/r24/` 的 8 張環刃／迴旋刃與 VFX、2 張主選單 key art 為本專案 cv R24 製作內容，不是第三方素材。
+- 原畫模型 slug：`gpt-image-2`（內建介面 PNG provenance：`gpt-image/2.0`）；去背／修邊 slug：`local-pilot-matte-decontamination-v1`，依 `VISUAL_REFRESH_PILOT` 的 Wave 0 校準管線執行。
+- Key art 的 Captain、Orbit Guard、Rift Sniper 身份只以 R21 Hyper3D Rodin → Blender 三視圖渲染為 reference；模型僅負責氣氛與構圖，未替換 R21 角色 atlas 或動畫契約。
+- 完整 prompt、opaque master、mask、RGBA master、hash、alpha／亮度／飽和 gate 與實機證據保存在 `docs/evidence/R24_art/`。
+
 ## 衍生與重建說明
 
 - 字型由 `python tools/build_font_subset.py` 重建；上游版本與字集 commit 都固定於腳本。

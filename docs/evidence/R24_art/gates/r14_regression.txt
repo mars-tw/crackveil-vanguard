@@ -1,0 +1,31 @@
+﻿Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+R19_FORMFACTOR phone=touch tablet=touch coarse_desktop=touch fine_desktop=desktop fail_closed=true seed_max=400
+BONDS_ACTIVE=["bond_ember_pulse", "bond_void_rail", "bond_guard_echo", "bond_captain_shepherd"]
+BONDS_ACTIVE=["bond_ember_pulse", "bond_void_rail", "bond_captain_shepherd"]
+R14_HERO10 roster=10/9 weapons=11 construct_cap=6 targets=2 bonds=4 impact=frame2
+R24_VISUAL_ASSET_CONTRACT cutouts=8 keyart=2 orbit_scale=1.09 boomerang_scale=1.18
+R14_MOBILE_UI portrait_scale=1.96 landscape_scale=1.86 font=39 touch=76.0
+R22_CONTROLS_SPEC_BEGIN desktop_full (1920.0, 1080.0) touch=false
+R22_CONTROLS_SPEC_PASS desktop_full
+R22_CONTROLS_SPEC_BEGIN desktop_mid (1440.0, 780.0) touch=false
+R22_CONTROLS_SPEC_PASS desktop_mid
+R22_CONTROLS_SPEC_BEGIN short_laptop (1366.0, 600.0) touch=false
+R22_CONTROLS_SPEC_PASS short_laptop
+R22_CONTROLS_SPEC_BEGIN short_desktop (1280.0, 640.0) touch=false
+R22_CONTROLS_SPEC_PASS short_desktop
+R22_CONTROLS_SPEC_BEGIN phone_portrait (390.0, 844.0) touch=true
+R22_CONTROLS_SPEC_PASS phone_portrait
+R22_CONTROLS_SPEC_BEGIN phone_landscape (844.0, 390.0) touch=true
+R22_CONTROLS_SPEC_PASS phone_landscape
+R22_CONTROLS_SPEC_BEGIN tablet_touch (1024.0, 768.0) touch=true
+R22_CONTROLS_SPEC_PASS tablet_touch
+R22_CONTROLS_SPEC_BEGIN coarse_short_laptop (1366.0, 600.0) touch=true
+R22_CONTROLS_SPEC_PASS coarse_short_laptop
+R22_CONTROLS_REACHABILITY viewports=1920x1080,1440x780,1366x600,1280x640,390x844_touch,844x390_touch,1024x768_touch,1366x600_coarse rect=inside hit>=44 no_overlap canvas=internal
+R14_CAMERA desktop=1.28 mobile=1.56 threat=1.36
+R14_BACKGROUND interval=88.98 sig_len=41
+SCREENSHOT_BEAUTY_ON hud_hidden=true vfx_layers=4
+SCREENSHOT_BEAUTY_OFF hud_hidden=false vfx_layers=adaptive
+R14_PRESS_CAPTURE phase_banner=heat_red adaptive_layers=3 beauty_layers=4
+R14_REGRESSION_PASS

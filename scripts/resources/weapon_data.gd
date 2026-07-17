@@ -16,7 +16,11 @@ extends Resource
 
 @export_group("視覺")
 @export_file("*.png") var projectile_sprite_path: String = ""
+@export_file("*.png") var projectile_return_sprite_path: String = ""
 @export_file("*.png") var orbit_sprite_path: String = ""
+@export_file("*.png") var orbit_alternate_sprite_path: String = ""
+@export_file("*.png") var trail_sprite_path: String = ""
+@export_file("*.png") var impact_sprite_path: String = ""
 @export_file("*.png") var explosion_sprite_path: String = ""
 @export_file("*.png") var lightning_sprite_path: String = ""
 @export var sprite_scale: float = 1.0
@@ -392,6 +396,9 @@ func to_projectile_stats() -> Dictionary:
 		"pierce": pierce,
 		"color": color,
 		"projectile_sprite_path": projectile_sprite_path,
+		"projectile_return_sprite_path": projectile_return_sprite_path,
+		"trail_sprite_path": trail_sprite_path,
+		"impact_sprite_path": impact_sprite_path,
 		"sprite_scale": sprite_scale,
 		"target_group": "enemies",
 		"homing_turn_rate": homing_turn_rate,
@@ -436,6 +443,9 @@ func to_effect_stats() -> Dictionary:
 		"effect_lifetime": effect_lifetime,
 		"projectile_sprite_path": projectile_sprite_path,
 		"orbit_sprite_path": orbit_sprite_path,
+		"orbit_alternate_sprite_path": orbit_alternate_sprite_path,
+		"trail_sprite_path": trail_sprite_path,
+		"impact_sprite_path": impact_sprite_path,
 		"explosion_sprite_path": explosion_sprite_path,
 		"lightning_sprite_path": lightning_sprite_path,
 		"sprite_scale": sprite_scale,

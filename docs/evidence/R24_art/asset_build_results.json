@@ -1,0 +1,213 @@
+{
+  "schema_version": "cv-r24-art-build.v1",
+  "release": "cv R24",
+  "cutouts": [
+    {
+      "id": "weapon_main_blade_a",
+      "kind": "weapon",
+      "pipeline_rgba": "docs/evidence/R24_art/rgba/weapon_main_blade_a.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/weapon_main_blade_a.png",
+      "runtime": "assets/art/r24/weapons/weapon_main_blade_a.png",
+      "runtime_size": [
+        256,
+        256
+      ],
+      "manual_qa": "docs/evidence/R24_art/manual_qa/weapon_main_blade_a_edge_review.png",
+      "repair": {
+        "complement_pixels_repainted": 164,
+        "neighbor_fill_iterations": 1,
+        "edge_contract": 4,
+        "alpha_floor": 6
+      },
+      "sha256": {
+        "master_rgba": "038b869f506f1480926b2e554583e90ce5e9c365579c306f3847cbddbcebcfbe",
+        "runtime": "0902871e163e9b65589f751089b25b020373119f71ca8cde760018fab38dddff",
+        "manual_qa": "2f336731d12054e9802dde387cac8e7be6ded309320b86c09497b0e8617c644b"
+      }
+    },
+    {
+      "id": "weapon_main_blade_b",
+      "kind": "weapon",
+      "pipeline_rgba": "docs/evidence/R24_art/rgba/weapon_main_blade_b.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/weapon_main_blade_b.png",
+      "runtime": "assets/art/r24/weapons/weapon_main_blade_b.png",
+      "runtime_size": [
+        256,
+        256
+      ],
+      "manual_qa": "docs/evidence/R24_art/manual_qa/weapon_main_blade_b_edge_review.png",
+      "repair": {
+        "complement_pixels_repainted": 130,
+        "neighbor_fill_iterations": 1,
+        "edge_contract": 4,
+        "alpha_floor": 6
+      },
+      "sha256": {
+        "master_rgba": "36b8973a91e83a15cd890ba8e2106813fe804f559b5a0bf88257d4999a52ca7d",
+        "runtime": "ab64b14609c16980c942c174f07b01850988879edf6a8c19e6fb2c415d503e42",
+        "manual_qa": "3f75512bab635c317c81ccefc90c211637f7e3658b614b151deac4625adce929"
+      }
+    },
+    {
+      "id": "weapon_far_blade_outbound",
+      "kind": "weapon",
+      "pipeline_rgba": "docs/evidence/R24_art/rgba/weapon_far_blade_outbound.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/weapon_far_blade_outbound.png",
+      "runtime": "assets/art/r24/weapons/weapon_far_blade_outbound.png",
+      "runtime_size": [
+        256,
+        256
+      ],
+      "manual_qa": "docs/evidence/R24_art/manual_qa/weapon_far_blade_outbound_edge_review.png",
+      "repair": {
+        "complement_pixels_repainted": 165,
+        "neighbor_fill_iterations": 1,
+        "edge_contract": 5,
+        "alpha_floor": 7
+      },
+      "sha256": {
+        "master_rgba": "93e29997275c2ba147969eb1eb6b201d1ad0abf46f9cbb5a6178b1bdec195728",
+        "runtime": "d476658fea37255aecb9a1f6a33dc9cd1a54baad12da4f7e7d308502b87f4d9f",
+        "manual_qa": "f182fb4ec1bed525907f14c92e450fb7a84a95505d85e3d0f731bea3ca46a9b4"
+      }
+    },
+    {
+      "id": "weapon_far_blade_return",
+      "kind": "weapon",
+      "pipeline_rgba": "docs/evidence/R24_art/rgba/weapon_far_blade_return.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/weapon_far_blade_return.png",
+      "runtime": "assets/art/r24/weapons/weapon_far_blade_return.png",
+      "runtime_size": [
+        256,
+        256
+      ],
+      "manual_qa": "docs/evidence/R24_art/manual_qa/weapon_far_blade_return_edge_review.png",
+      "repair": {
+        "complement_pixels_repainted": 153,
+        "neighbor_fill_iterations": 1,
+        "edge_contract": 5,
+        "alpha_floor": 7
+      },
+      "sha256": {
+        "master_rgba": "470aa09c40bec025b3784d3048c0d535e447544a16ab07f9ee3ecd20d364c2d3",
+        "runtime": "5298d9b68d9650534c2a547b0b4831deb7724279c195b54382b8b9a594611bbc",
+        "manual_qa": "e55623c932aa054c9c8595be75afbbbaad4be49556a9fc96749261df757d0f30"
+      }
+    },
+    {
+      "id": "vfx_orbit_impact",
+      "kind": "vfx",
+      "pipeline_rgba": "docs/evidence/R24_art/rgba/vfx_orbit_impact.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/vfx_orbit_impact.png",
+      "runtime": "assets/art/r24/vfx/vfx_orbit_impact.png",
+      "runtime_size": [
+        256,
+        256
+      ],
+      "manual_qa": "docs/evidence/R24_art/manual_qa/vfx_orbit_impact_edge_review.png",
+      "repair": {
+        "complement_pixels_repainted": 283,
+        "neighbor_fill_iterations": 1,
+        "edge_contract": 8,
+        "alpha_floor": 10
+      },
+      "sha256": {
+        "master_rgba": "20e93a4fa9fba8aee25dab7b7c0e741cb54d1a5629a997f07b67d0d46d3cae48",
+        "runtime": "7de7b06b9bdb3843f633211ed97f2671ab760e5ab933cb8974c9f4fd3f9f9547",
+        "manual_qa": "ddaddece2edd318b4f409f09155b03611a200b73d2c3d0fd748d419ba182dfc3"
+      }
+    },
+    {
+      "id": "vfx_boomerang_impact",
+      "kind": "vfx",
+      "pipeline_rgba": "docs/evidence/R24_art/rgba/vfx_boomerang_impact.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/vfx_boomerang_impact.png",
+      "runtime": "assets/art/r24/vfx/vfx_boomerang_impact.png",
+      "runtime_size": [
+        256,
+        256
+      ],
+      "manual_qa": "docs/evidence/R24_art/manual_qa/vfx_boomerang_impact_edge_review.png",
+      "repair": {
+        "complement_pixels_repainted": 48,
+        "neighbor_fill_iterations": 1,
+        "edge_contract": 7,
+        "alpha_floor": 9
+      },
+      "sha256": {
+        "master_rgba": "d99039d7d92e2ef206f38b038047a5c17e005845fb2d997d30d9e06a4914073f",
+        "runtime": "e256bd6e13221d81a97871b081adaabf8e9d59343ca8d022cdd6bbf75e8e86fb",
+        "manual_qa": "de6a79c56eb02cd89d68a5fc280b480067d85d9b4ce01de68d387357f6e5eed7"
+      }
+    },
+    {
+      "id": "vfx_orbit_trail",
+      "kind": "vfx",
+      "pipeline_rgba": "docs/evidence/R24_art/rgba/vfx_orbit_trail.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/vfx_orbit_trail.png",
+      "runtime": "assets/art/r24/vfx/vfx_orbit_trail.png",
+      "runtime_size": [
+        256,
+        256
+      ],
+      "manual_qa": "docs/evidence/R24_art/manual_qa/vfx_orbit_trail_edge_review.png",
+      "repair": {
+        "complement_pixels_repainted": 235,
+        "neighbor_fill_iterations": 1,
+        "edge_contract": 9,
+        "alpha_floor": 12
+      },
+      "sha256": {
+        "master_rgba": "c94450ff83bc2424a5c9777448b2471dc19b03707a08e1afb14f4276ecc1a684",
+        "runtime": "bd1ca831f6b29a44d1792bc20de746921271916f75e227c76271f61cd87968ab",
+        "manual_qa": "bff842ea40c2891a4e8980cdfe39e3b475d2a3d18b5d9c351a5185d3480d5dc5"
+      }
+    },
+    {
+      "id": "vfx_boomerang_trail",
+      "kind": "vfx",
+      "pipeline_rgba": "docs/evidence/R24_art/rgba/vfx_boomerang_trail.png",
+      "master_rgba": "docs/evidence/R24_art/rgba_master/vfx_boomerang_trail.png",
+      "runtime": "assets/art/r24/vfx/vfx_boomerang_trail.png",
+      "runtime_size": [
+        256,
+        256
+      ],
+      "manual_qa": "docs/evidence/R24_art/manual_qa/vfx_boomerang_trail_edge_review.png",
+      "repair": {
+        "complement_pixels_repainted": 217,
+        "neighbor_fill_iterations": 1,
+        "edge_contract": 9,
+        "alpha_floor": 12
+      },
+      "sha256": {
+        "master_rgba": "2e8daf58f7f25b2b23054b7ca1b2e04fd8efd857ce6c3e4a0ecbb5304c8b822b",
+        "runtime": "f3bc8f2ac7ee0a779d327b38a9c2aad1b5562839768ae48927ba52b59f1f71aa",
+        "manual_qa": "d0bbd6b7ded6569cfb5e4e99a75995cbfa52b37d22e6896734f3793ff7de0d3b"
+      }
+    }
+  ],
+  "keyart": [
+    {
+      "id": "menu_keyart_desktop",
+      "path": "assets/art/r24/keyart/menu_keyart_desktop.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "6d2540154b6afbbaa089e480ad06674cdad507a11f33436204f0f09416d03113",
+      "safe_crop": "desktop-left-ui/right-hero"
+    },
+    {
+      "id": "menu_keyart_mobile_safe",
+      "path": "assets/art/r24/keyart/menu_keyart_mobile_safe.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "545d62a391039fed7baee44361636d02a9c0dca3e1d944317611d64a620573b5",
+      "safe_crop": "390x844 centered cover",
+      "crop_evidence": "docs/evidence/R24_art/after/menu_keyart_mobile_390x844_crop.png"
+    }
+  ]
+}

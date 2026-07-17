@@ -523,7 +523,7 @@ func spawn_combo_text(combo_count: int, world_position: Vector2) -> Node:
 	return spawn_damage_number("COMBO ×%d" % combo_count, world_position, Color(0.72, 1.0, 0.92), 24)
 
 
-func spawn_death_burst(world_position: Vector2, burst_color: Color, burst_scale: float = 1.0, burst_style: String = "burst") -> Node:
+func spawn_death_burst(world_position: Vector2, burst_color: Color, burst_scale: float = 1.0, burst_style: String = "burst", custom_texture_path: String = "") -> Node:
 	var viewport_size := _viewport_size_for_lod()
 	if get_pool_live_count("death_burst") >= MOBILE_TUNING.death_burst_cap(viewport_size, DEATH_BURST_CAP):
 		return null
@@ -536,6 +536,7 @@ func spawn_death_burst(world_position: Vector2, burst_color: Color, burst_scale:
 		"color": burst_color,
 		"scale": burst_scale,
 		"style": burst_style,
+		"custom_texture_path": custom_texture_path,
 		"particle_multiplier": MOBILE_TUNING.lod_particle_multiplier(viewport_size),
 		"composite_layers": get_visual_composite_layer_count(
 			viewport_size,

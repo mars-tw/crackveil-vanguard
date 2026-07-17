@@ -1,0 +1,25 @@
+{
+  "schema_version": "cv-r24-browser-audit.v1",
+  "release": "cv R24",
+  "date": "2026-07-17",
+  "source": "fresh Godot Web export served from localhost with a cache-isolated origin",
+  "desktop": {
+    "viewport": [1920, 1080],
+    "pass": true,
+    "evidence": "docs/evidence/R24_art/after/main_menu_r24_1920x1080.png",
+    "observation": "left menu remains clear; identity-locked squad and rift focal point remain in the right composition"
+  },
+  "mobile_portrait": {
+    "viewport": [390, 844],
+    "pass": true,
+    "evidence": "docs/evidence/R24_art/after/main_menu_r24_390x844.png",
+    "observation": "portrait-safe art is selected by aspect ratio; buttons remain on the dark field and the three hero silhouettes remain visible below the controls"
+  },
+  "weapon_runtime": {
+    "viewport": [1920, 1080],
+    "pass": true,
+    "evidence": "docs/evidence/R24_art/after/weapon_battle_r24_1920x1080.png",
+    "observation": "warm bone/amber alternating orbit blades remain readable against the cold-blue arena and do not cover the physics-root hero silhouettes"
+  },
+  "browser_session_finalized": true
+}

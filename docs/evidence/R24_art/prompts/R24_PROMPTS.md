@@ -1,0 +1,21 @@
+# cv R24 final image prompt record
+
+Generation used the built-in image generator with requested/actual model slug `gpt-image-2` (`gpt-image/2.0`). Cutouts used a solid `#ff00ff` chroma matte and were then processed by `local-pilot-matte-decontamination-v1`. The palette lock for every weapon/VFX prompt was bone white, hot amber/gold, and deep plum; cold cyan/blue was forbidden.
+
+## Cutout prompt set
+
+- **R24-P01 — main orbit blade A:** Square isolated game sprite of one compact crescent orbit blade, asymmetric chipped ivory/bone ceramic cutting edge, dark plum metal spine and small hot-amber energy seams, strong readable silhouette, three-quarter top view, centered with generous margin, solid flat #ff00ff chroma-key background, no cast shadow, no text, no blue or cyan, no fog or particles.
+- **R24-P02 — main orbit blade B:** Matching second compact crescent orbit blade variant for the same weapon family, visibly different notch and reverse-swept tip, ivory/bone edge, dark plum spine, hot-amber seams, three-quarter top view, centered, solid flat #ff00ff background, no shadow/text/blue/cyan/fog.
+- **R24-P03 — far blade outbound:** Isolated thrown boomerang shield-blade, forward attack pose with a broad hooked tip and readable outbound leading edge, ivory ceramic plates, deep-plum metal core, hot-amber energy inset, compact game sprite, centered on solid #ff00ff, no shadow/text/blue/cyan/fog.
+- **R24-P04 — far blade return:** Matching return-flight boomerang shield-blade variant, reversed leading edge and folded inner hook so return direction is immediately readable, same ivory/plum/amber materials, centered on solid #ff00ff, no shadow/text/blue/cyan/fog.
+- **R24-P05 — orbit impact:** Tight hard-core radial hit burst for an orbit blade impact, short ivory shards and hot-amber sparks around a deep-plum core, compact opaque center and crisp finite edge, no broad glow cloud, centered on solid #ff00ff, no text/blue/cyan.
+- **R24-P06 — boomerang impact:** Tight directional slash-impact mark for a returning shield-boomerang, hooked ivory arc with amber contact sparks and a small plum core, compact opaque center, crisp finite edge, centered on solid #ff00ff, no text/blue/cyan/fog.
+- **R24-P07 — orbit trail:** Compact curved orbit-blade trail segment, ivory-to-hot-amber ribbon with a deep-plum inner edge, hard readable center and short tapered ends, no wide transparent haze, centered on solid #ff00ff, no text/blue/cyan.
+- **R24-P08 — boomerang trail:** Compact directional return trail for a shield-boomerang, hooked amber-and-ivory sweep with plum inner accent, hard readable center and two short tapered ends, no wide transparent haze, centered on solid #ff00ff, no text/blue/cyan.
+
+## B-flow key-art prompt set
+
+Identity reference images were the R21 Rodin/Blender renders `docs/evidence/art_r21/threeview/hero_captain.png`, `hero_orbit_guard.png`, and `hero_rift_sniper.png`. The generator was asked to preserve those silhouettes, armor shapes, palette identities, and facial/helmet cues; it supplied only the atmosphere and composition.
+
+- **R24-K01 — desktop safe:** 16:9 cinematic main-menu key art for Crackveil Vanguard. Preserve the exact identity and costume silhouettes of the three supplied R21 Blender hero references. Place the captain, orbit guard, and rift sniper as a cohesive squad in the right 60–65%; reserve the left 34% as dark, low-detail negative space for desktop menu UI. Behind them, a fractured magenta-violet rift and warm amber rim light in a ruined cosmic battlefield, deep plum shadows, no cyan wash, no logos, no text, no invented characters, no costume redesign.
+- **R24-K02 — mobile safe portrait source/edit:** Portrait-oriented companion composition using the same three supplied R21 hero identities. Keep all faces/helmets, torsos, and the rift focal point inside the central vertical safety strip, with clear dark negative space below for mobile menu controls. Match the desktop atmosphere: magenta-violet rift, amber rim light, deep-plum ruin haze, no cyan wash, no logos/text, no extra characters, no costume redesign. The final 1920×1080 mobile-safe export composites this generated portrait strip over a darkened/blurred crop of the generated desktop atmosphere; the center 390×844 cover crop is the acceptance target.

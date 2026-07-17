@@ -1,0 +1,21 @@
+{
+  "schema_version": "cv-r24-release-gates.v1",
+  "release": "cv R24",
+  "version": "0.17.1-r24",
+  "date": "2026-07-17",
+  "pass": true,
+  "gates": {
+    "final_alpha_master": {"pass": true, "count": "8/8", "evidence_glob": "docs/evidence/R24_art/gates/*_manual.json"},
+    "final_alpha_runtime": {"pass": true, "count": "8/8", "evidence_glob": "docs/evidence/R24_art/gates/*_runtime.json"},
+    "brightness_saturation_palette": {"pass": true, "count": "10/10", "evidence": "docs/evidence/R24_art/art_gate_summary.json"},
+    "mobile_safe_crop": {"pass": true, "viewport": "390x844", "evidence": "docs/evidence/R24_art/browser_audit.json"},
+    "godot_import": {"exit_code": 0, "evidence": "docs/evidence/R24_art/gates/godot_import.txt"},
+    "r14_regression": {"exit_code": 0, "marker": "R14_REGRESSION_PASS", "evidence": "docs/evidence/R24_art/gates/r14_regression.txt"},
+    "true_animation_regression": {"exit_code": 0, "marker": "TRUE_ANIMATION_REGRESSION_PASS", "evidence": "docs/evidence/R24_art/gates/true_animation_regression.txt"},
+    "weapon_smoke": {"exit_code": 0, "marker": "WEAPON_SMOKE_PASS", "evidence": "docs/evidence/R24_art/gates/weapon_smoke_test.txt"},
+    "web_export": {"exit_code": 0, "evidence": "docs/evidence/R24_art/gates/web_export.txt"},
+    "secret_scan": {"pass": true, "hits": 0, "evidence": "docs/evidence/R24_art/gates/secret_scan.txt"},
+    "r21_contract_guard": {"pass": true, "changed_paths": 0, "evidence": "docs/evidence/R24_art/gates/r21_contract_guard.txt"},
+    "git_diff_check": {"exit_code": 0}
+  }
+}

@@ -19,6 +19,7 @@ var spark_cooldown: float = 0.0
 var sprite: Sprite2D = null
 var glow: Sprite2D = null
 var trail: Line2D = null
+var trail_art: Sprite2D = null
 
 
 func _ready() -> void:
@@ -57,6 +58,8 @@ func pool_on_release() -> void:
 		glow.visible = false
 	if trail != null:
 		trail.visible = false
+	if trail_art != null:
+		trail_art.visible = false
 	hit_flash_timer = 0.0
 	spark_cooldown = 0.0
 	var shape_node := get_node_or_null("CollisionShape2D") as CollisionShape2D
@@ -167,8 +170,14 @@ func _spawn_hit_spark() -> void:
 	if spark_cooldown > 0.0:
 		return
 	spark_cooldown = 0.08
-	var color: Color = stats.get("color", Color(0.8, 0.9, 1.0))
-	EntityFactory.spawn_death_burst(global_position, color.lerp(Color(1.0, 0.94, 0.56), 0.56), 0.72, "spark")
+	var impact_path := str(stats.get("impact_sprite_path", ""))
+	if impact_path != "":
+		# Kept on the successful overlap/hit branch so the impact art cannot fire
+		# before damage or independently of the active hitbox.
+		EntityFactory.spawn_death_burst(global_position, Color.WHITE, 0.75, "r24_weapon_impact", impact_path)
+	else:
+		var color: Color = stats.get("color", Color(0.8, 0.9, 1.0))
+		EntityFactory.spawn_death_burst(global_position, color.lerp(Color(1.0, 0.94, 0.56), 0.56), 0.72, "spark")
 
 
 func _tick_hit_flash(delta: float) -> void:
@@ -176,13 +185,13 @@ func _tick_hit_flash(delta: float) -> void:
 		hit_flash_timer = max(hit_flash_timer - delta, 0.0)
 	var color: Color = stats.get("color", Color(0.8, 0.9, 1.0))
 	var ratio := hit_flash_timer / 0.09 if hit_flash_timer > 0.0 else 0.0
-	var display_color := color
+	var display_color := Color.WHITE
 	if ratio > 0.0:
-		display_color = color.lerp(Color.WHITE, ratio)
+		display_color = Color(1.0, 0.72, 0.34).lerp(Color.WHITE, ratio)
 	if sprite != null:
 		sprite.modulate = display_color
 	if glow != null:
-		glow.modulate = Color(display_color.r, display_color.g, display_color.b, 0.34 + ratio * 0.34)
+		glow.modulate = Color(color.r, color.g, color.b, 0.34 + ratio * 0.34)
 
 
 func _hit_key_for(body: Node) -> int:
@@ -228,6 +237,15 @@ func _ensure_sprite() -> void:
 	trail.end_cap_mode = Line2D.LINE_CAP_ROUND
 	trail.joint_mode = Line2D.LINE_JOINT_ROUND
 
+	trail_art = get_node_or_null("TrailArt") as Sprite2D
+	if trail_art == null:
+		trail_art = Sprite2D.new()
+		trail_art.name = "TrailArt"
+		add_child(trail_art)
+	trail_art.centered = true
+	trail_art.z_index = -1
+	trail_art.visible = false
+
 	sprite = get_node_or_null("Sprite2D") as Sprite2D
 	if sprite == null:
 		sprite = Sprite2D.new()
@@ -239,14 +257,28 @@ func _ensure_sprite() -> void:
 func _apply_sprite() -> void:
 	_ensure_sprite()
 	var sprite_path: String = str(stats.get("orbit_sprite_path", "res://assets/sprites/proj_blade.png"))
+	var alternate_path := str(stats.get("orbit_alternate_sprite_path", ""))
+	if alternate_path != "" and orbit_index % 2 == 1:
+		sprite_path = alternate_path
 	var texture: Texture2D = SPRITE_LOADER.get_texture(sprite_path)
 	if texture == null:
 		sprite.visible = false
 		return
 	sprite.visible = true
-	sprite.modulate = stats.get("color", Color(0.8, 0.9, 1.0))
+	sprite.modulate = Color.WHITE
 	var projectile_radius: float = float(stats.get("projectile_radius", 8.0))
 	SPRITE_LOADER.fit_sprite(sprite, texture, projectile_radius * 4.2, float(stats.get("sprite_scale", 1.0)))
+	var trail_path := str(stats.get("trail_sprite_path", ""))
+	if trail_art != null and trail_path != "":
+		var trail_texture := SPRITE_LOADER.get_texture(trail_path)
+		trail_art.visible = trail_texture != null
+		if trail_texture != null:
+			trail_art.texture = trail_texture
+			trail_art.modulate = Color(1.0, 1.0, 1.0, 0.64)
+			trail_art.position = Vector2(-projectile_radius * 0.7, 0.0)
+			ART_RESOURCES.fit_sprite(trail_art, trail_texture, projectile_radius * 5.8)
+	elif trail_art != null:
+		trail_art.visible = false
 	var color: Color = stats.get("color", Color(0.8, 0.9, 1.0))
 	if glow != null:
 		glow.visible = true
