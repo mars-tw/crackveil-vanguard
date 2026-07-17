@@ -108,6 +108,14 @@ jobs:
           python3 tools/verify_r25_c2pa.py
           python3 tools/check_r25_parallax_gates.py
 
+      - name: Import Godot resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          # R25 起資產量成長，場景啟動時的隱式匯入會撞測試 watchdog；先顯式匯入（跑兩次讓字型/主題二次相依收斂）
+          "${GODOT_BIN}" --headless --import --path . || true
+          "${GODOT_BIN}" --headless --import --path . || true
+
       - name: Run Godot regression gates
         shell: bash
         run: |
