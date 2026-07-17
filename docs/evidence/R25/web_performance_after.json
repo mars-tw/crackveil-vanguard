@@ -1,0 +1,25 @@
+{
+  "schema": "rift-r25-web-performance.v1",
+  "mode": "after",
+  "url": "http://127.0.0.1:8067/?cv_r19_test=1&cv_r22_test=1",
+  "profile": {
+    "focal": "Fast3G 1.6Mbps down / 750Kbps up / 150ms RTT + CPU 4x",
+    "tti": "local transfer + CPU 1x after focal; reproducible before/after bundle comparison"
+  },
+  "focal_ms": 298.59999990463257,
+  "focal_budget_ms": 3000,
+  "focal_budget_passed": true,
+  "tti_ms": 14164.299999713898,
+  "baseline_tti_ms": 15742,
+  "tti_delta_percent": -10.022233517253857,
+  "tti_delta_budget_percent": 10,
+  "performance_mark": {
+    "name": "rift-r25-main-focal",
+    "entryType": "mark",
+    "startTime": 102.2999997138977,
+    "duration": 0
+  },
+  "request_failures": [],
+  "page_errors": [],
+  "passed": true
+}

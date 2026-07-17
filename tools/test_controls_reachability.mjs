@@ -13,7 +13,7 @@ const chromePath = process.env.UI_CAPTURE_CHROME ?? "C:/Program Files/Google/Chr
 const targetUrl = new URL(process.env.UI_CAPTURE_URL ?? "http://127.0.0.1:8067/");
 targetUrl.searchParams.set("cv_r19_test", "1");
 targetUrl.searchParams.set("cv_r22_test", "1");
-const evidenceDir = path.resolve("docs/evidence/R22_controls");
+const evidenceDir = path.resolve(process.env.UI_CAPTURE_EVIDENCE_DIR ?? "docs/evidence/R22_controls");
 
 const desktopUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36";
 const mobileUserAgent = "Mozilla/5.0 (Linux; Android 15; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36";

@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+"""Copy the R25 focal and synchronize Godot's PWA cache manifest."""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import hashlib
+import json
+import re
+import shutil
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+RELEASE = "0.18.0-r25"
+FOCAL_SOURCE = ROOT / "assets" / "art" / "r25" / "r25_web_focal.webp"
+FOCAL_HASH = "48393809"
+FOCAL_REF = f"r25-web-focal.webp?v={FOCAL_HASH}"
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dir", required=True, help="Godot Web export directory")
+    parser.add_argument("--evidence", default="docs/evidence/R25/pwa_cache_verification.json")
+    args = parser.parse_args()
+    output = Path(args.dir).resolve()
+    html = output / "index.html"
+    worker = output / "index.service.worker.js"
+    if not html.exists() or not worker.exists():
+        raise SystemExit(f"missing PWA export files in {output}")
+    source_hash = sha256(FOCAL_SOURCE)
+    if not source_hash.startswith(FOCAL_HASH):
+        raise SystemExit(f"focal hash drifted: {source_hash}")
+    focal_output = output / "r25-web-focal.webp"
+    shutil.copyfile(FOCAL_SOURCE, focal_output)
+
+    html_text = html.read_text(encoding="utf-8")
+    if html_text.count(FOCAL_REF) < 2 or f'content="{RELEASE}"' not in html_text:
+        raise SystemExit("exported HTML lacks the R25 focal/content-cache markers")
+    inline_marker = "rift-r25-inline-focal"
+    if inline_marker not in html_text:
+        focal_data = base64.b64encode(FOCAL_SOURCE.read_bytes()).decode("ascii")
+        inline_block = (
+            f'<div id="{inline_marker}" style="position:fixed;inset:0;z-index:2147483646;background:#04070f">'
+            f'<img src="data:image/webp;base64,{focal_data}" alt="" '
+            'style="width:100%;height:100%;object-fit:cover" '
+            "onload=\"if(!performance.getEntriesByName('rift-r25-main-focal').length)performance.mark('rift-r25-main-focal')\">"
+            "</div><script>addEventListener('DOMContentLoaded',()=>{const f=document.getElementById('rift-r25-inline-focal');"
+            "const s=document.getElementById('status');if(!f||!s)return;const timer=setInterval(()=>{"
+            "if(!s.isConnected||getComputedStyle(s).display==='none'||window.__cvR22Controls?.main_menu||window.__cvR19Controls?.main_menu){"
+            "f.remove();clearInterval(timer)}},50)},{once:true})</script>"
+        )
+        html_text = html_text.replace("<body>", "<body>\n\t\t" + inline_block, 1)
+        html.write_text(html_text, encoding="utf-8", newline="\n")
+    worker_text = worker.read_text(encoding="utf-8")
+    worker_text, version_count = re.subn(
+        r"const CACHE_VERSION = '[^']+';",
+        f"const CACHE_VERSION = '{RELEASE}|{FOCAL_HASH}';",
+        worker_text,
+        count=1,
+    )
+    required_cached = [
+        "index.html",
+        "index.js",
+        "index.offline.html",
+        "index.audio.worklet.js",
+        "index.audio.position.worklet.js",
+        "index.png",
+        "index.manifest.json",
+        "index.144x144.png",
+        "index.180x180.png",
+        "index.512x512.png",
+        FOCAL_REF,
+    ]
+    replacement = "const CACHED_FILES = " + json.dumps(required_cached, ensure_ascii=False, separators=(",", ":")) + ";"
+    worker_text, files_count = re.subn(r"const CACHED_FILES = \[[^;]+;", replacement, worker_text, count=1)
+    if version_count != 1 or files_count != 1:
+        raise SystemExit("unable to patch PWA service worker")
+    worker.write_text(worker_text, encoding="utf-8", newline="\n")
+
+    checks = {
+        "release": RELEASE,
+        "cache_version": f"{RELEASE}|{FOCAL_HASH}",
+        "focal_ref": FOCAL_REF,
+        "focal_source_sha256": source_hash,
+        "focal_export_sha256": sha256(focal_output),
+        "cached_files": required_cached,
+        "offline_url": "index.offline.html",
+        "old_cache_cleanup": "activate deletes same-prefix caches except current CACHE_NAME",
+        "passed": source_hash == sha256(focal_output) and all(name in worker_text for name in required_cached),
+    }
+    evidence = ROOT / args.evidence
+    evidence.parent.mkdir(parents=True, exist_ok=True)
+    evidence.write_text(json.dumps(checks, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"R25_PWA_CACHE_PASS version={checks['cache_version']} files={len(required_cached)}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

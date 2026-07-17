@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m pip install --upgrade fonttools pillow
+          python3 -m pip install --upgrade fonttools pillow numpy c2pa-python
 
       - name: Cache Godot export templates
         id: cache-templates
@@ -101,6 +101,31 @@ jobs:
           set -euo pipefail
           python3 tools/check_sprite_luminance.py
 
+      - name: Check Wave 2 R25 provenance and parallax budgets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/verify_r25_c2pa.py
+          python3 tools/check_r25_parallax_gates.py
+
+      - name: Run Godot regression gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          scenes=(
+            R14RegressionTest
+            TrueAnimationRegressionTest
+            PoolContractTest
+            GameplayCapTest
+            SquadSmokeTest
+            WeaponSmokeTest
+            EnemyArtRegressionTest
+            R25ParallaxRegressionTest
+          )
+          for scene in "${scenes[@]}"; do
+            "${GODOT_BIN}" --headless --fixed-fps 60 --path . "res://scenes/debug/${scene}.tscn"
+          done
+
       - name: Inject build date
         shell: bash
         run: |
@@ -135,9 +160,36 @@ jobs:
           set -euo pipefail
           mkdir -p public
           "${GODOT_BIN}" --headless --export-release "Web" "public/index.html"
+          python3 tools/finalize_r25_web_export.py --dir public
           cp assets/art/cover.png public/cover.png
           touch public/.nojekyll
           find public -maxdepth 1 -type f -printf "%f %s bytes\n" | sort
+
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.58.2
+          npx playwright install --with-deps chromium
+
+      - name: Run Web performance and controls gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8067 --bind 127.0.0.1 --directory public > "${RUNNER_TEMP}/r25-http.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "${server_pid}" 2>/dev/null || true' EXIT
+          export UI_CAPTURE_PLAYWRIGHT="${GITHUB_WORKSPACE}/node_modules"
+          export UI_CAPTURE_CHROME
+          UI_CAPTURE_CHROME="$(node -e "console.log(require('playwright').chromium.executablePath())")"
+          export R25_WEB_URL="http://127.0.0.1:8067/"
+          export R25_WEB_BASELINE_JSON="docs/evidence/R25/web_performance_before.json"
+          python3 tools/check_available_memory.py --label web-performance
+          node tools/test_r25_web_performance.mjs
+          export UI_CAPTURE_URL="http://127.0.0.1:8067/"
+          export UI_CAPTURE_EVIDENCE_DIR="docs/evidence/R25/controls"
+          python3 tools/check_available_memory.py --label controls
+          node tools/test_controls_reachability.mjs
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

@@ -7,7 +7,7 @@
 
 Crackveil Vanguard 是一款以小隊編成為核心的 2D survivors roguelite。帶領裂隙先鋒進入每局隨機抽選的異變戰場，在自動武器火網中招募英雄、組合羈絆、選擇進化，撐過不斷加壓的敵潮。
 
-目前版本：**0.17.1-r24**（與 `project.godot` 一致）
+目前版本：**0.18.0-r25**（與 `project.godot` 一致）
 
 ## 線上遊玩
 
@@ -94,6 +94,7 @@ python tools/build_font_subset.py
 ```powershell
 & $godot --headless --fixed-fps 60 --path . res://scenes/debug/R14RegressionTest.tscn
 & $godot --headless --fixed-fps 60 --path . res://scenes/debug/TrueAnimationRegressionTest.tscn
+& $godot --headless --fixed-fps 60 --path . res://scenes/debug/R25ParallaxRegressionTest.tscn
 & $godot --headless --fixed-fps 60 --path . res://scenes/debug/PoolContractTest.tscn
 & $godot --headless --fixed-fps 60 --path . res://scenes/debug/GameplayCapTest.tscn
 & $godot --headless --fixed-fps 60 --path . res://scenes/debug/SquadSmokeTest.tscn

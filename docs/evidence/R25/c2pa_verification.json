@@ -1,0 +1,398 @@
+{
+  "schema": "rift-r25-c2pa-verification.v1",
+  "sdk": "c2pa-python",
+  "expected_softwareAgent": {
+    "name": "gpt-image",
+    "version_prefix": "2."
+  },
+  "masters": [
+    {
+      "master": "docs/evidence/R25/masters/ember_rift_far_master.png",
+      "sha256": "033d50be88ae97c528bc15ce27cb587363aa9d795305dfb3dc8abe8910b1a33e",
+      "embedded": true,
+      "validation_state": "Valid",
+      "sdk_valid": true,
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      },
+      "digitalSourceType": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia",
+      "signature": {
+        "alg": "Ps256",
+        "issuer": "OpenAI OpCo, LLC",
+        "common_name": "OpenAI Media Service",
+        "cert_serial_number": "15483366567143162630298612244848338035",
+        "time": "2026-07-17T08:56:09.315450+00:00"
+      },
+      "required_success_codes": [
+        "assertion.dataHash.match",
+        "claimSignature.validated"
+      ],
+      "success_codes": [
+        "assertion.dataHash.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "claimSignature.insideValidity",
+        "claimSignature.validated",
+        "signingCredential.ocsp.notRevoked",
+        "signingCredential.ocsp.notRevoked",
+        "timeStamp.validated"
+      ],
+      "informational_codes": [
+        "timeStamp.untrusted"
+      ],
+      "failure_codes": [
+        "signingCredential.untrusted"
+      ],
+      "passed": true
+    },
+    {
+      "master": "docs/evidence/R25/masters/ember_rift_mid_master.png",
+      "sha256": "1d0472344ab9cef64a445084f1168d30e9487e28b9fe494df19d075b0b8d6cc4",
+      "embedded": true,
+      "validation_state": "Valid",
+      "sdk_valid": true,
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      },
+      "digitalSourceType": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia",
+      "signature": {
+        "alg": "Ps256",
+        "issuer": "OpenAI OpCo, LLC",
+        "common_name": "OpenAI Media Service",
+        "cert_serial_number": "15483366567143162630298612244848338035",
+        "time": "2026-07-17T08:56:47.128777+00:00"
+      },
+      "required_success_codes": [
+        "assertion.dataHash.match",
+        "claimSignature.validated"
+      ],
+      "success_codes": [
+        "assertion.dataHash.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "claimSignature.insideValidity",
+        "claimSignature.validated",
+        "signingCredential.ocsp.notRevoked",
+        "signingCredential.ocsp.notRevoked",
+        "timeStamp.validated"
+      ],
+      "informational_codes": [
+        "timeStamp.untrusted"
+      ],
+      "failure_codes": [
+        "signingCredential.untrusted"
+      ],
+      "passed": true
+    },
+    {
+      "master": "docs/evidence/R25/masters/ember_rift_near_master.png",
+      "sha256": "e8de98150868a7da78ecd41f21c54ad9b978b574c332d76c0177844a2f283ef9",
+      "embedded": true,
+      "validation_state": "Valid",
+      "sdk_valid": true,
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      },
+      "digitalSourceType": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia",
+      "signature": {
+        "alg": "Es256",
+        "issuer": "OpenAI OpCo, LLC",
+        "common_name": "OpenAI Media Service",
+        "cert_serial_number": "471440979205905794604524502504016020624908622401",
+        "time": "2026-07-17T08:57:28.975561+00:00"
+      },
+      "required_success_codes": [
+        "assertion.dataHash.match",
+        "claimSignature.validated"
+      ],
+      "success_codes": [
+        "assertion.dataHash.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "claimSignature.insideValidity",
+        "claimSignature.validated",
+        "signingCredential.ocsp.notRevoked",
+        "signingCredential.ocsp.notRevoked",
+        "timeStamp.validated"
+      ],
+      "informational_codes": [
+        "timeStamp.untrusted"
+      ],
+      "failure_codes": [
+        "signingCredential.untrusted"
+      ],
+      "passed": true
+    },
+    {
+      "master": "docs/evidence/R25/masters/rift_void_far_master.png",
+      "sha256": "d4fdc729423e2fc7d272804f98ba8d7a107a494a9da41961e7d42bb3d2297277",
+      "embedded": true,
+      "validation_state": "Valid",
+      "sdk_valid": true,
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      },
+      "digitalSourceType": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia",
+      "signature": {
+        "alg": "Ps256",
+        "issuer": "OpenAI OpCo, LLC",
+        "common_name": "OpenAI Media Service",
+        "cert_serial_number": "15483366567143162630298612244848338035",
+        "time": "2026-07-17T08:51:57.101569+00:00"
+      },
+      "required_success_codes": [
+        "assertion.dataHash.match",
+        "claimSignature.validated"
+      ],
+      "success_codes": [
+        "assertion.dataHash.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "claimSignature.insideValidity",
+        "claimSignature.validated",
+        "signingCredential.ocsp.notRevoked",
+        "signingCredential.ocsp.notRevoked",
+        "timeStamp.validated"
+      ],
+      "informational_codes": [
+        "timeStamp.untrusted"
+      ],
+      "failure_codes": [
+        "signingCredential.untrusted"
+      ],
+      "passed": true
+    },
+    {
+      "master": "docs/evidence/R25/masters/rift_void_mid_master.png",
+      "sha256": "7f9c9ff6e76b2e87a7da1a3224efa662430b9bb1268ff3bdcb39bb6146f936bf",
+      "embedded": true,
+      "validation_state": "Valid",
+      "sdk_valid": true,
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      },
+      "digitalSourceType": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia",
+      "signature": {
+        "alg": "Es256",
+        "issuer": "OpenAI OpCo, LLC",
+        "common_name": "OpenAI Media Service",
+        "cert_serial_number": "471440979205905794604524502504016020624908622401",
+        "time": "2026-07-17T08:52:37.118734+00:00"
+      },
+      "required_success_codes": [
+        "assertion.dataHash.match",
+        "claimSignature.validated"
+      ],
+      "success_codes": [
+        "assertion.dataHash.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "claimSignature.insideValidity",
+        "claimSignature.validated",
+        "signingCredential.ocsp.notRevoked",
+        "signingCredential.ocsp.notRevoked",
+        "timeStamp.validated"
+      ],
+      "informational_codes": [
+        "timeStamp.untrusted"
+      ],
+      "failure_codes": [
+        "signingCredential.untrusted"
+      ],
+      "passed": true
+    },
+    {
+      "master": "docs/evidence/R25/masters/rift_void_near_master.png",
+      "sha256": "797ec27c9c722e0b7aa8c9b4813d737459c014ff481cba3e8e1f32e26dd6f994",
+      "embedded": true,
+      "validation_state": "Valid",
+      "sdk_valid": true,
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      },
+      "digitalSourceType": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia",
+      "signature": {
+        "alg": "Ps256",
+        "issuer": "OpenAI OpCo, LLC",
+        "common_name": "OpenAI Media Service",
+        "cert_serial_number": "15483366567143162630298612244848338035",
+        "time": "2026-07-17T08:53:07.026448+00:00"
+      },
+      "required_success_codes": [
+        "assertion.dataHash.match",
+        "claimSignature.validated"
+      ],
+      "success_codes": [
+        "assertion.dataHash.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "claimSignature.insideValidity",
+        "claimSignature.validated",
+        "signingCredential.ocsp.notRevoked",
+        "signingCredential.ocsp.notRevoked",
+        "timeStamp.validated"
+      ],
+      "informational_codes": [
+        "timeStamp.untrusted"
+      ],
+      "failure_codes": [
+        "signingCredential.untrusted"
+      ],
+      "passed": true
+    },
+    {
+      "master": "docs/evidence/R25/masters/wasteland_farm_far_master.png",
+      "sha256": "fd3e53169ecf7b5af493c8aabb35c2ea52b458f2b12672b3a65618a09779b6b0",
+      "embedded": true,
+      "validation_state": "Valid",
+      "sdk_valid": true,
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      },
+      "digitalSourceType": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia",
+      "signature": {
+        "alg": "Ps256",
+        "issuer": "OpenAI OpCo, LLC",
+        "common_name": "OpenAI Media Service",
+        "cert_serial_number": "15483366567143162630298612244848338035",
+        "time": "2026-07-17T08:54:00.208729+00:00"
+      },
+      "required_success_codes": [
+        "assertion.dataHash.match",
+        "claimSignature.validated"
+      ],
+      "success_codes": [
+        "assertion.dataHash.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "claimSignature.insideValidity",
+        "claimSignature.validated",
+        "signingCredential.ocsp.notRevoked",
+        "signingCredential.ocsp.notRevoked",
+        "timeStamp.validated"
+      ],
+      "informational_codes": [
+        "timeStamp.untrusted"
+      ],
+      "failure_codes": [
+        "signingCredential.untrusted"
+      ],
+      "passed": true
+    },
+    {
+      "master": "docs/evidence/R25/masters/wasteland_farm_mid_master.png",
+      "sha256": "a9a29bd483891e0caf765539b65025f1c279171a338d445d66c24529192dece0",
+      "embedded": true,
+      "validation_state": "Valid",
+      "sdk_valid": true,
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      },
+      "digitalSourceType": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia",
+      "signature": {
+        "alg": "Es256",
+        "issuer": "OpenAI OpCo, LLC",
+        "common_name": "OpenAI Media Service",
+        "cert_serial_number": "471440979205905794604524502504016020624908622401",
+        "time": "2026-07-17T08:54:41.508666+00:00"
+      },
+      "required_success_codes": [
+        "assertion.dataHash.match",
+        "claimSignature.validated"
+      ],
+      "success_codes": [
+        "assertion.dataHash.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "claimSignature.insideValidity",
+        "claimSignature.validated",
+        "signingCredential.ocsp.notRevoked",
+        "signingCredential.ocsp.notRevoked",
+        "timeStamp.validated"
+      ],
+      "informational_codes": [
+        "timeStamp.untrusted"
+      ],
+      "failure_codes": [
+        "signingCredential.untrusted"
+      ],
+      "passed": true
+    },
+    {
+      "master": "docs/evidence/R25/masters/wasteland_farm_near_master.png",
+      "sha256": "2298c55eca1206b554e3752910cee3c12232d77c53b056f20d655b7eb605c640",
+      "embedded": true,
+      "validation_state": "Valid",
+      "sdk_valid": true,
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      },
+      "digitalSourceType": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia",
+      "signature": {
+        "alg": "Es256",
+        "issuer": "OpenAI OpCo, LLC",
+        "common_name": "OpenAI Media Service",
+        "cert_serial_number": "471440979205905794604524502504016020624908622401",
+        "time": "2026-07-17T08:55:13.688487+00:00"
+      },
+      "required_success_codes": [
+        "assertion.dataHash.match",
+        "claimSignature.validated"
+      ],
+      "success_codes": [
+        "assertion.dataHash.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "assertion.hashedURI.match",
+        "claimSignature.insideValidity",
+        "claimSignature.validated",
+        "signingCredential.ocsp.notRevoked",
+        "signingCredential.ocsp.notRevoked",
+        "timeStamp.validated"
+      ],
+      "informational_codes": [
+        "timeStamp.untrusted"
+      ],
+      "failure_codes": [
+        "signingCredential.untrusted"
+      ],
+      "passed": true
+    }
+  ],
+  "all_passed": true
+}

@@ -56,13 +56,14 @@ static func get_texture(path: String) -> Texture2D:
 		return null
 	if texture_cache.has(path):
 		return texture_cache[path]
+	var resource_path := path.split("?", true, 1)[0]
 	var texture: Texture2D = null
-	if ResourceLoader.exists(path):
-		var resource := load(path)
+	if ResourceLoader.exists(resource_path):
+		var resource := load(resource_path)
 		texture = resource as Texture2D
 	else:
 		var image := Image.new()
-		var error := image.load(path)
+		var error := image.load(resource_path)
 		if error == OK:
 			texture = ImageTexture.create_from_image(image)
 

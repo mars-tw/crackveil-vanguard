@@ -1,0 +1,144 @@
+{
+  "active_manifest": "urn:c2pa:bb368113-f72e-423c-a70b-eba7f86e7e8a",
+  "manifests": {
+    "urn:c2pa:bb368113-f72e-423c-a70b-eba7f86e7e8a": {
+      "claim_generator_info": [
+        {
+          "name": "OpenAI Media Service API",
+          "icon": {
+            "format": "image/svg+xml",
+            "identifier": "self#jumbf=-c2pa-urn-c2pa-bb368113-f72e-423c-a70b-eba7f86e7e8a-c2pa.assertions-c2pa.icon"
+          },
+          "org.contentauth.c2pa_rs": "0.79.2",
+          "specVersion": "2.2.0"
+        }
+      ],
+      "title": "image.png",
+      "instance_id": "xmp:iid:f4ce22c2-17d0-4410-8486-4e41df9cbc9b",
+      "assertions": [
+        {
+          "label": "c2pa.actions.v2",
+          "data": {
+            "actions": [
+              {
+                "action": "c2pa.created",
+                "when": "2026-07-17T00:00:00Z",
+                "softwareAgent": {
+                  "name": "gpt-image",
+                  "version": "2.0"
+                },
+                "digitalSourceType": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia"
+              },
+              {
+                "action": "c2pa.converted",
+                "when": "2026-07-17T00:00:00Z"
+              },
+              {
+                "action": "c2pa.watermarked.unbound",
+                "when": "2026-07-17T00:00:00Z"
+              }
+            ]
+          },
+          "created": true
+        },
+        {
+          "label": "c2pa.certificate-status",
+          "data": {
+            "ocspVals": [
+              "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",
+              "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"
+            ]
+          },
+          "created": true
+        }
+      ],
+      "signature_info": {
+        "alg": "Ps256",
+        "issuer": "OpenAI OpCo, LLC",
+        "common_name": "OpenAI Media Service",
+        "cert_serial_number": "15483366567143162630298612244848338035",
+        "time": "2026-07-17T08:56:09.315450+00:00"
+      },
+      "label": "urn:c2pa:bb368113-f72e-423c-a70b-eba7f86e7e8a",
+      "claim_version": 2
+    }
+  },
+  "validation_status": [
+    {
+      "code": "signingCredential.untrusted",
+      "url": "self#jumbf=/c2pa/urn:c2pa:bb368113-f72e-423c-a70b-eba7f86e7e8a/c2pa.signature",
+      "explanation": "signing certificate untrusted"
+    }
+  ],
+  "validation_results": {
+    "activeManifest": {
+      "success": [
+        {
+          "code": "signingCredential.ocsp.notRevoked",
+          "url": "OCSP_RESPONSE",
+          "explanation": "certificate not revoked"
+        },
+        {
+          "code": "signingCredential.ocsp.notRevoked",
+          "url": "OCSP_RESPONSE",
+          "explanation": "certificate not revoked"
+        },
+        {
+          "code": "timeStamp.validated",
+          "url": "self#jumbf=/c2pa/urn:c2pa:bb368113-f72e-423c-a70b-eba7f86e7e8a/c2pa.signature",
+          "explanation": "timestamp message digest matched: OpenAI TSA Leaf"
+        },
+        {
+          "code": "claimSignature.insideValidity",
+          "url": "self#jumbf=/c2pa/urn:c2pa:bb368113-f72e-423c-a70b-eba7f86e7e8a/c2pa.signature",
+          "explanation": "claim signature valid"
+        },
+        {
+          "code": "claimSignature.validated",
+          "url": "self#jumbf=/c2pa/urn:c2pa:bb368113-f72e-423c-a70b-eba7f86e7e8a/c2pa.signature",
+          "explanation": "claim signature valid"
+        },
+        {
+          "code": "assertion.hashedURI.match",
+          "url": "self#jumbf=/c2pa/urn:c2pa:bb368113-f72e-423c-a70b-eba7f86e7e8a/c2pa.assertions/c2pa.icon",
+          "explanation": "hashed uri matched: self#jumbf=c2pa.assertions/c2pa.icon"
+        },
+        {
+          "code": "assertion.hashedURI.match",
+          "url": "self#jumbf=/c2pa/urn:c2pa:bb368113-f72e-423c-a70b-eba7f86e7e8a/c2pa.assertions/c2pa.actions.v2",
+          "explanation": "hashed uri matched: self#jumbf=c2pa.assertions/c2pa.actions.v2"
+        },
+        {
+          "code": "assertion.hashedURI.match",
+          "url": "self#jumbf=/c2pa/urn:c2pa:bb368113-f72e-423c-a70b-eba7f86e7e8a/c2pa.assertions/c2pa.certificate-status",
+          "explanation": "hashed uri matched: self#jumbf=c2pa.assertions/c2pa.certificate-status"
+        },
+        {
+          "code": "assertion.hashedURI.match",
+          "url": "self#jumbf=/c2pa/urn:c2pa:bb368113-f72e-423c-a70b-eba7f86e7e8a/c2pa.assertions/c2pa.hash.data",
+          "explanation": "hashed uri matched: self#jumbf=c2pa.assertions/c2pa.hash.data"
+        },
+        {
+          "code": "assertion.dataHash.match",
+          "url": "self#jumbf=/c2pa/urn:c2pa:bb368113-f72e-423c-a70b-eba7f86e7e8a/c2pa.assertions/c2pa.hash.data",
+          "explanation": "data hash valid"
+        }
+      ],
+      "informational": [
+        {
+          "code": "timeStamp.untrusted",
+          "url": "self#jumbf=/c2pa/urn:c2pa:bb368113-f72e-423c-a70b-eba7f86e7e8a/c2pa.signature",
+          "explanation": "timestamp cert untrusted: OpenAI TSA Leaf"
+        }
+      ],
+      "failure": [
+        {
+          "code": "signingCredential.untrusted",
+          "url": "self#jumbf=/c2pa/urn:c2pa:bb368113-f72e-423c-a70b-eba7f86e7e8a/c2pa.signature",
+          "explanation": "signing certificate untrusted"
+        }
+      ]
+    }
+  },
+  "validation_state": "Valid"
+}

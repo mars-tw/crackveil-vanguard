@@ -135,6 +135,14 @@ silhouette is enlarged with the existing violet volume glow. Rebuild with
   Captain, Orbit Guard, and Rift Sniper as identity-only references.  The R21
   runtime character atlas and animation contracts were not changed.
 
+- `assets/art/r25/parallax/` contains nine project-produced Wave 2 R25 battle
+  layers (three themes times far/mid/near). The recorded model slug is
+  `gpt-image-2`; every immutable PNG master has valid embedded C2PA identifying
+  `gpt-image 2.0`. Master/runtime hashes, prompts, deterministic postprocess,
+  and C2PA summaries are recorded in `assets/art/r25/parallax/manifest.json`
+  and `docs/evidence/R25/`. The boot splash and Web focal are deterministic
+  derivatives of those same layers, not independent or third-party art.
+
 - The Traditional Chinese UI font is a subset of
   [Noto Sans CJK TC Regular](https://github.com/notofonts/noto-cjk/tree/Sans2.004/Sans/OTF/TraditionalChinese),
   licensed under SIL Open Font License 1.1. See `assets/fonts/OFL.txt`.

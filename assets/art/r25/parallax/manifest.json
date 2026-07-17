@@ -1,0 +1,501 @@
+{
+  "schema": "rift-r25-parallax-manifest.v1",
+  "round": "R25",
+  "release": "0.18.0-r25",
+  "generator": "OpenAI built-in imagegen",
+  "model_slug": "gpt-image-2",
+  "prompt_manifest": "docs/evidence/R25/prompts/R25_PARALLAX_PROMPTS.md",
+  "style_board": "docs/evidence/R25/style_board.md",
+  "reference_hashes": {
+    "menu_keyart_desktop": "6d254015fd1154fd78da68c829cb54a5252dad91753e7e60fd6efcaa55d03113",
+    "ground_void_stone": "be757188ff99cd575742a52626a003c88ddf61ba5ebceab3333a8c8ca2270c80",
+    "farm_ruined_barn": "b304e16fe2c19cc554ef99043e8ed8ee7a667aa1283e834ee9bd3dc113e2ffd9",
+    "ember_lava_crack": "6b58a2d0fb9a94a1cbe795e8395e9bc6b5583b1aa7e48c77c01e6b052d97d57"
+  },
+  "c2pa_verification": "docs/evidence/R25/c2pa_verification.json",
+  "boot_splash": {
+    "runtime": "assets/art/r25/r25_boot_splash.png",
+    "runtime_sha256": "e03c4d6d82579fd33f9814522fd2f48129c01525a73466401f6cdd86e684e66a",
+    "dimensions": [
+      640,
+      360
+    ],
+    "source_layers": [
+      "rift_void_far",
+      "rift_void_mid",
+      "rift_void_near"
+    ],
+    "postprocess": [
+      "R25 high-quality composite",
+      "LANCZOS resize 1536x768 -> 640x360",
+      "128-color indexed PNG",
+      "PNG optimize=true compress_level=9"
+    ]
+  },
+  "web_focal": {
+    "runtime": "assets/art/r25/r25_web_focal.webp",
+    "runtime_sha256": "48393809c0c17c45bb8625258cff9d3bcf8e183bfef07c2bf6261718ba6ed1e0",
+    "dimensions": [
+      640,
+      360
+    ],
+    "source_layers": [
+      "rift_void_far",
+      "rift_void_mid",
+      "rift_void_near"
+    ],
+    "postprocess": [
+      "R25 high-quality composite",
+      "LANCZOS resize 1536x768 -> 640x360",
+      "WebP quality=68 method=6"
+    ]
+  },
+  "runtime_policy": {
+    "high": [
+      "far",
+      "mid",
+      "near"
+    ],
+    "medium": [
+      "far",
+      "mid",
+      "near"
+    ],
+    "low": [
+      "far",
+      "mid"
+    ],
+    "central_gameplay_band_norm": [
+      0.22,
+      0.21,
+      0.56,
+      0.58
+    ],
+    "text_regions_norm": [
+      [
+        0.02,
+        0.02,
+        0.32,
+        0.16
+      ],
+      [
+        0.68,
+        0.02,
+        0.3,
+        0.16
+      ]
+    ],
+    "content_hash_query": "?v=<sha256-first-8>"
+  },
+  "budgets": {
+    "per_layer_max_dimensions": [
+      2048,
+      1024
+    ],
+    "desktop_high_vram_limit_bytes": 67108864,
+    "mobile_low_vram_limit_bytes": 33554432,
+    "desktop_high_vram_bytes": 42467328,
+    "mobile_low_vram_bytes": 28311552
+  },
+  "assets": [
+    {
+      "id": "rift_void_far",
+      "theme": "rift_void",
+      "layer": "far",
+      "role": "far_sky",
+      "prompt_id": "R25-P01",
+      "model_slug": "gpt-image-2",
+      "master": "docs/evidence/R25/masters/rift_void_far_master.png",
+      "master_sha256": "d4fdc729423e2fc7d272804f98ba8d7a107a494a9da41961e7d42bb3d2297277",
+      "runtime": "assets/art/r25/parallax/rift_void_far.webp",
+      "runtime_sha256": "0c3a17d6a9244681a8b196a4f2814c8356937e89016788600212be6926788ec4",
+      "runtime_ref": "res://assets/art/r25/parallax/rift_void_far.webp?v=0c3a17d6",
+      "format": "WebP",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "decoded_vram_bytes": 4718592,
+      "parallax_factor": 0.025,
+      "safe_focus_bbox_norm": [
+        0.22,
+        0.21,
+        0.56,
+        0.58
+      ],
+      "c2pa": {
+        "embedded_master": true,
+        "validation_state": "Valid",
+        "passed": true,
+        "softwareAgent": {
+          "name": "gpt-image",
+          "version": "2.0",
+          "normalized": "gpt-image 2.0"
+        },
+        "signature_alg": "Ps256",
+        "issuer": "OpenAI OpCo, LLC"
+      },
+      "postprocess": [
+        "Pillow Image.Resampling.LANCZOS resize 1774x887 -> 1536x768",
+        "GaussianBlur radius=0.55 for gameplay-band noise control",
+        "Color saturation x0.88",
+        "Brightness x0.52 for HUD contrast",
+        "Pillow WebP quality=86 method=6 exact=true"
+      ]
+    },
+    {
+      "id": "rift_void_mid",
+      "theme": "rift_void",
+      "layer": "mid",
+      "role": "mid_terrain_silhouette",
+      "prompt_id": "R25-P02",
+      "model_slug": "gpt-image-2",
+      "master": "docs/evidence/R25/masters/rift_void_mid_master.png",
+      "master_sha256": "7f9c9ff6e76b2e87a7da1a3224efa662430b9bb1268ff3bdcb39bb6146f936bf",
+      "runtime": "assets/art/r25/parallax/rift_void_mid.webp",
+      "runtime_sha256": "08025cd7c6d2f2197ef0ca76684f2e14e5abb2760748fb5d91ec3a5905c5ee35",
+      "runtime_ref": "res://assets/art/r25/parallax/rift_void_mid.webp?v=08025cd7",
+      "format": "WebP",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "decoded_vram_bytes": 4718592,
+      "parallax_factor": 0.055,
+      "safe_focus_bbox_norm": [
+        0.22,
+        0.21,
+        0.56,
+        0.58
+      ],
+      "c2pa": {
+        "embedded_master": true,
+        "validation_state": "Valid",
+        "passed": true,
+        "softwareAgent": {
+          "name": "gpt-image",
+          "version": "2.0",
+          "normalized": "gpt-image 2.0"
+        },
+        "signature_alg": "Es256",
+        "issuer": "OpenAI OpCo, LLC"
+      },
+      "postprocess": [
+        "Pillow Image.Resampling.LANCZOS resize 1774x887 -> 1536x768",
+        "Imagegen-skill chroma removal retained as alpha source",
+        "RGB brightness x0.78; alpha unchanged",
+        "Pillow WebP quality=86 method=6 exact=true"
+      ]
+    },
+    {
+      "id": "rift_void_near",
+      "theme": "rift_void",
+      "layer": "near",
+      "role": "near_decoration",
+      "prompt_id": "R25-P03",
+      "model_slug": "gpt-image-2",
+      "master": "docs/evidence/R25/masters/rift_void_near_master.png",
+      "master_sha256": "797ec27c9c722e0b7aa8c9b4813d737459c014ff481cba3e8e1f32e26dd6f994",
+      "runtime": "assets/art/r25/parallax/rift_void_near.webp",
+      "runtime_sha256": "b86c781e2849de2dc1d93e4634063b5506d9a5267590d8d844962ce815338204",
+      "runtime_ref": "res://assets/art/r25/parallax/rift_void_near.webp?v=b86c781e",
+      "format": "WebP",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "decoded_vram_bytes": 4718592,
+      "parallax_factor": 0.095,
+      "safe_focus_bbox_norm": [
+        0.22,
+        0.21,
+        0.56,
+        0.58
+      ],
+      "c2pa": {
+        "embedded_master": true,
+        "validation_state": "Valid",
+        "passed": true,
+        "softwareAgent": {
+          "name": "gpt-image",
+          "version": "2.0",
+          "normalized": "gpt-image 2.0"
+        },
+        "signature_alg": "Ps256",
+        "issuer": "OpenAI OpCo, LLC"
+      },
+      "postprocess": [
+        "Pillow Image.Resampling.LANCZOS resize 1774x887 -> 1536x768",
+        "Imagegen-skill chroma removal retained as alpha source",
+        "RGB brightness x0.84; alpha unchanged",
+        "Pillow WebP quality=86 method=6 exact=true"
+      ]
+    },
+    {
+      "id": "wasteland_farm_far",
+      "theme": "wasteland_farm",
+      "layer": "far",
+      "role": "far_sky",
+      "prompt_id": "R25-P04",
+      "model_slug": "gpt-image-2",
+      "master": "docs/evidence/R25/masters/wasteland_farm_far_master.png",
+      "master_sha256": "fd3e53169ecf7b5af493c8aabb35c2ea52b458f2b12672b3a65618a09779b6b0",
+      "runtime": "assets/art/r25/parallax/wasteland_farm_far.webp",
+      "runtime_sha256": "87654aeea4724739a3e9c9e705cf8ffbd563731639f59e7be43765a5b08c7768",
+      "runtime_ref": "res://assets/art/r25/parallax/wasteland_farm_far.webp?v=87654aee",
+      "format": "WebP",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "decoded_vram_bytes": 4718592,
+      "parallax_factor": 0.025,
+      "safe_focus_bbox_norm": [
+        0.22,
+        0.21,
+        0.56,
+        0.58
+      ],
+      "c2pa": {
+        "embedded_master": true,
+        "validation_state": "Valid",
+        "passed": true,
+        "softwareAgent": {
+          "name": "gpt-image",
+          "version": "2.0",
+          "normalized": "gpt-image 2.0"
+        },
+        "signature_alg": "Ps256",
+        "issuer": "OpenAI OpCo, LLC"
+      },
+      "postprocess": [
+        "Pillow Image.Resampling.LANCZOS resize 1774x887 -> 1536x768",
+        "GaussianBlur radius=0.55 for gameplay-band noise control",
+        "Color saturation x0.88",
+        "Brightness x0.52 for HUD contrast",
+        "Pillow WebP quality=86 method=6 exact=true"
+      ]
+    },
+    {
+      "id": "wasteland_farm_mid",
+      "theme": "wasteland_farm",
+      "layer": "mid",
+      "role": "mid_terrain_silhouette",
+      "prompt_id": "R25-P05",
+      "model_slug": "gpt-image-2",
+      "master": "docs/evidence/R25/masters/wasteland_farm_mid_master.png",
+      "master_sha256": "a9a29bd483891e0caf765539b65025f1c279171a338d445d66c24529192dece0",
+      "runtime": "assets/art/r25/parallax/wasteland_farm_mid.webp",
+      "runtime_sha256": "02680224340b6becd9b1d8e18c3905f4dcf7768cba66eb18fd43dd8591075bf8",
+      "runtime_ref": "res://assets/art/r25/parallax/wasteland_farm_mid.webp?v=02680224",
+      "format": "WebP",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "decoded_vram_bytes": 4718592,
+      "parallax_factor": 0.055,
+      "safe_focus_bbox_norm": [
+        0.22,
+        0.21,
+        0.56,
+        0.58
+      ],
+      "c2pa": {
+        "embedded_master": true,
+        "validation_state": "Valid",
+        "passed": true,
+        "softwareAgent": {
+          "name": "gpt-image",
+          "version": "2.0",
+          "normalized": "gpt-image 2.0"
+        },
+        "signature_alg": "Es256",
+        "issuer": "OpenAI OpCo, LLC"
+      },
+      "postprocess": [
+        "Pillow Image.Resampling.LANCZOS resize 1774x887 -> 1536x768",
+        "Imagegen-skill chroma removal retained as alpha source",
+        "RGB brightness x0.78; alpha unchanged",
+        "Pillow WebP quality=86 method=6 exact=true"
+      ]
+    },
+    {
+      "id": "wasteland_farm_near",
+      "theme": "wasteland_farm",
+      "layer": "near",
+      "role": "near_decoration",
+      "prompt_id": "R25-P06",
+      "model_slug": "gpt-image-2",
+      "master": "docs/evidence/R25/masters/wasteland_farm_near_master.png",
+      "master_sha256": "2298c55eca1206b554e3752910cee3c12232d77c53b056f20d655b7eb605c640",
+      "runtime": "assets/art/r25/parallax/wasteland_farm_near.webp",
+      "runtime_sha256": "1200906b3af5dd33e930d284f8e06743185c44eaba2459eaf58807cf051f3ec0",
+      "runtime_ref": "res://assets/art/r25/parallax/wasteland_farm_near.webp?v=1200906b",
+      "format": "WebP",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "decoded_vram_bytes": 4718592,
+      "parallax_factor": 0.095,
+      "safe_focus_bbox_norm": [
+        0.22,
+        0.21,
+        0.56,
+        0.58
+      ],
+      "c2pa": {
+        "embedded_master": true,
+        "validation_state": "Valid",
+        "passed": true,
+        "softwareAgent": {
+          "name": "gpt-image",
+          "version": "2.0",
+          "normalized": "gpt-image 2.0"
+        },
+        "signature_alg": "Es256",
+        "issuer": "OpenAI OpCo, LLC"
+      },
+      "postprocess": [
+        "Pillow Image.Resampling.LANCZOS resize 1774x887 -> 1536x768",
+        "Imagegen-skill chroma removal retained as alpha source",
+        "RGB brightness x0.84; alpha unchanged",
+        "Pillow WebP quality=86 method=6 exact=true"
+      ]
+    },
+    {
+      "id": "ember_rift_far",
+      "theme": "ember_rift",
+      "layer": "far",
+      "role": "far_sky",
+      "prompt_id": "R25-P07",
+      "model_slug": "gpt-image-2",
+      "master": "docs/evidence/R25/masters/ember_rift_far_master.png",
+      "master_sha256": "033d50be88ae97c528bc15ce27cb587363aa9d795305dfb3dc8abe8910b1a33e",
+      "runtime": "assets/art/r25/parallax/ember_rift_far.webp",
+      "runtime_sha256": "0076291d9d575cd6e97348cb6aedb3c75910b0fff6f1b976ed2145b439fb906b",
+      "runtime_ref": "res://assets/art/r25/parallax/ember_rift_far.webp?v=0076291d",
+      "format": "WebP",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "decoded_vram_bytes": 4718592,
+      "parallax_factor": 0.025,
+      "safe_focus_bbox_norm": [
+        0.22,
+        0.21,
+        0.56,
+        0.58
+      ],
+      "c2pa": {
+        "embedded_master": true,
+        "validation_state": "Valid",
+        "passed": true,
+        "softwareAgent": {
+          "name": "gpt-image",
+          "version": "2.0",
+          "normalized": "gpt-image 2.0"
+        },
+        "signature_alg": "Ps256",
+        "issuer": "OpenAI OpCo, LLC"
+      },
+      "postprocess": [
+        "Pillow Image.Resampling.LANCZOS resize 1774x887 -> 1536x768",
+        "GaussianBlur radius=0.55 for gameplay-band noise control",
+        "Color saturation x0.88",
+        "Brightness x0.52 for HUD contrast",
+        "Pillow WebP quality=86 method=6 exact=true"
+      ]
+    },
+    {
+      "id": "ember_rift_mid",
+      "theme": "ember_rift",
+      "layer": "mid",
+      "role": "mid_terrain_silhouette",
+      "prompt_id": "R25-P08",
+      "model_slug": "gpt-image-2",
+      "master": "docs/evidence/R25/masters/ember_rift_mid_master.png",
+      "master_sha256": "1d0472344ab9cef64a445084f1168d30e9487e28b9fe494df19d075b0b8d6cc4",
+      "runtime": "assets/art/r25/parallax/ember_rift_mid.webp",
+      "runtime_sha256": "f73329c82605d09277c50f62c91a47403765592bb0325b336548352eda8ca830",
+      "runtime_ref": "res://assets/art/r25/parallax/ember_rift_mid.webp?v=f73329c8",
+      "format": "WebP",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "decoded_vram_bytes": 4718592,
+      "parallax_factor": 0.055,
+      "safe_focus_bbox_norm": [
+        0.22,
+        0.21,
+        0.56,
+        0.58
+      ],
+      "c2pa": {
+        "embedded_master": true,
+        "validation_state": "Valid",
+        "passed": true,
+        "softwareAgent": {
+          "name": "gpt-image",
+          "version": "2.0",
+          "normalized": "gpt-image 2.0"
+        },
+        "signature_alg": "Ps256",
+        "issuer": "OpenAI OpCo, LLC"
+      },
+      "postprocess": [
+        "Pillow Image.Resampling.LANCZOS resize 1774x887 -> 1536x768",
+        "Imagegen-skill chroma removal retained as alpha source",
+        "RGB brightness x0.78; alpha unchanged",
+        "Pillow WebP quality=86 method=6 exact=true"
+      ]
+    },
+    {
+      "id": "ember_rift_near",
+      "theme": "ember_rift",
+      "layer": "near",
+      "role": "near_decoration",
+      "prompt_id": "R25-P09",
+      "model_slug": "gpt-image-2",
+      "master": "docs/evidence/R25/masters/ember_rift_near_master.png",
+      "master_sha256": "e8de98150868a7da78ecd41f21c54ad9b978b574c332d76c0177844a2f283ef9",
+      "runtime": "assets/art/r25/parallax/ember_rift_near.webp",
+      "runtime_sha256": "cd54bfb89f7843180e5f8470e8b555ffdfef4a7f047a80b06d75515aced3000f",
+      "runtime_ref": "res://assets/art/r25/parallax/ember_rift_near.webp?v=cd54bfb8",
+      "format": "WebP",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "decoded_vram_bytes": 4718592,
+      "parallax_factor": 0.095,
+      "safe_focus_bbox_norm": [
+        0.22,
+        0.21,
+        0.56,
+        0.58
+      ],
+      "c2pa": {
+        "embedded_master": true,
+        "validation_state": "Valid",
+        "passed": true,
+        "softwareAgent": {
+          "name": "gpt-image",
+          "version": "2.0",
+          "normalized": "gpt-image 2.0"
+        },
+        "signature_alg": "Es256",
+        "issuer": "OpenAI OpCo, LLC"
+      },
+      "postprocess": [
+        "Pillow Image.Resampling.LANCZOS resize 1774x887 -> 1536x768",
+        "Imagegen-skill chroma removal retained as alpha source",
+        "RGB brightness x0.84; alpha unchanged",
+        "Pillow WebP quality=86 method=6 exact=true"
+      ]
+    }
+  ]
+}

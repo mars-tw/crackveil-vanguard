@@ -154,3 +154,11 @@
 3. **重做 10 英雄／11 武器平衡驗收。** 先救牧者 0.72% 實戰份額，再用移動群、Boss、散兵約束極端分布。
 4. **補齊首玩說明與無障礙。** 把契約、招募、隊長死亡、羈絆、進化、商店做成情境教學；修正不存在的色盲輔助宣稱並加入 UI scale／高對比。
 5. **明確化三戰場產品承諾。** 最佳解是 Boss 後換場與階段進程；若短期不做，立即改成「每局抽選其一」。
+# Wave 2 R25 裂隙先鋒（2026-07-17）
+
+- 版本 `0.18.0-r25`；三既有戰場新增 9 張 `1536×768` WebP 遠／中／近視差素材，高／中 3 層、低畫質 far+mid 2 層。
+- 九份 imagegen PNG master 的 C2PA 均為 `gpt-image 2.0 / Valid`；manifest 同時記錄 master/runtime SHA-256、prompt、後製與 query ref。
+- 解壓 VRAM：desktop high/medium 40.50MiB；mobile low 27.00MiB；R25 視覺斷言 73/73 PASS。
+- Web：Fast3G/4× focal 298.6ms；TTI 14164.3ms，相對 before -10.02%；PWA cache `0.18.0-r25|48393809`。
+- Godot 8 個功能／動畫回歸與 Playwright controls 8/8 PASS；Stress avg 11.521ms、p95 16.053ms、min FPS 37.00，維持 18ms 硬門檻。
+- 詳細證據與回滾見 `docs/CODEX_RESPONSE_rift_vanguard_R25.md`、`docs/evidence/R25/`。

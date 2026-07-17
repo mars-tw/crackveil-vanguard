@@ -25,6 +25,13 @@ Crackveil Vanguard 的程式與專案自有內容採根目錄 [MIT License](LICE
 - Key art 的 Captain、Orbit Guard、Rift Sniper 身份只以 R21 Hyper3D Rodin → Blender 三視圖渲染為 reference；模型僅負責氣氛與構圖，未替換 R21 角色 atlas 或動畫契約。
 - 完整 prompt、opaque master、mask、RGBA master、hash、alpha／亮度／飽和 gate 與實機證據保存在 `docs/evidence/R24_art/`。
 
+## R25 裂隙先鋒視差場景
+
+- `assets/art/r25/parallax/` 的三個戰場、各遠／中／近三層共九層，為本專案 Wave 2 R25 製作內容，不是第三方素材。
+- 原畫模型 slug 為 `gpt-image-2`；九份 PNG master 皆保留內嵌 C2PA，`c2pa-python` 驗證 `softwareAgent=gpt-image 2.0`、claim signature 與 data hash 有效。
+- 中／近景以 imagegen skill 色鍵工具去背；runtime 以固定 LANCZOS、亮度／飽和度與 WebP quality 86 管線輸出。完整 prompt、style board、master、C2PA JSON、來源與 runtime SHA-256、逐步後製紀錄位於 `docs/evidence/R25/` 與 `assets/art/r25/parallax/manifest.json`。
+- `r25_boot_splash.png` 與 `r25_web_focal.webp` 是上述三層裂隙虛空素材的可重建衍生檔；Web focal 使用 `?v=48393809` 並列入 R25 PWA 離線快取。
+
 ## 衍生與重建說明
 
 - 字型由 `python tools/build_font_subset.py` 重建；上游版本與字集 commit 都固定於腳本。

@@ -11,6 +11,26 @@ const RIFT_CRACK_TEXTURE_PATH := "res://assets/art/rift_cracks.png"
 const VIGNETTE_TEXTURE_PATH := "res://assets/art/vignette.png"
 const DECOR_PATH_PREFIX := "res://assets/art/decor/"
 
+const R25_PARALLAX_PATHS: Dictionary = {
+	"rift_void": {
+		"far": "res://assets/art/r25/parallax/rift_void_far.webp?v=0c3a17d6",
+		"mid": "res://assets/art/r25/parallax/rift_void_mid.webp?v=08025cd7",
+		"near": "res://assets/art/r25/parallax/rift_void_near.webp?v=b86c781e"
+	},
+	"wasteland_farm": {
+		"far": "res://assets/art/r25/parallax/wasteland_farm_far.webp?v=87654aee",
+		"mid": "res://assets/art/r25/parallax/wasteland_farm_mid.webp?v=02680224",
+		"near": "res://assets/art/r25/parallax/wasteland_farm_near.webp?v=1200906b"
+	},
+	"ember_rift": {
+		"far": "res://assets/art/r25/parallax/ember_rift_far.webp?v=0076291d",
+		"mid": "res://assets/art/r25/parallax/ember_rift_mid.webp?v=f73329c8",
+		"near": "res://assets/art/r25/parallax/ember_rift_near.webp?v=cd54bfb8"
+	}
+}
+const R25_PARALLAX_FACTORS: Dictionary = {"far": 0.025, "mid": 0.055, "near": 0.095}
+const R25_PARALLAX_LAYERS: Array[String] = ["far", "mid", "near"]
+
 const DECOR_POOL_SIZE := 96
 const DECOR_CELL_SIZE := 245.0
 const DECOR_GRID_RADIUS_X := 6
@@ -165,6 +185,9 @@ var meteor_lines: Array[Line2D] = []
 var meteor_states: Array[Dictionary] = []
 var applied_mobile_lod: bool = false
 var mobile_lod_initialized: bool = false
+var parallax_sprites: Dictionary = {}
+var parallax_runtime_refs: Dictionary = {}
+var forced_parallax_quality: String = "auto"
 
 
 func _ready() -> void:
@@ -174,6 +197,8 @@ func _ready() -> void:
 	vignette_texture = SPRITE_LOADER.get_texture(VIGNETTE_TEXTURE_PATH)
 	current_theme = _profile_for_id(current_theme_id)
 	_load_theme_textures()
+	_ensure_parallax_layers()
+	_load_parallax_theme()
 	_apply_theme_exports()
 	_reset_environment_timers()
 	_ensure_canvas_tone()
@@ -196,6 +221,7 @@ func configure_run_theme(new_run_seed: int, theme_id: String = "") -> void:
 	current_theme_id = theme_id if theme_id != "" else RUN_THEME.select_theme_id(run_seed)
 	current_theme = _profile_for_id(current_theme_id)
 	_apply_theme_exports()
+	_load_parallax_theme()
 	_reset_environment_timers()
 	_ensure_canvas_tone()
 	_ensure_dust_particles()
@@ -244,6 +270,7 @@ func _process(delta: float) -> void:
 		last_evolution_step = evolution_step
 		last_decor_cell = Vector2i(999999, 999999)
 	_update_rift_sprites(center)
+	_update_parallax_layers(center)
 	_update_dust_bounds()
 	_update_environment_colors()
 	_update_decor_positions(center, mobile_lod)
@@ -451,6 +478,79 @@ func _ensure_rift_sprites() -> void:
 	rift_cracks.z_index = 42
 
 
+func _ensure_parallax_layers() -> void:
+	var stack := get_node_or_null("R25ParallaxStack") as Node2D
+	if stack == null:
+		stack = Node2D.new()
+		stack.name = "R25ParallaxStack"
+		add_child(stack)
+	for index in range(R25_PARALLAX_LAYERS.size()):
+		var layer_name := R25_PARALLAX_LAYERS[index]
+		var sprite := stack.get_node_or_null(layer_name.capitalize()) as Sprite2D
+		if sprite == null:
+			sprite = Sprite2D.new()
+			sprite.name = layer_name.capitalize()
+			stack.add_child(sprite)
+		sprite.centered = true
+		sprite.z_index = index + 1
+		parallax_sprites[layer_name] = sprite
+
+
+func _load_parallax_theme() -> void:
+	_ensure_parallax_layers()
+	parallax_runtime_refs.clear()
+	var theme_paths: Dictionary = R25_PARALLAX_PATHS.get(current_theme_id, R25_PARALLAX_PATHS["rift_void"])
+	for layer_name in R25_PARALLAX_LAYERS:
+		var runtime_ref := str(theme_paths.get(layer_name, ""))
+		var sprite: Sprite2D = parallax_sprites.get(layer_name)
+		if sprite != null:
+			sprite.texture = SPRITE_LOADER.get_texture(runtime_ref)
+		parallax_runtime_refs[layer_name] = runtime_ref
+	_apply_parallax_quality()
+	_update_parallax_layers(_get_center())
+
+
+func _update_parallax_layers(center: Vector2) -> void:
+	var viewport_size := _viewport_size()
+	for layer_name in R25_PARALLAX_LAYERS:
+		var sprite: Sprite2D = parallax_sprites.get(layer_name)
+		if sprite == null or sprite.texture == null:
+			continue
+		var texture_size := Vector2(float(sprite.texture.get_width()), float(sprite.texture.get_height()))
+		if texture_size.x <= 0.0 or texture_size.y <= 0.0:
+			continue
+		# Independent visual roots stay separate from the physics/camera root. A small
+		# overscan keeps the full generated composition visible at every viewport.
+		sprite.scale = Vector2(viewport_size.x / texture_size.x, viewport_size.y / texture_size.y) * 1.08
+		var factor := float(R25_PARALLAX_FACTORS.get(layer_name, 0.0))
+		var max_offset := viewport_size * (0.022 + factor * 0.12)
+		sprite.position = Vector2(
+			clamp(-center.x * factor, -max_offset.x, max_offset.x),
+			clamp(-center.y * factor, -max_offset.y, max_offset.y)
+		)
+
+
+func _resolved_parallax_quality() -> String:
+	if forced_parallax_quality in ["low", "medium", "high"]:
+		return forced_parallax_quality
+	return "low" if _mobile_lod_active() else "high"
+
+
+func _apply_parallax_quality() -> void:
+	var quality := _resolved_parallax_quality()
+	for layer_name in R25_PARALLAX_LAYERS:
+		var sprite: Sprite2D = parallax_sprites.get(layer_name)
+		if sprite == null:
+			continue
+		sprite.visible = layer_name != "near" or quality != "low"
+		sprite.modulate = Color(1.0, 1.0, 1.0, 0.72 if layer_name == "near" and quality == "medium" else 1.0)
+
+
+func debug_set_parallax_quality(quality: String) -> void:
+	forced_parallax_quality = quality if quality in ["auto", "low", "medium", "high"] else "auto"
+	_apply_parallax_quality()
+
+
 func _update_rift_sprites(center: Vector2) -> void:
 	if rift_glow == null or rift_cracks == null:
 		return
@@ -506,6 +606,7 @@ func _apply_visual_lod_state(mobile_lod: bool, force_refresh: bool = false) -> v
 		return
 	applied_mobile_lod = mobile_lod
 	mobile_lod_initialized = true
+	_apply_parallax_quality()
 	if vignette_rect != null:
 		vignette_rect.modulate = Color(1.0, 1.0, 1.0, 0.6 if mobile_lod else 0.72)
 	if dust_particles != null:
@@ -902,12 +1003,20 @@ func _decor_pool_target_size() -> int:
 
 
 func get_mobile_lod_debug_state() -> Dictionary:
+	var visible_layers: Array[String] = []
+	for layer_name in R25_PARALLAX_LAYERS:
+		var sprite: Sprite2D = parallax_sprites.get(layer_name)
+		if sprite != null and sprite.visible and sprite.texture != null:
+			visible_layers.append(layer_name)
 	return {
 		"mobile_lod": _mobile_lod_active(),
 		"applied_mobile_lod": applied_mobile_lod,
 		"dust_amount": dust_particles.amount if dust_particles != null else 0,
 		"decor_target": _decor_pool_target_size(),
-		"dynamic_multiplier": MOBILE_TUNING.background_dynamic_multiplier(_viewport_size())
+		"dynamic_multiplier": MOBILE_TUNING.background_dynamic_multiplier(_viewport_size()),
+		"parallax_quality": _resolved_parallax_quality(),
+		"parallax_layers": visible_layers,
+		"parallax_runtime_refs": parallax_runtime_refs.duplicate(true)
 	}
 
 

@@ -1,0 +1,670 @@
+{
+  "schema": "rift-r25-parallax-gates.v1",
+  "passed": true,
+  "summary": {
+    "checks": 73,
+    "passed": 73,
+    "failed": 0
+  },
+  "vram_table": [
+    {
+      "id": "rift_void_far",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "formula": "1536x768x4",
+      "decoded_vram_bytes": 4718592,
+      "decoded_vram_mib": 4.5,
+      "file_bytes": 21348
+    },
+    {
+      "id": "rift_void_mid",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "formula": "1536x768x4",
+      "decoded_vram_bytes": 4718592,
+      "decoded_vram_mib": 4.5,
+      "file_bytes": 66994
+    },
+    {
+      "id": "rift_void_near",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "formula": "1536x768x4",
+      "decoded_vram_bytes": 4718592,
+      "decoded_vram_mib": 4.5,
+      "file_bytes": 139490
+    },
+    {
+      "id": "wasteland_farm_far",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "formula": "1536x768x4",
+      "decoded_vram_bytes": 4718592,
+      "decoded_vram_mib": 4.5,
+      "file_bytes": 23840
+    },
+    {
+      "id": "wasteland_farm_mid",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "formula": "1536x768x4",
+      "decoded_vram_bytes": 4718592,
+      "decoded_vram_mib": 4.5,
+      "file_bytes": 107548
+    },
+    {
+      "id": "wasteland_farm_near",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "formula": "1536x768x4",
+      "decoded_vram_bytes": 4718592,
+      "decoded_vram_mib": 4.5,
+      "file_bytes": 147488
+    },
+    {
+      "id": "ember_rift_far",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "formula": "1536x768x4",
+      "decoded_vram_bytes": 4718592,
+      "decoded_vram_mib": 4.5,
+      "file_bytes": 25004
+    },
+    {
+      "id": "ember_rift_mid",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "formula": "1536x768x4",
+      "decoded_vram_bytes": 4718592,
+      "decoded_vram_mib": 4.5,
+      "file_bytes": 82852
+    },
+    {
+      "id": "ember_rift_near",
+      "dimensions": [
+        1536,
+        768
+      ],
+      "formula": "1536x768x4",
+      "decoded_vram_bytes": 4718592,
+      "decoded_vram_mib": 4.5,
+      "file_bytes": 114048
+    }
+  ],
+  "vram_totals": {
+    "desktop_high_bytes": 42467328,
+    "desktop_high_mib": 40.5,
+    "mobile_low_bytes": 28311552,
+    "mobile_low_mib": 27.0
+  },
+  "results": [
+    {
+      "name": "asset_count",
+      "passed": true,
+      "count": 9
+    },
+    {
+      "name": "prompt_id_uniqueness",
+      "passed": true
+    },
+    {
+      "name": "dimensions_format:rift_void_far",
+      "passed": true,
+      "dimensions": [
+        1536,
+        768
+      ],
+      "format": "WEBP"
+    },
+    {
+      "name": "compressed_disk_size:rift_void_far",
+      "passed": true,
+      "file_bytes": 21348,
+      "decoded_bytes": 4718592
+    },
+    {
+      "name": "hash_match:rift_void_far",
+      "passed": true
+    },
+    {
+      "name": "content_hash_ref:rift_void_far",
+      "passed": true,
+      "runtime_ref": "res://assets/art/r25/parallax/rift_void_far.webp?v=0c3a17d6"
+    },
+    {
+      "name": "c2pa:rift_void_far",
+      "passed": true,
+      "state": "Valid",
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      }
+    },
+    {
+      "name": "non_solid_asset:rift_void_far",
+      "passed": true,
+      "rgb_variance": 0.004050466697663069
+    },
+    {
+      "name": "dimensions_format:rift_void_mid",
+      "passed": true,
+      "dimensions": [
+        1536,
+        768
+      ],
+      "format": "WEBP"
+    },
+    {
+      "name": "compressed_disk_size:rift_void_mid",
+      "passed": true,
+      "file_bytes": 66994,
+      "decoded_bytes": 4718592
+    },
+    {
+      "name": "hash_match:rift_void_mid",
+      "passed": true
+    },
+    {
+      "name": "content_hash_ref:rift_void_mid",
+      "passed": true,
+      "runtime_ref": "res://assets/art/r25/parallax/rift_void_mid.webp?v=08025cd7"
+    },
+    {
+      "name": "c2pa:rift_void_mid",
+      "passed": true,
+      "state": "Valid",
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      }
+    },
+    {
+      "name": "alpha_range:rift_void_mid",
+      "passed": true,
+      "range": 1.0
+    },
+    {
+      "name": "non_solid_asset:rift_void_mid",
+      "passed": true,
+      "rgb_variance": 0.0030938326381146908
+    },
+    {
+      "name": "dimensions_format:rift_void_near",
+      "passed": true,
+      "dimensions": [
+        1536,
+        768
+      ],
+      "format": "WEBP"
+    },
+    {
+      "name": "compressed_disk_size:rift_void_near",
+      "passed": true,
+      "file_bytes": 139490,
+      "decoded_bytes": 4718592
+    },
+    {
+      "name": "hash_match:rift_void_near",
+      "passed": true
+    },
+    {
+      "name": "content_hash_ref:rift_void_near",
+      "passed": true,
+      "runtime_ref": "res://assets/art/r25/parallax/rift_void_near.webp?v=b86c781e"
+    },
+    {
+      "name": "c2pa:rift_void_near",
+      "passed": true,
+      "state": "Valid",
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      }
+    },
+    {
+      "name": "alpha_range:rift_void_near",
+      "passed": true,
+      "range": 1.0
+    },
+    {
+      "name": "non_solid_asset:rift_void_near",
+      "passed": true,
+      "rgb_variance": 0.014274094253778458
+    },
+    {
+      "name": "dimensions_format:wasteland_farm_far",
+      "passed": true,
+      "dimensions": [
+        1536,
+        768
+      ],
+      "format": "WEBP"
+    },
+    {
+      "name": "compressed_disk_size:wasteland_farm_far",
+      "passed": true,
+      "file_bytes": 23840,
+      "decoded_bytes": 4718592
+    },
+    {
+      "name": "hash_match:wasteland_farm_far",
+      "passed": true
+    },
+    {
+      "name": "content_hash_ref:wasteland_farm_far",
+      "passed": true,
+      "runtime_ref": "res://assets/art/r25/parallax/wasteland_farm_far.webp?v=87654aee"
+    },
+    {
+      "name": "c2pa:wasteland_farm_far",
+      "passed": true,
+      "state": "Valid",
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      }
+    },
+    {
+      "name": "non_solid_asset:wasteland_farm_far",
+      "passed": true,
+      "rgb_variance": 0.0035736868157982826
+    },
+    {
+      "name": "dimensions_format:wasteland_farm_mid",
+      "passed": true,
+      "dimensions": [
+        1536,
+        768
+      ],
+      "format": "WEBP"
+    },
+    {
+      "name": "compressed_disk_size:wasteland_farm_mid",
+      "passed": true,
+      "file_bytes": 107548,
+      "decoded_bytes": 4718592
+    },
+    {
+      "name": "hash_match:wasteland_farm_mid",
+      "passed": true
+    },
+    {
+      "name": "content_hash_ref:wasteland_farm_mid",
+      "passed": true,
+      "runtime_ref": "res://assets/art/r25/parallax/wasteland_farm_mid.webp?v=02680224"
+    },
+    {
+      "name": "c2pa:wasteland_farm_mid",
+      "passed": true,
+      "state": "Valid",
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      }
+    },
+    {
+      "name": "alpha_range:wasteland_farm_mid",
+      "passed": true,
+      "range": 1.0
+    },
+    {
+      "name": "non_solid_asset:wasteland_farm_mid",
+      "passed": true,
+      "rgb_variance": 0.0048396713100373745
+    },
+    {
+      "name": "dimensions_format:wasteland_farm_near",
+      "passed": true,
+      "dimensions": [
+        1536,
+        768
+      ],
+      "format": "WEBP"
+    },
+    {
+      "name": "compressed_disk_size:wasteland_farm_near",
+      "passed": true,
+      "file_bytes": 147488,
+      "decoded_bytes": 4718592
+    },
+    {
+      "name": "hash_match:wasteland_farm_near",
+      "passed": true
+    },
+    {
+      "name": "content_hash_ref:wasteland_farm_near",
+      "passed": true,
+      "runtime_ref": "res://assets/art/r25/parallax/wasteland_farm_near.webp?v=1200906b"
+    },
+    {
+      "name": "c2pa:wasteland_farm_near",
+      "passed": true,
+      "state": "Valid",
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      }
+    },
+    {
+      "name": "alpha_range:wasteland_farm_near",
+      "passed": true,
+      "range": 1.0
+    },
+    {
+      "name": "non_solid_asset:wasteland_farm_near",
+      "passed": true,
+      "rgb_variance": 0.014806811697781086
+    },
+    {
+      "name": "dimensions_format:ember_rift_far",
+      "passed": true,
+      "dimensions": [
+        1536,
+        768
+      ],
+      "format": "WEBP"
+    },
+    {
+      "name": "compressed_disk_size:ember_rift_far",
+      "passed": true,
+      "file_bytes": 25004,
+      "decoded_bytes": 4718592
+    },
+    {
+      "name": "hash_match:ember_rift_far",
+      "passed": true
+    },
+    {
+      "name": "content_hash_ref:ember_rift_far",
+      "passed": true,
+      "runtime_ref": "res://assets/art/r25/parallax/ember_rift_far.webp?v=0076291d"
+    },
+    {
+      "name": "c2pa:ember_rift_far",
+      "passed": true,
+      "state": "Valid",
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      }
+    },
+    {
+      "name": "non_solid_asset:ember_rift_far",
+      "passed": true,
+      "rgb_variance": 0.0037401998415589333
+    },
+    {
+      "name": "dimensions_format:ember_rift_mid",
+      "passed": true,
+      "dimensions": [
+        1536,
+        768
+      ],
+      "format": "WEBP"
+    },
+    {
+      "name": "compressed_disk_size:ember_rift_mid",
+      "passed": true,
+      "file_bytes": 82852,
+      "decoded_bytes": 4718592
+    },
+    {
+      "name": "hash_match:ember_rift_mid",
+      "passed": true
+    },
+    {
+      "name": "content_hash_ref:ember_rift_mid",
+      "passed": true,
+      "runtime_ref": "res://assets/art/r25/parallax/ember_rift_mid.webp?v=f73329c8"
+    },
+    {
+      "name": "c2pa:ember_rift_mid",
+      "passed": true,
+      "state": "Valid",
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      }
+    },
+    {
+      "name": "alpha_range:ember_rift_mid",
+      "passed": true,
+      "range": 1.0
+    },
+    {
+      "name": "non_solid_asset:ember_rift_mid",
+      "passed": true,
+      "rgb_variance": 0.0014384598471224308
+    },
+    {
+      "name": "dimensions_format:ember_rift_near",
+      "passed": true,
+      "dimensions": [
+        1536,
+        768
+      ],
+      "format": "WEBP"
+    },
+    {
+      "name": "compressed_disk_size:ember_rift_near",
+      "passed": true,
+      "file_bytes": 114048,
+      "decoded_bytes": 4718592
+    },
+    {
+      "name": "hash_match:ember_rift_near",
+      "passed": true
+    },
+    {
+      "name": "content_hash_ref:ember_rift_near",
+      "passed": true,
+      "runtime_ref": "res://assets/art/r25/parallax/ember_rift_near.webp?v=cd54bfb8"
+    },
+    {
+      "name": "c2pa:ember_rift_near",
+      "passed": true,
+      "state": "Valid",
+      "softwareAgent": {
+        "name": "gpt-image",
+        "version": "2.0",
+        "normalized": "gpt-image 2.0"
+      }
+    },
+    {
+      "name": "alpha_range:ember_rift_near",
+      "passed": true,
+      "range": 1.0
+    },
+    {
+      "name": "non_solid_asset:ember_rift_near",
+      "passed": true,
+      "rgb_variance": 0.002795284613966942
+    },
+    {
+      "name": "desktop_vram_budget",
+      "passed": true,
+      "bytes": 42467328,
+      "mib": 40.5
+    },
+    {
+      "name": "mobile_vram_budget",
+      "passed": true,
+      "bytes": 28311552,
+      "mib": 27.0
+    },
+    {
+      "name": "low_quality_true_two_layer_policy",
+      "passed": true
+    },
+    {
+      "name": "safe_crop_all_viewports",
+      "passed": true,
+      "viewports": [
+        {
+          "viewport": [
+            1920,
+            1080
+          ],
+          "worst_case_focus_edges_norm": [
+            0.16419999999999993,
+            0.15339999999999995,
+            0.8358000000000001,
+            0.8466
+          ],
+          "passed": true
+        },
+        {
+          "viewport": [
+            1024,
+            768
+          ],
+          "worst_case_focus_edges_norm": [
+            0.16419999999999996,
+            0.15339999999999995,
+            0.8358,
+            0.8465999999999999
+          ],
+          "passed": true
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "worst_case_focus_edges_norm": [
+            0.16419999999999996,
+            0.15339999999999995,
+            0.8358,
+            0.8466
+          ],
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "low_quality_real_material:rift_void",
+      "passed": true,
+      "rgb_variance": 0.004333994816988707
+    },
+    {
+      "name": "low_quality_real_material:wasteland_farm",
+      "passed": true,
+      "rgb_variance": 0.003972476813942194
+    },
+    {
+      "name": "low_quality_real_material:ember_rift",
+      "passed": true,
+      "rgb_variance": 0.003585035679861903
+    },
+    {
+      "name": "central_gameplay_band_readability",
+      "passed": true,
+      "themes": [
+        {
+          "theme": "rift_void",
+          "luminance_std": 0.0036289123818278313,
+          "luminance_p95_p05": 0.004444068297743797,
+          "edge_density": 0.00035055133353389755,
+          "passed": true
+        },
+        {
+          "theme": "wasteland_farm",
+          "luminance_std": 0.025355558842420578,
+          "luminance_p95_p05": 0.06078145764768114,
+          "edge_density": 0.0039371623654366845,
+          "passed": true
+        },
+        {
+          "theme": "ember_rift",
+          "luminance_std": 0.0032672665547579527,
+          "luminance_p95_p05": 0.00825028377585113,
+          "edge_density": 0.00012033851748178572,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "wcag_text_contrast",
+      "passed": true,
+      "minimum_required": 4.5,
+      "regions": [
+        {
+          "theme": "rift_void",
+          "region": 0,
+          "minimum_ratio": 16.690114974975586,
+          "p01_ratio": 18.04599952697754,
+          "passed": true
+        },
+        {
+          "theme": "rift_void",
+          "region": 1,
+          "minimum_ratio": 16.825862884521484,
+          "p01_ratio": 18.3358097076416,
+          "passed": true
+        },
+        {
+          "theme": "wasteland_farm",
+          "region": 0,
+          "minimum_ratio": 16.428817749023438,
+          "p01_ratio": 17.930370330810547,
+          "passed": true
+        },
+        {
+          "theme": "wasteland_farm",
+          "region": 1,
+          "minimum_ratio": 16.58376693725586,
+          "p01_ratio": 17.858409881591797,
+          "passed": true
+        },
+        {
+          "theme": "ember_rift",
+          "region": 0,
+          "minimum_ratio": 17.152982711791992,
+          "p01_ratio": 19.005006790161133,
+          "passed": true
+        },
+        {
+          "theme": "ember_rift",
+          "region": 1,
+          "minimum_ratio": 17.320899963378906,
+          "p01_ratio": 18.945775985717773,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "quality_evidence_low_medium_high",
+      "passed": true,
+      "files": 9
+    },
+    {
+      "name": "viewport_evidence_three_sizes",
+      "passed": true,
+      "files": 9
+    }
+  ]
+}

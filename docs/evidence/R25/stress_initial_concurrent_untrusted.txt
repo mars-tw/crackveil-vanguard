@@ -1,0 +1,10 @@
+R25 STRESS FAILURE RECORD — concurrent/untrusted pre-change baseline
+Recorded from the original command output before R25 implementation.
+
+command:
+Godot_v4.7-stable_win64_console.exe --headless --fixed-fps 60 --path . res://scenes/debug/StressTest.tscn -- --baseline-source=R24_R25_BEFORE_AVG_MS_15.028 --machine-condition=concurrent_untrusted
+
+exit=1
+STRESS_RESULT baseline_source=R24_R25_BEFORE_AVG_MS_15.028 machine_condition=concurrent_untrusted avg_ms=218.534 p95_ms=746.723
+
+Disposition: preserved only as an untrusted shared-machine failure. It is not used as a passing baseline and no budget was loosened.
