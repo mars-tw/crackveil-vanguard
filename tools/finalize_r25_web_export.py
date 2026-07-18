@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "0.18.0-r25"
+RELEASE = "0.18.1-r26"
 FOCAL_SOURCE = ROOT / "assets" / "art" / "r25" / "r25_web_focal.webp"
 FOCAL_HASH = "48393809"
 FOCAL_REF = f"r25-web-focal.webp?v={FOCAL_HASH}"
@@ -50,6 +50,13 @@ def main() -> int:
             f'<img src="data:image/webp;base64,{focal_data}" alt="" '
             'style="width:100%;height:100%;object-fit:cover" '
             "onload=\"if(!performance.getEntriesByName('rift-r25-main-focal').length)performance.mark('rift-r25-main-focal')\">"
+            "<style>@media (orientation:portrait){#rift-r25-inline-focal img{object-fit:contain!important}}"
+            "#rift-r25-inline-focal::before{content:'CRACKVEIL VANGUARD';position:absolute;top:12%;left:0;right:0;z-index:1;"
+            "text-align:center;color:#dff3ff;font:600 24px/1.3 system-ui,sans-serif;letter-spacing:.14em;"
+            "text-shadow:0 2px 12px rgba(0,170,255,.25)}"
+            "#rift-r25-inline-focal::after{content:'';position:absolute;left:50%;bottom:15%;z-index:1;width:34px;height:34px;"
+            "margin-left:-17px;border:3px solid #2b4a63;border-top-color:#64d8ff;border-radius:50%;"
+            "animation:rift-spin 1s linear infinite}</style>"
             "</div><script>addEventListener('DOMContentLoaded',()=>{const f=document.getElementById('rift-r25-inline-focal');"
             "const s=document.getElementById('status');if(!f||!s)return;const timer=setInterval(()=>{"
             "if(!s.isConnected||getComputedStyle(s).display==='none'||window.__cvR22Controls?.main_menu||window.__cvR19Controls?.main_menu){"
