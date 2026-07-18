@@ -672,7 +672,16 @@ func _apply_responsive_layout() -> void:
 	var menu_x := (viewport_size.x - menu_width) * 0.5 if mobile and portrait else margin
 	var menu_y := logo_label.offset_bottom + 102.0 if mobile and portrait else logo_label.offset_bottom + 4.0 if mobile else 164.0 if not portrait else 108.0
 	var menu_button_count := menu_box.get_child_count()
-	menu_box.size = Vector2(menu_width, button_height * float(menu_button_count) + button_gap * float(max(0, menu_button_count - 1)))
+	var menu_block_height := button_height * float(menu_button_count) + button_gap * float(max(0, menu_button_count - 1))
+	if mobile and portrait:
+		# 直式：選單＋種子列整塊垂直置中，底部保留安全區——行動瀏覽器動態工具列
+		# 會吃掉視口下緣，固定 top 偏移會把種子列排進被遮蓋帶
+		var seed_block_height := touch_height + 16.0
+		var bottom_reserve := maxf(viewport_size.y * 0.085, 64.0)
+		var top_min := logo_label.offset_bottom + 24.0
+		var centered_y := (viewport_size.y - (menu_block_height + seed_block_height)) * 0.5
+		menu_y = clampf(centered_y, top_min, maxf(top_min, viewport_size.y - menu_block_height - seed_block_height - bottom_reserve))
+	menu_box.size = Vector2(menu_width, menu_block_height)
 	menu_box.position = Vector2(menu_x, menu_y)
 	for child in menu_box.get_children():
 		if child is Button:
@@ -755,6 +764,11 @@ func _apply_responsive_layout() -> void:
 	version_label.offset_right = -margin
 	version_label.offset_top = -32.0
 	version_label.offset_bottom = -10.0
+	if mobile and portrait:
+		# 直式抬離瀏覽器工具列遮蓋帶
+		var version_reserve := maxf(viewport_size.y * 0.085, 64.0)
+		version_label.offset_top = -version_reserve - 22.0
+		version_label.offset_bottom = -version_reserve
 	seed_input.add_theme_font_size_override("font_size", 14)
 	seed_start_button.add_theme_font_size_override("font_size", 14)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
