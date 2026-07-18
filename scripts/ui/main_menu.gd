@@ -764,11 +764,6 @@ func _apply_responsive_layout() -> void:
 	version_label.offset_right = -margin
 	version_label.offset_top = -32.0
 	version_label.offset_bottom = -10.0
-	if mobile and portrait:
-		# 直式抬離瀏覽器工具列遮蓋帶
-		var version_reserve := maxf(viewport_size.y * 0.085, 64.0)
-		version_label.offset_top = -version_reserve - 22.0
-		version_label.offset_bottom = -version_reserve
 	seed_input.add_theme_font_size_override("font_size", 14)
 	seed_start_button.add_theme_font_size_override("font_size", 14)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
