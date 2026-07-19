@@ -23,6 +23,7 @@ var card_grid: GridContainer
 var option_buttons: Array[Button] = []
 var meta_buttons: Dictionary = {}
 var pending_mobile_confirm_button: Button = null
+var italic_card_font_cache: FontVariation = null
 
 
 func _ready() -> void:
@@ -158,20 +159,32 @@ func show_options(options: Array) -> void:
 	for index in range(options.size()):
 		var option: Dictionary = options[index]
 		var button := Button.new()
-		button.text = "裂隙契約 · %s\n%s\n\n%s" % [
-			["I", "II", "III", "IV"][index % 4],
-			str(option.get("name", "契約")),
-			str(option.get("description", ""))
-		]
-		button.set_meta("base_text", button.text)
+		button.text = ""
 		button.set_meta("option_name", str(option.get("name", "契約")))
 		button.set_meta("option_key", _option_key(option))
+		button.set_meta("base_bbcode", _card_bbcode(index, option))
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		button.add_theme_font_size_override("font_size", 20)
+		var card_label := RichTextLabel.new()
+		card_label.name = "CardText"
+		card_label.bbcode_enabled = true
+		card_label.fit_content = false
+		card_label.scroll_active = false
+		card_label.shortcut_keys_enabled = false
+		card_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+		card_label.offset_left = 14.0
+		card_label.offset_top = 12.0
+		card_label.offset_right = -14.0
+		card_label.offset_bottom = -12.0
+		card_label.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+		card_label.add_theme_font_override("italics_font", _italic_card_font())
+		button.add_child(card_label)
+		_set_card_font_size(button, 20)
 		_apply_contract_card_style(button, index)
 		button.pressed.connect(_on_contract_pressed.bind(option))
 		card_grid.add_child(button)
 		option_buttons.append(button)
+		_render_card(button)
 
 	_refresh_meta_panel()
 	_apply_responsive_layout()
@@ -213,7 +226,7 @@ func _on_contract_pressed(contract: Dictionary) -> void:
 		if pressed_button != null and pressed_button != pending_mobile_confirm_button:
 			_reset_pending_mobile_confirm()
 			pending_mobile_confirm_button = pressed_button
-			pressed_button.text = "再次點擊確認\n\n" + str(pressed_button.get_meta("base_text", pressed_button.text))
+			_render_card(pressed_button)
 			return
 		if pressed_button != null:
 			_reset_pending_mobile_confirm()
@@ -262,9 +275,76 @@ func _option_key(option: Dictionary) -> String:
 
 
 func _reset_pending_mobile_confirm() -> void:
-	if pending_mobile_confirm_button != null and is_instance_valid(pending_mobile_confirm_button):
-		pending_mobile_confirm_button.text = str(pending_mobile_confirm_button.get_meta("base_text", pending_mobile_confirm_button.text))
+	var previous := pending_mobile_confirm_button
 	pending_mobile_confirm_button = null
+	if previous != null and is_instance_valid(previous):
+		_render_card(previous)
+
+
+func _card_bbcode(index: int, option: Dictionary) -> String:
+	var lines: Array[String] = []
+	lines.append("裂隙契約 · %s" % ["I", "II", "III", "IV"][index % 4])
+	lines.append(str(option.get("name", "契約")))
+	var flavor := str(option.get("flavor", ""))
+	if not flavor.is_empty():
+		lines.append("[i][color=#a9bdd6]%s[/color][/i]" % flavor)
+	lines.append(str(option.get("description", "")))
+	return "[center]" + "\n".join(lines) + "[/center]"
+
+
+func _card_label(button: Button) -> RichTextLabel:
+	if button == null or not is_instance_valid(button):
+		return null
+	return button.get_node_or_null("CardText") as RichTextLabel
+
+
+func _render_card(button: Button) -> void:
+	if button == null or not is_instance_valid(button):
+		return
+	var label := _card_label(button)
+	var compact := bool(button.get_meta("compact_mode", false))
+	var pending := button == pending_mobile_confirm_button
+	if compact:
+		if label != null:
+			label.visible = false
+		var index: int = maxi(option_buttons.find(button), 0)
+		if pending:
+			button.text = "再次點擊確認\n%s" % str(button.get_meta("option_name", "契約"))
+		else:
+			button.text = "%s · %s\n點兩次確認" % [["I", "II", "III", "IV"][index % 4], str(button.get_meta("option_name", "契約"))]
+	else:
+		button.text = ""
+		if label != null:
+			label.visible = true
+			var bbcode := str(button.get_meta("base_bbcode", ""))
+			label.text = ("[center]再次點擊確認[/center]\n" + bbcode) if pending else bbcode
+
+
+func _set_card_font_size(button: Button, size: int) -> void:
+	button.add_theme_font_size_override("font_size", size)
+	var label := _card_label(button)
+	if label != null:
+		label.add_theme_font_size_override("normal_font_size", size)
+		label.add_theme_font_size_override("bold_font_size", size)
+		label.add_theme_font_size_override("italics_font_size", size)
+
+
+func _sync_card_label_font_sizes(button: Button) -> void:
+	var label := _card_label(button)
+	if label == null:
+		return
+	var size := label.get_theme_font_size("normal_font_size")
+	label.add_theme_font_size_override("bold_font_size", size)
+	label.add_theme_font_size_override("italics_font_size", size)
+
+
+func _italic_card_font() -> FontVariation:
+	if italic_card_font_cache == null:
+		italic_card_font_cache = FontVariation.new()
+		var base_font: Font = root.get_theme_default_font() if root != null else ThemeDB.fallback_font
+		italic_card_font_cache.base_font = base_font
+		italic_card_font_cache.variation_transform = Transform2D(Vector2(1.0, 0.0), Vector2(0.24, 1.0), Vector2.ZERO)
+	return italic_card_font_cache
 
 
 func _build_meta_buttons() -> void:
@@ -424,17 +504,16 @@ func _apply_responsive_layout() -> void:
 	var card_height: float = 240.0 if mobile and portrait else 160.0 if portrait else max(190.0, available_card_height)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
+		button.set_meta("compact_mode", compact_landscape)
 		if compact_landscape:
-			var option_index := option_buttons.find(button)
 			button.autowrap_mode = TextServer.AUTOWRAP_OFF
 			button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-			button.text = "%s · %s\n點兩次確認" % [["I", "II", "III", "IV"][option_index % 4], str(button.get_meta("option_name", "契約"))]
-			button.add_theme_font_size_override("font_size", 14)
+			_set_card_font_size(button, 14)
 		else:
 			button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			button.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
-			button.text = str(button.get_meta("base_text", button.text))
-			button.add_theme_font_size_override("font_size", 18 if portrait else 18 if mobile else 20)
+			_set_card_font_size(button, 18 if portrait else 18 if mobile else 20)
+		_render_card(button)
 	if seed_input != null:
 		seed_input.add_theme_font_size_override("font_size", 13)
 	if seed_paste_button != null:
@@ -454,7 +533,9 @@ func _apply_responsive_layout() -> void:
 		seed_paste_button.add_theme_font_size_override("font_size", 15 if portrait else 13)
 		seed_start_button.add_theme_font_size_override("font_size", 15 if portrait else 13)
 		for button in option_buttons:
-			button.add_theme_font_size_override("font_size", 18 if portrait else 16)
+			_set_card_font_size(button, 18 if portrait else 16)
+	for button in option_buttons:
+		_sync_card_label_font_sizes(button)
 	call_deferred("_publish_reachability_probe", viewport_size)
 
 

@@ -33,36 +33,42 @@ const CONTRACT_POOL: Array = [
 	{
 		"id": "contract_blood_tax",
 		"name": "血稅",
+		"flavor": "裂隙低語：以你的血，換更利的刃。",
 		"description": "全隊傷害 +12%，受擊傷害 +10%。",
 		"rule_change": false
 	},
 	{
 		"id": "contract_golden_famine",
 		"name": "金饑",
+		"flavor": "裂隙撒下金雨，先扣住你的選擇作抵。",
 		"description": "金幣掉落 +40%；90 秒前升級只給 2 張選項。",
 		"rule_change": true
 	},
 	{
 		"id": "contract_quiet_veil",
 		"name": "靜幕",
+		"flavor": "裂隙先借你寂靜，稍後連本帶利討回。",
 		"description": "前 60 秒敵潮較疏；60 秒後敵潮加快補回壓力。",
 		"rule_change": true
 	},
 	{
 		"id": "contract_elite_beacon",
 		"name": "精英信標",
+		"flavor": "裂隙點亮信標，替強敵提前引路。",
 		"description": "首次精英提前到 35 秒；精英額外 +3 金幣。",
 		"rule_change": true
 	},
 	{
 		"id": "contract_glass_magnet",
 		"name": "玻璃磁界",
+		"flavor": "裂隙代你拾起一切，抵押是你的血肉。",
 		"description": "開局即啟用磁暴回收；全隊最大 HP -8%。",
 		"rule_change": true
 	},
 	{
 		"id": "contract_single_thread",
 		"name": "單線協定",
+		"flavor": "裂隙只與隊長簽約，其餘皆是附註。",
 		"description": "隊長傷害 +18%；隊員傷害 -10%。",
 		"rule_change": true
 	}

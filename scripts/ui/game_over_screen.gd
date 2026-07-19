@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+const DEFEAT_EPILOGUE := "先鋒的殘響沒入裂隙，這筆交易還沒結清——下一局討回來。"
 
 signal restart_requested
 signal main_menu_requested
@@ -124,7 +125,8 @@ func _update_summary_count(progress_ratio: float) -> void:
 		summary[key] = int(round(float(displayed_summary.get(key, 0)) * progress_ratio))
 	var progress: Dictionary = summary.get("echo_progress", {})
 	var elapsed := float(displayed_summary.get("elapsed_time", 0.0)) * progress_ratio
-	summary_label.text = "%s\n存活 %s　等級 %d　金幣 %d\n%s\n%s\n契約：%s\n%s" % [
+	summary_label.text = "%s\n%s\n存活 %s　等級 %d　金幣 %d\n%s\n%s\n契約：%s\n%s" % [
+		DEFEAT_EPILOGUE,
 		_survival_rating(elapsed),
 		GameManager.format_time(elapsed),
 		int(summary.get("level", 1)),

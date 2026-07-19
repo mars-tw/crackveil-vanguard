@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+const VICTORY_EPILOGUE := "「守門者·帷幕」沉回裂隙深處，先鋒把黎明帶回了戰線。"
 
 signal continue_requested
 signal main_menu_requested
@@ -103,7 +104,7 @@ func show_summary(summary: Dictionary) -> void:
 func _update_summary_count(progress_ratio: float) -> void:
 	var summary := displayed_summary
 	var progress: Dictionary = summary.get("echo_progress", {})
-	summary_label.text = "擊破守門者·帷幕\n存活  %s\n擊殺  %d\n精英擊殺  %d\n金幣  %d\n契約  %s\n殘響  +%d（本局 %d / 持有 %d）\n新成就  %s" % [
+	summary_label.text = VICTORY_EPILOGUE + "\n擊破守門者·帷幕\n存活  %s\n擊殺  %d\n精英擊殺  %d\n金幣  %d\n契約  %s\n殘響  +%d（本局 %d / 持有 %d）\n新成就  %s" % [
 		GameManager.format_time(float(summary.get("elapsed_time", 0.0)) * progress_ratio),
 		int(round(float(summary.get("kills", 0)) * progress_ratio)),
 		int(round(float(summary.get("elites_killed", 0)) * progress_ratio)),

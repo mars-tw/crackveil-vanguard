@@ -205,11 +205,16 @@ func _append_recruit_options(pool: Array) -> void:
 		var hero_id: String = str(hero_data.get("id"))
 		if member_ids.has(hero_id) or recruited_once.has(hero_id) or dead_ids.has(hero_id):
 			continue
+		var recruit_description: String = str(hero_data.get("description"))
+		var hero_quote_value = hero_data.get("quote")
+		var hero_quote: String = str(hero_quote_value) if hero_quote_value != null else ""
+		if not hero_quote.is_empty():
+			recruit_description = "「%s」\n%s" % [hero_quote, recruit_description]
 		pool.append({
 			"id": "recruit_hero",
 			"hero_id": hero_id,
 			"name": "招募：" + str(hero_data.get("display_name")),
-			"description": str(hero_data.get("description")),
+			"description": recruit_description,
 			"weight": recruit_weight
 		})
 

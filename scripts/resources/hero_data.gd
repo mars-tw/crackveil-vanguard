@@ -3,6 +3,8 @@ extends Resource
 
 @export var id: String = ""
 @export var display_name: String = "未命名英雄"
+@export var epithet: String = ""
+@export_multiline var quote: String = ""
 @export_multiline var description: String = ""
 @export var body_color: Color = Color(0.35, 0.78, 1.0)
 @export var core_color: Color = Color(0.88, 0.98, 1.0)
