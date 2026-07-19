@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "0.18.1-r26"
+RELEASE = "0.19.0-r29"
 FOCAL_SOURCE = ROOT / "assets" / "art" / "r25" / "r25_web_focal.webp"
 FOCAL_HASH = "48393809"
 FOCAL_REF = f"r25-web-focal.webp?v={FOCAL_HASH}"
@@ -56,14 +56,26 @@ def main() -> int:
             "text-shadow:0 2px 12px rgba(0,170,255,.25)}"
             "#rift-r25-inline-focal::after{content:'';position:absolute;left:50%;bottom:15%;z-index:1;width:34px;height:34px;"
             "margin-left:-17px;border:3px solid #2b4a63;border-top-color:#64d8ff;border-radius:50%;"
-            "animation:rift-spin 1s linear infinite}</style>"
+            "animation:rift-spin 1s linear infinite}"
+            "#rift-r29-mb{position:absolute;left:0;right:0;bottom:9.5%;z-index:1;text-align:center;color:#9fd8f2;"
+            "font:500 14px/1.5 system-ui,sans-serif;letter-spacing:.05em;text-shadow:0 1px 8px rgba(0,0,0,.85)}</style>"
+            '<div id="rift-r29-mb">連線中…</div>'
             "</div><script>addEventListener('DOMContentLoaded',()=>{const f=document.getElementById('rift-r25-inline-focal');"
-            "const s=document.getElementById('status');if(!f||!s)return;const timer=setInterval(()=>{"
+            "const s=document.getElementById('status');if(!f||!s)return;const mb=document.getElementById('rift-r29-mb');"
+            "const timer=setInterval(()=>{"
             "if(!s.isConnected||getComputedStyle(s).display==='none'||window.__cvR22Controls?.main_menu||window.__cvR19Controls?.main_menu){"
-            "f.remove();clearInterval(timer)}},50)},{once:true})</script>"
+            "f.remove();clearInterval(timer);return}"
+            # R29 P1-5：掛在既有 #status-progress 更新處，顯示「已載/總量 MB」給行動網路首載體感。
+            "const p=document.getElementById('status-progress');"
+            "if(mb){if(p&&p.getAttribute('max')&&p.max>0){const t=p.max/1048576;"
+            "mb.textContent='已載 '+(p.value/1048576).toFixed(1)+' / '+t.toFixed(1)+' MB'+(t>20?'（行動網路首次載入需時較久）':'')}"
+            "else{mb.textContent='連線下載中…'}}"
+            "},50)},{once:true})</script>"
         )
         html_text = html_text.replace("<body>", "<body>\n\t\t" + inline_block, 1)
         html.write_text(html_text, encoding="utf-8", newline="\n")
+    if "rift-r29-mb" not in html_text:
+        raise SystemExit("R29 loading MB counter marker missing from exported HTML")
     worker_text = worker.read_text(encoding="utf-8")
     worker_text, version_count = re.subn(
         r"const CACHE_VERSION = '[^']+';",
@@ -96,6 +108,7 @@ def main() -> int:
         "focal_ref": FOCAL_REF,
         "focal_source_sha256": source_hash,
         "focal_export_sha256": sha256(focal_output),
+        "loading_mb_marker": "rift-r29-mb",
         "cached_files": required_cached,
         "offline_url": "index.offline.html",
         "old_cache_cleanup": "activate deletes same-prefix caches except current CACHE_NAME",

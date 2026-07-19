@@ -22,6 +22,7 @@ var settings_button: Button
 var seed_row: HBoxContainer
 var seed_input: LineEdit
 var seed_start_button: Button
+var panel_backdrop: ColorRect
 var side_panel: Panel
 var side_title: Label
 var side_close_button: Button
@@ -31,8 +32,10 @@ var achievements_grid: GridContainer
 var achievement_dialog: AcceptDialog
 var version_label: Label
 var meta_buttons: Dictionary = {}
+var volume_row: HBoxContainer
 var volume_label: Label
 var volume_slider: HSlider
+var settings_toggle_grid: GridContainer
 var mute_check: CheckBox
 var damage_numbers_check: CheckBox
 var screen_shake_check: CheckBox
@@ -158,19 +161,40 @@ func _build_ui() -> void:
 	seed_start_button.pressed.connect(_on_seed_start_pressed)
 	seed_row.add_child(seed_start_button)
 
+	# R29 P0-2：面板後全幅暗化 backdrop——擋住並暗化底下主選單，點擊面板外即關閉。
+	panel_backdrop = ColorRect.new()
+	panel_backdrop.name = "PanelBackdrop"
+	panel_backdrop.color = Color(0.008, 0.016, 0.03, 0.62)
+	panel_backdrop.visible = false
+	panel_backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel_backdrop.gui_input.connect(_on_backdrop_gui_input)
+	root.add_child(panel_backdrop)
+
 	side_panel = Panel.new()
 	side_panel.name = "SidePanel"
 	side_panel.visible = false
+	# R29 P0-2：近不透明深底（alpha 0.97 ≥ 0.94），底下文字不再穿透；視覺語言與主選單按鈕同系。
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.027, 0.062, 0.094, 0.97)
+	panel_style.border_color = Color(0.34, 0.82, 0.94, 0.85)
+	panel_style.set_border_width_all(2)
+	panel_style.set_corner_radius_all(14)
+	panel_style.shadow_color = Color(0.0, 0.0, 0.0, 0.5)
+	panel_style.shadow_size = 16
+	side_panel.add_theme_stylebox_override("panel", panel_style)
 	root.add_child(side_panel)
 
 	side_title = Label.new()
 	side_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	side_title.add_theme_font_size_override("font_size", 24)
+	side_title.add_theme_color_override("font_color", Color(0.92, 0.98, 1.0, 1.0))
 	side_panel.add_child(side_title)
 
 	side_close_button = Button.new()
 	side_close_button.text = "關閉"
 	side_close_button.pressed.connect(_on_close_panel_pressed)
+	_apply_menu_button_style(side_close_button)
+	side_close_button.add_theme_font_size_override("font_size", 18)
 	side_panel.add_child(side_close_button)
 
 	side_scroll = ScrollContainer.new()
@@ -203,6 +227,12 @@ func _make_menu_button(text_value: String) -> Button:
 	button.text = text_value
 	button.custom_minimum_size = Vector2(220.0, 48.0)
 	button.add_theme_font_size_override("font_size", 20)
+	_apply_menu_button_style(button)
+	return button
+
+
+func _apply_menu_button_style(button: Button) -> void:
+	# R29 ART-1：主選單／面板按鈕共用同一組四態（normal/hover/pressed/focus）視覺語言。
 	var normal := StyleBoxFlat.new()
 	normal.bg_color = Color(0.045, 0.105, 0.15, 0.78)
 	normal.border_color = Color(0.34, 0.82, 0.94, 0.72)
@@ -219,18 +249,27 @@ func _make_menu_button(text_value: String) -> Button:
 	pressed.bg_color = Color(0.025, 0.075, 0.11, 0.96)
 	pressed.border_color = Color(0.78, 1.0, 1.0, 1.0)
 	pressed.content_margin_top = 4.0
+	var focus := StyleBoxFlat.new()
+	focus.draw_center = false
+	focus.border_color = Color(0.85, 1.0, 1.0, 0.9)
+	focus.set_border_width_all(2)
+	focus.set_corner_radius_all(12)
 	button.add_theme_stylebox_override("normal", normal)
 	button.add_theme_stylebox_override("hover", hover)
 	button.add_theme_stylebox_override("pressed", pressed)
+	button.add_theme_stylebox_override("focus", focus)
 	button.add_theme_color_override("font_color", Color(0.86, 0.97, 1.0))
-	return button
 
 
 func _show_panel(panel_id: String) -> void:
 	active_panel_id = panel_id
 	side_panel.visible = true
+	if panel_backdrop != null:
+		panel_backdrop.visible = true
+	volume_row = null
 	volume_slider = null
 	volume_label = null
+	settings_toggle_grid = null
 	mute_check = null
 	damage_numbers_check = null
 	screen_shake_check = null
@@ -270,6 +309,8 @@ func _build_meta_panel() -> void:
 		var track_id := str(track.get("id", ""))
 		var button := Button.new()
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		# R29 P1-3：已滿級（disabled）軌道文字補對比，深底上維持 ≥4.5:1。
+		button.add_theme_color_override("font_disabled_color", Color(0.62, 0.72, 0.8, 1.0))
 		button.pressed.connect(_on_meta_upgrade_pressed.bind(track_id))
 		side_content.add_child(button)
 		meta_buttons[track_id] = button
@@ -306,12 +347,13 @@ func _refresh_meta_buttons() -> void:
 func _unlock_text() -> String:
 	if not MetaProgress.has_method("get_unlock_definitions"):
 		return ""
+	# R29 文案潤飾：與成就徽章同語彙（✓／□），並明說解鎖條件單位。
 	var lines: Array[String] = ["解鎖入口"]
 	for unlock in MetaProgress.get_unlock_definitions():
 		var unlock_id := str(unlock.get("id", ""))
 		var unlocked := MetaProgress.has_unlock(unlock_id)
-		lines.append("%s %s（累積 %d）" % [
-			"已解鎖" if unlocked else "未解鎖",
+		lines.append("%s %s（累積 %d 碎片解鎖）" % [
+			"✓" if unlocked else "□",
 			str(unlock.get("name", "")),
 			int(unlock.get("required_lifetime_shards", 0))
 		])
@@ -371,9 +413,15 @@ func _apply_achievement_badge_style(button: Button, unlocked: bool) -> void:
 	hover.bg_color = Color(0.07, 0.22, 0.2, 0.96) if unlocked else Color(0.06, 0.07, 0.09, 0.92)
 	var pressed := normal.duplicate() as StyleBoxFlat
 	pressed.bg_color = Color(0.025, 0.1, 0.095, 1.0) if unlocked else Color(0.025, 0.03, 0.04, 1.0)
+	var focus := StyleBoxFlat.new()
+	focus.draw_center = false
+	focus.border_color = Color(0.85, 1.0, 1.0, 0.9)
+	focus.set_border_width_all(1)
+	focus.set_corner_radius_all(8)
 	button.add_theme_stylebox_override("normal", normal)
 	button.add_theme_stylebox_override("hover", hover)
 	button.add_theme_stylebox_override("pressed", pressed)
+	button.add_theme_stylebox_override("focus", focus)
 	button.add_theme_color_override("font_color", Color(0.9, 1.0, 0.92, 1.0) if unlocked else Color(0.5, 0.56, 0.62, 1.0))
 	button.add_theme_font_size_override("font_size", 13)
 
@@ -411,49 +459,63 @@ func _achievement_text() -> String:
 
 
 func _build_settings_panel() -> void:
+	# R29 P0-1：音量標籤＋滑桿併一列省直向高度；滑桿流式寬（EXPAND_FILL）不再固定 240px 溢出。
+	volume_row = HBoxContainer.new()
+	volume_row.add_theme_constant_override("separation", 12)
+	volume_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	side_content.add_child(volume_row)
+
 	volume_label = Label.new()
 	volume_label.text = "音量"
-	side_content.add_child(volume_label)
+	volume_row.add_child(volume_label)
 
 	volume_slider = HSlider.new()
 	volume_slider.min_value = 0.0
 	volume_slider.max_value = 1.0
 	volume_slider.step = 0.05
-	volume_slider.custom_minimum_size = Vector2(240.0, 44.0)
+	volume_slider.custom_minimum_size = Vector2(0.0, 44.0)
+	volume_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	volume_slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	volume_slider.value_changed.connect(_on_volume_slider_changed)
-	side_content.add_child(volume_slider)
+	volume_row.add_child(volume_slider)
 
-	var toggle_grid := GridContainer.new()
-	toggle_grid.columns = 2
-	toggle_grid.add_theme_constant_override("h_separation", 10)
-	toggle_grid.add_theme_constant_override("v_separation", 6)
-	toggle_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	side_content.add_child(toggle_grid)
+	# R29 P0-1：欄數不再固定兩欄；由 _apply_responsive_layout 依版面寬決定（<700px 一律單欄）。
+	settings_toggle_grid = GridContainer.new()
+	settings_toggle_grid.columns = 1
+	settings_toggle_grid.add_theme_constant_override("h_separation", 10)
+	settings_toggle_grid.add_theme_constant_override("v_separation", 6)
+	settings_toggle_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	side_content.add_child(settings_toggle_grid)
 
 	mute_check = CheckBox.new()
 	mute_check.text = "靜音"
+	mute_check.add_theme_font_size_override("font_size", 14)
 	mute_check.toggled.connect(_on_mute_toggled)
-	toggle_grid.add_child(mute_check)
+	settings_toggle_grid.add_child(mute_check)
 
 	damage_numbers_check = CheckBox.new()
 	damage_numbers_check.text = "顯示傷害數字"
+	damage_numbers_check.add_theme_font_size_override("font_size", 14)
 	damage_numbers_check.toggled.connect(_on_damage_numbers_toggled)
-	toggle_grid.add_child(damage_numbers_check)
+	settings_toggle_grid.add_child(damage_numbers_check)
 
 	screen_shake_check = CheckBox.new()
 	screen_shake_check.text = "螢幕震動"
+	screen_shake_check.add_theme_font_size_override("font_size", 14)
 	screen_shake_check.toggled.connect(_on_screen_shake_toggled)
-	toggle_grid.add_child(screen_shake_check)
+	settings_toggle_grid.add_child(screen_shake_check)
 
 	force_joystick_check = CheckBox.new()
 	force_joystick_check.text = "強制顯示搖桿"
+	force_joystick_check.add_theme_font_size_override("font_size", 14)
 	force_joystick_check.toggled.connect(_on_force_joystick_toggled)
-	toggle_grid.add_child(force_joystick_check)
+	settings_toggle_grid.add_child(force_joystick_check)
 
 	high_contrast_check = CheckBox.new()
 	high_contrast_check.text = "高對比"
+	high_contrast_check.add_theme_font_size_override("font_size", 14)
 	high_contrast_check.toggled.connect(_on_high_contrast_toggled)
-	toggle_grid.add_child(high_contrast_check)
+	settings_toggle_grid.add_child(high_contrast_check)
 
 	ui_scale_label = Label.new()
 	ui_scale_label.text = "介面大小"
@@ -465,7 +527,8 @@ func _build_settings_panel() -> void:
 	ui_scale_slider.step = 1.0
 	ui_scale_slider.tick_count = 3
 	ui_scale_slider.ticks_on_borders = true
-	ui_scale_slider.custom_minimum_size = Vector2(240.0, 44.0)
+	ui_scale_slider.custom_minimum_size = Vector2(0.0, 44.0)
+	ui_scale_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	ui_scale_slider.value_changed.connect(_on_ui_scale_slider_changed)
 	side_content.add_child(ui_scale_slider)
 	_sync_audio_controls()
@@ -473,21 +536,30 @@ func _build_settings_panel() -> void:
 
 
 func _build_guide_panel() -> void:
-	var guide_text := Label.new()
-	guide_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	guide_text.text = "\n".join([
-		"每局會從裂隙虛空、廢土農野、餘燼裂原隨機抽選一個戰場；擊敗 Boss 後可繼續無盡作戰。",
-		"開局先選契約：契約會改變本局風險與獎勵。",
-		"招募會把隊伍擴到最多 9 人；隊長死亡時全隊撤退。",
-		"羈絆由特定成員組合啟用，會改變武器、治療或防禦。",
-		"武器進化需要本局等級 7、指定質變等級與武器傷害等級。",
-		"商亭會在 Boss 前後出現，花金幣補血、改裝或刷新選項。",
-	])
-	side_content.add_child(guide_text)
+	# R29 P1-4＋文案潤飾：整段長文改逐則列表、字級基準 15（手機縮放後約 29px），
+	# 數字改中文（九人／等級七）、ASCII 詞移離斷行孤兒位，消除「擊敗 Boss／後可繼續」式硬拆。
+	var guide_rows := [
+		["戰場", "每局從裂隙虛空、廢土農野、餘燼裂原之中，隨機抽選一張戰場。"],
+		["無盡", "擊敗 Boss 之後可續戰無盡敵潮，衝擊更高紀錄。"],
+		["契約", "開局先選契約：契約會改變本局的風險與獎勵。"],
+		["隊伍", "招募可把隊伍擴到最多九人；隊長倒下，全隊撤退。"],
+		["羈絆", "特定成員同隊會啟用羈絆，改變武器、治療或防禦。"],
+		["進化", "武器進化需要本局等級七、指定質變等級與武器傷害等級。"],
+		["商亭", "商亭會在 Boss 戰前後出現：花金幣補血、改裝或刷新選項。"],
+	]
+	for row in guide_rows:
+		var row_label := Label.new()
+		row_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		row_label.text = "「%s」%s" % [str(row[0]), str(row[1])]
+		row_label.add_theme_font_size_override("font_size", 15)
+		row_label.add_theme_color_override("font_color", Color(0.87, 0.93, 0.97, 1.0))
+		side_content.add_child(row_label)
 
 	var tip_label := Label.new()
 	tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	tip_label.text = "進局後也可從暫停選單重看情境教學。"
+	tip_label.add_theme_font_size_override("font_size", 14)
+	tip_label.add_theme_color_override("font_color", Color(0.64, 0.79, 0.89, 1.0))
 	side_content.add_child(tip_label)
 
 
@@ -511,7 +583,28 @@ func _start_run(seed_text: String) -> void:
 
 
 func _on_close_panel_pressed() -> void:
+	_close_side_panel()
+
+
+func _close_side_panel() -> void:
 	side_panel.visible = false
+	if panel_backdrop != null:
+		panel_backdrop.visible = false
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	# R29 P0-2：ui_cancel（Esc／Android back）關閉面板，脫離模態陷阱。
+	if side_panel != null and side_panel.visible and event.is_action_pressed("ui_cancel"):
+		_close_side_panel()
+		get_viewport().set_input_as_handled()
+
+
+func _on_backdrop_gui_input(event: InputEvent) -> void:
+	# R29 P0-2：面板外點擊／觸控即關閉。
+	var mouse_pressed := event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT
+	var touch_pressed := event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed
+	if mouse_pressed or touch_pressed:
+		_close_side_panel()
 
 
 func _on_meta_upgrade_pressed(track_id: String) -> void:
@@ -712,18 +805,25 @@ func _apply_responsive_layout() -> void:
 	var panel_x := viewport_size.x - panel_width - margin
 	if mobile:
 		if portrait:
+			# R29 P0-1：面板為模態（backdrop 蓋住選單），直向可抬到近頂端換取控制垂直空間。
 			panel_width = viewport_size.x - margin * 2.0
 			panel_x = margin
-			panel_y = max(126.0, logo_label.offset_top + 112.0)
+			panel_y = maxf(40.0, viewport_size.y * 0.075)
 			panel_height = max(360.0, viewport_size.y - panel_y - margin)
 		else:
 			panel_width = max(300.0, viewport_size.x - menu_width - margin * 3.0)
 			panel_x = menu_box.position.x + menu_width + margin
 			panel_y = menu_y
 			panel_height = max(190.0, viewport_size.y - panel_y - margin)
+	# R29 P0-1b：面板寬統一收口 ≤ viewport−24px，任何檔位不得水平溢出。
+	panel_width = minf(panel_width, viewport_size.x - 24.0)
+	panel_x = clampf(panel_x, 12.0, maxf(12.0, viewport_size.x - panel_width - 12.0))
 	var available_panel_height: float = max(1.0, viewport_size.y - panel_y - margin)
 	var minimum_panel_height: float = min(260.0 if not mobile else 164.0, available_panel_height)
 	panel_height = clamp(panel_height, minimum_panel_height, available_panel_height)
+	if panel_backdrop != null:
+		panel_backdrop.position = Vector2.ZERO
+		panel_backdrop.size = viewport_size
 	side_panel.position = Vector2(panel_x, panel_y)
 	side_panel.size = Vector2(panel_width, panel_height)
 
@@ -734,11 +834,17 @@ func _apply_responsive_layout() -> void:
 	side_close_button.size = Vector2(104.0 if mobile else 82.0, touch_height)
 	if side_scroll != null:
 		var scroll_y := 64.0 if mobile and not portrait else 76.0 if mobile else 70.0
-		var scroll_bottom := 0.0 if mobile and not portrait else 84.0 if mobile else 92.0
+		# R29 P0-1：直向手機面板底部原保留 84px 空帶（無任何控件），縮到 24px 還給設定控制。
+		var scroll_bottom := 0.0 if mobile and not portrait else 24.0 if mobile else 92.0
 		side_scroll.position = Vector2(24.0 if mobile else 28.0, scroll_y)
 		side_scroll.size = Vector2(panel_width - (48.0 if mobile else 56.0), panel_height - scroll_y - scroll_bottom)
 	if side_content != null:
 		side_content.custom_minimum_size = Vector2(max(240.0, panel_width - (48.0 if mobile else 56.0)), 0.0)
+	if settings_toggle_grid != null and is_instance_valid(settings_toggle_grid):
+		# R29 P0-1：以版面寬決定欄數——窄版面（<700px，含手機直向）一律單欄流式。
+		settings_toggle_grid.columns = 1 if viewport_size.x < 700.0 else 2
+	if volume_row != null and is_instance_valid(volume_row):
+		volume_row.visible = not (mobile and not portrait)
 	if volume_label != null:
 		volume_label.visible = not (mobile and not portrait)
 	if volume_slider != null:
@@ -815,7 +921,8 @@ func _ui_scale_multiplier() -> float:
 func _apply_accessibility_palette() -> void:
 	var high_contrast := PlayerSettings != null and bool(PlayerSettings.get("high_contrast_enabled"))
 	if side_panel != null:
-		side_panel.modulate = Color(1.0, 1.0, 1.0, 0.98 if high_contrast else 0.88)
+		# R29 P0-2：面板不再半透明（原 0.88 讓底下選單文字穿透、內文對比不足）。
+		side_panel.modulate = Color(1.0, 1.0, 1.0, 1.0)
 	var labels: Array = [logo_label, logo_glow_label, side_title, version_label, ui_scale_label]
 	for control in labels:
 		var label := control as Label

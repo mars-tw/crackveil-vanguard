@@ -1,0 +1,43 @@
+# R29 本地 gate 輸出摘要（Godot 4.7 stable headless, Windows, 2026-07-19）
+
+## EnemyArtRegressionTest
+ENEMY_ART_ASSETS=7 source_canvas=96x96 atlas=512x3712 states=4/8/6/3/6 shared=true heroes=10 packed=true
+ENEMY_ART_REGRESSION_PASS
+
+## GameplayCapTest
+GAMEPLAY_CAP_PASS
+
+## PoolContractTest
+POOL_CONTRACT_PASS
+
+## R14RegressionTest
+R22_CONTROLS_SPEC_PASS phone_landscape
+R22_CONTROLS_SPEC_PASS tablet_touch
+R22_CONTROLS_SPEC_PASS coarse_short_laptop
+R22_CONTROLS_REACHABILITY viewports=1920x1080,1440x780,1366x600,1280x640,390x844_touch,844x390_touch,1024x768_touch,1366x600_coarse rect=inside hit>=44 no_overlap canvas=internal
+R14_REGRESSION_PASS
+
+## R25ParallaxRegressionTest
+R25_PARALLAX_REGRESSION_PASS
+
+## R29MenuModalTest
+R29_PORTRAIT_MODAL panel_alpha=0.97 guide_rows=8 columns=1
+R29_DESKTOP_COLUMNS columns=2
+R29_MENU_MODAL_PASS portrait=single_column desktop=two_column modal=backdrop+ui_cancel panel_alpha>=0.94
+
+## SquadSmokeTest
+WEAPON_SMOKE_PASS: 9-member squad, following, weapons, and recruit upgrades verified
+
+## TrueAnimationRegressionTest
+TRUE_ANIMATION_REGRESSION_PASS
+
+## WeaponSmokeTest
+WEAPON_SMOKE_PASS: 9-member squad, following, weapons, and recruit upgrades verified
+
+## import/export/finalize
+import x2 exit=0; import3 exit=0
+web export exit=0
+R25_PWA_CACHE_PASS version=0.19.0-r29|48393809 files=11
+
+## 秘密掃描
+grep -rniE 'sk-proj-...|sk-...|xai-...' . --exclude-dir=.git → 零命中（含二進位全量）
