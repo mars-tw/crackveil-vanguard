@@ -66,9 +66,11 @@ def main() -> int:
             "if(!s.isConnected||getComputedStyle(s).display==='none'||window.__cvR22Controls?.main_menu||window.__cvR19Controls?.main_menu){"
             "f.remove();clearInterval(timer);return}"
             # R29 P1-5：掛在既有 #status-progress 更新處，顯示「已載/總量 MB」給行動網路首載體感。
+            # R29.1 M1：value/max 均以 Number.isFinite 防護——異常口徑退回引導文案，不得露出 NaN。
             "const p=document.getElementById('status-progress');"
-            "if(mb){if(p&&p.getAttribute('max')&&p.max>0){const t=p.max/1048576;"
-            "mb.textContent='已載 '+(p.value/1048576).toFixed(1)+' / '+t.toFixed(1)+' MB'+(t>20?'（行動網路首次載入需時較久）':'')}"
+            "if(mb){const mx=p&&p.getAttribute('max')?Number(p.max):NaN;const v=p?Number(p.value):NaN;"
+            "if(Number.isFinite(mx)&&mx>0&&Number.isFinite(v)&&v>=0){const t=mx/1048576;"
+            "mb.textContent='已載 '+(v/1048576).toFixed(1)+' / '+t.toFixed(1)+' MB'+(t>20?'（行動網路首次載入需時較久）':'')}"
             "else{mb.textContent='連線下載中…'}}"
             "},50)},{once:true})</script>"
         )

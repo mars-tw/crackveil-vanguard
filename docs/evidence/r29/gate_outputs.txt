@@ -41,3 +41,19 @@ R25_PWA_CACHE_PASS version=0.19.0-r29|48393809 files=11
 
 ## 秘密掃描
 grep -rniE 'sk-proj-...|sk-...|xai-...' . --exclude-dir=.git → 零命中（含二進位全量）
+
+# R29.1 硬化補丁重跑（Grok 對抗複審裁決 R2/L1/M1/T2）
+
+## R29MenuModalTest（T2 擴充後）
+R29_PORTRAIT_MODAL panel_alpha=0.97 guide_rows=8 columns=1（settings backdrop 斷言新增）
+R29_BOUNDARY_COLUMNS 699=1 700=2
+R29_LANDSCAPE_TWO_COLUMN columns=2 panel_width=476
+R29_DESKTOP_COLUMNS columns=2
+R29_MENU_MODAL_PASS portrait=single_column boundary=699/700 landscape=two_column desktop=two_column modal=backdrop+ui_cancel panel_alpha>=0.94（exit=0）
+
+## R14RegressionTest（R2/L1 佈局改動後重跑）
+R14_REGRESSION_PASS（exit=0）
+
+## 重匯出＋finalize（M1 驗證）
+web export exit=0；R25_PWA_CACHE_PASS version=0.19.0-r29|48393809 files=11
+匯出 HTML 含 Number.isFinite 防護（value/max 雙檢，異常退回「連線下載中…」，不露 NaN）

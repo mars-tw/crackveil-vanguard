@@ -27,11 +27,17 @@ func _run_tests() -> void:
 	current_phase = "portrait_modal"
 	if not await _test_portrait_modal():
 		return
+	current_phase = "boundary_columns"
+	if not await _test_boundary_columns():
+		return
+	current_phase = "landscape_two_column"
+	if not await _test_landscape_two_column():
+		return
 	current_phase = "desktop_columns"
 	if not await _test_desktop_columns():
 		return
 	current_phase = "done"
-	print("R29_MENU_MODAL_PASS portrait=single_column desktop=two_column modal=backdrop+ui_cancel panel_alpha>=0.94")
+	print("R29_MENU_MODAL_PASS portrait=single_column boundary=699/700 landscape=two_column desktop=two_column modal=backdrop+ui_cancel panel_alpha>=0.94")
 	get_tree().quit(0)
 
 
@@ -94,9 +100,13 @@ func _test_portrait_modal() -> bool:
 		return false
 
 	# P0-1：390 直向設定切換群單欄、控制不水平溢出、面板寬 clamp <= viewport-24。
+	# R29.1 T2：settings 面板同樣必須掛 backdrop（模態一致性）。
 	menu._show_panel("settings")
 	await get_tree().process_frame
 	await get_tree().process_frame
+	if not menu.panel_backdrop.visible:
+		_fail("settings panel did not raise modal backdrop")
+		return false
 	if menu.settings_toggle_grid == null or menu.settings_toggle_grid.columns != 1:
 		_fail("portrait settings toggles are not single column")
 		return false
@@ -116,6 +126,79 @@ func _test_portrait_modal() -> bool:
 	viewport.queue_free()
 	MOBILE_TUNING.set_device_hints_override_for_tests()
 	print("R29_PORTRAIT_MODAL panel_alpha=%.2f guide_rows=%d columns=1" % [panel_style.bg_color.a, label_count])
+	return true
+
+
+func _test_boundary_columns() -> bool:
+	# R29.1 T2：欄數切換邊界——版面寬 699px 單欄、700px 兩欄。
+	var phone_hints := {"mobile_os": false, "ua_mobile": true, "ua_phone": true, "ua_tablet": false, "touch_available": true, "primary_coarse": true, "mouse_available": false}
+	var below := await _settings_columns_at(Vector2(699.0, 844.0), phone_hints)
+	if below != 1:
+		_fail("699px viewport should use single column, got %d" % below)
+		return false
+	var above := await _settings_columns_at(Vector2(700.0, 844.0), phone_hints)
+	if above != 2:
+		_fail("700px viewport should use two columns, got %d" % above)
+		return false
+	print("R29_BOUNDARY_COLUMNS 699=1 700=2")
+	return true
+
+
+func _settings_columns_at(size: Vector2, hints: Dictionary) -> int:
+	MOBILE_TUNING.set_device_hints_override_for_tests(hints)
+	var viewport := _make_ui_viewport(size)
+	var menu := MAIN_MENU_SCRIPT.new()
+	viewport.add_child(menu)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	menu._show_panel("settings")
+	await get_tree().process_frame
+	var columns := -1
+	if menu.settings_toggle_grid != null and is_instance_valid(menu.settings_toggle_grid):
+		columns = menu.settings_toggle_grid.columns
+	viewport.queue_free()
+	MOBILE_TUNING.set_device_hints_override_for_tests()
+	return columns
+
+
+func _test_landscape_two_column() -> bool:
+	# R29.1 T2：844x390 手機橫向——backdrop 存在、兩欄、面板寬 <= viewport-24、控制不橫向溢出。
+	var phone_hints := {"mobile_os": false, "ua_mobile": true, "ua_phone": true, "ua_tablet": false, "touch_available": true, "primary_coarse": true, "mouse_available": false}
+	MOBILE_TUNING.set_device_hints_override_for_tests(phone_hints)
+	var viewport := _make_ui_viewport(Vector2(844.0, 390.0))
+	var menu := MAIN_MENU_SCRIPT.new()
+	viewport.add_child(menu)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	menu._show_panel("settings")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if menu.panel_backdrop == null or not menu.panel_backdrop.visible:
+		_fail("landscape settings did not raise modal backdrop")
+		return false
+	if menu.settings_toggle_grid == null or menu.settings_toggle_grid.columns != 2:
+		_fail("landscape phone settings should use two columns")
+		return false
+	var panel_rect: Rect2 = menu.side_panel.get_global_rect()
+	if panel_rect.size.x > 844.0 - 24.0 + 0.75:
+		_fail("landscape panel width exceeds viewport-24 clamp: %.1f" % panel_rect.size.x)
+		return false
+	if panel_rect.position.x < -0.75 or panel_rect.end.x > 844.0 + 0.75:
+		_fail("landscape panel overflows viewport horizontally: " + str(panel_rect))
+		return false
+	var content_rect: Rect2 = menu.side_content.get_global_rect()
+	for control_value in [menu.mute_check, menu.damage_numbers_check, menu.screen_shake_check, menu.high_contrast_check, menu.ui_scale_slider]:
+		var control := control_value as Control
+		if control == null:
+			_fail("landscape settings control missing")
+			return false
+		var rect := control.get_global_rect()
+		if rect.end.x > content_rect.end.x + 0.75:
+			_fail("landscape settings control overflows content horizontally: " + str(rect))
+			return false
+	viewport.queue_free()
+	MOBILE_TUNING.set_device_hints_override_for_tests()
+	print("R29_LANDSCAPE_TWO_COLUMN columns=2 panel_width=%.0f" % panel_rect.size.x)
 	return true
 
 

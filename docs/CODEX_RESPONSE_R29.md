@@ -86,3 +86,14 @@ DOM 級行為驗證（真瀏覽器 Esc/點外/MB 數字）由 CI `test_controls_
 - **字型子集**：新文案用字均落在 3000 常用字安全集內，且 CI 每次部署重建子集，無缺字風險；本地 committed 子集未重建（與 R28 相同流程）。
 - **窄直向桌機視窗**（fine-pointer portrait，如 680×900）沿用 r26 桌機直向面板參數，非 FINDINGS 案例範圍；如需一併打磨列後續輪。
 - **引擎 40MB 首載瘦身**：Codex 7/24 佇列（D-02 第二步等），本輪僅補下載量體感。
+
+## R29.1 硬化補丁（Grok 對抗複審裁決，另開 commit）
+
+| id | 修法 | 驗證 |
+|---|---|---|
+| R2 | `side_content` 寬度雙向 clamp：240px 下限僅在捲動區容得下時生效，上限取「捲動區內寬」與「viewport−48」較小者——極窄視口不再橫向溢出 | R14＋R29 gate 重跑綠 |
+| L1 | `panel_width` 收口後加 `maxf(…, 160)` 正值下限，極小視口不得算出零寬/負寬面板 | 同上 |
+| M1 | MB 輪詢對 `#status-progress` 的 value/max 均以 `Number.isFinite` 防護（value 另加 ≥0），異常口徑退回「連線下載中…」，不露 NaN | 重匯出＋finalize 綠，HTML 實測含防護 |
+| T2 | `R29MenuModalTest` 補三案例：699/700 欄數切換邊界（699=1、700=2）；844×390 手機橫向（backdrop 存在、兩欄、面板寬 476 ≤ viewport−24、控制不橫向溢出）；直向 settings 面板 backdrop 斷言 | `R29_MENU_MODAL_PASS`（exit=0） |
+
+Grok V1（版本鏈）／G1（CI 未入）兩條經總稽核以完整 commit stat 駁回（審查包僅含三檔 diff 之視角問題），未動作。

@@ -816,7 +816,8 @@ func _apply_responsive_layout() -> void:
 			panel_y = menu_y
 			panel_height = max(190.0, viewport_size.y - panel_y - margin)
 	# R29 P0-1b：面板寬統一收口 ≤ viewport−24px，任何檔位不得水平溢出。
-	panel_width = minf(panel_width, viewport_size.x - 24.0)
+	# R29.1 L1：加 160px 正值下限——極小視口不得算出零寬/負寬面板。
+	panel_width = maxf(minf(panel_width, viewport_size.x - 24.0), 160.0)
 	panel_x = clampf(panel_x, 12.0, maxf(12.0, viewport_size.x - panel_width - 12.0))
 	var available_panel_height: float = max(1.0, viewport_size.y - panel_y - margin)
 	var minimum_panel_height: float = min(260.0 if not mobile else 164.0, available_panel_height)
@@ -839,7 +840,11 @@ func _apply_responsive_layout() -> void:
 		side_scroll.position = Vector2(24.0 if mobile else 28.0, scroll_y)
 		side_scroll.size = Vector2(panel_width - (48.0 if mobile else 56.0), panel_height - scroll_y - scroll_bottom)
 	if side_content != null:
-		side_content.custom_minimum_size = Vector2(max(240.0, panel_width - (48.0 if mobile else 56.0)), 0.0)
+		# R29.1 R2：雙向 clamp——240px 下限僅在捲動區容得下時生效；極窄視口以
+		# 捲動區內寬與 viewport−48 取小者收口，任何視口不得橫向溢出。
+		var side_inner_width: float = maxf(0.0, panel_width - (48.0 if mobile else 56.0))
+		var side_content_cap: float = minf(side_inner_width, maxf(0.0, viewport_size.x - 48.0))
+		side_content.custom_minimum_size = Vector2(minf(maxf(240.0, side_inner_width), side_content_cap), 0.0)
 	if settings_toggle_grid != null and is_instance_valid(settings_toggle_grid):
 		# R29 P0-1：以版面寬決定欄數——窄版面（<700px，含手機直向）一律單欄流式。
 		settings_toggle_grid.columns = 1 if viewport_size.x < 700.0 else 2
