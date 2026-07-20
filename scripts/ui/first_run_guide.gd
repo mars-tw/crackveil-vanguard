@@ -6,6 +6,7 @@ const WEB_REACHABILITY_PROBE := preload("res://scripts/services/web_reachability
 const SAVE_PATH := "user://crackveil_guide.cfg"
 
 var root: Control
+var backdrop: ColorRect
 var panel: Panel
 var title_label: Label
 var body_label: Label
@@ -55,10 +56,13 @@ func _build_ui() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
 
-	var dim := ColorRect.new()
-	dim.color = Color(0.0, 0.0, 0.0, 0.54)
-	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.add_child(dim)
+	backdrop = ColorRect.new()
+	backdrop.name = "OpaqueBackdrop"
+	# R30 R1-03：簡報是最高層 modal；不透出先建立的契約標題、HUD 或戰場。
+	backdrop.color = Color(0.004, 0.008, 0.02, 1.0)
+	backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
+	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(backdrop)
 
 	panel = Panel.new()
 	panel.name = "Panel"
@@ -265,7 +269,7 @@ func _ui_scale_multiplier() -> float:
 
 func _apply_accessibility_palette() -> void:
 	var high_contrast := PlayerSettings != null and bool(PlayerSettings.get("high_contrast_enabled"))
-	panel.modulate = Color(1.0, 1.0, 1.0, 0.98 if high_contrast else 0.9)
+	panel.modulate = Color(1.0, 1.0, 1.0, 0.98 if high_contrast else 0.96)
 	for label in [title_label, body_label]:
 		if label == null:
 			continue

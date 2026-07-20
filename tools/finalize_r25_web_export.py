@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Copy the R25 focal and synchronize Godot's PWA cache manifest."""
+"""Copy the R25 focal and finalize the R30 Web/PWA shell."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "0.19.0-r29"
+RELEASE = "0.19.1-r30"
 FOCAL_SOURCE = ROOT / "assets" / "art" / "r25" / "r25_web_focal.webp"
 FOCAL_HASH = "48393809"
 FOCAL_REF = f"r25-web-focal.webp?v={FOCAL_HASH}"
@@ -26,7 +26,7 @@ def sha256(path: Path) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir", required=True, help="Godot Web export directory")
-    parser.add_argument("--evidence", default="docs/evidence/R25/pwa_cache_verification.json")
+    parser.add_argument("--evidence", default="docs/evidence/r30/pwa_cache_verification.json")
     args = parser.parse_args()
     output = Path(args.dir).resolve()
     html = output / "index.html"
@@ -57,16 +57,15 @@ def main() -> int:
             "#rift-r25-inline-focal::after{content:'';position:absolute;left:50%;bottom:15%;z-index:1;width:34px;height:34px;"
             "margin-left:-17px;border:3px solid #2b4a63;border-top-color:#64d8ff;border-radius:50%;"
             "animation:rift-spin 1s linear infinite}"
-            "#rift-r29-mb{position:absolute;left:0;right:0;bottom:9.5%;z-index:1;text-align:center;color:#9fd8f2;"
+            "#rift-r30-mb{position:absolute;left:0;right:0;bottom:9.5%;z-index:1;text-align:center;color:#9fd8f2;"
             "font:500 14px/1.5 system-ui,sans-serif;letter-spacing:.05em;text-shadow:0 1px 8px rgba(0,0,0,.85)}</style>"
-            '<div id="rift-r29-mb">連線中…</div>'
+            '<div id="rift-r30-mb">連線中…</div>'
             "</div><script>addEventListener('DOMContentLoaded',()=>{const f=document.getElementById('rift-r25-inline-focal');"
-            "const s=document.getElementById('status');if(!f||!s)return;const mb=document.getElementById('rift-r29-mb');"
+            "const s=document.getElementById('status');if(!f||!s)return;const mb=document.getElementById('rift-r30-mb');"
             "const timer=setInterval(()=>{"
             "if(!s.isConnected||getComputedStyle(s).display==='none'||window.__cvR22Controls?.main_menu||window.__cvR19Controls?.main_menu){"
             "f.remove();clearInterval(timer);return}"
-            # R29 P1-5：掛在既有 #status-progress 更新處，顯示「已載/總量 MB」給行動網路首載體感。
-            # R29.1 M1：value/max 均以 Number.isFinite 防護——異常口徑退回引導文案，不得露出 NaN。
+            # R30 保留載入 MB 回饋與 Number.isFinite 雙防護。
             "const p=document.getElementById('status-progress');"
             "if(mb){const mx=p&&p.getAttribute('max')?Number(p.max):NaN;const v=p?Number(p.value):NaN;"
             "if(Number.isFinite(mx)&&mx>0&&Number.isFinite(v)&&v>=0){const t=mx/1048576;"
@@ -76,8 +75,22 @@ def main() -> int:
         )
         html_text = html_text.replace("<body>", "<body>\n\t\t" + inline_block, 1)
         html.write_text(html_text, encoding="utf-8", newline="\n")
-    if "rift-r29-mb" not in html_text:
-        raise SystemExit("R29 loading MB counter marker missing from exported HTML")
+    if "rift-r30-mb" not in html_text:
+        raise SystemExit("R30 loading MB counter marker missing from exported HTML")
+    sw_registration_marker = "rift-r30-offline-fallback"
+    if sw_registration_marker not in html_text:
+        registration_block = (
+            f'<script id="{sw_registration_marker}">'
+            "(()=>{if(!('serviceWorker'in navigator)||location.protocol==='file:')return;"
+            "addEventListener('load',()=>navigator.serviceWorker.register('index.service.worker.js')"
+            ".then(()=>navigator.serviceWorker.ready).then(r=>r.active?.postMessage('claim'))"
+            ".catch(e=>console.warn('R30 offline fallback registration failed',e)),{once:true})})()"
+            "</script>"
+        )
+        html_text = html_text.replace("</body>", registration_block + "\n\t</body>", 1)
+        html.write_text(html_text, encoding="utf-8", newline="\n")
+    if html_text.count(sw_registration_marker) != 1:
+        raise SystemExit("R30 offline fallback registration marker missing or duplicated")
     worker_text = worker.read_text(encoding="utf-8")
     worker_text, version_count = re.subn(
         r"const CACHE_VERSION = '[^']+';",
@@ -110,16 +123,18 @@ def main() -> int:
         "focal_ref": FOCAL_REF,
         "focal_source_sha256": source_hash,
         "focal_export_sha256": sha256(focal_output),
-        "loading_mb_marker": "rift-r29-mb",
+        "loading_mb_marker": "rift-r30-mb",
+        "service_worker_registration_marker": sw_registration_marker,
         "cached_files": required_cached,
         "offline_url": "index.offline.html",
         "old_cache_cleanup": "activate deletes same-prefix caches except current CACHE_NAME",
-        "passed": source_hash == sha256(focal_output) and all(name in worker_text for name in required_cached),
+        "offline_policy": "navigation fallback only; 40 MB game payload is not pre-cached",
+        "passed": source_hash == sha256(focal_output) and all(name in worker_text for name in required_cached) and sw_registration_marker in html_text,
     }
     evidence = ROOT / args.evidence
     evidence.parent.mkdir(parents=True, exist_ok=True)
     evidence.write_text(json.dumps(checks, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"R25_PWA_CACHE_PASS version={checks['cache_version']} files={len(required_cached)}")
+    print(f"R30_PWA_FALLBACK_PASS version={checks['cache_version']} files={len(required_cached)} registration=explicit")
     return 0
 
 

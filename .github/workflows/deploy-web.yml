@@ -123,6 +123,7 @@ jobs:
           scenes=(
             R14RegressionTest
             R29MenuModalTest
+            R30PlaytestFixTest
             TrueAnimationRegressionTest
             PoolContractTest
             GameplayCapTest
@@ -199,6 +200,8 @@ jobs:
           export UI_CAPTURE_EVIDENCE_DIR="docs/evidence/R25/controls"
           python3 tools/check_available_memory.py --label controls
           node tools/test_controls_reachability.mjs
+          export R30_PLAYTEST_SCREENSHOT="${RUNNER_TEMP}/r30-844x390-combat.png"
+          node tools/test_r30_playtest.mjs
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

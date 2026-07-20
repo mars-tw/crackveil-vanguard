@@ -14,6 +14,7 @@ var xp_icon: TextureRect
 var gold_icon: TextureRect
 var hp_label: Label
 var level_label: Label
+var xp_readout_label: Label
 var xp_bar: ProgressBar
 var theme_label: Label
 var time_label: Label
@@ -84,6 +85,9 @@ var milestone_tween: Tween = null
 var combo_break_tween: Tween = null
 var boss_intro_tween: Tween = null
 var screenshot_beauty_active: bool = false
+var last_level_value: int = 1
+var last_xp_value: int = 0
+var last_xp_required_value: int = 1
 
 
 func _ready() -> void:
@@ -183,6 +187,12 @@ func _build_ui() -> void:
 	level_label.position = Vector2(50.0, 42.0)
 	level_label.add_theme_font_size_override("font_size", 16)
 	root.add_child(level_label)
+
+	xp_readout_label = Label.new()
+	xp_readout_label.name = "XPReadoutLabel"
+	xp_readout_label.visible = false
+	xp_readout_label.add_theme_font_size_override("font_size", 16)
+	root.add_child(xp_readout_label)
 
 	xp_bar = ProgressBar.new()
 	xp_bar.name = "XPBar"
@@ -795,10 +805,18 @@ func _apply_responsive_layout() -> void:
 	var margin := 16.0 if mobile else 14.0
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
 	var safe_top := MOBILE_TUNING.safe_top_padding(viewport_size)
+	var compact_landscape := mobile and not portrait
+	_refresh_primary_stat_labels(compact_landscape)
 
 	if hud_panel != null:
 		hud_panel.position = Vector2(8.0, safe_top + 58.0) if mobile and portrait else Vector2(8.0, safe_top + 8.0 if mobile else 8.0)
-		hud_panel.size = Vector2(min(viewport_size.x - 16.0, 382.0), 126.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.72 if portrait else 0.38), 390.0 if mobile else 340.0), 112.0 if mobile else 108.0)
+		if mobile and portrait:
+			hud_panel.size = Vector2(min(viewport_size.x - 16.0, 382.0), 126.0)
+		elif compact_landscape:
+			# R30 R1-01：844x390 的 HP／等級＋經驗／XP bar 各有獨立垂直節奏。
+			hud_panel.size = Vector2(min(viewport_size.x * 0.38, 390.0), 118.0)
+		else:
+			hud_panel.size = Vector2(min(viewport_size.x * (0.72 if portrait else 0.38), 340.0), 108.0)
 	if score_panel != null:
 		if mobile and portrait:
 			score_panel.anchor_left = 0.5
@@ -824,8 +842,8 @@ func _apply_responsive_layout() -> void:
 	if xp_icon != null:
 		xp_icon.anchor_left = 0.0
 		xp_icon.anchor_right = 0.0
-		xp_icon.position = Vector2(margin + 2.0, safe_top + 114.0) if mobile and portrait else Vector2(margin + 2.0, safe_top + 42.0 if mobile else 44.0)
-		xp_icon.size = Vector2(34.0, 34.0) if mobile and portrait else Vector2(30.0, 30.0) if mobile else Vector2(24.0, 24.0)
+		xp_icon.position = Vector2(margin + 2.0, safe_top + 114.0) if mobile and portrait else Vector2(margin + 2.0, safe_top + 52.0 if compact_landscape else 44.0)
+		xp_icon.size = Vector2(34.0, 34.0) if mobile and portrait else Vector2(26.0, 26.0) if compact_landscape else Vector2(24.0, 24.0)
 	if gold_icon != null:
 		gold_icon.visible = not mobile
 		if mobile and portrait:
@@ -843,12 +861,17 @@ func _apply_responsive_layout() -> void:
 			gold_icon.offset_top = safe_top + 86.0 if mobile and not portrait else 20.0 if not portrait else 60.0
 			gold_icon.offset_bottom = gold_icon.offset_top + (30.0 if mobile else 26.0)
 
-	hp_label.position = Vector2(margin + 48.0, safe_top + 68.0) if mobile and portrait else Vector2(margin + 36.0, safe_top + 10.0 if mobile else 10.0)
+	hp_label.position = Vector2(margin + 48.0, safe_top + 68.0) if mobile and portrait else Vector2(margin + 36.0, safe_top + 12.0 if compact_landscape else 10.0)
 	hp_label.add_theme_font_size_override("font_size", (18 if portrait else 18) if mobile else (18 if portrait else 20))
-	level_label.position = Vector2(margin + 48.0, safe_top + 110.0) if mobile and portrait else Vector2(margin + 36.0, safe_top + 36.0 if mobile else 38.0)
+	level_label.position = Vector2(margin + 48.0, safe_top + 110.0) if mobile and portrait else Vector2(margin + 36.0, safe_top + 50.0 if compact_landscape else 38.0)
 	level_label.add_theme_font_size_override("font_size", (16 if portrait else 15) if mobile else (14 if portrait else 16))
-	xp_bar.position = Vector2(margin + 48.0, safe_top + 150.0) if mobile and portrait else Vector2(margin + 36.0, safe_top + 62.0 if mobile else 66.0)
-	xp_bar.size = Vector2(min(viewport_size.x - margin * 2.0 - 58.0, 306.0), 20.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.5 if portrait else 0.28), 286.0 if mobile else 260.0), 16.0 if mobile else 14.0)
+	if xp_readout_label != null:
+		xp_readout_label.visible = compact_landscape
+		xp_readout_label.position = Vector2(margin + 36.0, safe_top + 80.0)
+		xp_readout_label.size = Vector2(min(viewport_size.x * 0.28, 286.0), 24.0)
+		xp_readout_label.add_theme_font_size_override("font_size", 16)
+	xp_bar.position = Vector2(margin + 48.0, safe_top + 150.0) if mobile and portrait else Vector2(margin + 36.0, safe_top + 108.0 if compact_landscape else 66.0)
+	xp_bar.size = Vector2(min(viewport_size.x - margin * 2.0 - 58.0, 306.0), 20.0) if mobile and portrait else Vector2(min(viewport_size.x * (0.5 if portrait else 0.28), 286.0 if mobile else 260.0), 14.0 if compact_landscape else 14.0)
 	if theme_label != null:
 		theme_label.visible = not mobile and theme_label.text != ""
 		theme_label.position = Vector2(margin + 48.0, safe_top + 174.0) if mobile and portrait else Vector2(margin + 36.0, safe_top + 82.0 if mobile else 82.0)
@@ -1042,6 +1065,12 @@ func _apply_responsive_layout() -> void:
 		if not virtual_joystick.visible:
 			GameManager.set_touch_move_vector(Vector2.ZERO)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
+	if compact_landscape:
+		# 通用手機倍率會把 18px 放大到約 33px；橫向矮視口在此鎖回可讀且不互壓的 CSS 字級。
+		hp_label.add_theme_font_size_override("font_size", 24)
+		level_label.add_theme_font_size_override("font_size", 18)
+		if xp_readout_label != null:
+			xp_readout_label.add_theme_font_size_override("font_size", 16)
 	_compact_pause_controls(mobile)
 	var compact_pause_landscape := mobile and not portrait
 	if pause_settings_page != null:
@@ -1071,6 +1100,11 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
 	WEB_REACHABILITY_PROBE.publish("hud", viewport_size, {
+		"hud_panel": hud_panel,
+		"hp_label": hp_label,
+		"level_label": level_label,
+		"xp_readout": xp_readout_label,
+		"xp_bar": xp_bar,
 		"pause": pause_button,
 		"pause_overlay": pause_overlay,
 		"pause_settings_tab": pause_settings_tab_button,
@@ -1303,7 +1337,11 @@ func _on_stats_changed(stats: Dictionary) -> void:
 	var xp_required: int = max(1, int(stats.get("xp_required", 1)))
 
 	hp_label.text = "HP %d/%d" % [hp, max_hp]
-	level_label.text = "等級 %d   經驗 %d/%d" % [current_level, xp, xp_required]
+	last_level_value = current_level
+	last_xp_value = xp
+	last_xp_required_value = xp_required
+	var layout_size := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
+	_refresh_primary_stat_labels(MOBILE_TUNING.use_mobile_ui(layout_size) and layout_size.x >= layout_size.y)
 	xp_bar.value = clamp(float(xp) / float(xp_required), 0.0, 1.0)
 	var theme_name := str(stats.get("run_theme_name", ""))
 	var bond_names: PackedStringArray = stats.get("active_bond_names", PackedStringArray())
@@ -1325,6 +1363,13 @@ func _on_stats_changed(stats: Dictionary) -> void:
 		var pause_bond_text := "\n羈絆 %d/4：%s" % [bond_names.size(), " · ".join(bond_names)] if not bond_names.is_empty() else "\n羈絆 0/4"
 		pause_run_stats_label.text = "本局：擊殺 %d   金幣 %d   殘響 %d%s" % [kills, gold, echo_shards, pause_bond_text]
 	_on_pause_changed(bool(stats.get("manual_pause_visible", bool(stats.get("manual_paused", false)))))
+
+
+func _refresh_primary_stat_labels(compact_landscape: bool) -> void:
+	if level_label != null:
+		level_label.text = "等級 %d" % last_level_value if compact_landscape else "等級 %d   經驗 %d/%d" % [last_level_value, last_xp_value, last_xp_required_value]
+	if xp_readout_label != null:
+		xp_readout_label.text = "經驗 %d/%d" % [last_xp_value, last_xp_required_value]
 
 
 func _on_pause_changed(is_paused: bool) -> void:

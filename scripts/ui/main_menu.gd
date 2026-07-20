@@ -46,6 +46,9 @@ var ui_scale_slider: HSlider
 var syncing_settings: bool = false
 var syncing_audio: bool = false
 var active_panel_id: String = "meta"
+var web_window: JavaScriptObject = null
+var web_resize_callback: JavaScriptObject = null
+var web_reflow_pending: bool = false
 
 
 func _ready() -> void:
@@ -56,8 +59,9 @@ func _ready() -> void:
 	GameManager.system_pause_owners.clear()
 	_build_background()
 	_build_ui()
-	if not get_viewport().size_changed.is_connected(_apply_responsive_layout):
-		get_viewport().size_changed.connect(_apply_responsive_layout)
+	if not get_viewport().size_changed.is_connected(_on_viewport_size_changed):
+		get_viewport().size_changed.connect(_on_viewport_size_changed)
+	_install_web_viewport_hooks()
 	if MetaProgress.has_signal("progress_changed") and not MetaProgress.progress_changed.is_connected(_refresh_active_panel):
 		MetaProgress.progress_changed.connect(_refresh_active_panel)
 	if AchievementProgress.has_signal("achievement_unlocked") and not AchievementProgress.achievement_unlocked.is_connected(_on_achievement_changed):
@@ -66,6 +70,49 @@ func _ready() -> void:
 		PlayerSettings.settings_changed.connect(_sync_settings_controls)
 	if AudioManager.has_signal("settings_changed") and not AudioManager.settings_changed.is_connected(_sync_audio_controls):
 		AudioManager.settings_changed.connect(_sync_audio_controls)
+
+
+func _exit_tree() -> void:
+	if web_window != null and web_resize_callback != null:
+		web_window.removeEventListener("resize", web_resize_callback)
+		web_window.removeEventListener("orientationchange", web_resize_callback)
+	web_window = null
+	web_resize_callback = null
+
+
+func _install_web_viewport_hooks() -> void:
+	if not OS.has_feature("web"):
+		return
+	web_window = JavaScriptBridge.get_interface("window")
+	if web_window == null:
+		return
+	web_resize_callback = JavaScriptBridge.create_callback(_on_web_viewport_event)
+	web_window.addEventListener("resize", web_resize_callback)
+	web_window.addEventListener("orientationchange", web_resize_callback)
+
+
+func _on_viewport_size_changed() -> void:
+	_apply_responsive_layout()
+	_queue_browser_reflow()
+
+
+func _on_web_viewport_event(_arguments: Array) -> void:
+	_queue_browser_reflow()
+
+
+func _queue_browser_reflow() -> void:
+	if web_reflow_pending or not is_inside_tree():
+		return
+	web_reflow_pending = true
+	call_deferred("_apply_browser_reflow")
+
+
+func _apply_browser_reflow() -> void:
+	# orientationchange 與 canvas resize 的事件順序依瀏覽器而異；等兩 frame 讓 CSS innerWidth/innerHeight 收斂。
+	await get_tree().process_frame
+	await get_tree().process_frame
+	web_reflow_pending = false
+	_apply_responsive_layout()
 
 
 func _build_background() -> void:
@@ -347,13 +394,13 @@ func _refresh_meta_buttons() -> void:
 func _unlock_text() -> String:
 	if not MetaProgress.has_method("get_unlock_definitions"):
 		return ""
-	# R29 文案潤飾：與成就徽章同語彙（✓／□），並明說解鎖條件單位。
+	# R30 R1-04：U+25A1 WHITE SQUARE 不在既有子集；鎖定態改用確定涵蓋的 CJK「鎖」。
 	var lines: Array[String] = ["解鎖入口"]
 	for unlock in MetaProgress.get_unlock_definitions():
 		var unlock_id := str(unlock.get("id", ""))
 		var unlocked := MetaProgress.has_unlock(unlock_id)
 		lines.append("%s %s（累積 %d 碎片解鎖）" % [
-			"✓" if unlocked else "□",
+			"✓" if unlocked else "鎖",
 			str(unlock.get("name", "")),
 			int(unlock.get("required_lifetime_shards", 0))
 		])
@@ -394,7 +441,7 @@ func _refresh_achievement_grid() -> void:
 func _make_achievement_badge(row: Dictionary) -> Button:
 	var unlocked := bool(row.get("unlocked", false))
 	var button := Button.new()
-	button.text = "%s\n%s" % ["✓" if unlocked else "□", str(row.get("name", ""))]
+	button.text = "%s\n%s" % ["✓" if unlocked else "鎖", str(row.get("name", ""))]
 	button.tooltip_text = str(row.get("description", ""))
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	button.custom_minimum_size = Vector2(104.0, 64.0)
@@ -783,6 +830,10 @@ func _apply_responsive_layout() -> void:
 
 	var seed_height := 56.0 if mobile and not portrait else touch_height
 	var seed_gap: float = float(ceil(MOBILE_TUNING.BASE_CONTAINER_SEPARATION * MOBILE_TUNING.spacing_scale(viewport_size)))
+	# R30 R1-02：先清掉上一方向寫入的 min-size，避免 HBox 以橫向寬度拒絕縮回直向。
+	seed_row.custom_minimum_size = Vector2.ZERO
+	seed_input.custom_minimum_size = Vector2.ZERO
+	seed_start_button.custom_minimum_size = Vector2.ZERO
 	if mobile and not portrait:
 		var seed_width: float = min(MOBILE_TUNING.SEED_ROW_MAX_WIDTH, max(280.0, viewport_size.x - menu_width - margin * 3.0))
 		seed_row.position = Vector2(menu_box.position.x + menu_width + margin, menu_y)
@@ -793,7 +844,8 @@ func _apply_responsive_layout() -> void:
 		seed_row.position = menu_box.position + Vector2(0.0, menu_box.size.y + (16.0 if mobile else 16.0))
 		var seed_width: float = min(MOBILE_TUNING.SEED_ROW_MAX_WIDTH, menu_width)
 		seed_row.size = Vector2(seed_width, seed_height)
-		var seed_button_width := 132.0 if mobile else 108.0
+		# 390px 直向的 CJK 文字本身約需 136px；預留 148px，避免 intrinsic minimum 撐寬整列。
+		var seed_button_width := 148.0 if mobile else 108.0
 		seed_input.custom_minimum_size = Vector2(max(140.0, seed_width - seed_button_width - seed_gap), seed_height)
 		seed_start_button.custom_minimum_size = Vector2(seed_button_width, seed_height)
 
@@ -907,6 +959,7 @@ func _publish_reachability_probe(viewport_size: Vector2) -> void:
 		"meta": meta_button,
 		"achievements": achievements_button,
 		"settings": settings_button,
+		"seed_row": seed_row,
 		"seed_input": seed_input,
 		"seed_start": seed_start_button,
 		"side_panel": side_panel,

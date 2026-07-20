@@ -1,0 +1,38 @@
+R30 local verification summary (2026-07-20 Asia/Taipei)
+
+BRANCH main
+BASE_HEAD a977c25
+GODOT 4.7.stable.official.5b4e0cb0f
+
+R30_IMPORT_X2 first=0 second=0
+
+R14_REGRESSION_PASS
+R29_MENU_MODAL_PASS desktop_1920 wide_1366 touch_1024 portrait_390 landscape_844 boundary699 boundary700
+R30_HUD_844X390 hp=[P: (52.0, 22.0), S: (128.0, 35.0)] level=[P: (52.0, 60.0), S: (51.0, 27.0)] xp=[P: (52.0, 90.0), S: (236.32, 24.0)] bar=[P: (52.0, 118.0), S: (236.32, 14.0)]
+R30_SEED_REFLOW row=[P: (19.5, 644.0), S: (351.0, 76.0)] input=[P: (19.5, 644.0), S: (187.0, 76.0)] button=[P: (222.5, 644.0), S: (148.0, 76.0)]
+R30_GUIDE_BACKDROP layer=45 alpha=1.00
+R30_ACHIEVEMENT_LOCK glyph=鎖 codepoint=U+9396
+R30_PLAYTEST_FIX_PASS hud=844x390 seed=portrait-landscape-portrait guide=opaque lock=U+9396
+TRUE_ANIMATION_REGRESSION_PASS
+POOL_CONTRACT_PASS
+GAMEPLAY_CAP_PASS
+SQUAD_SMOKE_PASS
+WEAPON_SMOKE_PASS
+ENEMY_ART_REGRESSION_PASS
+R25_PARALLAX_REGRESSION_PASS
+GODOT_SCENE_GATES 10/10 PASS
+
+SPRITE_COLOR_PASS characters=17
+R25_C2PA_PASS masters=9
+R25_PARALLAX_GATE checks=73 failed=0
+R24_ART_GATE PASS
+
+R30_PWA_FALLBACK_PASS version=0.19.1-r30|48393809 files=11 registration=explicit
+R25_WEB_PERFORMANCE_PASS focal_ms=395.9 tti_ms=8178.1 delta=-48.05%
+R22_CONTROLS_CASES=8
+R30_PLAYWRIGHT_PASS viewport=844x390 service_worker=activated offline_title=裂隙需要連線
+
+ACTIVE_OLD_VERSION_SCAN 0.19.0-r29 matches=0 (docs/evidence, docs/playtest, docs/audit_openclose, and historical R29 reports excluded)
+PROHIBITED_SECRET_PREFIX_SCAN matches=0
+HISTORICAL_EVIDENCE_DIFF matches=0
+GIT_DIFF_CHECK PASS
