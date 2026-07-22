@@ -120,8 +120,8 @@ func _test_hero10_content_and_bonds() -> bool:
 		_fail("bond did not deactivate immediately on member death")
 		return false
 	manager.queue_free()
-	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.19.1-r30":
-		_fail("R30 release version drifted")
+	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.19.2-r31":
+		_fail("R31 release version drifted")
 		return false
 	if not is_equal_approx(float(R24_ORBIT_WEAPON.get("sprite_scale")), 1.09) or not is_equal_approx(float(R24_BOOMERANG_WEAPON.get("sprite_scale")), 1.18):
 		_fail("R24 orbit/boomerang readability scale drifted")

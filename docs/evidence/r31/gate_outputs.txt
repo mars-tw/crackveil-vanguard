@@ -1,0 +1,29 @@
+R31 local Godot verification summary (2026-07-22 Asia/Taipei)
+
+BRANCH main
+BASE_HEAD d49a662
+GODOT 4.7.stable.official.5b4e0cb0f
+
+R31_IMPORT_1_PASS
+R31_IMPORT_2_PASS
+
+R14_REGRESSION_PASS
+R29_MENU_MODAL_PASS portrait=single_column boundary=699/700 landscape=two_column desktop=two_column modal=backdrop+ui_cancel panel_alpha>=0.94
+R30_PLAYTEST_FIX_PASS hud=844x390-nonoverlap seed=portrait-landscape-portrait guide=opaque-layer45 lock=CJK
+TRUE_ANIMATION_REGRESSION_PASS
+POOL_CONTRACT_PASS
+GAMEPLAY_CAP_PASS
+WEAPON_SMOKE_PASS squad_scene=pass
+WEAPON_SMOKE_PASS weapon_scene=pass
+ENEMY_ART_REGRESSION_PASS
+R25_PARALLAX_REGRESSION_PASS
+
+R31_HOOK_ISOLATION debug_build+explicit_arg=required web_excludes=scripts/debug/**,scenes/debug/** marker=R31_ENDGAME_QA_HOOK_EXCLUDED
+R31_BOSS_REACHED elapsed=180.0 type=veil_gatekeeper active=true animation=idle
+R31_DEFEAT_REACHED title=任務失敗 death_animation=frame-based retry=triggered main_menu=triggered
+R31_VICTORY_REACHED title=階段勝利 boss_killed=true summary=visible
+R31_ENDGAME_GATE_PASS boss=spawned defeat=visible retry=triggered main_menu=triggered victory=visible web_hook=excluded
+
+R31_GODOT_SCENE_GATES_PASS 11/11
+R31_HOOK_DENIAL_PASS missing_arg=exit1
+R31_SAVE_ISOLATION_PASS default_saves_unchanged=3 isolated_paths=r31_*_test.cfg

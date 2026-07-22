@@ -1,0 +1,23 @@
+R31 release Web isolation evidence (2026-07-22 Asia/Taipei)
+
+COMMAND
+Godot_v4.7-stable_win64_console.exe --headless --path . --export-release Web export/r31-web/index.html
+python tools/finalize_r25_web_export.py --dir export/r31-web
+
+R31_PWA_FALLBACK_PASS version=0.19.2-r31|48393809 files=11 registration=explicit
+R31_RELEASE_ISOLATION_PASS hook_marker=absent hook_path=absent debug_dirs=absent version=0.19.2-r31
+
+EXPORT_PRESET_EXCLUDES
+scripts/debug/**
+scenes/debug/**
+
+FORBIDDEN index.pck SEARCHES (all zero matches)
+R31_ENDGAME_QA_HOOK_EXCLUDED
+r31_endgame_qa_hook
+R31EndgameGate
+scripts/debug/
+scenes/debug/
+
+index.pck bytes=9820816 sha256=A029356D8B4E1DA7E265A5D2663283D0A4778F238391FA6249CD95CC0359ECD1
+index.html sha256=E6022A008B2BE7C3BAD1C584AB45CBFB9E125EBA9EDF526D75D21923390CC06C
+HISTORICAL_EVIDENCE_DIFF matches=0

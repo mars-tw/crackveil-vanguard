@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Copy the R25 focal and finalize the R30 Web/PWA shell."""
+"""Copy the R25 focal and finalize the R31 Web/PWA shell."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "0.19.1-r30"
+RELEASE = "0.19.2-r31"
 FOCAL_SOURCE = ROOT / "assets" / "art" / "r25" / "r25_web_focal.webp"
 FOCAL_HASH = "48393809"
 FOCAL_REF = f"r25-web-focal.webp?v={FOCAL_HASH}"
@@ -26,7 +26,7 @@ def sha256(path: Path) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir", required=True, help="Godot Web export directory")
-    parser.add_argument("--evidence", default="docs/evidence/r30/pwa_cache_verification.json")
+    parser.add_argument("--evidence", default="docs/evidence/r31/pwa_cache_verification.json")
     args = parser.parse_args()
     output = Path(args.dir).resolve()
     html = output / "index.html"
@@ -134,7 +134,7 @@ def main() -> int:
     evidence = ROOT / args.evidence
     evidence.parent.mkdir(parents=True, exist_ok=True)
     evidence.write_text(json.dumps(checks, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"R30_PWA_FALLBACK_PASS version={checks['cache_version']} files={len(required_cached)} registration=explicit")
+    print(f"R31_PWA_FALLBACK_PASS version={checks['cache_version']} files={len(required_cached)} registration=explicit")
     return 0
 
 

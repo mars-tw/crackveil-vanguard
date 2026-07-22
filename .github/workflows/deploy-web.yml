@@ -135,6 +135,7 @@ jobs:
           for scene in "${scenes[@]}"; do
             "${GODOT_BIN}" --headless --fixed-fps 60 --path . "res://scenes/debug/${scene}.tscn"
           done
+          "${GODOT_BIN}" --headless --fixed-fps 60 --path . res://scenes/debug/R31EndgameGate.tscn -- --qa-endgame=r31
 
       - name: Inject build date
         shell: bash
