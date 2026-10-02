@@ -1,9 +1,9 @@
 class_name TrueAnimationLibrary
 extends RefCounted
 
-const ATLAS_PATH := "res://assets/sprites/true_character_atlas.png"
-const CELL_SIZE := 64
-const ATLAS_COLUMNS := 8
+const ATLAS_PATH := "res://assets/sprites/r35_character_atlas.png"
+const CELL_SIZE := 128
+const ATLAS_COLUMNS := 16
 const STATE_ORDER: Array[StringName] = [&"idle", &"walk", &"attack", &"hurt", &"death"]
 const FRAME_COUNTS := {
 	&"idle": 4,
@@ -20,6 +20,10 @@ const STATE_FRAME_OFFSETS := {
 	&"death": 21,
 }
 const FRAMES_PER_CHARACTER := 27
+const CAPTAIN_COMBO_CELL_SIZE := 160
+const CAPTAIN_COMBO_COLUMNS := 12
+const CAPTAIN_COMBO_ORIGIN_Y := 3712
+const CAPTAIN_COMBO_NAMES: Array[StringName] = [&"attack_combo_a", &"attack_combo_b", &"attack_combo_finisher"]
 const STATE_FPS := {
 	&"idle": 4.0,
 	&"walk": 10.0,
@@ -79,13 +83,25 @@ static func get_sprite_frames(sprite_path: String) -> SpriteFrames:
 		var state: StringName = STATE_ORDER[state_index]
 		frames.add_animation(state)
 		frames.set_animation_loop(state, state == &"idle" or state == &"walk")
-		frames.set_animation_speed(state, float(STATE_FPS[state]))
+		frames.set_animation_speed(state, 18.0 if character_id == "hero_captain" and state == &"attack" else float(STATE_FPS[state]))
 		for frame_index in range(int(FRAME_COUNTS[state])):
 			var atlas_cell: int = int(CHARACTER_INDEX[character_id]) * FRAMES_PER_CHARACTER + int(STATE_FRAME_OFFSETS[state]) + frame_index
 			var frame_texture := AtlasTexture.new()
 			frame_texture.atlas = _atlas
 			frame_texture.region = Rect2((atlas_cell % ATLAS_COLUMNS) * CELL_SIZE, (atlas_cell / ATLAS_COLUMNS) * CELL_SIZE, CELL_SIZE, CELL_SIZE)
 			frames.add_frame(state, frame_texture)
+	if character_id == "hero_captain":
+		for combo_index in range(CAPTAIN_COMBO_NAMES.size()):
+			var combo_name := CAPTAIN_COMBO_NAMES[combo_index]
+			frames.add_animation(combo_name)
+			frames.set_animation_loop(combo_name, false)
+			frames.set_animation_speed(combo_name, 18.0)
+			for frame_index in range(6):
+				var cell := combo_index * 6 + frame_index
+				var frame_texture := AtlasTexture.new()
+				frame_texture.atlas = _atlas
+				frame_texture.region = Rect2((cell % CAPTAIN_COMBO_COLUMNS) * CAPTAIN_COMBO_CELL_SIZE, CAPTAIN_COMBO_ORIGIN_Y + (cell / CAPTAIN_COMBO_COLUMNS) * CAPTAIN_COMBO_CELL_SIZE, CAPTAIN_COMBO_CELL_SIZE, CAPTAIN_COMBO_CELL_SIZE)
+				frames.add_frame(combo_name, frame_texture)
 	_frames_cache[character_id] = frames
 	return frames
 

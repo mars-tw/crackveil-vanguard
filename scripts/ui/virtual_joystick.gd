@@ -79,10 +79,10 @@ func configure_for_viewport(viewport_size: Vector2, mobile: bool, size_index: in
 	var radius: float = 66.0
 	if mobile:
 		var portrait_ratios: Array[float] = [0.20, 0.24, 0.27]
-		var landscape_ratios: Array[float] = [0.17, 0.20, 0.22]
+		var landscape_ratios: Array[float] = [0.14, 0.16, 0.19]
 		var base_axis: float = safe_size.x if portrait else min(safe_size.x, safe_size.y)
 		var ratio: float = float(portrait_ratios[clamped_index] if portrait else landscape_ratios[clamped_index])
-		radius = max(70.0 if portrait else 64.0, base_axis * ratio)
+		radius = max(70.0 if portrait else 52.0, base_axis * ratio)
 	elif tablet:
 		var tablet_radii := [74.0, 86.0, 98.0] if portrait else [70.0, 82.0, 94.0]
 		radius = tablet_radii[clamped_index]
@@ -124,9 +124,9 @@ func _reset_direction() -> void:
 func _draw() -> void:
 	var center := dynamic_center if center_active else _default_center()
 	var radius := stick_radius * feedback_scale
-	var base_color := Color(0.025, 0.075, 0.12, 0.5 if center_active else 0.4)
-	var ring_color := Color(0.42, 0.86, 1.0, 0.76 if center_active else 0.56)
-	var knob_color := Color(0.46, 0.9, 1.0, 0.9)
+	var base_color := Color(0.025, 0.075, 0.12, 0.40 if center_active else 0.15)
+	var ring_color := Color(0.42, 0.86, 1.0, 0.7 if center_active else 0.32)
+	var knob_color := Color(0.46, 0.9, 1.0, 0.9 if center_active else 0.52)
 	# 疊兩層半透明圓與偏心亮斑，做出不靠 shader 的低成本玻璃感。
 	draw_circle(center, radius + 10.0, Color(0.0, 0.02, 0.06, 0.26))
 	draw_circle(center, radius + 6.0, base_color)

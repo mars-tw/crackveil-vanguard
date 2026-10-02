@@ -13,10 +13,10 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "0.19.2-r31"
-FOCAL_SOURCE = ROOT / "assets" / "art" / "r25" / "r25_web_focal.webp"
-FOCAL_HASH = "48393809"
-FOCAL_REF = f"r25-web-focal.webp?v={FOCAL_HASH}"
+RELEASE = "0.25.0-r37"
+FOCAL_SOURCE = ROOT / "assets" / "art" / "r33" / "r33_keyart.png"
+FOCAL_HASH = "04c40aa0"
+FOCAL_REF = f"r33-web-focal.png?v={FOCAL_HASH}"
 
 
 def sha256(path: Path) -> str:
@@ -26,7 +26,7 @@ def sha256(path: Path) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir", required=True, help="Godot Web export directory")
-    parser.add_argument("--evidence", default="docs/evidence/r31/pwa_cache_verification.json")
+    parser.add_argument("--evidence", default="docs/evidence/r32/pwa_cache_verification.json")
     args = parser.parse_args()
     output = Path(args.dir).resolve()
     html = output / "index.html"
@@ -36,10 +36,38 @@ def main() -> int:
     source_hash = sha256(FOCAL_SOURCE)
     if not source_hash.startswith(FOCAL_HASH):
         raise SystemExit(f"focal hash drifted: {source_hash}")
-    focal_output = output / "r25-web-focal.webp"
+    focal_output = output / "r33-web-focal.png"
     shutil.copyfile(FOCAL_SOURCE, focal_output)
 
+    # A persistent Godot service worker may still supply an older index.pck
+    # even when the HTML has updated. Content-address the actual game package.
+    pack_source = output / "index.pck"
+    pack_hash = sha256(pack_source)[:12]
+    pack_name = f"index-{pack_hash}.pck"
+    shutil.copyfile(pack_source, output / pack_name)
+    gl_source_path = ROOT / "web" / "webgl_state_cache.js"
+    gl_hash = sha256(gl_source_path)
+    cache_version = f"{RELEASE}|{FOCAL_HASH}|{pack_hash}|{gl_hash[:12]}"
+
     html_text = html.read_text(encoding="utf-8")
+    gl_cache_marker = 'id="rift-r36-webgl-state-cache"'
+    gl_source = gl_source_path.read_text(encoding="utf-8")
+    gl_block = f'<script {gl_cache_marker}>\n{gl_source}\n</script>'
+    # Classic script executes before the Godot engine constructs its GL
+    # context. Inline delivery also works from the PWA navigation cache.
+    if gl_cache_marker in html_text:
+        html_text = re.sub(r'<script id="rift-r36-webgl-state-cache">.*?</script>', lambda _match: gl_block, html_text, count=1, flags=re.S)
+    else:
+        html_text = html_text.replace("</head>", gl_block + "\n</head>", 1)
+    config_match = re.search(r"const GODOT_CONFIG = (\{[^\n]+\});", html_text)
+    if not config_match:
+        raise SystemExit("Godot Engine configuration missing")
+    config = json.loads(config_match.group(1))
+    config["mainPack"] = pack_name
+    config.setdefault("fileSizes", {}).pop("index.pck", None)
+    config["fileSizes"][pack_name] = pack_source.stat().st_size
+    html_text = html_text[:config_match.start(1)] + json.dumps(config, separators=(",", ":")) + html_text[config_match.end(1):]
+    html.write_text(html_text, encoding="utf-8", newline="\n")
     if html_text.count(FOCAL_REF) < 2 or f'content="{RELEASE}"' not in html_text:
         raise SystemExit("exported HTML lacks the R25 focal/content-cache markers")
     inline_marker = "rift-r25-inline-focal"
@@ -47,7 +75,7 @@ def main() -> int:
         focal_data = base64.b64encode(FOCAL_SOURCE.read_bytes()).decode("ascii")
         inline_block = (
             f'<div id="{inline_marker}" style="position:fixed;inset:0;z-index:2147483646;background:#04070f">'
-            f'<img src="data:image/webp;base64,{focal_data}" alt="" '
+            f'<img src="data:image/png;base64,{focal_data}" alt="" '
             'style="width:100%;height:100%;object-fit:cover" '
             "onload=\"if(!performance.getEntriesByName('rift-r25-main-focal').length)performance.mark('rift-r25-main-focal')\">"
             "<style>@media (orientation:portrait){#rift-r25-inline-focal img{object-fit:contain!important}}"
@@ -57,6 +85,7 @@ def main() -> int:
             "#rift-r25-inline-focal::after{content:'';position:absolute;left:50%;bottom:15%;z-index:1;width:34px;height:34px;"
             "margin-left:-17px;border:3px solid #2b4a63;border-top-color:#64d8ff;border-radius:50%;"
             "animation:rift-spin 1s linear infinite}"
+            "#rift-r25-inline-focal.load-failed::after{display:none}"
             "#rift-r30-mb{position:absolute;left:0;right:0;bottom:9.5%;z-index:1;text-align:center;color:#9fd8f2;"
             "font:500 14px/1.5 system-ui,sans-serif;letter-spacing:.05em;text-shadow:0 1px 8px rgba(0,0,0,.85)}</style>"
             '<div id="rift-r30-mb">連線中…</div>'
@@ -65,6 +94,8 @@ def main() -> int:
             "const timer=setInterval(()=>{"
             "if(!s.isConnected||getComputedStyle(s).display==='none'||window.__cvR22Controls?.main_menu||window.__cvR19Controls?.main_menu){"
             "f.remove();clearInterval(timer);return}"
+            "const notice=document.getElementById('status-notice');"
+            "if(notice&&notice.textContent.trim()&&getComputedStyle(notice).display!=='none'){clearInterval(timer);return}"
             # R30 保留載入 MB 回饋與 Number.isFinite 雙防護。
             "const p=document.getElementById('status-progress');"
             "if(mb){const mx=p&&p.getAttribute('max')?Number(p.max):NaN;const v=p?Number(p.value):NaN;"
@@ -77,6 +108,12 @@ def main() -> int:
         html.write_text(html_text, encoding="utf-8", newline="\n")
     if "rift-r30-mb" not in html_text:
         raise SystemExit("R30 loading MB counter marker missing from exported HTML")
+    recovery_marker = 'id="rift-r32-loading-recovery-script"'
+    if recovery_marker not in html_text:
+        recovery_source = (ROOT / "web" / "loading_recovery.mjs").read_text(encoding="utf-8")
+        recovery_block = f'<script type="module" {recovery_marker}>\n{recovery_source}\n</script>'
+        html_text = html_text.replace("</body>", recovery_block + "\n\t</body>", 1)
+        html.write_text(html_text, encoding="utf-8", newline="\n")
     sw_registration_marker = "rift-r30-offline-fallback"
     if sw_registration_marker not in html_text:
         registration_block = (
@@ -94,7 +131,7 @@ def main() -> int:
     worker_text = worker.read_text(encoding="utf-8")
     worker_text, version_count = re.subn(
         r"const CACHE_VERSION = '[^']+';",
-        f"const CACHE_VERSION = '{RELEASE}|{FOCAL_HASH}';",
+        f"const CACHE_VERSION = '{cache_version}';",
         worker_text,
         count=1,
     )
@@ -119,11 +156,16 @@ def main() -> int:
 
     checks = {
         "release": RELEASE,
-        "cache_version": f"{RELEASE}|{FOCAL_HASH}",
+        "cache_version": cache_version,
+        "game_pack": pack_name,
+        "game_pack_sha256": sha256(pack_source),
         "focal_ref": FOCAL_REF,
         "focal_source_sha256": source_hash,
         "focal_export_sha256": sha256(focal_output),
         "loading_mb_marker": "rift-r30-mb",
+        "loading_recovery_marker": recovery_marker,
+        "webgl_state_cache_marker": gl_cache_marker,
+        "webgl_state_cache_sha256": gl_hash,
         "service_worker_registration_marker": sw_registration_marker,
         "cached_files": required_cached,
         "offline_url": "index.offline.html",

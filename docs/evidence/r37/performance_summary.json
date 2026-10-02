@@ -1,0 +1,156 @@
+{
+  "candidate": "0.25.0-r37",
+  "pck_sha256": "fef310ab72747659d869ead507b6ec72f269ef052802b01c32ffb66a1934ca52",
+  "method": "Sequential single Chrome game, no video, real main-menu seed/keyboard/touch/upgrade input, no gameplay state injection; warmup first 5 seconds and paused samples excluded.",
+  "seed": 20261002,
+  "phone_is_desktop_chrome_touch_emulation": true,
+  "gpu_preference": 0,
+  "comparison_limitation": "Different peak enemy/projectile loads despite the same seed; both desktop runs reach the 60 Hz presentation ceiling. No fixed percentage performance improvement claimed.",
+  "r36_baseline_desktop": {
+    "active_seconds": 30.1887785155552,
+    "mean_fps": 59.76470588235294,
+    "median_fps": 60,
+    "min_fps": 58,
+    "max_fps": 60,
+    "peak_enemies": 95,
+    "peak_logical_shots": 82,
+    "mean_process_ms": 11.544117647058824,
+    "mean_physics_ms": 14.067647058823532,
+    "mean_draw_calls": 565.5882352941177,
+    "rendering": {
+      "css": [
+        1280,
+        720
+      ],
+      "canvas": [
+        1280,
+        720
+      ],
+      "dpr": 1,
+      "renderer": "ANGLE (Intel, Intel(R) Graphics (0x00007D67) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "vendor": "Google Inc. (Intel)"
+    },
+    "native_gl_verification": {
+      "ready": true,
+      "cachedQueries": 4774,
+      "scissorMatches": true,
+      "drawMatches": true,
+      "readMatches": true
+    },
+    "artifact_identity": {
+      "htmlSHA256": "163de762d6053781092d3dd8830e14a79bdee83a52cf0efd58ff8601215485b5",
+      "shimSHA256": "3aa6455f00e44b85f1c4e943e3a7ea92872c795c99d6f5dc466127993db7669c",
+      "pckNames": [
+        "index-080af36b47b8.pck"
+      ]
+    },
+    "evidence": "performance/r36-release-baseline-desktop.json"
+  },
+  "r37_desktop": {
+    "active_seconds": 30.6647115066662,
+    "mean_fps": 59.97142857142857,
+    "median_fps": 60,
+    "min_fps": 59,
+    "max_fps": 60,
+    "peak_enemies": 111,
+    "peak_logical_shots": 52,
+    "mean_process_ms": 10.274285714285716,
+    "mean_physics_ms": 12.608571428571429,
+    "mean_draw_calls": 457.37142857142857,
+    "rendering": {
+      "css": [
+        1280,
+        720
+      ],
+      "canvas": [
+        1280,
+        720
+      ],
+      "dpr": 1,
+      "renderer": "ANGLE (Intel, Intel(R) Graphics (0x00007D67) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "vendor": "Google Inc. (Intel)"
+    },
+    "native_gl_verification": {
+      "ready": true,
+      "cachedQueries": 4886,
+      "scissorMatches": true,
+      "drawMatches": true,
+      "readMatches": true
+    },
+    "artifact_identity": {
+      "htmlSHA256": "dbe3f184e4d2de0bc57aca207ad8d2aeeea1080154c33fe7147e58c0d91df633",
+      "shimSHA256": "3aa6455f00e44b85f1c4e943e3a7ea92872c795c99d6f5dc466127993db7669c",
+      "pckNames": [
+        "index-fef310ab7274.pck"
+      ]
+    },
+    "evidence": "performance/r37-candidate-desktop.json"
+  },
+  "r37_phone_45_seconds": {
+    "active_seconds": 45.0173388622213,
+    "mean_fps": 59.71739130434783,
+    "median_fps": 60,
+    "min_fps": 57,
+    "max_fps": 60,
+    "peak_enemies": 102,
+    "peak_logical_shots": 102,
+    "mean_process_ms": 11.041304347826088,
+    "mean_physics_ms": 17.413043478260875,
+    "mean_draw_calls": 560.2826086956521,
+    "rendering": {
+      "css": [
+        844,
+        390
+      ],
+      "canvas": [
+        1688,
+        780
+      ],
+      "dpr": 2,
+      "renderer": "ANGLE (Intel, Intel(R) Graphics (0x00007D67) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "vendor": "Google Inc. (Intel)"
+    },
+    "native_gl_verification": {
+      "ready": true,
+      "cachedQueries": 5770,
+      "scissorMatches": true,
+      "drawMatches": true,
+      "readMatches": true
+    },
+    "artifact_identity": {
+      "htmlSHA256": "dbe3f184e4d2de0bc57aca207ad8d2aeeea1080154c33fe7147e58c0d91df633",
+      "shimSHA256": "3aa6455f00e44b85f1c4e943e3a7ea92872c795c99d6f5dc466127993db7669c",
+      "pckNames": [
+        "index-fef310ab7274.pck"
+      ]
+    },
+    "evidence": "performance/r37-candidate-phone.json"
+  },
+  "manual_combat": {
+    "active_seconds": 20.0473158800005,
+    "real_tap_at_seconds": 8.79229928000001,
+    "first_tap_actual_hits": 9,
+    "active_hits_total": 10,
+    "empty_active_impacts": 0,
+    "channel_impacts": 8,
+    "channel_actual_hits": 9,
+    "channel_energy_spent": 64,
+    "held_after_release": false,
+    "pending_after_release": false,
+    "effect_after_release": false,
+    "assisted_casts_observed": 0,
+    "step_distance_observed": 0,
+    "web_exact_animation_frame_published": false,
+    "frame2_physics_step_evidence": "Controlled headless CombatPolishR37Test only: actual step180, three targets at500 damaged on pose2; no natural Web lunge observed in this near-target manual session.",
+    "evidence": "performance/r37-candidate-manual-combat.json",
+    "public_battle_image": "gameplay.png"
+  },
+  "observed_errors": {
+    "webgl_failure": false,
+    "gameplay_script_error": false,
+    "single_unidentified_console_http404_per_run": true,
+    "page_http_failed_responses": []
+  },
+  "sources_remain_frozen": true,
+  "browsers_closed": true
+}

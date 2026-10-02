@@ -11,6 +11,7 @@ var panel: Panel
 var title_label: Label
 var body_label: Label
 var actions_box: VBoxContainer
+var navigation_box: HBoxContainer
 var dont_show_check: CheckBox
 var previous_button: Button
 var start_button: Button
@@ -46,7 +47,9 @@ func _ready() -> void:
 	_build_ui()
 	if not get_viewport().size_changed.is_connected(_apply_responsive_layout):
 		get_viewport().size_changed.connect(_apply_responsive_layout)
-	root.visible = not _is_disabled()
+	# R33 starts with a playable encounter; the full guide remains available
+	# through the pause menu instead of blocking the first slash with six pages.
+	root.visible = false
 
 
 func _build_ui() -> void:
@@ -98,18 +101,21 @@ func _build_ui() -> void:
 	dont_show_check.text = "不再顯示"
 	dont_show_check.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions_box.add_child(dont_show_check)
+	navigation_box = HBoxContainer.new()
+	navigation_box.add_theme_constant_override("separation", 12)
+	actions_box.add_child(navigation_box)
 
 	previous_button = Button.new()
 	previous_button.text = "上一頁"
 	previous_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	previous_button.pressed.connect(_on_previous_pressed)
-	actions_box.add_child(previous_button)
+	navigation_box.add_child(previous_button)
 
 	start_button = Button.new()
 	start_button.text = "開始行動"
 	start_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	start_button.pressed.connect(_on_start_pressed)
-	actions_box.add_child(start_button)
+	navigation_box.add_child(start_button)
 	_refresh_page()
 	_apply_responsive_layout()
 
@@ -120,6 +126,10 @@ func _on_start_pressed() -> void:
 		_refresh_page()
 		_apply_responsive_layout()
 		return
+	_dismiss_guide()
+
+
+func _dismiss_guide() -> void:
 	if AudioManager != null and AudioManager.has_method("unlock_audio"):
 		AudioManager.unlock_audio()
 	if dont_show_check.button_pressed:
@@ -129,6 +139,9 @@ func _on_start_pressed() -> void:
 
 
 func _on_previous_pressed() -> void:
+	if page_index == 0:
+		_dismiss_guide()
+		return
 	page_index = max(0, page_index - 1)
 	_refresh_page()
 	_apply_responsive_layout()
@@ -156,7 +169,8 @@ func _refresh_page() -> void:
 		body_label.text = str(page.get("body", ""))
 	start_button.text = "開始行動" if page_index >= DECISION_PAGES.size() else "下一頁"
 	if previous_button != null:
-		previous_button.visible = page_index > 0
+		previous_button.visible = true
+		previous_button.text = "直接出擊" if page_index == 0 else "上一頁"
 
 
 func _controls_page_text() -> String:
@@ -220,9 +234,9 @@ func _apply_responsive_layout() -> void:
 	body_label.offset_top = title_label.offset_bottom + (12.0 if mobile else 14.0)
 	var control_height := touch_height
 	var action_gap := 16.0 if mobile else 12.0
-	var action_rows := 2.0 + (1.0 if previous_button != null and previous_button.visible else 0.0)
+	var action_rows := 2.0
 	var action_height := control_height * action_rows + action_gap * (action_rows - 1.0)
-	var action_width: float = min(panel_width - (48.0 if mobile else 72.0), 300.0 if mobile else 220.0)
+	var action_width: float = min(panel_width - (48.0 if mobile else 72.0), 360.0)
 	var action_bottom_margin := 18.0 if mobile else 20.0
 	var actions_top := panel_height - action_height - action_bottom_margin
 	actions_box.add_theme_constant_override("separation", int(action_gap))
@@ -234,15 +248,15 @@ func _apply_responsive_layout() -> void:
 	actions_box.offset_bottom = actions_top + action_height
 	dont_show_check.custom_minimum_size = Vector2(action_width, control_height)
 	if previous_button != null:
-		previous_button.custom_minimum_size = Vector2(action_width, control_height)
-	start_button.custom_minimum_size = Vector2(action_width, control_height)
+		previous_button.custom_minimum_size = Vector2((action_width - 12.0) * 0.5, control_height)
+	start_button.custom_minimum_size = Vector2((action_width - 12.0) * 0.5, control_height)
 	body_label.offset_bottom = actions_top - (14.0 if mobile else 16.0)
 	var ui_multiplier := _ui_scale_multiplier()
 	body_label.add_theme_font_size_override("font_size", int(round(float(16 if mobile else (18 if portrait else 20)) * ui_multiplier)))
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
-	if mobile and OS.has_feature("web"):
+	if mobile:
 		title_label.add_theme_font_size_override("font_size", 24 if portrait else 20)
-		body_label.add_theme_font_size_override("font_size", int(round(float(16 if portrait else 15) * ui_multiplier)))
+		body_label.add_theme_font_size_override("font_size", int(round(20.0 * ui_multiplier)))
 		dont_show_check.add_theme_font_size_override("font_size", int(round(float(16 if portrait else 15) * ui_multiplier)))
 		if previous_button != null:
 			previous_button.add_theme_font_size_override("font_size", int(round(float(17 if portrait else 15) * ui_multiplier)))
@@ -255,7 +269,8 @@ func _publish_reachability_probe(viewport_size: Vector2) -> void:
 	WEB_REACHABILITY_PROBE.publish("guide", viewport_size, {
 		"start": start_button,
 		"dont_show": dont_show_check,
-		"previous": previous_button
+		"previous": previous_button,
+		"skip": previous_button if page_index == 0 else null
 	}, {
 		"visible": root != null and root.visible
 	})

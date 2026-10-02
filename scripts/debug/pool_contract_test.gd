@@ -17,6 +17,9 @@ func _run_tests() -> void:
 	await get_tree().process_frame
 
 	leader = GameManager.player
+	# Pool isolation must also disable the captain's innate R33 melee attack.
+	if leader != null:
+		leader.set("auto_cleave_cooldown_timer", 999.0)
 	if leader == null or not is_instance_valid(leader):
 		_fail("leader not found")
 		return
@@ -41,6 +44,9 @@ func _run_tests() -> void:
 
 
 func _prepare_heroes() -> void:
+	# Remove the playable opening encounter before testing one specific hitbox.
+	for existing in get_tree().get_nodes_in_group("enemies"):
+		EntityFactory.release_enemy(existing)
 	var members: Array = []
 	if GameManager.squad_manager != null and is_instance_valid(GameManager.squad_manager) and GameManager.squad_manager.has_method("get_members"):
 		members = GameManager.squad_manager.get_members()

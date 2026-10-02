@@ -12,7 +12,10 @@ func _ready() -> void:
 
 
 func set_cooldown_ratio(value: float) -> void:
-	cooldown_ratio = clamp(value, 0.0, 1.0)
+	var next_ratio: float = clamp(value, 0.0, 1.0)
+	if is_equal_approx(next_ratio, cooldown_ratio):
+		return
+	cooldown_ratio = next_ratio
 	queue_redraw()
 
 

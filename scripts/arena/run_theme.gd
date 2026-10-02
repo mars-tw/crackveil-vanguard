@@ -3,13 +3,19 @@ extends RefCounted
 const THEME_IDS := [
 	"rift_void",
 	"wasteland_farm",
-	"ember_rift"
+	"ember_rift",
+	"storm_isles",
+	"star_frost",
+	"veil_court"
 ]
 
 const THEME_NAMES: Dictionary = {
-	"rift_void": "裂隙虛空",
-	"wasteland_farm": "廢土農野",
-	"ember_rift": "餘燼裂原"
+	"rift_void": "蒼月空庭",
+	"wasteland_farm": "翠晶花園",
+	"ember_rift": "緋星熔庭",
+	"storm_isles": "風暴空島",
+	"star_frost": "星霜冰庭",
+	"veil_court": "帷幕王庭"
 }
 
 

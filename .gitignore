@@ -16,6 +16,7 @@ dist/
 *.wasm
 *.html
 *.js
+!web/webgl_state_cache.js
 *.worker.js
 *.zip
 *.dmg
@@ -58,3 +59,9 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# Local coordination and raw playtest recordings are not release sources.
+.audit-tmp/
+docs/audit_openclose/
+docs/evidence/**/video/
+docs/evidence/**/*.webm

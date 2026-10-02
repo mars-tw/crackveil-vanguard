@@ -9,6 +9,7 @@ const PLAYER_POOL_SIZE := 12
 const SFX_PATHS: Dictionary = {
 	"fire": "res://assets/audio/fire.wav",
 	"hit": "res://assets/audio/hit.wav",
+	"critical_impact": "res://assets/audio/critical_impact.wav",
 	"upgrade": "res://assets/audio/upgrade.wav",
 	"contract": "res://assets/audio/contract.wav",
 	"elite": "res://assets/audio/elite.wav",
@@ -35,6 +36,7 @@ const SFX_ALIASES: Dictionary = {
 const SFX_COOLDOWNS: Dictionary = {
 	"fire": 0.07,
 	"hit": 0.045,
+	"critical_impact": 0.20,
 	"upgrade": 0.08,
 	"contract": 0.12,
 	"elite": 0.8,
@@ -48,7 +50,9 @@ const SFX_COOLDOWNS: Dictionary = {
 	"combo_milestone": 0.8,
 	"boomerang_catch": 0.12,
 	"explosion": 0.11,
-	"ui_click": 0.035
+	"ui_click": 0.035,
+	"cleave": 0.2,
+	"cleave_heavy": 0.3
 }
 
 var master_volume: float = 0.75
@@ -167,6 +171,10 @@ func _load_streams() -> void:
 		var target_id := str(SFX_ALIASES[alias_id])
 		if not sfx_streams.has(alias_id) and sfx_streams.has(target_id):
 			sfx_streams[str(alias_id)] = sfx_streams[target_id]
+	# Authored in code, so these two short transients require no download and
+	# never silently fall back to the old high-pitched pulse tone.
+	sfx_streams["cleave"] = _make_cleave_stream(false)
+	sfx_streams["cleave_heavy"] = _make_cleave_stream(true)
 
 
 func _resolve_sfx_id(sfx_id: String) -> String:
@@ -212,6 +220,36 @@ func _make_procedural_stream(sfx_id: String) -> AudioStream:
 	stream.mix_rate = sample_rate
 	stream.stereo = false
 	stream.data = data
+	return stream
+
+
+func _make_cleave_stream(heavy: bool) -> AudioStreamWAV:
+	var sample_rate := 22050
+	var duration := 0.21 if heavy else 0.12
+	var sample_count := int(float(sample_rate) * duration)
+	var pcm := PackedByteArray()
+	pcm.resize(sample_count * 2)
+	for index in range(sample_count):
+		var t := float(index) / float(sample_rate)
+		var progress := t / duration
+		var envelope := minf(1.0, t / 0.003) * pow(1.0 - progress, 2.4)
+		# A dry downward blade swish, then a low, brief contact thump. The
+		# deterministic noise does not touch the seeded gameplay RNG.
+		var noise := fposmod(sin(float(index) * 12.9898 + 78.233) * 43758.5453, 1.0) * 2.0 - 1.0
+		var swish := sin(TAU * (1380.0 * t - 2450.0 * t * t)) * 0.14 + noise * 0.26
+		var contact_t := maxf(0.0, t - 0.012)
+		var bass := sin(TAU * ((74.0 if heavy else 120.0) * contact_t - 70.0 * contact_t * contact_t)) * exp(-contact_t * (24.0 if heavy else 42.0))
+		var wave := (swish + bass * (0.58 if heavy else 0.36)) * envelope
+		var sample := int(clampf(wave * 29000.0, -32767.0, 32767.0))
+		if sample < 0:
+			sample += 65536
+		pcm[index * 2] = sample & 0xFF
+		pcm[index * 2 + 1] = (sample >> 8) & 0xFF
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = sample_rate
+	stream.stereo = false
+	stream.data = pcm
 	return stream
 
 

@@ -4,6 +4,7 @@ extends "res://scripts/weapons/base_weapon.gd"
 func _process(delta: float) -> void:
 	if owner_player == null or data == null or not GameManager.game_running:
 		return
+	firing_clock += delta
 
 	cooldown_timer -= delta
 	if cooldown_timer > 0.0:
@@ -33,7 +34,7 @@ func _throw_at(target: Node2D) -> void:
 		var direction := base_direction.rotated(angle_offset).normalized()
 		var side_offset := direction.rotated(PI * 0.5) * (float(index) - float(projectile_count - 1) * 0.5) * 10.0
 		var spawn_position: Vector2 = owner_player.global_position + direction * 24.0 + side_offset
-		EntityFactory.spawn_projectile(spawn_position, direction, base_stats, owner_player)
+		register_projectile_spawn(EntityFactory.spawn_projectile(spawn_position, direction, base_stats, owner_player))
 
 	register_trigger()
 	if AudioManager != null and AudioManager.has_method("play_sfx"):

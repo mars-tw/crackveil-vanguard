@@ -5,6 +5,10 @@ const WEB_REACHABILITY_PROBE := preload("res://scripts/services/web_reachability
 const COOLDOWN_RING_SCRIPT := preload("res://scripts/ui/cooldown_ring.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+const MINIMAP := preload("res://scripts/ui/r36_minimap.gd")
+const COMBAT_READOUT := preload("res://scripts/ui/combat_readout.gd")
+const EQUIPMENT_PANEL := preload("res://scripts/ui/equipment_panel.gd")
+const R33_LOOT_BANNER := preload("res://scripts/ui/r33_loot_banner.gd")
 
 var root: Control
 var hud_panel: Panel
@@ -30,6 +34,12 @@ var active_ability_button: Button
 var active_ability_cooldown: TextureProgressBar
 var active_ability_cooldown_ring: Control
 var active_ability_label: Label
+var energy_panel: Panel
+var energy_label: Label
+var energy_bar: ProgressBar
+var summon_button: Button
+var auto_button: Button
+var auto_mode := false
 var toast_panel: Panel
 var toast_label: Label
 var level_flash_rect: ColorRect
@@ -88,6 +98,47 @@ var screenshot_beauty_active: bool = false
 var last_level_value: int = 1
 var last_xp_value: int = 0
 var last_xp_required_value: int = 1
+var equipment_panel: Control = null
+var runtime_probe_checked: bool = false
+var runtime_probe_enabled: bool = false
+var ability_layout_signature: Array = []
+var ability_layout_updates: int = 0
+
+
+func attach_equipment_panel(director: Node) -> void:
+	if is_instance_valid(equipment_panel):
+		equipment_panel.queue_free()
+	equipment_panel = EQUIPMENT_PANEL.new()
+	equipment_panel.name = "EquipmentPanel"
+	root.add_child(equipment_panel)
+	equipment_panel.configure(director)
+	var loot_banner := R33_LOOT_BANNER.new()
+	loot_banner.name = "LootBanner"
+	root.add_child(loot_banner)
+	director.loot_collected.connect(loot_banner.show_item)
+	_layout_equipment_panel()
+	ability_layout_signature.clear()
+
+
+func _layout_equipment_panel() -> void:
+	if not is_instance_valid(equipment_panel):
+		return
+	var viewport_size := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
+	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
+	var portrait := viewport_size.y > viewport_size.x
+	var width := minf(410.0 if not mobile else 300.0, viewport_size.x - 24.0)
+	var height := maxf(56.0, MOBILE_TUNING.touch_target(viewport_size)) if _should_show_touch_controls() else 38.0
+	var y := viewport_size.y - height - 8.0
+	if _should_show_touch_controls() and portrait and virtual_joystick != null:
+		y = virtual_joystick.position.y - height - 12.0
+	equipment_panel.position = Vector2((viewport_size.x - width) * 0.5, y)
+	equipment_panel.size = Vector2(width, height)
+	for button in equipment_panel.buttons:
+		button.custom_minimum_size = Vector2(0.0, height)
+		button.add_theme_font_size_override("font_size", 12 if mobile else 14)
+	equipment_panel.slot_row.add_theme_constant_override("separation", 5)
+	equipment_panel.details_label.add_theme_font_size_override("font_size", 13)
+	equipment_panel.set_compact(mobile)
 
 
 func _ready() -> void:
@@ -141,6 +192,10 @@ func _process(_delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_B:
+			_open_summon_shop()
+			get_viewport().set_input_as_handled()
+			return
 		if event.keycode == KEY_F12 and OS.is_debug_build():
 			set_screenshot_beauty_mode(not screenshot_beauty_active)
 			get_viewport().set_input_as_handled()
@@ -261,9 +316,8 @@ func _build_ui() -> void:
 
 	active_ability_button = Button.new()
 	active_ability_button.name = "ActiveAbilityButton"
-	active_ability_button.text = "裂"
-	active_ability_button.tooltip_text = "裂隙脈衝"
-	active_ability_button.pressed.connect(_on_active_ability_pressed)
+	active_ability_button.text = "斬"
+	active_ability_button.tooltip_text = "點按拔刀；按住持續旋斬"
 	active_ability_button.button_down.connect(_on_active_ability_button_down)
 	active_ability_button.button_up.connect(_on_active_ability_button_up)
 	_apply_active_ability_glass_style()
@@ -292,6 +346,45 @@ func _build_ui() -> void:
 	active_ability_label.add_theme_font_size_override("font_size", 16)
 	active_ability_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(active_ability_label)
+	energy_panel = Panel.new()
+	energy_panel.name = "CaptainEnergyReadout"
+	energy_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var energy_style := StyleBoxFlat.new()
+	energy_style.bg_color = Color(0.018, 0.03, 0.055, 0.90)
+	energy_style.border_color = Color("bdae78")
+	energy_style.set_border_width_all(1)
+	energy_style.set_corner_radius_all(7)
+	energy_panel.add_theme_stylebox_override("panel", energy_style)
+	root.add_child(energy_panel)
+	energy_label = Label.new()
+	energy_label.position = Vector2(10, 4)
+	energy_label.size = Vector2(204, 24)
+	energy_label.add_theme_font_size_override("font_size", 14)
+	energy_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	energy_panel.add_child(energy_label)
+	energy_bar = ProgressBar.new()
+	energy_bar.position = Vector2(10, 31)
+	energy_bar.size = Vector2(204, 6)
+	energy_bar.show_percentage = false
+	energy_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var energy_fill := StyleBoxFlat.new()
+	energy_fill.bg_color = Color("e8c87e")
+	energy_fill.set_corner_radius_all(3)
+	energy_bar.add_theme_stylebox_override("fill", energy_fill)
+	energy_panel.add_child(energy_bar)
+	energy_panel.visible = false
+	var minimap := MINIMAP.new()
+	minimap.name = "LoopMinimap"
+	root.add_child(minimap)
+	summon_button = Button.new()
+	summon_button.name = "SummonButton"
+	summon_button.text = "技能／寵物召喚"
+	summon_button.pressed.connect(_open_summon_shop)
+	root.add_child(summon_button)
+	auto_button = Button.new()
+	auto_button.name = "AutoBattleButton"
+	auto_button.pressed.connect(_toggle_auto_battle)
+	root.add_child(auto_button)
 
 	toast_panel = Panel.new()
 	toast_panel.name = "ToastPanel"
@@ -308,6 +401,9 @@ func _build_ui() -> void:
 	toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	toast_label.add_theme_font_size_override("font_size", 18)
+	toast_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	toast_label.offset_left = 12.0
+	toast_label.offset_right = -12.0
 	toast_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	toast_panel.add_child(toast_label)
 
@@ -374,6 +470,9 @@ func _build_ui() -> void:
 	root.add_child(combo_break_label)
 
 	_build_virtual_joystick()
+	var combat_readout := COMBAT_READOUT.new()
+	combat_readout.name = "CombatReadout"
+	root.add_child(combat_readout)
 	_build_pause_overlay()
 	_apply_responsive_layout()
 
@@ -830,7 +929,7 @@ func _apply_responsive_layout() -> void:
 			score_panel.anchor_left = 1.0
 			score_panel.anchor_right = 1.0
 			score_panel.position = Vector2.ZERO
-			score_panel.offset_left = -358.0 if not portrait else -276.0
+			score_panel.offset_left = -338.0 if compact_landscape else -358.0 if not portrait else -276.0
 			score_panel.offset_right = -150.0 if mobile and not portrait else -margin
 			score_panel.offset_top = safe_top + 76.0 if mobile and not portrait else 8.0 if not portrait else 48.0
 			score_panel.offset_bottom = score_panel.offset_top + (52.0 if mobile else 46.0)
@@ -898,8 +997,8 @@ func _apply_responsive_layout() -> void:
 		score_label.offset_bottom = score_label.offset_top + 38.0
 		score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	else:
-		score_label.offset_left = -338.0 if not portrait else -258.0
-		score_label.offset_right = -150.0 if mobile and not portrait else -104.0 if not portrait else -14.0
+		score_label.offset_left = -330.0 if compact_landscape else -338.0 if not portrait else -258.0
+		score_label.offset_right = -158.0 if compact_landscape else -104.0 if not portrait else -14.0
 		score_label.offset_top = safe_top + 84.0 if mobile and not portrait else 17.0 if not portrait else 54.0
 		score_label.offset_bottom = score_label.offset_top + (34.0 if mobile else 30.0)
 		score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -1005,8 +1104,10 @@ func _apply_responsive_layout() -> void:
 		if not show_touch_controls:
 			active_ability_cooldown.visible = false
 	if active_ability_label != null and active_ability_button != null:
-		active_ability_label.position = active_ability_button.position
-		active_ability_label.size = active_ability_button.size
+		active_ability_label.add_theme_font_size_override("font_size", 13)
+		active_ability_label.position = active_ability_button.position + Vector2(-16, active_ability_button.size.y + 3)
+		active_ability_label.size = Vector2(active_ability_button.size.x + 32, 18)
+		active_ability_label.clip_text = true
 		if not show_touch_controls:
 			active_ability_label.visible = false
 
@@ -1018,8 +1119,9 @@ func _apply_responsive_layout() -> void:
 		toast_panel.anchor_bottom = 0.0
 		toast_panel.offset_left = -toast_width * 0.5
 		toast_panel.offset_right = toast_width * 0.5
-		toast_panel.offset_top = safe_top + 186.0 if mobile and portrait else safe_top + 64.0 if mobile else 56.0 if not portrait else 94.0
+		toast_panel.offset_top = safe_top + 266.0 if mobile and portrait else safe_top + 132.0 if mobile else 124.0 if not portrait else 94.0
 		toast_panel.offset_bottom = toast_panel.offset_top + (58.0 if mobile else 48.0)
+		toast_label.add_theme_font_size_override("font_size", 14 if mobile else 16)
 
 	if captain_hit_flash_rect != null:
 		captain_hit_flash_rect.offset_left = 0.0
@@ -1072,6 +1174,9 @@ func _apply_responsive_layout() -> void:
 		if xp_readout_label != null:
 			xp_readout_label.add_theme_font_size_override("font_size", 16)
 	_compact_pause_controls(mobile)
+	if mobile:
+		score_label.add_theme_font_size_override("font_size", 14)
+		time_label.add_theme_font_size_override("font_size", 22 if portrait else 23)
 	var compact_pause_landscape := mobile and not portrait
 	if pause_settings_page != null:
 		pause_settings_page.add_theme_constant_override("separation", 4 if compact_pause_landscape else 10)
@@ -1092,11 +1197,84 @@ func _apply_responsive_layout() -> void:
 	if pause_joystick_size_slider != null:
 		pause_joystick_size_slider.visible = show_touch_controls and not compact_pause_landscape
 	_layout_quick_controls(viewport_size, mobile, portrait, margin, safe_top, touch_height, pause_width, show_touch_controls)
+	_layout_equipment_panel()
+	if toast_label != null:
+		toast_label.add_theme_font_size_override("font_size", 14 if mobile else 16)
 	_apply_accessibility_palette()
+	_apply_r33_battle_layout(viewport_size, mobile)
+	ability_layout_signature.clear()
 	call_deferred("_publish_reachability_probe", viewport_size)
 
 
+func _apply_r33_battle_layout(size: Vector2, mobile: bool) -> void:
+	var top := MOBILE_TUNING.safe_top_padding(size)
+	var portrait := size.y > size.x
+	var width := 184.0 if mobile and portrait else 242.0 if mobile else 270.0
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.045, 0.055, 0.105, 0.78)
+	style.border_color = Color(0.6, 0.7, 1.0, 0.45)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(9)
+	hud_panel.position = Vector2(10, top + 8)
+	hud_panel.size = Vector2(width, 58)
+	hud_panel.add_theme_stylebox_override("panel", style)
+	hp_icon.position = Vector2(18, top + 14)
+	hp_icon.size = Vector2(20, 20)
+	hp_label.position = Vector2(44, top + 12)
+	hp_label.add_theme_font_size_override("font_size", 15 if mobile and portrait else 17 if mobile else 19)
+	level_label.position = Vector2(width - 36, top + 13)
+	level_label.add_theme_font_size_override("font_size", 13)
+	xp_icon.visible = false
+	xp_readout_label.visible = false
+	xp_bar.position = Vector2(20, top + 47)
+	xp_bar.size = Vector2(width - 20, 5)
+	theme_label.visible = false
+	gold_icon.visible = false
+	var score_width := 118.0 if mobile and portrait else 188.0
+	score_panel.offset_left = -score_width - 70.0
+	score_panel.offset_right = -70.0
+	score_panel.offset_top = top + 8.0
+	score_panel.offset_bottom = top + 50.0
+	score_panel.add_theme_stylebox_override("panel", style)
+	score_label.anchor_left = 1.0
+	score_label.anchor_right = 1.0
+	score_label.offset_left = score_panel.offset_left + 8
+	score_label.offset_right = -78
+	score_label.offset_top = top + 16.0
+	score_label.offset_bottom = top + 40.0
+	score_label.add_theme_font_size_override("font_size", 12 if mobile else 15)
+	time_label.anchor_left = 0.5
+	time_label.anchor_right = 0.5
+	time_label.offset_left = -50
+	time_label.offset_right = 50
+	time_label.offset_top = top + 10 if not portrait else top + 72
+	time_label.offset_bottom = time_label.offset_top + 29
+	time_label.add_theme_font_size_override("font_size", 20)
+	pause_button.offset_left = -58
+	pause_button.offset_right = -10
+	pause_button.offset_top = top + 8
+	pause_button.offset_bottom = top + 52
+	pause_button.custom_minimum_size = Vector2(44, 44)
+	pause_button.add_theme_font_size_override("font_size", 13)
+	quick_controls.visible = false
+	if toast_panel != null:
+		toast_panel.offset_top = size.y - (114.0 if mobile and not portrait else 116.0 if not mobile else 250.0)
+		toast_panel.offset_bottom = toast_panel.offset_top + 44
+	_refresh_r33_labels()
+
+
+func _refresh_r33_labels() -> void:
+	if theme_label != null:
+		theme_label.visible = false
+	if level_label != null:
+		level_label.text = "Lv.%d" % last_level_value
+	if score_label != null:
+		score_label.text = "%d 殺　金 %d" % [GameManager.kills, GameManager.gold]
+
+
 func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
+	if not is_inside_tree() or get_viewport() == null:
+		return
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
 	WEB_REACHABILITY_PROBE.publish("hud", viewport_size, {
@@ -1118,7 +1296,9 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"pause_high_contrast": pause_high_contrast_check,
 		"pause_ui_scale": pause_ui_scale_slider,
 		"virtual_joystick": virtual_joystick,
-		"active_ability": active_ability_button
+		"active_ability": active_ability_button,
+		"summon": summon_button,
+		"auto_battle": auto_button
 	}, {
 		"paused": pause_overlay != null and pause_overlay.visible,
 		"confirmed_touch": MOBILE_TUNING.has_confirmed_touch(),
@@ -1147,7 +1327,7 @@ func _layout_quick_controls(viewport_size: Vector2, mobile: bool, portrait: bool
 		y = safe_top + touch_height + 80.0 if mobile else safe_top + touch_height + 22.0 if show_touch_controls else safe_top + 58.0
 	quick_controls.position = Vector2(max(margin, x), y)
 	quick_controls.size = Vector2(total_width, total_height)
-	quick_controls.visible = not (pause_overlay != null and pause_overlay.visible)
+	quick_controls.visible = not mobile and not (pause_overlay != null and pause_overlay.visible)
 	for index in range(buttons.size()):
 		var button := buttons[index] as Button
 		if button == null:
@@ -1330,6 +1510,9 @@ func set_touch_controls_forced_visible(value: bool) -> void:
 
 
 func _on_stats_changed(stats: Dictionary) -> void:
+	_publish_runtime_probe(stats)
+	if is_instance_valid(equipment_panel):
+		equipment_panel.update_from_stats(stats)
 	var hp := int(ceil(float(stats.get("hp", 0.0))))
 	var max_hp := int(ceil(float(stats.get("max_hp", 0.0))))
 	var current_level := int(stats.get("level", 1))
@@ -1349,12 +1532,13 @@ func _on_stats_changed(stats: Dictionary) -> void:
 		var bond_text := "　羈絆 %d/4　%s" % [bond_names.size(), " · ".join(bond_names)] if not bond_names.is_empty() else "　羈絆 0/4"
 		theme_label.text = ("地圖：%s" % theme_name if theme_name != "" else "") + bond_text
 		theme_label.visible = not MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size)
-	time_label.text = GameManager.format_time(float(stats.get("elapsed_time", 0.0)))
+	time_label.text = ("波%d  " % int(stats.get("endless_wave", 1)) if str(stats.get("run_mode", "campaign")) == "endless" else "") + GameManager.format_time(float(stats.get("elapsed_time", 0.0)))
 	var mobile := MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size)
 	var kills := int(stats.get("kills", 0))
 	var gold := int(stats.get("gold", 0))
 	var echo_shards := int(stats.get("echo_shards", 0))
-	score_label.text = "K%d" % kills if mobile else "擊殺 %d   金幣 %d   殘響 %d" % [
+	var squad_count: int = GameManager.squad_manager.get_member_count() if is_instance_valid(GameManager.squad_manager) else 1
+	score_label.text = ("K%d" % kills if layout_size.y > layout_size.x else "擊殺 %d　金 %d　隊 %d" % [kills, gold, squad_count]) if mobile else "擊殺 %d   金幣 %d   殘響 %d" % [
 		kills,
 		gold,
 		echo_shards
@@ -1362,7 +1546,68 @@ func _on_stats_changed(stats: Dictionary) -> void:
 	if pause_run_stats_label != null:
 		var pause_bond_text := "\n羈絆 %d/4：%s" % [bond_names.size(), " · ".join(bond_names)] if not bond_names.is_empty() else "\n羈絆 0/4"
 		pause_run_stats_label.text = "本局：擊殺 %d   金幣 %d   殘響 %d%s" % [kills, gold, echo_shards, pause_bond_text]
+		for item in stats.get("equipment_slots", []):
+			pause_run_stats_label.text += "\n%s：%s" % [str(item.get("slot_name", "裝備")), str(item.get("name", "空槽"))]
 	_on_pause_changed(bool(stats.get("manual_pause_visible", bool(stats.get("manual_paused", false)))))
+	_refresh_r33_labels()
+
+
+func _publish_runtime_probe(stats: Dictionary) -> void:
+	if not OS.has_feature("web"):
+		return
+	if not runtime_probe_checked:
+		runtime_probe_checked = true
+		var probe_json: Variant = JavaScriptBridge.eval("JSON.stringify({enabled:new URLSearchParams(window.location.search).get('cv_r32_test') === '1'})", true)
+		var probe_flags: Variant = JSON.parse_string(str(probe_json))
+		runtime_probe_enabled = probe_flags is Dictionary and probe_flags.get("enabled", false) == true
+	if not runtime_probe_enabled:
+		return
+	var payload := stats.duplicate(true)
+	payload["fps"] = Engine.get_frames_per_second()
+	payload["performance"] = {
+		"process_ms": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
+		"physics_ms": Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
+		"draw_calls": Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+		"render_objects": Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
+		"hud_static_layout_updates": ability_layout_updates
+	}
+	payload["version"] = str(ProjectSettings.get_setting("application/config/version", ""))
+	payload["stage_id"] = GameManager.selected_stage_id
+	payload["campaign_clears"] = GameManager.campaign_clears
+	if is_instance_valid(GameManager.player):
+		payload["player_x"] = GameManager.player.global_position.x
+		payload["player_y"] = GameManager.player.global_position.y
+		if GameManager.player.has_method("get_cleave_debug_state"):
+			payload["cleave"] = GameManager.player.get_cleave_debug_state()
+		if GameManager.player.has_method("get_firepower_debug_state"):
+			payload["firepower"] = GameManager.player.get_firepower_debug_state()
+		if GameManager.player.has_method("get_channel_debug_state"):
+			payload["channel"] = GameManager.player.get_channel_debug_state()
+	if is_instance_valid(GameManager.arena):
+		var spawner := GameManager.arena.get_node_or_null("EnemySpawner")
+		if spawner != null and spawner.has_method("get_harvest_debug_state"):
+			payload["horde"] = spawner.get_harvest_debug_state()
+		var boss_states: Array = []
+		var topology := GameManager.arena.get_node_or_null("LoopWorldTopology")
+		if topology != null:
+			payload["loop_world"] = topology.get_debug_state()
+		if is_instance_valid(GameManager.summon_director):
+			payload["summons"] = GameManager.summon_director.get_debug_state()
+		if is_instance_valid(GameManager.summon_screen) and GameManager.summon_screen.has_method("get_debug_state"):
+			payload["summon_ui"] = GameManager.summon_screen.get_debug_state()
+		var specials: Array = []
+		for enemy in get_tree().get_nodes_in_group("enemies"):
+			if enemy.get("is_active") == true and str(enemy.get("special_elite_id")) != "":
+				specials.append(enemy.get_special_elite_debug_state())
+		payload["special_elites"] = specials
+		var presentation := GameManager.arena.get_node_or_null("CombatPresentation")
+		if presentation != null:
+			payload["presentation"] = presentation.get_debug_state()
+		for enemy in get_tree().get_nodes_in_group("enemies"):
+			if enemy.get("is_active") == true and enemy.get("is_boss") == true:
+				boss_states.append(enemy.get_boss_debug_state())
+		payload["bosses"] = boss_states
+	JavaScriptBridge.eval("window.__cvR32Runtime = %s" % JSON.stringify(payload), true)
 
 
 func _refresh_primary_stat_labels(compact_landscape: bool) -> void:
@@ -1380,7 +1625,7 @@ func _on_pause_changed(is_paused: bool) -> void:
 		pause_button.visible = not is_paused
 		pause_button.disabled = is_paused
 	if quick_controls != null:
-		quick_controls.visible = not is_paused
+		quick_controls.visible = false
 		quick_controls.mouse_filter = Control.MOUSE_FILTER_IGNORE if is_paused else Control.MOUSE_FILTER_PASS
 	if is_paused:
 		_sync_audio_controls()
@@ -1456,10 +1701,18 @@ func _apply_active_ability_glass_style() -> void:
 
 
 func _on_active_ability_button_down() -> void:
+	var actor := GameManager.player
+	if is_instance_valid(actor):
+		if actor.has_method("set_active_ability_held"):
+			actor.set_active_ability_held(true)
+		actor.try_cast_active_ability()
 	_animate_active_ability_press(Vector2.ONE * 0.9, 0.055)
 
 
 func _on_active_ability_button_up() -> void:
+	var actor := GameManager.player
+	if is_instance_valid(actor) and actor.has_method("set_active_ability_held"):
+		actor.set_active_ability_held(false)
 	_animate_active_ability_press(Vector2.ONE, 0.1)
 
 
@@ -1474,31 +1727,91 @@ func _animate_active_ability_press(target_scale: Vector2, duration: float) -> vo
 
 
 func _refresh_active_ability_button() -> void:
-	if active_ability_button == null:
+	if active_ability_button == null or not is_inside_tree() or get_viewport() == null:
 		return
 	var active_player := GameManager.player
-	var visible_for_player := _should_show_touch_controls() and active_player != null and is_instance_valid(active_player) and active_player.has_method("get_active_ability_cooldown_remaining")
+	var layout := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
+	var touch := _should_show_touch_controls()
+	var signature: Array = [layout, touch, GameManager.game_running, GameManager.auto_upgrade_enabled,
+		virtual_joystick.position if virtual_joystick != null else Vector2.ZERO,
+		equipment_panel.position if is_instance_valid(equipment_panel) else Vector2.ZERO,
+		active_ability_button.position, active_ability_button.size]
+	var update_layout := signature != ability_layout_signature
+	if update_layout:
+		ability_layout_signature = signature
+		ability_layout_updates += 1
+	if summon_button != null and update_layout:
+		summon_button.visible = GameManager.game_running
+		summon_button.add_theme_font_size_override("font_size", 14)
+		auto_button.visible = touch and GameManager.game_running
+		auto_button.add_theme_font_size_override("font_size", 14)
+		auto_button.text = "自動戰鬥：開" if GameManager.auto_upgrade_enabled else "自動戰鬥：關"
+		var button_height := maxf(56.0, MOBILE_TUNING.touch_target(layout)) if touch else 40.0
+		var row_y := layout.y - 122.0
+		if touch and virtual_joystick != null:
+			var reserved_top := virtual_joystick.position.y
+			if layout.y > layout.x and is_instance_valid(equipment_panel):
+				reserved_top = minf(reserved_top, equipment_panel.position.y)
+			row_y = reserved_top - button_height - 12.0
+		summon_button.position = Vector2(12.0 if touch else 20.0, row_y)
+		summon_button.size = Vector2(136.0 if touch else 224.0, button_height)
+		# A horizontal row clears both the actual joystick heat zone and the
+		# minimum 56px touch height enforced by the general mobile UI pass.
+		var auto_x := layout.x - 148.0 if layout.y > layout.x else 156.0
+		auto_button.position = Vector2(auto_x, row_y)
+		auto_button.size = Vector2(136.0, button_height)
+	var channel: Dictionary = active_player.get_channel_debug_state() if is_instance_valid(active_player) and active_player.has_method("get_channel_debug_state") else {}
+	if energy_panel != null:
+		energy_panel.visible = not touch and not channel.is_empty() and GameManager.game_running and not GameManager.is_system_pause_active()
+		if update_layout:
+			energy_panel.position = Vector2(20, layout.y - 68)
+			energy_panel.size = Vector2(224, 44)
+		energy_bar.value = float(channel.get("energy_ratio", 1.0)) * 100.0
+		energy_label.text = "放開空白鍵回能" if bool(channel.get("exhausted", false)) else "旋斬能量 %d／%d" % [roundi(float(channel.get("energy", 120.0))), roundi(float(channel.get("energy_max", 120.0)))]
+	var visible_for_player := touch and active_player != null and is_instance_valid(active_player) and active_player.has_method("get_active_ability_cooldown_remaining")
 	active_ability_button.visible = visible_for_player
 	if active_ability_cooldown != null:
 		active_ability_cooldown.visible = visible_for_player
 	if active_ability_cooldown_ring != null:
 		active_ability_cooldown_ring.visible = visible_for_player
 	if active_ability_label != null:
+		# Touch tree scaling targets buttons; this separate caption keeps its
+		# measured size and fits below the circle instead of obscuring the skill.
+		if update_layout:
+			active_ability_label.add_theme_font_size_override("font_size", 13)
+			active_ability_label.position = Vector2(clampf(active_ability_button.position.x - 16, 4.0, layout.x - 112.0), minf(active_ability_button.position.y + active_ability_button.size.y + 3.0, layout.y - 21.0))
+			active_ability_label.size = Vector2(112, 18)
+			active_ability_label.clip_text = true
 		active_ability_label.visible = visible_for_player
 	if not visible_for_player:
 		return
 	var remaining: float = float(active_player.get_active_ability_cooldown_remaining())
 	var duration: float = max(0.001, float(active_player.get_active_ability_cooldown_duration()))
 	var ratio: float = clamp(remaining / duration, 0.0, 1.0)
-	active_ability_button.disabled = remaining > 0.01 or get_tree().paused or not GameManager.game_running
-	active_ability_button.text = "裂"
+	var channel_available := not channel.is_empty()
+	active_ability_button.disabled = get_tree().paused or not GameManager.game_running or (remaining > 0.01 and not channel_available)
+	active_ability_button.text = "旋" if bool(channel.get("active", false)) else "斬"
+	if channel_available and (bool(channel.get("held", false)) or bool(channel.get("active", false))):
+		ratio = 1.0 - float(channel.get("energy_ratio", 1.0))
 	if active_ability_cooldown != null:
 		active_ability_cooldown.value = ratio
 		active_ability_cooldown.modulate = Color(1.0, 1.0, 1.0, 0.30 if ratio > 0.0 else 0.0)
 	if active_ability_cooldown_ring != null and active_ability_cooldown_ring.has_method("set_cooldown_ratio"):
 		active_ability_cooldown_ring.call("set_cooldown_ratio", ratio)
 	if active_ability_label != null:
-		active_ability_label.text = "%.1f" % remaining if remaining > 0.05 else ""
+		active_ability_label.text = ("放開回能" if bool(channel.get("exhausted", false)) else "能量 %d%%" % roundi(float(channel.get("energy_ratio", 1.0)) * 100.0) if bool(channel.get("held", false)) else "按住旋斬") if channel_available else ("%.1f" % remaining if remaining > 0.05 else "")
+
+
+func _open_summon_shop() -> void:
+	if GameManager.has_method("open_summon_shop"):
+		GameManager.open_summon_shop()
+
+
+func _toggle_auto_battle() -> void:
+	GameManager.auto_upgrade_enabled = not GameManager.auto_upgrade_enabled
+	var player := GameManager.player
+	if is_instance_valid(player) and player.has_method("set_auto_channel_enabled"):
+		player.set_auto_channel_enabled(GameManager.auto_upgrade_enabled)
 
 
 func _on_level_flash_requested() -> void:
@@ -1561,18 +1874,22 @@ func _on_combo_milestone_requested(combo_count: int) -> void:
 		milestone_tween.kill()
 	if combo_pulse_tween != null and combo_pulse_tween.is_valid():
 		combo_pulse_tween.kill()
-	var viewport_size := get_viewport().get_visible_rect().size
+	var viewport_size := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		viewport_size = Vector2(1280.0, 720.0)
-	milestone_label.text = "COMBO x%d  OVERDRIVE +10%%" % combo_count
-	milestone_label.visible = true
+	milestone_label.text = "%d 連斬　火力爆發 +10%%" % combo_count
+	milestone_label.add_theme_font_size_override("font_size", 28)
+	# The phone's persistent readout already shows the milestone and buff timer.
+	# Keep the battlefield clear during the burst rather than adding a second
+	# full-width message over its smaller canvas.
+	milestone_label.visible = false
 	milestone_label.modulate = Color(1.0, 0.78, 0.24, 0.0)
 	milestone_label.scale = Vector2.ONE * 0.82
 	if combo_pulse_rect != null:
 		var start_size: float = min(viewport_size.x, viewport_size.y) * 0.34
 		var end_size: float = max(viewport_size.x, viewport_size.y) * 1.95
 		var center := viewport_size * 0.5
-		var pulse_color := Color(1.0, 0.74, 0.18, 0.62)
+		var pulse_color := Color(1.0, 0.74, 0.18, 0.12)
 		combo_pulse_rect.visible = true
 		combo_pulse_rect.modulate = pulse_color
 		combo_pulse_rect.position = center - Vector2.ONE * start_size * 0.5
@@ -1606,7 +1923,8 @@ func _on_combo_break_requested(combo_count: int) -> void:
 		return
 	if combo_break_tween != null and combo_break_tween.is_valid():
 		combo_break_tween.kill()
-	combo_break_label.text = "COMBO LOST x%d" % combo_count
+	combo_break_label.text = "連斬中斷 %d" % combo_count
+	combo_break_label.add_theme_font_size_override("font_size", 20)
 	combo_break_label.visible = true
 	combo_break_label.modulate = Color(0.86, 0.92, 0.96, 0.88)
 	combo_break_label.position.y += 4.0
@@ -1926,6 +2244,9 @@ func _on_toast_requested(message: String) -> void:
 	if message == "":
 		return
 	toast_queue.append(message)
+	# Loot bursts should not leave old notices playing for half a minute.
+	if toast_queue.size() > 4:
+		toast_queue.pop_front()
 	if not toast_showing:
 		_play_toast_queue()
 
@@ -1935,6 +2256,10 @@ func _play_toast_queue() -> void:
 	while not toast_queue.is_empty():
 		toast_token += 1
 		toast_label.text = toast_queue.pop_front()
+		var mobile := MOBILE_TUNING.use_mobile_ui(MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size))
+		toast_label.add_theme_font_size_override("font_size", 14 if mobile else 16)
+		var toast_height := maxf(48.0, toast_label.get_minimum_size().y + 12.0)
+		toast_panel.offset_bottom = toast_panel.offset_top + toast_height
 		toast_panel.visible = true
 		await get_tree().create_timer(1.5, true).timeout
 	if toast_panel != null:

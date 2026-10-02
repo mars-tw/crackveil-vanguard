@@ -4,6 +4,12 @@ const FIRST_RUN_GUIDE_SCRIPT := preload("res://scripts/ui/first_run_guide.gd")
 const RUN_THEME := preload("res://scripts/arena/run_theme.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
+const LOOT_DIRECTOR := preload("res://scripts/services/loot_director.gd")
+const STAGE_CATALOG := preload("res://scripts/services/stage_catalog.gd")
+const PRESENTATION := preload("res://scripts/vfx/combat_presentation.gd")
+const LOOP_WORLD := preload("res://scripts/services/loop_world_topology.gd")
+const SUMMON_DIRECTOR := preload("res://scripts/services/coin_summon_director.gd")
+const SUMMON_SCREEN := preload("res://scripts/ui/summon_shop_screen.gd")
 
 @export var run_seed: int = 0
 
@@ -17,12 +23,18 @@ const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 var first_run_guide: CanvasLayer = null
 var mobile_color_grade: CanvasModulate = null
 var leader_light: Sprite2D = null
+var theme_grade: Color = Color.WHITE
+var device_grade: Color = Color.WHITE
 
 
 func _ready() -> void:
 	_apply_run_seed()
 	_apply_mobile_color_grade()
 	_apply_background_theme()
+	var stage := STAGE_CATALOG.get_stage(GameManager.selected_stage_id)
+	var spawner := get_node_or_null("EnemySpawner")
+	if spawner != null:
+		spawner.boss_time = 120.0 if GameManager.run_mode == "endless" else float(stage.get("boss_time", 180.0))
 	if not get_viewport().size_changed.is_connected(_apply_mobile_color_grade):
 		get_viewport().size_changed.connect(_apply_mobile_color_grade)
 
@@ -56,20 +68,62 @@ func _ready() -> void:
 	if stage_victory_screen.has_signal("continue_requested"):
 		stage_victory_screen.continue_requested.connect(Callable(GameManager, "continue_after_stage_victory"))
 	if stage_victory_screen.has_signal("main_menu_requested"):
-		stage_victory_screen.main_menu_requested.connect(_on_main_menu_requested)
+		stage_victory_screen.main_menu_requested.connect(Callable(GameManager, "return_to_world_map"))
 	if contract_screen.has_signal("contract_selected"):
 		contract_screen.contract_selected.connect(Callable(GameManager, "apply_contract"))
 	if contract_screen.has_signal("seed_restart_requested"):
 		contract_screen.seed_restart_requested.connect(_on_seed_restart_requested)
 
 	GameManager.arena = self
+	var loop_world := LOOP_WORLD.new()
+	loop_world.name = "LoopWorldTopology"
+	add_child(loop_world)
+	var presentation := PRESENTATION.new()
+	presentation.name = "CombatPresentation"
+	add_child(presentation)
+	var loot_director := LOOT_DIRECTOR.new()
+	loot_director.name = "LootDirector"
+	add_child(loot_director)
+	loot_director.setup(self, GameManager.current_run_seed)
 	EntityFactory.initialize_for_arena(self)
 	var leader: Node = null
 	if squad_manager != null and squad_manager.has_method("start_squad"):
 		leader = squad_manager.start_squad()
+	if leader is Node2D:
+		leader.global_position = Vector2(0, 1000)
+		for member in get_tree().get_nodes_in_group("heroes"):
+			if member != leader and member is Node2D:
+				member.global_position += Vector2(0, 1000)
+		loop_world.set_run_origin(leader.global_position)
+		var camera := leader.get_node_or_null("Camera2D") as Camera2D
+		if camera != null:
+			camera.reset_smoothing()
+			camera.force_update_scroll()
 	_attach_leader_light(leader as Node2D)
 	GameManager.start_run(self, leader, squad_manager, false)
+	var summons := SUMMON_DIRECTOR.new()
+	summons.name = "CoinSummonDirector"
+	summons.save_path = GameManager.campaign_save_path.replace(".cfg", "_pets.cfg")
+	add_child(summons)
+	summons.setup(self, GameManager.current_run_seed)
+	GameManager.summon_director = summons
+	var summon_screen := SUMMON_SCREEN.new()
+	summon_screen.name = "SummonShopScreen"
+	add_child(summon_screen)
+	GameManager.summon_screen = summon_screen
+	GameManager.paid_summon.clear()
+	summon_screen.draw_requested.connect(Callable(GameManager, "purchase_summon"))
+	summon_screen.choice_selected.connect(Callable(GameManager, "complete_summon"))
+	summon_screen.closed.connect(Callable(GameManager, "close_summon_shop"))
+	var is_phone := MOBILE_TUNING.layout_tier(MOBILE_TUNING.ui_layout_size(get_viewport_rect().size)) == MOBILE_TUNING.LayoutTier.PHONE
+	GameManager.auto_upgrade_enabled = is_phone
+	if is_instance_valid(leader) and leader.has_method("set_auto_channel_enabled"):
+		leader.set_auto_channel_enabled(is_phone)
+	var hud := get_node_or_null("HUD")
+	if hud != null and hud.has_method("attach_equipment_panel"):
+		hud.attach_equipment_panel(loot_director)
 	_attach_first_run_guide()
+	GameManager.show_toast("點按踏進拔刀；按住空白鍵或「斬」持續旋斬，放開即可回能。")
 
 
 func _apply_mobile_color_grade() -> void:
@@ -80,8 +134,15 @@ func _apply_mobile_color_grade() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
 	# 手機面板通常偏亮、偏豔：微壓亮度與紅色，留下冷青裂隙高光。
-	mobile_color_grade.color = MOBILE_TUNING.battlefield_color_modulate(viewport_size, mobile)
+	device_grade = MOBILE_TUNING.battlefield_color_modulate(viewport_size, mobile)
+	mobile_color_grade.color = device_grade * theme_grade
 	_update_leader_light()
+
+
+func set_theme_grade(color: Color) -> void:
+	theme_grade = color
+	if mobile_color_grade != null:
+		mobile_color_grade.color = device_grade * theme_grade
 
 
 func _attach_leader_light(leader: Node2D) -> void:
@@ -176,7 +237,8 @@ func _apply_run_seed() -> void:
 		selected_seed = max(1, randi())
 	seed(selected_seed)
 	GameManager.current_run_seed = selected_seed
-	var theme_id := RUN_THEME.select_theme_id(selected_seed)
+	var stage := STAGE_CATALOG.get_stage(GameManager.selected_stage_id)
+	var theme_id := str(stage.get("theme_id", RUN_THEME.select_theme_id(selected_seed)))
 	GameManager.set_current_run_theme(theme_id, RUN_THEME.get_theme_name(theme_id))
 
 

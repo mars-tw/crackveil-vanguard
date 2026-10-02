@@ -1,0 +1,34 @@
+import path from "node:path";
+import fs from "node:fs/promises";
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+const { chromium } = require(process.env.UI_CAPTURE_PLAYWRIGHT ? path.join(process.env.UI_CAPTURE_PLAYWRIGHT, "playwright-core") : "playwright");
+const projectText = await fs.readFile(new URL("../project.godot", import.meta.url), "utf8");
+const expectedVersion = projectText.match(/^config\/version="([^"]+)"/m)?.[1];
+if (!expectedVersion) throw new Error("Project release version is missing");
+const url = new URL(process.env.UI_CAPTURE_URL ?? "http://127.0.0.1:8072/");
+url.searchParams.set("cv_r22_test", "1");
+url.searchParams.set("cv_r32_test", "1");
+const browser = await chromium.launch({ executablePath: process.env.UI_CAPTURE_CHROME || chromium.executablePath(), headless: true });
+const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+const errors = [];
+page.on("pageerror", error => errors.push(error.message));
+page.on("console", msg => { if (/SCRIPT ERROR/.test(msg.text())) errors.push(msg.text()); });
+try {
+  await page.goto(url.href, { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => window.__cvR22Controls?.main_menu?.controls?.start?.visible, null, { timeout: 120000 });
+  const start = await page.evaluate(() => window.__cvR22Controls.main_menu.controls.start);
+  await page.mouse.click(start.center_x, start.center_y);
+  await page.waitForFunction(() => window.__cvR32Runtime?.game_running && !window.__cvR32Runtime?.waiting_for_contract, null, { timeout: 30000 });
+  await page.keyboard.down("d");
+  await page.keyboard.press("Space");
+  await page.waitForTimeout(800);
+  await page.keyboard.up("d");
+  await page.waitForTimeout(700);
+  const runtime = await page.evaluate(() => window.__cvR32Runtime);
+  if (runtime.version !== expectedVersion || runtime.kills < 1 || runtime.loop_world?.hard_bounds !== false || errors.length) throw new Error(JSON.stringify({ runtime, errors }));
+  const out = process.env.R33_WEB_SMOKE_OUT ?? "docs/evidence/r33/web_smoke.json";
+  await fs.mkdir(path.dirname(out), { recursive: true });
+  await fs.writeFile(out, JSON.stringify({ passed: true, version: runtime.version, kills: runtime.kills, cleave: runtime.cleave, errors }, null, 2));
+  console.log(`WEB_SMOKE_PASS version=${runtime.version} quick_start=true actual_input=true combat=true loop_world=true`);
+} finally { await browser.close(); }

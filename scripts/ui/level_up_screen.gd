@@ -5,12 +5,16 @@ const MOBILE_CONFIRM_WINDOW_MSEC := 350
 const ICON_XP := preload("res://assets/art/icon_xp.png")
 const ICON_HEALTH := preload("res://assets/art/icon_health.png")
 const ICON_GOLD := preload("res://assets/art/icon_gold.png")
+const UPGRADE_PREVIEW := preload("res://scripts/services/upgrade_preview.gd")
+const R33_ANIMATION := preload("res://scripts/animation/true_animation_library.gd")
+const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 
 signal upgrade_selected(upgrade: Dictionary)
 
 var root: Control
 var panel: Panel
 var title_label: Label
+var progress_label: Label
 var card_scroll: ScrollContainer
 var card_grid: GridContainer
 var option_buttons: Array[Button] = []
@@ -54,6 +58,14 @@ func _build_ui() -> void:
 	title_label.add_theme_constant_override("outline_size", 2)
 	panel.add_child(title_label)
 
+	progress_label = Label.new()
+	progress_label.name = "RunProgress"
+	progress_label.anchor_right = 1.0
+	progress_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	progress_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	progress_label.add_theme_color_override("font_color", Color(0.72, 0.86, 0.93))
+	panel.add_child(progress_label)
+
 	card_scroll = ScrollContainer.new()
 	card_scroll.name = "CardScroll"
 	card_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -74,18 +86,23 @@ func _build_ui() -> void:
 
 func show_options(options: Array) -> void:
 	for child in card_grid.get_children():
+		card_grid.remove_child(child)
 		child.queue_free()
 	option_buttons.clear()
 	pending_mobile_confirm_button = null
 	pending_mobile_confirm_started_msec = 0
+	title_label.text = "Lv.%d · 選擇升級" % int(GameManager.level)
+	if progress_label != null:
+		progress_label.text = "第 %d 次強化 · 經驗 %d／%d" % [maxi(1, int(GameManager.level) - 1), int(GameManager.xp), int(GameManager.xp_required)]
 
 	for option in options:
 		var button := Button.new()
 		var title := str(option.get("name", "升級"))
 		button.text = ""
+		button.tooltip_text = str(option.get("description", ""))
 		button.set_meta("option_key", _option_key(option))
 		button.set_meta("upgrade_option", option)
-		_build_card_content(button, title, str(option.get("description", "")), option)
+		_build_card_content(button, title, UPGRADE_PREVIEW.describe(option), option)
 		_apply_card_style(button, option)
 		button.pressed.connect(_on_upgrade_pressed.bind(option))
 		button.mouse_entered.connect(_on_card_focus.bind(button, true))
@@ -101,16 +118,18 @@ func show_options(options: Array) -> void:
 
 
 func _on_upgrade_pressed(upgrade: Dictionary) -> void:
-	if MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size):
-		var pressed_button := _button_for_option(upgrade)
-		var now_msec := Time.get_ticks_msec()
-		if pressed_button != null and pressed_button == pending_mobile_confirm_button and now_msec - pending_mobile_confirm_started_msec <= MOBILE_CONFIRM_WINDOW_MSEC:
-			_reset_pending_mobile_confirm()
-		else:
-			_set_pending_mobile_confirm(pressed_button, now_msec)
-			return
+	_reset_pending_mobile_confirm()
 	root.visible = false
 	upgrade_selected.emit(upgrade)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if root == null or not root.visible or not event is InputEventKey or not event.pressed or event.echo:
+		return
+	var index := int(event.keycode) - KEY_1
+	if index >= 0 and index < option_buttons.size():
+		_on_upgrade_pressed(option_buttons[index].get_meta("upgrade_option", {}))
+		get_viewport().set_input_as_handled()
 
 
 func hide_screen() -> void:
@@ -150,7 +169,7 @@ func _reset_pending_mobile_confirm() -> void:
 	pending_mobile_confirm_button = null
 	pending_mobile_confirm_started_msec = 0
 	if title_label != null:
-		title_label.text = "選擇升級"
+		title_label.text = "Lv.%d · 選擇升級" % int(GameManager.level)
 
 
 func _set_pending_mobile_confirm(button: Button, now_msec: int) -> void:
@@ -224,6 +243,14 @@ func _build_card_content(button: Button, title: String, description: String, opt
 
 func _upgrade_icon(option: Dictionary) -> Texture2D:
 	var option_id := str(option.get("id", ""))
+	if option_id == "recruit_hero":
+		var hero_path := "res://resources/heroes/%s.tres" % str(option.get("hero_id", ""))
+		if ResourceLoader.exists(hero_path):
+			var hero_data: Resource = load(hero_path)
+			var hero_frames := R33_ANIMATION.get_sprite_frames(str(hero_data.get("sprite_path")))
+			var portrait: Texture2D = hero_frames.get_frame_texture(&"idle", 0) if hero_frames != null else null
+			if portrait != null:
+				return portrait
 	if "gold" in option_id:
 		return ICON_GOLD
 	if "heal" in option_id or "health" in option_id or "armor" in option_id or "hp" in option_id:
@@ -232,6 +259,8 @@ func _upgrade_icon(option: Dictionary) -> Texture2D:
 
 
 func _upgrade_category_text(option: Dictionary) -> String:
+	if str(option.get("id", "")) == "recruit_hero":
+		return "招募隊友"
 	if _is_evolution_option(option):
 		return "武器進化"
 	match str(option.get("upgrade_category", "standard")):
@@ -358,6 +387,11 @@ func _apply_responsive_layout() -> void:
 	title_label.offset_top = 16.0 if mobile else 18.0
 	title_label.offset_bottom = title_label.offset_top + (52.0 if mobile else 40.0)
 	title_label.add_theme_font_size_override("font_size", (24 if portrait else 28) if mobile else (28 if portrait else 30))
+	progress_label.offset_left = 10.0
+	progress_label.offset_right = -10.0
+	progress_label.offset_top = title_label.offset_bottom - (8.0 if mobile else 0.0)
+	progress_label.offset_bottom = progress_label.offset_top + 24.0
+	progress_label.add_theme_font_size_override("font_size", 12 if mobile else 14)
 
 	card_grid.columns = 1 if portrait else 3
 	card_grid.add_theme_constant_override("h_separation", 26 if mobile else 18)
@@ -365,7 +399,7 @@ func _apply_responsive_layout() -> void:
 	if card_scroll != null:
 		card_scroll.offset_left = 20.0 if mobile else 26.0
 		card_scroll.offset_right = -card_scroll.offset_left
-		card_scroll.offset_top = title_label.offset_bottom + (14.0 if mobile else 18.0)
+		card_scroll.offset_top = progress_label.offset_bottom + (8.0 if mobile else 12.0)
 		card_scroll.offset_bottom = -20.0 if mobile else -26.0
 		card_grid.custom_minimum_size = Vector2(max(1.0, panel_width - card_scroll.offset_left * 2.0), 0.0)
 
@@ -373,14 +407,32 @@ func _apply_responsive_layout() -> void:
 	var card_width: float = panel_width - side_padding if portrait else max(190.0, (panel_width - side_padding - 36.0) / 3.0)
 	var card_scroll_top := card_scroll.offset_top if card_scroll != null else title_label.offset_bottom + 14.0
 	var available_card_height := panel_height - card_scroll_top - (20.0 if mobile else 26.0)
-	var card_height: float = 224.0 if mobile and portrait else 180.0 if portrait else clamp(available_card_height, 190.0 if not mobile else 204.0, 244.0 if not mobile else 260.0)
+	var card_height: float = 270.0 if mobile and portrait else 244.0 if portrait else clamp(available_card_height, 224.0 if not mobile else 224.0, 284.0 if not mobile else 280.0)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
+	progress_label.add_theme_font_size_override("font_size", 12 if mobile else 14)
 	if mobile and OS.has_feature("web"):
 		title_label.add_theme_font_size_override("font_size", 24 if portrait else 22)
 	for button in option_buttons:
 		_layout_card_content(button, portrait, mobile)
+	call_deferred("_fit_card_text")
+
+
+func _fit_card_text() -> void:
+	# CJK line metrics differ from the fallback font. Fit the actual shaped text
+	# once layout has a width, and let the outer scroll reach the complete card.
+	await get_tree().process_frame
+	for button in option_buttons:
+		if button == null or not is_instance_valid(button):
+			continue
+		var description := button.get_node_or_null("CardDescription") as Label
+		if description == null:
+			continue
+		var text_height := description.get_minimum_size().y
+		var needed_height := description.offset_top + text_height + 18.0
+		if needed_height > button.custom_minimum_size.y:
+			button.custom_minimum_size.y = ceilf(needed_height)
 
 
 func _animate_cards_in() -> void:
@@ -389,14 +441,11 @@ func _animate_cards_in() -> void:
 		if button == null or not is_instance_valid(button):
 			continue
 		button.pivot_offset = button.size * 0.5
-		var target_position := button.position
-		button.position = target_position + Vector2(0.0, 54.0)
 		button.scale = Vector2.ONE * 0.9
 		button.modulate.a = 0.0
 		var tween := create_tween().set_parallel(true)
 		tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		tween.tween_property(button, "position", target_position, 0.42).set_delay(float(index) * 0.08)
 		tween.tween_property(button, "scale", Vector2.ONE, 0.42).set_delay(float(index) * 0.08)
 		tween.tween_property(button, "modulate:a", 1.0, 0.24).set_delay(float(index) * 0.08)
 

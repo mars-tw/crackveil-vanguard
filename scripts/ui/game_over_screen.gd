@@ -136,6 +136,7 @@ func _update_summary_count(progress_ratio: float) -> void:
 		str(summary.get("contract_name", "無契約")),
 		_echo_destination_text(summary, progress)
 	]
+	summary_label.text += "\n裝備拾取 %d 件　拆解 %d 件" % [int(displayed_summary.get("equipment_collected", 0)), int(displayed_summary.get("equipment_salvaged", 0))]
 
 
 func _on_restart_pressed() -> void:
@@ -161,7 +162,7 @@ func _survival_rating(elapsed: float) -> String:
 	if elapsed < 30.0:
 		return "評價：裂縫入口失守。"
 	if elapsed < 90.0:
-		return "評價：摸到節奏，火力尚未成形。"
+		return "評價：持續清場，下一次再挑戰守關者。"
 	if elapsed < 180.0:
 		return "評價：撐過中段壓力。"
 	if elapsed < 300.0:

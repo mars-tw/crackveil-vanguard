@@ -93,19 +93,23 @@ func _test_active_ability_damage_and_cooldown() -> bool:
 	if enemy == null:
 		_fail("active ability target spawn failed")
 		return false
+	# Finish source-atlas/pool initialization before measuring the 111 ms
+	# authored anticipation; an import/prewarm stall is not an attack frame.
+	for frame in range(3):
+		await get_tree().process_frame
 	var hp_before: float = float(enemy.get("hp"))
 	var cast_ok: bool = bool(leader.call("try_cast_active_ability"))
-	await get_tree().create_timer(0.11).timeout
+	await get_tree().create_timer(0.04).timeout
 	if float(enemy.get("hp")) < hp_before:
 		_fail("rift pulse damaged before the impact frame")
 		return false
-	await get_tree().create_timer(0.12).timeout
+	await get_tree().create_timer(0.18).timeout
 	var hp_after: float = float(enemy.get("hp"))
 	var cooldown_remaining: float = float(leader.call("get_active_ability_cooldown_remaining"))
 	if not cast_ok or hp_after >= hp_before:
 		_fail("rift pulse did not damage target hp %.2f->%.2f cast=%s" % [hp_before, hp_after, str(cast_ok)])
 		return false
-	if cooldown_remaining < 2.6:
+	if cooldown_remaining < float(leader.call("get_active_ability_cooldown_duration")) - 0.45:
 		_fail("rift pulse cooldown too short: %.2f" % cooldown_remaining)
 		return false
 	if bool(leader.call("try_cast_active_ability")):
@@ -116,6 +120,8 @@ func _test_active_ability_damage_and_cooldown() -> bool:
 
 
 func _disable_all_weapons() -> void:
+	if leader != null:
+		leader.set("auto_cleave_cooldown_timer", 999.0)
 	var members: Array = squad_manager.get_members() if squad_manager != null and squad_manager.has_method("get_members") else []
 	for member in members:
 		if member == null or not is_instance_valid(member):

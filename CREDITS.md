@@ -18,7 +18,32 @@ Crackveil Vanguard 的程式與專案自有內容採根目錄 [MIT License](LICE
 | Top Down Tentacle Creature（Sean Noonan） | [OpenGameArt](https://opengameart.org/content/top-down-tentacle-creature) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | `enemy_tank.png`、`enemy_boss.png` 與對應逐幀姿勢的來源。 |
 | Animated Walk-Cycle Monsters + Hijabi from Eman Quest（Night Blade） | [OpenGameArt](https://opengameart.org/content/animated-walk-cycle-monsters-hijabi-from-eman-quest) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | `enemy_fast.png`、三種 elite 敵人與對應逐幀姿勢的來源。 |
 
-## R24 專案自製視覺資產
+## R35 專案自製資產
+
+- `assets/art/r35/captain_combo_sheet*.png`：內建 imagegen 製作的 18 個原創隊長動作；機械排版追加於 `assets/sprites/r35_character_atlas.png`，保留原圖集全部像素。來源與排版資料見 `docs/evidence/r35/captain_combo_atlas.json`。
+- `assets/art/r35/sources/`：八種技能／攻擊特效共 64 幀的原始透明圖、提示詞及來源記錄；Godot Image 只做裁切、尺寸整理與排版，輸出 `r35_skill_fx_atlas.png`。詳細紀錄見同目錄及 `assets/art/r35/qa/`。
+- `assets/audio/critical_impact.wav`：本專案原創程序音效，由 `tools/build_critical_impact_audio.py` 生成低頻撞擊、短噪訊與金屬尾音，44.1 kHz、16-bit mono、0.18 秒。
+
+## R34 專案自製資產
+
+- `assets/art/r34/` 的六張角色／魔物姿勢原圖、局部修正版、六個戰場與世界地圖，皆由 Codex 內建 imagegen 製作。原始檔、提示詞及 SHA-256 保留於素材目錄與 `docs/evidence/r34/`。
+- 遊戲使用 `assets/sprites/r34_character_atlas.png`。17 種角色各有 12 個姿勢欄位；其中 E 圖三種魔物各使用 11 個不同原畫，另一次步伐複用。27 格是播放時序，不代表 27 張不同原畫。
+- Atlas 只做原 RGBA 連通元件分離、等比尺寸整理與排版。牧者準備姿勢單獨取用修正版的單杖元件，其餘 D 圖 35 個姿勢沿用原圖。提取與逐姿勢來源記錄見 `docs/evidence/r34/atlas_preparation.json`。
+- 既有 CC0 魔物圖檔仍保留作歷史與設定路徑相容；R34 的角色／魔物畫面由新 Atlas 提供。
+
+## R33 專案自製資產（歷史）
+
+- `assets/sprites/r33_character_atlas.png`：原創 cel 造型與逐格關節姿勢，由 `scripts/services/r33_sprite_painter.gd` 與 Godot 原生烘焙產生，17 種角色／魔物各 27 格。
+- `assets/art/r33/` 的地面與道具 SVG：本專案原創、可重建的動漫遺跡材質與裝飾。
+- `assets/art/r33/r33_keyart.png`：本次使用 Codex 內建 imagegen 製作的原創動漫四人主視覺；提示詞與來源記錄見 `docs/evidence/r33/art/r33_keyart_prompt.txt`。
+
+## R36 環狀世界與寵物素材
+
+- `assets/art/r36/` 四種無縫手繪地面與八處透明地標為本專案新製素材；原始圖、提示詞、衍生檔與 SHA-256 記錄於該目錄的 `source_manifest.json`、`README.md`。
+- `assets/pets/r36/pet_atlas.png` 是狐狸、羽鷹、靈兔共 36 個原始姿勢的整理圖集。原畫由內建 imagegen 製作，來源與提示詞、每個動作的裁切位置保存在 `pet_sheet_original.png`、`pet_sheet.prompt.txt`、`pose_manifest.json`。
+- 原始大圖保留於本機來源目錄，Web 匯出只使用實際播放圖集與地景素材；未取用《暗黑破壞神》的角色、地圖或特效。
+
+## R24 專案自製視覺資產（歷史）
 
 - `assets/art/r24/` 的 8 張環刃／迴旋刃與 VFX、2 張主選單 key art 為本專案 cv R24 製作內容，不是第三方素材。
 - 原畫模型 slug：`gpt-image-2`（內建介面 PNG provenance：`gpt-image/2.0`）；去背／修邊 slug：`local-pilot-matte-decontamination-v1`，依 `VISUAL_REFRESH_PILOT` 的 Wave 0 校準管線執行。

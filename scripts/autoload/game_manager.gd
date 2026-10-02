@@ -28,6 +28,26 @@ const SHOP_POST_VICTORY_GRACE := 12.0
 const COMBO_WINDOW := 1.15
 const COMBO_MILESTONES: Array[int] = [25, 50, 100]
 const COMBO_FIRE_RATE_BUFF_DURATION := 5.0
+const STAGE_CATALOG := preload("res://scripts/services/stage_catalog.gd")
+var selected_stage_id: String = "moon"
+var campaign_clears: Array[String] = []
+var campaign_save_path: String = "user://campaign.cfg"
+var run_mode: String = "campaign"
+var endless_start_time: float = 0.0
+var endless_start_kills: int = 0
+var endless_best: Dictionary = {}
+var boss_kills_total: int = 0
+var critical_strikes_enabled: bool = true
+var critical_hits: int = 0
+var peak_critical_damage: float = 0.0
+var critical_feedback_timer: float = 0.0
+var wallet_gold: int = 0
+var wallet_dirty: bool = false
+var wallet_timer: float = 0.0
+var auto_upgrade_enabled: bool = false
+var summon_director: Node = null
+var summon_screen: Node = null
+var paid_summon: Dictionary = {}
 
 const CONTRACT_POOL: Array = [
 	{
@@ -148,6 +168,7 @@ const AFFIX_TOASTS: Dictionary = {
 var arena: Node = null
 var player: Node = null
 var squad_manager: Node = null
+var loot_director: Node = null
 
 var game_running: bool = false
 var is_game_over: bool = false
@@ -164,7 +185,7 @@ var gold: int = 0
 var gold_earned: int = 0
 var level: int = 1
 var xp: int = 0
-var xp_required: int = 12
+var xp_required: int = 24
 var stats_timer: float = 0.0
 var touch_move_vector: Vector2 = Vector2.ZERO
 var upgrade_counts: Dictionary = {}
@@ -214,6 +235,7 @@ var combat_damage_total: float = 0.0
 # Debug-build capture aid. Runtime systems may read this flag only to raise
 # presentation LOD; gameplay cadence and release builds must remain unchanged.
 var screenshot_beauty_mode: bool = false
+var tactical_launch: bool = false
 
 const META_HP_APPLIED_KEY := "_cv_meta_hp_multiplier_applied"
 const META_PICKUP_APPLIED_KEY := "_cv_meta_pickup_bonus_applied"
@@ -221,6 +243,77 @@ const META_PICKUP_APPLIED_KEY := "_cv_meta_pickup_bonus_applied"
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	var campaign := ConfigFile.new()
+	if campaign.load(campaign_save_path) == OK:
+		for value in campaign.get_value("campaign", "clears", []):
+			if not STAGE_CATALOG.get_stage(str(value)).is_empty() and not campaign_clears.has(str(value)):
+				campaign_clears.append(str(value))
+		var saved_best: Variant = campaign.get_value("campaign", "endless_best", {})
+		if saved_best is Dictionary:
+			endless_best = saved_best.duplicate(true)
+		wallet_gold = maxi(0, int(campaign.get_value("campaign", "wallet_gold", 0)))
+
+
+func select_stage(stage_id: String) -> bool:
+	if STAGE_CATALOG.get_stage(stage_id).is_empty():
+		return false
+	selected_stage_id = stage_id
+	return true
+
+
+func start_selected_stage(mode: String = "campaign") -> void:
+	run_mode = "endless" if mode == "endless" else "campaign"
+	tactical_launch = false
+	game_running = false
+	manual_paused = false
+	system_pause_owners.clear()
+	clear_time_scale_owners()
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/arena/Arena.tscn")
+
+
+func start_endless_stage(stage_id: String = "") -> bool:
+	var target := selected_stage_id if stage_id == "" else stage_id
+	if not campaign_clears.has(target) or not select_stage(target):
+		return false
+	forced_run_seed = 0
+	start_selected_stage("endless")
+	return true
+
+
+func get_endless_wave() -> int:
+	return 1 + int(maxf(0.0, elapsed_time - endless_start_time) / 30.0) if run_mode == "endless" else 0
+
+
+func _save_campaign() -> bool:
+	var campaign := ConfigFile.new()
+	campaign.set_value("campaign", "clears", campaign_clears)
+	campaign.set_value("campaign", "endless_best", endless_best)
+	campaign.set_value("campaign", "wallet_gold", wallet_gold)
+	var saved := campaign.save(campaign_save_path) == OK
+	wallet_dirty = not saved
+	wallet_timer = 0.0
+	return saved
+
+
+func start_next_stage() -> void:
+	var next_id := STAGE_CATALOG.get_next_stage_id(selected_stage_id)
+	if next_id == "":
+		return_to_world_map()
+		return
+	select_stage(next_id)
+	forced_run_seed = 0
+	start_selected_stage()
+
+
+func return_to_world_map() -> void:
+	game_running = false
+	stage_victory_pending = false
+	manual_paused = false
+	system_pause_owners.clear()
+	clear_time_scale_owners()
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/ui/WorldMap.tscn")
 
 
 func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null, reset_player: bool = true) -> void:
@@ -228,20 +321,27 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	arena = new_arena
 	player = new_player
 	squad_manager = new_squad_manager
+	loot_director = new_arena.get_node_or_null("LootDirector") if is_instance_valid(new_arena) else null
 	game_running = true
 	is_game_over = false
 	waiting_for_upgrade = false
 	waiting_for_shop = false
 	waiting_for_contract = false
 	stage_victory_pending = false
+	boss_kills_total = 0
+	endless_start_time = 0.0
+	endless_start_kills = 0
+	critical_hits = 0
+	peak_critical_damage = 0.0
+	critical_feedback_timer = 0.0
 	manual_paused = false
 	elapsed_time = 0.0
 	kills = 0
-	gold = 0
+	gold = wallet_gold
 	gold_earned = 0
 	level = 1
 	xp = 0
-	xp_required = 12
+	xp_required = 24
 	stats_timer = 0.0
 	touch_move_vector = Vector2.ZERO
 	upgrade_counts.clear()
@@ -292,8 +392,13 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 
 
 func _process(delta: float) -> void:
+	if wallet_dirty:
+		wallet_timer += delta
+		if wallet_timer >= 2.0 or not game_running:
+			_save_campaign()
 	if game_running and not get_tree().paused:
 		elapsed_time += delta
+		critical_feedback_timer = maxf(0.0, critical_feedback_timer - delta)
 		if temporary_squad_damage_timer > 0.0:
 			temporary_squad_damage_timer = max(temporary_squad_damage_timer - delta, 0.0)
 		if combo_fire_rate_timer > 0.0:
@@ -466,7 +571,16 @@ func get_stats() -> Dictionary:
 	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("get_active_bond_names"):
 		active_bond_names = squad_manager.get_active_bond_names()
 
-	return {
+	var stats := {
+		"wallet_gold": wallet_gold,
+		"auto_upgrade": auto_upgrade_enabled,
+		"run_mode": run_mode,
+		"endless_wave": get_endless_wave(),
+		"endless_seconds": maxf(0.0, elapsed_time - endless_start_time) if run_mode == "endless" else 0.0,
+		"endless_kills": maxi(0, kills - endless_start_kills) if run_mode == "endless" else 0,
+		"boss_kills_total": boss_kills_total,
+		"critical_hits": critical_hits,
+		"peak_critical_damage": peak_critical_damage,
 		"hp": hp_value,
 		"max_hp": max_hp_value,
 		"elapsed_time": elapsed_time,
@@ -496,6 +610,11 @@ func get_stats() -> Dictionary:
 		"combo_fire_rate_timer": combo_fire_rate_timer,
 		"is_game_over": is_game_over
 	}
+	stats["combo_count"] = combo_count
+	stats["combo_remaining"] = maxf(0.0, COMBO_WINDOW - (elapsed_time - combo_last_kill_time)) if combo_count > 0 else 0.0
+	if is_instance_valid(loot_director):
+		stats.merge(loot_director.get_stats(), true)
+	return stats
 
 
 func is_system_pause_active() -> bool:
@@ -565,8 +684,8 @@ func _record_combo_kill(amount: int) -> void:
 	var combo_position := Vector2.ZERO
 	if player != null and is_instance_valid(player):
 		combo_position = player.global_position + Vector2(0.0, -72.0)
-	if combo_count < 10 or combo_count % 5 == 0:
-		EntityFactory.spawn_combo_text(combo_count, combo_position)
+	# R33 keeps the count in the compact HUD. The action silhouette must remain
+	# visible, rather than being covered by repeated COMBO labels.
 	if combo_count >= 10 and combo_count % 10 == 0 and combo_count != last_combo_pulse_count:
 		last_combo_pulse_count = combo_count
 		_trigger_combo_pulse(combo_count, combo_position)
@@ -614,6 +733,8 @@ func add_gold(amount: int) -> void:
 	if not game_running:
 		return
 	gold += amount
+	wallet_gold = gold
+	wallet_dirty = true
 	gold_earned += max(0, amount)
 	queue_stats_emit()
 
@@ -623,9 +744,105 @@ func spend_gold(amount: int) -> bool:
 		return true
 	if gold < amount:
 		return false
+	var before := gold
 	gold -= amount
+	wallet_gold = gold
+	if not _save_campaign():
+		gold = before
+		wallet_gold = before
+		show_toast("錢包存檔未完成，這次未扣金幣。")
+		return false
 	emit_stats()
 	return true
+
+
+func open_summon_shop() -> void:
+	if not game_running or is_game_over or waiting_for_upgrade or waiting_for_shop or waiting_for_contract or stage_victory_pending:
+		return
+	if not is_instance_valid(summon_director) or not is_instance_valid(summon_screen):
+		return
+	_request_system_pause("summon")
+	summon_screen.show_shop(summon_director)
+
+
+func purchase_summon(kind: String) -> void:
+	if not system_pause_owners.has("summon") or not is_instance_valid(summon_director) or not paid_summon.is_empty():
+		return
+	var cost: int = int(summon_director.preview_cost(kind))
+	if gold < cost:
+		show_toast("金幣不足，需要 %d 金幣。" % cost)
+		return
+	var result: Dictionary = summon_director.request_draw(kind)
+	if not bool(result.get("ok", false)):
+		show_toast(str(result.get("reason", "目前沒有可抽取的內容。")))
+		return
+	if not spend_gold(cost):
+		summon_director.cancel_draw(str(result.get("draw_id", "")))
+		return
+	paid_summon = result.duplicate(true)
+	paid_summon["paid_cost"] = cost
+	if summon_director.has_method("mark_paid"):
+		summon_director.mark_paid(str(result.get("draw_id", "")))
+	if kind == "pet":
+		complete_summon(str(result.get("draw_id", "")), 0)
+	else:
+		summon_screen.show_result(result)
+
+
+func complete_summon(draw_id: String, index: int) -> void:
+	if paid_summon.is_empty() or str(paid_summon.get("draw_id", "")) != draw_id or not is_instance_valid(summon_director):
+		return
+	if str(paid_summon.get("kind", "")) == "skill":
+		var choices: Array = paid_summon.get("choice_options", [])
+		if index < 0 or index >= choices.size():
+			show_toast("請選擇其中一張技能卡。")
+			return
+	var cost: int = int(paid_summon.get("paid_cost", 0))
+	var result: Dictionary = summon_director.commit_draw(draw_id, index)
+	paid_summon.clear()
+	if not bool(result.get("ok", false)):
+		gold += cost
+		wallet_gold = gold
+		_save_campaign()
+		show_toast(str(result.get("reason", "召喚未完成，金幣已退還。")))
+	else:
+		var option: Dictionary = result.get("option", result.get("apply_option", {}))
+		if not option.is_empty():
+			apply_summon_option(option)
+		show_toast(str(result.get("message", "召喚完成！")))
+	if is_instance_valid(summon_screen):
+		summon_screen.show_shop(summon_director)
+	emit_stats()
+
+
+func apply_summon_option(option: Dictionary) -> void:
+	if str(option.get("id", "")) == "summon_skill":
+		summon_director.grant_skill(str(option.get("skill_id", "")))
+	else:
+		if not _is_upgrade_available(option):
+			return
+		_register_upgrade_pick(option)
+		if is_instance_valid(squad_manager):
+			squad_manager.apply_upgrade(option)
+		elif is_instance_valid(player):
+			player.apply_personal_upgrade(option)
+	AudioManager.play_sfx("upgrade")
+
+
+func close_summon_shop() -> void:
+	if not paid_summon.is_empty():
+		complete_summon(str(paid_summon.get("draw_id", "")), 0)
+	if is_instance_valid(summon_screen):
+		summon_screen.hide_shop()
+	_release_system_pause("summon")
+	emit_stats()
+
+
+func get_summon_skill_pool() -> Array:
+	var pool: Array = PLAYER_UPGRADE_POOL.duplicate(true)
+	if is_instance_valid(squad_manager):
+		pool = squad_manager.build_upgrade_pool(pool)
+	return pool.filter(func(option: Dictionary) -> bool: return _is_upgrade_available(option))
 
 
 func add_xp(amount: int) -> void:
@@ -647,11 +864,19 @@ func _request_level_up() -> void:
 	upgrade_entry_token += 1
 	var local_token := upgrade_entry_token
 	var choices := _build_upgrade_choices()
+	if auto_upgrade_enabled and not choices.is_empty():
+		var chosen: Dictionary = choices[0]
+		for option in choices:
+			if str(option.get("id", "")) == "recruit_hero" or str(option.get("upgrade_kind", "")) == "weapon_projectiles":
+				chosen = option
+				break
+		show_toast("自動強化：%s" % str(chosen.get("name", "")))
+		apply_upgrade(chosen)
+		return
 	_spawn_level_up_ritual()
-	var time_scale_owner := "level_up:%d" % local_token
-	var time_scale_token := acquire_time_scale(time_scale_owner, 0.35)
+	_request_system_pause("upgrade")
 	emit_stats()
-	_finish_level_up_slowmo(local_token, choices, time_scale_owner, time_scale_token)
+	level_up_requested.emit(choices)
 
 
 func _spawn_level_up_ritual() -> void:
@@ -712,9 +937,6 @@ func apply_upgrade(upgrade: Dictionary) -> void:
 	waiting_for_upgrade = false
 
 	if _try_request_pending_level_up():
-		return
-	elif not was_fallback and randf() < 0.1 and not waiting_for_shop and _request_shop("level_up_random"):
-		_release_system_pause("upgrade")
 		return
 	else:
 		_release_system_pause("upgrade")
@@ -874,12 +1096,27 @@ func _request_shop(source: String = "timed") -> bool:
 	if _should_delay_shop_for_boss():
 		_delay_shop_for_boss(source)
 		return false
+	var options := _build_shop_options()
+	if not _has_purchasable_shop_reward(options):
+		# A stock refresh is not a useful purchase when the squad cannot buy a
+		# reward. Retry later without stopping an underfunded run.
+		next_shop_time = maxf(next_shop_time, elapsed_time + 12.0)
+		return false
 	waiting_for_shop = true
 	shop_refresh_count = 0
 	_request_system_pause("shop")
 	emit_stats()
-	shop_requested.emit(_build_shop_options())
+	shop_requested.emit(options)
 	return true
+
+
+func _has_purchasable_shop_reward(options: Array) -> bool:
+	for option in options:
+		if str(option.get("id", "")) == "refresh_shop":
+			continue
+		if bool(option.get("enabled", false)) and gold >= int(option.get("cost", 0)):
+			return true
+	return false
 
 
 func _build_shop_options() -> Array:
@@ -1016,6 +1253,8 @@ func get_upgrade_choice_count() -> int:
 
 func get_outgoing_damage_multiplier(source: Node = null) -> float:
 	var multiplier := float(contract_modifiers.get("damage_multiplier", 1.0))
+	if is_instance_valid(loot_director):
+		multiplier *= loot_director.get_outgoing_damage_multiplier()
 	if MetaProgress.has_method("get_damage_multiplier"):
 		multiplier *= float(MetaProgress.get_damage_multiplier())
 	if temporary_squad_damage_timer > 0.0:
@@ -1029,7 +1268,10 @@ func get_outgoing_damage_multiplier(source: Node = null) -> float:
 
 
 func get_fire_rate_multiplier(_source: Node = null) -> float:
-	return 1.1 if combo_fire_rate_timer > 0.0 else 1.0
+	var multiplier := 1.1 if combo_fire_rate_timer > 0.0 else 1.0
+	if is_instance_valid(loot_director):
+		multiplier *= loot_director.get_fire_rate_multiplier()
+	return multiplier
 
 
 func get_kill_thump_pitch(base_pitch: float) -> float:
@@ -1043,6 +1285,8 @@ const DAMAGE_TAKEN_SOFT_CAP_MIN := 0.85
 
 func get_incoming_damage_multiplier(target: Node = null) -> float:
 	var reduction_multiplier := 1.0
+	if is_instance_valid(loot_director):
+		reduction_multiplier *= loot_director.get_incoming_damage_multiplier()
 	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("has_active_bond"):
 		if squad_manager.has_active_bond("bond_guard_echo"):
 			reduction_multiplier *= 0.95
@@ -1195,6 +1439,8 @@ func _apply_contract_start_effects() -> void:
 
 
 func _should_request_contract() -> bool:
+	if not tactical_launch:
+		return false
 	var current_scene := get_tree().current_scene
 	if current_scene != null:
 		var scene_path := str(current_scene.scene_file_path)
@@ -1293,11 +1539,12 @@ func _delay_shop_for_boss(_source: String) -> void:
 
 
 func _is_in_boss_shop_window(time_value: float) -> bool:
-	return time_value >= SHOP_BOSS_TIME - SHOP_BOSS_WINDOW_BEFORE and time_value <= SHOP_BOSS_TIME + SHOP_BOSS_WINDOW_AFTER
+	var stage_boss_time := float(STAGE_CATALOG.get_stage(selected_stage_id).get("boss_time", SHOP_BOSS_TIME))
+	return time_value >= stage_boss_time - SHOP_BOSS_WINDOW_BEFORE and time_value <= stage_boss_time + SHOP_BOSS_WINDOW_AFTER
 
 
 func _boss_window_end() -> float:
-	return SHOP_BOSS_TIME + SHOP_BOSS_WINDOW_AFTER
+	return float(STAGE_CATALOG.get_stage(selected_stage_id).get("boss_time", SHOP_BOSS_TIME)) + SHOP_BOSS_WINDOW_AFTER
 
 
 func _schedule_next_shop_after(reference_time: float) -> void:
@@ -1334,6 +1581,8 @@ func apply_current_meta_progress_to_squad() -> void:
 
 func apply_current_meta_progress_to_member(member: Node) -> void:
 	_apply_meta_progress_to_members([member])
+	if is_instance_valid(loot_director):
+		loot_director.apply_member_bonuses(member)
 
 
 func _apply_meta_progress_start_effects() -> void:
@@ -1354,8 +1603,10 @@ func _apply_meta_progress_to_members(members: Array) -> void:
 		var old_max_hp: float = max(1.0, _as_float(member.get("max_hp"), 1.0))
 		var old_current_hp: float = _as_float(member.get("current_hp"), old_max_hp)
 		var hp_ratio: float = clamp(old_current_hp / old_max_hp, 0.0, 1.0)
-		var base_max_hp: float = max(1.0, old_max_hp / previous_hp_multiplier)
-		var new_max_hp: float = max(1.0, base_max_hp * hp_multiplier)
+		var equipment_stats: Dictionary = member.get_meta("run_equipment_bonuses", {})
+		var equipment_hp: float = float(equipment_stats.get("max_hp", 0.0))
+		var base_max_hp: float = max(1.0, (old_max_hp - equipment_hp) / previous_hp_multiplier)
+		var new_max_hp: float = max(1.0, base_max_hp * hp_multiplier + equipment_hp)
 		member.set("max_hp", new_max_hp)
 		member.set("current_hp", min(new_max_hp, new_max_hp * hp_ratio))
 		member.set_meta(META_HP_APPLIED_KEY, hp_multiplier)
@@ -1376,6 +1627,8 @@ func _as_float(value: Variant, fallback: float = 0.0) -> float:
 
 func _summary_with_echo(summary: Dictionary) -> Dictionary:
 	var enriched := summary.duplicate(true)
+	if is_instance_valid(loot_director):
+		enriched.merge(loot_director.get_stats(), true)
 	var total_eligible: int = 0
 	if MetaProgress.has_method("calculate_run_shards"):
 		total_eligible = int(MetaProgress.calculate_run_shards(enriched))
@@ -1443,6 +1696,10 @@ func player_died() -> void:
 		return
 
 	var dead_player := player
+	if run_mode == "endless":
+		var previous: Dictionary = endless_best.get(selected_stage_id, {})
+		endless_best[selected_stage_id] = {"wave": maxi(int(previous.get("wave", 0)), get_endless_wave()), "kills": maxi(int(previous.get("kills", 0)), maxi(0, kills - endless_start_kills)), "seconds": maxf(float(previous.get("seconds", 0.0)), maxf(0.0, elapsed_time - endless_start_time))}
+		_save_campaign()
 	is_game_over = true
 	game_running = false
 	upgrade_entry_token += 1
@@ -1494,6 +1751,10 @@ func record_elite_kill() -> void:
 
 func record_boss_spawn(boss_name: String = "VEIL GATEKEEPER") -> void:
 	boss_spawned = true
+	boss_killed = false
+	boss_phase_two_time = -1.0
+	if run_mode == "endless":
+		boss_name += "・無盡第 %d 波" % get_endless_wave()
 	boss_spawn_time = elapsed_time
 	boss_intro_requested.emit(boss_name)
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
@@ -1502,6 +1763,18 @@ func record_boss_spawn(boss_name: String = "VEIL GATEKEEPER") -> void:
 
 func set_boss_active(value: bool) -> void:
 	boss_active = value
+
+
+func record_critical_hit(position: Vector2, source: Vector2, amount: float) -> void:
+	critical_hits += 1
+	peak_critical_damage = maxf(peak_critical_damage, amount)
+	var presentation := get_tree().get_first_node_in_group("combat_presentation")
+	if presentation != null:
+		presentation.play_effect("critical_impact", position, (position - source).normalized(), 0.50 + minf(0.40, amount / 250.0))
+	if critical_feedback_timer <= 0.0:
+		critical_feedback_timer = 0.24
+		request_combat_impact(3.8, 0.026)
+		AudioManager.play_sfx("critical_impact", false, -4.0, 1.0)
 
 
 func record_boss_phase_two() -> void:
@@ -1518,10 +1791,18 @@ func record_boss_kill() -> void:
 	upgrade_entry_token += 1
 	clear_time_scale_owners()
 	boss_kill_time = elapsed_time
+	boss_kills_total += 1
+	if not campaign_clears.has(selected_stage_id):
+		campaign_clears.append(selected_stage_id)
+		_save_campaign()
 	if AchievementProgress != null and AchievementProgress.has_method("record_boss_kill"):
 		AchievementProgress.record_boss_kill()
 	if AchievementProgress != null and AchievementProgress.has_method("record_survival_time"):
 		AchievementProgress.record_survival_time(elapsed_time)
+	if run_mode == "endless":
+		show_toast("無盡守關者擊破！傳說裝備已回收，繼續迎戰下一波。")
+		emit_stats()
+		return
 	waiting_for_upgrade = false
 	waiting_for_shop = false
 	waiting_for_contract = false
@@ -1543,7 +1824,11 @@ func record_boss_kill() -> void:
 		"boss_active": false,
 		"boss_phase_two_reached": boss_phase_two_time >= 0.0,
 		"boss_killed": true,
-		"contract_name": active_contract_name
+		"contract_name": active_contract_name,
+		"stage_id": selected_stage_id,
+		"stage_name": str(STAGE_CATALOG.get_stage(selected_stage_id).get("name", "")),
+		"boss_name": str(STAGE_CATALOG.get_stage(selected_stage_id).get("boss_name", "")),
+		"next_stage_id": STAGE_CATALOG.get_next_stage_id(selected_stage_id)
 	}
 	stage_victory_requested.emit(_summary_with_echo(summary))
 
@@ -1552,6 +1837,12 @@ func continue_after_stage_victory() -> void:
 	if not stage_victory_pending:
 		return
 	stage_victory_pending = false
+	run_mode = "endless"
+	endless_start_time = elapsed_time
+	endless_start_kills = kills
+	var spawner := arena.get_node_or_null("EnemySpawner") if is_instance_valid(arena) else null
+	if spawner != null and spawner.has_method("begin_endless"):
+		spawner.begin_endless()
 	if elapsed_time >= next_shop_time:
 		next_shop_time = elapsed_time + SHOP_POST_VICTORY_GRACE
 	_release_system_pause("stage_victory")

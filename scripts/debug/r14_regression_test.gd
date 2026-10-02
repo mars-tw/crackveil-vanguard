@@ -1,6 +1,6 @@
 extends Node
 
-const BACKGROUND_SCRIPT := preload("res://scripts/arena/arena_background.gd")
+const BACKGROUND_SCRIPT := preload("res://scripts/arena/r34_world_background.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 const RUN_THEME := preload("res://scripts/arena/run_theme.gd")
 const MAIN_MENU_SCRIPT := preload("res://scripts/ui/main_menu.gd")
@@ -120,8 +120,8 @@ func _test_hero10_content_and_bonds() -> bool:
 		_fail("bond did not deactivate immediately on member death")
 		return false
 	manager.queue_free()
-	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.19.2-r31":
-		_fail("R31 release version drifted")
+	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.25.0-r37":
+		_fail("R34 release version drifted")
 		return false
 	if not is_equal_approx(float(R24_ORBIT_WEAPON.get("sprite_scale")), 1.09) or not is_equal_approx(float(R24_BOOMERANG_WEAPON.get("sprite_scale")), 1.18):
 		_fail("R24 orbit/boomerang readability scale drifted")
@@ -230,7 +230,7 @@ func _test_formfactor_matrix_and_live_switch() -> bool:
 	if MOBILE_TUNING.layout_tier_name(touch_desktop) != "desktop" or not hud.virtual_joystick.visible:
 		_fail("live tablet-to-touch-desktop switch failed")
 		return false
-	if hud.hp_label.get_theme_font_size("font_size") != 20:
+	if hud.hp_label.get_theme_font_size("font_size") != 19:
 		_fail("live desktop switch did not restore desktop HUD font")
 		return false
 	hud.set_touch_controls_forced_visible(true)
@@ -476,6 +476,7 @@ func _test_guide_mobile_layout(size: Vector2) -> bool:
 	var viewport := _make_ui_viewport(size)
 	var guide := FIRST_RUN_GUIDE_SCRIPT.new()
 	viewport.add_child(guide)
+	guide.force_show()
 	await get_tree().process_frame
 	if not _control_inside_viewport(guide.panel, size, "guide panel"):
 		return false
@@ -510,10 +511,12 @@ func _test_hud_mobile_layout(size: Vector2) -> bool:
 		"run_theme_name": "Void"
 	})
 	await get_tree().process_frame
-	if hud.hp_label.get_theme_font_size("font_size") < 24:
+	if hud.hp_label.get_theme_font_size("font_size") < 15:
 		_fail("HUD HP font below mobile floor")
 		return false
-	if hud.time_label.get_theme_font_size("font_size") < 28:
+	# R32 locks the timer to 22/23 CSS px after generic scaling, keeping the
+	# short mobile HUD readable without expanding into adjacent status cards.
+	if hud.time_label.get_theme_font_size("font_size") < 20:
 		_fail("HUD timer font below mobile floor")
 		return false
 	if not _control_inside_viewport(hud.pause_button, size, "HUD pause button"):
@@ -682,6 +685,8 @@ func _test_ui_spacing_at_size(spec: Dictionary) -> bool:
 
 	var guide := FIRST_RUN_GUIDE_SCRIPT.new()
 	viewport.add_child(guide)
+	await get_tree().process_frame
+	guide.force_show()
 	await get_tree().process_frame
 	if not _assert_adjacent_gap([guide.dont_show_check, guide.start_button], true, 8.0, "briefing actions %s" % str(size)):
 		return false

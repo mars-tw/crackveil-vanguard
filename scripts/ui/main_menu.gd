@@ -15,6 +15,8 @@ var logo_glow_label: Label
 var logo_label: Label
 var menu_box: VBoxContainer
 var start_button: Button
+var world_button: Button
+var navigation_row: HBoxContainer
 var guide_button: Button
 var meta_button: Button
 var achievements_button: Button
@@ -136,7 +138,7 @@ func _build_ui() -> void:
 
 	key_art = TextureRect.new()
 	key_art.name = "R24KeyArt"
-	key_art.texture = SPRITE_LOADER.get_texture("res://assets/art/r24/keyart/menu_keyart_desktop.png")
+	key_art.texture = SPRITE_LOADER.get_texture("res://assets/art/r33/r33_keyart.png")
 	key_art.set_anchors_preset(Control.PRESET_FULL_RECT)
 	key_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	key_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
@@ -175,10 +177,18 @@ func _build_ui() -> void:
 	start_button = _make_menu_button("開始出擊")
 	start_button.pressed.connect(_on_start_pressed)
 	menu_box.add_child(start_button)
+	world_button = _make_menu_button("世界地圖")
+	world_button.name = "WorldMapButton"
+	world_button.pressed.connect(Callable(GameManager, "return_to_world_map"))
+	navigation_row = HBoxContainer.new()
+	navigation_row.name = "NavigationRow"
+	navigation_row.add_theme_constant_override("separation", 8)
+	menu_box.add_child(navigation_row)
+	navigation_row.add_child(world_button)
 
 	guide_button = _make_menu_button("玩法")
 	guide_button.pressed.connect(_show_panel.bind("guide"))
-	menu_box.add_child(guide_button)
+	navigation_row.add_child(guide_button)
 
 	meta_button = _make_menu_button("殘響升級")
 	meta_button.pressed.connect(_show_panel.bind("meta"))
@@ -591,6 +601,7 @@ func _build_guide_panel() -> void:
 		["契約", "開局先選契約：契約會改變本局的風險與獎勵。"],
 		["隊伍", "招募可把隊伍擴到最多九人；隊長倒下，全隊撤退。"],
 		["羈絆", "特定成員同隊會啟用羈絆，改變武器、治療或防禦。"],
+		["裝備", "彩色光柱是裝備。靠近即可拾取，較強的同槽裝備會自動換上，較弱的拆成金幣；菁英必掉稀有以上，Boss 必掉傳說。"],
 		["進化", "武器進化需要本局等級七、指定質變等級與武器傷害等級。"],
 		["商亭", "商亭會在 Boss 戰前後出現：花金幣補血、改裝或刷新選項。"],
 	]
@@ -611,6 +622,7 @@ func _build_guide_panel() -> void:
 
 
 func _on_start_pressed() -> void:
+	GameManager.tactical_launch = false
 	_start_run("")
 
 
@@ -619,10 +631,12 @@ func _on_seed_submitted(text_value: String) -> void:
 
 
 func _on_seed_start_pressed() -> void:
+	GameManager.tactical_launch = true
 	_start_run(seed_input.text if seed_input != null else "")
 
 
 func _start_run(seed_text: String) -> void:
+	GameManager.run_mode = "campaign"
 	var selected_seed := GameManager.seed_from_text(seed_text) if seed_text.strip_edges() != "" else 0
 	GameManager.forced_run_seed = selected_seed
 	get_tree().paused = false
@@ -771,14 +785,14 @@ func _apply_responsive_layout() -> void:
 	if mobile:
 		margin = 18.0 if portrait else 16.0
 	var touch_height := MOBILE_TUNING.touch_target(viewport_size)
-	var button_height := (56.0 if mobile and not portrait else touch_height) if mobile else 48.0
-	var button_gap := 12.0 if mobile and portrait else 8.0 if mobile else 10.0
+	var button_height := (56.0 if mobile and not portrait else 64.0) if mobile else 48.0
+	var button_gap := 8.0 if mobile else 10.0
 	var ui_multiplier := _ui_scale_multiplier()
 	if key_art != null:
 		# Select the safe crop by aspect ratio as well as device class.  A narrow
 		# desktop browser must not fall back to the 16:9 composition simply because
 		# its pointer is fine-grained.
-		var key_art_path := "res://assets/art/r24/keyart/menu_keyart_mobile_safe.png" if portrait else "res://assets/art/r24/keyart/menu_keyart_desktop.png"
+		var key_art_path := "res://assets/art/r33/r33_keyart.png"
 		key_art.texture = SPRITE_LOADER.get_texture(key_art_path)
 		key_art.set_offsets_preset(Control.PRESET_FULL_RECT)
 		key_art.modulate = Color(1.0, 1.0, 1.0, 0.96 if mobile and portrait else 1.0)
@@ -826,7 +840,11 @@ func _apply_responsive_layout() -> void:
 	for child in menu_box.get_children():
 		if child is Button:
 			(child as Button).custom_minimum_size = Vector2(menu_width, button_height)
-			(child as Button).add_theme_font_size_override("font_size", int(round(float(22 if mobile and portrait else 16 if mobile else 20) * ui_multiplier)))
+			(child as Button).add_theme_font_size_override("font_size", int(round(float(22 if mobile else 20) * ui_multiplier)))
+	for button in [world_button, guide_button]:
+		button.custom_minimum_size = Vector2((menu_width - 8.0) * 0.5, button_height)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.add_theme_font_size_override("font_size", 22 if mobile and portrait else 16 if mobile else 18)
 
 	var seed_height := 56.0 if mobile and not portrait else touch_height
 	var seed_gap: float = float(ceil(MOBILE_TUNING.BASE_CONTAINER_SEPARATION * MOBILE_TUNING.spacing_scale(viewport_size)))
@@ -930,6 +948,17 @@ func _apply_responsive_layout() -> void:
 	seed_input.add_theme_font_size_override("font_size", 14)
 	seed_start_button.add_theme_font_size_override("font_size", 14)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
+	# Container sizing follows the actual touch font metrics. Reset inherited
+	# font growth here so a sixth action cannot widen or push down the menu.
+	menu_box.add_theme_constant_override("separation", int(button_gap))
+	for child in menu_box.get_children():
+		if child is Button:
+			(child as Button).add_theme_font_size_override("font_size", int(round(float(22 if mobile else 20) * ui_multiplier)))
+			(child as Button).custom_minimum_size = Vector2(menu_width, button_height)
+	for button in [world_button, guide_button]:
+		button.custom_minimum_size = Vector2((menu_width - 8.0) * 0.5, button_height)
+		button.add_theme_font_size_override("font_size", 22 if mobile and portrait else 16 if mobile else 18)
+	navigation_row.add_theme_constant_override("separation", 8)
 	if mobile and not portrait:
 		menu_box.add_theme_constant_override("separation", int(button_gap))
 		for child in menu_box.get_children():
@@ -950,11 +979,15 @@ func _apply_responsive_layout() -> void:
 	_apply_accessibility_palette()
 	_publish_reachability_probe(viewport_size)
 	call_deferred("_publish_reachability_probe", viewport_size)
+	# Font/minimum notifications are deferred by containers. Apply the measured
+	# width after those notifications so a previous orientation cannot persist.
+	menu_box.set_deferred("size", Vector2(menu_width, menu_block_height))
 
 
 func _publish_reachability_probe(viewport_size: Vector2) -> void:
 	WEB_REACHABILITY_PROBE.publish("main_menu", viewport_size, {
 		"start": start_button,
+		"world_map": world_button,
 		"guide": guide_button,
 		"meta": meta_button,
 		"achievements": achievements_button,

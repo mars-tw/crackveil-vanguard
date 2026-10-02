@@ -54,13 +54,12 @@ func _fire_lance(target: Node2D) -> void:
 		damage_value *= 0.92
 
 	if hit_points.size() == 1:
-		hit_points.append(origin + direction * beam_range)
-	else:
-		hit_points.append(origin + direction * beam_range)
+		# A miss earns only a short muzzle stroke, not a full-range debug line.
+		hit_points.append(origin + direction * 28.0)
 	EntityFactory.spawn_lightning_arc(
 		hit_points,
 		data_color("color", Color(0.72, 0.96, 1.0)).lerp(Color.WHITE, 0.24),
-		data_float("effect_lifetime", 0.18),
+		0.10,
 		data_string("lightning_sprite_path", "res://assets/sprites/proj_lightning.png"),
 		beam_width * (4.6 if evolved else 3.7) * (1.0 + float(visual_level) * 0.045)
 	)

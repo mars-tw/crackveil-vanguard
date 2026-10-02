@@ -7,6 +7,9 @@ var trigger_count: int = 0
 var projectile_stats_cache: Dictionary = {}
 var effect_stats_cache: Dictionary = {}
 var stats_cache_dirty: bool = true
+var firing_clock: float = 0.0
+var projectiles_fired: int = 0
+var projectiles_rejected: int = 0
 
 
 func setup(player_node: Node2D, weapon_data: Resource) -> void:
@@ -23,6 +26,9 @@ func setup(player_node: Node2D, weapon_data: Resource) -> void:
 func reset_weapon() -> void:
 	cooldown_timer = _initial_cooldown_stagger()
 	trigger_count = 0
+	firing_clock = 0.0
+	projectiles_fired = 0
+	projectiles_rejected = 0
 
 
 func get_weapon_id() -> String:
@@ -58,6 +64,17 @@ func _on_data_changed() -> void:
 
 func register_trigger() -> void:
 	trigger_count += 1
+
+
+func register_projectile_spawn(projectile: Node) -> void:
+	if projectile != null:
+		projectiles_fired += 1
+	else:
+		projectiles_rejected += 1
+
+
+func get_firepower_debug_state() -> Dictionary:
+	return {"weapon_id": get_weapon_id(), "volleys": trigger_count, "projectiles_fired": projectiles_fired, "projectiles_rejected": projectiles_rejected, "seconds": firing_clock, "projectiles_per_second": float(projectiles_fired) / maxf(0.001, firing_clock), "volley_size": data_int("projectile_count", 1), "cooldown_seconds": scaled_cooldown(data_float("cooldown", 1.0)), "damage": data_float("damage", 0.0), "pierce": data_int("pierce", 0)}
 
 
 func scaled_cooldown(base_cooldown: float) -> float:

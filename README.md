@@ -3,36 +3,44 @@
 [![Deploy Web](https://github.com/mars-tw/crackveil-vanguard/actions/workflows/deploy-web.yml/badge.svg)](https://github.com/mars-tw/crackveil-vanguard/actions/workflows/deploy-web.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-[![Crackveil Vanguard 封面](assets/art/cover.png)](https://mars-tw.github.io/crackveil-vanguard/)
+[![Crackveil Vanguard 封面](assets/art/r33/r33_keyart.png)](https://mars-tw.github.io/crackveil-vanguard/)
 
-Crackveil Vanguard 是一款以小隊編成為核心的 2D survivors roguelite。帶領裂隙先鋒進入每局隨機抽選的異變戰場，在自動武器火網中招募英雄、組合羈絆、選擇進化，撐過不斷加壓的敵潮。
+Crackveil Vanguard 是一款以小隊編成為核心的 2D survivors roguelite。從世界地圖選擇六個異變戰場，在連發火網中招募英雄、組合羈絆、選擇進化，清除怪群並挑戰各關 Boss。
 
-目前版本：**0.19.2-r31**（與 `project.godot` 一致）
+目前版本：**0.25.0-r37**（與 `project.godot` 一致）。`main` 分支通過檢查後自動更新 GitHub Pages。
+
+新版改為可持續移動的環狀世界，沿路有八處地標，怪群從畫面外持續湧入。裂線起手每輪 12 發，可升到 20 發；近身範圍斬、按住旋斬與四種可抽法術共同清怪。每個戰場除了 Boss，也有六種特殊菁英；金幣可抽技能與永久寵物。擊敗各關 Boss 後仍可進入對應無盡模式。
+
+[直接遊玩](https://mars-tw.github.io/crackveil-vanguard/)；更新與驗證見 [R37 發布報告](docs/R37_RELEASE_REPORT.md)，實際操作回報見 [戰鬥與效能紀錄](docs/R37_COMBAT_PERFORMANCE.md)。
 
 ## 線上遊玩
 
 **[立即遊玩 Crackveil Vanguard](https://mars-tw.github.io/crackveil-vanguard/)**
 
-Web 版不需安裝。首次載入需下載約 40 MB 的 WebAssembly 與遊戲資源，行動裝置建議使用橫向畫面。Web 版不提供完整離線遊玩；斷線重新整理會顯示輕量「需要連線」提示，恢復連線後即可重新載入。
+Web 版不需安裝。本機 R36 的 WebAssembly 與遊戲包合計約 76 MiB，行動裝置建議使用橫向畫面。Web 版不提供完整離線遊玩；斷線重新整理會顯示輕量「需要連線」提示，恢復連線後即可重新載入。
 
 ## 最新特色
 
+- **環狀世界與特殊菁英**：4096 × 3072 的週期世界可以持續往外走；八處地標、環狀主路與中央支路維持方向感。六關沿用不同地景色調，各有召喚、衝鋒、護盾、冰霜、火焰與寶藏菁英。
+- **大量火力與金幣召喚**：裂線 12／16／20 發，搭配追蹤飛彈、回旋刃與大範圍旋斬；80 金幣抽當局技能、120 金幣抽永久寵物，重複寵物會升星。商店顯示費用、有效候選機率與保底。
+- **動漫戰鬥重製**：17 種成年動漫角色／魔物原畫姿勢；魔物放大，鋪滿可行走區的手繪地面與周緣地標共同構成戰場。
+- **踏進拔刀與持續旋斬**：點按空白鍵或右下「斬」，可在準備動作中向外圈目標踏進，近怪時留在原地；按住持續旋斬，放開回能。斬擊在真正 impact frame 命中，敵人有砍飛與死亡反應。
+- **直接進場、快速選卡**：開始出擊直接戰鬥，教學可從暫停重看；種子出擊可選戰術契約。桌機可用 1／2／3 選卡，手機單次點選；HUD 頂欄縮至 58 px，裝備以底部短幅演出。
+- **裝備掉落與換裝**：武裝核心、護甲、戰靴三槽，精良／稀有／史詩／傳說四品質。裝備有落地光柱與磁吸拾取，較強自動換上，較弱拆成金幣；菁英必掉稀有以上，Boss 必掉傳說。屬性會實際作用於全隊。
+- **群怪收割與多殺**：密集怪群提供貫穿與範圍武器的清怪窗口；方向命中碎光、斬殺短弧與三階多殺演出跟隨真實傷害事件。遠程、衝刺與 Boss 彈幕有起手預警。
+- **升級與手機體驗**：卡面顯示數值前後、強化階段和選後進化進度；簡報可直接出擊，無法購買有效商品時延後商亭。手機搖桿、連斬面板與裝備列經實玩修正，主角與隊友加上不同顏色的輪廓。
 - **10 位英雄、最多 9 人出擊**：隊長、火力、控場、治療與召喚定位皆有專屬武器與成長路線。
 - **真姿勢動畫**：10 位英雄與敵人皆採逐幀姿勢動畫；走路會改變四肢姿勢，攻擊包含預備、命中與收招，傷害鎖定 impact frame，並具受傷與死亡反應。
-- **角色藝術 R21 Rodin 量產**：十英雄改以 Blender MCP 的 Hyper3D Rodin 一體模型為底，18 骨逐幀擺姿勢，具完整臉部、角色專屬裝束／道具與暖 key、冷 fill、rim 的 AgX 打光；遊戲仍只載入共用 2D atlas。
+- **可追溯美術**：R34 使用保留原圖與提示詞的 imagegen 姿勢素材；12 個姿勢欄位排成 27 格播放時序，E 圖三種魔物各有 11 個不同原畫。舊版資產保留作歷史參考。
 - **羈絆系統**：特定英雄同隊會啟用燼脈聯爆、縫獵協議、星盾和聲或牧長裂約；成員倒下時即時重算。
 - **UI 與跨裝置修復**：桌機、平板與手機版面分級，修正按鈕間距、勾選框、教學／簡報彈窗、升級卡與觸控目標。
 - **11 種武器與質變升級**：裂線、星環、雷鏈、飛彈、榴彈、虛空網、裂光、治療和聲與裂隙建構體等玩法。
-- **三種種子化戰場**：裂隙虛空、廢土農野與餘燼裂原，每局依 seed 抽選其一；擊敗 Boss 後可繼續無盡作戰。
+- **六關世界地圖**：蒼月空庭、翠晶花園、緋星熔庭、雷霆浮島、星霜聖域、帷幕王庭。不同敵潮、Boss 外型與彈幕；通關會存檔，可接下一關或繼續無盡。
 - **可重現流程**：支援 run seed、成就、殘響升級、音量、UI scale、高對比與搖桿設定。
 
 ## 畫面
 
-![R21 Hyper3D Rodin 裂隙虛空實機戰鬥](docs/evidence/art_r21/web_battle_r21.png)
-
-![R20.1 與 R21 十位英雄 native 64px 對照](docs/evidence/art_r21/before_after/all_heroes_r20_1_vs_r21.png)
-
-![逐幀待機、行走、攻擊、受傷與死亡姿勢](docs/hero10_true_animation_proof.png)
+![R37 真正 Chrome 操作的持續旋斬與怪群戰鬥](docs/evidence/r37/gameplay.png)
 
 ## 操作
 
@@ -41,7 +49,8 @@ Web 版不需安裝。首次載入需下載約 40 MB 的 WebAssembly 與遊戲�
 | 操作 | 按鍵 |
 | --- | --- |
 | 移動 | `WASD` 或方向鍵 |
-| 隊長技（裂隙脈衝） | `Space` |
+| 隊長技 | 點按 `Space` 拔刀；按住持續旋斬 |
+| 金幣召喚 | `B` 或左下「召喚」 |
 | 暫停／繼續 | `P` 或 `Esc` |
 | 攻擊 | 自動鎖定最近敵人 |
 | 選單與升級卡 | 滑鼠點擊 |
@@ -49,7 +58,8 @@ Web 版不需安裝。首次載入需下載約 40 MB 的 WebAssembly 與遊戲�
 ### 手機／平板
 
 - 左下虛擬搖桿移動。
-- 右下「裂」按鈕施放隊長技。
+- 右下「斬」按鈕：點按拔刀，按住持續旋斬。
+- 左下「召喚」抽技能／寵物；手機預設自動選升級與能量旋斬，可切換手動。平板保留手動選卡與較大的作戰視野。
 - 右上按鈕暫停；選單、契約與升級卡直接觸控。
 - 武器會自動攻擊，不需要額外瞄準按鈕。
 
@@ -103,9 +113,16 @@ python tools/build_font_subset.py
 & $godot --headless --fixed-fps 60 --path . res://scenes/debug/SquadSmokeTest.tscn
 & $godot --headless --fixed-fps 60 --path . res://scenes/debug/WeaponSmokeTest.tscn
 & $godot --headless --fixed-fps 60 --path . res://scenes/debug/EnemyArtRegressionTest.tscn
+& $godot --headless --fixed-fps 60 --path . res://scenes/debug/CombatR32RegressionTest.tscn
+& $godot --headless --fixed-fps 60 --path . res://scenes/debug/R32LootTest.tscn
+& $godot --headless --fixed-fps 60 --path . res://scenes/debug/R32ExperienceTest.tscn
+& $godot --headless --fixed-fps 60 --path . res://scenes/debug/ReviewR32IntegrationTest.tscn
+& $godot --headless --fixed-fps 60 --path . res://scenes/debug/SpawnDensityR32Test.tscn
 ```
 
 R14、R31 Endgame 與 TrueAnimation 是核心回歸門檻；其餘場景覆蓋選單模態、真人試玩修正、pool、cap、小隊、武器與敵人美術契約。R31 hook 還要求 debug build 與命令列 user arg，Web release preset 會排除 `scripts/debug/**`、`scenes/debug/**`。成功時各場景以 exit code 0 結束，並輸出對應 `*_PASS` 標記。
+
+R32 新增戰鬥、掉裝、整合、獨立覆核與敵潮密度五組門檻。驗收也檢查 log 不含 `SCRIPT ERROR`，不能只看 exit code 或 PASS 文字。載入錯誤與重試可用 `node tools/test_r32_loading_recovery.mjs` 驗證。
 
 ## Web 匯出
 
@@ -126,3 +143,8 @@ python -m http.server 8067 --directory export/web
 - 第三方字型、字集與 CC0／MIT 素材的來源、授權及用途見 [CREDITS.md](CREDITS.md)。
 - 逐檔衍生素材與 SHA-256 紀錄見 [assets/CREDITS.md](assets/CREDITS.md)。
 - 宣傳素材與簡介見 [PRESSKIT.md](PRESSKIT.md)。
+## R37 更新
+
+地面加入較暗的野地、暖色環道與路肩，八處地標移出主要通路。魔物攻擊的危險邊界與方向更清楚；傷害文字保留描邊，減少重複文字節點、字體排版與空場查詢。觸控按鈕、搖桿及裝備列在手機與平板橫、直向皆保留間距。
+
+未錄影的 Chrome 實玩中，桌機 30 秒與手機尺寸 45 秒的 FPS 中位數均為 60；這是指定硬體、種子及觸控模擬的結果，實體行動裝置仍需個別驗證。完整數據、候選版本雜湊與限制見發布報告。

@@ -44,10 +44,20 @@ enum LayoutTier {
 }
 
 static var _device_hints_override: Dictionary = {}
+static var _cached_web_size := Vector2.ZERO
+static var _cached_web_raw_size := Vector2.ZERO
+static var _cached_web_size_msec := -10000
+static var _cached_web_hints: Dictionary = {}
+static var _cached_web_hints_msec := -10000
+
+static func invalidate_web_cache() -> void:
+	_cached_web_size_msec = -10000
+	_cached_web_hints_msec = -10000
 
 
 static func set_device_hints_override_for_tests(device_hints: Dictionary = {}) -> void:
 	_device_hints_override = device_hints.duplicate(true)
+	invalidate_web_cache()
 
 
 static func layout_tier(viewport_size: Vector2, force_phone: bool = false, device_hints: Dictionary = {}) -> int:
@@ -58,6 +68,8 @@ static func layout_tier(viewport_size: Vector2, force_phone: bool = false, devic
 	var hints := device_hints if not device_hints.is_empty() else _runtime_device_hints()
 	var handset_ua := bool(hints.get("ua_phone", false)) or (bool(hints.get("ua_mobile", false)) and not bool(hints.get("ua_tablet", false)))
 	var confirmed_touch := has_confirmed_touch(hints)
+	if bool(hints.get("ua_tablet", false)) and confirmed_touch:
+		return LayoutTier.TABLET
 	# A short desktop browser window is still a desktop input surface.  Size may
 	# compact the layout, but it must never manufacture phone controls.
 	if handset_ua or (short_side < MOBILE_VIEWPORT_WIDTH_TRIGGER and confirmed_touch):
@@ -88,10 +100,16 @@ static func use_tablet_ui(viewport_size: Vector2, device_hints: Dictionary = {})
 static func ui_layout_size(viewport_size: Vector2) -> Vector2:
 	var size := _safe_viewport_size(viewport_size)
 	if OS.has_feature("web"):
+		var now := Time.get_ticks_msec()
+		if now - _cached_web_size_msec < 150 and _cached_web_raw_size == size:
+			return _cached_web_size
 		var css_width := int(JavaScriptBridge.eval("window.innerWidth || document.documentElement.clientWidth || 0", true))
 		var css_height := int(JavaScriptBridge.eval("window.innerHeight || document.documentElement.clientHeight || 0", true))
 		if css_width > 0 and css_height > 0:
-			return Vector2(float(css_width), float(css_height))
+			_cached_web_size = Vector2(float(css_width), float(css_height))
+			_cached_web_raw_size = size
+			_cached_web_size_msec = now
+			return _cached_web_size
 		var window_size := DisplayServer.window_get_size()
 		if window_size.x > 0 and window_size.y > 0:
 			return Vector2(window_size)
@@ -99,6 +117,9 @@ static func ui_layout_size(viewport_size: Vector2) -> Vector2:
 
 
 static func apply_web_canvas_scale(layer: CanvasLayer, viewport_size: Vector2, root: Control = null) -> Vector2:
+	# Layout/orientation events force fresh CSS dimensions; the hot combat
+	# path shares a short cache instead of thousands of JS bridge calls.
+	_cached_web_size_msec = -10000
 	var layout_size := ui_layout_size(viewport_size)
 	if layer == null or not OS.has_feature("web"):
 		return layout_size
@@ -450,6 +471,8 @@ static func _safe_viewport_size(viewport_size: Vector2) -> Vector2:
 static func _runtime_device_hints() -> Dictionary:
 	if not _device_hints_override.is_empty():
 		return _device_hints_override
+	if OS.has_feature("web") and Time.get_ticks_msec() - _cached_web_hints_msec < 250:
+		return _cached_web_hints
 	var mobile_os := OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios")
 	var touch_available := false
 	if DisplayServer.has_method("is_touchscreen_available"):
@@ -472,7 +495,7 @@ static func _runtime_device_hints() -> Dictionary:
 			touch_available = touch_available or bool(web_hints.get("touch", false))
 			primary_coarse = bool(web_hints.get("primary_coarse", false))
 			mouse_available = bool(web_hints.get("mouse", mouse_available))
-	return {
+	var result := {
 		"mobile_os": mobile_os,
 		"ua_mobile": ua_mobile,
 		"ua_phone": ua_phone,
@@ -481,3 +504,7 @@ static func _runtime_device_hints() -> Dictionary:
 		"primary_coarse": primary_coarse,
 		"mouse_available": mouse_available
 	}
+	if OS.has_feature("web"):
+		_cached_web_hints = result
+		_cached_web_hints_msec = Time.get_ticks_msec()
+	return result

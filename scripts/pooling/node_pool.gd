@@ -35,12 +35,14 @@ func warm(count: int) -> void:
 
 
 func acquire(active_parent: Node) -> Node:
+	if not is_instance_valid(active_parent) or not is_instance_valid(pool_root) or active_parent.is_queued_for_deletion() or pool_root.is_queued_for_deletion():
+		return null
 	var node: Node = null
 	while not free_list.is_empty():
-		var candidate: Node = free_list.pop_back()
+		var candidate: Variant = free_list.pop_back()
 		if candidate == null or not is_instance_valid(candidate):
 			continue
-		var candidate_id := candidate.get_instance_id()
+		var candidate_id: int = candidate.get_instance_id()
 		if not _in_pool.has(candidate_id):
 			duplicate_release_count += 1
 			push_warning("Pool free-list duplicate/live entry discarded: %s" % pool_name)
@@ -67,6 +69,10 @@ func acquire(active_parent: Node) -> Node:
 
 func release(node: Node) -> void:
 	if node == null or not is_instance_valid(node):
+		return
+	if not is_instance_valid(pool_root) or pool_root.is_queued_for_deletion():
+		if not node.is_queued_for_deletion():
+			node.queue_free()
 		return
 
 	var instance_id := node.get_instance_id()

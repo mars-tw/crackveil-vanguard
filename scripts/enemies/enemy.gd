@@ -1,10 +1,13 @@
 class_name Enemy
 extends CharacterBody2D
+const CRITICAL := preload("res://scripts/services/critical_strike_resolver.gd")
+const TELEGRAPH := preload("res://scripts/vfx/monster_attack_telegraph.gd")
 
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 const TRUE_ANIMATION_LIBRARY := preload("res://scripts/animation/true_animation_library.gd")
+const COMBAT_FEEDBACK := preload("res://scripts/vfx/combat_feedback.gd")
 const THREAT_GLOW_DENSITY_START := 80
 const THREAT_GLOW_DENSITY_FULL := 150
 const HIT_FLASH_DURATION := 0.08
@@ -81,6 +84,24 @@ var affix_field_slow_strength: float = 0.0
 var affix_field_tick_timer: float = 0.0
 var boss_phase_two_triggered: bool = false
 var boss_ability_timer: float = 0.0
+var boss_phase_volley_pending: bool = false
+var boss_pattern: String = "legacy_ring"
+var boss_dash: bool = false
+var boss_ability_cooldown: float = 4.2
+var boss_volley_index: int = 0
+var boss_projectiles_fired: int = 0
+var damage_hit_index: int = 0
+var last_hit_critical: bool = false
+var special_elite_id := ""
+var special_elite_name := ""
+var special_skill := ""
+var special_cooldown := 3.0
+var special_timer := 2.0
+var special_casts := 0
+var special_shield_active := false
+var special_gold_drops := 0
+var special_projectiles_fired := 0
+var special_label: Label
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
@@ -90,6 +111,8 @@ var affix_ring: Line2D = null
 var affix_marker: Line2D = null
 var hp_bar_bg: Line2D = null
 var hp_bar_fg: Line2D = null
+var attack_cue: Line2D = null
+var attack_telegraph: Node2D = null
 var shadow: Sprite2D = null
 var threat_glow: Sprite2D = null
 var boss_inner_glow: Sprite2D = null
@@ -113,10 +136,14 @@ var death_animation_profile: StringName = &"none"
 var pending_attack_target: WeakRef = null
 var pending_attack_kind: StringName = &"contact"
 var pending_attack_damage_multiplier: float = 1.0
+var pending_attack_direction: Vector2 = Vector2.RIGHT
+var pending_ring_projectile_count: int = 10
 var attack_hitbox_active: bool = false
 var attack_hit_registry: Dictionary = {}
 var attack_impact_count: int = 0
 var knockback_velocity: Vector2 = Vector2.ZERO
+var stagger_guard_timer: float = 0.0
+var death_recoil_velocity: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -163,6 +190,7 @@ func pool_on_release() -> void:
 	affix_field_tick_timer = 0.0
 	boss_phase_two_triggered = false
 	boss_ability_timer = 0.0
+	boss_phase_volley_pending = false
 	rotation = 0.0
 	if sprite != null:
 		sprite.rotation = 0.0
@@ -196,16 +224,25 @@ func pool_on_release() -> void:
 	pending_attack_target = null
 	pending_attack_kind = &"contact"
 	pending_attack_damage_multiplier = 1.0
+	pending_attack_direction = Vector2.RIGHT
+	pending_ring_projectile_count = 10
 	attack_hitbox_active = false
 	attack_hit_registry.clear()
 	attack_impact_count = 0
 	knockback_velocity = Vector2.ZERO
+	_hide_attack_cue()
+	stagger_guard_timer = 0.0
+	death_recoil_velocity = Vector2.ZERO
 	last_visual_direction = Vector2.RIGHT
 	threat_glow_base_alpha = 0.18
 	if affix_ring != null:
 		affix_ring.visible = false
 	if affix_marker != null:
 		affix_marker.visible = false
+	if attack_cue != null:
+		attack_cue.visible = false
+	if attack_telegraph != null:
+		attack_telegraph.hide_cue()
 	_set_hp_bar_visible(false)
 	var shape_node := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape_node != null:
@@ -216,6 +253,7 @@ func pool_reset(args: Dictionary) -> void:
 	global_position = args.get("position", Vector2.ZERO)
 	spawn_token = int(args.get("spawn_token", spawn_token + 1))
 	setup(str(args.get("enemy_id", "normal")), args.get("config", {}))
+	_constrain_to_stage()
 
 
 func setup(enemy_type: String, config: Dictionary) -> void:
@@ -264,7 +302,24 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	status_strengths.clear()
 	expired_status_ids.clear()
 	boss_phase_two_triggered = false
-	boss_ability_timer = float(config.get("boss_ability_cooldown", 4.8))
+	boss_ability_cooldown = float(config.get("boss_ability_cooldown", 4.8))
+	boss_ability_timer = boss_ability_cooldown
+	boss_pattern = str(config.get("boss_pattern", "legacy_ring"))
+	boss_dash = bool(config.get("boss_dash", false))
+	boss_volley_index = 0
+	boss_projectiles_fired = 0
+	damage_hit_index = 0
+	last_hit_critical = false
+	special_elite_id = str(config.get("special_elite_id", ""))
+	special_elite_name = str(config.get("special_elite_name", ""))
+	special_skill = str(config.get("special_skill", ""))
+	special_cooldown = float(config.get("special_cooldown", 3.0))
+	special_timer = 1.4
+	special_casts = 0
+	special_gold_drops = 0
+	special_projectiles_fired = 0
+	special_shield_active = special_skill == "shield_slam"
+	boss_phase_volley_pending = false
 	rotation = 0.0
 	hit_flash_timer = 0.0
 	is_dying = false
@@ -277,13 +332,32 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	animation_lod_tier = &"near"
 	animation_frozen = false
 	pending_attack_target = null
+	pending_attack_direction = Vector2.RIGHT
+	pending_ring_projectile_count = 10
 	attack_hitbox_active = false
 	attack_hit_registry.clear()
 	attack_impact_count = 0
 	knockback_velocity = Vector2.ZERO
+	stagger_guard_timer = 0.0
+	death_recoil_velocity = Vector2.ZERO
+	if attack_cue != null:
+		attack_cue.visible = false
 	_apply_shape()
 	_apply_sprite()
 	_apply_affix_visuals()
+	if special_label == null:
+		special_label = Label.new()
+		special_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		special_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		special_label.add_theme_font_size_override("font_size", 14)
+		special_label.add_theme_color_override("font_outline_color", Color("11192a"))
+		special_label.add_theme_constant_override("outline_size", 3)
+		add_child(special_label)
+	special_label.text = special_elite_name
+	special_label.size = Vector2(160, 22)
+	special_label.position = Vector2(-80, -64 * animated_sprite.scale.y - 25)
+	special_label.visible = special_elite_name != ""
+	special_label.add_theme_color_override("font_color", body_color.lightened(0.45))
 	_update_hp_bar()
 	_set_hp_bar_visible(false)
 	_request_camera_pressure_on_spawn()
@@ -297,12 +371,14 @@ func _physics_process(delta: float) -> void:
 	if not is_active:
 		return
 	_tick_hit_flash(delta)
+	stagger_guard_timer = maxf(0.0, stagger_guard_timer - delta)
 
 	_tick_status_effects(delta)
 	attack_timer = max(attack_timer - delta, 0.0)
 	if current_animation_name == &"hurt":
 		velocity = knockback_velocity
 		move_and_slide()
+		_constrain_to_stage()
 		knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, delta * KNOCKBACK_DECELERATION)
 		_tick_affix(delta)
 		_tick_hp_bar(delta)
@@ -317,6 +393,8 @@ func _physics_process(delta: float) -> void:
 		return
 
 	match behavior_id:
+		"elite_special":
+			_physics_special_elite(delta, target)
 		"ranged":
 			_physics_ranged(delta, target)
 		"dasher":
@@ -368,6 +446,7 @@ func _physics_dasher(delta: float, target: Node2D) -> void:
 				behavior_state = "dash"
 				behavior_timer = dash_duration
 				_set_sprite_modulate(Color.WHITE)
+				_hide_attack_cue()
 		"dash":
 			behavior_timer = max(behavior_timer - delta, 0.0)
 			velocity = dash_direction * dash_speed
@@ -393,6 +472,7 @@ func _physics_dasher(delta: float, target: Node2D) -> void:
 				behavior_timer = dash_windup
 				attack_timer = attack_cooldown
 				velocity = Vector2.ZERO
+				_show_attack_cue(&"dash", target)
 			else:
 				velocity = to_target.normalized() * _effective_speed() if to_target.length_squared() > 1.0 else Vector2.ZERO
 			_move_and_face()
@@ -400,27 +480,102 @@ func _physics_dasher(delta: float, target: Node2D) -> void:
 
 
 func _physics_boss(delta: float, target: Node2D) -> void:
+	if boss_phase_volley_pending and _start_attack(target, 0.82, &"ring"):
+		pending_ring_projectile_count = 14
+		boss_phase_volley_pending = false
+		return
 	var to_target: Vector2 = target.global_position - global_position
-	if to_target.length_squared() > 180.0 * 180.0:
-		velocity = to_target.normalized() * _effective_speed()
+	if boss_dash:
+		_physics_dasher(delta, target)
 	else:
-		velocity = Vector2.ZERO
-	_move_and_face()
-	_try_contact_attack(target, 1.15)
+		if to_target.length_squared() > 130.0 * 130.0:
+			velocity = to_target.normalized() * _effective_speed()
+		else:
+			velocity = Vector2.ZERO
+		_move_and_face()
+		_try_contact_attack(target, 1.15)
 
 	boss_ability_timer -= delta
 	if boss_ability_timer <= 0.0 and current_animation_name != &"attack":
 		_start_attack(target, 0.82, &"ring")
-		boss_ability_timer = 5.4
+		boss_ability_timer = boss_ability_cooldown * (0.72 if boss_phase_two_triggered else 1.0)
 
 	if not boss_phase_two_triggered and hp <= max_hp * 0.5:
 		_trigger_boss_phase_two()
 
 
+func _physics_special_elite(delta: float, target: Node2D) -> void:
+	special_timer = maxf(0.0, special_timer - delta)
+	special_shield_active = special_skill == "shield_slam" and special_timer > 1.0
+	if special_skill == "treasure":
+		var away := (global_position - target.global_position).normalized()
+		velocity = away * _effective_speed() if global_position.distance_to(target.global_position) < 440.0 else Vector2.ZERO
+		_move_and_face()
+		if special_timer <= 0.0 and special_gold_drops < 8:
+			EntityFactory.spawn_gold_coin(global_position, 5, 0.5)
+			special_gold_drops += 1
+			special_timer = 1.8
+		return
+	if special_skill == "storm_charge":
+		_physics_dasher(delta, target)
+	else:
+		var offset := target.global_position - global_position
+		velocity = offset.normalized() * _effective_speed() if offset.length() > 175.0 else Vector2.ZERO
+		_move_and_face()
+		_try_contact_attack(target)
+	if special_timer <= 0.0 and current_animation_name not in [&"attack", &"hurt"]:
+		if _start_attack(target, 1.0, &"elite"):
+			special_timer = special_cooldown
+
+
+func _apply_special_elite_impact(target: Node2D) -> void:
+	special_casts += 1
+	if special_skill == "summoner":
+		for index in range(5):
+			if EntityFactory.get_enemy_live_count() >= death_spawn_cap:
+				break
+			EntityFactory.spawn_enemy("elite_summonling", {"max_hp":18.0, "speed":126.0, "damage":4.0, "xp":1, "gold":2, "radius":11.0, "sprite_path":"res://assets/sprites/enemy_grunt.png", "sprite_scale":1.2}, global_position + Vector2.RIGHT.rotated(TAU * float(index) / 5.0) * 75.0)
+		return
+	if special_skill == "shield_slam":
+		for hero in get_tree().get_nodes_in_group("heroes"):
+			if hero is Node2D and hero.global_position.distance_to(global_position) <= 145.0:
+				hero.take_damage(damage, global_position)
+		special_shield_active = false
+		return
+	var count := 10 if special_skill == "frost_ring" else 5 if special_skill == "storm_charge" else 8
+	for index in range(count):
+		var angle := pending_attack_direction.angle() + (float(index) - 2.0) * 0.16 if special_skill == "storm_charge" else TAU * float(index) / float(count)
+		var stats := _enemy_projectile_stats()
+		stats["color"] = body_color
+		stats["projectile_speed"] = 380.0 if special_skill == "storm_charge" else ranged_projectile_speed
+		if EntityFactory.spawn_enemy_projectile(global_position, Vector2.RIGHT.rotated(angle), stats, self, "elite") != null:
+			special_projectiles_fired += 1
+	if special_skill == "frost_ring":
+		for hero in get_tree().get_nodes_in_group("heroes"):
+			if hero is Node2D and hero.global_position.distance_to(global_position) < 170.0 and hero.has_method("apply_movement_slow"):
+				hero.apply_movement_slow(1.0, 0.25)
+
+
+func get_special_elite_debug_state() -> Dictionary:
+	return {"id":special_elite_id, "name":special_elite_name, "skill":special_skill, "casts":special_casts, "projectiles_fired":special_projectiles_fired, "shield":special_shield_active, "gold_drops":special_gold_drops, "timer":special_timer}
+
+
 func _move_and_face() -> void:
 	move_and_slide()
+	_constrain_to_stage()
 	if velocity.length_squared() > 1.0:
 		last_visual_direction = velocity.normalized()
+
+
+func _constrain_to_stage() -> void:
+	if is_instance_valid(GameManager.arena) and GameManager.arena.get_node_or_null("LoopWorldTopology") != null:
+		return
+	if not is_instance_valid(GameManager.arena):
+		return
+	var background := GameManager.arena.get_node_or_null("Background")
+	if background != null and background.has_method("get_playable_rect"):
+		var bounds: Rect2 = background.get_playable_rect().grow(-14.0)
+		global_position = global_position.clamp(bounds.position, bounds.end)
 
 
 func _try_contact_attack(target: Node2D, damage_multiplier: float = 1.0) -> void:
@@ -439,10 +594,15 @@ func _start_attack(target: Node2D, damage_multiplier: float, attack_kind: String
 	pending_attack_target = weakref(target) if target != null else null
 	pending_attack_kind = attack_kind
 	pending_attack_damage_multiplier = damage_multiplier
+	pending_attack_direction = (target.global_position - global_position).normalized() if target != null else last_visual_direction
+	if pending_attack_direction == Vector2.ZERO:
+		pending_attack_direction = Vector2.RIGHT
+	pending_ring_projectile_count = 10
 	attack_hit_registry.clear()
 	attack_hitbox_active = false
 	attack_timer = attack_cooldown
 	_play_animation_state(&"attack", true)
+	_show_attack_cue(attack_kind, target)
 	return true
 
 
@@ -450,13 +610,28 @@ func _apply_attack_impact() -> void:
 	if not is_active or is_dying or current_animation_name != &"attack":
 		return
 	attack_hitbox_active = true
+	_hide_attack_cue()
 	attack_impact_count += 1
+	var presentation := get_tree().get_first_node_in_group("combat_presentation")
+	if presentation != null:
+		var effect := "monster_bite"
+		if pending_attack_kind == &"ranged":
+			effect = "monster_fire"
+		elif special_skill == "flame_nova":
+			effect = "monster_fire"
+		elif boss_pattern == "ice_frost" or affix_id == "affix_field":
+			effect = "monster_frost"
+		elif is_boss or is_elite:
+			effect = "monster_shadow"
+		presentation.play_effect(effect, global_position + pending_attack_direction * radius, pending_attack_direction, 0.85 if is_boss else 0.48)
 	var target := pending_attack_target.get_ref() as Node2D if pending_attack_target != null else null
 	match pending_attack_kind:
+		&"elite":
+			_apply_special_elite_impact(target)
 		&"ranged":
 			_fire_ranged_projectile(target)
 		&"ring":
-			_fire_ring_projectiles(10)
+			_fire_ring_projectiles(pending_ring_projectile_count)
 		_:
 			_apply_contact_impact(target)
 	attack_hitbox_active = false
@@ -473,19 +648,25 @@ func _apply_contact_impact(target: Node2D) -> void:
 	if global_position.distance_squared_to(target.global_position) > active_distance * active_distance:
 		return
 	attack_hit_registry[hit_key] = true
-	target.take_damage(damage * pending_attack_damage_multiplier, global_position)
+	if target.has_method("get_channel_debug_state"):
+		target.take_damage(damage * pending_attack_damage_multiplier, global_position, is_boss)
+	else:
+		target.take_damage(damage * pending_attack_damage_multiplier, global_position)
 
 
 func _fire_ranged_projectile(target: Node2D) -> void:
 	if target == null or not is_instance_valid(target):
 		return
-	var direction := (target.global_position - global_position).normalized()
+	var direction := pending_attack_direction
 	if direction == Vector2.ZERO:
 		direction = Vector2.RIGHT
 	EntityFactory.spawn_enemy_projectile(global_position + direction * (radius + 8.0), direction, _enemy_projectile_stats(), self, "normal")
 
 
 func _fire_ring_projectiles(count: int) -> void:
+	if is_boss and boss_pattern != "legacy_ring":
+		_fire_stage_boss_volley()
+		return
 	var projectile_count: int = max(1, count)
 	var projectile_stats := _enemy_projectile_stats(0.82)
 	var priority := "boss" if is_boss else "normal"
@@ -494,6 +675,59 @@ func _fire_ring_projectiles(count: int) -> void:
 	for index in range(projectile_count):
 		var direction := Vector2.RIGHT.rotated(TAU * float(index) / float(projectile_count))
 		EntityFactory.spawn_enemy_projectile(global_position + direction * (radius + 8.0), direction, projectile_stats, self, priority)
+
+
+func _boss_shot_plan() -> Array[Dictionary]:
+	var plan: Array[Dictionary] = []
+	var phase := boss_phase_two_triggered
+	var aim := pending_attack_direction.angle()
+	match boss_pattern:
+		"legacy_ring":
+			var amount := 14 if phase else 10
+			for ray in range(amount):
+				plan.append({"angle": TAU * float(ray) / float(amount), "speed": 1.0})
+		"moon_cross":
+			for arm in range(4):
+				for ray in range(-1, 2):
+					plan.append({"angle": float(arm) * PI * 0.5 + float(ray) * 0.12 + (0.3 if phase else 0.0), "speed": 1.0})
+		"garden_fan":
+			var amount := 11 if phase else 7
+			for ray in range(amount):
+				plan.append({"angle": aim + (float(ray) - float(amount - 1) * 0.5) * 0.16, "speed": 1.18})
+		"ember_spiral":
+			var amount := 16 if phase else 9
+			for ray in range(amount):
+				plan.append({"angle": TAU * float(ray) / float(amount) + float(boss_volley_index) * 0.38, "speed": 0.78 + float(ray % 3) * 0.16})
+		"storm_star":
+			for arm in range(5):
+				for ray in range(4 if phase else 2):
+					plan.append({"angle": float(arm) * TAU / 5.0 + float(ray) * 0.07 + float(boss_volley_index) * 0.22, "speed": 1.28})
+		"ice_frost":
+			for arm in range(6):
+				for layer in range(3 if phase else 2):
+					plan.append({"angle": float(arm) * TAU / 6.0 + float(boss_volley_index % 2) * PI / 6.0, "speed": 0.62 + float(layer) * 0.38})
+		_:
+			var amount := 16 if phase else 12
+			for ray in range(amount):
+				plan.append({"angle": TAU * float(ray) / float(amount) + float(boss_volley_index) * 0.16, "speed": 0.88})
+			for ray in range(-1, 2):
+				plan.append({"angle": aim + float(ray) * 0.09, "speed": 1.45})
+	return plan
+
+
+func _fire_stage_boss_volley() -> void:
+	for shot in _boss_shot_plan():
+		var stats := _enemy_projectile_stats(0.82)
+		stats["projectile_speed"] = ranged_projectile_speed * float(shot.speed)
+		stats["color"] = body_color.lightened(0.3)
+		var direction := Vector2.RIGHT.rotated(float(shot.angle))
+		if EntityFactory.spawn_enemy_projectile(global_position + direction * (radius + 8.0), direction, stats, self, "boss") != null:
+			boss_projectiles_fired += 1
+	boss_volley_index += 1
+
+
+func get_boss_debug_state() -> Dictionary:
+	return {"pattern": boss_pattern, "phase_two": boss_phase_two_triggered, "dash": boss_dash, "volleys": boss_volley_index, "projectiles_fired": boss_projectiles_fired, "next_plan": _boss_shot_plan(), "ability_cooldown": boss_ability_cooldown}
 
 
 func _enemy_projectile_stats(damage_multiplier: float = 1.0) -> Dictionary:
@@ -517,7 +751,15 @@ func _trigger_boss_phase_two() -> void:
 	boss_phase_two_triggered = true
 	_apply_boss_phase_visuals()
 	EntityFactory.spawn_death_burst(global_position, Color(0.82, 0.42, 1.0), 3.1, "boss_phase")
-	_fire_ring_projectiles(14)
+	boss_phase_volley_pending = true
+	# The phase transition is spectacular, but its damaging volley still obeys
+	# anticipation -> active frame 2 -> recovery instead of firing on HP input.
+	if current_animation_name == &"attack" and pending_attack_kind == &"ring":
+		pending_ring_projectile_count = 14
+		boss_phase_volley_pending = false
+	elif _start_attack(_find_nearest_hero(), 0.82, &"ring"):
+		pending_ring_projectile_count = 14
+		boss_phase_volley_pending = false
 	_spawn_boss_dashers(4)
 	if GameManager.has_method("record_boss_phase_two"):
 		GameManager.record_boss_phase_two()
@@ -611,12 +853,15 @@ func apply_knockback(source_position: Vector2, strength: float) -> void:
 	# Convert the legacy displacement-strength contract into a decelerating
 	# physics impulse: v^2 / (2a) ~= strength.  This keeps the collider/root
 	# authoritative while preserving the former 4-8 px weapon feel.
-	var impulse_speed := sqrt(2.0 * KNOCKBACK_DECELERATION * strength)
+	var resistance := 0.18 if is_boss else (0.55 if is_elite else 1.0)
+	var impulse_speed := sqrt(2.0 * KNOCKBACK_DECELERATION * strength) * resistance
 	var impulse := direction.normalized() * impulse_speed
 	if impulse.length_squared() > knockback_velocity.length_squared():
 		knockback_velocity = impulse
-	if current_animation_name not in [&"hurt", &"death"]:
+	if current_animation_name not in [&"hurt", &"death"] and _can_stagger(0.0):
 		_play_animation_state(&"hurt", true)
+		_cancel_windup_on_stagger()
+		stagger_guard_timer = 0.65 if is_boss else (0.38 if is_elite else 0.0)
 
 
 func _tick_status_effects(delta: float) -> void:
@@ -650,12 +895,29 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 	if hp <= 0.0 or not is_active:
 		return 0.0
 
-	var final_amount := amount * _damage_taken_multiplier()
+	var final_amount := maxf(0.0, amount * _damage_taken_multiplier())
+	if special_shield_active:
+		final_amount *= 0.45
+	if final_amount <= 0.0:
+		return 0.0
+	damage_hit_index += 1
+	last_hit_critical = false
+	if GameManager.game_running and GameManager.critical_strikes_enabled:
+		var result := CRITICAL.resolve(final_amount, GameManager.current_run_seed, spawn_token, damage_hit_index)
+		last_hit_critical = bool(result.critical)
+		final_amount = float(result.damage)
 	hp = max(hp - final_amount, 0.0)
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("hit")
-	var number_position := global_position + Vector2(randf_range(-8.0, 8.0), -radius - 10.0)
-	EntityFactory.spawn_damage_number(final_amount, number_position, Color(1.0, 0.96, 0.72))
+	var number_position := global_position + Vector2(float((spawn_token * 13 + damage_hit_index * 7) % 17 - 8), -radius - 10.0)
+	var severity := final_amount / maxf(1.0, max_hp)
+	var heavy_hit := severity >= 0.4
+	if last_hit_critical:
+		EntityFactory.spawn_damage_number("爆擊 %d" % roundi(final_amount), number_position, Color("ffe18c"), 28)
+		GameManager.record_critical_hit(global_position, source_position, final_amount)
+	else:
+		EntityFactory.spawn_damage_number(final_amount, number_position, Color(1.0, 0.79, 0.38) if heavy_hit else Color(1.0, 0.96, 0.72), 23 if heavy_hit else 0)
+	COMBAT_FEEDBACK.report_hit(global_position, source_position, severity, hp <= 0.0, is_elite or is_boss)
 	hp_bar_timer = 0.55
 	_trigger_hit_micro_feedback()
 	_update_hp_bar()
@@ -666,13 +928,43 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 	else:
 		var recoil_direction := global_position - source_position
 		if recoil_direction.length_squared() > 0.001:
-			knockback_velocity = recoil_direction.normalized() * 72.0
+			var recoil_speed := lerpf(74.0, 155.0, clampf(severity * 2.0, 0.0, 1.0))
+			recoil_speed *= 0.18 if is_boss else (0.55 if is_elite else 1.0)
+			if last_hit_critical:
+				recoil_speed *= 1.5
+			var recoil := recoil_direction.normalized() * recoil_speed
+			if recoil.length_squared() > knockback_velocity.length_squared():
+				knockback_velocity = recoil
 		# Dense multi-hit weapons may damage the same enemy several times during
 		# one reaction.  Keep the in-flight hurt clip instead of restarting frame
 		# zero (and rebuilding its sequence) for every hit.
-		if current_animation_name != &"hurt":
+		if current_animation_name != &"hurt" and _can_stagger(severity):
 			_play_animation_state(&"hurt", true)
+			_cancel_windup_on_stagger()
+			stagger_guard_timer = 0.65 if is_boss else (0.38 if is_elite else 0.0)
 	return final_amount
+
+
+func _can_stagger(severity: float) -> bool:
+	if not is_elite and not is_boss:
+		return true
+	if stagger_guard_timer > 0.0:
+		return false
+	# Preserve threatening active attacks under chip damage. A substantial hit
+	# can still interrupt them and earns a real articulated hurt reaction.
+	if current_animation_name == &"attack":
+		return severity >= (0.045 if is_boss else 0.13)
+	return true
+
+
+func _cancel_windup_on_stagger() -> void:
+	_hide_attack_cue()
+	if (behavior_id == "dasher" or special_skill == "storm_charge") and behavior_state in ["windup", "dash"]:
+		# An interrupted dash must earn a new visible windup after recovery.
+		# It cannot resume an invisible charge from an already-hidden cue.
+		behavior_state = "recover"
+		behavior_timer = dash_recover
+		velocity = Vector2.ZERO
 
 
 func _trigger_hit_micro_feedback() -> void:
@@ -680,15 +972,18 @@ func _trigger_hit_micro_feedback() -> void:
 	hit_flash_timer = maxf(hit_flash_timer, HIT_FLASH_DURATION)
 
 
-func _die(_source_position: Vector2 = Vector2.ZERO) -> void:
+func _die(source_position: Vector2 = Vector2.ZERO) -> void:
 	if not is_active or is_dying:
 		return
 	is_dying = true
 	is_active = false
 	velocity = Vector2.ZERO
 	knockback_velocity = Vector2.ZERO
+	var death_direction := (global_position - source_position).normalized()
+	death_recoil_velocity = death_direction * (35.0 if is_boss else (100.0 if is_elite else 180.0))
 	attack_hitbox_active = false
 	pending_attack_target = null
+	_hide_attack_cue()
 	status_timers.clear()
 	status_strengths.clear()
 	_set_hp_bar_visible(false)
@@ -715,6 +1010,11 @@ func _finalize_death() -> void:
 		AudioManager.play_sfx("kill_thump", false, -7.0, thump_pitch)
 	if is_elite and GameManager.has_method("record_elite_kill"):
 		GameManager.record_elite_kill()
+	# Pool generation resets death_finalized; this guarded hook awards exactly
+	# one equipment roll and runs before boss victory can pause the arena.
+	var loot_director := get_tree().get_first_node_in_group("loot_director")
+	if loot_director != null and loot_director.has_method("on_enemy_defeated"):
+		loot_director.on_enemy_defeated(global_position, is_elite, is_boss, type_id)
 	if is_boss and GameManager.has_method("record_boss_kill"):
 		GameManager.record_boss_kill()
 	var burst_scale := 2.25 if is_boss else (1.55 if is_elite else 1.0)
@@ -908,7 +1208,58 @@ func _ensure_visual_nodes() -> void:
 	hp_bar_fg.width = 3.0
 	hp_bar_fg.default_color = Color(0.9, 0.16, 0.16, 0.96)
 	hp_bar_fg.z_index = 5
+	attack_cue = get_node_or_null("AttackCue") as Line2D
+	if attack_cue == null:
+		attack_cue = Line2D.new()
+		attack_cue.name = "AttackCue"
+		add_child(attack_cue)
+	attack_cue.z_index = -1
+	attack_cue.visible = false
 	_set_hp_bar_visible(false)
+
+
+func _show_attack_cue(kind: StringName, target: Node2D) -> void:
+	if attack_cue == null:
+		return
+	if attack_telegraph == null:
+		attack_telegraph = TELEGRAPH.new()
+		attack_telegraph.name = "AttackTelegraph"
+		add_child(attack_telegraph)
+	attack_telegraph.position = Vector2(0.0, 54.0 * animated_sprite.scale.y) if animated_sprite != null else Vector2.ZERO
+	var area_radius := 145.0 if kind == &"elite" and special_skill == "shield_slam" else 0.0
+	if area_radius > 0.0:
+		attack_telegraph.position = Vector2.ZERO
+	attack_telegraph.show_cue(&"ring" if kind == &"elite" else kind, dash_direction if kind == &"dash" else pending_attack_direction, radius, is_boss or is_elite, body_color, area_radius)
+	attack_cue.closed = false
+	attack_cue.width = 2.2
+	attack_cue.default_color = Color(1.0, 0.48, 0.21, 0.8)
+	if kind == &"ring":
+		attack_cue.closed = true
+		attack_cue.width = 3.0
+		attack_cue.default_color = Color(1.0, 0.42, 0.68, 0.9)
+		attack_cue.points = _circle_points(radius * 2.15, 24)
+	elif kind == &"ranged" or kind == &"dash":
+		var direction := dash_direction if kind == &"dash" else pending_attack_direction
+		var length := minf(dash_trigger_range, 165.0) if kind == &"dash" else 95.0
+		var point := direction * length
+		var side := direction.orthogonal() * 8.0
+		attack_cue.points = PackedVector2Array([direction * (radius + 6.0), point, point - direction * 14.0 + side, point, point - direction * 14.0 - side])
+	else:
+		attack_cue.visible = false
+		return
+	attack_cue.visible = true
+	# Retain the cue's public activity flag for animation contracts while the
+	# ground decal provides the visible warning instead of an arrow line.
+	attack_cue.modulate.a = 0.0
+	attack_cue.points = PackedVector2Array()
+
+
+func _hide_attack_cue() -> void:
+	if attack_cue != null:
+		attack_cue.visible = false
+		attack_cue.points = PackedVector2Array()
+	if attack_telegraph != null:
+		attack_telegraph.hide_cue()
 
 
 func _apply_sprite() -> void:
@@ -938,8 +1289,8 @@ func _apply_shadow_and_glow() -> void:
 		_ensure_boss_volume_nodes()
 	if shadow != null:
 		shadow.visible = true
-		shadow.position = Vector2(0.0, radius * 0.86)
-		ART_RESOURCES.fit_sprite(shadow, ART_RESOURCES.get_ellipse_shadow(), radius * (5.4 if is_boss else 3.2))
+		shadow.position = Vector2(0.0, 54.0 * animated_sprite.scale.y) if animation_frames_ready else Vector2(0.0, radius * 0.86)
+		ART_RESOURCES.fit_sprite(shadow, ART_RESOURCES.get_ellipse_shadow(), radius * (6.0 if is_boss else 4.5))
 		shadow.modulate.a = 0.84 if is_boss else 0.68
 	if threat_glow != null:
 		threat_glow.visible = true
@@ -1071,7 +1422,8 @@ func _setup_animation_frames(target_diameter: float, scale_multiplier: float) ->
 		return
 	animated_sprite.sprite_frames = frames
 	animated_sprite.modulate = Color.WHITE
-	animated_sprite.scale = Vector2.ONE * (target_diameter / float(TRUE_ANIMATION_LIBRARY.CELL_SIZE)) * scale_multiplier
+	var readability_scale := 1.2 if is_boss else 1.45 if is_elite else 1.8
+	animated_sprite.scale = Vector2.ONE * (target_diameter / float(TRUE_ANIMATION_LIBRARY.CELL_SIZE)) * scale_multiplier * readability_scale
 	animation_frames_ready = true
 	animated_sprite.visible = true
 	sprite.visible = false
@@ -1116,6 +1468,12 @@ func tick_shared_enemy_animation(delta: float, focus_position: Vector2, focus_va
 		_update_visual_state()
 	elif not is_dying:
 		return
+	elif death_recoil_velocity.length_squared() > 0.01:
+		# The articulated fall poses still run in full; a small ballistic slide
+		# carries the attack direction after the disabled collider leaves combat.
+		global_position += death_recoil_velocity * delta
+		_constrain_to_stage()
+		death_recoil_velocity = death_recoil_velocity.move_toward(Vector2.ZERO, 520.0 * delta)
 	var playback_fps := _shared_animation_playback_fps(focus_position, focus_valid)
 	animation_effective_fps = playback_fps
 	if playback_fps <= 0.0:

@@ -24,8 +24,8 @@ const PREWARM_COUNTS: Dictionary = {
 	# shared, so this headroom keeps full death reactions without duplicating
 	# textures or instantiating enemies on the hot path.
 	"enemy": 320,
-	"projectile": 320,
-	"fork_projectile": 56,
+	"projectile": 384,
+	"fork_projectile": 224,
 	"orbit_projectile": 56,
 	"explosion": 112,
 	"hazard_zone": 18,
@@ -44,7 +44,7 @@ const DAMAGE_NUMBER_MERGE_AGE := 0.24
 const EXPLOSION_CAP := 48
 const HAZARD_ZONE_CAP := 16
 const RIFT_CONSTRUCT_CAP := 6
-const FORK_PROJECTILE_CAP := 48
+const FORK_PROJECTILE_CAP := 192
 const ENEMY_PROJECTILE_CAP := 72
 const DEATH_BURST_CAP := 20
 const CORPSE_GHOST_CAP := 24
@@ -462,6 +462,9 @@ func queue_regular_drop(xp_position: Vector2, xp_amount: int, coin_position: Vec
 
 
 func _drain_regular_drop_queue() -> void:
+	if not is_instance_valid(pool_root) or not pool_root.is_inside_tree() or pool_root.is_queued_for_deletion():
+		regular_drop_queue.clear()
+		return
 	var count := mini(REGULAR_DROPS_PER_PHYSICS_FRAME, regular_drop_queue.size())
 	for _index in range(count):
 		var request: Dictionary = regular_drop_queue.pop_front()
@@ -524,6 +527,10 @@ func spawn_combo_text(combo_count: int, world_position: Vector2) -> Node:
 
 
 func spawn_death_burst(world_position: Vector2, burst_color: Color, burst_scale: float = 1.0, burst_style: String = "burst", custom_texture_path: String = "") -> Node:
+	if burst_style == "level_column":
+		var presentation := get_tree().get_first_node_in_group("combat_presentation")
+		if presentation != null and bool(presentation.get_debug_state().get("assets_ready", false)):
+			return presentation.play_effect("critical_impact", world_position, Vector2.UP, 0.80)
 	var viewport_size := _viewport_size_for_lod()
 	if get_pool_live_count("death_burst") >= MOBILE_TUNING.death_burst_cap(viewport_size, DEATH_BURST_CAP):
 		return null
@@ -1286,6 +1293,8 @@ func _viewport_size_for_lod() -> Vector2:
 
 
 func _acquire(pool_name: String) -> Node:
+	if not is_instance_valid(pool_root) or not pool_root.is_inside_tree() or pool_root.is_queued_for_deletion():
+		return null
 	if not pools.has(pool_name):
 		_create_pool(pool_name, _scene_for_pool(pool_name))
 	var pool: RefCounted = pools[pool_name]

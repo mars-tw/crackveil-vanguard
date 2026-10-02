@@ -104,6 +104,8 @@ def builtin_symbols() -> set[str]:
     chars.update(chr(codepoint) for codepoint in range(0x2000, 0x2070))
     chars.update(chr(codepoint) for codepoint in range(0x3000, 0x3040))
     chars.update(chr(codepoint) for codepoint in range(0xFF01, 0xFF5F))
+    # Upgrade previews use a real arrow; Han-only source scanning misses it.
+    chars.update("→")
     return chars
 
 

@@ -1,9 +1,9 @@
 extends "res://scripts/weapons/base_weapon.gd"
 
-
 func _process(delta: float) -> void:
 	if owner_player == null or data == null or not GameManager.game_running:
 		return
+	firing_clock += delta
 
 	cooldown_timer -= delta
 	if cooldown_timer > 0.0:
@@ -27,9 +27,11 @@ func _fire_at(target: Node2D) -> void:
 	var projectile_count: int = max(1, data_int("projectile_count", 1))
 	var spread_degrees: float = data_float("spread_degrees", 24.0)
 	if evolved_fan:
-		projectile_count = clamp(projectile_count, 3, 5)
-		spread_degrees = max(spread_degrees, 52.0)
+		projectile_count = clamp(projectile_count, 12, 20)
+		spread_degrees = max(spread_degrees, 60.0)
 	var spread: float = deg_to_rad(min(spread_degrees, spread_degrees * 0.32 * float(projectile_count - 1)))
+	if get_weapon_id() == "riftline_emitter" and not evolved_fan:
+		spread = deg_to_rad(spread_degrees)
 	for index in range(projectile_count):
 		var angle_offset: float = 0.0
 		if projectile_count > 1:
@@ -41,7 +43,8 @@ func _fire_at(target: Node2D) -> void:
 		if evolved_fan and abs(angle_offset) > 0.001:
 			shot_stats["damage"] = float(shot_stats.get("damage", 10.0)) * 0.82
 			shot_stats["range"] = float(shot_stats.get("range", 520.0)) * 0.82
-		EntityFactory.spawn_projectile(spawn_position, direction, shot_stats, owner_player)
+		var projectile := EntityFactory.spawn_projectile(spawn_position, direction, shot_stats, owner_player)
+		register_projectile_spawn(projectile)
 
 	register_trigger()
 	if AudioManager != null and AudioManager.has_method("play_sfx"):

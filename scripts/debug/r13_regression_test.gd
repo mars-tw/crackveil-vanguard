@@ -113,8 +113,8 @@ func _test_weapon_hit_feedback() -> bool:
 	for _frame in range(12):
 		await get_tree().physics_frame
 	var pushed_distance := before_position.distance_to(enemy.global_position)
-	if pushed_distance < 3.8 or pushed_distance > 8.4:
-		_fail("riftline knockback outside 4-8px range: %.2f" % pushed_distance)
+	if pushed_distance < 12.0 or pushed_distance > 30.0:
+		_fail("R33 riftline knockback outside 12-30px range: %.2f" % pushed_distance)
 		return false
 	EntityFactory.release_projectile(projectile)
 
@@ -159,6 +159,11 @@ func _test_level_up_ritual() -> bool:
 
 
 func _test_time_scale_owner_stack() -> bool:
+	# The R33 level picker opens immediately; this isolated timing test must
+	# release that modal pause before measuring its independent impact owner.
+	GameManager.system_pause_owners.clear()
+	GameManager.waiting_for_upgrade = false
+	get_tree().paused = false
 	GameManager.clear_time_scale_owners()
 	var slow_token := GameManager.acquire_time_scale("r13_level_slow", 0.35)
 	if abs(Engine.time_scale - 0.35) > 0.001:

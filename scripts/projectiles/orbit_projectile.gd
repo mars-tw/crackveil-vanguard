@@ -58,13 +58,17 @@ func pool_on_release() -> void:
 		glow.visible = false
 	if trail != null:
 		trail.visible = false
+		trail.points = PackedVector2Array()
+		trail.gradient = null
 	if trail_art != null:
 		trail_art.visible = false
+		trail_art.texture = null
 	hit_flash_timer = 0.0
 	spark_cooldown = 0.0
 	var shape_node := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape_node != null:
 		shape_node.disabled = true
+	queue_redraw()
 
 
 func pool_reset(args: Dictionary) -> void:
@@ -170,6 +174,10 @@ func _spawn_hit_spark() -> void:
 	if spark_cooldown > 0.0:
 		return
 	spark_cooldown = 0.08
+	if _uses_captain_cel_blade():
+		# Enemy.register_hit already supplies the directional contact star.
+		# A second 72 px bitmap on every orbit hit buried the small target.
+		return
 	var impact_path := str(stats.get("impact_sprite_path", ""))
 	if impact_path != "":
 		# Kept on the successful overlap/hit branch so the impact art cannot fire
@@ -192,6 +200,8 @@ func _tick_hit_flash(delta: float) -> void:
 		sprite.modulate = display_color
 	if glow != null:
 		glow.modulate = Color(color.r, color.g, color.b, 0.34 + ratio * 0.34)
+	if _uses_captain_cel_blade():
+		queue_redraw()
 
 
 func _hit_key_for(body: Node) -> int:
@@ -256,6 +266,18 @@ func _ensure_sprite() -> void:
 
 func _apply_sprite() -> void:
 	_ensure_sprite()
+	if _uses_captain_cel_blade():
+		sprite.visible = false
+		glow.visible = false
+		trail_art.visible = false
+		trail.visible = false
+		trail.material = null
+		trail.width = 2.5
+		trail.default_color = Color(0.66, 0.95, 1.0, 0.42)
+		trail.gradient = null
+		trail.points = PackedVector2Array()
+		queue_redraw()
+		return
 	var sprite_path: String = str(stats.get("orbit_sprite_path", "res://assets/sprites/proj_blade.png"))
 	var alternate_path := str(stats.get("orbit_alternate_sprite_path", ""))
 	if alternate_path != "" and orbit_index % 2 == 1:
@@ -301,3 +323,19 @@ func _apply_sprite() -> void:
 			Vector2(-length * 0.18, 0.0),
 			Vector2.ZERO
 		])
+
+
+func _uses_captain_cel_blade() -> bool:
+	return owner_player != null and is_instance_valid(owner_player) and str(owner_player.get("hero_id")) == "rift_captain"
+
+
+func _draw() -> void:
+	if not is_active or not _uses_captain_cel_blade():
+		return
+	var blade := PackedVector2Array([Vector2(19.0, -1.0), Vector2(7.0, -5.0), Vector2(-10.0, -3.0), Vector2(-15.0, 3.0), Vector2(0.0, 2.0), Vector2(13.0, 4.0)])
+	var outline := PackedVector2Array([Vector2(21.0, -1.0), Vector2(8.0, -6.5), Vector2(-11.0, -4.5), Vector2(-18.0, 4.0), Vector2(0.0, 3.5), Vector2(14.0, 5.5)])
+	draw_colored_polygon(outline, Color(0.03, 0.06, 0.08, 0.97))
+	draw_colored_polygon(blade, Color(0.73, 0.96, 1.0) if hit_flash_timer <= 0.0 else Color(1.0, 0.94, 0.61))
+	draw_line(Vector2(-10.0, -2.5), Vector2(19.0, -1.0), Color(1.0, 1.0, 0.98), 1.8, true)
+	draw_line(Vector2(-22.0, 3.0), Vector2(-14.0, 1.0), Color(0.04, 0.045, 0.04), 5.2, true)
+	draw_line(Vector2(-22.0, 3.0), Vector2(-14.0, 1.0), Color(1.0, 0.71, 0.25), 2.5, true)

@@ -7,6 +7,16 @@ const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 
 const TRAIL_NODE_CAP := 160
 static var active_trail_nodes: int = 0
+const FRIENDLY_VISUAL_DESKTOP_CAP := 320
+const FRIENDLY_VISUAL_PHONE_CAP := 180
+const FRIENDLY_VISUAL_TABLET_CAP := 240
+const READABILITY_CHECK_INTERVAL := 0.2
+const DART_GLINT_REDRAW_INTERVAL := 1.0 / 30.0
+static var active_friendly_visuals: int = 0
+static var friendly_visual_rejections: int = 0
+static var physics_tick_count: int = 0
+static var readability_check_count: int = 0
+static var dart_redraw_request_count: int = 0
 
 var direction: Vector2 = Vector2.RIGHT
 var speed: float = 560.0
@@ -57,6 +67,15 @@ var trail_registered: bool = false
 var mobile_readability_active: bool = false
 var visual_level: int = 0
 var evolved_visual: bool = false
+var visual_slot_registered: bool = false
+var cosmetic_suppressed: bool = false
+var head_animation_clock: float = 0.0
+var readability_check_timer: float = 0.0
+var visual_redraw_timer: float = 0.0
+var cel_render_kind: int = 0
+var dart_outline: PackedVector2Array = PackedVector2Array()
+var dart_body: PackedVector2Array = PackedVector2Array()
+var dart_length: float = 13.0
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
@@ -87,6 +106,7 @@ func pool_on_acquire() -> void:
 
 
 func pool_on_release() -> void:
+	_release_visual_slot()
 	is_active = false
 	visible = false
 	set_process(false)
@@ -131,6 +151,13 @@ func pool_on_release() -> void:
 	mobile_readability_active = false
 	visual_level = 0
 	evolved_visual = false
+	cosmetic_suppressed = false
+	head_animation_clock = 0.0
+	readability_check_timer = 0.0
+	visual_redraw_timer = 0.0
+	cel_render_kind = 0
+	dart_outline = PackedVector2Array()
+	dart_body = PackedVector2Array()
 	rotation = 0.0
 	if sprite != null:
 		sprite.rotation = 0.0
@@ -140,8 +167,14 @@ func pool_on_release() -> void:
 		glow.position = Vector2.ZERO
 	if trail != null:
 		trail.visible = false
+		trail.points = PackedVector2Array()
+		trail.gradient = null
+		trail.default_color = Color.TRANSPARENT
 	if trail_art != null:
 		trail_art.visible = false
+		trail_art.texture = null
+		trail_art.position = Vector2.ZERO
+		trail_art.scale = Vector2.ONE
 	if trail_registered:
 		active_trail_nodes = max(0, active_trail_nodes - 1)
 		trail_registered = false
@@ -150,6 +183,7 @@ func pool_on_release() -> void:
 	var shape_node := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape_node != null:
 		shape_node.disabled = true
+	queue_redraw()
 
 
 func pool_reset(args: Dictionary) -> void:
@@ -209,7 +243,12 @@ func setup(world_position: Vector2, projectile_direction: Vector2, projectile_st
 	_rebuild_fork_stats_cache()
 	source = projectile_source
 	traveled = 0.0
+	head_animation_clock = 0.0
+	readability_check_timer = READABILITY_CHECK_INTERVAL
+	visual_redraw_timer = 0.0
+	_cache_cel_geometry()
 	hit_bodies.clear()
+	_reserve_visual_slot()
 	if target_group == "none":
 		collision_mask = 0
 		monitoring = false
@@ -220,17 +259,36 @@ func setup(world_position: Vector2, projectile_direction: Vector2, projectile_st
 	_apply_sprite()
 	rotation = direction.angle()
 	muzzle_flash_timer = 0.06
+	queue_redraw()
 
 
 func _physics_process(delta: float) -> void:
 	if not is_active:
 		return
-	_refresh_projectile_readability()
+	physics_tick_count += 1
+	# Friendly cel bodies do not vary by layout tier. Avoid repeated CSS/UA Web
+	# bridge calls for every shot, every physics tick. Enemy palettes still adapt
+	# to an orientation/input change within 200 ms.
+	if cel_render_kind == 0:
+		readability_check_timer -= delta
+		if readability_check_timer <= 0.0:
+			readability_check_timer = READABILITY_CHECK_INTERVAL
+			_refresh_projectile_readability()
+	head_animation_clock += delta
 	_update_motion(delta)
 	var step := direction * speed * delta
 	global_position += step
 	traveled += speed * delta
 	_tick_projectile_vfx(delta)
+	if not cosmetic_suppressed:
+		if cel_render_kind == 1:
+			visual_redraw_timer -= delta
+			if visual_redraw_timer <= 0.0:
+				visual_redraw_timer += DART_GLINT_REDRAW_INTERVAL
+				dart_redraw_request_count += 1
+				queue_redraw()
+		elif cel_render_kind >= 3:
+			queue_redraw()
 	if _should_release_after_step():
 		is_active = false
 		EntityFactory.release_projectile(self)
@@ -329,14 +387,14 @@ func _apply_enemy_hit_feedback(body: Node) -> void:
 		var knockback_origin := global_position
 		if source != null and is_instance_valid(source):
 			knockback_origin = source.global_position
-		var knockback_strength := 4.0 + minf(4.0, radius * 0.35)
+		var knockback_strength := 18.0 + minf(6.0, radius * 0.5)
 		if bool(body.get("is_boss")):
 			knockback_strength *= 0.62
 		body.apply_knockback(knockback_origin, knockback_strength)
 	if motion_mode == "homing":
 		EntityFactory.spawn_death_burst(global_position, Color(1.0, 0.48, 0.22), 0.82, "burst")
 		EntityFactory.spawn_death_burst(global_position, Color(0.48, 0.44, 0.38), 0.9, "smoke_ring")
-	elif source_weapon_id == "rift_shield_boomerang" and impact_sprite_path != "":
+	elif source_weapon_id == "rift_shield_boomerang" and impact_sprite_path != "" and not _uses_cel_weapon():
 		# The generated impact is emitted only after the active Area2D hit succeeds;
 		# visual feedback never advances the damage timing.
 		EntityFactory.spawn_death_burst(global_position, Color.WHITE, 0.82, "r24_weapon_impact", impact_sprite_path)
@@ -488,6 +546,23 @@ func _ensure_sprite() -> void:
 
 func _apply_sprite() -> void:
 	_ensure_sprite()
+	if cosmetic_suppressed:
+		for layer in [sprite, glow, trail_art, muzzle_flash]:
+			layer.visible = false
+		trail.visible = false
+		trail.points = PackedVector2Array()
+		return
+	if _uses_cel_weapon():
+		sprite.visible = false
+		glow.visible = false
+		trail.visible = false
+		trail.points = PackedVector2Array()
+		trail.gradient = null
+		trail_art.visible = false
+		muzzle_flash.visible = false
+		mobile_readability_active = MOBILE_TUNING.use_mobile_ui(_viewport_size_for_lod())
+		queue_redraw()
+		return
 	var display_sprite_path := return_sprite_path if boomerang_returning and return_sprite_path != "" else sprite_path
 	var texture: Texture2D = SPRITE_LOADER.get_texture(display_sprite_path)
 	if texture == null:
@@ -529,6 +604,8 @@ func _configure_r24_trail_art() -> void:
 
 
 func _configure_projectile_vfx() -> void:
+	if _uses_cel_weapon():
+		return
 	var vfx_color := projectile_color
 	var glow_alpha: float = 0.34
 	var mobile_readability := MOBILE_TUNING.use_mobile_ui(_viewport_size_for_lod())
@@ -622,6 +699,127 @@ func _visual_growth(level_step: float, evolved_bonus: float) -> float:
 	return 1.0 + float(visual_level) * level_step + (evolved_bonus if evolved_visual else 0.0)
 
 
+func _uses_hard_dart() -> bool:
+	return source_weapon_id == "riftline_emitter" and target_group == "enemies"
+
+
+func _uses_cel_weapon() -> bool:
+	return cel_render_kind != 0
+
+
+func _cache_cel_geometry() -> void:
+	cel_render_kind = 0
+	if target_group == "heroes":
+		return
+	match source_weapon_id:
+		"riftline_emitter":
+			cel_render_kind = 1
+		"rift_seeker_missiles":
+			cel_render_kind = 2
+		"rift_shield_boomerang":
+			cel_render_kind = 3
+		"grenade_lob":
+			cel_render_kind = 4
+	if cel_render_kind == 1:
+		var half_width := 2.1
+		dart_length = 13.0 + minf(3.0, float(visual_level) * 0.5)
+		dart_outline = PackedVector2Array([Vector2(10.0, 0.0), Vector2(-4.0, -half_width - 1.5), Vector2(-dart_length, -half_width * 0.65), Vector2(-dart_length - 4.0, 0.0), Vector2(-dart_length, half_width * 0.65), Vector2(-4.0, half_width + 1.5)])
+		dart_body = PackedVector2Array([Vector2(8.0, 0.0), Vector2(-5.0, -half_width), Vector2(-dart_length, 0.0), Vector2(-5.0, half_width)])
+
+
+func _draw() -> void:
+	if not is_active or not _uses_cel_weapon():
+		return
+	if source_weapon_id == "rift_shield_boomerang":
+		_draw_cel_boomerang()
+		return
+	if source_weapon_id == "grenade_lob":
+		_draw_cel_grenade()
+		return
+	if source_weapon_id == "rift_seeker_missiles":
+		_draw_cel_missile()
+		return
+	draw_colored_polygon(dart_outline, Color(0.08, 0.035, 0.015, 0.94))
+	draw_colored_polygon(dart_body, Color(1.0, 0.88, 0.58, 1.0))
+	draw_line(Vector2(-dart_length + 3.0, 0.0), Vector2(7.0, 0.0), Color(1.0, 1.0, 0.91), 1.8, true)
+	var head_size := 2.1 + sin(head_animation_clock * 34.0) * 0.45
+	draw_circle(Vector2(6.5, 0.0), head_size, Color(1.0, 1.0, 0.94, 0.96))
+
+
+func get_friendly_visual_cap() -> int:
+	if MOBILE_TUNING.mobile_lod_enabled(_viewport_size_for_lod()):
+		return FRIENDLY_VISUAL_TABLET_CAP if MOBILE_TUNING.use_tablet_ui(_viewport_size_for_lod()) else FRIENDLY_VISUAL_PHONE_CAP
+	return FRIENDLY_VISUAL_DESKTOP_CAP
+
+
+func _reserve_visual_slot() -> void:
+	_release_visual_slot()
+	cosmetic_suppressed = false
+	if target_group == "heroes":
+		visible = true
+		return
+	if active_friendly_visuals < get_friendly_visual_cap():
+		active_friendly_visuals += 1
+		visual_slot_registered = true
+	else:
+		cosmetic_suppressed = true
+		friendly_visual_rejections += 1
+	visible = not cosmetic_suppressed
+	# Visibility is cosmetic only: monitoring, physics, hit tokens, damage,
+	# homing and return/lob trajectories keep running for every logical shot.
+
+
+func _release_visual_slot() -> void:
+	if visual_slot_registered:
+		active_friendly_visuals = maxi(0, active_friendly_visuals - 1)
+		visual_slot_registered = false
+
+
+func _exit_tree() -> void:
+	_release_visual_slot()
+
+
+func get_visual_budget_debug_state() -> Dictionary:
+	return {"cap": get_friendly_visual_cap(), "friendly_visible": active_friendly_visuals, "cosmetic_rejections": friendly_visual_rejections, "suppressed": cosmetic_suppressed, "logical_active": is_active, "physics": is_physics_processing(), "monitoring": monitoring}
+
+
+func _draw_cel_boomerang() -> void:
+	draw_set_transform(Vector2.ZERO, traveled * 0.036)
+	var tint := Color(0.55, 0.95, 1.0) if boomerang_returning else Color(1.0, 0.82, 0.32)
+	for side in [-1.0, 1.0]:
+		var blade := PackedVector2Array([Vector2(22.0 * side, -2.0), Vector2(11.0 * side, -8.0), Vector2(0.0, -4.0), Vector2(-7.0 * side, 1.0), Vector2(8.0 * side, -1.0)])
+		var outline := PackedVector2Array([Vector2(24.0 * side, -2.0), Vector2(12.0 * side, -10.0), Vector2(-1.0 * side, -6.0), Vector2(-10.0 * side, 3.0), Vector2(9.0 * side, 1.0)])
+		draw_colored_polygon(outline, Color(0.03, 0.04, 0.06, 0.96))
+		draw_colored_polygon(blade, tint)
+		draw_line(Vector2(-2.0 * side, -4.0), Vector2(22.0 * side, -2.0), Color(1.0, 1.0, 0.9), 2.0, true)
+	draw_circle(Vector2.ZERO, 4.5, Color(0.06, 0.1, 0.13))
+	draw_circle(Vector2.ZERO, 2.2, Color(1.0, 1.0, 0.9))
+	draw_set_transform(Vector2.ZERO)
+
+
+func _draw_cel_missile() -> void:
+	var shell := PackedVector2Array([Vector2(13.0, 0.0), Vector2(1.0, -5.0), Vector2(-14.0, -5.0), Vector2(-8.0, 0.0), Vector2(-14.0, 5.0), Vector2(1.0, 5.0)])
+	var outline := PackedVector2Array([Vector2(15.0, 0.0), Vector2(1.0, -6.5), Vector2(-16.0, -6.5), Vector2(-10.0, 0.0), Vector2(-16.0, 6.5), Vector2(1.0, 6.5)])
+	draw_colored_polygon(outline, Color(0.05, 0.04, 0.02, 0.96))
+	draw_colored_polygon(shell, Color(1.0, 0.73, 0.28))
+	draw_line(Vector2(-9.0, 0.0), Vector2(12.0, 0.0), Color(1.0, 1.0, 0.9), 3.0, true)
+
+
+func _draw_cel_grenade() -> void:
+	var progress := clampf(traveled / maxf(1.0, lob_distance), 0.0, 1.0)
+	var lift := sin(progress * PI) * lob_arc_height
+	# The physics root still follows the ground trajectory; only the visible
+	# energy core follows the authored lob, keeping the landing area exact.
+	draw_set_transform(Vector2(0.0, 0.0), 0.0, Vector2(1.3, 0.45))
+	draw_circle(Vector2.ZERO, 6.0, Color(0.02, 0.025, 0.025, 0.45))
+	draw_set_transform(Vector2(0.0, -lift).rotated(-rotation))
+	draw_circle(Vector2.ZERO, 9.0, Color(0.08, 0.04, 0.025, 0.96))
+	draw_circle(Vector2.ZERO, 7.0, Color(1.0, 0.6, 0.19))
+	draw_circle(Vector2(-1.5, -1.5), 4.3, Color(1.0, 1.0, 0.86))
+	draw_line(Vector2(0.0, -11.0), Vector2(0.0, -16.0), Color(0.67, 0.96, 1.0, 0.8), 2.0, true)
+	draw_set_transform(Vector2.ZERO)
+
+
 func _projectile_display_color() -> Color:
 	if source_weapon_id == "boss_ring":
 		return Color(1.0, 0.66, 1.0, 1.0)
@@ -631,6 +829,7 @@ func _projectile_display_color() -> Color:
 
 
 func _refresh_projectile_readability() -> void:
+	readability_check_count += 1
 	var next_mobile_readability := MOBILE_TUNING.use_mobile_ui(_viewport_size_for_lod())
 	if next_mobile_readability == mobile_readability_active:
 		return

@@ -40,6 +40,10 @@ func _run_tests() -> void:
 
 
 func _prepare_run_state() -> void:
+	for existing in get_tree().get_nodes_in_group("enemies"):
+		EntityFactory.release_enemy(existing)
+	if leader != null:
+		leader.set("auto_cleave_cooldown_timer", 999.0)
 	GameManager.game_running = true
 	GameManager.is_game_over = false
 	GameManager.waiting_for_upgrade = false

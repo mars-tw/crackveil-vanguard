@@ -77,6 +77,10 @@ func _run_tests() -> void:
 	if not await _wait_until(Callable(self, "_game_over_visible").bind(defeat_arena), 180):
 		_fail("defeat summary did not become visible after player death animation")
 		return
+	var defeat_camera := leader.get_node_or_null("Camera2D") as Camera2D
+	if defeat_camera == null or not defeat_camera.enabled or defeat_camera != defeat_arena.get_viewport().get_camera_2d():
+		_fail("defeat removed the final battlefield camera")
+		return
 	if not await _test_defeat_buttons(defeat_arena):
 		return
 	print("R31_DEFEAT_REACHED title=任務失敗 death_animation=frame-based retry=triggered main_menu=triggered")
@@ -100,10 +104,10 @@ func _run_tests() -> void:
 	var victory_root: Control = victory_screen.get("root") as Control if victory_screen != null else null
 	var victory_title: Label = victory_screen.get("title_label") as Label if victory_screen != null else null
 	var victory_summary: Label = victory_screen.get("summary_label") as Label if victory_screen != null else null
-	if victory_root == null or not victory_root.is_visible_in_tree() or victory_title == null or victory_title.text != "階段勝利":
+	if victory_root == null or not victory_root.is_visible_in_tree() or victory_title == null or not victory_title.text.contains("通關"):
 		_fail("victory UI title/root missing")
 		return
-	if victory_summary == null or not victory_summary.text.contains("擊破守門者"):
+	if victory_summary == null or not victory_summary.text.contains("擊破") or not victory_summary.text.contains(str(GameManager.STAGE_CATALOG.get_stage(GameManager.selected_stage_id).boss_name)):
 		_fail("victory summary copy missing")
 		return
 	if not bool(GameManager.get("boss_killed")) or not bool(GameManager.get("stage_victory_pending")):
@@ -141,6 +145,8 @@ func _test_release_isolation_contract() -> bool:
 
 
 func _prepare_test_saves() -> void:
+	GameManager.campaign_save_path = "user://r31_campaign_test.cfg"
+	GameManager.campaign_clears.clear()
 	PlayerSettings.debug_use_save_path("user://r31_player_settings_test.cfg", true)
 	MetaProgress.debug_use_save_path("user://r31_meta_progress_test.cfg", true)
 	AchievementProgress.debug_use_save_path("user://r31_achievement_test.cfg", true)

@@ -10,6 +10,7 @@ const TRUE_ANIMATION_LIBRARY := preload("res://scripts/animation/true_animation_
 const STEP_DUST_POOL_SIZE := 8
 const ATTACK_IMPACT_FRAME := 2
 const WALK_CONTACT_FRAMES := [1, 5]
+const SILHOUETTE_SHADER := preload("res://scripts/shaders/hero_silhouette.gdshader")
 
 @export var body_radius: float = 15.0
 @export var body_color: Color = Color(0.35, 0.78, 1.0)
@@ -30,6 +31,9 @@ var step_dust_pool: Array[CPUParticles2D] = []
 var next_step_dust_index: int = 0
 var step_dust_emit_count: int = 0
 var footstep_tick_count: int = 0
+var silhouette_material: ShaderMaterial = null
+var marker_refresh_timer: float = 0.0
+var pending_heavy_hurt: bool = false
 
 
 func _ready() -> void:
@@ -40,6 +44,33 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	_update_locomotion_state()
+	marker_refresh_timer -= _delta
+	if marker_refresh_timer <= 0.0:
+		marker_refresh_timer = 0.1
+		queue_redraw()
+
+
+func _draw() -> void:
+	var hero := get_parent()
+	if hero == null or hero.get("is_alive") != true or current_animation_name == &"death":
+		return
+	var leader: bool = hero.get("is_leader") == true
+	var marker := Color(1.0, 0.8, 0.34, 0.94) if leader else Color(0.38, 0.86, 1.0, 0.66)
+	var feet := Vector2(0.0, body_radius * 0.82)
+	if leader:
+		draw_arc(feet, body_radius * 0.95, 0.1, TAU - 0.1, 24, marker, 1.6, true)
+		var arrow := facing_direction.normalized()
+		var tip := feet + arrow * (body_radius + 6.0)
+		draw_line(tip, tip - arrow.rotated(0.6) * 5.0, marker, 1.6, true)
+		draw_line(tip, tip - arrow.rotated(-0.6) * 5.0, marker, 1.6, true)
+	else:
+		draw_arc(feet, body_radius * 0.65, 0.2, PI - 0.2, 12, marker, 1.2, true)
+	var health: float = float(hero.get("current_hp")) / maxf(1.0, float(hero.get("max_hp")))
+	if health < 0.995:
+		var bar := Rect2(Vector2(-15.0, -body_radius * 1.6), Vector2(30.0, 3.0))
+		draw_rect(bar.grow(1.0), Color(0.01, 0.02, 0.03, 0.9))
+		bar.size.x *= clampf(health, 0.0, 1.0)
+		draw_rect(bar, Color(1.0, 0.35, 0.3) if health < 0.35 else marker)
 
 
 func configure_visual(
@@ -68,17 +99,23 @@ func set_facing_direction(direction: Vector2) -> void:
 		sprite.flip_h = flip
 
 
-func play_attack() -> bool:
-	if not animation_frames_ready or current_animation_name in [&"attack", &"death"]:
+func play_attack(animation_name: StringName = &"attack") -> bool:
+	if not animation_frames_ready or is_attack_animation() or current_animation_name in [&"hurt", &"death"]:
 		return false
+	if not animated_sprite.sprite_frames.has_animation(animation_name):
+		animation_name = &"attack"
 	attack_impact_emitted = false
-	_play_state(&"attack", true)
+	_play_state(animation_name, true)
 	return true
 
 
-func play_hurt(_source_position: Vector2 = Vector2.ZERO) -> bool:
-	if not animation_frames_ready or current_animation_name in [&"attack", &"death"]:
+func play_hurt(_source_position: Vector2 = Vector2.ZERO, heavy: bool = true) -> bool:
+	if not animation_frames_ready or current_animation_name == &"death":
 		return false
+	if is_attack_animation():
+		if heavy:
+			pending_heavy_hurt = true
+		return heavy
 	attack_impact_emitted = true
 	_play_state(&"hurt", true)
 	return true
@@ -89,6 +126,7 @@ func play_death() -> bool:
 		return false
 	if current_animation_name == &"death":
 		return true
+	pending_heavy_hurt = false
 	attack_impact_emitted = true
 	_play_state(&"death", true)
 	return true
@@ -100,7 +138,21 @@ func trigger_hit_squash() -> void:
 
 
 func is_attack_hitbox_active() -> bool:
-	return current_animation_name == &"attack" and animated_sprite != null and animated_sprite.frame == ATTACK_IMPACT_FRAME
+	return is_attack_animation() and animated_sprite != null and animated_sprite.frame == ATTACK_IMPACT_FRAME
+
+
+func is_attack_animation() -> bool:
+	return current_animation_name == &"attack" or str(current_animation_name).begins_with("attack_combo_")
+
+
+func finish_attack_recovery() -> void:
+	if not is_attack_animation() or animated_sprite == null:
+		return
+	# A released channel skips its uncommitted active frame and retains the
+	# authored recovery poses. No idle/walk frame can become a damage event.
+	attack_impact_emitted = true
+	if animated_sprite.frame < ATTACK_IMPACT_FRAME + 1:
+		animated_sprite.set_frame_and_progress(ATTACK_IMPACT_FRAME + 1, 0.0)
 
 
 func get_animation_state() -> StringName:
@@ -147,6 +199,14 @@ func _ensure_sprite() -> void:
 	animated_sprite.z_index = 1
 	animated_sprite.position = Vector2.ZERO
 	animated_sprite.rotation = 0.0
+	if silhouette_material == null:
+		silhouette_material = ShaderMaterial.new()
+		silhouette_material.shader = SILHOUETTE_SHADER
+	var leader: bool = get_parent() != null and get_parent().get("is_leader") == true
+	silhouette_material.set_shader_parameter("edge_color", Color(1.0, 0.79, 0.32, 0.88) if leader else Color(0.34, 0.85, 1.0, 0.76))
+	# The cel atlas already contains its own ink edges. Avoid the selection-box
+	# look of an additional bright outline surrounding the entire character.
+	animated_sprite.material = null
 	if not animated_sprite.frame_changed.is_connected(_on_animation_frame_changed):
 		animated_sprite.frame_changed.connect(_on_animation_frame_changed)
 	if not animated_sprite.animation_finished.is_connected(_on_animation_finished):
@@ -171,7 +231,8 @@ func _apply_sprite() -> void:
 		push_error("Missing articulated animation frames for %s" % sprite_path)
 		return
 	animated_sprite.sprite_frames = frames
-	animated_sprite.scale = Vector2.ONE * (body_radius * 3.1 / float(TRUE_ANIMATION_LIBRARY.CELL_SIZE)) * sprite_scale
+	var art_size: float = 105.0 if get_parent() != null and get_parent().get("is_leader") == true else 80.0
+	animated_sprite.scale = Vector2.ONE * (art_size / float(TRUE_ANIMATION_LIBRARY.CELL_SIZE)) * sprite_scale
 	animated_sprite.modulate = Color.WHITE
 	animated_sprite.visible = true
 	sprite.visible = false
@@ -181,16 +242,16 @@ func _apply_sprite() -> void:
 
 	if shadow != null:
 		ART_RESOURCES.fit_sprite(shadow, ART_RESOURCES.get_ellipse_shadow(), body_radius * 3.2)
-		shadow.position = Vector2(0.0, body_radius * 0.82)
+		shadow.position = Vector2(0.0, 54.0 * art_size / float(TRUE_ANIMATION_LIBRARY.CELL_SIZE))
 	if aura != null:
 		ART_RESOURCES.fit_sprite(aura, ART_RESOURCES.get_radial_glow(), body_radius * 5.2)
-		aura.modulate = Color(core_color.r * 0.62 + body_color.r * 0.24, core_color.g * 0.62 + body_color.g * 0.24, core_color.b * 0.72 + 0.22, 0.38)
+		aura.modulate = Color(core_color.r * 0.62 + body_color.r * 0.24, core_color.g * 0.62 + body_color.g * 0.24, core_color.b * 0.72 + 0.22, 0.22)
 
 
 func _update_locomotion_state() -> void:
 	if not animation_frames_ready or animated_sprite == null:
 		return
-	if current_animation_name in [&"attack", &"hurt", &"death"]:
+	if is_attack_animation() or current_animation_name in [&"hurt", &"death"]:
 		return
 	var motion := _current_motion_velocity()
 	var moving := motion.length_squared() > 9.0
@@ -223,7 +284,7 @@ func _play_state(next_state: StringName, restart: bool = false) -> void:
 func _on_animation_frame_changed() -> void:
 	if animated_sprite == null:
 		return
-	if current_animation_name == &"attack" and animated_sprite.frame == ATTACK_IMPACT_FRAME and not attack_impact_emitted:
+	if is_attack_animation() and animated_sprite.frame == ATTACK_IMPACT_FRAME and not attack_impact_emitted:
 		attack_impact_emitted = true
 		attack_impact.emit()
 	elif current_animation_name == &"walk" and animated_sprite.frame in WALK_CONTACT_FRAMES:
@@ -232,10 +293,15 @@ func _on_animation_frame_changed() -> void:
 
 
 func _on_animation_finished() -> void:
-	match current_animation_name:
-		&"attack":
-			attack_finished.emit()
+	if is_attack_animation():
+		attack_finished.emit()
+		if pending_heavy_hurt:
+			pending_heavy_hurt = false
+			_play_state(&"hurt", true)
+		else:
 			_resume_locomotion()
+		return
+	match current_animation_name:
 		&"hurt":
 			_resume_locomotion()
 		&"death":
@@ -243,6 +309,7 @@ func _on_animation_finished() -> void:
 
 
 func _resume_locomotion() -> void:
+	pending_heavy_hurt = false
 	var moving := _current_motion_velocity().length_squared() > 9.0
 	_play_state(&"walk" if moving else &"idle", true)
 
@@ -352,3 +419,7 @@ func get_footstep_tick_count() -> int:
 
 func get_turn_squash_timer() -> float:
 	return 0.0
+
+
+func get_debug_state() -> Dictionary:
+	return {"animation": str(current_animation_name), "frame": animated_sprite.frame if animated_sprite != null else -1, "attack": is_attack_animation(), "impact_active": is_attack_hitbox_active(), "impact_emitted": attack_impact_emitted, "pending_heavy_hurt": pending_heavy_hurt, "authored_combo": animated_sprite != null and animated_sprite.sprite_frames != null and animated_sprite.sprite_frames.has_animation(&"attack_combo_finisher")}

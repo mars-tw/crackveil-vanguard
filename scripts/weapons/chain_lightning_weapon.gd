@@ -57,7 +57,7 @@ func _cast_chain(first_target: Node2D) -> void:
 	EntityFactory.spawn_lightning_arc(
 		points,
 		data_color("color", Color(0.46, 0.94, 1.0)).lerp(Color.WHITE, 0.32),
-		data_float("effect_lifetime", 0.22) + 0.04,
+		0.12,
 		data_string("lightning_sprite_path", "res://assets/sprites/proj_lightning.png"),
 		34.0 + float(visual_level) * 1.5 + (9.0 if evolved_visual else 0.0)
 	)
@@ -115,7 +115,7 @@ func _cast_overload_nova(origin: Vector2, used_ids: Dictionary) -> void:
 		EntityFactory.spawn_lightning_arc(
 			arc_points,
 			data_color("color", Color(0.72, 1.0, 0.92)).lerp(Color.WHITE, 0.34),
-			0.18,
+			0.10,
 			data_string("lightning_sprite_path", "res://assets/sprites/proj_lightning.png"),
 			38.0
 		)

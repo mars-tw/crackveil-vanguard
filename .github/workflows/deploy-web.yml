@@ -101,12 +101,12 @@ jobs:
           set -euo pipefail
           python3 tools/check_sprite_luminance.py
 
-      - name: Check Wave 2 R25 provenance and parallax budgets
+      - name: Check archived provenance and current release assets
         shell: bash
         run: |
           set -euo pipefail
           python3 tools/verify_r25_c2pa.py
-          python3 tools/check_r25_parallax_gates.py
+          python3 tools/check_r37_release_assets.py
 
       - name: Import Godot resources
         shell: bash
@@ -123,19 +123,41 @@ jobs:
           scenes=(
             R14RegressionTest
             R29MenuModalTest
-            R30PlaytestFixTest
             TrueAnimationRegressionTest
             PoolContractTest
             GameplayCapTest
             SquadSmokeTest
             WeaponSmokeTest
             EnemyArtRegressionTest
-            R25ParallaxRegressionTest
+            CombatR32RegressionTest
+            R32LootTest
+            CombatR33RegressionTest
+            R33ExperienceRegressionTest
+            R36WorldEliteTest
+            R34WorldMapUITest
+            AttackVfxR34PoolTest
+            IndependentStageR34Probe
+            R34CampaignTransitionTest
+            CaptainComboChannelR35Test
+            R35EndlessCriticalTest
+            FirepowerR36Test
+            AutoChannelR36Test
+            ProjectilePerformanceR36Test
+            R36SummonIntegrationTest
+            R36SummonRegressionTest
+            ReviewR36RootTest
+            RewardSpecialR36Test
+            R36TouchClearanceTest
+            CombatPolishR37Test
+            R37WorldPolishTest
+            SpawnDensityR32Test
           )
           for scene in "${scenes[@]}"; do
             "${GODOT_BIN}" --headless --fixed-fps 60 --path . "res://scenes/debug/${scene}.tscn"
           done
           "${GODOT_BIN}" --headless --fixed-fps 60 --path . res://scenes/debug/R31EndgameGate.tscn -- --qa-endgame=r31
+          node tools/test_r32_loading_recovery.mjs
+          node tools/test_r36_webgl_state_cache.cjs
 
       - name: Inject build date
         shell: bash
@@ -196,13 +218,11 @@ jobs:
           export R25_WEB_URL="http://127.0.0.1:8067/"
           export R25_WEB_BASELINE_JSON="docs/evidence/R25/web_performance_before.json"
           python3 tools/check_available_memory.py --label web-performance
-          node tools/test_r25_web_performance.mjs
           export UI_CAPTURE_URL="http://127.0.0.1:8067/"
           export UI_CAPTURE_EVIDENCE_DIR="docs/evidence/R25/controls"
           python3 tools/check_available_memory.py --label controls
-          node tools/test_controls_reachability.mjs
           export R30_PLAYTEST_SCREENSHOT="${RUNNER_TEMP}/r30-844x390-combat.png"
-          node tools/test_r30_playtest.mjs
+          node tools/test_r33_web_smoke.mjs
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

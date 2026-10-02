@@ -16,6 +16,7 @@ var shockwave_sprite: Sprite2D = null
 var core_flash: Sprite2D = null
 var smoke_sprite: Sprite2D = null
 var debris_particles: CPUParticles2D = null
+var mobile_lod_active: bool = false
 
 
 func _ready() -> void:
@@ -35,6 +36,7 @@ func pool_on_release() -> void:
 	stats = {}
 	source = null
 	age = 0.0
+	mobile_lod_active = false
 	rotation = 0.0
 	if sprite != null:
 		sprite.visible = false
@@ -60,6 +62,9 @@ func setup(world_position: Vector2, effect_stats: Dictionary, effect_source: Nod
 	stats = effect_stats
 	source = effect_source
 	age = 0.0
+	# The burst lives for less than half a second. Resolve its cosmetic tier once
+	# per pool generation, avoiding a UA JSON/eval roundtrip on every draw frame.
+	mobile_lod_active = MOBILE_TUNING.mobile_lod_enabled(get_viewport_rect().size)
 	rotation = 0.0
 	_apply_sprite()
 	_emit_debris()
@@ -169,9 +174,8 @@ func _update_sprite_state() -> void:
 	var lifetime: float = max(0.001, float(stats.get("effect_lifetime", 0.32)))
 	var t: float = clamp(age / lifetime, 0.0, 1.0)
 	var radius: float = float(stats.get("area_radius", 82.0))
-	var mobile_lod := MOBILE_TUNING.mobile_lod_enabled(get_viewport_rect().size)
 	var upgrade_scale: float = 1.0
-	if not mobile_lod:
+	if not mobile_lod_active:
 		upgrade_scale += min(8, int(stats.get("visual_level", 0))) * 0.0275 + (0.12 if bool(stats.get("evolved_visual", false)) else 0.0)
 	radius *= upgrade_scale
 	var texture := sprite.texture

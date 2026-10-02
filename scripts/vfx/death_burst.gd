@@ -50,8 +50,10 @@ func pool_on_release() -> void:
 		particles.emitting = false
 	if column != null:
 		column.visible = false
+		column.points = PackedVector2Array()
 	if shockwave != null:
 		shockwave.visible = false
+		shockwave.points = PackedVector2Array()
 	if core_flash != null:
 		core_flash.visible = false
 	if impact_ring != null:
@@ -88,7 +90,7 @@ func setup(world_position: Vector2, color_value: Color, scale_value: float = 1.0
 	particle_multiplier = clamp(particle_multiplier_value, 0.2, 1.0)
 	composite_layers = clamp(layer_count, 2, 4)
 	main_lifetime = _lifetime_for_style()
-	lifetime = main_lifetime * (SMOKE_LIFETIME_MULTIPLIER if composite_layers >= 3 else 1.0)
+	lifetime = main_lifetime if _uses_cel_contact() else main_lifetime * (SMOKE_LIFETIME_MULTIPLIER if composite_layers >= 3 else 1.0)
 	age = 0.0
 	rotation = 0.0
 	_apply_sprite()
@@ -198,6 +200,11 @@ func _ensure_sprite() -> void:
 
 func _apply_sprite() -> void:
 	_ensure_sprite()
+	if _uses_cel_contact():
+		for layer in [sprite, glow, core_flash, impact_ring, smoke, column, shockwave]:
+			layer.visible = false
+		queue_redraw()
+		return
 	var texture: Texture2D = SPRITE_LOADER.get_texture(_style_texture_path())
 	if texture == null:
 		sprite.visible = false
@@ -244,6 +251,9 @@ func _apply_sprite() -> void:
 
 
 func _update_sprite_state() -> void:
+	if _uses_cel_contact():
+		queue_redraw()
+		return
 	if sprite == null:
 		return
 	var t: float = clamp(age / main_lifetime, 0.0, 1.0)
@@ -289,7 +299,7 @@ func _update_sprite_state() -> void:
 
 
 func _emit_particles() -> void:
-	if particles == null or composite_layers < 4 or custom_texture_path != "":
+	if particles == null or composite_layers < 4 or custom_texture_path != "" or _uses_cel_contact():
 		if particles != null:
 			particles.emitting = false
 		return
@@ -373,7 +383,9 @@ func _lifetime_for_style() -> float:
 		return 0.22
 	match burst_style:
 		"spark":
-			return 0.24
+			return 0.10
+		"burst":
+			return 0.13
 		"smoke_ring":
 			return 0.48
 		"gold_rain":
@@ -388,6 +400,34 @@ func _lifetime_for_style() -> float:
 			return 0.82
 		_:
 			return 0.32
+
+
+func _uses_cel_contact() -> bool:
+	return custom_texture_path == "" and burst_style in ["burst", "spark"]
+
+
+func _draw() -> void:
+	if not is_active or not _uses_cel_contact():
+		return
+	var t := clampf(age / maxf(0.001, main_lifetime), 0.0, 1.0)
+	var alpha := pow(1.0 - t, 1.4)
+	var scale_value := burst_scale * (0.65 if burst_style == "spark" else 1.0)
+	var count := 3
+	for index in range(count):
+		var angle := TAU * float(index) / float(count) + 0.38
+		var direction := Vector2.RIGHT.rotated(angle)
+		var side := direction.orthogonal()
+		var distance := (3.0 + t * (12.0 + float(index % 3) * 2.0)) * scale_value
+		var center := direction * distance
+		var length := (5.0 - t * 2.0) * scale_value
+		var width := (1.0 - t * 0.5) * scale_value
+		var shard := PackedVector2Array([center + direction * length, center + side * width, center - direction * length * 0.4, center - side * width])
+		draw_colored_polygon(shard, Color(1.0, 0.72, 0.25, alpha))
+		draw_line(center, center + direction * length * 0.7, Color(1.0, 1.0, 0.91, alpha), 1.2, true)
+	if t < 0.35:
+		var flash := 3.0 * (1.0 - t / 0.35) * scale_value
+		var star := PackedVector2Array([Vector2(flash * 1.6, 0.0), Vector2(2.0, 2.0), Vector2(0.0, flash), Vector2(-2.0, 2.0), Vector2(-flash * 1.6, 0.0), Vector2(-2.0, -2.0), Vector2(0.0, -flash), Vector2(2.0, -2.0)])
+		draw_colored_polygon(star, Color(1.0, 1.0, 0.94, alpha))
 
 
 func _sprite_base_size(t: float) -> float:

@@ -73,17 +73,17 @@ func _build_ui() -> void:
 	summary_scroll.add_child(summary_label)
 
 	copy_seed_button = Button.new()
-	copy_seed_button.text = "複製本局種子"
-	copy_seed_button.pressed.connect(_on_copy_seed_pressed)
+	copy_seed_button.text = "下一關"
+	copy_seed_button.pressed.connect(Callable(GameManager, "start_next_stage"))
 	panel.add_child(copy_seed_button)
 
 	continue_button = Button.new()
-	continue_button.text = "繼續無盡"
+	continue_button.text = "無盡遠征・已解鎖"
 	continue_button.pressed.connect(_on_continue_pressed)
 	panel.add_child(continue_button)
 
 	main_menu_button = Button.new()
-	main_menu_button.text = "回主選單"
+	main_menu_button.text = "世界地圖"
 	main_menu_button.pressed.connect(_on_main_menu_pressed)
 	panel.add_child(main_menu_button)
 	_apply_responsive_layout()
@@ -91,6 +91,8 @@ func _build_ui() -> void:
 
 func show_summary(summary: Dictionary) -> void:
 	displayed_summary = summary.duplicate(true)
+	title_label.text = "%s・通關" % str(summary.get("stage_name", "階段"))
+	copy_seed_button.text = "下一關" if str(summary.get("next_stage_id", "")) != "" else "返回世界地圖"
 	_update_summary_count(0.0)
 	if summary_tween != null and summary_tween.is_valid():
 		summary_tween.kill()
@@ -104,7 +106,8 @@ func show_summary(summary: Dictionary) -> void:
 func _update_summary_count(progress_ratio: float) -> void:
 	var summary := displayed_summary
 	var progress: Dictionary = summary.get("echo_progress", {})
-	summary_label.text = VICTORY_EPILOGUE + "\n擊破守門者·帷幕\n存活  %s\n擊殺  %d\n精英擊殺  %d\n金幣  %d\n契約  %s\n殘響  +%d（本局 %d / 持有 %d）\n新成就  %s" % [
+	summary_label.text = "擊破%s\n存活  %s\n擊殺  %d\n精英擊殺  %d\n金幣  %d\n契約  %s\n殘響  +%d（本局 %d / 持有 %d）\n新成就  %s" % [
+		str(summary.get("boss_name", "守門者·帷幕")),
 		GameManager.format_time(float(summary.get("elapsed_time", 0.0)) * progress_ratio),
 		int(round(float(summary.get("kills", 0)) * progress_ratio)),
 		int(round(float(summary.get("elites_killed", 0)) * progress_ratio)),
@@ -115,6 +118,7 @@ func _update_summary_count(progress_ratio: float) -> void:
 		int(round(float(progress.get("shards", 0)) * progress_ratio)),
 		_new_achievement_text(summary)
 	]
+	summary_label.text += "\n裝備拾取 %d 件　拆解 %d 件\n守門者傳說裝備已回收" % [int(summary.get("equipment_collected", 0)), int(summary.get("equipment_salvaged", 0))]
 
 
 func _on_continue_pressed() -> void:

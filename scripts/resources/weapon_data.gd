@@ -230,6 +230,8 @@ func apply_upgrade(upgrade_kind: String) -> void:
 
 
 func can_apply_upgrade(upgrade_kind: String) -> bool:
+	if id == "riftline_emitter" and upgrade_kind == "weapon_projectiles" and projectile_count >= 20:
+		return false
 	if not QUALITATIVE_MAX_LEVELS.has(upgrade_kind):
 		return true
 	return get_modifier_level(upgrade_kind) < get_modifier_max_level(upgrade_kind)
@@ -294,8 +296,8 @@ func _apply_evolution(evolution_id: String) -> void:
 		display_name = str(definition.get("name", display_name))
 	match evolution_id:
 		"evo_rift_fan":
-			projectile_count = clamp(projectile_count + 1, 3, 5)
-			spread_degrees = max(spread_degrees, 48.0)
+			projectile_count = clamp(projectile_count + 4, 12, 20)
+			spread_degrees = max(spread_degrees, 60.0)
 			color = Color(0.52, 1.0, 0.86)
 		"evo_shear_halo":
 			orbit_radius += 28.0
@@ -353,6 +355,8 @@ func _apply_count_upgrade() -> void:
 	match behavior_id:
 		"linear":
 			projectile_count += projectile_count_upgrade
+			if id == "riftline_emitter":
+				projectile_count = mini(20, projectile_count)
 			pierce += pierce_upgrade
 		"orbit":
 			projectile_count += projectile_count_upgrade
