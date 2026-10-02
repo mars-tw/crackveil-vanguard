@@ -4,7 +4,10 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.metadata
 import json
+import platform
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -38,11 +41,23 @@ def collect_codes(node: Any, key: str) -> list[str]:
     )
 
 
+def collect_details(node: Any, key: str) -> list[dict[str, str]]:
+    if not isinstance(node, dict) or not isinstance(node.get(key), list):
+        return []
+    return [
+        {field: str(entry.get(field, "")) for field in ("code", "url", "explanation")}
+        for entry in node[key] if isinstance(entry, dict)
+    ]
+
+
 def verify(path: Path) -> dict[str, Any]:
     with c2pa.Reader(path) as reader:
         payload = json.loads(reader.json())
         validation_state = str(reader.get_validation_state())
-        sdk_valid = bool(reader.is_valid)
+        # Reader.is_valid reports the handle's lifecycle, not cryptographic
+        # validity. Overall state and required signature/hash success codes
+        # below remain mandatory and are never replaced by this flag.
+        reader_active = bool(reader.is_valid)
         embedded = bool(reader.is_embedded())
 
     active_label = str(payload.get("active_manifest", ""))
@@ -69,7 +84,7 @@ def verify(path: Path) -> dict[str, Any]:
     passed = all(
         (
             embedded,
-            sdk_valid,
+            reader_active,
             validation_state.lower() == "valid",
             bool(active_label),
             agent_name == "gpt-image",
@@ -88,7 +103,8 @@ def verify(path: Path) -> dict[str, Any]:
         "sha256": sha256(path),
         "embedded": embedded,
         "validation_state": validation_state,
-        "sdk_valid": sdk_valid,
+        "reader_active": reader_active,
+        "sdk_valid": reader_active,  # Backward-compatible historical field.
         "softwareAgent": {
             "name": agent_name,
             "version": agent_version,
@@ -100,6 +116,9 @@ def verify(path: Path) -> dict[str, Any]:
         "success_codes": success_codes,
         "informational_codes": informational_codes,
         "failure_codes": failure_codes,
+        "failure_details": collect_details(active_results, "failure"),
+        "validation_status": payload.get("validation_status", []),
+        "missing_required_success_codes": sorted(required_codes - set(success_codes)),
         "passed": passed,
     }
 
@@ -108,10 +127,29 @@ def main() -> int:
     masters = sorted(MASTER_DIR.glob("*_master.png"))
     if len(masters) != 9:
         raise SystemExit(f"R25_C2PA_FAIL expected=9 actual={len(masters)}")
-    records = [verify(path) for path in masters]
+    sdk = {
+        "package_version": importlib.metadata.version("c2pa-python"),
+        "python_version": platform.python_version(),
+        "platform": sys.platform,
+    }
+    print("R25_C2PA_SDK " + json.dumps(sdk, sort_keys=True), flush=True)
+    records = []
+    for path in masters:
+        try:
+            records.append(verify(path))
+        except Exception as error:
+            # Preserve a failure result and inspect the remaining masters;
+            # a reader/SDK error can never be converted into a passing asset.
+            records.append({
+                "master": path.relative_to(ROOT).as_posix(),
+                "sha256": sha256(path),
+                "passed": False,
+                "verification_exception": f"{type(error).__name__}: {error}",
+            })
     summary = {
         "schema": "rift-r25-c2pa-verification.v1",
         "sdk": "c2pa-python",
+        "sdk_environment": sdk,
         "expected_softwareAgent": {"name": "gpt-image", "version_prefix": "2."},
         "masters": records,
         "all_passed": all(record["passed"] for record in records),
@@ -122,12 +160,23 @@ def main() -> int:
         encoding="utf-8",
     )
     for record in records:
+        agent = record.get("softwareAgent", {}).get("normalized", "unavailable")
         print(
             "R25_C2PA_MASTER "
             f"file={Path(record['master']).name} "
-            f"agent={record['softwareAgent']['normalized']} "
-            f"state={record['validation_state']} pass={str(record['passed']).lower()}"
+            f"agent={agent} "
+            f"state={record.get('validation_state', 'reader_error')} pass={str(record['passed']).lower()}"
         )
+        if not record["passed"]:
+            diagnostics = {key: record.get(key) for key in (
+                "sha256", "reader_active", "success_codes", "failure_codes",
+                "failure_details", "validation_status",
+                "missing_required_success_codes", "verification_exception",
+            )}
+            print("R25_C2PA_DIAGNOSTIC " + json.dumps(
+                {"file": Path(record["master"]).name, **diagnostics},
+                ensure_ascii=False, sort_keys=True,
+            ))
     if not summary["all_passed"]:
         print(f"R25_C2PA_FAIL summary={SUMMARY_PATH.relative_to(ROOT).as_posix()}")
         return 1

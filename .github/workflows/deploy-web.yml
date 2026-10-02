@@ -39,7 +39,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m pip install --upgrade fonttools pillow numpy c2pa-python
+          # R25's frozen masters were verified with 0.36.0. An unpinned
+          # 0.38.0 upgrade changed four validation states in Linux CI.
+          # Keep signature/data-hash validation reproducible; log the SDK
+          # and full validation failures rather than weakening the gate.
+          python3 -m pip install --upgrade fonttools pillow numpy 'c2pa-python==0.36.0'
 
       - name: Cache Godot export templates
         id: cache-templates
