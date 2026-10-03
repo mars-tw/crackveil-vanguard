@@ -30,9 +30,11 @@ func _test() -> void:
 		for frame in range(4):
 			await get_tree().process_frame
 		var state: Dictionary = world.get_debug_state()
-		_check(state.nodes.size() == 6, "not all six stages on %s" % str(dimensions))
-		_check(world.progress.text == "已通關 2／6", "clear indicator missing")
+		_check(state.nodes.size() == world.stages.size(), "not all six stages on %s" % str(dimensions))
+		_check(world.progress.text == "已通關 2／%d" % world.stages.size(), "clear indicator missing")
 		for node in state.nodes:
+			if not bool(node.visible):
+				continue
 			_check(not bool(node.disabled), "stage was locked: " + str(node.id))
 			_check(float(node.width) >= 44 and float(node.height) >= 44, "stage touch target too small")
 			var box := Rect2(float(node.x), float(node.y), float(node.width), float(node.height))
@@ -52,7 +54,7 @@ func _test() -> void:
 		if not world.portrait:
 			for first in range(world.node_buttons.size()):
 				for second in range(first + 1, world.node_buttons.size()):
-					_check(not world.node_buttons[first].get_global_rect().intersects(world.node_buttons[second].get_global_rect()), "map nodes overlap on %s" % str(dimensions))
+					_check(not (world.node_buttons[first].visible and world.node_buttons[second].visible) or not world.node_buttons[first].get_global_rect().intersects(world.node_buttons[second].get_global_rect()), "map nodes overlap on %s" % str(dimensions))
 		if DisplayServer.get_name() != "headless":
 			await RenderingServer.frame_post_draw
 			DirAccess.make_dir_recursive_absolute("res://docs/evidence/r34/worldmap")

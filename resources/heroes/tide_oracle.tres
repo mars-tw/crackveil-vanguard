@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/hero_data.gd" id="1_data"]
+[resource]
+script = ExtResource("1_data")
+id = "tide_oracle"
+display_name = "潮汐魔導"
+epithet = "聽潮祭司"
+quote = "別停下，潮水會接住你。"
+description = "水杖引爆大片潮汐，緩速敵群並持續回復附近隊友。"
+body_color = Color(0.39, 0.89, 0.97, 1)
+core_color = Color(0.92, 1, 1, 1)
+sprite_path = "res://assets/sprites/hero_tide_oracle.png"
+sprite_scale = 1.7
+max_hp = 86.0
+move_speed = 224.0
+hit_radius = 11.0
+pickup_radius = 90.0
+starting_weapon_ids = PackedStringArray("tidal_covenant")
+passive_id = "tide_oracle"
+passive_value = 1.0
+passive_description = "每次爆潮替附近存活隊友額外回復 1 點。"

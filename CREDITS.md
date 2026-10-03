@@ -37,6 +37,12 @@ Crackveil Vanguard 的程式與專案自有內容採根目錄 [MIT License](LICE
 - `assets/art/r33/` 的地面與道具 SVG：本專案原創、可重建的動漫遺跡材質與裝飾。
 - `assets/art/r33/r33_keyart.png`：本次使用 Codex 內建 imagegen 製作的原創動漫四人主視覺；提示詞與來源記錄見 `docs/evidence/r33/art/r33_keyart_prompt.txt`。
 
+## R38 遠征新境與原創角色
+
+- 三位新英雄、六種新魔物的 144 個原創動作姿勢，以及三種地材、八個地標由內建 imagegen 製作。所有生成提示、原圖及間距修正版都保留在 `assets/art/r38/sources/`。
+- `assets/sprites/r38_character_atlas.png` 是原始 RGBA 主體的機械擷取與等比例打包結果，沒有程序畫身體或單張圖片晃動冒充走路。來源雜湊、動作對應及透明像素保留紀錄見 `assets/art/r38/source_manifest.json`。
+- 重建方法與美術範圍見 [R38 素材說明](assets/art/r38/README.md)。新角色為本專案原創，沿用專案自有內容授權。
+
 ## R36 環狀世界與寵物素材
 
 - `assets/art/r36/` 四種無縫手繪地面與八處透明地標為本專案新製素材；原始圖、提示詞、衍生檔與 SHA-256 記錄於該目錄的 `source_manifest.json`、`README.md`。

@@ -8,6 +8,7 @@ const ART_RESOURCES := preload("res://scripts/services/art_resources.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 const TRUE_ANIMATION_LIBRARY := preload("res://scripts/animation/true_animation_library.gd")
 const COMBAT_FEEDBACK := preload("res://scripts/vfx/combat_feedback.gd")
+const R38_ENEMIES := preload("res://scripts/services/r38_enemy_catalog.gd")
 const THREAT_GLOW_DENSITY_START := 80
 const THREAT_GLOW_DENSITY_FULL := 150
 const HIT_FLASH_DURATION := 0.08
@@ -102,6 +103,15 @@ var special_shield_active := false
 var special_gold_drops := 0
 var special_projectiles_fired := 0
 var special_label: Label
+var biome_skill := ""
+var biome_cooldown := 3.5
+var biome_timer := 1.4
+var biome_radius := 145.0
+var biome_heal := 12.0
+var biome_casts := 0
+var biome_damage_hits := 0
+var biome_support_healing := 0.0
+var biome_projectiles_fired := 0
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
@@ -191,6 +201,19 @@ func pool_on_release() -> void:
 	boss_phase_two_triggered = false
 	boss_ability_timer = 0.0
 	boss_phase_volley_pending = false
+	boss_pattern = "legacy_ring"
+	boss_dash = false
+	boss_volley_index = 0
+	boss_projectiles_fired = 0
+	biome_skill = ""
+	biome_timer = 1.4
+	biome_cooldown = 3.5
+	biome_radius = 145.0
+	biome_heal = 12.0
+	biome_casts = 0
+	biome_damage_hits = 0
+	biome_support_healing = 0.0
+	biome_projectiles_fired = 0
 	rotation = 0.0
 	if sprite != null:
 		sprite.rotation = 0.0
@@ -319,6 +342,15 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	special_gold_drops = 0
 	special_projectiles_fired = 0
 	special_shield_active = special_skill == "shield_slam"
+	biome_skill = str(config.get("biome_skill", ""))
+	biome_cooldown = float(config.get("biome_cooldown", 3.5))
+	biome_timer = minf(1.4, biome_cooldown)
+	biome_radius = float(config.get("biome_radius", 145.0))
+	biome_heal = float(config.get("biome_heal", 12.0))
+	biome_casts = 0
+	biome_damage_hits = 0
+	biome_support_healing = 0.0
+	biome_projectiles_fired = 0
 	boss_phase_volley_pending = false
 	rotation = 0.0
 	hit_flash_timer = 0.0
@@ -393,6 +425,8 @@ func _physics_process(delta: float) -> void:
 		return
 
 	match behavior_id:
+		"biome_skill":
+			_physics_biome_skill(delta, target)
 		"elite_special":
 			_physics_special_elite(delta, target)
 		"ranged":
@@ -528,6 +562,70 @@ func _physics_special_elite(delta: float, target: Node2D) -> void:
 			special_timer = special_cooldown
 
 
+func _physics_biome_skill(delta: float, target: Node2D) -> void:
+	biome_timer = maxf(0.0, biome_timer - delta)
+	var offset := target.global_position - global_position
+	var preferred := biome_radius * 0.72 if biome_skill == "coral_slam" else ranged_preferred_distance
+	velocity = offset.normalized() * _effective_speed() if offset.length_squared() > preferred * preferred else Vector2.ZERO
+	_move_and_face()
+	if biome_timer <= 0.0 and (biome_skill != "coral_slam" or offset.length_squared() <= (biome_radius + 24.0) * (biome_radius + 24.0)):
+		if _start_attack(target, 1.0, &"biome"):
+			biome_timer = biome_cooldown
+	elif biome_skill != "coral_slam":
+		_try_contact_attack(target)
+
+
+func _apply_biome_impact() -> void:
+	biome_casts += 1
+	match biome_skill:
+		"coral_slam":
+			for hero in get_tree().get_nodes_in_group("heroes"):
+				if not hero is Node2D or hero.get("is_alive") == false or not hero.has_method("take_damage"):
+					continue
+				if global_position.distance_squared_to(hero.global_position) <= biome_radius * biome_radius and hero.take_damage(damage, global_position):
+					biome_damage_hits += 1
+		"bloom_support":
+			_apply_bloom_support()
+		"tide_bolts", "gear_fan":
+			var angles: PackedFloat32Array = PackedFloat32Array([-0.13, 0.13, PI - 0.13, PI + 0.13]) if biome_skill == "tide_bolts" else PackedFloat32Array([-0.26, -0.13, 0.0, 0.13, 0.26])
+			for angle in angles:
+				var stats := _enemy_projectile_stats()
+				stats["color"] = body_color.lightened(0.15)
+				if EntityFactory.spawn_enemy_projectile(global_position + pending_attack_direction * (radius + 8.0), pending_attack_direction.rotated(angle), stats, self, "normal") != null:
+					biome_projectiles_fired += 1
+
+
+func _apply_bloom_support() -> void:
+	var healed := 0
+	for ally in EntityFactory.get_enemies_in_radius(global_position, biome_radius):
+		if ally == self or not is_instance_valid(ally) or ally.get("is_boss") == true or ally.get("is_elite") == true or not ally.has_method("apply_support_heal"):
+			continue
+		var amount: float = ally.apply_support_heal(biome_heal)
+		if amount > 0.0:
+			biome_support_healing += amount
+			healed += 1
+			if healed >= 6:
+				break
+
+
+func apply_support_heal(amount: float) -> float:
+	if not is_active or is_dying or hp <= 0.0 or amount <= 0.0:
+		return 0.0
+	var actual := minf(amount, max_hp - hp)
+	if actual <= 0.0:
+		return 0.0
+	hp += actual
+	hp_bar_timer = 0.4
+	_update_hp_bar()
+	_set_hp_bar_visible(true)
+	EntityFactory.spawn_damage_number("+%d" % roundi(actual), global_position + Vector2(0.0, -radius - 12.0), Color("a4efbc"), 18)
+	return actual
+
+
+func get_biome_debug_state() -> Dictionary:
+	return {"skill":biome_skill, "casts":biome_casts, "damage_hits":biome_damage_hits, "healing":biome_support_healing, "projectiles_fired":biome_projectiles_fired, "radius":biome_radius, "timer":biome_timer}
+
+
 func _apply_special_elite_impact(target: Node2D) -> void:
 	special_casts += 1
 	if special_skill == "summoner":
@@ -626,6 +724,8 @@ func _apply_attack_impact() -> void:
 		presentation.play_effect(effect, global_position + pending_attack_direction * radius, pending_attack_direction, 0.85 if is_boss else 0.48)
 	var target := pending_attack_target.get_ref() as Node2D if pending_attack_target != null else null
 	match pending_attack_kind:
+		&"biome":
+			_apply_biome_impact()
 		&"elite":
 			_apply_special_elite_impact(target)
 		&"ranged":
@@ -706,6 +806,26 @@ func _boss_shot_plan() -> Array[Dictionary]:
 			for arm in range(6):
 				for layer in range(3 if phase else 2):
 					plan.append({"angle": float(arm) * TAU / 6.0 + float(boss_volley_index % 2) * PI / 6.0, "speed": 0.62 + float(layer) * 0.38})
+		"dune_barrage":
+			var rays := 7 if phase else 5
+			for lane in range(-1, 2):
+				for ray in range(rays):
+					plan.append({"angle":aim + float(lane) * 0.52 + (float(ray) - float(rays - 1) * 0.5) * 0.055, "speed":0.82 + float(lane + 1) * 0.15})
+		"tidal_spiral":
+			var rays := 9 if phase else 6
+			for arm in range(2):
+				for ray in range(rays):
+					plan.append({"angle":float(arm) * PI + float(boss_volley_index) * 0.34 + float(ray) * 0.15, "speed":0.62 + float(ray) * 0.085})
+		"bloom_petals":
+			var rays := 4 if phase else 2
+			for petal in range(6):
+				for ray in range(rays):
+					plan.append({"angle":float(petal) * TAU / 6.0 + float(boss_volley_index % 2) * PI / 6.0 + (float(ray) - float(rays - 1) * 0.5) * 0.075, "speed":0.74 + float(ray % 2) * 0.36})
+		"gear_cross":
+			var rays := 6 if phase else 4
+			for arm in range(4):
+				for ray in range(rays):
+					plan.append({"angle":float(arm) * PI * 0.5 + float(boss_volley_index) * 0.24 + (float(ray) - float(rays - 1) * 0.5) * 0.055, "speed":0.65 + float(ray % 3) * 0.38})
 		_:
 			var amount := 16 if phase else 12
 			for ray in range(amount):
@@ -716,6 +836,8 @@ func _boss_shot_plan() -> Array[Dictionary]:
 
 
 func _fire_stage_boss_volley() -> void:
+	if boss_pattern == "bloom_petals":
+		_apply_bloom_support()
 	for shot in _boss_shot_plan():
 		var stats := _enemy_projectile_stats(0.82)
 		stats["projectile_speed"] = ranged_projectile_speed * float(shot.speed)
@@ -727,7 +849,7 @@ func _fire_stage_boss_volley() -> void:
 
 
 func get_boss_debug_state() -> Dictionary:
-	return {"pattern": boss_pattern, "phase_two": boss_phase_two_triggered, "dash": boss_dash, "volleys": boss_volley_index, "projectiles_fired": boss_projectiles_fired, "next_plan": _boss_shot_plan(), "ability_cooldown": boss_ability_cooldown}
+	return {"pattern": boss_pattern, "phase_two": boss_phase_two_triggered, "dash": boss_dash, "volleys": boss_volley_index, "projectiles_fired": boss_projectiles_fired, "next_plan": _boss_shot_plan(), "ability_cooldown": boss_ability_cooldown, "support_healing":biome_support_healing}
 
 
 func _enemy_projectile_stats(damage_multiplier: float = 1.0) -> Dictionary:
@@ -781,6 +903,13 @@ func _spawn_boss_dashers(count: int) -> void:
 
 
 func _boss_dasher_config() -> Dictionary:
+	var biome_minions := {"dune_barrage":"sand_stalker", "tidal_spiral":"tide_siren", "bloom_petals":"bloom_wisp", "gear_cross":"clockwork_reaper"}
+	if biome_minions.has(boss_pattern):
+		var config := R38_ENEMIES.get_config(str(biome_minions[boss_pattern]))
+		config["max_hp"] = minf(48.0, float(config["max_hp"]))
+		config["xp"] = 1
+		config["gold"] = 1
+		return config
 	return {
 		"max_hp": 28.0,
 		"speed": 116.0,
@@ -1227,9 +1356,12 @@ func _show_attack_cue(kind: StringName, target: Node2D) -> void:
 		add_child(attack_telegraph)
 	attack_telegraph.position = Vector2(0.0, 54.0 * animated_sprite.scale.y) if animated_sprite != null else Vector2.ZERO
 	var area_radius := 145.0 if kind == &"elite" and special_skill == "shield_slam" else 0.0
+	if kind == &"biome" and biome_skill == "coral_slam":
+		area_radius = biome_radius
 	if area_radius > 0.0:
 		attack_telegraph.position = Vector2.ZERO
-	attack_telegraph.show_cue(&"ring" if kind == &"elite" else kind, dash_direction if kind == &"dash" else pending_attack_direction, radius, is_boss or is_elite, body_color, area_radius)
+	var cue_kind: StringName = &"ring" if kind == &"elite" or (kind == &"biome" and biome_skill == "coral_slam") else &"ranged" if kind == &"biome" else kind
+	attack_telegraph.show_cue(cue_kind, dash_direction if kind == &"dash" else pending_attack_direction, radius, is_boss or is_elite, body_color, area_radius)
 	attack_cue.closed = false
 	attack_cue.width = 2.2
 	attack_cue.default_color = Color(1.0, 0.48, 0.21, 0.8)

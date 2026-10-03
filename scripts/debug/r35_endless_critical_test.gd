@@ -63,7 +63,7 @@ func _run() -> void:
 		if world == null:
 			return
 		var buttons: Array = world.get("node_buttons")
-		if not _check(buttons.size() == 6, "six stage nodes missing"):
+		if not _check(buttons.size() == stages.size(), "six stage nodes missing"):
 			return
 		for node_index in range(stages.size()):
 			(buttons[node_index] as Button).pressed.emit()

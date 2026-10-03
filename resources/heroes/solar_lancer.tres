@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/hero_data.gd" id="1_data"]
+[resource]
+script = ExtResource("1_data")
+id = "solar_lancer"
+display_name = "星焰槍騎"
+epithet = "逐日金槍"
+quote = "跟上，我替你們開路。"
+description = "金甲長槍貫穿前方敵陣，灼星烙印讓後續攻擊打得更痛。"
+body_color = Color(0.93, 0.70, 0.30, 1)
+core_color = Color(1, 0.96, 0.72, 1)
+sprite_path = "res://assets/sprites/hero_solar_lancer.png"
+sprite_scale = 2.0
+max_hp = 112.0
+move_speed = 232.0
+hit_radius = 12.0
+pickup_radius = 82.0
+starting_weapon_ids = PackedStringArray("solar_piercer")
+passive_id = "solar_lancer"
+passive_value = 0.12
+passive_description = "星焰貫槍傷害提高 12%。"

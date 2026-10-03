@@ -50,8 +50,21 @@ const CHARACTER_INDEX := {
 	"enemy_elite_swift": 15,
 	"enemy_boss": 16,
 }
+const EXTERNAL_ATLAS_PATH := "res://assets/sprites/r38_character_atlas.png"
+const EXTERNAL_CHARACTER_INDEX := {
+	"hero_solar_lancer": 0,
+	"hero_tide_oracle": 1,
+	"hero_shadow_ronin": 2,
+	"enemy_dune_scarab": 3,
+	"enemy_sand_stalker": 4,
+	"enemy_tide_siren": 5,
+	"enemy_coral_colossus": 6,
+	"enemy_bloom_wisp": 7,
+	"enemy_clockwork_reaper": 8,
+}
 
 static var _atlas: Texture2D = null
+static var _external_atlas: Texture2D = null
 static var _frames_cache: Dictionary = {}
 
 
@@ -60,21 +73,27 @@ static func character_id_from_sprite_path(sprite_path: String) -> String:
 
 
 static func has_character(sprite_path: String) -> bool:
-	return CHARACTER_INDEX.has(character_id_from_sprite_path(sprite_path))
+	var character_id := character_id_from_sprite_path(sprite_path)
+	return CHARACTER_INDEX.has(character_id) or EXTERNAL_CHARACTER_INDEX.has(character_id)
 
 
 static func get_sprite_frames(sprite_path: String) -> SpriteFrames:
 	var character_id := character_id_from_sprite_path(sprite_path)
-	if not CHARACTER_INDEX.has(character_id):
+	var external: bool = EXTERNAL_CHARACTER_INDEX.has(character_id)
+	if not CHARACTER_INDEX.has(character_id) and not external:
 		push_error("True animation atlas has no character '%s'" % character_id)
 		return null
 	if _frames_cache.has(character_id):
 		return _frames_cache[character_id] as SpriteFrames
-	if _atlas == null:
+	if external and _external_atlas == null:
+		_external_atlas = load(EXTERNAL_ATLAS_PATH) as Texture2D
+	elif not external and _atlas == null:
 		_atlas = load(ATLAS_PATH) as Texture2D
-	if _atlas == null:
-		push_error("Missing true animation atlas: %s" % ATLAS_PATH)
+	var character_atlas := _external_atlas if external else _atlas
+	if character_atlas == null:
+		push_error("Missing true animation atlas: %s" % (EXTERNAL_ATLAS_PATH if external else ATLAS_PATH))
 		return null
+	var character_index: int = int(EXTERNAL_CHARACTER_INDEX[character_id] if external else CHARACTER_INDEX[character_id])
 
 	var frames := SpriteFrames.new()
 	if frames.has_animation(&"default"):
@@ -85,9 +104,9 @@ static func get_sprite_frames(sprite_path: String) -> SpriteFrames:
 		frames.set_animation_loop(state, state == &"idle" or state == &"walk")
 		frames.set_animation_speed(state, 18.0 if character_id == "hero_captain" and state == &"attack" else float(STATE_FPS[state]))
 		for frame_index in range(int(FRAME_COUNTS[state])):
-			var atlas_cell: int = int(CHARACTER_INDEX[character_id]) * FRAMES_PER_CHARACTER + int(STATE_FRAME_OFFSETS[state]) + frame_index
+			var atlas_cell: int = character_index * FRAMES_PER_CHARACTER + int(STATE_FRAME_OFFSETS[state]) + frame_index
 			var frame_texture := AtlasTexture.new()
-			frame_texture.atlas = _atlas
+			frame_texture.atlas = character_atlas
 			frame_texture.region = Rect2((atlas_cell % ATLAS_COLUMNS) * CELL_SIZE, (atlas_cell / ATLAS_COLUMNS) * CELL_SIZE, CELL_SIZE, CELL_SIZE)
 			frames.add_frame(state, frame_texture)
 	if character_id == "hero_captain":
@@ -112,6 +131,13 @@ static func get_shared_atlas_instance_id() -> int:
 	return 0 if _atlas == null else int(_atlas.get_instance_id())
 
 
+static func get_external_atlas_instance_id() -> int:
+	if _external_atlas == null:
+		_external_atlas = load(EXTERNAL_ATLAS_PATH) as Texture2D
+	return 0 if _external_atlas == null else int(_external_atlas.get_instance_id())
+
+
 static func clear_cache_for_tests() -> void:
 	_frames_cache.clear()
 	_atlas = null
+	_external_atlas = null

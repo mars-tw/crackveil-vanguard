@@ -52,6 +52,10 @@ var compact: bool = false
 var layout_size := Vector2(1280, 720)
 var starting: bool = false
 var probe_enabled: bool = false
+const CHAPTER_SIZE := 6
+var chapter_row: HBoxContainer
+var chapter_buttons: Array[Button] = []
+var chapter_index: int = 0
 
 
 func _ready() -> void:
@@ -60,6 +64,9 @@ func _ready() -> void:
 	selected_id = str(GameManager.get("selected_stage_id"))
 	if CATALOG.get_stage(selected_id).is_empty() and not stages.is_empty():
 		selected_id = str(stages[0].get("id", "moon"))
+	for index in range(stages.size()):
+		if str(stages[index].get("id", "")) == selected_id:
+			chapter_index = index / CHAPTER_SIZE
 	_build_ui()
 	_apply_layout()
 	_update_selection()
@@ -103,6 +110,16 @@ func _build_ui() -> void:
 	graph = Control.new()
 	graph.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(graph)
+	chapter_row = HBoxContainer.new()
+	chapter_row.add_theme_constant_override("separation", 10)
+	root.add_child(chapter_row)
+	for chapter in range(ceili(float(stages.size()) / CHAPTER_SIZE)):
+		var tab := Button.new()
+		tab.text = "裂帷群島 · 1–6" if chapter == 0 else "遠征新境 · 7–10"
+		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tab.pressed.connect(_on_chapter_pressed.bind(chapter))
+		chapter_row.add_child(tab)
+		chapter_buttons.append(tab)
 	route = RouteCanvas.new()
 	route.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	route.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -270,6 +287,15 @@ func _apply_layout() -> void:
 	detail_description.add_theme_font_size_override("font_size", 13 if compact else 16)
 	detail_status.add_theme_font_size_override("font_size", 11 if compact else 14)
 	graph.position = Vector2(margin, header.position.y + header_height + gap)
+	chapter_row.visible = chapter_buttons.size() > 1
+	if chapter_row.visible:
+		chapter_row.position = graph.position if portrait else Vector2(margin + layout_size.x * 0.25, margin + 3.0)
+		chapter_row.size = Vector2(layout_size.x - margin * 2 if portrait else layout_size.x * 0.52, 40 if compact else 44)
+		for tab in chapter_buttons:
+			tab.custom_minimum_size.y = chapter_row.size.y
+			tab.add_theme_font_size_override("font_size", 15 if compact else 18)
+		if portrait:
+			graph.position.y += chapter_row.size.y + 8.0
 	graph.size = Vector2(layout_size.x - margin * 2, maxf(80, detail_panel.position.y - gap - graph.position.y))
 	portrait_scroll.visible = portrait
 	route.visible = not portrait
@@ -277,29 +303,38 @@ func _apply_layout() -> void:
 		var wanted_parent: Node = portrait_grid if portrait else graph
 		if button.get_parent() != wanted_parent:
 			button.reparent(wanted_parent, false)
+	var visible_indices: Array[int] = []
+	for index in range(node_buttons.size()):
+		node_buttons[index].visible = button_in_chapter(index)
+		if node_buttons[index].visible:
+			visible_indices.append(index)
 	if portrait:
 		portrait_grid.custom_minimum_size.x = graph.size.x - 12
 		var width := (graph.size.x - 24) * 0.5
 		var height := maxf(96, minf(142, (graph.size.y - 24) / 3.0))
-		for button in node_buttons:
+		for index in visible_indices:
+			var button := node_buttons[index]
 			button.custom_minimum_size = Vector2(width, height)
 			_layout_node_content(button, Vector2(width, height))
 	else:
-		var node_size := Vector2(170, 98) if not compact else Vector2(146, 64)
+		var node_size := Vector2(170, 98) if not compact else Vector2(146, minf(64.0, maxf(48.0, graph.size.y * 0.5 - 6.0)))
 		var positions: Array[Vector2] = []
-		for stage in stages:
+		for index in visible_indices:
+			var stage: Dictionary = stages[index]
 			var norm: Vector2 = stage.get("node_position", Vector2(0.5, 0.5))
 			positions.append(Vector2(clampf(norm.x * graph.size.x, node_size.x * 0.5, graph.size.x - node_size.x * 0.5), clampf(norm.y * graph.size.y, node_size.y * 0.5, graph.size.y - node_size.y * 0.5)))
 		if _positions_overlap(positions, node_size):
 			positions.clear()
-			for index in range(stages.size()):
-				positions.append(Vector2(graph.size.x * (0.15 + float(index / 2) * 0.35), graph.size.y * (0.74 if index % 2 == 0 else 0.24)))
+			var columns := ceili(float(visible_indices.size()) / 2.0)
+			for index in range(visible_indices.size()):
+				positions.append(Vector2(graph.size.x * (float(index / 2) + 0.5) / float(columns), graph.size.y * (0.75 if index % 2 == 0 else 0.25)))
 		route.points = positions
-		for index in range(node_buttons.size()):
+		for local_index in range(visible_indices.size()):
+			var index := visible_indices[local_index]
 			var button := node_buttons[index]
 			button.custom_minimum_size = node_size
 			button.size = node_size
-			button.position = positions[index] - node_size * 0.5
+			button.position = positions[local_index] - node_size * 0.5
 			_layout_node_content(button, node_size)
 	_update_selection()
 	call_deferred("_publish_probe")
@@ -346,8 +381,8 @@ func _update_selection() -> void:
 		var chosen := str(stage.get("id", "")) == selected_id
 		if is_clear:
 			clear_count += 1
-		if chosen:
-			selected_index = index
+		if chosen and button_in_chapter(index):
+			selected_index = index % CHAPTER_SIZE
 		var accent: Color = stage.get("color", GOLD)
 		var button := node_buttons[index]
 		button.add_theme_stylebox_override("normal", _panel_style(Color(0.025, 0.045, 0.085, 0.87 if chosen else 0.69), GOLD if chosen else Color(accent, 0.70), 3 if chosen else 1))
@@ -356,7 +391,8 @@ func _update_selection() -> void:
 		button.add_theme_stylebox_override("focus", _panel_style(Color(0, 0, 0, 0), Color("fff0ba"), 3))
 		var difficulty := button.get_node("Difficulty") as Label
 		difficulty.text = "難度 %s%s" % [str(stage.get("difficulty", 1)), "　通關" if is_clear else ""]
-		route.cleared.append(is_clear)
+		if button_in_chapter(index):
+			route.cleared.append(is_clear)
 	progress.text = "已通關 %d／%d" % [clear_count, stages.size()]
 	var selected := CATALOG.get_stage(selected_id)
 	detail_title.text = str(selected.get("name", "選擇戰場"))
@@ -373,6 +409,8 @@ func _update_selection() -> void:
 	start_button.disabled = selected.is_empty() or starting
 	route.selected = selected_index
 	route.queue_redraw()
+	for index in range(chapter_buttons.size()):
+		chapter_buttons[index].disabled = index == chapter_index
 	call_deferred("_publish_probe")
 
 
@@ -382,6 +420,13 @@ func _on_stage_pressed(stage_id: String) -> void:
 	if not bool(GameManager.select_stage(stage_id)):
 		return
 	selected_id = stage_id
+	var selected_chapter := 0
+	for index in range(stages.size()):
+		if str(stages[index].get("id", "")) == stage_id:
+			selected_chapter = index / CHAPTER_SIZE
+	if selected_chapter != chapter_index:
+		chapter_index = selected_chapter
+		_apply_layout()
 	_update_selection()
 	AudioManager.play_sfx("pickup", false, -7.0, 1.04)
 
@@ -392,6 +437,21 @@ func _on_start_pressed() -> void:
 	starting = true
 	_update_selection()
 	GameManager.start_selected_stage()
+
+
+func button_in_chapter(index: int) -> bool:
+	return index / CHAPTER_SIZE == chapter_index
+
+
+func _on_chapter_pressed(index: int) -> void:
+	if starting or index == chapter_index:
+		return
+	chapter_index = index
+	var first := chapter_index * CHAPTER_SIZE
+	if first < stages.size():
+		selected_id = str(stages[first].get("id", ""))
+		GameManager.select_stage(selected_id)
+	_apply_layout()
 
 
 func _on_endless_pressed() -> void:
@@ -434,7 +494,10 @@ func get_debug_state() -> Dictionary:
 		var entry := _control_state(button)
 		entry.merge({"id": stage_id, "selected": stage_id == selected_id, "cleared": cleared.has(stage_id), "disabled": button.disabled})
 		nodes.append(entry)
-	return {"endless": _control_state(endless_button), "selected_stage_id": selected_id, "viewport_width": layout_size.x, "viewport_height": layout_size.y, "portrait": portrait, "compact": compact, "map_source": map_source, "nodes": nodes, "start": _control_state(start_button) if start_button != null else {}, "back": _control_state(back_button) if back_button != null else {}, "details": _control_state(detail_panel) if detail_panel != null else {}, "boss_name": detail_boss.text if detail_boss != null else "", "description": detail_description.text if detail_description != null else ""}
+	var chapters: Array[Dictionary] = []
+	for button in chapter_buttons:
+		chapters.append(_control_state(button))
+	return {"chapter": chapter_index, "chapters": chapters, "stage_count": stages.size(), "endless": _control_state(endless_button), "selected_stage_id": selected_id, "viewport_width": layout_size.x, "viewport_height": layout_size.y, "portrait": portrait, "compact": compact, "map_source": map_source, "nodes": nodes, "start": _control_state(start_button) if start_button != null else {}, "back": _control_state(back_button) if back_button != null else {}, "details": _control_state(detail_panel) if detail_panel != null else {}, "boss_name": detail_boss.text if detail_boss != null else "", "description": detail_description.text if detail_description != null else ""}
 
 
 func _publish_probe() -> void:

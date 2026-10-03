@@ -4,6 +4,7 @@ const COMBAT_FEEDBACK := preload("res://scripts/vfx/combat_feedback.gd")
 const STAGE_CATALOG := preload("res://scripts/services/stage_catalog.gd")
 const SPECIAL_ELITES := preload("res://scripts/services/special_elite_catalog.gd")
 const MOBILE := preload("res://scripts/services/mobile_tuning.gd")
+const R38_ENEMIES := preload("res://scripts/services/r38_enemy_catalog.gd")
 const HARVEST_PACK_INTERVAL := 9.0
 const HARVEST_PACK_FIRST_TIME := 7.0
 const REMOTE_RECLAIM_INTERVAL := 1.0
@@ -143,6 +144,11 @@ var next_endless_boss_time: float = 120.0
 var special_elite_index := 0
 var special_elite_history: Array[Dictionary] = []
 var debug_forced_special_elite_id := ""
+var cached_spawn_stage_id := ""
+var cached_spawn_stage: Dictionary = {}
+var cached_stage_roster: Dictionary = {}
+var cached_roster_ids: Array = []
+var regular_spawn_counts: Dictionary = {}
 
 
 func begin_endless() -> void:
@@ -220,15 +226,18 @@ func _spawn_cadence(elapsed: float, boss_pressure: bool = false) -> Dictionary:
 
 func _spawn_opening_pack() -> void:
 	var center := _elite_reclaim_reference_position()
+	_refresh_stage_roster()
 	for index in range(12):
 		if EntityFactory.get_enemy_live_count() >= max_enemies:
 			break
-		var config := _config_for_spawn("normal")
+		var enemy_id := _choose_enemy_type() if not cached_stage_roster.is_empty() else "normal"
+		var config := _config_for_spawn(enemy_id)
 		config["max_hp"] = 16.0
 		config["xp"] = 1
 		config["damage"] = 4.0
 		var offset := Vector2(175.0 + float(index % 3) * 27.0, float(index / 3) * 30.0 - 45.0)
-		EntityFactory.spawn_enemy("normal", config, center + offset)
+		if EntityFactory.spawn_enemy(enemy_id, config, center + offset) != null:
+			_record_regular_spawn(enemy_id)
 
 
 func _spawn_one() -> void:
@@ -237,7 +246,8 @@ func _spawn_one() -> void:
 
 	var enemy_id := _choose_enemy_type()
 	var config: Dictionary = _config_for_spawn(enemy_id)
-	EntityFactory.spawn_enemy(enemy_id, config, _get_spawn_position())
+	if EntityFactory.spawn_enemy(enemy_id, config, _get_spawn_position()) != null:
+		_record_regular_spawn(enemy_id)
 
 
 func _spawn_harvest_pack() -> int:
@@ -250,7 +260,9 @@ func _spawn_harvest_pack() -> int:
 	if toward_player == Vector2.ZERO:
 		toward_player = Vector2.LEFT
 	var tangent := toward_player.orthogonal()
-	var config := _config_for_spawn("normal")
+	_refresh_stage_roster()
+	var enemy_id := _choose_enemy_type() if not cached_stage_roster.is_empty() else "normal"
+	var config := _config_for_spawn(enemy_id)
 	config["max_hp"] = float(config["max_hp"]) * 0.78
 	config["damage"] = float(config["damage"]) * 0.8
 	config["speed"] = float(config["speed"]) * 1.07
@@ -262,8 +274,10 @@ func _spawn_harvest_pack() -> int:
 		# Their cheap HP rewards lining up a rail shot, orbit sweep, or grenade.
 		var column := float(index % 5) - float(mini(pack_size, 5) - 1) * 0.5
 		var position := anchor + tangent * column * 27.0 - toward_player * float(index / 5) * 29.0
-		if EntityFactory.spawn_enemy("harvest_grunt", config, position) != null:
+		var spawn_id := "harvest_grunt" if cached_stage_roster.is_empty() else "harvest_%s" % enemy_id
+		if EntityFactory.spawn_enemy(spawn_id, config, position) != null:
 			spawned += 1
+			_record_regular_spawn(enemy_id)
 	if spawned > 0:
 		harvest_packs_spawned += 1
 		harvest_enemies_spawned += spawned
@@ -271,7 +285,25 @@ func _spawn_harvest_pack() -> int:
 
 
 func get_harvest_debug_state() -> Dictionary:
-	return {"special_elites":special_elite_history.duplicate(true), "packs_spawned": harvest_packs_spawned, "enemies_spawned": harvest_enemies_spawned, "next_pack_time": next_harvest_pack_time, "enemy_cap": max_enemies, "remote_regular_reclaims": remote_regular_reclaims, "cadence": _spawn_cadence(GameManager.elapsed_time, bool(GameManager.get("boss_active"))), "world_view": _get_world_view_rect()}
+	_refresh_stage_roster()
+	return {"special_elites":special_elite_history.duplicate(true), "packs_spawned": harvest_packs_spawned, "enemies_spawned": harvest_enemies_spawned, "next_pack_time": next_harvest_pack_time, "enemy_cap": max_enemies, "remote_regular_reclaims": remote_regular_reclaims, "cadence": _spawn_cadence(GameManager.elapsed_time, bool(GameManager.get("boss_active"))), "world_view": _get_world_view_rect(), "biome_roster":cached_stage_roster.duplicate(), "regular_spawn_counts":regular_spawn_counts.duplicate()}
+
+
+func _record_regular_spawn(enemy_id: String) -> void:
+	regular_spawn_counts[enemy_id] = int(regular_spawn_counts.get(enemy_id, 0)) + 1
+
+
+func _refresh_stage_roster() -> void:
+	if cached_spawn_stage_id == GameManager.selected_stage_id and not cached_spawn_stage.is_empty():
+		return
+	cached_spawn_stage_id = GameManager.selected_stage_id
+	cached_spawn_stage = STAGE_CATALOG.get_stage(cached_spawn_stage_id)
+	cached_stage_roster = R38_ENEMIES.get_roster(cached_spawn_stage_id)
+	cached_roster_ids = ENEMY_CONFIGS.keys() if cached_stage_roster.is_empty() else cached_stage_roster.keys()
+
+
+func _enemy_base_config(enemy_id: String) -> Dictionary:
+	return R38_ENEMIES.get_config(enemy_id) if R38_ENEMIES.has_enemy(enemy_id) else (ENEMY_CONFIGS.get(enemy_id, ENEMY_CONFIGS["normal"]) as Dictionary).duplicate(true)
 
 
 func _spawn_elite() -> bool:
@@ -354,18 +386,19 @@ func _spawn_boss() -> void:
 
 
 func _choose_enemy_type() -> String:
+	_refresh_stage_roster()
 	var elapsed := GameManager.elapsed_time
 	var total_weight := 0.0
 
-	for enemy_id in ENEMY_CONFIGS.keys():
-		var config: Dictionary = ENEMY_CONFIGS[enemy_id]
+	for enemy_id in cached_roster_ids:
+		var config: Dictionary = R38_ENEMIES.CONFIGS[enemy_id] if R38_ENEMIES.has_enemy(enemy_id) else ENEMY_CONFIGS[enemy_id]
 		if elapsed >= float(config.get("min_time", 0.0)):
 			total_weight += _stage_enemy_weight(enemy_id, config)
 
 	var roll := randf() * total_weight
 	var cursor := 0.0
-	for enemy_id in ENEMY_CONFIGS.keys():
-		var config: Dictionary = ENEMY_CONFIGS[enemy_id]
+	for enemy_id in cached_roster_ids:
+		var config: Dictionary = R38_ENEMIES.CONFIGS[enemy_id] if R38_ENEMIES.has_enemy(enemy_id) else ENEMY_CONFIGS[enemy_id]
 		if elapsed < float(config.get("min_time", 0.0)):
 			continue
 		cursor += _stage_enemy_weight(enemy_id, config)
@@ -376,15 +409,17 @@ func _choose_enemy_type() -> String:
 
 
 func _stage_enemy_weight(enemy_id: String, config: Dictionary) -> float:
-	var stage := STAGE_CATALOG.get_stage(GameManager.selected_stage_id)
-	return float(config.get("weight", 1.0)) * (2.5 if enemy_id == str(stage.get("enemy_bias", "")) else 1.0)
+	_refresh_stage_roster()
+	if not cached_stage_roster.is_empty():
+		return float(cached_stage_roster.get(enemy_id, 0.0))
+	return float(config.get("weight", 1.0)) * (2.5 if enemy_id == str(cached_spawn_stage.get("enemy_bias", "")) else 1.0)
 
 
 func _config_for_spawn(enemy_id: String) -> Dictionary:
-	var config: Dictionary = ENEMY_CONFIGS[enemy_id].duplicate(true)
+	_refresh_stage_roster()
+	var config := _enemy_base_config(enemy_id)
 	# Stronger late regions still leave ordinary monsters cheap to mow down.
-	var stage := STAGE_CATALOG.get_stage(GameManager.selected_stage_id)
-	config["max_hp"] = float(config["max_hp"]) * (1.0 + 0.06 * (float(stage.get("difficulty", 1)) - 1.0))
+	config["max_hp"] = float(config["max_hp"]) * (1.0 + 0.06 * (float(cached_spawn_stage.get("difficulty", 1)) - 1.0))
 	if GameManager.selected_stage_id == "moon":
 		config["damage"] = float(config["damage"]) * 0.65
 		config["speed"] = float(config["speed"]) * 0.90

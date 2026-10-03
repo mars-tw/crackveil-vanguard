@@ -1,0 +1,1530 @@
+{
+  "revision": "r38",
+  "generation_mode": "built_in_imagegen",
+  "source_originals_preserved": true,
+  "packing": "RGBA connected-component crop and uniform resize only; no painted or procedural body poses",
+  "atlas": "assets/sprites/r38_character_atlas.png",
+  "atlas_sha256": "dc1059e888062d3295bb3ed528be14c155b1975eef0c300913f86318bd65fb29",
+  "atlas_cell_size": 128,
+  "atlas_columns": 16,
+  "playback_frames_per_actor": 27,
+  "original_actor_count": 9,
+  "original_pose_count": 144,
+  "actors": [
+    {
+      "id": "hero_solar_lancer",
+      "source": "assets/art/r38/sources/hero_solar_lancer.png",
+      "source_sha256": "58debf950118bfba0a457ae76aa404f7502082ccdd0a269a2208697e68f5ff33",
+      "source_pose_count": 16,
+      "source_pose_boxes": [
+        [
+          29,
+          19,
+          285,
+          335
+        ],
+        [
+          318,
+          21,
+          643,
+          337
+        ],
+        [
+          652,
+          17,
+          962,
+          314
+        ],
+        [
+          962,
+          19,
+          1238,
+          330
+        ],
+        [
+          25,
+          335,
+          331,
+          667
+        ],
+        [
+          331,
+          337,
+          637,
+          653
+        ],
+        [
+          652,
+          363,
+          961,
+          643
+        ],
+        [
+          962,
+          328,
+          1221,
+          643
+        ],
+        [
+          0,
+          648,
+          370,
+          963
+        ],
+        [
+          365,
+          650,
+          693,
+          929
+        ],
+        [
+          720,
+          648,
+          989,
+          987
+        ],
+        [
+          990,
+          640,
+          1222,
+          989
+        ],
+        [
+          43,
+          937,
+          306,
+          1218
+        ],
+        [
+          310,
+          929,
+          639,
+          1230
+        ],
+        [
+          640,
+          974,
+          953,
+          1254
+        ],
+        [
+          933,
+          1004,
+          1240,
+          1222
+        ]
+      ],
+      "uniform_actor_scale": 0.3027027027027027,
+      "foot_baseline": 120,
+      "source_alpha_nonzero": 473596,
+      "extracted_alpha_nonzero": 473596,
+      "source_alpha_sum": 77752832,
+      "extracted_alpha_sum": 77752832,
+      "unique_original_poses": 16,
+      "walk_unique_poses": 4,
+      "attack_unique_poses": 6,
+      "impact_source_pose": 8,
+      "playback_pose_indices": [
+        0,
+        0,
+        1,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        4,
+        5,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        13,
+        14,
+        14,
+        14,
+        15,
+        15,
+        15
+      ],
+      "original_pose_sha256": [
+        "d757a5f98342afbd39a1e7f4e44ffeb817e89909c6f2767c69e726505716a636",
+        "5f711c2a70cceabad1e6144acc742f9c38d86809304a4d149e3052748db6fafc",
+        "e9a27bfec1a31288ee404293039cf08850c75f521c0e65dec5e0e6207c8c53d9",
+        "557b852cc1b00caa5129a0b302a46fe082d09896b12a643dda6a506d0f868e63",
+        "7dba667c8ba6fd20d19960efe85454b5eb25aa322f44d5b8c2f7f3852aaf17a7",
+        "3bd4931e167317e588ac37c3d25950f601b9cbbc75dee078c89dc4a96616fdb6",
+        "3fb47ba6254f057dfc14841f6bbdfe94d45b1813e88ada2411e5c3fd11413c6f",
+        "b9fcefd353e8b63cb2cdfda9baaf010769bf9d04bcf9e1071acef486a48d8b9c",
+        "bf88fe222aa7ca2ee6fe92f4ac6f5b919c35eac4c473f723f9fb53580327fd8a",
+        "2f6351493a0d2778cef62ed7d5c4ab195bcdde57287e3fc3b83aef389f2785d1",
+        "9833a213ec471683926ad092fe9d9fa375fd2e7d5381003f35bc23b093c103cd",
+        "fd45ee940247f7422568245b197d19f94880dda51337f0dad0b920cc2c55fd26",
+        "f3f6d3e771322b946307a8cc7efd55cd97616cf1cebbbdcf03c6557c1373810f",
+        "86d824b278bd0959230488bb416b1afc6b241d932b013bc9e2f159569306cd5d",
+        "ecdf37b9f18baf8275f53308ed47a2000840cea79fc8149c3e3b08335974bc1f",
+        "44dfb59aa5a8da3cc05db473d05722a7fab2cf01f601f77aaecdf93495946c25"
+      ],
+      "icon": "assets/sprites/hero_solar_lancer.png",
+      "atlas_character_index": 0,
+      "icon_sha256": "d4fa7e05946d17915f13a1e4a99a23ac20c084dbb69abf64d022d6e2e8972eb2"
+    },
+    {
+      "id": "hero_tide_oracle",
+      "source": "assets/art/r38/sources/hero_tide_oracle.png",
+      "source_sha256": "a66d7b69bcf5e908464715ed616c6f5888e525cae9aa57f8a8c43f353dd556a3",
+      "source_pose_count": 16,
+      "source_pose_boxes": [
+        [
+          27,
+          0,
+          314,
+          320
+        ],
+        [
+          314,
+          0,
+          627,
+          341
+        ],
+        [
+          628,
+          0,
+          941,
+          319
+        ],
+        [
+          941,
+          0,
+          1238,
+          316
+        ],
+        [
+          0,
+          296,
+          336,
+          636
+        ],
+        [
+          337,
+          319,
+          641,
+          631
+        ],
+        [
+          641,
+          316,
+          945,
+          631
+        ],
+        [
+          945,
+          314,
+          1228,
+          628
+        ],
+        [
+          0,
+          618,
+          350,
+          972
+        ],
+        [
+          350,
+          630,
+          640,
+          955
+        ],
+        [
+          640,
+          615,
+          946,
+          972
+        ],
+        [
+          946,
+          628,
+          1240,
+          1009
+        ],
+        [
+          0,
+          946,
+          295,
+          1254
+        ],
+        [
+          295,
+          954,
+          613,
+          1254
+        ],
+        [
+          610,
+          972,
+          959,
+          1254
+        ],
+        [
+          932,
+          1010,
+          1254,
+          1254
+        ]
+      ],
+      "uniform_actor_scale": 0.29396325459317585,
+      "foot_baseline": 120,
+      "source_alpha_nonzero": 843582,
+      "extracted_alpha_nonzero": 843582,
+      "source_alpha_sum": 128936457,
+      "extracted_alpha_sum": 128936457,
+      "unique_original_poses": 16,
+      "walk_unique_poses": 4,
+      "attack_unique_poses": 6,
+      "impact_source_pose": 8,
+      "playback_pose_indices": [
+        0,
+        0,
+        1,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        4,
+        5,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        13,
+        14,
+        14,
+        14,
+        15,
+        15,
+        15
+      ],
+      "original_pose_sha256": [
+        "b41848bbb7fe7f2ad1035a3cf1e5283175e4050035d308da168aac2a19f0c9dc",
+        "c9c6bae028451db6e22634ad72d21a1a72b2944b142d429fe8de432689cea5cf",
+        "3f80c7a18e89c1c9a3d7219e8d88e2187bae84eb7451d4d723737e08d3a1da79",
+        "04f16301d64b4d0a765543b32242a5524c79a2ac381c9d90336071efdf1e9674",
+        "3312bb9b254100f2229b2cf8f4e06fb00110686beb530198f40d007e3107cf7b",
+        "73ce910e6f43c70392b20f2ff93c18e0221d7791243f46a99c4fc9456ae77215",
+        "d994adebec3521fcc72f778a5ed7ba4ab562cb07724a2824ce3a412f2774fe8e",
+        "3c96b941dbb1475508b275b723bf2137ccd9006538888f3809858c09dd96a92d",
+        "59d91f9e8e2bf6b032cc1a3cfd877592c23b3d33acbe623ec6565e174b12caf7",
+        "9376dea7fad896738211f0747d592b81840aaec9679f4ddb9780b0cee2e9cb54",
+        "0e14c20475fe88c8ea561727881f4ab201d2420151e96113e467d5d2304b194e",
+        "acd33e8478c56b5a3adb8766a2fc1fd6fcb41ff6b9ed978f084e4bf31418f1a1",
+        "a44a6611d9bb5564ddf16a79b6487fc376122d5bf036163f0f627cd5899b230f",
+        "9caec5ed7ac1e615589758f7c43bc699ed412d458219b90e0a92aeca6a804dca",
+        "4ca9eda942940e1b7da59ee0da452b8452824767fb09554b7c2f1cf37faea17d",
+        "2d8fe06298c243a8d12721a941affca188d17a614698337f460c44c92f2fb205"
+      ],
+      "icon": "assets/sprites/hero_tide_oracle.png",
+      "atlas_character_index": 1,
+      "icon_sha256": "9d1275a4c4b4209b9676299047cd1dcbdf75f3fea980605b934c3ff065ca745d"
+    },
+    {
+      "id": "hero_shadow_ronin",
+      "source": "assets/art/r38/sources/hero_shadow_ronin.png",
+      "source_sha256": "fcb0d490f01813ea110add6ca6ec16969de05894c915d78f881eacaabadbf599",
+      "source_pose_count": 16,
+      "source_pose_boxes": [
+        [
+          29,
+          0,
+          330,
+          308
+        ],
+        [
+          380,
+          10,
+          605,
+          302
+        ],
+        [
+          606,
+          0,
+          955,
+          322
+        ],
+        [
+          956,
+          12,
+          1228,
+          306
+        ],
+        [
+          0,
+          322,
+          322,
+          620
+        ],
+        [
+          330,
+          292,
+          615,
+          621
+        ],
+        [
+          614,
+          318,
+          959,
+          625
+        ],
+        [
+          960,
+          324,
+          1247,
+          624
+        ],
+        [
+          0,
+          596,
+          422,
+          936
+        ],
+        [
+          372,
+          624,
+          648,
+          920
+        ],
+        [
+          648,
+          638,
+          975,
+          943
+        ],
+        [
+          976,
+          624,
+          1251,
+          943
+        ],
+        [
+          29,
+          936,
+          327,
+          1230
+        ],
+        [
+          327,
+          939,
+          649,
+          1254
+        ],
+        [
+          650,
+          943,
+          959,
+          1254
+        ],
+        [
+          947,
+          974,
+          1248,
+          1222
+        ]
+      ],
+      "uniform_actor_scale": 0.26540284360189575,
+      "foot_baseline": 120,
+      "source_alpha_nonzero": 550127,
+      "extracted_alpha_nonzero": 550127,
+      "source_alpha_sum": 96017133,
+      "extracted_alpha_sum": 96017133,
+      "unique_original_poses": 16,
+      "walk_unique_poses": 4,
+      "attack_unique_poses": 6,
+      "impact_source_pose": 8,
+      "playback_pose_indices": [
+        0,
+        0,
+        1,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        4,
+        5,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        13,
+        14,
+        14,
+        14,
+        15,
+        15,
+        15
+      ],
+      "original_pose_sha256": [
+        "96b7cf3a176f937fef77fd4cb15e4f239635601ce55633852ddb8f6d57193eb0",
+        "05ffc22d48f0366416db43f863ba79b53ea594597e90394d51ddbb0d47d71ebd",
+        "c179220bb36a8028a28b166a28d3d36208b1d4c24d8fda34aa5359bae89b84c2",
+        "ff0f8f231eab8ae50de7d075d3aafcf84db7d2b2e2a22df944bf91d9b96e4d52",
+        "5fe1488bae62f5be23176ecf189c30321794170dd7aad1c2228083a9f8fcbdba",
+        "0bbfa8704ee001bb0e276671db43379192b4d54b748e9de3387dbb52c94c91ca",
+        "c54b07837e232297d9e320a240a803f565a30889da87c83ae524f4a1c7ff00de",
+        "7d3cbd46d3e31b8be97cfee5ff29cb8097e23aec7fe731f2d2781546537eba85",
+        "c20177be59a594337bcdf237ffd43438768f65c66d326610a66fcced3cadfc98",
+        "5b326d8b86e520cff88f109cc49a6e6737fd3b4b0d3a27e82dbb4dde9b0ee91f",
+        "8906c885427af58615fb4ab34f1f12dec1b05eb7439e64b0770c8042d5189892",
+        "98daf9f3bccc459552b2c9db5931c393279107c2dd70a4b505a32a71611881c6",
+        "122c009ba5a8d195e7ee8ac9ecdfc2c869cccb34e24ad0a7fc757f53905ed537",
+        "c62244e88638b415cca5f23681af24bb99cc64dc45389351dda34143d26954ae",
+        "6a032389130f5c941978b0bdd74662f2771322baf91fdd7d133fd206e6368f00",
+        "bea9c2ab80ae4ffd127b25241565fe89d43e778cc9747ab77e1fb9c2ece8f00c"
+      ],
+      "icon": "assets/sprites/hero_shadow_ronin.png",
+      "atlas_character_index": 2,
+      "icon_sha256": "2d7de53e354891a8e0e07229e0410514d97c737d52e3b084ee8068b5749e15d6"
+    },
+    {
+      "id": "enemy_dune_scarab",
+      "source": "assets/art/r38/sources/enemy_dune_scarab.png",
+      "source_sha256": "51eb2d94b1a736c67e039ae54ceedb1e29da29cd066ce74f65dd4f6d1a35492f",
+      "source_pose_count": 16,
+      "source_pose_boxes": [
+        [
+          0,
+          19,
+          316,
+          317
+        ],
+        [
+          314,
+          21,
+          625,
+          318
+        ],
+        [
+          640,
+          31,
+          937,
+          329
+        ],
+        [
+          934,
+          31,
+          1240,
+          336
+        ],
+        [
+          0,
+          317,
+          308,
+          631
+        ],
+        [
+          320,
+          317,
+          637,
+          629
+        ],
+        [
+          628,
+          326,
+          944,
+          623
+        ],
+        [
+          944,
+          336,
+          1253,
+          623
+        ],
+        [
+          15,
+          630,
+          333,
+          936
+        ],
+        [
+          333,
+          629,
+          627,
+          932
+        ],
+        [
+          638,
+          626,
+          943,
+          938
+        ],
+        [
+          943,
+          623,
+          1240,
+          963
+        ],
+        [
+          0,
+          936,
+          318,
+          1233
+        ],
+        [
+          298,
+          932,
+          621,
+          1254
+        ],
+        [
+          624,
+          938,
+          965,
+          1254
+        ],
+        [
+          938,
+          964,
+          1243,
+          1230
+        ]
+      ],
+      "uniform_actor_scale": 0.3284457478005865,
+      "foot_baseline": 120,
+      "source_alpha_nonzero": 661865,
+      "extracted_alpha_nonzero": 661865,
+      "source_alpha_sum": 120215532,
+      "extracted_alpha_sum": 120215532,
+      "unique_original_poses": 16,
+      "walk_unique_poses": 4,
+      "attack_unique_poses": 6,
+      "impact_source_pose": 8,
+      "playback_pose_indices": [
+        0,
+        0,
+        1,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        4,
+        5,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        13,
+        14,
+        14,
+        14,
+        15,
+        15,
+        15
+      ],
+      "original_pose_sha256": [
+        "246ac97d6a6fac7fc2ccff238f9d5d2495bbbe91e6aa6163803a3072c7b9376f",
+        "71fa6158c3a95dac1d7f7bbffa0eb1bca5186bf024d9ffd134162cc21ed072a5",
+        "e7d9c581f17f78aac25b72d191784500f5a56934c58665430a2c68c3ebda608d",
+        "777adce5af63439331dd840bf77ac9d6246e9d85be75c68917a3f6bb640d2afc",
+        "183450849364f192f7af8c755eaedf3f5c00c50c511a51a974d34a95b41beb6e",
+        "70b3edef2c84eb012c7818472f8109a5e683af159151875e99aae74920054d19",
+        "2454c30e11a7d6c1c21cb197506b8c2c3cb8f5cde36f2847c34b298a2aad750e",
+        "091de9e114bb7089391bb6340f2cf09865852752d4e0176374761a46e852f19e",
+        "dcea635455a6c8d9889145661a502641f91bbb3c82d53200e932763aeabcc39c",
+        "f40461a64688e43c7114d06901eb72d3c2ddb73a4cb83839a7eb67215842db82",
+        "c6383f1eb55983dd9dfc90cb833005f5656d93089c46922ba98567d3f07e199c",
+        "fc3902d22c49f9ee9c6d1324a1294bfa23e32a372aba7096d8fa80dee5e41857",
+        "2d215e5b1b3b0a510df1f45bab2f6db35486522532ebdd67e2e6d13b1b2bd61b",
+        "c4010c8cd5c3d28991802f4b04111d365f74dccbfd786fe4111e9ddc7a9742e4",
+        "a4069f1deb692302d433cb7970d80d44f6642f52b7fc6849456312b33bad1cf9",
+        "4dd0455bb65dbd4c962492523aab28d7d695b7740fb6d14079a5f7175070375b"
+      ],
+      "icon": "assets/sprites/enemy_dune_scarab.png",
+      "atlas_character_index": 3,
+      "icon_sha256": "c07a5f368bfd7de89e434d0e911a3eb639a1c49254b7f8ae496c903fb86a19ac"
+    },
+    {
+      "id": "enemy_sand_stalker",
+      "source": "assets/art/r38/sources/enemy_sand_stalker.png",
+      "source_sha256": "d9fb3255e9329f5884ea00c0e087c1f22d93bfef2ae39955ccea802743249a8a",
+      "source_pose_count": 16,
+      "source_pose_boxes": [
+        [
+          99,
+          0,
+          324,
+          318
+        ],
+        [
+          328,
+          5,
+          627,
+          318
+        ],
+        [
+          634,
+          0,
+          956,
+          322
+        ],
+        [
+          956,
+          6,
+          1226,
+          318
+        ],
+        [
+          89,
+          318,
+          330,
+          629
+        ],
+        [
+          351,
+          318,
+          626,
+          625
+        ],
+        [
+          626,
+          330,
+          943,
+          651
+        ],
+        [
+          940,
+          345,
+          1226,
+          659
+        ],
+        [
+          21,
+          596,
+          365,
+          912
+        ],
+        [
+          365,
+          634,
+          706,
+          947
+        ],
+        [
+          706,
+          646,
+          943,
+          957
+        ],
+        [
+          943,
+          631,
+          1226,
+          1011
+        ],
+        [
+          37,
+          933,
+          318,
+          1230
+        ],
+        [
+          337,
+          966,
+          629,
+          1220
+        ],
+        [
+          667,
+          962,
+          949,
+          1211
+        ],
+        [
+          901,
+          1012,
+          1239,
+          1228
+        ]
+      ],
+      "uniform_actor_scale": 0.29473684210526313,
+      "foot_baseline": 120,
+      "source_alpha_nonzero": 455806,
+      "extracted_alpha_nonzero": 455806,
+      "source_alpha_sum": 83571991,
+      "extracted_alpha_sum": 83571991,
+      "unique_original_poses": 16,
+      "walk_unique_poses": 4,
+      "attack_unique_poses": 6,
+      "impact_source_pose": 8,
+      "playback_pose_indices": [
+        0,
+        0,
+        1,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        4,
+        5,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        13,
+        14,
+        14,
+        14,
+        15,
+        15,
+        15
+      ],
+      "original_pose_sha256": [
+        "42a6d3f99a0e1c70159572f6522182daf32c09d8e12ed2dd5cfdcb1dbca96ab9",
+        "3391c20d8e954bafb140403b77c33e6a92d1b1fb7f78312164471793d3de8397",
+        "7de60747c65b72e96713ea7cceae721ee929d99426e0a71504696bc12f8c6849",
+        "62536e8e8c9830c982015e0eeb0f968738b0dab53050dacd70e25346995575ab",
+        "c66ebb194ef2188b79c3dea964f17943cbc16df5355eaece67bc987a1e7316a5",
+        "49cd1424caea8596d0221649e524346b70317d5ef299d7af9ae6060d56f73cd8",
+        "4b921d317563f5b19319e60e9c7f648d542f6099091c60c19194d9366662e9a3",
+        "77fc83c6783ca8375faa3bb3e8a1de95d74241ea6973a2dc5c3ad3cd75290fb9",
+        "097a3dafa8c0b2482a5e3ab38ff070331debe1e82d6b8ce667e59df772aa1376",
+        "ae3fedaca5093ff79f809d5433ffca4ca37342750198d97bc50678467be16b26",
+        "65c5a7e53ccc5ead2fdee076868324c3936b662458d86d6620f211220563a77f",
+        "fef0103a84830e0ec35e86c9e2505bcbd48c791201d8f68d8936af8c442986d5",
+        "723193b24bb4b369fd7e6a02622c06e3b6a5997a1211a87f47736792edefaace",
+        "c3897b88b5fdb171b627ee8cf5f56af8cb449e73d0b3c8ac2e0e45c83a817be8",
+        "098e8b494e24206785964c503083f77a8c6c8baeb8c1b94295cb51a7b2df75ec",
+        "0183efc2a0e0af39ff976891b25d07f33e7a79759e5962f187fb0bd30f7349e6"
+      ],
+      "icon": "assets/sprites/enemy_sand_stalker.png",
+      "atlas_character_index": 4,
+      "icon_sha256": "5795977f261d28d45d8cc43f2c96f5c1c703aa454abfc2619bc2a0ea1f898887"
+    },
+    {
+      "id": "enemy_tide_siren",
+      "source": "assets/art/r38/sources/enemy_tide_siren.png",
+      "source_sha256": "9c9ee50f51e9412671101e6cddf46bd630deb6a3167b2454fb0c60599f788668",
+      "source_pose_count": 16,
+      "source_pose_boxes": [
+        [
+          0,
+          0,
+          309,
+          320
+        ],
+        [
+          309,
+          3,
+          601,
+          322
+        ],
+        [
+          601,
+          0,
+          910,
+          319
+        ],
+        [
+          911,
+          10,
+          1236,
+          313
+        ],
+        [
+          0,
+          312,
+          302,
+          639
+        ],
+        [
+          302,
+          322,
+          604,
+          629
+        ],
+        [
+          604,
+          314,
+          920,
+          637
+        ],
+        [
+          920,
+          313,
+          1238,
+          630
+        ],
+        [
+          0,
+          639,
+          360,
+          940
+        ],
+        [
+          351,
+          602,
+          659,
+          952
+        ],
+        [
+          659,
+          626,
+          930,
+          974
+        ],
+        [
+          930,
+          630,
+          1240,
+          1008
+        ],
+        [
+          0,
+          940,
+          334,
+          1254
+        ],
+        [
+          331,
+          952,
+          625,
+          1254
+        ],
+        [
+          622,
+          974,
+          957,
+          1254
+        ],
+        [
+          921,
+          1008,
+          1253,
+          1254
+        ]
+      ],
+      "uniform_actor_scale": 0.2962962962962963,
+      "foot_baseline": 120,
+      "source_alpha_nonzero": 819584,
+      "extracted_alpha_nonzero": 819584,
+      "source_alpha_sum": 117499225,
+      "extracted_alpha_sum": 117499225,
+      "unique_original_poses": 16,
+      "walk_unique_poses": 4,
+      "attack_unique_poses": 6,
+      "impact_source_pose": 8,
+      "playback_pose_indices": [
+        0,
+        0,
+        1,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        4,
+        5,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        13,
+        14,
+        14,
+        14,
+        15,
+        15,
+        15
+      ],
+      "original_pose_sha256": [
+        "47797c4a5bbb02244eec75a0df8dccccbd6990ad1e361265af6d886ffdf28727",
+        "eca80ce3e6f419653c8e194486c8e0562752debac11564d22cb70c4d18ba3ea4",
+        "61610e97449871df24f3c04e6f2a0d13944e105da8c4596ca81c26efec75dfc8",
+        "abbae624982de136a18800b8b6a704edfa04a8047631592cff2e818a0a385f7f",
+        "eb0f2d2a38e911b65bb008ac61a9d561a4304191bdf2f03b9815e3e459a0ce0c",
+        "39d763c427f289305fe995deafc91fd0c7df09a0006df23d37ca1a620539c273",
+        "807e4ac622d7af210b3282aac7b97e4760406f2a80155b5047aefbc64ab7c9b5",
+        "3b2bff752575e59dfe63d00d7e61729a747a7c2916b4da21dd8427ae3572d113",
+        "f909b20e2d03c50d18cc22e1bbe5dd3ee1a604b1e5b612974a9d6fe26d044ec3",
+        "2b4db6af3da2856bfa5d552315804a39ba3f1a623a15f8f73bf76bb4d6ca33b1",
+        "e966119916f8f9185c85be6d945979299d867613f43d0b8d7a3d43800d88d277",
+        "38f6229b0af5edb2f22d6a4e26da33dd9f486b88b89d66e92f5a146b0e735b8b",
+        "963da6656e50c4eb85281754b744d8c0706e62bfb232290a2ebc1dc1887919c9",
+        "2d057f023a031d179a70b55d3ec96a824b46403c2ce017365c0a3f584428c7c8",
+        "ac064768490cb3d215da86e635e03abb6966abb1913ccfe391d072cc872444c2",
+        "3979f65161dbe155c49771df1919e4e6a9afe45f87675403a783ea2702f83e54"
+      ],
+      "icon": "assets/sprites/enemy_tide_siren.png",
+      "atlas_character_index": 5,
+      "icon_sha256": "4f75a2d62e0574c20338af0857d2fe72b746b61d7a9e104dc223c99527bb0c9d"
+    },
+    {
+      "id": "enemy_coral_colossus",
+      "source": "assets/art/r38/sources/enemy_coral_colossus.png",
+      "source_sha256": "c0d47f4c8daf82f56fc402da25217ba341f26a903a42e85398688bfc56237d02",
+      "source_pose_count": 16,
+      "source_pose_boxes": [
+        [
+          43,
+          1,
+          318,
+          316
+        ],
+        [
+          318,
+          0,
+          615,
+          310
+        ],
+        [
+          654,
+          16,
+          941,
+          315
+        ],
+        [
+          960,
+          14,
+          1226,
+          315
+        ],
+        [
+          0,
+          316,
+          322,
+          629
+        ],
+        [
+          339,
+          320,
+          623,
+          630
+        ],
+        [
+          623,
+          315,
+          946,
+          629
+        ],
+        [
+          946,
+          315,
+          1232,
+          629
+        ],
+        [
+          0,
+          600,
+          324,
+          939
+        ],
+        [
+          325,
+          640,
+          625,
+          942
+        ],
+        [
+          634,
+          629,
+          945,
+          929
+        ],
+        [
+          955,
+          629,
+          1230,
+          991
+        ],
+        [
+          0,
+          938,
+          302,
+          1254
+        ],
+        [
+          302,
+          939,
+          615,
+          1254
+        ],
+        [
+          640,
+          949,
+          931,
+          1254
+        ],
+        [
+          925,
+          996,
+          1242,
+          1236
+        ]
+      ],
+      "uniform_actor_scale": 0.30939226519337015,
+      "foot_baseline": 120,
+      "source_alpha_nonzero": 798364,
+      "extracted_alpha_nonzero": 798364,
+      "source_alpha_sum": 150182017,
+      "extracted_alpha_sum": 150182017,
+      "unique_original_poses": 16,
+      "walk_unique_poses": 4,
+      "attack_unique_poses": 6,
+      "impact_source_pose": 8,
+      "playback_pose_indices": [
+        0,
+        0,
+        1,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        4,
+        5,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        13,
+        14,
+        14,
+        14,
+        15,
+        15,
+        15
+      ],
+      "original_pose_sha256": [
+        "04fbcf19cce97e49b78df49ed81c72f7f30ddab11a82b1006f7097e7cb891480",
+        "3cc3d60c5b102cca30ec4048e411e387397b65223884c2b58edeb95dd954bc2e",
+        "a97ca456283af5d31d019f2e5c52ac92d097517e5b8a41262495a35500fad271",
+        "567df20e194646ffdee68b82ec262f102fc14e0df0caf4e19a2c9796088bf57e",
+        "205872928c2aa3fd7bd00f27e475ae97293af830ee16c74f3254891df3e0f64c",
+        "5af16832c8bd592ea3fae160ecee709855eb51dad7317f4e38e7de8392931b04",
+        "784a0120092c3c66632735e33f88993f8bcb54f48ed9803e53db29296d3ee4ce",
+        "deb3677a80c4db8f084881b1f214b60d39d329d15d3143af9e104a04d34847d2",
+        "8ce6ab6c8b4abe23e5274ab8d004e2165e5fac54691396062c16ecb2ca553df9",
+        "86f17d49eb81979d285d28b7ebf9fb0388de6c938ad8c5ab82c61f5854cb3c08",
+        "efde2f68afee2f2d2a18671d411131a31f62d72d1cb070c4dd23e0510effb6fb",
+        "7cb0b4c825ba6ee03732467d0c786bc50743162875ba775993bb0a50840e371d",
+        "35bf97f3a0774cfefac21d3d639c58d9df44a247235fdc31c094a6604709cdd6",
+        "d16b5b3b01546dfba7f4d53a54ccc41a07d82db44d3acc198e3ee160ccd9c96f",
+        "8d9f22fcb973ddd8d827f06f4b2e22bbc8eba48c800e9d892dcc923b023df0dc",
+        "753362401a1eb3574c55c4c6f4ceef5e8bd153fa4da5e0fe41e71bfc78881567"
+      ],
+      "icon": "assets/sprites/enemy_coral_colossus.png",
+      "atlas_character_index": 6,
+      "icon_sha256": "da0b62d9d4e4eb2f646d6af6380b384a8e1a636b72e95b67bc12ad3d27ee03be"
+    },
+    {
+      "id": "enemy_bloom_wisp",
+      "source": "assets/art/r38/sources/enemy_bloom_wisp.png",
+      "source_sha256": "54f6e8647541556ea7d7113eb7c65d703e606f7f1e933bca9b8b75cc8a173134",
+      "source_pose_count": 16,
+      "source_pose_boxes": [
+        [
+          0,
+          0,
+          313,
+          319
+        ],
+        [
+          313,
+          0,
+          617,
+          315
+        ],
+        [
+          617,
+          9,
+          941,
+          340
+        ],
+        [
+          941,
+          0,
+          1236,
+          340
+        ],
+        [
+          23,
+          294,
+          321,
+          630
+        ],
+        [
+          321,
+          298,
+          617,
+          622
+        ],
+        [
+          615,
+          321,
+          939,
+          649
+        ],
+        [
+          939,
+          318,
+          1240,
+          626
+        ],
+        [
+          0,
+          598,
+          346,
+          932
+        ],
+        [
+          347,
+          600,
+          633,
+          930
+        ],
+        [
+          634,
+          617,
+          941,
+          963
+        ],
+        [
+          941,
+          621,
+          1242,
+          1000
+        ],
+        [
+          0,
+          931,
+          324,
+          1254
+        ],
+        [
+          324,
+          935,
+          619,
+          1254
+        ],
+        [
+          616,
+          960,
+          961,
+          1254
+        ],
+        [
+          922,
+          1000,
+          1240,
+          1224
+        ]
+      ],
+      "uniform_actor_scale": 0.2955145118733509,
+      "foot_baseline": 120,
+      "source_alpha_nonzero": 655586,
+      "extracted_alpha_nonzero": 655586,
+      "source_alpha_sum": 104821641,
+      "extracted_alpha_sum": 104821641,
+      "unique_original_poses": 16,
+      "walk_unique_poses": 4,
+      "attack_unique_poses": 6,
+      "impact_source_pose": 8,
+      "playback_pose_indices": [
+        0,
+        0,
+        1,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        4,
+        5,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        13,
+        14,
+        14,
+        14,
+        15,
+        15,
+        15
+      ],
+      "original_pose_sha256": [
+        "5516ab718dc1fdec1ab1f4599c2a7d8a0213354f280e31ba06f4892395a2b9e0",
+        "5d7fabf20f9062a5eeee7b5ef7b1cfc983957a59b81eff95777a0753e4032548",
+        "7780d8124808759b03f9efaccca028d7e13d8e7834c45bc21794956c88c4344e",
+        "e0df211c16bfadb6250d2f2b5c2f0a4e48672aa71c91f176a4171d89f9f6d1ec",
+        "effd852fb05375b050219d8ac204cb3c45bca84de46529a556aa903d115c47ba",
+        "d9f14e3a2491cd591931c865b32248ae06317e45e9cc084a750c673f98eb3411",
+        "bd6c8ba1a47dd6fcafc1eb5d82197fb755a2f71e518d78d9557fcb8ad6ce4846",
+        "839b5399323dbb32788354f2da7960f5ffa307ce7b445526ef01a81f0aa49650",
+        "ddec6f9221c42698aa982c08a962030e23054e37709ef16139d6320561af48c3",
+        "ed8a81481644914ede9dfe15d6e036dbcfa7471f7d13352f74c77fe4e293604e",
+        "7aef2967d8b8c69d851aaf4865e5be5531a35e32cbd629c47286d78b0947e96a",
+        "eac1425ea556e099383d85bceb90225f9b4357823e13731737290e928767c6e3",
+        "bde8391ce61b838ed3a016734919be6e60cb1f82f02346251cd7ff1d98f5189c",
+        "6a092e98af5b535422b7dfc519950eb74751592c9dcc61dc4c0770a816a6a21a",
+        "74a73cc594c08324fafe0348d712b4e47cfe2e6613c536222dc29cea2db655b1",
+        "11a0312ccd9dbaafa7088f14fa36e305a6bce0a87c841a0baeedec93692a96f8"
+      ],
+      "icon": "assets/sprites/enemy_bloom_wisp.png",
+      "atlas_character_index": 7,
+      "icon_sha256": "abf72c9c3b4cb7756c71e153036bc7c753925a6ef9aabede6ba5e25ef6355367"
+    },
+    {
+      "id": "enemy_clockwork_reaper",
+      "source": "assets/art/r38/sources/enemy_clockwork_reaper.png",
+      "source_sha256": "810589f21072d82583c071aa9de617f91649a94325714e7409d5fc2537f480ea",
+      "source_pose_count": 16,
+      "source_pose_boxes": [
+        [
+          41,
+          55,
+          312,
+          325
+        ],
+        [
+          313,
+          27,
+          623,
+          334
+        ],
+        [
+          652,
+          17,
+          922,
+          319
+        ],
+        [
+          955,
+          20,
+          1234,
+          330
+        ],
+        [
+          31,
+          303,
+          306,
+          603
+        ],
+        [
+          339,
+          337,
+          625,
+          619
+        ],
+        [
+          626,
+          314,
+          950,
+          619
+        ],
+        [
+          950,
+          345,
+          1215,
+          609
+        ],
+        [
+          0,
+          626,
+          338,
+          927
+        ],
+        [
+          349,
+          640,
+          669,
+          925
+        ],
+        [
+          694,
+          638,
+          973,
+          941
+        ],
+        [
+          972,
+          629,
+          1218,
+          970
+        ],
+        [
+          0,
+          923,
+          318,
+          1254
+        ],
+        [
+          318,
+          941,
+          643,
+          1222
+        ],
+        [
+          644,
+          962,
+          991,
+          1216
+        ],
+        [
+          949,
+          982,
+          1223,
+          1218
+        ]
+      ],
+      "uniform_actor_scale": 0.3227665706051873,
+      "foot_baseline": 120,
+      "source_alpha_nonzero": 414726,
+      "extracted_alpha_nonzero": 414726,
+      "source_alpha_sum": 68197140,
+      "extracted_alpha_sum": 68197140,
+      "unique_original_poses": 16,
+      "walk_unique_poses": 4,
+      "attack_unique_poses": 6,
+      "impact_source_pose": 8,
+      "playback_pose_indices": [
+        0,
+        0,
+        1,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        4,
+        5,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        13,
+        14,
+        14,
+        14,
+        15,
+        15,
+        15
+      ],
+      "original_pose_sha256": [
+        "affcda2d2df29e7a52b1229e418bb33befa73dd255533e6db1bccc4155690685",
+        "749c12b806ee4ab57a983e2e275e16f07dd62571709207266d71b5ab1257564f",
+        "0ed7d21de41a7369ba0481fb23fe3c0757bd531f58ad09667b402f96a30a39df",
+        "0ae4f0bec88937ab9fc67e74e33415cd2257551eae281cb02ff996b86f3a000f",
+        "c3953a64bd7fb9418a467d5515100b6a7b261e4884619be975f4720bc3a60a7e",
+        "3474326484045577fe783050543e1ec8c38a815679499b624e037bbfffa61458",
+        "e35848f6438c69cba449460e11ded80d5007929869bfca368b796002f046bda4",
+        "e47d5ed1c0aaab7e413578f76e7fa362c3a64ba0a25f7c1e8548573a3c7e8534",
+        "7edf0b36b53fd73080ea8362cb7de4c298aff7f56af14bf8aeef9af774112347",
+        "55ff3c52e60eb09faacab1852f4f5e0d1981a42e6e5ae061150ca8df2be328c5",
+        "7b518c20498870aeec65805ba469492872cb80334dd60456387a1b58f4918600",
+        "5be674885f635e7419855efcf89da2be960c95cd33266025c27c541d03f890ba",
+        "a3e8853bcadc93629b076c043ef22ef8e4ce164993ba4404b4b0c3eb88fda8e0",
+        "56f955ca6fd6349ba78df5714ba259ea4ebddb36939a65cc1b04637f11c7b09d",
+        "3bdf40c0ed2070ec735ce964b1e74ac0beac96e77eef78eaf3f31b256d6833ea",
+        "8413a967c38eb257043ec67b7dbfee879d550907e481733864472f803c14e2b9"
+      ],
+      "icon": "assets/sprites/enemy_clockwork_reaper.png",
+      "atlas_character_index": 8,
+      "icon_sha256": "43707c45c9acbf3133d1a5df6f7f183538f1a60e03f7057b09761e3ffca79356"
+    }
+  ],
+  "tiles": [
+    {
+      "id": "tile_desert",
+      "path": "assets/art/r38/tile_desert.png",
+      "sha256": "0575a8cc12f1c276a5ea2b729422b6d356f87eda7b9f9919c5492fea9d888880",
+      "edge_mean_rgb_error_x": 8.196703880914407,
+      "edge_mean_rgb_error_y": 9.508506113769272
+    },
+    {
+      "id": "tile_coral",
+      "path": "assets/art/r38/tile_coral.png",
+      "sha256": "5544eb66498dc3c1e489e5e19f6aae1a57692100a27d77314a9b72bf03b23b5f",
+      "edge_mean_rgb_error_x": 21.901648059542797,
+      "edge_mean_rgb_error_y": 21.31525784157363
+    },
+    {
+      "id": "tile_clockwork",
+      "path": "assets/art/r38/tile_clockwork.png",
+      "sha256": "49aa7fad46b8dffe89b47139a269cca0d5e4065be6a565ec89864c909a4ea88f",
+      "edge_mean_rgb_error_x": 10.608452950558213,
+      "edge_mean_rgb_error_y": 10.698032961190856
+    }
+  ],
+  "landmarks": {
+    "path": "assets/art/r38/landmarks.png",
+    "columns": 4,
+    "rows": 2,
+    "order": [
+      "desert_tomb",
+      "desert_obelisk",
+      "coral_palace",
+      "coral_lighthouse",
+      "moonflower_tree",
+      "petal_shrine",
+      "clockwork_gate",
+      "gear_tower"
+    ],
+    "sha256": "5ef880fc96ec631457eddd9bc1e1998c51376810f13561582e2ef5cc9afd6f6b"
+  }
+}

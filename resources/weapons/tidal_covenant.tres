@@ -1,0 +1,22 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/resources/r38_weapon_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/TidalCovenantWeapon.tscn" id="2_scene"]
+[resource]
+script = ExtResource("1_data")
+id = "tidal_covenant"
+display_name = "潮汐誓約"
+description = "在敵群中心引爆潮汐，緩速 24%；替 340 範圍內隊友回復 1 點。"
+behavior_id = "tidal_covenant"
+weapon_scene = ExtResource("2_scene")
+damage = 24.0
+cooldown = 1.7
+range = 500.0
+color = Color(0.36, 0.92, 1, 1)
+area_radius = 88.0
+effect_lifetime = 1.3
+projectile_sprite_path = "res://assets/sprites/proj_bullet.png"
+impact_sprite_path = "res://assets/sprites/proj_lightning.png"
+sprite_scale = 0.82
+damage_upgrade = 5.0
+cooldown_upgrade_multiplier = 0.88
+area_radius_upgrade = 18.0

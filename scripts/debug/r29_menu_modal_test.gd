@@ -71,7 +71,7 @@ func _test_portrait_modal() -> bool:
 		if child is Label:
 			label_count += 1
 	# Seven original help topics plus R32 equipment, followed by the replay tip.
-	if label_count != 9:
+	if label_count != 10:
 		_fail("guide panel row count drifted: %d" % label_count)
 		return false
 

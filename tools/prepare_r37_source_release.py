@@ -12,6 +12,7 @@ PUBLIC_TOOLS = {
     "preview_r35_skill_fx.gd", "test_r35_skill_fx_catalog.gd", "test_r32_loading_recovery.mjs",
     "test_r33_web_smoke.mjs", "test_r36_webgl_state_cache.cjs", "check_r37_release_assets.py",
     "sync_resource_uids.py", "r37_perf_compare.cjs", "prepare_r37_source_release.py",
+    "build_r38_content_atlas.py", "check_r38_content_assets.py", "measure_r38_hero_body_scale.py", "r38_map_playtest.cjs",
 }
 PUBLIC_DOCS = {
     "docs/COMBAT_R32.md", "docs/PROGRESSION_R32.md", "docs/PROGRESSION_R36.md",
@@ -25,6 +26,7 @@ PUBLIC_DOCS = {
     "docs/evidence/r36/native_latest/space_large_cyclone.png",
     "docs/evidence/r36/native_latest/east_landmark.png",
     "docs/evidence/r36/final_world_map.jpg",
+    "docs/R38_RELEASE_REPORT.md", "docs/R38_STAGES_ENEMIES.md", "docs/PROGRESSION_R38.md",
 }
 
 def git_paths(arguments):
@@ -44,6 +46,10 @@ def wanted(path):
         return True
     if path.startswith("docs/evidence/r37/"):
         return Path(path).name in {"gameplay.png", "manual-gameplay.png", "release_audit.md", "final_verification.json", "gates.json", "asset_gate.json", "performance_summary.json", "combat_polish.txt", "world_polish.txt", "hud_clearance.txt", "clean_web_smoke.json", "clean_asset_gate.json"}
+    if path.startswith("docs/evidence/r38/"):
+        return Path(path).name in {"gates.json", "independent_review.md", "playtest_summary.json", "hero_scale_playtest.json", "input_trace.json", "clean_build.json", "clean_web_smoke.json", "final_verification.json", "dunes.png", "tide.png", "bloom.png", "forge.png", "new_heroes.png", "new_hero_recruit.png", "public_content.jpg"}
+    if path in {"docs/evidence/r38-hero-body-scale-before.json", "docs/evidence/r38-hero-body-scale-after.json"}:
+        return True
     return False
 
 def main():

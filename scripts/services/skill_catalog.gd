@@ -52,7 +52,7 @@ static func get_live_legal_pool() -> Array[Dictionary]:
 	var keys := {}
 	for value in base:
 		var option: Dictionary = value
-		if str(option.get("id", "")) == "recruit_hero" or not GameManager._is_upgrade_available(option):
+		if not GameManager._is_upgrade_available(option):
 			continue
 		var key: String = GameManager._upgrade_level_key(option)
 		if not keys.has(key):

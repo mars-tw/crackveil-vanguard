@@ -1,0 +1,22 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/resources/r38_weapon_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/SolarPiercerWeapon.tscn" id="2_scene"]
+[resource]
+script = ExtResource("1_data")
+id = "solar_piercer"
+display_name = "星焰貫槍"
+description = "2 列長槍直刺，各貫穿 4 名敵人；同次出手不重複傷害。"
+behavior_id = "solar_piercer"
+weapon_scene = ExtResource("2_scene")
+damage = 34.0
+cooldown = 1.05
+range = 390.0
+color = Color(1, 0.76, 0.26, 1)
+projectile_count = 2
+projectile_radius = 12.0
+pierce = 3
+damage_upgrade = 6.0
+cooldown_upgrade_multiplier = 0.88
+range_upgrade = 30.0
+projectile_count_upgrade = 1
+pierce_upgrade = 1

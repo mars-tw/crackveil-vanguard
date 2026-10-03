@@ -1,0 +1,3225 @@
+{
+  "method": "Selected observed fields from unmodified full local runtime records; no gameplay-state writes.",
+  "runs": [
+    {
+      "original_local_record": "dunes-desktop.json",
+      "summary": {
+        "label": "dunes-desktop",
+        "stage": "dunes",
+        "version": "0.26.0-r38",
+        "activeSeconds": 20.6152266133334,
+        "controlledNaturalInput": true,
+        "gameplayInjection": false,
+        "video": false,
+        "mobileEmulation": false,
+        "meanFPS": 60,
+        "medianFPS": 60,
+        "minFPS": 60,
+        "maxFPS": 60,
+        "peakEnemies": 143,
+        "peakLogicalShots": 48,
+        "kills": 316,
+        "runTheme": "sunken_dunes",
+        "roster": {
+          "dune_scarab": 1,
+          "normal": 0.18,
+          "sand_stalker": 0.85,
+          "tank": 0.12
+        },
+        "actualSpeciesCounts": {
+          "dune_scarab": 261,
+          "normal": 40,
+          "sand_stalker": 248
+        },
+        "newSpeciesActuallySpawned": [
+          "dune_scarab",
+          "sand_stalker"
+        ],
+        "rendering": {
+          "css": [
+            1280,
+            720
+          ],
+          "canvas": [
+            1280,
+            720
+          ],
+          "dpr": 1,
+          "renderer": "ANGLE (Intel, Intel(R) Graphics (0x00007D67) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+        },
+        "nativeGLVerification": {
+          "ready": true,
+          "cachedQueries": 3230,
+          "scissorMatches": true,
+          "drawMatches": true,
+          "readMatches": true
+        },
+        "identity": {
+          "htmlSHA256": "0eca895cb57d8914ab9bcabf954f8b82b1adf9bed4cffec6d681f47af81207fe",
+          "pckNames": [
+            "index-3ad1a1f2ade9.pck"
+          ]
+        },
+        "errors": []
+      },
+      "actual_input_events": [
+        {
+          "kind": "actual_world_map_chapter2_node",
+          "selected_stage_id": "dunes",
+          "chapter": 1
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 5.32562199999999,
+          "level": 2
+        },
+        {
+          "kind": "actual_space_tap",
+          "time": 9.1919000666667
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 9.9092266133334,
+          "level": 3
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 14.511559946667,
+          "level": 4
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 16.700559946667,
+          "level": 5
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 18.9745599466669,
+          "level": 6
+        }
+      ],
+      "samples": [
+        {
+          "wall_ms": 15,
+          "active_time": 0.125966666666667,
+          "fps": 22,
+          "kills": 0,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 0,
+          "logical_shots": 0
+        },
+        {
+          "wall_ms": 781,
+          "active_time": 0.913955333333335,
+          "fps": 22,
+          "kills": 12,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 20,
+          "logical_shots": 29
+        },
+        {
+          "wall_ms": 1544,
+          "active_time": 1.65328866666667,
+          "fps": 60,
+          "kills": 14,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 31,
+          "logical_shots": 32
+        },
+        {
+          "wall_ms": 2310,
+          "active_time": 2.37595533333333,
+          "fps": 60,
+          "kills": 16,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 40,
+          "logical_shots": 31
+        },
+        {
+          "wall_ms": 3068,
+          "active_time": 3.10162199999999,
+          "fps": 60,
+          "kills": 23,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 42,
+          "logical_shots": 33
+        },
+        {
+          "wall_ms": 4365,
+          "active_time": 4.31662199999999,
+          "fps": 60,
+          "kills": 37,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 56,
+          "logical_shots": 43
+        },
+        {
+          "wall_ms": 5135,
+          "active_time": 5.07262199999999,
+          "fps": 60,
+          "kills": 42,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 66,
+          "logical_shots": 34
+        },
+        {
+          "wall_ms": 5910,
+          "active_time": 5.32562199999999,
+          "fps": 60,
+          "kills": 42,
+          "level": 2,
+          "paused": true,
+          "enemies_live": 71,
+          "logical_shots": 36
+        },
+        {
+          "wall_ms": 6747,
+          "active_time": 5.51195533333332,
+          "fps": 60,
+          "kills": 42,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 69,
+          "logical_shots": 45
+        },
+        {
+          "wall_ms": 7511,
+          "active_time": 6.25128866666665,
+          "fps": 60,
+          "kills": 53,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 74,
+          "logical_shots": 35
+        },
+        {
+          "wall_ms": 8280,
+          "active_time": 6.98762199999998,
+          "fps": 60,
+          "kills": 55,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 84,
+          "logical_shots": 47
+        },
+        {
+          "wall_ms": 9043,
+          "active_time": 7.69362199999998,
+          "fps": 60,
+          "kills": 64,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 96,
+          "logical_shots": 33
+        },
+        {
+          "wall_ms": 9799,
+          "active_time": 8.43593030666666,
+          "fps": 60,
+          "kills": 73,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 106,
+          "logical_shots": 41
+        },
+        {
+          "wall_ms": 10563,
+          "active_time": 9.1919000666667,
+          "fps": 60,
+          "kills": 86,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 105,
+          "logical_shots": 30
+        },
+        {
+          "wall_ms": 11341,
+          "active_time": 9.9092266133334,
+          "fps": 59,
+          "kills": 89,
+          "level": 3,
+          "paused": true,
+          "enemies_live": 103,
+          "logical_shots": 36
+        },
+        {
+          "wall_ms": 12152,
+          "active_time": 10.0788932800001,
+          "fps": 60,
+          "kills": 91,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 101,
+          "logical_shots": 37
+        },
+        {
+          "wall_ms": 12932,
+          "active_time": 10.7635599466668,
+          "fps": 60,
+          "kills": 124,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 90,
+          "logical_shots": 28
+        },
+        {
+          "wall_ms": 13699,
+          "active_time": 11.4195599466668,
+          "fps": 60,
+          "kills": 136,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 99,
+          "logical_shots": 29
+        },
+        {
+          "wall_ms": 14469,
+          "active_time": 12.1815599466668,
+          "fps": 60,
+          "kills": 146,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 106,
+          "logical_shots": 43
+        },
+        {
+          "wall_ms": 15235,
+          "active_time": 12.9572266133336,
+          "fps": 60,
+          "kills": 156,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 107,
+          "logical_shots": 45
+        },
+        {
+          "wall_ms": 16001,
+          "active_time": 13.6162266133336,
+          "fps": 60,
+          "kills": 170,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 117,
+          "logical_shots": 45
+        },
+        {
+          "wall_ms": 16780,
+          "active_time": 14.3782266133336,
+          "fps": 60,
+          "kills": 186,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 116,
+          "logical_shots": 32
+        },
+        {
+          "wall_ms": 17541,
+          "active_time": 14.511559946667,
+          "fps": 60,
+          "kills": 189,
+          "level": 4,
+          "paused": true,
+          "enemies_live": 113,
+          "logical_shots": 38
+        },
+        {
+          "wall_ms": 18379,
+          "active_time": 14.667559946667,
+          "fps": 60,
+          "kills": 195,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 111,
+          "logical_shots": 29
+        },
+        {
+          "wall_ms": 19151,
+          "active_time": 15.3962266133337,
+          "fps": 60,
+          "kills": 222,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 103,
+          "logical_shots": 42
+        },
+        {
+          "wall_ms": 19930,
+          "active_time": 16.1218932800004,
+          "fps": 60,
+          "kills": 231,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 126,
+          "logical_shots": 44
+        },
+        {
+          "wall_ms": 20699,
+          "active_time": 16.700559946667,
+          "fps": 60,
+          "kills": 250,
+          "level": 5,
+          "paused": true,
+          "enemies_live": 121,
+          "logical_shots": 33
+        },
+        {
+          "wall_ms": 21498,
+          "active_time": 16.8702266133337,
+          "fps": 60,
+          "kills": 254,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 121,
+          "logical_shots": 29
+        },
+        {
+          "wall_ms": 22265,
+          "active_time": 17.5762266133336,
+          "fps": 60,
+          "kills": 269,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 130,
+          "logical_shots": 31
+        },
+        {
+          "wall_ms": 23037,
+          "active_time": 18.3185599466669,
+          "fps": 60,
+          "kills": 276,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 136,
+          "logical_shots": 31
+        },
+        {
+          "wall_ms": 23799,
+          "active_time": 18.9745599466669,
+          "fps": 60,
+          "kills": 286,
+          "level": 6,
+          "paused": true,
+          "enemies_live": 143,
+          "logical_shots": 30
+        },
+        {
+          "wall_ms": 24630,
+          "active_time": 19.1108932800002,
+          "fps": 60,
+          "kills": 289,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 143,
+          "logical_shots": 32
+        },
+        {
+          "wall_ms": 25405,
+          "active_time": 19.8865599466668,
+          "fps": 60,
+          "kills": 291,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 142,
+          "logical_shots": 48
+        },
+        {
+          "wall_ms": 26188,
+          "active_time": 20.6152266133334,
+          "fps": 60,
+          "kills": 316,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 132,
+          "logical_shots": 38
+        }
+      ]
+    },
+    {
+      "original_local_record": "tide-desktop.json",
+      "summary": {
+        "label": "tide-desktop",
+        "stage": "tide",
+        "version": "0.26.0-r38",
+        "activeSeconds": 20.6039751111113,
+        "controlledNaturalInput": true,
+        "gameplayInjection": false,
+        "video": false,
+        "mobileEmulation": false,
+        "meanFPS": 58.90909090909091,
+        "medianFPS": 60,
+        "minFPS": 50,
+        "maxFPS": 60,
+        "peakEnemies": 129,
+        "peakLogicalShots": 160,
+        "kills": 263,
+        "runTheme": "tidal_ruins",
+        "roster": {
+          "coral_colossus": 0.75,
+          "fast": 0.12,
+          "normal": 0.18,
+          "tide_siren": 1
+        },
+        "actualSpeciesCounts": {
+          "coral_colossus": 139,
+          "fast": 8,
+          "normal": 46,
+          "tide_siren": 356
+        },
+        "newSpeciesActuallySpawned": [
+          "coral_colossus",
+          "tide_siren"
+        ],
+        "rendering": {
+          "css": [
+            1280,
+            720
+          ],
+          "canvas": [
+            1280,
+            720
+          ],
+          "dpr": 1,
+          "renderer": "ANGLE (Intel, Intel(R) Graphics (0x00007D67) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+        },
+        "nativeGLVerification": {
+          "ready": true,
+          "cachedQueries": 3188,
+          "scissorMatches": true,
+          "drawMatches": true,
+          "readMatches": true
+        },
+        "identity": {
+          "htmlSHA256": "0eca895cb57d8914ab9bcabf954f8b82b1adf9bed4cffec6d681f47af81207fe",
+          "pckNames": [
+            "index-3ad1a1f2ade9.pck"
+          ]
+        },
+        "errors": []
+      },
+      "actual_input_events": [
+        {
+          "kind": "actual_world_map_chapter2_node",
+          "selected_stage_id": "tide",
+          "chapter": 1
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 5.40162133333332,
+          "level": 2
+        },
+        {
+          "kind": "actual_space_tap",
+          "time": 9.21328800000004
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 9.7086213333334,
+          "level": 3
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 9.94495466666674,
+          "level": 4
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 12.2446213333335,
+          "level": 5
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 16.7652880000003,
+          "level": 6
+        }
+      ],
+      "samples": [
+        {
+          "wall_ms": 21,
+          "active_time": 0.116666666666667,
+          "fps": 34,
+          "kills": 0,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 0,
+          "logical_shots": 0
+        },
+        {
+          "wall_ms": 794,
+          "active_time": 0.895454666666668,
+          "fps": 41,
+          "kills": 12,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 20,
+          "logical_shots": 41
+        },
+        {
+          "wall_ms": 1561,
+          "active_time": 1.56825466666667,
+          "fps": 41,
+          "kills": 12,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 32,
+          "logical_shots": 43
+        },
+        {
+          "wall_ms": 2324,
+          "active_time": 2.354588,
+          "fps": 60,
+          "kills": 17,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 40,
+          "logical_shots": 58
+        },
+        {
+          "wall_ms": 3090,
+          "active_time": 3.01395466666666,
+          "fps": 60,
+          "kills": 20,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 52,
+          "logical_shots": 104
+        },
+        {
+          "wall_ms": 4322,
+          "active_time": 4.28962133333332,
+          "fps": 60,
+          "kills": 27,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 62,
+          "logical_shots": 115
+        },
+        {
+          "wall_ms": 5089,
+          "active_time": 4.99862133333332,
+          "fps": 60,
+          "kills": 38,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 68,
+          "logical_shots": 95
+        },
+        {
+          "wall_ms": 5847,
+          "active_time": 5.40162133333332,
+          "fps": 60,
+          "kills": 45,
+          "level": 2,
+          "paused": true,
+          "enemies_live": 68,
+          "logical_shots": 111
+        },
+        {
+          "wall_ms": 6655,
+          "active_time": 5.53795466666665,
+          "fps": 60,
+          "kills": 47,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 66,
+          "logical_shots": 118
+        },
+        {
+          "wall_ms": 7422,
+          "active_time": 6.30762133333332,
+          "fps": 60,
+          "kills": 53,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 71,
+          "logical_shots": 136
+        },
+        {
+          "wall_ms": 8180,
+          "active_time": 7.03028799999998,
+          "fps": 60,
+          "kills": 60,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 90,
+          "logical_shots": 158
+        },
+        {
+          "wall_ms": 8943,
+          "active_time": 7.75595466666665,
+          "fps": 60,
+          "kills": 68,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 93,
+          "logical_shots": 132
+        },
+        {
+          "wall_ms": 9710,
+          "active_time": 8.48462133333334,
+          "fps": 60,
+          "kills": 79,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 85,
+          "logical_shots": 152
+        },
+        {
+          "wall_ms": 10478,
+          "active_time": 9.21328800000004,
+          "fps": 60,
+          "kills": 95,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 77,
+          "logical_shots": 111
+        },
+        {
+          "wall_ms": 11242,
+          "active_time": 9.7086213333334,
+          "fps": 60,
+          "kills": 102,
+          "level": 3,
+          "paused": true,
+          "enemies_live": 81,
+          "logical_shots": 145
+        },
+        {
+          "wall_ms": 12061,
+          "active_time": 9.89195466666674,
+          "fps": 60,
+          "kills": 104,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 86,
+          "logical_shots": 126
+        },
+        {
+          "wall_ms": 12819,
+          "active_time": 9.94495466666674,
+          "fps": 60,
+          "kills": 104,
+          "level": 4,
+          "paused": true,
+          "enemies_live": 85,
+          "logical_shots": 137
+        },
+        {
+          "wall_ms": 13629,
+          "active_time": 10.1116213333334,
+          "fps": 60,
+          "kills": 107,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 75,
+          "logical_shots": 125
+        },
+        {
+          "wall_ms": 14400,
+          "active_time": 10.8402880000001,
+          "fps": 60,
+          "kills": 119,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 86,
+          "logical_shots": 142
+        },
+        {
+          "wall_ms": 15160,
+          "active_time": 11.5129546666668,
+          "fps": 60,
+          "kills": 129,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 84,
+          "logical_shots": 158
+        },
+        {
+          "wall_ms": 15924,
+          "active_time": 12.2446213333335,
+          "fps": 60,
+          "kills": 141,
+          "level": 5,
+          "paused": true,
+          "enemies_live": 82,
+          "logical_shots": 141
+        },
+        {
+          "wall_ms": 16749,
+          "active_time": 12.4279546666669,
+          "fps": 60,
+          "kills": 145,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 87,
+          "logical_shots": 149
+        },
+        {
+          "wall_ms": 17513,
+          "active_time": 13.1232880000002,
+          "fps": 60,
+          "kills": 152,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 96,
+          "logical_shots": 134
+        },
+        {
+          "wall_ms": 18294,
+          "active_time": 13.8429546666669,
+          "fps": 60,
+          "kills": 159,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 98,
+          "logical_shots": 130
+        },
+        {
+          "wall_ms": 19063,
+          "active_time": 14.6216213333336,
+          "fps": 60,
+          "kills": 173,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 96,
+          "logical_shots": 160
+        },
+        {
+          "wall_ms": 19843,
+          "active_time": 15.316954666667,
+          "fps": 60,
+          "kills": 185,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 94,
+          "logical_shots": 130
+        },
+        {
+          "wall_ms": 20609,
+          "active_time": 16.0562880000004,
+          "fps": 60,
+          "kills": 190,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 119,
+          "logical_shots": 126
+        },
+        {
+          "wall_ms": 21375,
+          "active_time": 16.7652880000003,
+          "fps": 60,
+          "kills": 198,
+          "level": 6,
+          "paused": true,
+          "enemies_live": 114,
+          "logical_shots": 136
+        },
+        {
+          "wall_ms": 22192,
+          "active_time": 16.934954666667,
+          "fps": 60,
+          "kills": 201,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 111,
+          "logical_shots": 139
+        },
+        {
+          "wall_ms": 22959,
+          "active_time": 17.6201700000003,
+          "fps": 56,
+          "kills": 219,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 111,
+          "logical_shots": 137
+        },
+        {
+          "wall_ms": 23760,
+          "active_time": 18.3887973333337,
+          "fps": 50,
+          "kills": 229,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 122,
+          "logical_shots": 125
+        },
+        {
+          "wall_ms": 24528,
+          "active_time": 19.1643640000003,
+          "fps": 50,
+          "kills": 239,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 129,
+          "logical_shots": 105
+        },
+        {
+          "wall_ms": 25295,
+          "active_time": 19.841979777778,
+          "fps": 60,
+          "kills": 249,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 123,
+          "logical_shots": 148
+        },
+        {
+          "wall_ms": 26065,
+          "active_time": 20.6039751111113,
+          "fps": 60,
+          "kills": 263,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 117,
+          "logical_shots": 152
+        }
+      ]
+    },
+    {
+      "original_local_record": "bloom-desktop.json",
+      "summary": {
+        "label": "bloom-desktop",
+        "stage": "bloom",
+        "version": "0.26.0-r38",
+        "activeSeconds": 20.7076595923811,
+        "controlledNaturalInput": true,
+        "gameplayInjection": false,
+        "video": false,
+        "mobileEmulation": false,
+        "meanFPS": 59.88,
+        "medianFPS": 60,
+        "minFPS": 59,
+        "maxFPS": 60,
+        "peakEnemies": 129,
+        "peakLogicalShots": 51,
+        "kills": 276,
+        "runTheme": "moonbloom_grove",
+        "roster": {
+          "bloom_wisp": 1,
+          "fast": 0.48,
+          "normal": 0.15,
+          "sand_stalker": 0.32
+        },
+        "actualSpeciesCounts": {
+          "bloom_wisp": 348,
+          "fast": 43,
+          "normal": 40,
+          "sand_stalker": 118
+        },
+        "newSpeciesActuallySpawned": [
+          "bloom_wisp",
+          "sand_stalker"
+        ],
+        "rendering": {
+          "css": [
+            1280,
+            720
+          ],
+          "canvas": [
+            1280,
+            720
+          ],
+          "dpr": 1,
+          "renderer": "ANGLE (Intel, Intel(R) Graphics (0x00007D67) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+        },
+        "nativeGLVerification": {
+          "ready": true,
+          "cachedQueries": 3712,
+          "scissorMatches": true,
+          "drawMatches": true,
+          "readMatches": true
+        },
+        "identity": {
+          "htmlSHA256": "0eca895cb57d8914ab9bcabf954f8b82b1adf9bed4cffec6d681f47af81207fe",
+          "pckNames": [
+            "index-3ad1a1f2ade9.pck"
+          ]
+        },
+        "errors": []
+      },
+      "actual_input_events": [
+        {
+          "kind": "actual_world_map_chapter2_node",
+          "selected_stage_id": "bloom",
+          "chapter": 1
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 5.24045618666665,
+          "level": 2
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 8.37933062666664,
+          "level": 3
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 9.20196438666668,
+          "level": 4
+        },
+        {
+          "kind": "actual_space_tap",
+          "time": 9.40195638666669
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 10.0532636666667,
+          "level": 5
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 11.3819303333335,
+          "level": 6
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 14.0952636666669,
+          "level": 7
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 16.678263666667,
+          "level": 8
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 19.0915970000002,
+          "level": 9
+        }
+      ],
+      "samples": [
+        {
+          "wall_ms": 8,
+          "active_time": 0.127866666666667,
+          "fps": 35,
+          "kills": 0,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 0,
+          "logical_shots": 0
+        },
+        {
+          "wall_ms": 784,
+          "active_time": 0.924166666666668,
+          "fps": 34,
+          "kills": 12,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 20,
+          "logical_shots": 29
+        },
+        {
+          "wall_ms": 1566,
+          "active_time": 1.6105,
+          "fps": 34,
+          "kills": 12,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 34,
+          "logical_shots": 43
+        },
+        {
+          "wall_ms": 2334,
+          "active_time": 2.39983333333333,
+          "fps": 60,
+          "kills": 15,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 46,
+          "logical_shots": 31
+        },
+        {
+          "wall_ms": 3092,
+          "active_time": 3.08616666666666,
+          "fps": 60,
+          "kills": 17,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 42,
+          "logical_shots": 34
+        },
+        {
+          "wall_ms": 4481,
+          "active_time": 4.41782242666666,
+          "fps": 60,
+          "kills": 25,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 65,
+          "logical_shots": 42
+        },
+        {
+          "wall_ms": 5242,
+          "active_time": 5.22079030666665,
+          "fps": 60,
+          "kills": 29,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 81,
+          "logical_shots": 31
+        },
+        {
+          "wall_ms": 6005,
+          "active_time": 5.24045618666665,
+          "fps": 60,
+          "kills": 29,
+          "level": 2,
+          "paused": true,
+          "enemies_live": 76,
+          "logical_shots": 31
+        },
+        {
+          "wall_ms": 6816,
+          "active_time": 5.42678206666665,
+          "fps": 60,
+          "kills": 30,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 81,
+          "logical_shots": 43
+        },
+        {
+          "wall_ms": 7583,
+          "active_time": 6.09942182666664,
+          "fps": 60,
+          "kills": 37,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 80,
+          "logical_shots": 44
+        },
+        {
+          "wall_ms": 8355,
+          "active_time": 6.89172346666663,
+          "fps": 60,
+          "kills": 43,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 96,
+          "logical_shots": 35
+        },
+        {
+          "wall_ms": 9118,
+          "active_time": 7.54769722666663,
+          "fps": 60,
+          "kills": 47,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 104,
+          "logical_shots": 35
+        },
+        {
+          "wall_ms": 9884,
+          "active_time": 8.34299874666664,
+          "fps": 60,
+          "kills": 54,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 99,
+          "logical_shots": 43
+        },
+        {
+          "wall_ms": 10642,
+          "active_time": 8.37933062666664,
+          "fps": 60,
+          "kills": 61,
+          "level": 3,
+          "paused": true,
+          "enemies_live": 98,
+          "logical_shots": 31
+        },
+        {
+          "wall_ms": 11453,
+          "active_time": 8.52932462666665,
+          "fps": 60,
+          "kills": 61,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 103,
+          "logical_shots": 33
+        },
+        {
+          "wall_ms": 12223,
+          "active_time": 9.20196438666668,
+          "fps": 60,
+          "kills": 67,
+          "level": 4,
+          "paused": true,
+          "enemies_live": 98,
+          "logical_shots": 27
+        },
+        {
+          "wall_ms": 13034,
+          "active_time": 9.40195638666669,
+          "fps": 60,
+          "kills": 70,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 97,
+          "logical_shots": 28
+        },
+        {
+          "wall_ms": 13817,
+          "active_time": 10.0532636666667,
+          "fps": 60,
+          "kills": 90,
+          "level": 5,
+          "paused": true,
+          "enemies_live": 96,
+          "logical_shots": 31
+        },
+        {
+          "wall_ms": 14638,
+          "active_time": 10.2199303333334,
+          "fps": 59,
+          "kills": 92,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 91,
+          "logical_shots": 43
+        },
+        {
+          "wall_ms": 15404,
+          "active_time": 10.9789303333334,
+          "fps": 59,
+          "kills": 102,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 104,
+          "logical_shots": 34
+        },
+        {
+          "wall_ms": 16170,
+          "active_time": 11.3819303333335,
+          "fps": 60,
+          "kills": 104,
+          "level": 6,
+          "paused": true,
+          "enemies_live": 104,
+          "logical_shots": 39
+        },
+        {
+          "wall_ms": 16990,
+          "active_time": 11.5182636666668,
+          "fps": 60,
+          "kills": 105,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 108,
+          "logical_shots": 51
+        },
+        {
+          "wall_ms": 17755,
+          "active_time": 12.3075970000002,
+          "fps": 60,
+          "kills": 110,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 110,
+          "logical_shots": 39
+        },
+        {
+          "wall_ms": 18535,
+          "active_time": 12.9939303333335,
+          "fps": 60,
+          "kills": 117,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 125,
+          "logical_shots": 35
+        },
+        {
+          "wall_ms": 19307,
+          "active_time": 13.7755970000002,
+          "fps": 60,
+          "kills": 132,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 123,
+          "logical_shots": 39
+        },
+        {
+          "wall_ms": 20071,
+          "active_time": 14.0952636666669,
+          "fps": 60,
+          "kills": 135,
+          "level": 7,
+          "paused": true,
+          "enemies_live": 126,
+          "logical_shots": 43
+        },
+        {
+          "wall_ms": 20884,
+          "active_time": 14.2452636666669,
+          "fps": 60,
+          "kills": 137,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 121,
+          "logical_shots": 32
+        },
+        {
+          "wall_ms": 21671,
+          "active_time": 14.957263666667,
+          "fps": 60,
+          "kills": 152,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 115,
+          "logical_shots": 44
+        },
+        {
+          "wall_ms": 22437,
+          "active_time": 15.7495970000003,
+          "fps": 60,
+          "kills": 164,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 123,
+          "logical_shots": 35
+        },
+        {
+          "wall_ms": 23199,
+          "active_time": 16.472263666667,
+          "fps": 60,
+          "kills": 181,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 128,
+          "logical_shots": 36
+        },
+        {
+          "wall_ms": 23967,
+          "active_time": 16.678263666667,
+          "fps": 60,
+          "kills": 183,
+          "level": 8,
+          "paused": true,
+          "enemies_live": 130,
+          "logical_shots": 34
+        },
+        {
+          "wall_ms": 24790,
+          "active_time": 16.8449303333336,
+          "fps": 60,
+          "kills": 187,
+          "level": 8,
+          "paused": false,
+          "enemies_live": 129,
+          "logical_shots": 28
+        },
+        {
+          "wall_ms": 25570,
+          "active_time": 17.5735970000003,
+          "fps": 60,
+          "kills": 208,
+          "level": 8,
+          "paused": false,
+          "enemies_live": 109,
+          "logical_shots": 40
+        },
+        {
+          "wall_ms": 26339,
+          "active_time": 18.2992636666669,
+          "fps": 60,
+          "kills": 226,
+          "level": 8,
+          "paused": false,
+          "enemies_live": 119,
+          "logical_shots": 43
+        },
+        {
+          "wall_ms": 27119,
+          "active_time": 19.0582636666668,
+          "fps": 60,
+          "kills": 236,
+          "level": 8,
+          "paused": false,
+          "enemies_live": 124,
+          "logical_shots": 38
+        },
+        {
+          "wall_ms": 27889,
+          "active_time": 19.0915970000002,
+          "fps": 60,
+          "kills": 236,
+          "level": 9,
+          "paused": true,
+          "enemies_live": 124,
+          "logical_shots": 38
+        },
+        {
+          "wall_ms": 28700,
+          "active_time": 19.2779303333335,
+          "fps": 60,
+          "kills": 242,
+          "level": 9,
+          "paused": false,
+          "enemies_live": 126,
+          "logical_shots": 48
+        },
+        {
+          "wall_ms": 29488,
+          "active_time": 19.9399303333335,
+          "fps": 60,
+          "kills": 261,
+          "level": 9,
+          "paused": false,
+          "enemies_live": 119,
+          "logical_shots": 48
+        },
+        {
+          "wall_ms": 30255,
+          "active_time": 20.7076595923811,
+          "fps": 59,
+          "kills": 276,
+          "level": 9,
+          "paused": false,
+          "enemies_live": 111,
+          "logical_shots": 43
+        }
+      ]
+    },
+    {
+      "original_local_record": "forge-desktop.json",
+      "summary": {
+        "label": "forge-desktop",
+        "stage": "forge",
+        "version": "0.26.0-r38",
+        "activeSeconds": 20.1315232400001,
+        "controlledNaturalInput": true,
+        "gameplayInjection": false,
+        "video": false,
+        "mobileEmulation": false,
+        "meanFPS": 59.95454545454545,
+        "medianFPS": 60,
+        "minFPS": 59,
+        "maxFPS": 60,
+        "peakEnemies": 141,
+        "peakLogicalShots": 154,
+        "kills": 260,
+        "runTheme": "clockwork_forge",
+        "roster": {
+          "clockwork_reaper": 1,
+          "dune_scarab": 0.3,
+          "normal": 0.15,
+          "tank": 0.4
+        },
+        "actualSpeciesCounts": {
+          "clockwork_reaper": 382,
+          "dune_scarab": 104,
+          "normal": 51
+        },
+        "newSpeciesActuallySpawned": [
+          "clockwork_reaper",
+          "dune_scarab"
+        ],
+        "rendering": {
+          "css": [
+            1280,
+            720
+          ],
+          "canvas": [
+            1280,
+            720
+          ],
+          "dpr": 1,
+          "renderer": "ANGLE (Intel, Intel(R) Graphics (0x00007D67) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+        },
+        "nativeGLVerification": {
+          "ready": true,
+          "cachedQueries": 3318,
+          "scissorMatches": true,
+          "drawMatches": true,
+          "readMatches": true
+        },
+        "identity": {
+          "htmlSHA256": "0eca895cb57d8914ab9bcabf954f8b82b1adf9bed4cffec6d681f47af81207fe",
+          "pckNames": [
+            "index-3ad1a1f2ade9.pck"
+          ]
+        },
+        "errors": []
+      },
+      "actual_input_events": [
+        {
+          "kind": "actual_world_map_chapter2_node",
+          "selected_stage_id": "forge",
+          "chapter": 1
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 3.43025333333333,
+          "level": 2
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 6.12991999999999,
+          "level": 3
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 8.9747746666667,
+          "level": 4
+        },
+        {
+          "kind": "actual_space_tap",
+          "time": 9.10810800000004
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 10.3017746666668,
+          "level": 5
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 14.3831080000003,
+          "level": 6
+        },
+        {
+          "kind": "actual_first_upgrade_card",
+          "time": 16.971189906667,
+          "level": 7
+        }
+      ],
+      "samples": [
+        {
+          "wall_ms": 5,
+          "active_time": 0.116666666666667,
+          "fps": 35,
+          "kills": 0,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 0,
+          "logical_shots": 0
+        },
+        {
+          "wall_ms": 772,
+          "active_time": 0.836586666666668,
+          "fps": 36,
+          "kills": 8,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 20,
+          "logical_shots": 41
+        },
+        {
+          "wall_ms": 1533,
+          "active_time": 1.47592,
+          "fps": 36,
+          "kills": 12,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 29,
+          "logical_shots": 31
+        },
+        {
+          "wall_ms": 2293,
+          "active_time": 2.26525333333333,
+          "fps": 60,
+          "kills": 15,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 41,
+          "logical_shots": 78
+        },
+        {
+          "wall_ms": 3054,
+          "active_time": 2.98791999999999,
+          "fps": 60,
+          "kills": 21,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 51,
+          "logical_shots": 117
+        },
+        {
+          "wall_ms": 3817,
+          "active_time": 3.43025333333333,
+          "fps": 60,
+          "kills": 23,
+          "level": 2,
+          "paused": true,
+          "enemies_live": 48,
+          "logical_shots": 100
+        },
+        {
+          "wall_ms": 4643,
+          "active_time": 3.61358666666666,
+          "fps": 60,
+          "kills": 25,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 50,
+          "logical_shots": 109
+        },
+        {
+          "wall_ms": 5941,
+          "active_time": 4.83158666666666,
+          "fps": 60,
+          "kills": 36,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 70,
+          "logical_shots": 103
+        },
+        {
+          "wall_ms": 6701,
+          "active_time": 5.52391999999999,
+          "fps": 60,
+          "kills": 42,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 72,
+          "logical_shots": 100
+        },
+        {
+          "wall_ms": 7466,
+          "active_time": 6.12991999999999,
+          "fps": 60,
+          "kills": 55,
+          "level": 3,
+          "paused": true,
+          "enemies_live": 71,
+          "logical_shots": 115
+        },
+        {
+          "wall_ms": 8304,
+          "active_time": 6.29658666666665,
+          "fps": 60,
+          "kills": 56,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 74,
+          "logical_shots": 107
+        },
+        {
+          "wall_ms": 9070,
+          "active_time": 6.98291999999998,
+          "fps": 60,
+          "kills": 58,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 85,
+          "logical_shots": 127
+        },
+        {
+          "wall_ms": 9843,
+          "active_time": 7.77644133333331,
+          "fps": 59,
+          "kills": 68,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 102,
+          "logical_shots": 150
+        },
+        {
+          "wall_ms": 10625,
+          "active_time": 8.53544133333334,
+          "fps": 60,
+          "kills": 82,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 94,
+          "logical_shots": 111
+        },
+        {
+          "wall_ms": 11389,
+          "active_time": 8.9747746666667,
+          "fps": 60,
+          "kills": 87,
+          "level": 4,
+          "paused": true,
+          "enemies_live": 97,
+          "logical_shots": 151
+        },
+        {
+          "wall_ms": 12220,
+          "active_time": 9.10810800000004,
+          "fps": 60,
+          "kills": 88,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 87,
+          "logical_shots": 123
+        },
+        {
+          "wall_ms": 12979,
+          "active_time": 9.8124413333334,
+          "fps": 60,
+          "kills": 102,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 87,
+          "logical_shots": 128
+        },
+        {
+          "wall_ms": 13754,
+          "active_time": 10.3017746666668,
+          "fps": 60,
+          "kills": 115,
+          "level": 5,
+          "paused": true,
+          "enemies_live": 86,
+          "logical_shots": 146
+        },
+        {
+          "wall_ms": 14592,
+          "active_time": 10.4714413333334,
+          "fps": 60,
+          "kills": 117,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 91,
+          "logical_shots": 130
+        },
+        {
+          "wall_ms": 15356,
+          "active_time": 11.1834413333335,
+          "fps": 60,
+          "kills": 126,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 84,
+          "logical_shots": 138
+        },
+        {
+          "wall_ms": 16121,
+          "active_time": 11.9061080000002,
+          "fps": 60,
+          "kills": 139,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 103,
+          "logical_shots": 127
+        },
+        {
+          "wall_ms": 16886,
+          "active_time": 12.6151080000002,
+          "fps": 60,
+          "kills": 145,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 105,
+          "logical_shots": 150
+        },
+        {
+          "wall_ms": 17645,
+          "active_time": 13.3574413333336,
+          "fps": 60,
+          "kills": 151,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 106,
+          "logical_shots": 148
+        },
+        {
+          "wall_ms": 18412,
+          "active_time": 14.0801080000003,
+          "fps": 60,
+          "kills": 158,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 127,
+          "logical_shots": 129
+        },
+        {
+          "wall_ms": 19174,
+          "active_time": 14.3831080000003,
+          "fps": 60,
+          "kills": 159,
+          "level": 6,
+          "paused": true,
+          "enemies_live": 117,
+          "logical_shots": 131
+        },
+        {
+          "wall_ms": 19977,
+          "active_time": 14.4831080000003,
+          "fps": 60,
+          "kills": 159,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 117,
+          "logical_shots": 154
+        },
+        {
+          "wall_ms": 20740,
+          "active_time": 15.2370272400003,
+          "fps": 60,
+          "kills": 176,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 106,
+          "logical_shots": 124
+        },
+        {
+          "wall_ms": 21510,
+          "active_time": 16.000189906667,
+          "fps": 60,
+          "kills": 196,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 114,
+          "logical_shots": 117
+        },
+        {
+          "wall_ms": 22292,
+          "active_time": 16.7288565733337,
+          "fps": 60,
+          "kills": 216,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 109,
+          "logical_shots": 125
+        },
+        {
+          "wall_ms": 23065,
+          "active_time": 16.971189906667,
+          "fps": 60,
+          "kills": 230,
+          "level": 7,
+          "paused": true,
+          "enemies_live": 113,
+          "logical_shots": 130
+        },
+        {
+          "wall_ms": 23892,
+          "active_time": 17.124189906667,
+          "fps": 60,
+          "kills": 230,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 112,
+          "logical_shots": 135
+        },
+        {
+          "wall_ms": 24673,
+          "active_time": 17.9135232400003,
+          "fps": 60,
+          "kills": 236,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 116,
+          "logical_shots": 124
+        },
+        {
+          "wall_ms": 25439,
+          "active_time": 18.6391899066669,
+          "fps": 60,
+          "kills": 247,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 115,
+          "logical_shots": 129
+        },
+        {
+          "wall_ms": 26209,
+          "active_time": 19.3618565733335,
+          "fps": 60,
+          "kills": 257,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 126,
+          "logical_shots": 129
+        },
+        {
+          "wall_ms": 26988,
+          "active_time": 20.1315232400001,
+          "fps": 60,
+          "kills": 260,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 141,
+          "logical_shots": 146
+        }
+      ]
+    },
+    {
+      "original_local_record": "tide-phone.json",
+      "summary": {
+        "label": "tide-phone",
+        "stage": "tide",
+        "version": "0.26.0-r38",
+        "activeSeconds": 30.6256615911118,
+        "controlledNaturalInput": true,
+        "gameplayInjection": false,
+        "video": false,
+        "mobileEmulation": true,
+        "meanFPS": 59.806451612903224,
+        "medianFPS": 60,
+        "minFPS": 58,
+        "maxFPS": 60,
+        "peakEnemies": 150,
+        "peakLogicalShots": 141,
+        "kills": 456,
+        "runTheme": "tidal_ruins",
+        "roster": {
+          "coral_colossus": 0.75,
+          "fast": 0.12,
+          "normal": 0.18,
+          "tide_siren": 1
+        },
+        "actualSpeciesCounts": {
+          "coral_colossus": 230,
+          "fast": 27,
+          "normal": 92,
+          "tide_siren": 491
+        },
+        "newSpeciesActuallySpawned": [
+          "coral_colossus",
+          "tide_siren"
+        ],
+        "rendering": {
+          "css": [
+            844,
+            390
+          ],
+          "canvas": [
+            1688,
+            780
+          ],
+          "dpr": 2,
+          "renderer": "ANGLE (Intel, Intel(R) Graphics (0x00007D67) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+        },
+        "nativeGLVerification": {
+          "ready": true,
+          "cachedQueries": 3934,
+          "scissorMatches": true,
+          "drawMatches": true,
+          "readMatches": true
+        },
+        "identity": {
+          "htmlSHA256": "0eca895cb57d8914ab9bcabf954f8b82b1adf9bed4cffec6d681f47af81207fe",
+          "pckNames": [
+            "index-3ad1a1f2ade9.pck"
+          ]
+        },
+        "errors": []
+      },
+      "actual_input_events": [
+        {
+          "kind": "actual_world_map_chapter2_node",
+          "selected_stage_id": "tide",
+          "chapter": 1
+        }
+      ],
+      "samples": [
+        {
+          "wall_ms": 8,
+          "active_time": 0.123433333333333,
+          "fps": 34,
+          "kills": 0,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 0,
+          "logical_shots": 0
+        },
+        {
+          "wall_ms": 871,
+          "active_time": 0.963042666666668,
+          "fps": 31,
+          "kills": 11,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 19,
+          "logical_shots": 29
+        },
+        {
+          "wall_ms": 1736,
+          "active_time": 1.81604266666667,
+          "fps": 60,
+          "kills": 14,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 36,
+          "logical_shots": 42
+        },
+        {
+          "wall_ms": 2604,
+          "active_time": 2.655376,
+          "fps": 60,
+          "kills": 18,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 48,
+          "logical_shots": 99
+        },
+        {
+          "wall_ms": 3469,
+          "active_time": 3.45083587999999,
+          "fps": 60,
+          "kills": 25,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 46,
+          "logical_shots": 100
+        },
+        {
+          "wall_ms": 5053,
+          "active_time": 4.98557354666665,
+          "fps": 48,
+          "kills": 37,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 70,
+          "logical_shots": 105
+        },
+        {
+          "wall_ms": 5921,
+          "active_time": 5.86124021333332,
+          "fps": 60,
+          "kills": 42,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 79,
+          "logical_shots": 87
+        },
+        {
+          "wall_ms": 6788,
+          "active_time": 6.63690542666665,
+          "fps": 60,
+          "kills": 52,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 79,
+          "logical_shots": 118
+        },
+        {
+          "wall_ms": 7656,
+          "active_time": 7.43987330666664,
+          "fps": 60,
+          "kills": 58,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 97,
+          "logical_shots": 106
+        },
+        {
+          "wall_ms": 8521,
+          "active_time": 8.33217094666665,
+          "fps": 60,
+          "kills": 62,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 98,
+          "logical_shots": 104
+        },
+        {
+          "wall_ms": 9391,
+          "active_time": 9.17747046666669,
+          "fps": 60,
+          "kills": 73,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 94,
+          "logical_shots": 111
+        },
+        {
+          "wall_ms": 10257,
+          "active_time": 9.97277198666673,
+          "fps": 60,
+          "kills": 87,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 94,
+          "logical_shots": 102
+        },
+        {
+          "wall_ms": 11123,
+          "active_time": 10.7650736266668,
+          "fps": 60,
+          "kills": 105,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 92,
+          "logical_shots": 118
+        },
+        {
+          "wall_ms": 11990,
+          "active_time": 11.5407092666668,
+          "fps": 60,
+          "kills": 112,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 105,
+          "logical_shots": 105
+        },
+        {
+          "wall_ms": 12861,
+          "active_time": 12.4330069066668,
+          "fps": 60,
+          "kills": 114,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 117,
+          "logical_shots": 103
+        },
+        {
+          "wall_ms": 13739,
+          "active_time": 13.3056386666669,
+          "fps": 60,
+          "kills": 119,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 127,
+          "logical_shots": 102
+        },
+        {
+          "wall_ms": 14625,
+          "active_time": 14.1176061866669,
+          "fps": 60,
+          "kills": 126,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 136,
+          "logical_shots": 111
+        },
+        {
+          "wall_ms": 15498,
+          "active_time": 14.990237946667,
+          "fps": 60,
+          "kills": 139,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 143,
+          "logical_shots": 106
+        },
+        {
+          "wall_ms": 16373,
+          "active_time": 15.771873346667,
+          "fps": 60,
+          "kills": 158,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 131,
+          "logical_shots": 100
+        },
+        {
+          "wall_ms": 17239,
+          "active_time": 16.550508866667,
+          "fps": 60,
+          "kills": 187,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 130,
+          "logical_shots": 114
+        },
+        {
+          "wall_ms": 18127,
+          "active_time": 17.4154742666671,
+          "fps": 60,
+          "kills": 202,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 129,
+          "logical_shots": 103
+        },
+        {
+          "wall_ms": 19011,
+          "active_time": 18.2744399066671,
+          "fps": 60,
+          "kills": 209,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 128,
+          "logical_shots": 114
+        },
+        {
+          "wall_ms": 19890,
+          "active_time": 19.0637416666672,
+          "fps": 60,
+          "kills": 216,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 147,
+          "logical_shots": 104
+        },
+        {
+          "wall_ms": 20762,
+          "active_time": 19.9697054266672,
+          "fps": 60,
+          "kills": 227,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 150,
+          "logical_shots": 114
+        },
+        {
+          "wall_ms": 21642,
+          "active_time": 20.7846728266672,
+          "fps": 60,
+          "kills": 243,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 141,
+          "logical_shots": 99
+        },
+        {
+          "wall_ms": 22539,
+          "active_time": 21.5829742266673,
+          "fps": 60,
+          "kills": 265,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 137,
+          "logical_shots": 109
+        },
+        {
+          "wall_ms": 23409,
+          "active_time": 22.4116077466673,
+          "fps": 60,
+          "kills": 279,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 129,
+          "logical_shots": 89
+        },
+        {
+          "wall_ms": 24317,
+          "active_time": 23.2569072666674,
+          "fps": 60,
+          "kills": 299,
+          "level": 8,
+          "paused": false,
+          "enemies_live": 127,
+          "logical_shots": 125
+        },
+        {
+          "wall_ms": 25193,
+          "active_time": 24.0718746666674,
+          "fps": 60,
+          "kills": 315,
+          "level": 8,
+          "paused": false,
+          "enemies_live": 131,
+          "logical_shots": 126
+        },
+        {
+          "wall_ms": 26093,
+          "active_time": 24.9111744266674,
+          "fps": 60,
+          "kills": 326,
+          "level": 8,
+          "paused": false,
+          "enemies_live": 137,
+          "logical_shots": 139
+        },
+        {
+          "wall_ms": 26978,
+          "active_time": 25.7761398266675,
+          "fps": 60,
+          "kills": 342,
+          "level": 8,
+          "paused": false,
+          "enemies_live": 143,
+          "logical_shots": 118
+        },
+        {
+          "wall_ms": 27857,
+          "active_time": 26.5797869200008,
+          "fps": 59,
+          "kills": 369,
+          "level": 8,
+          "paused": false,
+          "enemies_live": 126,
+          "logical_shots": 132
+        },
+        {
+          "wall_ms": 28748,
+          "active_time": 27.3811202533341,
+          "fps": 60,
+          "kills": 391,
+          "level": 8,
+          "paused": false,
+          "enemies_live": 117,
+          "logical_shots": 139
+        },
+        {
+          "wall_ms": 29650,
+          "active_time": 28.240120253334,
+          "fps": 60,
+          "kills": 406,
+          "level": 9,
+          "paused": false,
+          "enemies_live": 125,
+          "logical_shots": 137
+        },
+        {
+          "wall_ms": 30524,
+          "active_time": 29.0550115866673,
+          "fps": 58,
+          "kills": 421,
+          "level": 9,
+          "paused": false,
+          "enemies_live": 116,
+          "logical_shots": 141
+        },
+        {
+          "wall_ms": 31398,
+          "active_time": 29.7940281911118,
+          "fps": 58,
+          "kills": 440,
+          "level": 9,
+          "paused": false,
+          "enemies_live": 117,
+          "logical_shots": 112
+        },
+        {
+          "wall_ms": 32276,
+          "active_time": 30.5756635911118,
+          "fps": 59,
+          "kills": 456,
+          "level": 9,
+          "paused": false,
+          "enemies_live": 111,
+          "logical_shots": 138
+        }
+      ]
+    },
+    {
+      "original_local_record": "recruit-bloom-desktop.json",
+      "summary": {
+        "label": "recruit-bloom-desktop",
+        "stage": "bloom",
+        "version": "0.26.0-r38",
+        "activeSeconds": 20.3117720296297,
+        "controlledNaturalInput": true,
+        "gameplayInjection": false,
+        "video": false,
+        "mobileEmulation": false,
+        "meanFPS": 57.18181818181818,
+        "medianFPS": 60,
+        "minFPS": 45,
+        "maxFPS": 60,
+        "peakEnemies": 107,
+        "peakLogicalShots": 73,
+        "kills": 282,
+        "runTheme": "moonbloom_grove",
+        "roster": {
+          "bloom_wisp": 1,
+          "fast": 0.48,
+          "normal": 0.15,
+          "sand_stalker": 0.32
+        },
+        "actualSpeciesCounts": {
+          "bloom_wisp": 322,
+          "fast": 41,
+          "normal": 57,
+          "sand_stalker": 111
+        },
+        "newSpeciesActuallySpawned": [
+          "bloom_wisp",
+          "sand_stalker"
+        ],
+        "rendering": {
+          "css": [
+            1280,
+            720
+          ],
+          "canvas": [
+            1280,
+            720
+          ],
+          "dpr": 1,
+          "renderer": "ANGLE (Intel, Intel(R) Graphics (0x00007D67) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+        },
+        "nativeGLVerification": {
+          "ready": true,
+          "cachedQueries": 61002,
+          "scissorMatches": true,
+          "drawMatches": true,
+          "readMatches": true
+        },
+        "identity": {
+          "htmlSHA256": "0eca895cb57d8914ab9bcabf954f8b82b1adf9bed4cffec6d681f47af81207fe",
+          "pckNames": [
+            "index-3ad1a1f2ade9.pck"
+          ]
+        },
+        "errors": []
+      },
+      "actual_input_events": [
+        {
+          "kind": "actual_world_map_chapter2_node",
+          "selected_stage_id": "bloom",
+          "chapter": 1
+        },
+        {
+          "kind": "actual_upgrade_card",
+          "cardIndex": 0,
+          "intent": "No new hero offered; take real riftline fork to progress while preserving squad capacity",
+          "time": 4.76153599999999,
+          "level": 2
+        },
+        {
+          "kind": "actual_upgrade_card",
+          "cardIndex": 0,
+          "intent": "No new hero offered; choose orbit resonance, keep squad slots open",
+          "time": 8.98203384000001,
+          "level": 3
+        },
+        {
+          "kind": "actual_space_tap",
+          "time": 9.13202784000001
+        },
+        {
+          "kind": "actual_upgrade_card",
+          "cardIndex": 0,
+          "intent": "No new hero offered; increase pickup range to reach next real upgrade",
+          "time": 9.86366524000005,
+          "level": 4
+        },
+        {
+          "kind": "actual_upgrade_card",
+          "cardIndex": 0,
+          "intent": "Recruit naturally offered NEW solar_lancer 星焰槍騎; actual left card click",
+          "time": 11.3786046400001,
+          "level": 5
+        },
+        {
+          "kind": "actual_upgrade_card",
+          "cardIndex": 0,
+          "intent": "Solar lancer already recruited; upgrade riftline fork without injecting state",
+          "time": 14.5538091333336,
+          "level": 6
+        },
+        {
+          "kind": "actual_upgrade_card",
+          "cardIndex": 0,
+          "intent": "New solar lancer joined (squad 4); choose real 12-to-16 volley upgrade",
+          "time": 19.3493477229631,
+          "level": 7
+        }
+      ],
+      "samples": [
+        {
+          "wall_ms": 5,
+          "active_time": 0.1215,
+          "fps": 20,
+          "kills": 0,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 0,
+          "logical_shots": 0
+        },
+        {
+          "wall_ms": 774,
+          "active_time": 0.787602666666667,
+          "fps": 20,
+          "kills": 12,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 15,
+          "logical_shots": 29
+        },
+        {
+          "wall_ms": 1541,
+          "active_time": 1.60420266666667,
+          "fps": 57,
+          "kills": 12,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 33,
+          "logical_shots": 44
+        },
+        {
+          "wall_ms": 2307,
+          "active_time": 2.27686933333333,
+          "fps": 60,
+          "kills": 14,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 40,
+          "logical_shots": 45
+        },
+        {
+          "wall_ms": 3066,
+          "active_time": 3.06620266666666,
+          "fps": 60,
+          "kills": 18,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 40,
+          "logical_shots": 32
+        },
+        {
+          "wall_ms": 4359,
+          "active_time": 4.30853599999999,
+          "fps": 60,
+          "kills": 27,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 61,
+          "logical_shots": 31
+        },
+        {
+          "wall_ms": 5127,
+          "active_time": 4.76153599999999,
+          "fps": 60,
+          "kills": 30,
+          "level": 2,
+          "paused": true,
+          "enemies_live": 65,
+          "logical_shots": 36
+        },
+        {
+          "wall_ms": 66593,
+          "active_time": 4.91152999999999,
+          "fps": 60,
+          "kills": 32,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 70,
+          "logical_shots": 34
+        },
+        {
+          "wall_ms": 67361,
+          "active_time": 5.65683351999998,
+          "fps": 60,
+          "kills": 38,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 77,
+          "logical_shots": 44
+        },
+        {
+          "wall_ms": 68125,
+          "active_time": 6.31580715999998,
+          "fps": 60,
+          "kills": 43,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 74,
+          "logical_shots": 48
+        },
+        {
+          "wall_ms": 68895,
+          "active_time": 7.12177491999997,
+          "fps": 60,
+          "kills": 53,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 91,
+          "logical_shots": 41
+        },
+        {
+          "wall_ms": 69662,
+          "active_time": 7.81108067999996,
+          "fps": 60,
+          "kills": 56,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 91,
+          "logical_shots": 43
+        },
+        {
+          "wall_ms": 70432,
+          "active_time": 8.52605207999999,
+          "fps": 60,
+          "kills": 76,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 75,
+          "logical_shots": 53
+        },
+        {
+          "wall_ms": 71212,
+          "active_time": 8.98203384000001,
+          "fps": 60,
+          "kills": 89,
+          "level": 3,
+          "paused": true,
+          "enemies_live": 80,
+          "logical_shots": 37
+        },
+        {
+          "wall_ms": 179102,
+          "active_time": 9.13202784000001,
+          "fps": 60,
+          "kills": 92,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 75,
+          "logical_shots": 48
+        },
+        {
+          "wall_ms": 179891,
+          "active_time": 9.86366524000005,
+          "fps": 60,
+          "kills": 104,
+          "level": 4,
+          "paused": true,
+          "enemies_live": 75,
+          "logical_shots": 50
+        },
+        {
+          "wall_ms": 224617,
+          "active_time": 10.0499911200001,
+          "fps": 60,
+          "kills": 108,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 75,
+          "logical_shots": 37
+        },
+        {
+          "wall_ms": 225388,
+          "active_time": 10.7726288800001,
+          "fps": 60,
+          "kills": 119,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 78,
+          "logical_shots": 50
+        },
+        {
+          "wall_ms": 226154,
+          "active_time": 11.3786046400001,
+          "fps": 60,
+          "kills": 121,
+          "level": 5,
+          "paused": true,
+          "enemies_live": 84,
+          "logical_shots": 53
+        },
+        {
+          "wall_ms": 291823,
+          "active_time": 11.5723473066668,
+          "fps": 60,
+          "kills": 124,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 89,
+          "logical_shots": 38
+        },
+        {
+          "wall_ms": 292603,
+          "active_time": 12.2822349466668,
+          "fps": 59,
+          "kills": 134,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 89,
+          "logical_shots": 48
+        },
+        {
+          "wall_ms": 293369,
+          "active_time": 13.0382047066669,
+          "fps": 60,
+          "kills": 142,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 107,
+          "logical_shots": 36
+        },
+        {
+          "wall_ms": 294147,
+          "active_time": 13.7388431333335,
+          "fps": 59,
+          "kills": 150,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 99,
+          "logical_shots": 52
+        },
+        {
+          "wall_ms": 294934,
+          "active_time": 14.5204758000002,
+          "fps": 59,
+          "kills": 179,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 80,
+          "logical_shots": 49
+        },
+        {
+          "wall_ms": 295705,
+          "active_time": 14.5538091333336,
+          "fps": 59,
+          "kills": 179,
+          "level": 6,
+          "paused": true,
+          "enemies_live": 80,
+          "logical_shots": 51
+        },
+        {
+          "wall_ms": 388522,
+          "active_time": 14.7242992666669,
+          "fps": 60,
+          "kills": 189,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 86,
+          "logical_shots": 37
+        },
+        {
+          "wall_ms": 389292,
+          "active_time": 15.4665531466669,
+          "fps": 51,
+          "kills": 198,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 93,
+          "logical_shots": 48
+        },
+        {
+          "wall_ms": 390058,
+          "active_time": 16.1873345540743,
+          "fps": 54,
+          "kills": 206,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 96,
+          "logical_shots": 57
+        },
+        {
+          "wall_ms": 390823,
+          "active_time": 16.9108483896299,
+          "fps": 54,
+          "kills": 225,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 85,
+          "logical_shots": 48
+        },
+        {
+          "wall_ms": 391606,
+          "active_time": 17.6593463896299,
+          "fps": 51,
+          "kills": 255,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 81,
+          "logical_shots": 35
+        },
+        {
+          "wall_ms": 392388,
+          "active_time": 18.3984241674076,
+          "fps": 45,
+          "kills": 262,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 90,
+          "logical_shots": 45
+        },
+        {
+          "wall_ms": 393157,
+          "active_time": 19.0618610562965,
+          "fps": 60,
+          "kills": 268,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 103,
+          "logical_shots": 40
+        },
+        {
+          "wall_ms": 393924,
+          "active_time": 19.3493477229631,
+          "fps": 60,
+          "kills": 271,
+          "level": 7,
+          "paused": true,
+          "enemies_live": 96,
+          "logical_shots": 42
+        },
+        {
+          "wall_ms": 508294,
+          "active_time": 19.5243423896298,
+          "fps": 60,
+          "kills": 271,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 95,
+          "logical_shots": 70
+        },
+        {
+          "wall_ms": 509131,
+          "active_time": 20.3117720296297,
+          "fps": 46,
+          "kills": 282,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 84,
+          "logical_shots": 73
+        }
+      ]
+    },
+    {
+      "original_local_record": "scale-fixed-r2-bloom-desktop.json",
+      "summary": {
+        "label": "scale-fixed-r2-bloom-desktop",
+        "stage": "bloom",
+        "version": "0.26.0-r38",
+        "activeSeconds": 20.428409946667,
+        "controlledNaturalInput": true,
+        "gameplayInjection": false,
+        "video": false,
+        "mobileEmulation": false,
+        "meanFPS": 58.95454545454545,
+        "medianFPS": 60,
+        "minFPS": 55,
+        "maxFPS": 60,
+        "peakEnemies": 139,
+        "peakLogicalShots": 53,
+        "kills": 263,
+        "runTheme": "moonbloom_grove",
+        "roster": {
+          "bloom_wisp": 1,
+          "fast": 0.48,
+          "normal": 0.15,
+          "sand_stalker": 0.32
+        },
+        "actualSpeciesCounts": {
+          "bloom_wisp": 333,
+          "fast": 51,
+          "normal": 56,
+          "sand_stalker": 103
+        },
+        "newSpeciesActuallySpawned": [
+          "bloom_wisp",
+          "sand_stalker"
+        ],
+        "rendering": {
+          "css": [
+            1280,
+            720
+          ],
+          "canvas": [
+            1280,
+            720
+          ],
+          "dpr": 1,
+          "renderer": "ANGLE (Intel, Intel(R) Graphics (0x00007D67) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+        },
+        "nativeGLVerification": {
+          "ready": true,
+          "cachedQueries": 57618,
+          "scissorMatches": true,
+          "drawMatches": true,
+          "readMatches": true
+        },
+        "identity": {
+          "htmlSHA256": "862041b055a6533a414dbf7a1d51a95cc48a44866000b5f639067e4a715e825b",
+          "pckNames": [
+            "index-61d50a298c4c.pck"
+          ]
+        },
+        "errors": []
+      },
+      "actual_input_events": [
+        {
+          "kind": "actual_world_map_chapter2_node",
+          "selected_stage_id": "bloom",
+          "chapter": 1
+        },
+        {
+          "kind": "actual_upgrade_card",
+          "cardIndex": 2,
+          "intent": "Root visually approved right chain damage upgrade; no new hero yet, retain slots",
+          "time": 3.99007955555555,
+          "level": 2
+        },
+        {
+          "kind": "actual_upgrade_card",
+          "cardIndex": 0,
+          "intent": "Recruit naturally offered NEW shadow_ronin 影刃遊俠; root visually confirms left card, scale2.1",
+          "time": 6.43286145777776,
+          "level": 3
+        },
+        {
+          "kind": "actual_space_tap",
+          "time": 9.49377049777782
+        },
+        {
+          "kind": "actual_upgrade_card",
+          "cardIndex": 1,
+          "intent": "Upgrade actual missile damage 9-to-12 after shadow ronin joins",
+          "time": 10.2467704977779,
+          "level": 4
+        },
+        {
+          "kind": "actual_upgrade_card",
+          "cardIndex": 1,
+          "intent": "Shadow ronin recruited; add real grenade ally for survival/firepower while walking",
+          "time": 15.6859819155559,
+          "level": 5
+        },
+        {
+          "kind": "actual_upgrade_card",
+          "cardIndex": 0,
+          "intent": "Recruit naturally offered NEW tide_oracle 潮汐魔導; validate scale1.7 beside recruited shadow2.1",
+          "time": 17.9314192800004,
+          "level": 6
+        },
+        {
+          "kind": "actual_upgrade_card",
+          "cardIndex": 0,
+          "intent": "Both new heroes joined; take actual orbit count2-to-3 before final readable battle screenshot",
+          "time": 19.451747946667,
+          "level": 7
+        }
+      ],
+      "samples": [
+        {
+          "wall_ms": 9,
+          "active_time": 0.133333333333333,
+          "fps": 20,
+          "kills": 0,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 0,
+          "logical_shots": 0
+        },
+        {
+          "wall_ms": 772,
+          "active_time": 0.784697777777779,
+          "fps": 21,
+          "kills": 12,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 15,
+          "logical_shots": 29
+        },
+        {
+          "wall_ms": 1545,
+          "active_time": 1.55988666666667,
+          "fps": 45,
+          "kills": 12,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 32,
+          "logical_shots": 30
+        },
+        {
+          "wall_ms": 2327,
+          "active_time": 2.37955333333333,
+          "fps": 59,
+          "kills": 16,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 41,
+          "logical_shots": 31
+        },
+        {
+          "wall_ms": 3105,
+          "active_time": 3.12724733333333,
+          "fps": 60,
+          "kills": 23,
+          "level": 1,
+          "paused": false,
+          "enemies_live": 51,
+          "logical_shots": 31
+        },
+        {
+          "wall_ms": 4470,
+          "active_time": 3.99007955555555,
+          "fps": 60,
+          "kills": 28,
+          "level": 2,
+          "paused": true,
+          "enemies_live": 65,
+          "logical_shots": 44
+        },
+        {
+          "wall_ms": 100052,
+          "active_time": 4.12340755555555,
+          "fps": 60,
+          "kills": 28,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 63,
+          "logical_shots": 31
+        },
+        {
+          "wall_ms": 100810,
+          "active_time": 4.87626436444444,
+          "fps": 60,
+          "kills": 34,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 64,
+          "logical_shots": 43
+        },
+        {
+          "wall_ms": 101579,
+          "active_time": 5.61859769777777,
+          "fps": 57,
+          "kills": 48,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 82,
+          "logical_shots": 36
+        },
+        {
+          "wall_ms": 102360,
+          "active_time": 6.31619945777776,
+          "fps": 60,
+          "kills": 51,
+          "level": 2,
+          "paused": false,
+          "enemies_live": 82,
+          "logical_shots": 33
+        },
+        {
+          "wall_ms": 103135,
+          "active_time": 6.43286145777776,
+          "fps": 60,
+          "kills": 51,
+          "level": 3,
+          "paused": true,
+          "enemies_live": 82,
+          "logical_shots": 45
+        },
+        {
+          "wall_ms": 155851,
+          "active_time": 6.60252133777776,
+          "fps": 60,
+          "kills": 53,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 87,
+          "logical_shots": 31
+        },
+        {
+          "wall_ms": 156612,
+          "active_time": 7.32515909777775,
+          "fps": 60,
+          "kills": 56,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 99,
+          "logical_shots": 38
+        },
+        {
+          "wall_ms": 157392,
+          "active_time": 8.03413073777775,
+          "fps": 60,
+          "kills": 62,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 106,
+          "logical_shots": 48
+        },
+        {
+          "wall_ms": 158167,
+          "active_time": 8.80143716444445,
+          "fps": 60,
+          "kills": 74,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 103,
+          "logical_shots": 36
+        },
+        {
+          "wall_ms": 158935,
+          "active_time": 9.49377049777782,
+          "fps": 58,
+          "kills": 83,
+          "level": 3,
+          "paused": false,
+          "enemies_live": 104,
+          "logical_shots": 34
+        },
+        {
+          "wall_ms": 159711,
+          "active_time": 10.2467704977779,
+          "fps": 58,
+          "kills": 88,
+          "level": 4,
+          "paused": true,
+          "enemies_live": 107,
+          "logical_shots": 42
+        },
+        {
+          "wall_ms": 243805,
+          "active_time": 10.3861038311112,
+          "fps": 60,
+          "kills": 91,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 104,
+          "logical_shots": 32
+        },
+        {
+          "wall_ms": 244602,
+          "active_time": 11.1680320533334,
+          "fps": 59,
+          "kills": 103,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 104,
+          "logical_shots": 50
+        },
+        {
+          "wall_ms": 245411,
+          "active_time": 11.9006391644446,
+          "fps": 57,
+          "kills": 121,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 107,
+          "logical_shots": 46
+        },
+        {
+          "wall_ms": 246184,
+          "active_time": 12.6762724977779,
+          "fps": 59,
+          "kills": 131,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 114,
+          "logical_shots": 37
+        },
+        {
+          "wall_ms": 246964,
+          "active_time": 13.4474949422224,
+          "fps": 60,
+          "kills": 139,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 113,
+          "logical_shots": 46
+        },
+        {
+          "wall_ms": 247729,
+          "active_time": 14.1048798311113,
+          "fps": 60,
+          "kills": 145,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 128,
+          "logical_shots": 45
+        },
+        {
+          "wall_ms": 248500,
+          "active_time": 14.8490282755558,
+          "fps": 59,
+          "kills": 160,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 127,
+          "logical_shots": 32
+        },
+        {
+          "wall_ms": 249279,
+          "active_time": 15.6359839155559,
+          "fps": 57,
+          "kills": 173,
+          "level": 4,
+          "paused": false,
+          "enemies_live": 113,
+          "logical_shots": 44
+        },
+        {
+          "wall_ms": 250054,
+          "active_time": 15.6859819155559,
+          "fps": 57,
+          "kills": 173,
+          "level": 5,
+          "paused": true,
+          "enemies_live": 113,
+          "logical_shots": 33
+        },
+        {
+          "wall_ms": 344162,
+          "active_time": 15.8556417955559,
+          "fps": 60,
+          "kills": 176,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 116,
+          "logical_shots": 43
+        },
+        {
+          "wall_ms": 344943,
+          "active_time": 16.5873078800003,
+          "fps": 58,
+          "kills": 198,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 124,
+          "logical_shots": 40
+        },
+        {
+          "wall_ms": 345735,
+          "active_time": 17.3421095200004,
+          "fps": 58,
+          "kills": 210,
+          "level": 5,
+          "paused": false,
+          "enemies_live": 125,
+          "logical_shots": 33
+        },
+        {
+          "wall_ms": 346516,
+          "active_time": 17.9314192800004,
+          "fps": 59,
+          "kills": 216,
+          "level": 6,
+          "paused": true,
+          "enemies_live": 137,
+          "logical_shots": 34
+        },
+        {
+          "wall_ms": 433931,
+          "active_time": 18.1230812800004,
+          "fps": 60,
+          "kills": 217,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 136,
+          "logical_shots": 48
+        },
+        {
+          "wall_ms": 434708,
+          "active_time": 18.848747946667,
+          "fps": 60,
+          "kills": 231,
+          "level": 6,
+          "paused": false,
+          "enemies_live": 137,
+          "logical_shots": 45
+        },
+        {
+          "wall_ms": 435486,
+          "active_time": 19.451747946667,
+          "fps": 59,
+          "kills": 238,
+          "level": 7,
+          "paused": true,
+          "enemies_live": 137,
+          "logical_shots": 50
+        },
+        {
+          "wall_ms": 479146,
+          "active_time": 19.6543312800003,
+          "fps": 60,
+          "kills": 242,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 139,
+          "logical_shots": 40
+        },
+        {
+          "wall_ms": 479962,
+          "active_time": 20.4117432800003,
+          "fps": 55,
+          "kills": 262,
+          "level": 7,
+          "paused": false,
+          "enemies_live": 123,
+          "logical_shots": 53
+        }
+      ]
+    }
+  ]
+}

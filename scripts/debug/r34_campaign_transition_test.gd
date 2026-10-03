@@ -59,7 +59,7 @@ func _run() -> void:
 		return
 	var stages := CATALOG.get_stages()
 	var buttons: Array = map.get("node_buttons")
-	if not _check(buttons.size() == 6, "world map does not expose six real stage buttons"):
+	if not _check(buttons.size() == stages.size(), "world map does not expose six real stage buttons"):
 		return
 	phase = "press_all_six_world_map_nodes"
 	for index in range(stages.size()):
@@ -163,7 +163,7 @@ func _run() -> void:
 	for button in final_nodes:
 		if not _check((button.get_node("Difficulty") as Label).text.contains("通關"), "a final map node did not show its clear status"):
 			return
-	if not _check((final_map.get("progress") as Label).text.contains("6／6") and GameManager.campaign_clears.size() == 6, "final world map did not show all six clears"):
+	if not _check((final_map.get("progress") as Label).text.contains("%d／%d" % [stages.size(), stages.size()]) and GameManager.campaign_clears.size() == stages.size(), "final world map did not show all six clears"):
 		return
 	finished = true
 	print("R34_CAMPAIGN_TRANSITION_PASS controlled_fixture=true scene_instances=%d arenas=%d map_node_presses=6 real_start_press=1 real_next_presses=6 clears=6/6 checkmarks=6 old_nodes=0 old_modals=0 isolated_saves=true watchdog=20s" % [scene_instances, arena_instances])

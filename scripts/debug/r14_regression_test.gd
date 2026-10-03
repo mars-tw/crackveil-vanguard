@@ -80,11 +80,11 @@ func _test_hero10_content_and_bonds() -> bool:
 		_fail("hero10 balance stats drifted")
 		return false
 	var available_heroes: Array = DEFAULT_SQUAD.get("available_heroes")
-	if available_heroes.size() != 10 or int(DEFAULT_SQUAD.get("max_members")) != 9:
-		_fail("hero10 roster must remain 10 choose 9")
+	if available_heroes.size() != 13 or int(DEFAULT_SQUAD.get("max_members")) != 9:
+		_fail("expanded roster must be 13 choose 9")
 		return false
 	var available_weapons: Array = WEAPON_CATALOG.get("available_weapons")
-	if available_weapons.size() != 11 or str(HERO10_WEAPON.get("behavior_id")) != "rift_construct":
+	if available_weapons.size() != 14 or str(HERO10_WEAPON.get("behavior_id")) != "rift_construct":
 		_fail("hero10 weapon catalog/behavior contract drifted")
 		return false
 	if not is_equal_approx(float(HERO10_WEAPON.get("damage")), 8.5) or not is_equal_approx(float(HERO10_WEAPON.get("cooldown")), 1.35):
@@ -120,7 +120,7 @@ func _test_hero10_content_and_bonds() -> bool:
 		_fail("bond did not deactivate immediately on member death")
 		return false
 	manager.queue_free()
-	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.25.0-r37":
+	if str(ProjectSettings.get_setting("application/config/version", "")) != "0.26.0-r38":
 		_fail("R34 release version drifted")
 		return false
 	if not is_equal_approx(float(R24_ORBIT_WEAPON.get("sprite_scale")), 1.09) or not is_equal_approx(float(R24_BOOMERANG_WEAPON.get("sprite_scale")), 1.18):

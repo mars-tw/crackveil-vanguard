@@ -4,8 +4,8 @@ const CATALOG := preload("res://scripts/services/stage_catalog.gd")
 const HERO_SCENE := preload("res://scenes/heroes/Hero.tscn")
 const CAPTAIN := preload("res://resources/heroes/rift_captain.tres")
 const SPAWNER := preload("res://scripts/enemies/enemy_spawner.gd")
-const BASE_COUNTS := [12, 7, 9, 10, 12, 15]
-const PHASE_COUNTS := [12, 11, 16, 20, 18, 19]
+const BASE_COUNTS := [12, 7, 9, 10, 12, 15, 15, 12, 12, 16]
+const PHASE_COUNTS := [12, 11, 16, 20, 18, 19, 21, 18, 24, 24]
 
 class Bounds:
 	extends Node2D
@@ -107,7 +107,7 @@ func _test_six_patterns() -> void:
 		EntityFactory.release_enemy(boss)
 		await get_tree().process_frame
 		print("INDEPENDENT_STAGE_R34_PATTERN %s base=%d phase2=%d anticipation_zero=true true_impact=true" % [str(stage.pattern), int(BASE_COUNTS[index]), int(PHASE_COUNTS[index])])
-	_assert(fingerprints.size() == 6, "six bosses share the same projectile plan")
+	_assert(fingerprints.size() == CATALOG.get_stages().size(), "six bosses share the same projectile plan")
 
 
 func _test_dash_pool_reuse() -> void:
@@ -144,7 +144,7 @@ func _test_campaign_reset() -> void:
 	GameManager.start_run(fixture_arena, hero, null, false)
 	_assert(GameManager.game_running and not get_tree().paused and not GameManager.waiting_for_shop and not GameManager.waiting_for_upgrade and not GameManager.waiting_for_contract and not GameManager.stage_victory_pending and not GameManager.boss_killed, "new stage retained prior modal/victory state")
 	_assert(GameManager.get_time_scale_owner_count() == 0 and is_equal_approx(Engine.time_scale, 1.0) and GameManager.touch_move_vector == Vector2.ZERO and int(GameManager.run_token) == old_token + 1, "new run retained old input/timer ownership")
-	_assert(CATALOG.get_next_stage_id("veil") == "" and not GameManager.select_stage("not_a_stage"), "final/invalid stage transitions are not bounded")
+	_assert(CATALOG.get_next_stage_id("forge") == "" and not GameManager.select_stage("not_a_stage"), "final/invalid stage transitions are not bounded")
 	print("INDEPENDENT_STAGE_R34_CAMPAIGN boss_award_once=true pause=true fresh_run_modals=0 time_owners=0 touch=zero run_token=renewed")
 
 

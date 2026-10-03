@@ -9,14 +9,20 @@ const RADII := Vector2(1400.0, 1000.0)
 const MATERIAL_SPAN := Vector2(512.0, 512.0)
 const ROOT := "res://assets/art/r36/"
 const ATLAS_PATH := ROOT + "landmarks.png"
-const TILE_PATHS := {"stone": ROOT + "tile_stone.png", "grass": ROOT + "tile_grass.png", "basalt": ROOT + "tile_basalt.png", "frost": ROOT + "tile_frost.png"}
+const TILE_PATHS := {"stone": ROOT + "tile_stone.png", "grass": ROOT + "tile_grass.png", "basalt": ROOT + "tile_basalt.png", "frost": ROOT + "tile_frost.png", "desert": "res://assets/art/r38/tile_desert.png", "coral": "res://assets/art/r38/tile_coral.png", "clockwork": "res://assets/art/r38/tile_clockwork.png"}
+const EXPEDITION_ATLAS := "res://assets/art/r38/landmarks.png"
+const EXPEDITION_LANDMARKS := {"sunken_dunes": ["曜砂王陵", "日輪石碑"], "tidal_ruins": ["珊潮殿堂", "望潮燈塔"], "moonbloom_grove": ["月華靈樹", "花冠聖祠"], "clockwork_forge": ["時輪巨門", "星齒高塔"]}
 const THEMES := {
 	"rift_void": {"tile": "stone", "field": Color(0.80, 0.90, 1.0), "road": Color(1.10, 1.02, 0.87)},
 	"wasteland_farm": {"tile": "grass", "field": Color(0.89, 1.0, 0.86), "road": Color(0.88, 0.92, 0.80)},
 	"ember_rift": {"tile": "basalt", "field": Color(1.0, 0.84, 0.87), "road": Color(0.67, 0.57, 0.61)},
 	"storm_isles": {"tile": "stone", "field": Color(0.65, 0.80, 0.95), "road": Color(0.95, 1.0, 1.06)},
 	"star_frost": {"tile": "frost", "field": Color(0.92, 0.97, 1.0), "road": Color(0.75, 0.84, 0.98)},
-	"veil_court": {"tile": "stone", "field": Color(0.93, 0.82, 1.0), "road": Color(1.0, 0.91, 0.86)}
+	"veil_court": {"tile": "stone", "field": Color(0.93, 0.82, 1.0), "road": Color(1.0, 0.91, 0.86)},
+	"sunken_dunes": {"tile": "desert", "road_tile": "desert", "field": Color(1.0, 0.88, 0.70), "road": Color(1.12, 0.98, 0.76), "landmark_pair": 0},
+	"tidal_ruins": {"tile": "coral", "road_tile": "coral", "field": Color(0.64, 0.93, 0.97), "road": Color(0.99, 1.08, 1.10), "landmark_pair": 2},
+	"moonbloom_grove": {"tile": "grass", "road_tile": "frost", "field": Color(0.74, 0.88, 0.86), "road": Color(1.02, 0.91, 1.12), "landmark_pair": 4},
+	"clockwork_forge": {"tile": "clockwork", "road_tile": "clockwork", "field": Color(0.88, 0.79, 0.71), "road": Color(1.17, 1.01, 0.72), "landmark_pair": 6}
 }
 const LANDMARK_IDS: Array[String] = ["moon_gate", "garden_fountain", "south_waypost", "ember_altar", "frost_obelisk", "storm_pylon", "veil_throne", "crystal_heart"]
 const LANDMARK_NAMES: Array[String] = ["月門遺館", "翠泉花庭", "南行驛門", "緋焰祭台", "星霜石碑", "風潮晶塔", "帷幕王座", "晶心原"]
@@ -31,6 +37,7 @@ var ground_material: ShaderMaterial
 var landmark_sprites: Array[Sprite2D] = []
 var landmark_entries: Array[Dictionary] = []
 var landmark_regions: Array[Texture2D] = []
+var loaded_landmark_atlas := ""
 var texture_cache: Dictionary = {}
 var texture_load_count: int = 0
 var fallback: Texture2D
@@ -74,7 +81,7 @@ func configure_run_theme(seed: int, theme: String = "") -> void:
 		return
 	var style: Dictionary = THEMES[current_theme_id]
 	var field := _load_bitmap(str(TILE_PATHS[style["tile"]]))
-	var road := _load_bitmap(str(TILE_PATHS["stone"]))
+	var road := _load_bitmap(str(TILE_PATHS[style.get("road_tile", "stone")]))
 	ground_material.set_shader_parameter("field_tex", field if field != null else fallback)
 	ground_material.set_shader_parameter("road_tex", road if road != null else fallback)
 	ground_material.set_shader_parameter("field_tint", style["field"])
@@ -104,7 +111,12 @@ func _load_bitmap(path: String) -> Texture2D:
 
 func _load_landmarks() -> void:
 	landmark_entries = get_landmarks()
-	var atlas := _load_bitmap(ATLAS_PATH)
+	var style: Dictionary = THEMES[current_theme_id]
+	var atlas_path := EXPEDITION_ATLAS if style.has("landmark_pair") else ATLAS_PATH
+	if loaded_landmark_atlas != atlas_path:
+		landmark_regions.clear()
+		loaded_landmark_atlas = atlas_path
+	var atlas := _load_bitmap(atlas_path)
 	if atlas != null and landmark_regions.is_empty():
 		var size := atlas.get_size()
 		for index in range(8):
@@ -124,7 +136,8 @@ func _load_landmarks() -> void:
 		if landmark_regions.size() != 8:
 			sprite.visible = false
 			continue
-		sprite.texture = landmark_regions[index]
+		var region_index := int(style.get("landmark_pair", 0)) + index % 2 if style.has("landmark_pair") else index
+		sprite.texture = landmark_regions[region_index]
 		var size := sprite.texture.get_size()
 		var scale_value := LANDMARK_SPANS[index] / maxf(size.x, size.y)
 		sprite.scale = Vector2.ONE * scale_value
@@ -175,7 +188,8 @@ func get_landmarks() -> Array[Dictionary]:
 		var outward := Vector2(cos(angle), sin(angle)).normalized()
 		# The map point stays on the road; the painted structure sits beyond its
 		# shoulder, leaving the travel lane readable even for the largest gate.
-		result.append({"id": LANDMARK_IDS[index], "name": LANDMARK_NAMES[index], "position": position, "visual_position": position + outward * LANDMARK_CLEARANCE, "color": LANDMARK_COLORS[index], "road_index": index, "obstacle_radius": 55.0, "visual_span": LANDMARK_SPANS[index]})
+		var landmark_name: String = EXPEDITION_LANDMARKS[current_theme_id][index % 2] if EXPEDITION_LANDMARKS.has(current_theme_id) else LANDMARK_NAMES[index]
+		result.append({"id": LANDMARK_IDS[index], "name": landmark_name, "position": position, "visual_position": position + outward * LANDMARK_CLEARANCE, "color": LANDMARK_COLORS[index], "road_index": index, "obstacle_radius": 55.0, "visual_span": LANDMARK_SPANS[index]})
 	return result
 
 

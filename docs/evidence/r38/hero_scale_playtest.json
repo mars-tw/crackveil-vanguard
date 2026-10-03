@@ -1,0 +1,72 @@
+{
+  "version": "0.26.0-r38",
+  "candidate_pck_sha256": "61d50a298c4c3fc86979f176261884ea6dd5fa334f8470c5c1c91bf54acbefe0",
+  "artifact_identity": {
+    "htmlSHA256": "862041b055a6533a414dbf7a1d51a95cc48a44866000b5f639067e4a715e825b",
+    "pckNames": [
+      "index-61d50a298c4c.pck"
+    ]
+  },
+  "previous_candidate_pck_sha256": "3ad1a1f2ade9440edc072ffb3ed312d96b7c28f710a1f1058d85ee1f439e055d",
+  "method": "Focused actual chapter2 bloom/start/natural cards and real clicks; no code changes, no RNG/save/HP/options/time injection, no repeat of original five map FPS cases.",
+  "fresh_attempts": 2,
+  "first_attempt": "Harness JSON decision-file partial read; browser closed; no production gameplay failure. Second attempt uses atomic temp-file rename.",
+  "active_seconds": 20.428409946667,
+  "new_heroes_naturally_recruited": [
+    {
+      "id": "shadow_ronin",
+      "name": "影刃遊俠",
+      "configured_sprite_scale": 2.1,
+      "offered_at_level": 3
+    },
+    {
+      "id": "tide_oracle",
+      "name": "潮汐魔導",
+      "configured_sprite_scale": 1.7,
+      "offered_at_level": 6
+    }
+  ],
+  "actual_choice_events": [
+    {
+      "kind": "actual_upgrade_card",
+      "cardIndex": 0,
+      "intent": "Recruit naturally offered NEW shadow_ronin 影刃遊俠; root visually confirms left card, scale2.1",
+      "time": 6.43286145777776,
+      "level": 3
+    },
+    {
+      "kind": "actual_upgrade_card",
+      "cardIndex": 0,
+      "intent": "Recruit naturally offered NEW tide_oracle 潮汐魔導; validate scale1.7 beside recruited shadow2.1",
+      "time": 17.9314192800004,
+      "level": 6
+    }
+  ],
+  "visual_review": {
+    "resolved_representative_new_hero_scale_issue": true,
+    "shadow_position": "bottom right of squad, black/red coat and dual blades",
+    "tide_position": "upper middle of squad, blue/white dress and staff",
+    "observed_body_height_css_approx": "about80 pixels each in1280x720 screenshot; captain and squad bodies remain readable",
+    "icon_sized": false,
+    "faces_limbs_and_equipment_readable": true,
+    "no_black_frame_or_cut_off_body_observed": true,
+    "solar_source_scale": 2,
+    "solar_natural_re_recruit_observed": false
+  },
+  "gl_native_verification": {
+    "ready": true,
+    "cachedQueries": 57618,
+    "scissorMatches": true,
+    "drawMatches": true,
+    "readMatches": true
+  },
+  "errors": [],
+  "raw": "playtest/scale-fixed-r2-bloom-desktop.json",
+  "battle_image": "new_heroes.png",
+  "card_images": [
+    "playtest/scale-fixed-r2-bloom-desktop-upgrade-3.png",
+    "playtest/scale-fixed-r2-bloom-desktop-upgrade-6.png"
+  ],
+  "browsers_closed": true,
+  "source_changed_by_qa": false
+}

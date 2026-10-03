@@ -1,0 +1,31 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/resources/r38_weapon_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/ShadowTwinbladesWeapon.tscn" id="2_scene"]
+[resource]
+script = ExtResource("1_data")
+id = "shadow_twinblades"
+display_name = "追影雙刃"
+description = "向敵群擲出 2 把返場刀，近身與返程交叉切開敵陣。"
+behavior_id = "shadow_twinblades"
+weapon_scene = ExtResource("2_scene")
+damage = 22.0
+cooldown = 0.85
+range = 380.0
+color = Color(1, 0.30, 0.45, 1)
+projectile_count = 2
+projectile_speed = 490.0
+projectile_radius = 8.0
+pierce = 2
+spread_degrees = 16.0
+boomerang_return_ratio = 0.50
+boomerang_catch_radius = 26.0
+projectile_sprite_path = "res://assets/art/r24/weapons/weapon_far_blade_outbound.png"
+projectile_return_sprite_path = "res://assets/art/r24/weapons/weapon_far_blade_return.png"
+trail_sprite_path = "res://assets/art/r24/vfx/vfx_boomerang_trail.png"
+impact_sprite_path = "res://assets/art/r24/vfx/vfx_boomerang_impact.png"
+sprite_scale = 0.85
+damage_upgrade = 4.0
+cooldown_upgrade_multiplier = 0.90
+range_upgrade = 35.0
+projectile_count_upgrade = 1
+pierce_upgrade = 1

@@ -275,6 +275,8 @@ func _append_weapon_upgrade_options(pool: Array) -> void:
 func _append_qualitative_upgrade_options(pool: Array, member: Node, weapon_id: String, weapon_data: Resource, hero_name: String) -> void:
 	var behavior_id := str(weapon_data.get("behavior_id"))
 	var definitions: Array = QUALITATIVE_UPGRADES.get(behavior_id, [])
+	if weapon_data.has_method("get_qualitative_upgrade_definitions"):
+		definitions = weapon_data.call("get_qualitative_upgrade_definitions")
 	for definition in definitions:
 		var upgrade_kind := str(definition.get("upgrade_kind", ""))
 		if weapon_data.has_method("can_apply_upgrade") and not weapon_data.can_apply_upgrade(upgrade_kind):
@@ -644,6 +646,10 @@ func get_weapon_trigger_counts() -> Dictionary:
 
 
 func _get_count_upgrade_description(weapon_data: Resource) -> String:
+	if weapon_data.has_method("get_count_upgrade_description"):
+		var custom: String = weapon_data.call("get_count_upgrade_description")
+		if not custom.is_empty():
+			return custom
 	match str(weapon_data.get("behavior_id")):
 		"linear":
 			return "+%d 發投射物，+%d 穿透" % [int(weapon_data.get("projectile_count_upgrade")), int(weapon_data.get("pierce_upgrade"))]

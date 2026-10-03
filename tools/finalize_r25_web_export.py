@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "0.25.0-r37"
+RELEASE = "0.26.0-r38"
 FOCAL_SOURCE = ROOT / "assets" / "art" / "r33" / "r33_keyart.png"
 FOCAL_HASH = "04c40aa0"
 FOCAL_REF = f"r33-web-focal.png?v={FOCAL_HASH}"
@@ -170,7 +170,7 @@ def main() -> int:
         "cached_files": required_cached,
         "offline_url": "index.offline.html",
         "old_cache_cleanup": "activate deletes same-prefix caches except current CACHE_NAME",
-        "offline_policy": "navigation fallback only; 40 MB game payload is not pre-cached",
+        "offline_policy": "navigation fallback only; game payload is not pre-cached",
         "passed": source_hash == sha256(focal_output) and all(name in worker_text for name in required_cached) and sw_registration_marker in html_text,
     }
     evidence = ROOT / args.evidence

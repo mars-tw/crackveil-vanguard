@@ -1,0 +1,221 @@
+{
+  "version": "0.26.0-r38",
+  "pck_sha256": "3ad1a1f2ade9440edc072ffb3ed312d96b7c28f710a1f1058d85ee1f439e055d",
+  "method": "One Chrome game at a time; actual MainMenu WorldMap -> chapter2 -> visible node -> Start; real keyboard/touch/upgrade clicks; no HP/gold/time/boss/options injection; no video.",
+  "limitations": "FPS is per-map active samples after 5s, paused samples excluded; desktop Intel ANGLE and mobile touch emulation, not a guarantee of stable FPS or a physical handset test. Bosses remain covered by exact-frame controlled gates.",
+  "runs": [
+    {
+      "stage": "dunes",
+      "device": "Chrome desktop1280x720 DPR1",
+      "active_seconds": 20.6152266133334,
+      "mean_fps": 60,
+      "median_fps": 60,
+      "min_fps": 60,
+      "peak_enemies": 143,
+      "peak_logical_shots": 48,
+      "kills": 316,
+      "theme": "sunken_dunes",
+      "actual_species_counts": {
+        "dune_scarab": 261,
+        "normal": 40,
+        "sand_stalker": 248
+      },
+      "new_species": [
+        "dune_scarab",
+        "sand_stalker"
+      ],
+      "native_gl_verified": true,
+      "errors": [],
+      "battle_image": "playtest/dunes-desktop-battle.png",
+      "world_map_image": "playtest/dunes-desktop-world-map.png",
+      "walk_pair": [
+        "playtest/dunes-desktop-mob-walk-a.png",
+        "playtest/dunes-desktop-mob-walk-b.png"
+      ],
+      "raw": "playtest/dunes-desktop.json"
+    },
+    {
+      "stage": "tide",
+      "device": "Chrome desktop1280x720 DPR1",
+      "active_seconds": 20.6039751111113,
+      "mean_fps": 58.90909090909091,
+      "median_fps": 60,
+      "min_fps": 50,
+      "peak_enemies": 129,
+      "peak_logical_shots": 160,
+      "kills": 263,
+      "theme": "tidal_ruins",
+      "actual_species_counts": {
+        "coral_colossus": 139,
+        "fast": 8,
+        "normal": 46,
+        "tide_siren": 356
+      },
+      "new_species": [
+        "coral_colossus",
+        "tide_siren"
+      ],
+      "native_gl_verified": true,
+      "errors": [],
+      "battle_image": "playtest/tide-desktop-battle.png",
+      "world_map_image": "playtest/tide-desktop-world-map.png",
+      "walk_pair": [
+        "playtest/tide-desktop-mob-walk-a.png",
+        "playtest/tide-desktop-mob-walk-b.png"
+      ],
+      "raw": "playtest/tide-desktop.json"
+    },
+    {
+      "stage": "bloom",
+      "device": "Chrome desktop1280x720 DPR1",
+      "active_seconds": 20.7076595923811,
+      "mean_fps": 59.88,
+      "median_fps": 60,
+      "min_fps": 59,
+      "peak_enemies": 129,
+      "peak_logical_shots": 51,
+      "kills": 276,
+      "theme": "moonbloom_grove",
+      "actual_species_counts": {
+        "bloom_wisp": 348,
+        "fast": 43,
+        "normal": 40,
+        "sand_stalker": 118
+      },
+      "new_species": [
+        "bloom_wisp",
+        "sand_stalker"
+      ],
+      "native_gl_verified": true,
+      "errors": [],
+      "battle_image": "playtest/bloom-desktop-battle.png",
+      "world_map_image": "playtest/bloom-desktop-world-map.png",
+      "walk_pair": [
+        "playtest/bloom-desktop-mob-walk-a.png",
+        "playtest/bloom-desktop-mob-walk-b.png"
+      ],
+      "raw": "playtest/bloom-desktop.json"
+    },
+    {
+      "stage": "forge",
+      "device": "Chrome desktop1280x720 DPR1",
+      "active_seconds": 20.1315232400001,
+      "mean_fps": 59.95454545454545,
+      "median_fps": 60,
+      "min_fps": 59,
+      "peak_enemies": 141,
+      "peak_logical_shots": 154,
+      "kills": 260,
+      "theme": "clockwork_forge",
+      "actual_species_counts": {
+        "clockwork_reaper": 382,
+        "dune_scarab": 104,
+        "normal": 51
+      },
+      "new_species": [
+        "clockwork_reaper",
+        "dune_scarab"
+      ],
+      "native_gl_verified": true,
+      "errors": [],
+      "battle_image": "playtest/forge-desktop-battle.png",
+      "world_map_image": "playtest/forge-desktop-world-map.png",
+      "walk_pair": [
+        "playtest/forge-desktop-mob-walk-a.png",
+        "playtest/forge-desktop-mob-walk-b.png"
+      ],
+      "raw": "playtest/forge-desktop.json"
+    },
+    {
+      "stage": "tide",
+      "device": "Chrome touch 844x390 DPR2",
+      "active_seconds": 30.6256615911118,
+      "mean_fps": 59.806451612903224,
+      "median_fps": 60,
+      "min_fps": 58,
+      "peak_enemies": 150,
+      "peak_logical_shots": 141,
+      "kills": 456,
+      "theme": "tidal_ruins",
+      "actual_species_counts": {
+        "coral_colossus": 230,
+        "fast": 27,
+        "normal": 92,
+        "tide_siren": 491
+      },
+      "new_species": [
+        "coral_colossus",
+        "tide_siren"
+      ],
+      "native_gl_verified": true,
+      "errors": [],
+      "battle_image": "playtest/tide-phone-battle.png",
+      "world_map_image": "playtest/tide-phone-world-map.png",
+      "walk_pair": [
+        "playtest/tide-phone-mob-walk-a.png",
+        "playtest/tide-phone-mob-walk-b.png"
+      ],
+      "raw": "playtest/tide-phone.json"
+    }
+  ],
+  "new_hero": {
+    "observed": true,
+    "ids": [
+      "shadow_ronin",
+      "tide_oracle"
+    ],
+    "names": [
+      "影刃遊俠",
+      "潮汐魔導"
+    ],
+    "natural_recruits": true,
+    "resolved_readable_scale": true,
+    "final_candidate_pck_sha256": "61d50a298c4c3fc86979f176261884ea6dd5fa334f8470c5c1c91bf54acbefe0",
+    "previous_candidate_pck_sha256": "3ad1a1f2ade9440edc072ffb3ed312d96b7c28f710a1f1058d85ee1f439e055d",
+    "solar_not_directly_reobserved": true,
+    "visual_supplement": "hero_scale_playtest.json",
+    "battle_image": "new_heroes.png",
+    "raw": "playtest/scale-fixed-r2-bloom-desktop.json"
+  },
+  "visual_review": {
+    "native_cjk_readable": true,
+    "four_distinct_materials_and_landmarks": true,
+    "new_species_visible_in_battle": true,
+    "no_black_frame_or_hard_period_edge_observed": true,
+    "limb_pose_evidence": "Paired gameplay stills plus the asset gate for authored poses; no individual mob instance tracker in the Web probe.",
+    "bank_new_hero_draw_not_exercised": true,
+    "new_solar_scale_issue": "Representative external-hero sizing resolved and directly observed on Shadow/Tide in final61d pack; Solar config2.0 but not naturally re-recruited in this focused run. Original tiny Solar observation preserved in pre_scale_new_hero_observation.",
+    "new_hero_scale_resolved": true,
+    "final_visual_identity": {
+      "htmlSHA256": "862041b055a6533a414dbf7a1d51a95cc48a44866000b5f639067e4a715e825b",
+      "pckNames": [
+        "index-61d50a298c4c.pck"
+      ]
+    }
+  },
+  "source_unchanged": true,
+  "browsers_closed": true,
+  "local_preview_server_pid": 66444,
+  "original_five_map_candidate_pck_sha256": "3ad1a1f2ade9440edc072ffb3ed312d96b7c28f710a1f1058d85ee1f439e055d",
+  "final_visual_candidate_pck_sha256": "61d50a298c4c3fc86979f176261884ea6dd5fa334f8470c5c1c91bf54acbefe0",
+  "pre_scale_new_hero_observation": {
+    "observed": true,
+    "id": "solar_lancer",
+    "name": "星焰槍騎",
+    "method": "Natural level5 offer, visually reviewed CJK card and real left-card mouse click; later level7 recruit card indicates current squad4.",
+    "selection_event": {
+      "kind": "actual_upgrade_card",
+      "cardIndex": 0,
+      "intent": "Recruit naturally offered NEW solar_lancer 星焰槍騎; actual left card click",
+      "time": 11.3786046400001,
+      "level": 5
+    },
+    "evidence": "playtest/recruit-bloom-desktop.json",
+    "offer_image": "new_hero_recruit.png",
+    "battle_image": "playtest/recruit-bloom-desktop-battle.png",
+    "separate_run_active_seconds": 20.3117720296297,
+    "separate_run_fps_mean": 57.18181818181818,
+    "separate_run_fps_min": 45,
+    "separate_run_not_in_5_map_fps": true
+  }
+}

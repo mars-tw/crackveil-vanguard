@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/hero_data.gd" id="1_data"]
+[resource]
+script = ExtResource("1_data")
+id = "shadow_ronin"
+display_name = "影刃遊俠"
+epithet = "緋月雙鋒"
+quote = "別眨眼，第二刀已經回來了。"
+description = "黑紅雙刃穿透敵陣再飛回；回影追斬可讓返程再次命中。"
+body_color = Color(0.55, 0.20, 0.30, 1)
+core_color = Color(1, 0.34, 0.43, 1)
+sprite_path = "res://assets/sprites/hero_shadow_ronin.png"
+sprite_scale = 2.1
+max_hp = 94.0
+move_speed = 252.0
+hit_radius = 11.0
+pickup_radius = 82.0
+starting_weapon_ids = PackedStringArray("shadow_twinblades")
+passive_id = "shadow_ronin"
+passive_value = 0.10
+passive_description = "追影雙刃傷害提高 10%。"

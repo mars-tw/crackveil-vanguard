@@ -111,6 +111,7 @@ jobs:
           set -euo pipefail
           python3 tools/verify_r25_c2pa.py
           python3 tools/check_r37_release_assets.py
+          python3 tools/check_r38_content_assets.py
 
       - name: Import Godot resources
         shell: bash
@@ -154,6 +155,10 @@ jobs:
             R36TouchClearanceTest
             CombatPolishR37Test
             R37WorldPolishTest
+            R38ContentTest
+            R38HeroWeaponTest
+            R38MapExpansionTest
+            R38ArtGate
             SpawnDensityR32Test
           )
           for scene in "${scenes[@]}"; do

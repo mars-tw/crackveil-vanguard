@@ -6,7 +6,8 @@ const THEME_IDS := [
 	"ember_rift",
 	"storm_isles",
 	"star_frost",
-	"veil_court"
+	"veil_court",
+	"sunken_dunes", "tidal_ruins", "moonbloom_grove", "clockwork_forge"
 ]
 
 const THEME_NAMES: Dictionary = {
@@ -15,7 +16,9 @@ const THEME_NAMES: Dictionary = {
 	"ember_rift": "緋星熔庭",
 	"storm_isles": "風暴空島",
 	"star_frost": "星霜冰庭",
-	"veil_court": "帷幕王庭"
+	"veil_court": "帷幕王庭",
+	"sunken_dunes": "曜砂王陵", "tidal_ruins": "珊潮遺都",
+	"moonbloom_grove": "月華靈森", "clockwork_forge": "時輪工坊"
 }
 
 
