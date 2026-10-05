@@ -1,0 +1,90 @@
+{
+  "method": "Chrome phone emulation, 844x390 CSS / DPR 2; one fresh MainMenu Start; real single touch down/up and real Close. All page evaluation read-only. No physical-device claim, gameplay injection, purchases, other held fingers, Gear, auto toggle or rotation.",
+  "artifactIdentity": {
+    "version": "0.26.1-r39",
+    "mainPack": "index-54e029130910.pck",
+    "packSHA256": "54e029130910ab6e8088d0aba9638f50149824a59504477f30e505d868526c0f",
+    "htmlSHA256": "ced3a396918243d3253a167a5fe5116ee5a52810a1114503c4612f4d19b185ad",
+    "htmlPacks": [
+      "index-54e029130910.pck"
+    ]
+  },
+  "initial": {
+    "elapsed_time": 0.811843333333334,
+    "game_running": true,
+    "waiting_for_contract": false,
+    "waiting_for_upgrade": false,
+    "waiting_for_shop": false,
+    "system_paused": false,
+    "summon_visible": false,
+    "held": false,
+    "pending": false,
+    "summon_control": {
+      "center_x": 161.119995117188,
+      "center_y": 344,
+      "exists": true,
+      "height": 44,
+      "visible": true,
+      "width": 64,
+      "x": 129.119995117188,
+      "y": 322
+    }
+  },
+  "touch_down": {
+    "elapsed_time": 1.30051,
+    "game_running": true,
+    "waiting_for_contract": false,
+    "waiting_for_upgrade": false,
+    "waiting_for_shop": false,
+    "system_paused": false,
+    "summon_visible": false,
+    "held": false,
+    "pending": false
+  },
+  "one_second_after_touch_up": {
+    "elapsed_time": 1.61634333333333,
+    "game_running": true,
+    "waiting_for_contract": false,
+    "waiting_for_upgrade": false,
+    "waiting_for_shop": false,
+    "system_paused": true,
+    "summon_visible": true,
+    "held": false,
+    "pending": false,
+    "close_control": {
+      "center_x": 422,
+      "center_y": 346,
+      "disabled": false,
+      "height": 48,
+      "visible": true,
+      "width": 800,
+      "x": 22,
+      "y": 322
+    }
+  },
+  "after_real_close": {
+    "elapsed_time": 2.02073222222222,
+    "game_running": true,
+    "waiting_for_contract": false,
+    "waiting_for_upgrade": false,
+    "waiting_for_shop": false,
+    "system_paused": false,
+    "summon_visible": false,
+    "held": false,
+    "pending": false
+  },
+  "checks": {
+    "candidate54e": true,
+    "initialGuardsClear": true,
+    "shopVisibleAfterRelease": true,
+    "shopPaused": true,
+    "closeReturnsToBattle": true,
+    "noErrors": true
+  },
+  "passed_checks": 6,
+  "check_count": 6,
+  "errors": [],
+  "source_unchanged": true,
+  "chrome_closed": true,
+  "claim_limit": "This proves the single-touch Summon entry opens, remains visible and closes. It does not retroactively validate the earlier while-held attempt whose held precondition was false."
+}

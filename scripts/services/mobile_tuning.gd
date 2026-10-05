@@ -205,7 +205,7 @@ static func ability_button_size(viewport_size: Vector2, force_mobile: bool = fal
 	if not use_mobile_ui(viewport_size, force_mobile):
 		return 68.0 if _safe_viewport_size(viewport_size).y > _safe_viewport_size(viewport_size).x else 62.0
 	var size := _safe_viewport_size(viewport_size)
-	return 92.0 if size.y > size.x else 84.0
+	return 56.0 if size.y > size.x and size.x <= 360.0 else 64.0 if size.y > size.x else 60.0
 
 
 static func ability_button_position(viewport_size: Vector2, force_mobile: bool = false) -> Vector2:
@@ -215,7 +215,7 @@ static func ability_button_position(viewport_size: Vector2, force_mobile: bool =
 		var desktop_bottom := 34.0 if size.y > size.x else 28.0
 		return Vector2(size.x - button_size - 24.0, size.y - button_size - desktop_bottom)
 	var portrait := size.y > size.x
-	var right_margin := 22.0 if portrait else 20.0
+	var right_margin := 12.0
 	var bottom_margin := safe_bottom_padding(size, force_mobile) + (24.0 if portrait else 18.0)
 	return Vector2(size.x - button_size - right_margin, size.y - button_size - bottom_margin)
 
@@ -226,7 +226,7 @@ static func joystick_margin(viewport_size: Vector2, joystick_size: Vector2, forc
 		var desktop_margin: float = max(14.0, joystick_size.x * 0.08)
 		return Vector2(desktop_margin, desktop_margin)
 	var portrait := size.y > size.x
-	return Vector2(18.0 if portrait else 16.0, safe_bottom_padding(size, force_mobile) + (18.0 if portrait else 14.0))
+	return Vector2(12.0, safe_bottom_padding(size, force_mobile) + (24.0 if portrait else 18.0))
 
 
 static func joystick_rect(viewport_size: Vector2, joystick_size: Vector2, force_mobile: bool = false) -> Rect2:

@@ -39,11 +39,18 @@ func _run() -> void:
 		for frame in range(4):
 			await get_tree().process_frame
 		var hud: Node = arena.get_node("HUD")
+		var phone := mini(dimensions.x,dimensions.y)<600
 		var controls := {"joystick":hud.virtual_joystick,"summon":hud.summon_button,"auto":hud.auto_button,"ability":hud.active_ability_button,"equipment":hud.equipment_panel}
+		if phone:
+			controls["gear"] = hud.get("phone_equipment_button")
+			_check(not hud.auto_button.is_visible_in_tree() and not hud.equipment_panel.is_visible_in_tree(),"phone battle auto/equipment row should move to pause details")
 		var visible: Array[String] = []
 		var screen := Rect2(Vector2.ZERO,Vector2(dimensions))
 		for key in controls:
 			var control: Control = controls[key]
+			if not is_instance_valid(control):
+				_check(false,"missing touch control "+str(key))
+				continue
 			if not control.is_visible_in_tree():
 				continue
 			visible.append(key)
@@ -55,7 +62,7 @@ func _run() -> void:
 				var left: Control = controls[visible[first]]
 				var right: Control = controls[visible[second]]
 				_check(not left.get_global_rect().intersects(right.get_global_rect()),"touch overlap %s %s/%s" % [dimensions,visible[first],visible[second]])
-		_check(visible.has("joystick") and visible.has("summon") and visible.has("auto"),"touch core controls hidden")
+		_check(visible.has("joystick") and visible.has("summon") and visible.has("gear" if phone else "auto"),"touch core controls hidden")
 		var stable_updates: int = hud.ability_layout_updates
 		for frame in range(30):
 			await get_tree().process_frame
@@ -63,7 +70,8 @@ func _run() -> void:
 		GameManager.auto_upgrade_enabled = not GameManager.auto_upgrade_enabled
 		await get_tree().process_frame
 		_check(hud.ability_layout_updates > stable_updates, "auto toggle did not invalidate HUD layout")
-		_check(hud.auto_button.text.ends_with("開" if GameManager.auto_upgrade_enabled else "關"), "auto label remained stale")
+		var mode_button: Button = hud.get("pause_auto_button") if phone else hud.auto_button
+		_check(is_instance_valid(mode_button) and mode_button.text.ends_with("開" if GameManager.auto_upgrade_enabled else "關"), "auto label remained stale")
 		if DisplayServer.get_name()!="headless":
 			await RenderingServer.frame_post_draw
 			DirAccess.make_dir_recursive_absolute("res://docs/evidence/r36/touch")
@@ -74,7 +82,7 @@ func _run() -> void:
 		await get_tree().process_frame
 	MOBILE.set_device_hints_override_for_tests({})
 	if failures.is_empty():
-		print("R36_TOUCH_CLEARANCE_PASS sizes=4 actual_controls=joystick,summon,auto,ability,equipment bounds=true pairwise_overlap=0")
+		print("R36_TOUCH_CLEARANCE_PASS sizes=4 phone=joystick,summon,gear,ability tablet=joystick,summon,auto,ability,equipment bounds=true pairwise_overlap=0")
 		get_tree().quit(0)
 	else:
 		get_tree().quit(1)

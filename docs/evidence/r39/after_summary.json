@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "artifactIdentity": {
+    "version": "0.26.1-r39",
+    "mainPack": "index-54e029130910.pck",
+    "packSHA256": "54e029130910ab6e8088d0aba9638f50149824a59504477f30e505d868526c0f",
+    "htmlSHA256": "ced3a396918243d3253a167a5fe5116ee5a52810a1114503c4612f4d19b185ad"
+  },
+  "method": "Chrome phone emulation, not a physical phone: 844x390 CSS / DPR 2, same page rotated to390x844 then back. Actual UI/native touch input, read-only page probes; no HP, money, RNG or time injection, purchases, or FPS claims.",
+  "natural_active_seconds": 10.8402784444446,
+  "natural_kills": 152,
+  "hit_area_comparison": {
+    "metric": "Union of the five visible interactive hit rectangles including Pause; CSS square pixels, not painted or opaque pixel occlusion.",
+    "same_viewport_css": [
+      844,
+      390
+    ],
+    "viewport_area_css": 329160,
+    "before_version": "0.26.0-r38",
+    "before_pack": "index-61d50a298c4c.pck",
+    "before_visible_controls": [
+      "virtual_joystick",
+      "active_ability",
+      "summon",
+      "auto_battle",
+      "pause"
+    ],
+    "after_visible_controls": [
+      "virtual_joystick",
+      "active_ability",
+      "summon",
+      "equipment_menu",
+      "pause"
+    ],
+    "before_union_area_css": 48612.18116396869,
+    "after_union_area_css": 22635.174999414063,
+    "before_percent": 14.7685566788093,
+    "after_percent": 6.8766481344677555,
+    "display_percent": [
+      14.77,
+      6.88
+    ],
+    "after_control_rects_css": {
+      "virtual_joystick": {
+        "x": 12,
+        "y": 256.880004882812,
+        "width": 109.120002746582,
+        "height": 109.120002746582
+      },
+      "active_ability": {
+        "x": 772,
+        "y": 306,
+        "width": 60,
+        "height": 60
+      },
+      "summon": {
+        "x": 129.119995117188,
+        "y": 322,
+        "width": 64,
+        "height": 44
+      },
+      "equipment_menu": {
+        "x": 201.119995117188,
+        "y": 322,
+        "width": 44,
+        "height": 44
+      },
+      "pause": {
+        "x": 788,
+        "y": 18,
+        "width": 54,
+        "height": 44
+      }
+    },
+    "protected_roi_css": {
+      "x": 168.8,
+      "y": 78,
+      "width": 506.4,
+      "height": 234
+    },
+    "after_roi_intersections_css": {
+      "virtual_joystick": 0.0,
+      "active_ability": 0,
+      "summon": 0.0,
+      "equipment_menu": 0.0,
+      "pause": 0
+    },
+    "protected_roi_no_control_overlaps": true,
+    "limit": "Only these input controls are covered; passive HUD, toasts, minimap and combat art can occupy other pixels."
+  },
+  "multi_touch": {
+    "manual_move_and_held_slash_observed": true,
+    "right_release_left_move_world_px": 79.916610717774,
+    "all_release_move_world_px": 0,
+    "right_release_held": false,
+    "all_release_held": false
+  },
+  "orientation": {
+    "slash_sizes_css": [
+      [
+        60,
+        60
+      ],
+      [
+        64,
+        64
+      ],
+      [
+        60,
+        60
+      ]
+    ],
+    "portrait_pause_css": {
+      "x": 334,
+      "y": 34,
+      "width": 54,
+      "height": 44,
+      "right_edge": 388,
+      "viewport_width": 390
+    },
+    "pause_inside": true,
+    "minimum_touch_target44_met": true,
+    "limit": "Pause width is54, not44; it meets minimum44 and right edge388<=390. The old fixture exact-width failure is not a production bounds failure."
+  },
+  "gear_and_auto": {
+    "gear_opens_pause_run_tab": true,
+    "auto_toggle_in_first_row_visible": true,
+    "equipment_names_before": [
+      "空槽",
+      "空槽",
+      "空槽"
+    ],
+    "equipment_names_after": [
+      "裂刃晶核",
+      "雷鑄護甲",
+      "雷步戰靴"
+    ],
+    "live_auto_label_restored": "自動戰鬥：開",
+    "paused_runtime_limitation": "The live HUD label reads the actual boolean; paused runtime.auto_upgrade snapshots remain stale until stats emit/resume. Raw false checks are preserved and do not prove toggle failure."
+  },
+  "summon": {
+    "single_touch_checks": {
+      "candidate54e": true,
+      "initialGuardsClear": true,
+      "shopVisibleAfterRelease": true,
+      "shopPaused": true,
+      "closeReturnsToBattle": true,
+      "noErrors": true
+    },
+    "single_touch_passed_checks": 6,
+    "single_touch_check_count": 6,
+    "single_touch_open_persisted_and_real_close_passed": true,
+    "while_held_verified": false,
+    "while_held_claim_limit": "Earlier third-finger attempt had channel.held=false before opening, so the held precondition was invalid. Do not claim full while-held PASS from that run."
+  },
+  "evidence": {
+    "landscape": "phone-after.png",
+    "portrait": "phone-after-portrait.png",
+    "single_summon": "summon_single_check.json",
+    "readback": "AFTER_REVIEW.md"
+  },
+  "errors": [],
+  "source_unchanged": true,
+  "chrome_closed": true,
+  "raw_after_kept_local": true,
+  "claim_limit": "Bounded observed controls and single-touch Summon verification only; not a false full-PASS claim for every raw check or physical-device test."
+}

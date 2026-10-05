@@ -81,9 +81,35 @@ func set_compact(enabled: bool) -> void:
 		update_from_stats(cached_stats)
 
 
+var battle_hidden := false
+
+
+func set_battle_hidden(value: bool) -> void:
+	if battle_hidden == value:
+		return
+	battle_hidden = value
+	if value:
+		hide()
+		if details != null:
+			details.hide()
+		inspected_slot = -1
+	else:
+		update_from_stats(cached_stats)
+
+
+func get_summary_text() -> String:
+	var entries: Array[String] = []
+	var equipped: Array = cached_stats.get("equipment_slots", [])
+	for index in range(CATALOG.SLOTS.size()):
+		var item: Dictionary = equipped[index] if index < equipped.size() else {}
+		var slot_name := str(CATALOG.SLOT_NAMES[CATALOG.SLOTS[index]])
+		entries.append("%s：%s\n%s" % [slot_name, str(item.get("name", "尚未裝備")), str(item.get("description", ""))])
+	return "\n\n".join(entries)
+
+
 func update_from_stats(stats: Dictionary) -> void:
 	if stats.has("game_running"):
-		visible = bool(stats.get("game_running", false)) and not bool(stats.get("is_game_over", false)) and not bool(stats.get("manual_pause_visible", false)) and not bool(stats.get("system_paused", false))
+		visible = not battle_hidden and bool(stats.get("game_running", false)) and not bool(stats.get("is_game_over", false)) and not bool(stats.get("manual_pause_visible", false)) and not bool(stats.get("system_paused", false))
 		if not visible and details != null:
 			details.hide()
 			inspected_slot = -1

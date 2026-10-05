@@ -10,7 +10,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	var view := MOBILE.ui_layout_size(get_viewport().get_visible_rect().size)
 	var phone := MOBILE.layout_tier(view) == MOBILE.LayoutTier.PHONE
-	size = Vector2(100, 124) if phone else Vector2(146, 172)
+	size = Vector2(68, 88) if phone else Vector2(146, 172)
 	position = Vector2(view.x - size.x - 12, 78)
 	visible = GameManager.game_running and is_instance_valid(GameManager.player)
 	clock += delta

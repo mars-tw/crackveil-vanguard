@@ -15,6 +15,7 @@ var dynamic_center: Vector2 = Vector2.ZERO
 var center_active: bool = false
 var feedback_scale: float = 1.0
 var feedback_tween: Tween = null
+var phone_compact := false
 
 
 func _ready() -> void:
@@ -25,6 +26,9 @@ func _ready() -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
+	if get_tree().paused or not GameManager.game_running or not is_visible_in_tree():
+		reset_input()
+		return
 	if event is InputEventScreenTouch:
 		var touch_event := event as InputEventScreenTouch
 		if touch_event.pressed and active_touch_index == -1:
@@ -43,6 +47,8 @@ func _gui_input(event: InputEvent) -> void:
 			_update_direction(drag_event.position)
 			accept_event()
 	elif event is InputEventMouseButton:
+		if active_touch_index != -1:
+			return
 		var mouse_button := event as InputEventMouseButton
 		if mouse_button.button_index == MOUSE_BUTTON_LEFT:
 			mouse_active = mouse_button.pressed
@@ -55,6 +61,8 @@ func _gui_input(event: InputEvent) -> void:
 				_reset_direction()
 			accept_event()
 	elif event is InputEventMouseMotion and mouse_active:
+		if active_touch_index != -1:
+			return
 		var motion := event as InputEventMouseMotion
 		_update_direction(motion.position)
 		accept_event()
@@ -75,14 +83,13 @@ func configure_for_viewport(viewport_size: Vector2, mobile: bool, size_index: in
 	if safe_size.x <= 0.0 or safe_size.y <= 0.0:
 		safe_size = Vector2(390.0, 844.0)
 	var portrait: bool = safe_size.y > safe_size.x
+	phone_compact = mobile
 	var clamped_index: int = clamp(size_index, 0, 2)
 	var radius: float = 66.0
 	if mobile:
-		var portrait_ratios: Array[float] = [0.20, 0.24, 0.27]
-		var landscape_ratios: Array[float] = [0.14, 0.16, 0.19]
-		var base_axis: float = safe_size.x if portrait else min(safe_size.x, safe_size.y)
-		var ratio: float = float(portrait_ratios[clamped_index] if portrait else landscape_ratios[clamped_index])
-		radius = max(70.0 if portrait else 52.0, base_axis * ratio)
+		# Keep the whole heat zone at the edge; menus use a different UI scale.
+		var radii := [34.0, 40.0, 48.0] if portrait and safe_size.x <= 360.0 else [40.0, 48.0, 56.0] if portrait else [38.0, 44.0, 52.0]
+		radius = float(radii[clamped_index])
 	elif tablet:
 		var tablet_radii := [74.0, 86.0, 98.0] if portrait else [70.0, 82.0, 94.0]
 		radius = tablet_radii[clamped_index]
@@ -111,24 +118,44 @@ func _update_direction(local_position: Vector2) -> void:
 
 
 func _reset_direction() -> void:
+	reset_input()
+
+
+func reset_input() -> void:
 	active_touch_index = -1
 	mouse_active = false
 	center_active = false
 	dynamic_center = _default_center()
 	direction = Vector2.ZERO
 	direction_changed.emit(direction)
-	_animate_feedback(1.0)
+	if is_inside_tree() and is_node_ready():
+		_animate_feedback(1.0)
+	else:
+		feedback_scale = 1.0
 	queue_redraw()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT or what == NOTIFICATION_EXIT_TREE:
+		reset_input()
+	elif what == NOTIFICATION_VISIBILITY_CHANGED and not is_visible_in_tree():
+		reset_input()
 
 
 func _draw() -> void:
 	var center := dynamic_center if center_active else _default_center()
 	var radius := stick_radius * feedback_scale
-	var base_color := Color(0.025, 0.075, 0.12, 0.40 if center_active else 0.15)
-	var ring_color := Color(0.42, 0.86, 1.0, 0.7 if center_active else 0.32)
-	var knob_color := Color(0.46, 0.9, 1.0, 0.9 if center_active else 0.52)
+	var base_alpha := (0.18 if center_active else 0.03) if phone_compact else (0.40 if center_active else 0.15)
+	var ring_alpha := (0.65 if center_active else 0.22) if phone_compact else (0.7 if center_active else 0.32)
+	var knob_alpha := (0.8 if center_active else 0.28) if phone_compact else (0.9 if center_active else 0.52)
+	var base_color := Color(0.025, 0.075, 0.12, base_alpha)
+	var ring_color := Color(0.42, 0.86, 1.0, ring_alpha)
+	var knob_color := Color(0.46, 0.9, 1.0, knob_alpha)
 	# 疊兩層半透明圓與偏心亮斑，做出不靠 shader 的低成本玻璃感。
-	draw_circle(center, radius + 10.0, Color(0.0, 0.02, 0.06, 0.26))
+	if phone_compact and center_active:
+		draw_circle(center, radius + 8.0, Color(0.0, 0.02, 0.06, 0.10))
+	elif not phone_compact:
+		draw_circle(center, radius + 10.0, Color(0.0, 0.02, 0.06, 0.26))
 	draw_circle(center, radius + 6.0, base_color)
 	draw_arc(center, radius, 0.0, TAU, 48, ring_color, 3.0)
 	draw_arc(center, radius - 7.0, -2.75, -0.35, 32, Color(0.82, 0.98, 1.0, 0.24), 2.0)
@@ -153,7 +180,7 @@ func _set_feedback_scale(value: float) -> void:
 
 func _apply_radius(radius: float) -> void:
 	stick_radius = max(32.0, radius)
-	knob_radius = max(22.0, stick_radius * 0.3)
+	knob_radius = max(16.0 if phone_compact else 22.0, stick_radius * 0.3)
 	var heat_radius: float = stick_radius * max(1.0, heat_zone_multiplier)
 	custom_minimum_size = Vector2.ONE * heat_radius * 2.0
 	if not center_active:

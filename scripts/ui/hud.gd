@@ -39,6 +39,9 @@ var energy_label: Label
 var energy_bar: ProgressBar
 var summon_button: Button
 var auto_button: Button
+var phone_equipment_button: Button
+var pause_auto_button: Button
+var touch_input_blocked := false
 var auto_mode := false
 var toast_panel: Panel
 var toast_label: Label
@@ -125,6 +128,7 @@ func _layout_equipment_panel() -> void:
 		return
 	var viewport_size := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
+	equipment_panel.set_battle_hidden(mobile)
 	var portrait := viewport_size.y > viewport_size.x
 	var width := minf(410.0 if not mobile else 300.0, viewport_size.x - 24.0)
 	var height := maxf(56.0, MOBILE_TUNING.touch_target(viewport_size)) if _should_show_touch_controls() else 38.0
@@ -187,7 +191,25 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	var blocked := get_tree().paused or not GameManager.game_running
+	if blocked and not touch_input_blocked:
+		_reset_touch_input()
+	touch_input_blocked = blocked
 	_refresh_active_ability_button()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT or what == NOTIFICATION_EXIT_TREE:
+		_reset_touch_input()
+
+
+func _reset_touch_input() -> void:
+	if is_instance_valid(virtual_joystick):
+		virtual_joystick.reset_input()
+	GameManager.set_touch_move_vector(Vector2.ZERO)
+	var actor := GameManager.player
+	if is_instance_valid(actor) and actor.has_method("set_active_ability_held"):
+		actor.set_active_ability_held(false)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -385,6 +407,12 @@ func _build_ui() -> void:
 	auto_button.name = "AutoBattleButton"
 	auto_button.pressed.connect(_toggle_auto_battle)
 	root.add_child(auto_button)
+	phone_equipment_button = Button.new()
+	phone_equipment_button.name = "PhoneEquipmentButton"
+	phone_equipment_button.text = "裝備"
+	phone_equipment_button.focus_mode = Control.FOCUS_NONE
+	phone_equipment_button.pressed.connect(_open_phone_equipment)
+	root.add_child(phone_equipment_button)
 
 	toast_panel = Panel.new()
 	toast_panel.name = "ToastPanel"
@@ -587,7 +615,6 @@ func _build_pause_settings_page() -> void:
 	pause_settings_page.add_theme_constant_override("separation", 10)
 	pause_settings_page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	pause_content.add_child(pause_settings_page)
-
 	pause_volume_label = Label.new()
 	pause_volume_label.text = "音量"
 	pause_volume_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -706,6 +733,11 @@ func _build_pause_run_page() -> void:
 	pause_run_page.add_theme_constant_override("separation", 14)
 	pause_run_page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	pause_content.add_child(pause_run_page)
+	pause_auto_button = Button.new()
+	pause_auto_button.name = "PauseAutoBattleButton"
+	pause_auto_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_auto_button.pressed.connect(_toggle_auto_battle)
+	pause_run_page.add_child(pause_auto_button)
 
 	pause_run_stats_label = Label.new()
 	pause_run_stats_label.name = "PauseRunStatsLabel"
@@ -891,6 +923,7 @@ func _make_hud_icon(icon_name: String, texture: Texture2D) -> TextureRect:
 func _apply_responsive_layout() -> void:
 	if root == null:
 		return
+	_reset_touch_input()
 
 	var viewport_size := get_viewport().get_visible_rect().size
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
@@ -1202,6 +1235,7 @@ func _apply_responsive_layout() -> void:
 		toast_label.add_theme_font_size_override("font_size", 14 if mobile else 16)
 	_apply_accessibility_palette()
 	_apply_r33_battle_layout(viewport_size, mobile)
+	_apply_phone_battle_layout(viewport_size, mobile)
 	ability_layout_signature.clear()
 	call_deferred("_publish_reachability_probe", viewport_size)
 
@@ -1272,6 +1306,63 @@ func _refresh_r33_labels() -> void:
 		score_label.text = "%d 殺　金 %d" % [GameManager.kills, GameManager.gold]
 
 
+func _apply_phone_battle_layout(view: Vector2, phone: bool) -> void:
+	# Battle controls have their own CSS sizes, after the general menu scaling.
+	_apply_active_ability_glass_style(phone)
+	phone_equipment_button.visible = phone and GameManager.game_running
+	pause_auto_button.visible = phone
+	if not phone:
+		summon_button.text = "技能／寵物召喚"
+		summon_button.remove_theme_stylebox_override("normal")
+		return
+	var top := MOBILE_TUNING.safe_top_padding(view)
+	var portrait := view.y > view.x
+	var status_width := minf(190.0, view.x - 168.0)
+	hud_panel.size = Vector2(status_width, 52)
+	hp_label.add_theme_font_size_override("font_size", 13 if view.x <= 360 else 15)
+	level_label.position = Vector2(status_width - 32, top + 13)
+	xp_bar.size.x = status_width - 20
+	score_panel.offset_left = -148
+	score_panel.offset_right = -66
+	score_label.offset_left = -144
+	score_label.offset_right = -70
+	score_label.add_theme_font_size_override("font_size", 11)
+	pause_button.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	pause_button.custom_minimum_size = Vector2(44,44)
+	pause_button.add_theme_font_size_override("font_size", 13)
+	pause_button.position = Vector2(view.x - 56, top + 8)
+	pause_button.size = Vector2(44,44)
+	active_ability_button.custom_minimum_size = Vector2.ONE * MOBILE_TUNING.ability_button_size(view)
+	active_ability_button.add_theme_font_size_override("font_size", 24)
+	# Reducing a font/minimum does not shrink a Control that already grew.
+	active_ability_button.reset_size()
+	active_ability_button.size = active_ability_button.custom_minimum_size
+	for layer_control in [active_ability_cooldown, active_ability_cooldown_ring]:
+		layer_control.position = active_ability_button.position
+		layer_control.size = active_ability_button.size
+	if active_ability_cooldown_ring.has_method("set_ring_width"):
+		active_ability_cooldown_ring.set_ring_width(3.0)
+	for button in [summon_button, phone_equipment_button]:
+		button.custom_minimum_size = Vector2(44,44)
+		button.add_theme_font_size_override("font_size", 14)
+		var panel := StyleBoxFlat.new()
+		panel.bg_color = Color(0.025,0.06,0.10,0.40)
+		panel.border_color = Color(0.5,0.8,1.0,0.5)
+		panel.set_border_width_all(1)
+		panel.set_corner_radius_all(8)
+		panel.content_margin_left = 6
+		panel.content_margin_right = 6
+		button.add_theme_stylebox_override("normal",panel)
+	pause_auto_button.custom_minimum_size = Vector2(0,44)
+	pause_auto_button.add_theme_font_size_override("font_size",14)
+	summon_button.text = "召喚"
+	toast_panel.offset_left = -110
+	toast_panel.offset_right = 110
+	toast_panel.offset_top = top + (122 if portrait else 72)
+	toast_panel.offset_bottom = toast_panel.offset_top + 44
+	toast_label.add_theme_font_size_override("font_size",12)
+
+
 func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 	if not is_inside_tree() or get_viewport() == null:
 		return
@@ -1298,7 +1389,9 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"virtual_joystick": virtual_joystick,
 		"active_ability": active_ability_button,
 		"summon": summon_button,
-		"auto_battle": auto_button
+		"auto_battle": auto_button,
+		"equipment_menu": phone_equipment_button,
+		"pause_auto_battle": pause_auto_button
 	}, {
 		"paused": pause_overlay != null and pause_overlay.visible,
 		"confirmed_touch": MOBILE_TUNING.has_confirmed_touch(),
@@ -1548,6 +1641,8 @@ func _on_stats_changed(stats: Dictionary) -> void:
 		pause_run_stats_label.text = "本局：擊殺 %d   金幣 %d   殘響 %d%s" % [kills, gold, echo_shards, pause_bond_text]
 		for item in stats.get("equipment_slots", []):
 			pause_run_stats_label.text += "\n%s：%s" % [str(item.get("slot_name", "裝備")), str(item.get("name", "空槽"))]
+			if mobile and not str(item.get("description", "")).is_empty():
+				pause_run_stats_label.text += "\n" + str(item.get("description", ""))
 	_on_pause_changed(bool(stats.get("manual_pause_visible", bool(stats.get("manual_paused", false)))))
 	_refresh_r33_labels()
 
@@ -1618,6 +1713,8 @@ func _refresh_primary_stat_labels(compact_landscape: bool) -> void:
 
 
 func _on_pause_changed(is_paused: bool) -> void:
+	if get_tree().paused or is_paused:
+		_reset_touch_input()
 	if pause_overlay != null:
 		pause_overlay.visible = is_paused
 	if pause_button != null:
@@ -1674,16 +1771,16 @@ func _on_active_ability_pressed() -> void:
 		active_player.try_cast_active_ability()
 
 
-func _apply_active_ability_glass_style() -> void:
+func _apply_active_ability_glass_style(phone: bool = false) -> void:
 	if active_ability_button == null:
 		return
 	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0.025, 0.09, 0.14, 0.72)
+	normal.bg_color = Color(0.025, 0.09, 0.14, 0.30 if phone else 0.72)
 	normal.border_color = Color(0.42, 0.9, 1.0, 0.9)
-	normal.set_border_width_all(3)
+	normal.set_border_width_all(2 if phone else 3)
 	normal.set_corner_radius_all(46)
 	normal.shadow_color = Color(0.12, 0.78, 1.0, 0.3)
-	normal.shadow_size = 9
+	normal.shadow_size = 2 if phone else 9
 	var hover := normal.duplicate() as StyleBoxFlat
 	hover.bg_color = Color(0.06, 0.18, 0.24, 0.86)
 	var pressed := normal.duplicate() as StyleBoxFlat
@@ -1701,6 +1798,8 @@ func _apply_active_ability_glass_style() -> void:
 
 
 func _on_active_ability_button_down() -> void:
+	if get_tree().paused or not GameManager.game_running:
+		return
 	var actor := GameManager.player
 	if is_instance_valid(actor):
 		if actor.has_method("set_active_ability_held"):
@@ -1732,18 +1831,21 @@ func _refresh_active_ability_button() -> void:
 	var active_player := GameManager.player
 	var layout := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
 	var touch := _should_show_touch_controls()
+	var phone := MOBILE_TUNING.use_mobile_ui(layout)
+	var blocked := get_tree().paused or not GameManager.game_running
+	virtual_joystick.mouse_filter = Control.MOUSE_FILTER_IGNORE if blocked else Control.MOUSE_FILTER_STOP
 	var signature: Array = [layout, touch, GameManager.game_running, GameManager.auto_upgrade_enabled,
 		virtual_joystick.position if virtual_joystick != null else Vector2.ZERO,
 		equipment_panel.position if is_instance_valid(equipment_panel) else Vector2.ZERO,
-		active_ability_button.position, active_ability_button.size]
+		active_ability_button.position, active_ability_button.size, blocked]
 	var update_layout := signature != ability_layout_signature
 	if update_layout:
 		ability_layout_signature = signature
 		ability_layout_updates += 1
 	if summon_button != null and update_layout:
-		summon_button.visible = GameManager.game_running
+		summon_button.visible = GameManager.game_running and not blocked
 		summon_button.add_theme_font_size_override("font_size", 14)
-		auto_button.visible = touch and GameManager.game_running
+		auto_button.visible = touch and GameManager.game_running and not phone
 		auto_button.add_theme_font_size_override("font_size", 14)
 		auto_button.text = "自動戰鬥：開" if GameManager.auto_upgrade_enabled else "自動戰鬥：關"
 		var button_height := maxf(56.0, MOBILE_TUNING.touch_target(layout)) if touch else 40.0
@@ -1760,6 +1862,21 @@ func _refresh_active_ability_button() -> void:
 		var auto_x := layout.x - 148.0 if layout.y > layout.x else 156.0
 		auto_button.position = Vector2(auto_x, row_y)
 		auto_button.size = Vector2(136.0, button_height)
+		phone_equipment_button.visible = phone and GameManager.game_running and not blocked
+		if phone:
+			var bottom := MOBILE_TUNING.safe_bottom_padding(layout) + (24.0 if layout.y > layout.x else 18.0)
+			var utilities_x := virtual_joystick.position.x + virtual_joystick.size.x + 8
+			var utilities_y := layout.y - bottom - 44
+			if utilities_x + 116 > active_ability_button.position.x - 8:
+				utilities_x = layout.x - 128
+				utilities_y = active_ability_button.position.y - 52
+			summon_button.custom_minimum_size = Vector2(64,44)
+			summon_button.size = Vector2(64,44)
+			summon_button.position = Vector2(utilities_x,utilities_y)
+			summon_button.add_theme_font_size_override("font_size",14)
+			phone_equipment_button.size = Vector2(44,44)
+			phone_equipment_button.position = Vector2(utilities_x + 72,utilities_y)
+		pause_auto_button.text = auto_button.text
 	var channel: Dictionary = active_player.get_channel_debug_state() if is_instance_valid(active_player) and active_player.has_method("get_channel_debug_state") else {}
 	if energy_panel != null:
 		energy_panel.visible = not touch and not channel.is_empty() and GameManager.game_running and not GameManager.is_system_pause_active()
@@ -1782,7 +1899,11 @@ func _refresh_active_ability_button() -> void:
 			active_ability_label.position = Vector2(clampf(active_ability_button.position.x - 16, 4.0, layout.x - 112.0), minf(active_ability_button.position.y + active_ability_button.size.y + 3.0, layout.y - 21.0))
 			active_ability_label.size = Vector2(112, 18)
 			active_ability_label.clip_text = true
-		active_ability_label.visible = visible_for_player
+		active_ability_label.visible = visible_for_player and (not phone or bool(channel.get("held", false)))
+		if phone and update_layout:
+			active_ability_label.position = active_ability_button.position + Vector2(0, active_ability_button.size.y - 17)
+			active_ability_label.size = Vector2(active_ability_button.size.x,14)
+			active_ability_label.add_theme_font_size_override("font_size",10)
 	if not visible_for_player:
 		return
 	var remaining: float = float(active_player.get_active_ability_cooldown_remaining())
@@ -1803,8 +1924,15 @@ func _refresh_active_ability_button() -> void:
 
 
 func _open_summon_shop() -> void:
+	_reset_touch_input()
 	if GameManager.has_method("open_summon_shop"):
 		GameManager.open_summon_shop()
+
+
+func _open_phone_equipment() -> void:
+	_reset_touch_input()
+	GameManager.set_manual_pause(true)
+	_show_pause_tab("run")
 
 
 func _toggle_auto_battle() -> void:
