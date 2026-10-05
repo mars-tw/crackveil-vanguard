@@ -602,7 +602,8 @@ func get_formation_world_position(slot_index: int) -> Vector2:
 		return leader.global_position
 
 	var local_offset := get_formation_local_offset(slot_index)
-	var forward: Vector2 = leader.get_facing_direction() if leader.has_method("get_facing_direction") else Vector2.RIGHT
+	# Formation follows travel, independently of a locked melee aim.
+	var forward: Vector2 = leader.get_locomotion_facing_direction() if leader.has_method("get_locomotion_facing_direction") else leader.get_facing_direction() if leader.has_method("get_facing_direction") else Vector2.RIGHT
 	var right: Vector2 = forward.rotated(PI * 0.5)
 	return leader.global_position + right * local_offset.x - forward * local_offset.y
 

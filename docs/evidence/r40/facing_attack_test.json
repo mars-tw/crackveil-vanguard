@@ -31,11 +31,11 @@
 			"axis": "(-1.0, 0.0)",
 			"crossed_living_target_damage": 0.0,
 			"frame": 2,
-			"front_damage": 72.0,
+			"front_damage": 126.0,
 			"fx": {
 				"frame": 0,
 				"kind": "slash_a",
-				"position": "(-47.0, 22.0)",
+				"position": "(-43.16666, 22.0)",
 				"rotation": 3.14159274101257,
 				"sprite_animation": "default",
 				"visible": true
@@ -163,7 +163,7 @@
 			"axis": "(1.0, 0.0)",
 			"crossed_living_target_damage": 0.0,
 			"frame": 2,
-			"front_damage": 72.0,
+			"front_damage": 126.0,
 			"fx": {
 				"frame": 0,
 				"kind": "slash_a",
@@ -299,7 +299,7 @@
 			"fx": {
 				"frame": 0,
 				"kind": "slash_a",
-				"position": "(0.0, -21.16666)",
+				"position": "(0.0, -17.33333)",
 				"rotation": -1.57079637050629,
 				"sprite_animation": "default",
 				"visible": true
@@ -493,7 +493,7 @@
 			"axis": "(0.0, 1.0)",
 			"crossed_living_target_damage": 0.0,
 			"frame": 2,
-			"front_damage": 26.0,
+			"front_damage": 45.5,
 			"fx": {
 				"frame": 0,
 				"kind": "slash_a",
@@ -653,7 +653,7 @@
 			"weapon": "solar_piercer"
 		},
 		{
-			"damage": 24.0,
+			"damage": 42.0,
 			"events": [
 				{
 					"frame": 2,
@@ -771,6 +771,114 @@
 				"visual_facing": "(1.0, 0.0)"
 			},
 			"weapon": "shadow_twinblades"
+		}
+	],
+	"formation_movement_policy": [
+		{
+			"after_recovery": {
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						-1.0,
+						0.0
+					],
+					"flip_h": true,
+					"frame": 0,
+					"impact_active": false,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": true,
+				"lock": "(-1.0, 0.0)",
+				"locomotion_facing": "(1.0, 0.0)",
+				"public_facing": "(1.0, 0.0)",
+				"raw_facing": "(-1.0, 0.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(1.0, 0.0)"
+			},
+			"aim": "(-1.0, 0.0)",
+			"follower_anchor_count": 8,
+			"impact_frame": 2,
+			"input_changed_to_left_while_aim_up": false,
+			"maximum_error": 0.0,
+			"static_leader": "(0.0, 0.0)",
+			"travel_left_anchors": [
+				"(58.0, 46.0)",
+				"(58.0, -46.0)",
+				"(106.0, 92.0)",
+				"(116.0, 0.0)",
+				"(106.0, -92.0)",
+				"(170.0, 68.0)",
+				"(184.0, 0.0)",
+				"(170.0, -68.0)"
+			],
+			"travel_right_anchors": [
+				"(-58.0, -46.0)",
+				"(-58.0, 46.0)",
+				"(-106.0, -92.0)",
+				"(-116.0, 0.0)",
+				"(-106.0, 92.0)",
+				"(-170.0, -68.0)",
+				"(-184.0, 0.0)",
+				"(-170.0, 68.0)"
+			]
+		},
+		{
+			"after_recovery": {
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						-1.0,
+						0.0
+					],
+					"flip_h": true,
+					"frame": 0,
+					"impact_active": false,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": true,
+				"lock": "(0.0, -1.0)",
+				"locomotion_facing": "(-1.0, 0.0)",
+				"public_facing": "(-1.0, 0.0)",
+				"raw_facing": "(-1.0, 0.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(-1.0, 0.0)"
+			},
+			"aim": "(0.0, -1.0)",
+			"follower_anchor_count": 8,
+			"impact_frame": 2,
+			"input_changed_to_left_while_aim_up": true,
+			"maximum_error": 0.0,
+			"static_leader": "(0.0, 0.0)",
+			"travel_left_anchors": [
+				"(58.0, 46.0)",
+				"(58.0, -46.0)",
+				"(106.0, 92.0)",
+				"(116.0, 0.0)",
+				"(106.0, -92.0)",
+				"(170.0, 68.0)",
+				"(184.0, 0.0)",
+				"(170.0, -68.0)"
+			],
+			"travel_right_anchors": [
+				"(-58.0, -46.0)",
+				"(-58.0, 46.0)",
+				"(-106.0, -92.0)",
+				"(-116.0, 0.0)",
+				"(-106.0, 92.0)",
+				"(-170.0, -68.0)",
+				"(-184.0, 0.0)",
+				"(-170.0, 68.0)"
+			]
 		}
 	],
 	"last_visual_debug": {
@@ -900,9 +1008,9 @@
 		"assets_ready": true,
 		"cap": 32,
 		"channels": 0,
-		"emitted": 9,
-		"free": 1,
-		"peak": 1,
+		"emitted": 15,
+		"free": 2,
+		"peak": 2,
 		"rejected": 0
 	},
 	"reactions": {

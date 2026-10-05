@@ -59,6 +59,7 @@ func _run() -> void:
 	for axis in AXES:
 		await _test_captain_cast(axis, false)
 		await _test_captain_cast(axis, true)
+	await _test_formation_movement_policy()
 	await _test_reactions_and_reset()
 	await _test_follower_weapons()
 	evidence["last_visual_debug"] = visual.get_debug_state()
@@ -235,6 +236,76 @@ func _on_captain_impact() -> void:
 		if effect.kind == "slash_a" and effect.age <= 0.04:
 			observed_fx = {"kind":effect.kind, "position":effect.global_position, "rotation":effect.rotation,
 				"sprite_animation": str(effect.sprite.animation), "frame":effect.sprite.frame, "visible":effect.visible}
+
+func _formation_anchors() -> Array[Vector2]:
+	var anchors: Array[Vector2] = []
+	# Query the actual manager and its selected runtime SquadData; these are the
+	# legal eight follower slots under the unchanged nine-person party cap.
+	for slot in range(1,int(GameManager.squad_manager.squad_data.max_members)):
+		anchors.append(GameManager.squad_manager.get_formation_world_position(slot))
+	return anchors
+
+func _check_anchor_policy(expected: Array[Vector2], reason: String) -> float:
+	var actual := _formation_anchors()
+	var maximum := 0.0
+	_check(actual.size() == 8 and expected.size() == 8, "formation test lost legal eight follower anchors")
+	for index in range(mini(actual.size(),expected.size())):
+		maximum = maxf(maximum,actual[index].distance_to(expected[index]))
+	_check(maximum <= 0.01, "attack-facing contaminated movement formation: %s max_error=%.4f" % [reason,maximum])
+	return maximum
+
+func _test_formation_movement_policy() -> void:
+	var manager: Node = GameManager.squad_manager
+	_check(manager.squad_data.max_members == 9 and manager.squad_data.get_hero_data("rift_captain") != null,
+		"formation fixture did not use real selected/default nine-person squad resource")
+	var rows: Array[Dictionary] = []
+	for aim in [Vector2.LEFT,Vector2.UP]:
+		captain.reset_for_run()
+		_disable_controllers_and_other_combat()
+		captain.set_physics_process(false)
+		captain.global_position = Vector2.ZERO
+		_clear_enemy_fixture()
+		captain.set_desired_velocity(Vector2.LEFT * captain.move_speed)
+		var anchors_left := _formation_anchors()
+		captain.set_desired_velocity(Vector2.RIGHT * captain.move_speed)
+		var anchors_right := _formation_anchors()
+		_check(anchors_left[0].distance_to(anchors_right[0]) > 40.0, "movement policy baseline failed to turn real formation")
+		var target := _target(aim * 70.0)
+		var target_hp: float = target.hp
+		impact_frame = -1
+		_check(captain.try_cast_active_ability() and captain.active_ability_pending, "formation fixture did not start actual manual target-aimed swing")
+		_check(captain.attack_direction_lock.is_equal_approx(aim), "formation fixture did not lock actual left/up visual aim")
+		var max_error := 0.0
+		for _frame in range(100):
+			await get_tree().physics_frame
+			max_error = maxf(max_error,_check_anchor_policy(anchors_right,"travelRight during aim "+str(aim)))
+			_check(captain.global_position == Vector2.ZERO and captain.get_locomotion_facing_direction().is_equal_approx(Vector2.RIGHT), "formation fixture leader moved or changed intended travelRight")
+			_check(visual.facing_direction.is_equal_approx(aim), "correct formation came at cost of losing actual attack aim")
+			if impact_frame >= 0:
+				break
+			_check(is_equal_approx(target.hp,target_hp), "formation swing damaged target before real frame2")
+		_check(impact_frame == 2 and target.hp < target_hp, "formation fixture did not reach real animation frame2 / enemy damage")
+		var input_changed: bool = aim == Vector2.UP
+		if input_changed:
+			captain.set_desired_velocity(Vector2.LEFT * captain.move_speed)
+			max_error = maxf(max_error,_check_anchor_policy(anchors_left,"inputLeft during busy aimUp"))
+			_check(captain.attack_direction_lock == Vector2.UP and captain.get_visual_facing_direction() == Vector2.UP,
+				"inputLeft formation update rotated busy visual aimUp")
+		var expected: Array[Vector2] = anchors_left if input_changed else anchors_right
+		for _frame in range(100):
+			max_error = maxf(max_error,_check_anchor_policy(expected,"authored recovery movement policy"))
+			if not visual.is_attack_animation():
+				break
+			await get_tree().physics_frame
+		max_error = maxf(max_error,_check_anchor_policy(expected,"after recovery movement policy"))
+		rows.append({"aim":str(aim),"static_leader":str(captain.global_position),"impact_frame":impact_frame,
+			"follower_anchor_count":expected.size(),"maximum_error":max_error,"input_changed_to_left_while_aim_up":input_changed,
+			"travel_right_anchors":anchors_right,"travel_left_anchors":anchors_left,"after_recovery":_snapshot(captain)})
+		print("R40_FORMATION aim=%s legal_slots=8 travel_right_anchors_stable=true frame2=true recovery_stable=true inputLeft_policy=%s max_error=%.4f" % [aim,str(input_changed),max_error])
+		captain.set_desired_velocity(Vector2.ZERO)
+		_clear_enemy_fixture()
+	captain.set_physics_process(true)
+	evidence["formation_movement_policy"] = rows
 
 func _test_reactions_and_reset() -> void:
 	captain.reset_for_run()

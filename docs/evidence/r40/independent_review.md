@@ -22,3 +22,7 @@
 - `facing_attack_test.json`：`failures=[]`，四個主軸的手動／自動共 8 組攻擊案例。F2 前方命中、後方傷害 0、活目標換邊不改在途方向、FX 朝向／位置與 lock 一致；恢復後回當前移動方向。另包含移動朝向、牧者與新英雄起手／busy lock、hurt／death／新局 reset，以及 same-frame controller 的 authored frame 2。
 
 此報告是來源與既有 headless 證據覆核，不替接下來的 Web 實玩畫面或公開部署結果背書。
+
+最終候選補註：HUD 的 Web runtime probe 追加 PlayerVisual 的唯讀 `get_debug_state()` 結果，仍限 `cv_r32_test=1` 才發布。此追加不修改 physics、布局、美術或遊戲輸入，只讓體驗員讀到朝向／mirror／frame 資料；未因此重跑相同 gates。Windows 最後體驗候選為 `0.26.2-r40`／`index-d2c78c51f7ce.pck`，完整 SHA-256 `d2c78c51f7ceeff633d063756f90333915b70ea97da0f03749867916d2451a0d`；正式 Linux CI 的包身分另見 `deployment.json`，不混用兩種 export hash。
+
+CI 後續發現（run `37254505333`、head `f269cb5`）：WeaponSmoke 的 formation assertion 失敗，最大誤差 177.67，大於既有上限 92；因此 export／Web smoke／Pages 都被跳過。追查到原先這份有界角色覆核未包含的 `SquadManager.get_formation_world_position():605`，仍以新的 canonical `get_facing_direction()` 作隊形方向，導致隊友錨點跟近戰 aim 旋轉。已回報 root 需改用 locomotion facing，保留原驗收閾值。此 CI 阻擋未解除前，不將前述局部來源覆核結論當成完整發布通過。
