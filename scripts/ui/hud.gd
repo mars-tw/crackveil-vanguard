@@ -1674,6 +1674,9 @@ func _publish_runtime_probe(stats: Dictionary) -> void:
 		payload["player_y"] = GameManager.player.global_position.y
 		if GameManager.player.has_method("get_cleave_debug_state"):
 			payload["cleave"] = GameManager.player.get_cleave_debug_state()
+		var player_visual := GameManager.player.get_node_or_null("Visual")
+		if player_visual != null and player_visual.has_method("get_debug_state"):
+			payload["animation"] = player_visual.get_debug_state()
 		if GameManager.player.has_method("get_firepower_debug_state"):
 			payload["firepower"] = GameManager.player.get_firepower_debug_state()
 		if GameManager.player.has_method("get_channel_debug_state"):

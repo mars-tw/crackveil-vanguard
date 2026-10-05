@@ -291,6 +291,8 @@ func reset_for_run() -> void:
 	if visual != null:
 		visual.visible = true
 		visual.modulate = Color.WHITE
+		if visual.has_method("reset_facing_direction"):
+			visual.reset_facing_direction()
 		if visual.has_method("_resume_locomotion"):
 			visual.call("_resume_locomotion")
 	if camera != null:
@@ -431,9 +433,37 @@ func _movement_multiplier() -> float:
 
 
 func get_facing_direction() -> Vector2:
+	return get_visual_facing_direction()
+
+
+func get_locomotion_facing_direction() -> Vector2:
+	# A direction key and Space may arrive in the same controller tick.
+	if desired_velocity.length_squared() > 1.0:
+		return desired_velocity.normalized()
 	if last_move_direction == Vector2.ZERO:
 		return Vector2.RIGHT
 	return last_move_direction.normalized()
+
+
+func get_visual_facing_direction() -> Vector2:
+	if visual != null:
+		if visual.has_method("is_attack_animation") and visual.is_attack_animation():
+			return attack_direction_lock
+		if visual.has_method("get_animation_state") and visual.get_animation_state() in [&"hurt", &"death"]:
+			return visual.get("facing_direction")
+	return get_locomotion_facing_direction()
+
+
+func begin_directional_attack(direction: Vector2, animation_name: StringName = &"attack") -> bool:
+	if visual == null or not visual.has_method("play_attack"):
+		return false
+	var aim := direction.normalized() if direction.length_squared() > 0.001 else get_facing_direction()
+	if not bool(visual.call("play_attack", animation_name)):
+		return false
+	# Commit once, only after the authored animation accepts this cast.
+	attack_direction_lock = aim
+	visual.call("set_facing_direction", aim)
+	return true
 
 
 func try_cast_active_ability() -> bool:
@@ -459,16 +489,13 @@ func _begin_active_ability() -> bool:
 	if visual == null or not visual.has_method("play_attack"):
 		push_error("Active ability requires the articulated attack animation")
 		return false
-	if not bool(visual.call("play_attack", &"attack_combo_a")):
+	if not begin_directional_attack(forward, &"attack_combo_a"):
 		return false
-	if visual.has_method("set_facing_direction"):
-		visual.call("set_facing_direction", forward)
 	active_ability_cooldown_timer = RIFT_PULSE_COOLDOWN
 	active_ability_cast_count += 1
 	active_ability_pending = true
 	active_ability_queued = false
 	pending_active_ability_direction = forward
-	attack_direction_lock = forward
 	pending_ability_charge = momentum_charge
 	momentum_charge = 0.0
 	_begin_draw_cut_step(target, forward)
@@ -649,14 +676,10 @@ func _tick_captain_cleave(delta: float) -> void:
 		auto_cleave_cooldown_timer = EMPTY_AUTO_CLEAVE_RETRY
 		return
 	pending_combo_index = combo_index
-	if not bool(visual.call("play_attack", COMBO_ANIMATIONS[pending_combo_index])):
+	var aim := (target.global_position - global_position).normalized()
+	if not begin_directional_attack(aim, COMBO_ANIMATIONS[pending_combo_index]):
 		return
-	pending_cleave_direction = (target.global_position - global_position).normalized()
-	if pending_cleave_direction == Vector2.ZERO:
-		pending_cleave_direction = get_facing_direction()
-	attack_direction_lock = pending_cleave_direction
-	if visual.has_method("set_facing_direction"):
-		visual.call("set_facing_direction", pending_cleave_direction)
+	pending_cleave_direction = attack_direction_lock
 	auto_cleave_pending = true
 	auto_cleave_cooldown_timer = AUTO_CLEAVE_COOLDOWN
 
@@ -720,11 +743,8 @@ func _begin_channel_swing() -> void:
 		channel_exhausted = true
 		_stop_channel()
 		return
-	if visual == null or not visual.has_method("play_attack") or not bool(visual.call("play_attack", &"attack_combo_finisher")):
+	if not begin_directional_attack(_active_ability_direction(), &"attack_combo_finisher"):
 		return
-	attack_direction_lock = _active_ability_direction()
-	if visual.has_method("set_facing_direction"):
-		visual.call("set_facing_direction", attack_direction_lock)
 	channel_energy -= CHANNEL_ENERGY_COST
 	channel_reserved_energy = CHANNEL_ENERGY_COST
 	channel_pending = true
@@ -910,32 +930,12 @@ func _spawn_rift_pulse_visuals(forward: Vector2) -> void:
 
 
 func get_cleave_debug_state() -> Dictionary:
-	return {"auto_cuts": auto_cleave_count, "auto_hits": auto_cleave_hit_count, "active_hits": active_ability_hit_count, "empty_active_impacts": active_ability_empty_impacts, "kills": cleave_kills_total, "last_hits": last_cleave_hit_count, "last_kills": last_cleave_kill_count, "max_hits": peak_cleave_hit_count, "momentum": momentum_charge, "queued": active_ability_queued, "auto_pending": auto_cleave_pending, "active_pending": active_ability_pending, "auto_cooldown": auto_cleave_cooldown_timer, "step_active": draw_cut_step_active, "step_distance": draw_cut_step_distance, "step_total_distance": draw_cut_step_total_distance, "assisted_casts": draw_cut_assisted_casts, "step_aborts": draw_cut_step_aborts, "step_reason": draw_cut_step_last_reason, "auto_target_queries": auto_cleave_target_queries, "candidate_checks": cleave_candidate_checks, "cone_sqrt_calls": cleave_cone_sqrt_calls, "presentation_lookups": presentation_lookups, "presentation_ready_checks": presentation_ready_checks}
+	return {"attack_direction": [attack_direction_lock.x, attack_direction_lock.y], "auto_cuts": auto_cleave_count, "auto_hits": auto_cleave_hit_count, "active_hits": active_ability_hit_count, "empty_active_impacts": active_ability_empty_impacts, "kills": cleave_kills_total, "last_hits": last_cleave_hit_count, "last_kills": last_cleave_kill_count, "max_hits": peak_cleave_hit_count, "momentum": momentum_charge, "queued": active_ability_queued, "auto_pending": auto_cleave_pending, "active_pending": active_ability_pending, "auto_cooldown": auto_cleave_cooldown_timer, "step_active": draw_cut_step_active, "step_distance": draw_cut_step_distance, "step_total_distance": draw_cut_step_total_distance, "assisted_casts": draw_cut_assisted_casts, "step_aborts": draw_cut_step_aborts, "step_reason": draw_cut_step_last_reason, "auto_target_queries": auto_cleave_target_queries, "candidate_checks": cleave_candidate_checks, "cone_sqrt_calls": cleave_cone_sqrt_calls, "presentation_lookups": presentation_lookups, "presentation_ready_checks": presentation_ready_checks}
 
 
-func _update_facing(delta: float) -> void:
-	if _captain_attack_busy():
-		var locked_direction := attack_direction_lock
-		if visual != null and visual.has_method("set_facing_direction"):
-			visual.set_facing_direction(locked_direction)
-		return
-	var facing_direction := get_facing_direction()
-	facing_refresh_timer -= delta
-	if not _is_cached_facing_enemy_valid():
-		cached_facing_enemy = null
-		cached_facing_token = 0
-	if facing_refresh_timer <= 0.0:
-		cached_facing_enemy = get_nearest_enemy(620.0)
-		cached_facing_token = _hit_key_for(cached_facing_enemy)
-		facing_refresh_timer = 0.1
-	if _is_cached_facing_enemy_valid():
-		facing_direction = (cached_facing_enemy.global_position - global_position).normalized()
-
-	if facing_direction != Vector2.ZERO and visual != null:
-		if visual.has_method("set_facing_direction"):
-			visual.set_facing_direction(facing_direction)
-		else:
-			visual.rotation = facing_direction.angle()
+func _update_facing(_delta: float) -> void:
+	if visual != null and visual.has_method("set_facing_direction"):
+		visual.set_facing_direction(get_visual_facing_direction())
 
 
 func _is_cached_facing_enemy_valid() -> bool:

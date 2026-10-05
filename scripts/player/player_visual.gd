@@ -23,6 +23,7 @@ var animated_sprite: AnimatedSprite2D = null
 var shadow: Sprite2D = null
 var aura: Sprite2D = null
 var facing_direction: Vector2 = Vector2.RIGHT
+var horizontal_flip := false
 var current_animation_name: StringName = &"idle"
 var animation_frames_ready: bool = false
 var attack_impact_emitted: bool = false
@@ -85,6 +86,7 @@ func configure_visual(
 	body_radius = new_radius
 	body_color = new_body_color
 	core_color = new_core_color
+	reset_facing_direction()
 	_apply_sprite()
 
 
@@ -92,11 +94,22 @@ func set_facing_direction(direction: Vector2) -> void:
 	if direction.length_squared() <= 0.001:
 		return
 	facing_direction = direction.normalized()
-	var flip := facing_direction.x < -0.05
+	# A pure vertical direction has no horizontal sign; retain its last side.
+	if absf(facing_direction.x) > 0.05:
+		horizontal_flip = facing_direction.x < 0.0
 	if animated_sprite != null:
-		animated_sprite.flip_h = flip
+		animated_sprite.flip_h = horizontal_flip
 	if sprite != null:
-		sprite.flip_h = flip
+		sprite.flip_h = horizontal_flip
+
+
+func reset_facing_direction() -> void:
+	facing_direction = Vector2.RIGHT
+	horizontal_flip = false
+	if animated_sprite != null:
+		animated_sprite.flip_h = false
+	if sprite != null:
+		sprite.flip_h = false
 
 
 func play_attack(animation_name: StringName = &"attack") -> bool:
@@ -251,12 +264,16 @@ func _apply_sprite() -> void:
 func _update_locomotion_state() -> void:
 	if not animation_frames_ready or animated_sprite == null:
 		return
+	var parent := get_parent()
+	if parent != null and parent.has_method("get_visual_facing_direction"):
+		set_facing_direction(parent.get_visual_facing_direction())
 	if is_attack_animation() or current_animation_name in [&"hurt", &"death"]:
 		return
 	var motion := _current_motion_velocity()
 	var moving := motion.length_squared() > 9.0
 	if moving:
-		set_facing_direction(motion)
+		if parent == null or not parent.has_method("get_visual_facing_direction"):
+			set_facing_direction(motion)
 		_play_state(&"walk")
 		var speed_ratio: float = motion.length() / max(1.0, _movement_speed_for_animation())
 		animated_sprite.speed_scale = clamp(speed_ratio, 0.65, 1.8)
@@ -422,4 +439,4 @@ func get_turn_squash_timer() -> float:
 
 
 func get_debug_state() -> Dictionary:
-	return {"animation": str(current_animation_name), "frame": animated_sprite.frame if animated_sprite != null else -1, "attack": is_attack_animation(), "impact_active": is_attack_hitbox_active(), "impact_emitted": attack_impact_emitted, "pending_heavy_hurt": pending_heavy_hurt, "authored_combo": animated_sprite != null and animated_sprite.sprite_frames != null and animated_sprite.sprite_frames.has_animation(&"attack_combo_finisher")}
+	return {"animation": str(current_animation_name), "frame": animated_sprite.frame if animated_sprite != null else -1, "attack": is_attack_animation(), "impact_active": is_attack_hitbox_active(), "impact_emitted": attack_impact_emitted, "pending_heavy_hurt": pending_heavy_hurt, "authored_combo": animated_sprite != null and animated_sprite.sprite_frames != null and animated_sprite.sprite_frames.has_animation(&"attack_combo_finisher"), "facing_direction": [facing_direction.x, facing_direction.y], "flip_h": horizontal_flip, "body_rotation": animated_sprite.rotation if animated_sprite != null else 0.0}

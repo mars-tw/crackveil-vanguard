@@ -16,15 +16,14 @@ func _physics_process(_delta: float) -> void:
 	if hero == null or not is_instance_valid(hero):
 		return
 
-	if Input.is_action_just_pressed("active_ability") and hero.has_method("try_cast_active_ability"):
-		hero.try_cast_active_ability()
-
 	var keyboard_direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var touch_direction := GameManager.get_touch_move_vector()
 	var input_direction: Vector2 = (keyboard_direction + touch_direction).limit_length(1.0)
 
 	if hero.has_method("set_move_direction"):
 		hero.set_move_direction(input_direction)
+	if Input.is_action_just_pressed("active_ability") and hero.has_method("try_cast_active_ability"):
+		hero.try_cast_active_ability()
 
 
 func _ensure_input_actions() -> void:

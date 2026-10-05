@@ -64,12 +64,10 @@ func _begin_cast(target: Node2D) -> bool:
 	var direction := (target.global_position - owner_player.global_position).normalized()
 	if direction == Vector2.ZERO:
 		direction = Vector2.RIGHT
-	if not bool(owner_visual.call("play_attack")):
+	if not owner_player.has_method("begin_directional_attack") or not bool(owner_player.call("begin_directional_attack", direction)):
 		return false
 	# Hero._update_facing holds this direction while any real attack animation
 	# is busy, including follower casts. Keep its shared lock aligned with aim.
-	owner_player.set("attack_direction_lock", direction)
-	owner_visual.call("set_facing_direction", direction)
 	pending_target = weakref(target)
 	pending_spawn_token = int(target.get("spawn_token"))
 	pending_direction = direction

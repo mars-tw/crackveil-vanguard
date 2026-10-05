@@ -1,0 +1,968 @@
+{
+	"art_directions": "existing horizontal mirror and logical aim vectors; no claim of true eight-direction artwork",
+	"axes": [
+		{
+			"after_recovery": {
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						1.0,
+						0.0
+					],
+					"flip_h": false,
+					"frame": 0,
+					"impact_active": false,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(-1.0, 0.0)",
+				"locomotion_facing": "(1.0, 0.0)",
+				"public_facing": "(1.0, 0.0)",
+				"raw_facing": "(1.0, 0.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(1.0, 0.0)"
+			},
+			"automatic": false,
+			"axis": "(-1.0, 0.0)",
+			"crossed_living_target_damage": 0.0,
+			"frame": 2,
+			"front_damage": 72.0,
+			"fx": {
+				"frame": 0,
+				"kind": "slash_a",
+				"position": "(-47.0, 22.0)",
+				"rotation": 3.14159274101257,
+				"sprite_animation": "default",
+				"visible": true
+			},
+			"locked": {
+				"animation": {
+					"animation": "attack_combo_a",
+					"attack": true,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						-1.0,
+						0.0
+					],
+					"flip_h": true,
+					"frame": 2,
+					"impact_active": true,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": true,
+				"lock": "(-1.0, 0.0)",
+				"locomotion_facing": "(1.0, 0.0)",
+				"public_facing": "(-1.0, 0.0)",
+				"raw_facing": "(-1.0, 0.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(-1.0, 0.0)"
+			},
+			"rear_damage": 0.0
+		},
+		{
+			"after_recovery": {
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						1.0,
+						0.0
+					],
+					"flip_h": false,
+					"frame": 0,
+					"impact_active": false,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(-1.0, 0.0)",
+				"locomotion_facing": "(1.0, 0.0)",
+				"public_facing": "(1.0, 0.0)",
+				"raw_facing": "(1.0, 0.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(1.0, 0.0)"
+			},
+			"automatic": true,
+			"axis": "(-1.0, 0.0)",
+			"crossed_living_target_damage": 0.0,
+			"frame": 2,
+			"front_damage": 26.0,
+			"fx": {
+				"frame": 0,
+				"kind": "slash_a",
+				"position": "(-43.16666, 22.0)",
+				"rotation": 3.14159274101257,
+				"sprite_animation": "default",
+				"visible": true
+			},
+			"locked": {
+				"animation": {
+					"animation": "attack_combo_a",
+					"attack": true,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						-1.0,
+						0.0
+					],
+					"flip_h": true,
+					"frame": 2,
+					"impact_active": true,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": true,
+				"lock": "(-1.0, 0.0)",
+				"locomotion_facing": "(1.0, 0.0)",
+				"public_facing": "(-1.0, 0.0)",
+				"raw_facing": "(-1.0, 0.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(-1.0, 0.0)"
+			},
+			"rear_damage": 0.0
+		},
+		{
+			"after_recovery": {
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						-1.0,
+						0.0
+					],
+					"flip_h": true,
+					"frame": 0,
+					"impact_active": false,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": true,
+				"lock": "(1.0, 0.0)",
+				"locomotion_facing": "(-1.0, 0.0)",
+				"public_facing": "(-1.0, 0.0)",
+				"raw_facing": "(-1.0, 0.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(-1.0, 0.0)"
+			},
+			"automatic": false,
+			"axis": "(1.0, 0.0)",
+			"crossed_living_target_damage": 0.0,
+			"frame": 2,
+			"front_damage": 72.0,
+			"fx": {
+				"frame": 0,
+				"kind": "slash_a",
+				"position": "(43.16666, 22.0)",
+				"rotation": 0.0,
+				"sprite_animation": "default",
+				"visible": true
+			},
+			"locked": {
+				"animation": {
+					"animation": "attack_combo_a",
+					"attack": true,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						1.0,
+						0.0
+					],
+					"flip_h": false,
+					"frame": 2,
+					"impact_active": true,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(1.0, 0.0)",
+				"locomotion_facing": "(-1.0, 0.0)",
+				"public_facing": "(1.0, 0.0)",
+				"raw_facing": "(1.0, 0.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(1.0, 0.0)"
+			},
+			"rear_damage": 0.0
+		},
+		{
+			"after_recovery": {
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						-1.0,
+						0.0
+					],
+					"flip_h": true,
+					"frame": 0,
+					"impact_active": false,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": true,
+				"lock": "(1.0, 0.0)",
+				"locomotion_facing": "(-1.0, 0.0)",
+				"public_facing": "(-1.0, 0.0)",
+				"raw_facing": "(-1.0, 0.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(-1.0, 0.0)"
+			},
+			"automatic": true,
+			"axis": "(1.0, 0.0)",
+			"crossed_living_target_damage": 0.0,
+			"frame": 2,
+			"front_damage": 26.0,
+			"fx": {
+				"frame": 0,
+				"kind": "slash_a",
+				"position": "(43.16666, 22.0)",
+				"rotation": 0.0,
+				"sprite_animation": "default",
+				"visible": true
+			},
+			"locked": {
+				"animation": {
+					"animation": "attack_combo_a",
+					"attack": true,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						1.0,
+						0.0
+					],
+					"flip_h": false,
+					"frame": 2,
+					"impact_active": true,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(1.0, 0.0)",
+				"locomotion_facing": "(-1.0, 0.0)",
+				"public_facing": "(1.0, 0.0)",
+				"raw_facing": "(1.0, 0.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(1.0, 0.0)"
+			},
+			"rear_damage": 0.0
+		},
+		{
+			"after_recovery": {
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						0.0,
+						1.0
+					],
+					"flip_h": false,
+					"frame": 0,
+					"impact_active": false,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(0.0, -1.0)",
+				"locomotion_facing": "(0.0, 1.0)",
+				"public_facing": "(0.0, 1.0)",
+				"raw_facing": "(0.0, 1.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(0.0, 1.0)"
+			},
+			"automatic": false,
+			"axis": "(0.0, -1.0)",
+			"crossed_living_target_damage": 0.0,
+			"frame": 2,
+			"front_damage": 72.0,
+			"fx": {
+				"frame": 0,
+				"kind": "slash_a",
+				"position": "(0.0, -21.16666)",
+				"rotation": -1.57079637050629,
+				"sprite_animation": "default",
+				"visible": true
+			},
+			"locked": {
+				"animation": {
+					"animation": "attack_combo_a",
+					"attack": true,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						0.0,
+						-1.0
+					],
+					"flip_h": false,
+					"frame": 2,
+					"impact_active": true,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(0.0, -1.0)",
+				"locomotion_facing": "(0.0, 1.0)",
+				"public_facing": "(0.0, -1.0)",
+				"raw_facing": "(0.0, -1.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(0.0, -1.0)"
+			},
+			"rear_damage": 0.0
+		},
+		{
+			"after_recovery": {
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						0.0,
+						1.0
+					],
+					"flip_h": false,
+					"frame": 0,
+					"impact_active": false,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(0.0, -1.0)",
+				"locomotion_facing": "(0.0, 1.0)",
+				"public_facing": "(0.0, 1.0)",
+				"raw_facing": "(0.0, 1.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(0.0, 1.0)"
+			},
+			"automatic": true,
+			"axis": "(0.0, -1.0)",
+			"crossed_living_target_damage": 0.0,
+			"frame": 2,
+			"front_damage": 26.0,
+			"fx": {
+				"frame": 0,
+				"kind": "slash_a",
+				"position": "(0.0, -21.16666)",
+				"rotation": -1.57079637050629,
+				"sprite_animation": "default",
+				"visible": true
+			},
+			"locked": {
+				"animation": {
+					"animation": "attack_combo_a",
+					"attack": true,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						0.0,
+						-1.0
+					],
+					"flip_h": false,
+					"frame": 2,
+					"impact_active": true,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(0.0, -1.0)",
+				"locomotion_facing": "(0.0, 1.0)",
+				"public_facing": "(0.0, -1.0)",
+				"raw_facing": "(0.0, -1.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(0.0, -1.0)"
+			},
+			"rear_damage": 0.0
+		},
+		{
+			"after_recovery": {
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						0.0,
+						-1.0
+					],
+					"flip_h": false,
+					"frame": 0,
+					"impact_active": false,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(0.0, 1.0)",
+				"locomotion_facing": "(0.0, -1.0)",
+				"public_facing": "(0.0, -1.0)",
+				"raw_facing": "(0.0, -1.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(0.0, -1.0)"
+			},
+			"automatic": false,
+			"axis": "(0.0, 1.0)",
+			"crossed_living_target_damage": 0.0,
+			"frame": 2,
+			"front_damage": 72.0,
+			"fx": {
+				"frame": 0,
+				"kind": "slash_a",
+				"position": "(0.0, 65.16666)",
+				"rotation": 1.57079637050629,
+				"sprite_animation": "default",
+				"visible": true
+			},
+			"locked": {
+				"animation": {
+					"animation": "attack_combo_a",
+					"attack": true,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						0.0,
+						1.0
+					],
+					"flip_h": false,
+					"frame": 2,
+					"impact_active": true,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(0.0, 1.0)",
+				"locomotion_facing": "(0.0, -1.0)",
+				"public_facing": "(0.0, 1.0)",
+				"raw_facing": "(0.0, 1.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(0.0, 1.0)"
+			},
+			"rear_damage": 0.0
+		},
+		{
+			"after_recovery": {
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						0.0,
+						-1.0
+					],
+					"flip_h": false,
+					"frame": 0,
+					"impact_active": false,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(0.0, 1.0)",
+				"locomotion_facing": "(0.0, -1.0)",
+				"public_facing": "(0.0, -1.0)",
+				"raw_facing": "(0.0, -1.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(0.0, -1.0)"
+			},
+			"automatic": true,
+			"axis": "(0.0, 1.0)",
+			"crossed_living_target_damage": 0.0,
+			"frame": 2,
+			"front_damage": 26.0,
+			"fx": {
+				"frame": 0,
+				"kind": "slash_a",
+				"position": "(0.0, 65.16666)",
+				"rotation": 1.57079637050629,
+				"sprite_animation": "default",
+				"visible": true
+			},
+			"locked": {
+				"animation": {
+					"animation": "attack_combo_a",
+					"attack": true,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						0.0,
+						1.0
+					],
+					"flip_h": false,
+					"frame": 2,
+					"impact_active": true,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(0.0, 1.0)",
+				"locomotion_facing": "(0.0, -1.0)",
+				"public_facing": "(0.0, 1.0)",
+				"raw_facing": "(0.0, 1.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(0.0, 1.0)"
+			},
+			"rear_damage": 0.0
+		}
+	],
+	"failures": [],
+	"follower_weapons": [
+		{
+			"damage": 0.0,
+			"events": [
+				{
+					"frame": 2,
+					"state": {
+						"animation": {
+							"animation": "attack",
+							"attack": true,
+							"authored_combo": false,
+							"body_rotation": 0.0,
+							"facing_direction": [
+								-1.0,
+								0.0
+							],
+							"flip_h": true,
+							"frame": 2,
+							"impact_active": true,
+							"impact_emitted": true,
+							"pending_heavy_hurt": false
+						},
+						"flip_h": true,
+						"lock": "(-1.0, 0.0)",
+						"locomotion_facing": "(1.0, 0.0)",
+						"public_facing": "(-1.0, 0.0)",
+						"raw_facing": "(-1.0, 0.0)",
+						"root_rotation": 0.0,
+						"sprite_rotation": 0.0,
+						"visual_facing": "(-1.0, 0.0)"
+					}
+				}
+			],
+			"hero": "rift_shepherd",
+			"state": {
+				"animation": {
+					"animation": "attack",
+					"attack": true,
+					"authored_combo": false,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						-1.0,
+						0.0
+					],
+					"flip_h": true,
+					"frame": 2,
+					"impact_active": true,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": true,
+				"lock": "(-1.0, 0.0)",
+				"locomotion_facing": "(1.0, 0.0)",
+				"public_facing": "(-1.0, 0.0)",
+				"raw_facing": "(-1.0, 0.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(-1.0, 0.0)"
+			},
+			"weapon": "rift_constructs"
+		},
+		{
+			"damage": 38.0800000000017,
+			"events": [
+				{
+					"frame": 2,
+					"state": {
+						"animation": {
+							"animation": "attack",
+							"attack": true,
+							"authored_combo": false,
+							"body_rotation": 0.0,
+							"facing_direction": [
+								-1.0,
+								0.0
+							],
+							"flip_h": true,
+							"frame": 2,
+							"impact_active": true,
+							"impact_emitted": true,
+							"pending_heavy_hurt": false
+						},
+						"flip_h": true,
+						"lock": "(-1.0, 0.0)",
+						"locomotion_facing": "(1.0, 0.0)",
+						"public_facing": "(-1.0, 0.0)",
+						"raw_facing": "(-1.0, 0.0)",
+						"root_rotation": 0.0,
+						"sprite_rotation": 0.0,
+						"visual_facing": "(-1.0, 0.0)"
+					}
+				}
+			],
+			"hero": "solar_lancer",
+			"state": {
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": false,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						1.0,
+						0.0
+					],
+					"flip_h": false,
+					"frame": 1,
+					"impact_active": false,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(-1.0, 0.0)",
+				"locomotion_facing": "(1.0, 0.0)",
+				"public_facing": "(1.0, 0.0)",
+				"raw_facing": "(1.0, 0.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(1.0, 0.0)"
+			},
+			"weapon": "solar_piercer"
+		},
+		{
+			"damage": 24.0,
+			"events": [
+				{
+					"frame": 2,
+					"state": {
+						"animation": {
+							"animation": "attack",
+							"attack": true,
+							"authored_combo": false,
+							"body_rotation": 0.0,
+							"facing_direction": [
+								-1.0,
+								0.0
+							],
+							"flip_h": true,
+							"frame": 2,
+							"impact_active": true,
+							"impact_emitted": true,
+							"pending_heavy_hurt": false
+						},
+						"flip_h": true,
+						"lock": "(-1.0, 0.0)",
+						"locomotion_facing": "(1.0, 0.0)",
+						"public_facing": "(-1.0, 0.0)",
+						"raw_facing": "(-1.0, 0.0)",
+						"root_rotation": 0.0,
+						"sprite_rotation": 0.0,
+						"visual_facing": "(-1.0, 0.0)"
+					}
+				}
+			],
+			"hero": "tide_oracle",
+			"state": {
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": false,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						1.0,
+						0.0
+					],
+					"flip_h": false,
+					"frame": 1,
+					"impact_active": false,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(-1.0, 0.0)",
+				"locomotion_facing": "(1.0, 0.0)",
+				"public_facing": "(1.0, 0.0)",
+				"raw_facing": "(1.0, 0.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(1.0, 0.0)"
+			},
+			"weapon": "tidal_covenant"
+		},
+		{
+			"damage": 48.3999999999942,
+			"events": [
+				{
+					"frame": 2,
+					"state": {
+						"animation": {
+							"animation": "attack",
+							"attack": true,
+							"authored_combo": false,
+							"body_rotation": 0.0,
+							"facing_direction": [
+								-1.0,
+								0.0
+							],
+							"flip_h": true,
+							"frame": 2,
+							"impact_active": true,
+							"impact_emitted": true,
+							"pending_heavy_hurt": false
+						},
+						"flip_h": true,
+						"lock": "(-1.0, 0.0)",
+						"locomotion_facing": "(1.0, 0.0)",
+						"public_facing": "(-1.0, 0.0)",
+						"raw_facing": "(-1.0, 0.0)",
+						"root_rotation": 0.0,
+						"sprite_rotation": 0.0,
+						"visual_facing": "(-1.0, 0.0)"
+					}
+				}
+			],
+			"hero": "shadow_ronin",
+			"state": {
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": false,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						1.0,
+						0.0
+					],
+					"flip_h": false,
+					"frame": 1,
+					"impact_active": false,
+					"impact_emitted": true,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(-1.0, 0.0)",
+				"locomotion_facing": "(1.0, 0.0)",
+				"public_facing": "(1.0, 0.0)",
+				"raw_facing": "(1.0, 0.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(1.0, 0.0)"
+			},
+			"weapon": "shadow_twinblades"
+		}
+	],
+	"last_visual_debug": {
+		"animation": "idle",
+		"attack": false,
+		"authored_combo": true,
+		"body_rotation": 0.0,
+		"facing_direction": [
+			1.0,
+			0.0
+		],
+		"flip_h": false,
+		"frame": 0,
+		"impact_active": false,
+		"impact_emitted": true,
+		"pending_heavy_hurt": false
+	},
+	"locomotion": {
+		"left_with_enemy_right": true,
+		"normalized": true,
+		"vertical_mirrors": [
+			{
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						0.0,
+						-1.0
+					],
+					"flip_h": true,
+					"frame": 3,
+					"impact_active": false,
+					"impact_emitted": false,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": true,
+				"lock": "(1.0, 0.0)",
+				"locomotion_facing": "(0.0, -1.0)",
+				"public_facing": "(0.0, -1.0)",
+				"raw_facing": "(0.0, -1.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(0.0, -1.0)"
+			},
+			{
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						0.0,
+						1.0
+					],
+					"flip_h": true,
+					"frame": 3,
+					"impact_active": false,
+					"impact_emitted": false,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": true,
+				"lock": "(1.0, 0.0)",
+				"locomotion_facing": "(0.0, 1.0)",
+				"public_facing": "(0.0, 1.0)",
+				"raw_facing": "(0.0, 1.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(0.0, 1.0)"
+			},
+			{
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						0.0,
+						-1.0
+					],
+					"flip_h": false,
+					"frame": 4,
+					"impact_active": false,
+					"impact_emitted": false,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(1.0, 0.0)",
+				"locomotion_facing": "(0.0, -1.0)",
+				"public_facing": "(0.0, -1.0)",
+				"raw_facing": "(0.0, -1.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(0.0, -1.0)"
+			},
+			{
+				"animation": {
+					"animation": "walk",
+					"attack": false,
+					"authored_combo": true,
+					"body_rotation": 0.0,
+					"facing_direction": [
+						0.0,
+						1.0
+					],
+					"flip_h": false,
+					"frame": 4,
+					"impact_active": false,
+					"impact_emitted": false,
+					"pending_heavy_hurt": false
+				},
+				"flip_h": false,
+				"lock": "(1.0, 0.0)",
+				"locomotion_facing": "(0.0, 1.0)",
+				"public_facing": "(0.0, 1.0)",
+				"raw_facing": "(0.0, 1.0)",
+				"root_rotation": 0.0,
+				"sprite_rotation": 0.0,
+				"visual_facing": "(0.0, 1.0)"
+			}
+		],
+		"zero_ignored": true
+	},
+	"presentation_debug": {
+		"active": 0,
+		"assets_ready": true,
+		"cap": 32,
+		"channels": 0,
+		"emitted": 9,
+		"free": 1,
+		"peak": 1,
+		"rejected": 0
+	},
+	"reactions": {
+		"death_preserves_left": true,
+		"hurt_preserves_left": true,
+		"reset": {
+			"animation": {
+				"animation": "idle",
+				"attack": false,
+				"authored_combo": true,
+				"body_rotation": 0.0,
+				"facing_direction": [
+					1.0,
+					0.0
+				],
+				"flip_h": false,
+				"frame": 0,
+				"impact_active": false,
+				"impact_emitted": true,
+				"pending_heavy_hurt": false
+			},
+			"flip_h": false,
+			"lock": "(1.0, 0.0)",
+			"locomotion_facing": "(1.0, 0.0)",
+			"public_facing": "(1.0, 0.0)",
+			"raw_facing": "(1.0, 0.0)",
+			"root_rotation": 0.0,
+			"sprite_rotation": 0.0,
+			"visual_facing": "(1.0, 0.0)"
+		}
+	},
+	"same_frame_controller": {
+		"impact_frame": 2,
+		"input": "InputEventAction move_left+active_ability before physics tick",
+		"state": {
+			"animation": {
+				"animation": "attack_combo_a",
+				"attack": true,
+				"authored_combo": true,
+				"body_rotation": 0.0,
+				"facing_direction": [
+					-1.0,
+					0.0
+				],
+				"flip_h": true,
+				"frame": 0,
+				"impact_active": false,
+				"impact_emitted": false,
+				"pending_heavy_hurt": false
+			},
+			"flip_h": true,
+			"lock": "(-1.0, 0.0)",
+			"locomotion_facing": "(-1.0, 0.0)",
+			"public_facing": "(-1.0, 0.0)",
+			"raw_facing": "(-1.0, 0.0)",
+			"root_rotation": 0.0,
+			"sprite_rotation": 0.0,
+			"visual_facing": "(-1.0, 0.0)"
+		}
+	},
+	"test_kind": "controlled actual physics/animation fixture; not natural DPS",
+	"version": "0.26.2-r40"
+}

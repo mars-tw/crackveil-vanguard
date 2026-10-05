@@ -56,7 +56,8 @@ func _begin_cast(target: Node2D) -> bool:
 	pending_target = weakref(target)
 	pending_target_token = _target_token(target)
 	pending_target_position = target.global_position
-	if not bool(owner_visual.call("play_attack")):
+	var direction := (target.global_position - owner_player.global_position).normalized()
+	if not owner_player.has_method("begin_directional_attack") or not bool(owner_player.call("begin_directional_attack", direction)):
 		debug_cast_rejections += 1
 		pending_target = null
 		pending_target_token = 0
@@ -65,9 +66,6 @@ func _begin_cast(target: Node2D) -> bool:
 	attack_pending = true
 	debug_cast_starts += 1
 	cooldown_timer = scaled_cooldown(data_float("cooldown", 2.4))
-	var direction := (target.global_position - owner_player.global_position).normalized()
-	if direction != Vector2.ZERO and owner_visual.has_method("set_facing_direction"):
-		owner_visual.call("set_facing_direction", direction)
 	return true
 
 

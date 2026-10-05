@@ -28,6 +28,7 @@ PUBLIC_DOCS = {
     "docs/evidence/r36/final_world_map.jpg",
     "docs/R38_RELEASE_REPORT.md", "docs/R38_STAGES_ENEMIES.md", "docs/PROGRESSION_R38.md",
     "docs/R39_MOBILE_HUD.md",
+    "docs/R40_FACING_ATTACK.md",
 }
 
 def git_paths(arguments):
@@ -51,6 +52,8 @@ def wanted(path):
         return Path(path).name in {"gates.json", "independent_review.md", "playtest_summary.json", "hero_scale_playtest.json", "input_trace.json", "clean_build.json", "clean_web_smoke.json", "final_verification.json", "dunes.png", "tide.png", "bloom.png", "forge.png", "new_heroes.png", "new_hero_recruit.png", "public_content.jpg"}
     if path.startswith("docs/evidence/r39/"):
         return Path(path).name in {"after_summary.json", "summon_single_check.json", "AFTER_REVIEW.md", "mobile_hud_test.json", "independent_review.md", "targeted_gates.json", "phone-before.png", "phone-after.png", "phone-after-portrait.png"}
+    if path.startswith("docs/evidence/r40/"):
+        return Path(path).name in {"facing_attack_test.json", "after_summary.json", "independent_review.md", "targeted_gates.json", "after-move.png", "after-attack.png"}
     if path in {"docs/evidence/r38-hero-body-scale-before.json", "docs/evidence/r38-hero-body-scale-after.json"}:
         return True
     return False

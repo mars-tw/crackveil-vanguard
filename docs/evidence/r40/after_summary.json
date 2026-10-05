@@ -1,0 +1,438 @@
+{
+  "method": "One real Chrome desktop1280x720, actual MainMenuStart/LEFT-UP-DOWN keys and one Space; natural cards fully resolved via actual clicks; readonly page probes, no HP/RNG/enemy/time writes, video or FPS claim.",
+  "identity": {
+    "version": "0.26.2-r40",
+    "mainPack": "index-d2c78c51f7ce.pck",
+    "packSHA256": "d2c78c51f7ceeff633d063756f90333915b70ea97da0f03749867916d2451a0d",
+    "htmlSHA256": "f37d38980ad6b0688bc75d8cccf3db59acc4bdf7c89591b750a8e2a8054627be",
+    "actual_runtime_version": "0.26.2-r40"
+  },
+  "walks": [
+    {
+      "kind": "walk_sample",
+      "label": "left",
+      "key": "a",
+      "before": {
+        "elapsed_time": 0.266666666666667,
+        "player": [
+          0,
+          1000
+        ],
+        "game_running": true,
+        "system_paused": false,
+        "waiting_for_contract": false,
+        "waiting_for_upgrade": false,
+        "waiting_for_shop": false,
+        "animation": {
+          "animation": "attack_combo_a",
+          "attack": true,
+          "authored_combo": true,
+          "body_rotation": 0,
+          "facing_direction": [
+            0.996346652507782,
+            -0.0854011103510857
+          ],
+          "flip_h": false,
+          "frame": 0,
+          "impact_active": false,
+          "impact_emitted": false,
+          "pending_heavy_hurt": false
+        },
+        "cleave": {
+          "attack_direction": [
+            0.996346652507782,
+            -0.0854011103510857
+          ],
+          "auto_cuts": 0,
+          "auto_hits": 0,
+          "active_hits": 0,
+          "last_hits": 0,
+          "last_kills": 0,
+          "active_pending": false,
+          "queued": false,
+          "empty_active_impacts": 0
+        },
+        "channel": {
+          "held": false,
+          "active": false,
+          "mode": "idle"
+        }
+      },
+      "sample": {
+        "elapsed_time": 0.5,
+        "player": [
+          -38.3333358764648,
+          1000
+        ],
+        "game_running": true,
+        "system_paused": false,
+        "waiting_for_contract": false,
+        "waiting_for_upgrade": false,
+        "waiting_for_shop": false,
+        "animation": {
+          "animation": "walk",
+          "attack": false,
+          "authored_combo": true,
+          "body_rotation": 0,
+          "facing_direction": [
+            -1,
+            0
+          ],
+          "flip_h": true,
+          "frame": 0,
+          "impact_active": false,
+          "impact_emitted": true,
+          "pending_heavy_hurt": false
+        },
+        "cleave": {
+          "attack_direction": [
+            0.996346652507782,
+            -0.0854011103510857
+          ],
+          "auto_cuts": 1,
+          "auto_hits": 9,
+          "active_hits": 0,
+          "last_hits": 9,
+          "last_kills": 9,
+          "active_pending": false,
+          "queued": false,
+          "empty_active_impacts": 0
+        },
+        "channel": {
+          "held": false,
+          "active": false,
+          "mode": "idle"
+        }
+      },
+      "valid_walk_unpaused": true
+    },
+    {
+      "kind": "walk_sample",
+      "label": "up",
+      "key": "w",
+      "before": {
+        "elapsed_time": 0.649133333333334,
+        "player": [
+          -53.6666641235352,
+          1000
+        ],
+        "game_running": true,
+        "system_paused": false,
+        "waiting_for_contract": false,
+        "waiting_for_upgrade": false,
+        "waiting_for_shop": false,
+        "animation": {
+          "animation": "idle",
+          "attack": false,
+          "authored_combo": true,
+          "body_rotation": 0,
+          "facing_direction": [
+            -1,
+            0
+          ],
+          "flip_h": true,
+          "frame": 0,
+          "impact_active": false,
+          "impact_emitted": true,
+          "pending_heavy_hurt": false
+        },
+        "cleave": {
+          "attack_direction": [
+            0.996346652507782,
+            -0.0854011103510857
+          ],
+          "auto_cuts": 1,
+          "auto_hits": 9,
+          "active_hits": 0,
+          "last_hits": 9,
+          "last_kills": 9,
+          "active_pending": false,
+          "queued": false,
+          "empty_active_impacts": 0
+        },
+        "channel": {
+          "held": false,
+          "active": false,
+          "mode": "idle"
+        }
+      },
+      "sample": {
+        "elapsed_time": 0.902033333333334,
+        "player": [
+          -53.6666641235352,
+          949.476928710938
+        ],
+        "game_running": true,
+        "system_paused": false,
+        "waiting_for_contract": false,
+        "waiting_for_upgrade": false,
+        "waiting_for_shop": false,
+        "animation": {
+          "animation": "walk",
+          "attack": false,
+          "authored_combo": true,
+          "body_rotation": 0,
+          "facing_direction": [
+            0,
+            -1
+          ],
+          "flip_h": true,
+          "frame": 2,
+          "impact_active": false,
+          "impact_emitted": true,
+          "pending_heavy_hurt": false
+        },
+        "cleave": {
+          "attack_direction": [
+            0.996346652507782,
+            -0.0854011103510857
+          ],
+          "auto_cuts": 1,
+          "auto_hits": 9,
+          "active_hits": 0,
+          "last_hits": 9,
+          "last_kills": 9,
+          "active_pending": false,
+          "queued": false,
+          "empty_active_impacts": 0
+        },
+        "channel": {
+          "held": false,
+          "active": false,
+          "mode": "idle"
+        }
+      },
+      "valid_walk_unpaused": true
+    },
+    {
+      "kind": "walk_sample",
+      "label": "down",
+      "key": "s",
+      "before": {
+        "elapsed_time": 0.952033333333334,
+        "player": [
+          -53.6666641235352,
+          941.810302734375
+        ],
+        "game_running": true,
+        "system_paused": false,
+        "waiting_for_contract": false,
+        "waiting_for_upgrade": false,
+        "waiting_for_shop": false,
+        "animation": {
+          "animation": "idle",
+          "attack": false,
+          "authored_combo": true,
+          "body_rotation": 0,
+          "facing_direction": [
+            0,
+            -1
+          ],
+          "flip_h": true,
+          "frame": 0,
+          "impact_active": false,
+          "impact_emitted": true,
+          "pending_heavy_hurt": false
+        },
+        "cleave": {
+          "attack_direction": [
+            0.996346652507782,
+            -0.0854011103510857
+          ],
+          "auto_cuts": 1,
+          "auto_hits": 9,
+          "active_hits": 0,
+          "last_hits": 9,
+          "last_kills": 9,
+          "active_pending": false,
+          "queued": false,
+          "empty_active_impacts": 0
+        },
+        "channel": {
+          "held": false,
+          "active": false,
+          "mode": "idle"
+        }
+      },
+      "sample": {
+        "elapsed_time": 1.18533333333333,
+        "player": [
+          -53.6666641235352,
+          976.310119628906
+        ],
+        "game_running": true,
+        "system_paused": false,
+        "waiting_for_contract": false,
+        "waiting_for_upgrade": false,
+        "waiting_for_shop": false,
+        "animation": {
+          "animation": "walk",
+          "attack": false,
+          "authored_combo": true,
+          "body_rotation": 0,
+          "facing_direction": [
+            0,
+            1
+          ],
+          "flip_h": true,
+          "frame": 1,
+          "impact_active": false,
+          "impact_emitted": true,
+          "pending_heavy_hurt": false
+        },
+        "cleave": {
+          "attack_direction": [
+            0.996346652507782,
+            -0.0854011103510857
+          ],
+          "auto_cuts": 1,
+          "auto_hits": 9,
+          "active_hits": 0,
+          "last_hits": 9,
+          "last_kills": 9,
+          "active_pending": false,
+          "queued": false,
+          "empty_active_impacts": 0
+        },
+        "channel": {
+          "held": false,
+          "active": false,
+          "mode": "idle"
+        }
+      },
+      "valid_walk_unpaused": true
+    }
+  ],
+  "space_precondition": {
+    "valid": true,
+    "state": {
+      "elapsed_time": 1.87466666666666,
+      "player": [
+        -53.6666641235352,
+        1057.50012207031
+      ],
+      "game_running": true,
+      "system_paused": false,
+      "waiting_for_contract": false,
+      "waiting_for_upgrade": false,
+      "waiting_for_shop": false,
+      "animation": {
+        "animation": "idle",
+        "attack": false,
+        "authored_combo": true,
+        "body_rotation": 0,
+        "facing_direction": [
+          0,
+          1
+        ],
+        "flip_h": true,
+        "frame": 1,
+        "impact_active": false,
+        "impact_emitted": true,
+        "pending_heavy_hurt": false
+      },
+      "cleave": {
+        "attack_direction": [
+          0.996346652507782,
+          -0.0854011103510857
+        ],
+        "auto_cuts": 1,
+        "auto_hits": 9,
+        "active_hits": 0,
+        "last_hits": 9,
+        "last_kills": 9,
+        "active_pending": false,
+        "queued": false,
+        "empty_active_impacts": 0
+      },
+      "channel": {
+        "held": false,
+        "active": false,
+        "mode": "idle"
+      }
+    }
+  },
+  "attack": {
+    "observed_busy_samples": 5,
+    "busy_direction_matches": true,
+    "busy_body_rotation_zero": true,
+    "impact_observed": true,
+    "impact_state": {
+      "elapsed_time": 2.08066666666666,
+      "player": [
+        -53.6666641235352,
+        1057.50012207031
+      ],
+      "game_running": true,
+      "system_paused": false,
+      "waiting_for_contract": false,
+      "waiting_for_upgrade": false,
+      "waiting_for_shop": false,
+      "animation": {
+        "animation": "attack_combo_a",
+        "attack": true,
+        "authored_combo": true,
+        "body_rotation": 0,
+        "facing_direction": [
+          -0.0270105432718992,
+          0.99963515996933
+        ],
+        "flip_h": true,
+        "frame": 3,
+        "impact_active": false,
+        "impact_emitted": true,
+        "pending_heavy_hurt": false
+      },
+      "cleave": {
+        "attack_direction": [
+          -0.0270105432718992,
+          0.99963515996933
+        ],
+        "auto_cuts": 1,
+        "auto_hits": 9,
+        "active_hits": 1,
+        "last_hits": 1,
+        "last_kills": 1,
+        "active_pending": false,
+        "queued": false,
+        "empty_active_impacts": 0
+      },
+      "channel": {
+        "held": false,
+        "active": false,
+        "mode": "idle"
+      }
+    },
+    "active_hits_delta": 1,
+    "left_target_observed": false,
+    "distinct_busy_snapshots": 3,
+    "f2_directly_sampled": false,
+    "first_post_impact_sample_frame": 3
+  },
+  "checks": {
+    "left_walk_flip_true": true,
+    "up_walk_keep_left": true,
+    "down_walk_keep_left": true
+  },
+  "natural_active_seconds": 3.21999999999999,
+  "kills": 24,
+  "errors": [],
+  "evidence": [
+    "after-move.png",
+    "after-attack.png"
+  ],
+  "limitations": [
+    "Body still uses authored horizontal poses; no newly authored north/south sprite claim.",
+    "Actual F2 timing/cardinal damage is covered by parent controlled fixture; this natural sample only asserts observed busy direction and post-impact counters.",
+    "No repeated fresh games or enemy placement injection.",
+    "Natural probe sampled attack frames0/1 then3 with active_hits increment; exact frame2 was not directly captured, so no fresh Web exact-frame assertion is made."
+  ],
+  "source_unchanged": true,
+  "chrome_closed": true,
+  "visual_review": {
+    "after_move": "Viewed unedited screenshot: Captain retains left-facing body while logical movement is down; previous left side remains preserved.",
+    "after_attack": "Viewed unedited screenshot: gold-white crescent extends below Captain, matching the near-down logical attack direction. Body remains mirrored left with rotation0, preserving previous horizontal side for abs(x)<0.05.",
+    "new_north_south_body_art_claim": false,
+    "strict_enemy_left_target": "NOT_OBSERVED: actual attack x=-0.027 is within horizontal deadzone and primarily down, so it is not a controlled left-side attack."
+  }
+}
