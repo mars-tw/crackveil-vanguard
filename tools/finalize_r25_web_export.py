@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import base64
 import hashlib
 import json
 import re
@@ -13,7 +12,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "0.26.2-r40"
+RELEASE = "0.26.3-r41"
 FOCAL_SOURCE = ROOT / "assets" / "art" / "r33" / "r33_keyart.png"
 FOCAL_HASH = "04c40aa0"
 FOCAL_REF = f"r33-web-focal.png?v={FOCAL_HASH}"
@@ -72,10 +71,9 @@ def main() -> int:
         raise SystemExit("exported HTML lacks the R25 focal/content-cache markers")
     inline_marker = "rift-r25-inline-focal"
     if inline_marker not in html_text:
-        focal_data = base64.b64encode(FOCAL_SOURCE.read_bytes()).decode("ascii")
         inline_block = (
             f'<div id="{inline_marker}" style="position:fixed;inset:0;z-index:2147483646;background:#04070f">'
-            f'<img src="data:image/png;base64,{focal_data}" alt="" '
+            f'<img src="{FOCAL_REF}" alt="" '
             'style="width:100%;height:100%;object-fit:cover" '
             "onload=\"if(!performance.getEntriesByName('rift-r25-main-focal').length)performance.mark('rift-r25-main-focal')\">"
             "<style>@media (orientation:portrait){#rift-r25-inline-focal img{object-fit:contain!important}}"
@@ -108,6 +106,33 @@ def main() -> int:
         html.write_text(html_text, encoding="utf-8", newline="\n")
     if "rift-r30-mb" not in html_text:
         raise SystemExit("R30 loading MB counter marker missing from exported HTML")
+    startup_marker = 'id="rift-r41-mobile-startup"'
+    startup_source = (ROOT / "web" / "mobile_startup.js").read_text(encoding="utf-8")
+    if startup_marker not in html_text:
+        html_text = html_text.replace("</head>", f'<script {startup_marker}>\n{startup_source}\n</script>\n</head>', 1)
+        engine_line = "const engine = new Engine(GODOT_CONFIG);"
+        startup_config = (
+            "const r41Startup = CrackveilMobileStartup.prepare(document, window, GODOT_CONFIG);\n"
+            "GODOT_CONFIG.onProgress = (current, total) => {const p=document.getElementById('status-progress');"
+            "if(p&&current>0&&total>0){p.value=current;p.max=total}};\n"
+            + engine_line
+        )
+        if engine_line not in html_text:
+            raise SystemExit("Godot Engine constructor marker missing")
+        html_text = html_text.replace(engine_line, startup_config, 1)
+        original_start = "engine.startGame({\n\t\t\t'onProgress':"
+        if original_start not in html_text:
+            raise SystemExit("Godot startGame marker missing")
+        html_text = html_text.replace(original_start, "CrackveilMobileStartup.start(engine, GODOT_CONFIG, {\n\t\t\t'onProgress':", 1)
+        html_text = html_text.replace("}).then(() => {\n\t\t\tsetStatusMode('hidden');",
+            "}.onProgress, r41Startup).then(() => {\n\t\t\tsetStatusMode('hidden');", 1)
+        if "}.onProgress, r41Startup)" not in html_text:
+            raise SystemExit("Godot startup promise marker missing")
+        if "await engine.startGame({ onProgress: progress });" not in html_text:
+            raise SystemExit("Desktop helper branch changed unexpectedly")
+        if html_text.count("CrackveilMobileStartup.start(engine, GODOT_CONFIG, {") != 1:
+            raise SystemExit("Startup wrapper must be called once, outside its helper")
+        html.write_text(html_text, encoding="utf-8", newline="\n")
     recovery_marker = 'id="rift-r32-loading-recovery-script"'
     if recovery_marker not in html_text:
         recovery_source = (ROOT / "web" / "loading_recovery.mjs").read_text(encoding="utf-8")
@@ -171,6 +196,8 @@ def main() -> int:
         "offline_url": "index.offline.html",
         "old_cache_cleanup": "activate deletes same-prefix caches except current CACHE_NAME",
         "offline_policy": "navigation fallback only; game payload is not pre-cached",
+        "startup_policy": "mobile sequential init/preload/start and CSS-resolution pixel budget",
+        "loading_art_policy": "one shared external focal URL; no duplicate base64 image",
         "passed": source_hash == sha256(focal_output) and all(name in worker_text for name in required_cached) and sw_registration_marker in html_text,
     }
     evidence = ROOT / args.evidence

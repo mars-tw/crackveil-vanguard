@@ -1,0 +1,688 @@
+{
+ "schema_version": 1,
+ "label": "baseline",
+ "method": "One native Chrome browser with phone viewport/touch emulation844x390 DPR3; fresh context and disabled HTTP cache, normal service-worker install allowed, actual MainMenuStart/joystick/natural cards20s. No video, route interception, gameplay writes or artificial CPU/GPU throttle.",
+ "artifactIdentity": {
+  "mainPack": "index-3304a85dd586.pck",
+  "packSHA256": "3304a85dd586b86a929789ded90c29265bae90d29cf3e74d035b1e15e87e2657",
+  "htmlSHA256": "6a5365920c6fa48204d36317ffeef4c784843e350d8faf21ebcb0b077108588c",
+  "expectedVersion": "0.26.2-r40",
+  "actualRuntimeVersion": "0.26.2-r40"
+ },
+ "browserVersion": {
+  "protocolVersion": "1.3",
+  "product": "Chrome/154.0.8037.58",
+  "revision": "@a654841425914cbb703a2931e07b70a83aedbafd",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "jsVersion": "15.4.80.11"
+ },
+ "cold_load_wall_ms": 3095,
+ "start_click_perf_ms": 3459.300000011921,
+ "menu_sample": {
+  "phase": "menu",
+  "now": 3112.699999988079,
+  "canvas": {
+   "css_width": 844,
+   "css_height": 390,
+   "width": 2532,
+   "height": 1170
+  },
+  "dpr": 3,
+  "js_memory": {
+   "usedJSHeapSize": 107721058,
+   "totalJSHeapSize": 111070842,
+   "jsHeapSizeLimit": 4395630592
+  },
+  "wasm_memory": {
+   "allocated_linear_memory_bytes": 83689472,
+   "source": "engine.rtenv.HEAPU8.buffer.byteLength",
+   "used_linear_memory_bytes": null
+  },
+  "cdp_heap": {
+   "usedSize": 12682432,
+   "totalSize": 16044032,
+   "embedderHeapUsedSize": 7500776,
+   "backingStorageSize": 95026810
+  },
+  "cdp_metrics": {
+   "Timestamp": 431596.940085,
+   "AudioHandlers": 4,
+   "AudioWorkletProcessors": 0,
+   "Documents": 1,
+   "Frames": 1,
+   "JSEventListeners": 60,
+   "Nodes": 106,
+   "ArrayBufferContents": 15,
+   "LayoutDuration": 0.015846,
+   "ScriptDuration": 0.046478,
+   "TaskDuration": 3.009329,
+   "ProcessTime": 2.321691,
+   "JSHeapUsedSize": 12655996,
+   "JSHeapTotalSize": 15781888
+  },
+  "runtime": null,
+  "process_memory": {
+   "rows": [
+    {
+     "pid": 16412,
+     "type": "renderer",
+     "private_committed_bytes": 16072704,
+     "working_set_bytes": 35803136,
+     "cpu_seconds": 0.03125
+    },
+    {
+     "pid": 23104,
+     "type": "storage.mojom.StorageService",
+     "private_committed_bytes": 8302592,
+     "working_set_bytes": 20910080,
+     "cpu_seconds": 0.015625
+    },
+    {
+     "pid": 26056,
+     "type": "GPU",
+     "private_committed_bytes": 458985472,
+     "working_set_bytes": 516984832,
+     "cpu_seconds": 2.28125
+    },
+    {
+     "pid": 40020,
+     "type": "renderer",
+     "private_committed_bytes": 45174784,
+     "working_set_bytes": 90759168,
+     "cpu_seconds": 0.1875
+    },
+    {
+     "pid": 42596,
+     "type": "browser",
+     "private_committed_bytes": 51363840,
+     "working_set_bytes": 145502208,
+     "cpu_seconds": 0.78125
+    },
+    {
+     "pid": 53816,
+     "type": "renderer",
+     "private_committed_bytes": 397733888,
+     "working_set_bytes": 464592896,
+     "cpu_seconds": 2.640625
+    },
+    {
+     "pid": 58844,
+     "type": "network.mojom.NetworkService",
+     "private_committed_bytes": 27955200,
+     "working_set_bytes": 56852480,
+     "cpu_seconds": 0.265625
+    },
+    {
+     "pid": 64900,
+     "type": "audio.mojom.AudioService",
+     "private_committed_bytes": 8851456,
+     "working_set_bytes": 25612288,
+     "cpu_seconds": 0.03125
+    }
+   ],
+   "private_committed_sum_bytes": 1014439936,
+   "working_set_sum_bytes": 1357017088
+  }
+ },
+ "arena_start_sample": {
+  "phase": "arena-start",
+  "now": 4537.199999988079,
+  "canvas": {
+   "css_width": 844,
+   "css_height": 390,
+   "width": 2532,
+   "height": 1170
+  },
+  "dpr": 3,
+  "js_memory": {
+   "usedJSHeapSize": 58848758,
+   "totalJSHeapSize": 68143686,
+   "jsHeapSizeLimit": 4395630592
+  },
+  "wasm_memory": {
+   "allocated_linear_memory_bytes": 150405120,
+   "source": "engine.rtenv.HEAPU8.buffer.byteLength",
+   "used_linear_memory_bytes": null
+  },
+  "cdp_heap": {
+   "usedSize": 9891552,
+   "totalSize": 19189760,
+   "embedderHeapUsedSize": 1067528,
+   "backingStorageSize": 48953926
+  },
+  "cdp_metrics": {
+   "Timestamp": 431598.288208,
+   "AudioHandlers": 25,
+   "AudioWorkletProcessors": 3,
+   "Documents": 1,
+   "Frames": 1,
+   "JSEventListeners": 64,
+   "Nodes": 106,
+   "ArrayBufferContents": 196,
+   "LayoutDuration": 0.015892,
+   "ScriptDuration": 1.016189,
+   "TaskDuration": 4.010383,
+   "ProcessTime": 3.792188,
+   "JSHeapUsedSize": 9824372,
+   "JSHeapTotalSize": 19189760
+  },
+  "runtime": {
+   "version": "0.26.2-r40",
+   "elapsed_time": 0.139066666666667,
+   "hp": 110,
+   "kills": 0,
+   "level": 1,
+   "game_running": true,
+   "system_paused": false,
+   "waiting_for_upgrade": false,
+   "firepower": {
+    "enemies_live": 0,
+    "friendly_projectiles_visible": 0,
+    "projectiles_logical": 0
+   },
+   "performance": {
+    "draw_calls": 77,
+    "hud_static_layout_updates": 0,
+    "physics_ms": 0.7,
+    "process_ms": 435.5,
+    "render_objects": 396
+   }
+  },
+  "process_memory": {
+   "rows": [
+    {
+     "pid": 16412,
+     "type": "renderer",
+     "private_committed_bytes": 16072704,
+     "working_set_bytes": 35803136,
+     "cpu_seconds": 0.03125
+    },
+    {
+     "pid": 23104,
+     "type": "storage.mojom.StorageService",
+     "private_committed_bytes": 8302592,
+     "working_set_bytes": 20910080,
+     "cpu_seconds": 0.015625
+    },
+    {
+     "pid": 26056,
+     "type": "GPU",
+     "private_committed_bytes": 644952064,
+     "working_set_bytes": 729341952,
+     "cpu_seconds": 2.5
+    },
+    {
+     "pid": 40020,
+     "type": "renderer",
+     "private_committed_bytes": 45174784,
+     "working_set_bytes": 90759168,
+     "cpu_seconds": 0.1875
+    },
+    {
+     "pid": 42596,
+     "type": "browser",
+     "private_committed_bytes": 52039680,
+     "working_set_bytes": 146829312,
+     "cpu_seconds": 0.8125
+    },
+    {
+     "pid": 53816,
+     "type": "renderer",
+     "private_committed_bytes": 433152000,
+     "working_set_bytes": 540958720,
+     "cpu_seconds": 4.265625
+    },
+    {
+     "pid": 58844,
+     "type": "network.mojom.NetworkService",
+     "private_committed_bytes": 27955200,
+     "working_set_bytes": 56852480,
+     "cpu_seconds": 0.265625
+    },
+    {
+     "pid": 64900,
+     "type": "audio.mojom.AudioService",
+     "private_committed_bytes": 8851456,
+     "working_set_bytes": 25624576,
+     "cpu_seconds": 0.03125
+    }
+   ],
+   "private_committed_sum_bytes": 1236500480,
+   "working_set_sum_bytes": 1647079424
+  }
+ },
+ "final_sample": {
+  "phase": "battle-final",
+  "now": 25937.30000001192,
+  "canvas": {
+   "css_width": 844,
+   "css_height": 390,
+   "width": 2532,
+   "height": 1170
+  },
+  "dpr": 3,
+  "js_memory": {
+   "usedJSHeapSize": 88511000,
+   "totalJSHeapSize": 106650360,
+   "jsHeapSizeLimit": 4395630592
+  },
+  "wasm_memory": {
+   "allocated_linear_memory_bytes": 150405120,
+   "source": "engine.rtenv.HEAPU8.buffer.byteLength",
+   "used_linear_memory_bytes": null
+  },
+  "cdp_heap": {
+   "usedSize": 26130308,
+   "totalSize": 44273664,
+   "embedderHeapUsedSize": 4126600,
+   "backingStorageSize": 62376696
+  },
+  "cdp_metrics": {
+   "Timestamp": 431619.768743,
+   "AudioHandlers": 413,
+   "AudioWorkletProcessors": 13,
+   "Documents": 1,
+   "Frames": 1,
+   "JSEventListeners": 174,
+   "Nodes": 90,
+   "ArrayBufferContents": 1707,
+   "LayoutDuration": 0.015892,
+   "ScriptDuration": 13.393307,
+   "TaskDuration": 17.237182,
+   "ProcessTime": 19.746488,
+   "JSHeapUsedSize": 26082072,
+   "JSHeapTotalSize": 44273664
+  },
+  "runtime": {
+   "version": "0.26.2-r40",
+   "elapsed_time": 20.5058234666672,
+   "hp": 137,
+   "kills": 310,
+   "level": 5,
+   "game_running": true,
+   "system_paused": false,
+   "waiting_for_upgrade": false,
+   "firepower": {
+    "enemies_live": 122,
+    "friendly_projectiles_visible": 34,
+    "projectiles_logical": 42
+   },
+   "performance": {
+    "draw_calls": 585,
+    "hud_static_layout_updates": 1,
+    "physics_ms": 11.3,
+    "process_ms": 11.9,
+    "render_objects": 2496
+   }
+  },
+  "process_memory": {
+   "rows": [
+    {
+     "pid": 16412,
+     "type": "renderer",
+     "private_committed_bytes": 15761408,
+     "working_set_bytes": 35549184,
+     "cpu_seconds": 0.03125
+    },
+    {
+     "pid": 23104,
+     "type": "storage.mojom.StorageService",
+     "private_committed_bytes": 8302592,
+     "working_set_bytes": 20918272,
+     "cpu_seconds": 0.015625
+    },
+    {
+     "pid": 26056,
+     "type": "GPU",
+     "private_committed_bytes": 611614720,
+     "working_set_bytes": 695791616,
+     "cpu_seconds": 17.03125
+    },
+    {
+     "pid": 40020,
+     "type": "renderer",
+     "private_committed_bytes": 43724800,
+     "working_set_bytes": 89505792,
+     "cpu_seconds": 0.1875
+    },
+    {
+     "pid": 42596,
+     "type": "browser",
+     "private_committed_bytes": 52498432,
+     "working_set_bytes": 147779584,
+     "cpu_seconds": 1.015625
+    },
+    {
+     "pid": 53816,
+     "type": "renderer",
+     "private_committed_bytes": 557617152,
+     "working_set_bytes": 665849856,
+     "cpu_seconds": 19.25
+    },
+    {
+     "pid": 58844,
+     "type": "network.mojom.NetworkService",
+     "private_committed_bytes": 28147712,
+     "working_set_bytes": 57106432,
+     "cpu_seconds": 0.265625
+    },
+    {
+     "pid": 64900,
+     "type": "audio.mojom.AudioService",
+     "private_committed_bytes": 8859648,
+     "working_set_bytes": 25702400,
+     "cpu_seconds": 0.046875
+    }
+   ],
+   "private_committed_sum_bytes": 1326526464,
+   "working_set_sum_bytes": 1738203136
+  }
+ },
+ "phase_samples": [
+  {
+   "phase": "battle-5",
+   "elapsed_time": 5.55674066666665,
+   "canvas": {
+    "css_width": 844,
+    "css_height": 390,
+    "width": 2532,
+    "height": 1170
+   },
+   "wasm_linear_allocated_bytes": 150405120,
+   "cdp_heap": {
+    "usedSize": 16639084,
+    "totalSize": 26578944,
+    "embedderHeapUsedSize": 9604448,
+    "backingStorageSize": 59831730
+   },
+   "cdp_cumulative_time_seconds": {
+    "TaskDuration": 6.723281,
+    "ScriptDuration": 3.521904,
+    "ProcessTime": 7.31422
+   },
+   "runtime_counts": {
+    "enemies_live": 67,
+    "friendly_projectiles_visible": 47,
+    "projectiles_logical": 47
+   },
+   "process_private_committed_sum_bytes": 1309786112,
+   "gpu_process": {
+    "pid": 26056,
+    "type": "GPU",
+    "private_committed_bytes": 658747392,
+    "working_set_bytes": 743030784,
+    "cpu_seconds": 5.765625
+   },
+   "largest_renderer": {
+    "pid": 53816,
+    "type": "renderer",
+    "private_committed_bytes": 493838336,
+    "working_set_bytes": 600010752,
+    "cpu_seconds": 7.609375
+   }
+  },
+  {
+   "phase": "battle-11",
+   "elapsed_time": 11.0302025066668,
+   "canvas": {
+    "css_width": 844,
+    "css_height": 390,
+    "width": 2532,
+    "height": 1170
+   },
+   "wasm_linear_allocated_bytes": 150405120,
+   "cdp_heap": {
+    "usedSize": 26839676,
+    "totalSize": 34729984,
+    "embedderHeapUsedSize": 10091592,
+    "backingStorageSize": 63959105
+   },
+   "cdp_cumulative_time_seconds": {
+    "TaskDuration": 10.068916,
+    "ScriptDuration": 6.646987,
+    "ProcessTime": 11.340751
+   },
+   "runtime_counts": {
+    "enemies_live": 90,
+    "friendly_projectiles_visible": 32,
+    "projectiles_logical": 32
+   },
+   "process_private_committed_sum_bytes": 1309933568,
+   "gpu_process": {
+    "pid": 26056,
+    "type": "GPU",
+    "private_committed_bytes": 611209216,
+    "working_set_bytes": 695435264,
+    "cpu_seconds": 9.84375
+   },
+   "largest_renderer": {
+    "pid": 53816,
+    "type": "renderer",
+    "private_committed_bytes": 541483008,
+    "working_set_bytes": 649580544,
+    "cpu_seconds": 11.359375
+   }
+  },
+  {
+   "phase": "battle-16",
+   "elapsed_time": 16.371655506667,
+   "canvas": {
+    "css_width": 844,
+    "css_height": 390,
+    "width": 2532,
+    "height": 1170
+   },
+   "wasm_linear_allocated_bytes": 150405120,
+   "cdp_heap": {
+    "usedSize": 21191568,
+    "totalSize": 41291776,
+    "embedderHeapUsedSize": 2418552,
+    "backingStorageSize": 57888057
+   },
+   "cdp_cumulative_time_seconds": {
+    "TaskDuration": 13.979457,
+    "ScriptDuration": 10.307716,
+    "ProcessTime": 15.982961
+   },
+   "runtime_counts": {
+    "enemies_live": 111,
+    "friendly_projectiles_visible": 33,
+    "projectiles_logical": 33
+   },
+   "process_private_committed_sum_bytes": 1291014144,
+   "gpu_process": {
+    "pid": 26056,
+    "type": "GPU",
+    "private_committed_bytes": 613040128,
+    "working_set_bytes": 697180160,
+    "cpu_seconds": 13.828125
+   },
+   "largest_renderer": {
+    "pid": 53816,
+    "type": "renderer",
+    "private_committed_bytes": 520704000,
+    "working_set_bytes": 630640640,
+    "cpu_seconds": 15.84375
+   }
+  }
+ ],
+ "rendering": {
+  "css": [
+   844,
+   390
+  ],
+  "canvas": [
+   2532,
+   1170
+  ],
+  "drawing_buffer": [
+   2532,
+   1170
+  ],
+  "dpr": 3,
+  "context_lost": false,
+  "attributes": {
+   "alpha": false,
+   "antialias": false,
+   "depth": true,
+   "desynchronized": false,
+   "failIfMajorPerformanceCaveat": false,
+   "powerPreference": "high-performance",
+   "premultipliedAlpha": true,
+   "preserveDrawingBuffer": true,
+   "stencil": false,
+   "xrCompatible": false
+  },
+  "renderer": "ANGLE (Intel, Intel(R) Graphics (0x00007D67) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "vendor": "Google Inc. (Intel)",
+  "actual_backing_pixels": 2962440,
+  "css_pixels": 329160,
+  "backing_to_css_pixel_ratio": 9
+ },
+ "nativeGLVerification": {
+  "ready": true,
+  "cachedQueries": 2666,
+  "scissorMatches": true,
+  "drawMatches": true,
+  "readMatches": true
+ },
+ "navigator": {
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "maxTouchPoints": 1,
+  "deviceMemory": 32,
+  "hardwareConcurrency": 20
+ },
+ "wasm_memory_available": true,
+ "long_tasks": {
+  "threshold_ms": 50,
+  "load_before_start": {
+   "count": 1,
+   "total_ms": 2572,
+   "max_ms": 2572,
+   "over200ms": 1
+  },
+  "start_and_combat": {
+   "count": 3,
+   "total_ms": 1024,
+   "max_ms": 494,
+   "over200ms": 2
+  },
+  "all": {
+   "count": 4,
+   "total_ms": 3596,
+   "max_ms": 2572,
+   "over200ms": 3
+  },
+  "largest": [
+   {
+    "startTime": 520.3999999761581,
+    "duration": 2572,
+    "name": "self"
+   },
+   {
+    "startTime": 3491.300000011921,
+    "duration": 494,
+    "name": "self"
+   },
+   {
+    "startTime": 3986.100000023842,
+    "duration": 436,
+    "name": "self"
+   },
+   {
+    "startTime": 4442.399999976158,
+    "duration": 94,
+    "name": "self"
+   }
+  ],
+  "observer_error": null,
+  "dropped": 0
+ },
+ "context_events": {
+  "lost": [],
+  "restored": [],
+  "page_crashed": false
+ },
+ "resources": [
+  {
+   "name": "index.wasm",
+   "duration": 164.80000001192093,
+   "transferSize": 39509639,
+   "encodedBodySize": 39509339,
+   "decodedBodySize": 39509339
+  },
+  {
+   "name": "index-3304a85dd586.pck",
+   "duration": 207.79999995231628,
+   "transferSize": 47267508,
+   "encodedBodySize": 47267208,
+   "decodedBodySize": 47267208
+  }
+ ],
+ "pressure": {
+  "js_heap_cdp": {
+   "count": 6,
+   "min": 9891552,
+   "mean": 18895770,
+   "max": 26839676
+  },
+  "arraybuffer_backing_cdp": {
+   "count": 6,
+   "min": 48953926,
+   "mean": 64672720.666666664,
+   "max": 95026810
+  },
+  "wasm_linear_allocated": {
+   "count": 6,
+   "min": 83689472,
+   "mean": 139285845.33333334,
+   "max": 150405120
+  },
+  "process_private_commit_bytes": {
+   "count": 6,
+   "min": 1014439936,
+   "mean": 1248033450.6666667,
+   "max": 1326526464
+  }
+ },
+ "natural_active_seconds": 20.7754793466672,
+ "kills": 313,
+ "errors": [],
+ "failedResponses": [],
+ "limitations": [
+  "Chrome on Windows with phone viewport/touch/DPR emulation; not physical phone, Safari or phone-OS freeze reproduction.",
+  "Localhost cold context load is not public-mobile-network load time.",
+  "Allocated Wasm linear memory is capacity, not live allocations. CDP JS heap and backing storage are distinct metrics; process totals are not GPU VRAM.",
+  "Read-only measurements and long-task observer add small overhead. Screenshot is taken only after the measurement interval.",
+  "Memory maximums are maxima of six sparse samples, not continuous peak or leak proof. Device reports32GiB/20logical CPUs because this is the Windows host; no simulated phone CPU/RAM limits were applied."
+ ],
+ "source_unchanged": true,
+ "chrome_closed_by_finally": true,
+ "evidence": "baseline.png",
+ "canvas_no_dpr_cap_observed": true,
+ "readback": {
+  "battle_image_viewed": true,
+  "game_scene_visible": true,
+  "cold_context_reached_menu_and_arena": true,
+  "physical_phone_os_freeze_reproduced": false,
+  "desktop_chrome_crash_reproduced": false
+ },
+ "source_facts": {
+  "canvas_resize_policy": 2,
+  "engine_pixel_ratio": "GodotDisplayScreen.getPixelRatio reads uncapped window.devicePixelRatio when hidpi is enabled",
+  "mobile_texture_compression_export": false,
+  "desktop_texture_compression_export": true,
+  "threads_enabled_export": false,
+  "runtime_source": "R40 current local export, not R41 fix",
+  "local_preview_server_pid": 19188
+ },
+ "memory_observation_limits": "Do not add JS heap, ArrayBuffer backing, Wasm capacity and process private commit together; these metrics overlap and measure different allocation domains. Role-specific process memory comes from this browser instance, not a physical phone or direct GPU VRAM counter.",
+ "baseline_status": "VERIFIED: normal menu-to-battle progression on this host; high DPR load/memory pressure measured, physical phone freeze NOT_REPRODUCED/NOT_TESTED.",
+ "audio_observation": {
+  "AudioHandlers_menu": 4,
+  "AudioHandlers_at20s": 413,
+  "JSEventListeners_menu": 60,
+  "JSEventListeners_at20s": 174,
+  "interpretation": "Browser handler growth is observed; without a longer lifecycle/GC trace this is not proof of an audio leak."
+ }
+}

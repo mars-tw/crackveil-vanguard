@@ -2,6 +2,7 @@ extends Node
 
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
+const ANIMATION_LIBRARY := preload("res://scripts/animation/true_animation_library.gd")
 const ENEMY_SCENE := preload("res://scenes/enemies/Enemy.tscn")
 const ENEMY_SPAWNER_SCRIPT := preload("res://scripts/enemies/enemy_spawner.gd")
 
@@ -24,16 +25,21 @@ func _ready() -> void:
 		print("ENEMY_ART_REGRESSION_FAIL")
 		get_tree().quit(1)
 	else:
-		print("ENEMY_ART_ASSETS=7 source_canvas=96x96 atlas=512x3712 states=4/8/6/3/6 shared=true heroes=10 packed=true")
+		print("ENEMY_ART_ASSETS=7 source_canvas=96x96 atlas=current_R35_R38 states=4/8/6/3/6 shared=true historical_atlas_not_prewarmed=true")
 		print("ENEMY_ART_REGRESSION_PASS")
 		get_tree().quit(0)
 
 
 func _test_compact_assets_and_real_frames() -> void:
 	SPRITE_LOADER.prewarm_gameplay_textures()
-	var atlas := load("res://assets/sprites/true_character_atlas.png") as Texture2D
-	_assert(atlas != null and atlas.get_width() == 512 and atlas.get_height() == 3712, "true animation atlas dimensions drifted")
-	_assert(SPRITE_LOADER.texture_cache.has("res://assets/sprites/true_character_atlas.png"), "true animation atlas was not prewarmed")
+	_assert(not SPRITE_LOADER.texture_cache.has("res://assets/sprites/true_character_atlas.png"), "unused historical atlas was eagerly loaded")
+	var current_frames := ANIMATION_LIBRARY.get_sprite_frames("res://assets/sprites/enemy_grunt.png")
+	var external_frames := ANIMATION_LIBRARY.get_sprite_frames("res://assets/sprites/enemy_clockwork_reaper.png")
+	_assert(current_frames != null and external_frames != null, "current runtime articulated frames missing")
+	if current_frames != null and external_frames != null:
+		var atlas := (current_frames.get_frame_texture(&"walk",0) as AtlasTexture).atlas
+		var external := (external_frames.get_frame_texture(&"walk",0) as AtlasTexture).atlas
+		_assert(atlas.resource_path == ANIMATION_LIBRARY.ATLAS_PATH and external.resource_path == ANIMATION_LIBRARY.EXTERNAL_ATLAS_PATH, "runtime frames point at wrong shared atlas")
 	for base_name in ENEMY_ART_IDS:
 		var base_path := "res://assets/sprites/%s.png" % base_name
 		var texture := load(base_path) as Texture2D

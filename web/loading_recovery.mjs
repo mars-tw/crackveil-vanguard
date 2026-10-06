@@ -20,21 +20,35 @@ export function installLoadingRecovery(doc, win, now = () => performance.now()) 
   artwork.append(recovery);
   let lastValue = Number(progress.value) || 0;
   let lastActivity = now();
+  let lastPhase = win.__cvR41Startup?.phase || "";
   let timer;
+  const canvas = doc.getElementById("canvas");
+  const cleanup = () => {
+    win.clearInterval(timer);
+    win.removeEventListener?.("unhandledrejection", startupFailure);
+    canvas?.removeEventListener?.("webglcontextlost", startupFailure);
+  };
 
   const tick = () => {
-    if (!artwork.isConnected) {
-      win.clearInterval(timer);
+    if (!artwork.isConnected || win.__cvR41Startup?.phase === "ready") {
+      recovery.hidden = true;
+      cleanup();
       return;
     }
-    const failed = notice.textContent.trim() !== "" && win.getComputedStyle(notice).display !== "none";
+    const phase = win.__cvR41Startup?.phase || "";
+    if (phase !== lastPhase) {
+      lastPhase = phase;
+      lastActivity = now();
+      recovery.hidden = true;
+    }
+    const failed = phase === "failed" || (notice.textContent.trim() !== "" && win.getComputedStyle(notice).display !== "none");
     if (failed) {
       artwork.classList.add("load-failed");
       const mb = doc.getElementById("rift-r30-mb");
       if (mb) mb.textContent = "遊戲尚未啟動";
-      message.textContent = "載入失敗，請確認網路後重試。";
+      message.textContent = "載入失敗，可重新載入再試。";
       recovery.hidden = false;
-      win.clearInterval(timer);
+      cleanup();
       return;
     }
     const value = Number(progress.value);
@@ -44,12 +58,28 @@ export function installLoadingRecovery(doc, win, now = () => performance.now()) 
       recovery.hidden = true;
     }
     const total = Number(progress.max);
+    if (phase && phase !== "ready" && Number.isFinite(value) && Number.isFinite(total) &&
+        value >= total && now() - lastActivity >= 30000) {
+      message.textContent = "資料已下載，遊戲啟動尚未完成，可重新載入。";
+      recovery.hidden = false;
+      return;
+    }
     if (Number.isFinite(value) && Number.isFinite(total) && value < total && now() - lastActivity >= 30000) {
       message.textContent = "下載暫停了，可繼續等待或重新載入。";
       recovery.hidden = false;
     }
   };
   timer = win.setInterval(tick, 200);
+  const startupFailure = event => {
+    if (win.__cvR41Startup && win.__cvR41Startup.phase !== "ready") {
+      const reason = event?.reason?.message || event?.reason || event?.message || "graphics context lost";
+      if (win.__cvR41Startup.fail) win.__cvR41Startup.fail(reason);
+      else win.__cvR41Startup.phase = "failed";
+      tick();
+    }
+  };
+  win.addEventListener?.("unhandledrejection", startupFailure);
+  canvas?.addEventListener?.("webglcontextlost", startupFailure);
   tick();
   return { tick, recovery, message, retry };
 }

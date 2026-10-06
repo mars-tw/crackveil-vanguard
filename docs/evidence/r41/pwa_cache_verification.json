@@ -1,0 +1,33 @@
+{
+  "release": "0.26.3-r41",
+  "cache_version": "0.26.3-r41|04c40aa0|2f4a5b104eda|99543dc86933",
+  "game_pack": "index-2f4a5b104eda.pck",
+  "game_pack_sha256": "2f4a5b104edab5d5de04d382f8268fb23806489066422d5091ee30213c5f5792",
+  "focal_ref": "r33-web-focal.png?v=04c40aa0",
+  "focal_source_sha256": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd",
+  "focal_export_sha256": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd",
+  "loading_mb_marker": "rift-r30-mb",
+  "loading_recovery_marker": "id=\"rift-r32-loading-recovery-script\"",
+  "webgl_state_cache_marker": "id=\"rift-r36-webgl-state-cache\"",
+  "webgl_state_cache_sha256": "99543dc86933b1db31881dbc1ac1e3f6949c89276754ca731dfeb57ff79ac8b4",
+  "service_worker_registration_marker": "rift-r30-offline-fallback",
+  "cached_files": [
+    "index.html",
+    "index.js",
+    "index.offline.html",
+    "index.audio.worklet.js",
+    "index.audio.position.worklet.js",
+    "index.png",
+    "index.manifest.json",
+    "index.144x144.png",
+    "index.180x180.png",
+    "index.512x512.png",
+    "r33-web-focal.png?v=04c40aa0"
+  ],
+  "offline_url": "index.offline.html",
+  "old_cache_cleanup": "activate deletes same-prefix caches except current CACHE_NAME",
+  "offline_policy": "navigation fallback only; game payload is not pre-cached",
+  "startup_policy": "mobile sequential init/preload/start and CSS-resolution pixel budget",
+  "loading_art_policy": "one shared external focal URL; no duplicate base64 image",
+  "passed": true
+}

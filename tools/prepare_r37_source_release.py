@@ -13,6 +13,7 @@ PUBLIC_TOOLS = {
     "test_r33_web_smoke.mjs", "test_r36_webgl_state_cache.cjs", "check_r37_release_assets.py",
     "sync_resource_uids.py", "r37_perf_compare.cjs", "prepare_r37_source_release.py",
     "build_r38_content_atlas.py", "check_r38_content_assets.py", "measure_r38_hero_body_scale.py", "r38_map_playtest.cjs",
+    "test_r41_mobile_startup.cjs",
 }
 PUBLIC_DOCS = {
     "docs/COMBAT_R32.md", "docs/PROGRESSION_R32.md", "docs/PROGRESSION_R36.md",
@@ -29,6 +30,7 @@ PUBLIC_DOCS = {
     "docs/R38_RELEASE_REPORT.md", "docs/R38_STAGES_ENEMIES.md", "docs/PROGRESSION_R38.md",
     "docs/R39_MOBILE_HUD.md",
     "docs/R40_FACING_ATTACK.md",
+    "docs/R41_IPHONE_LOADING.md",
 }
 
 def git_paths(arguments):
@@ -41,7 +43,7 @@ def wanted(path):
     if path.startswith("assets/"):
         return "qa" not in parts and Path(path).suffix not in {".log", ".webm", ".mp4"}
     if path.startswith("web/"):
-        return path in {"web/webgl_state_cache.js", "web/loading_recovery.mjs"}
+        return path in {"web/webgl_state_cache.js", "web/loading_recovery.mjs", "web/mobile_startup.js"}
     if path.startswith("tools/"):
         return Path(path).name in PUBLIC_TOOLS
     if path in PUBLIC_DOCS:
@@ -54,6 +56,8 @@ def wanted(path):
         return Path(path).name in {"after_summary.json", "summon_single_check.json", "AFTER_REVIEW.md", "mobile_hud_test.json", "independent_review.md", "targeted_gates.json", "phone-before.png", "phone-after.png", "phone-after-portrait.png"}
     if path.startswith("docs/evidence/r40/"):
         return Path(path).name in {"facing_attack_test.json", "after_summary.json", "independent_review.md", "targeted_gates.json", "after-move.png", "after-attack.png"}
+    if path.startswith("docs/evidence/r41/"):
+        return Path(path).name in {"ASSET_ALLOC_AUDIT.md", "MEASUREMENT_REPORT.md", "independent_review.md", "asset_budget_baseline.json", "import_budget_after.json", "targeted_gates.json", "baseline.json", "after.json", "after.png", "pwa_cache_verification.json"}
     if path in {"docs/evidence/r38-hero-body-scale-before.json", "docs/evidence/r38-hero-body-scale-after.json"}:
         return True
     return False

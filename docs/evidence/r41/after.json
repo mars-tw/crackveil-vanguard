@@ -1,0 +1,768 @@
+{
+ "schema_version": 1,
+ "label": "after",
+ "startupAtMenu": {
+  "mobile": true,
+  "phase": "ready",
+  "canvasPixels": 329160,
+  "renderScale": 1,
+  "error": null
+ },
+ "startupFinal": {
+  "mobile": true,
+  "phase": "ready",
+  "transitions": [
+   {
+    "phase": "loading_engine",
+    "at": 143.80000001192093
+   },
+   {
+    "phase": "loading_pack",
+    "at": 337.4000000357628
+   },
+   {
+    "phase": "initializing",
+    "at": 478.4000000357628
+   },
+   {
+    "phase": "ready",
+    "at": 3205.300000011921
+   }
+  ],
+  "canvasPixels": 329160,
+  "renderScale": 1,
+  "error": null
+ },
+ "orientation": null,
+ "method": "One native Chrome browser with phone viewport/touch emulation844x390 DPR3; fresh context and disabled HTTP cache, normal service-worker install allowed, actual MainMenuStart/joystick/natural cards20s. No video, route interception, gameplay writes or artificial CPU/GPU throttle.",
+ "artifactIdentity": {
+  "mainPack": "index-2f4a5b104eda.pck",
+  "packSHA256": "2f4a5b104edab5d5de04d382f8268fb23806489066422d5091ee30213c5f5792",
+  "htmlSHA256": "24f109f4b5a1ebc4b56ff3cdfb285b82857933430655e77472b4b18ee2350bbb",
+  "expectedVersion": "0.26.3-r41",
+  "actualRuntimeVersion": "0.26.3-r41"
+ },
+ "browserVersion": {
+  "protocolVersion": "1.3",
+  "product": "Chrome/154.0.8037.58",
+  "revision": "@a654841425914cbb703a2931e07b70a83aedbafd",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "jsVersion": "15.4.80.11"
+ },
+ "cold_load_wall_ms": 3209,
+ "start_click_perf_ms": 3496.300000011921,
+ "menu_sample": {
+  "phase": "menu",
+  "now": 3212,
+  "canvas": {
+   "css_width": 844,
+   "css_height": 390,
+   "width": 844,
+   "height": 390
+  },
+  "dpr": 3,
+  "js_memory": {
+   "usedJSHeapSize": 110614933,
+   "totalJSHeapSize": 116041613,
+   "jsHeapSizeLimit": 4395630592
+  },
+  "wasm_memory": {
+   "allocated_linear_memory_bytes": 58064896,
+   "source": "engine.rtenv.HEAPU8.buffer.byteLength",
+   "used_linear_memory_bytes": null
+  },
+  "cdp_heap": {
+   "usedSize": 11129932,
+   "totalSize": 16568320,
+   "embedderHeapUsedSize": 1588240,
+   "backingStorageSize": 99473293
+  },
+  "cdp_metrics": {
+   "Timestamp": 433267.65006,
+   "AudioHandlers": 4,
+   "AudioWorkletProcessors": 0,
+   "Nodes": 114,
+   "ArrayBufferContents": 65,
+   "LayoutDuration": 0.01671,
+   "ScriptDuration": 0.102573,
+   "TaskDuration": 3.144212,
+   "ProcessTime": 2.072444,
+   "JSHeapUsedSize": 11110568,
+   "JSHeapTotalSize": 16568320
+  },
+  "runtime": null,
+  "process_memory": {
+   "rows": [
+    {
+     "pid": 2728,
+     "type": "renderer",
+     "private_committed_bytes": 18939904
+    },
+    {
+     "pid": 4800,
+     "type": "renderer",
+     "private_committed_bytes": 45199360
+    },
+    {
+     "pid": 29916,
+     "type": "renderer",
+     "private_committed_bytes": 342593536
+    },
+    {
+     "pid": 41260,
+     "type": "GPU",
+     "private_committed_bytes": 226267136
+    },
+    {
+     "pid": 62036,
+     "type": "browser",
+     "private_committed_bytes": 45961216
+    }
+   ],
+   "private_committed_sum_bytes": 713392128
+  }
+ },
+ "arena_start_sample": {
+  "phase": "arena-start",
+  "now": 4816.100000023842,
+  "canvas": {
+   "css_width": 844,
+   "css_height": 390,
+   "width": 844,
+   "height": 390
+  },
+  "dpr": 3,
+  "js_memory": {
+   "usedJSHeapSize": 31104167,
+   "totalJSHeapSize": 46000847,
+   "jsHeapSizeLimit": 4395630592
+  },
+  "wasm_memory": {
+   "allocated_linear_memory_bytes": 167444480,
+   "source": "engine.rtenv.HEAPU8.buffer.byteLength",
+   "used_linear_memory_bytes": null
+  },
+  "cdp_heap": {
+   "usedSize": 9794772,
+   "totalSize": 24694784,
+   "embedderHeapUsedSize": 1128248,
+   "backingStorageSize": 21306063
+  },
+  "cdp_metrics": {
+   "Timestamp": 433269.153095,
+   "AudioHandlers": 25,
+   "AudioWorkletProcessors": 3,
+   "Nodes": 93,
+   "ArrayBufferContents": 161,
+   "LayoutDuration": 0.016744,
+   "ScriptDuration": 1.304509,
+   "TaskDuration": 4.362529,
+   "ProcessTime": 3.805146,
+   "JSHeapUsedSize": 9721328,
+   "JSHeapTotalSize": 24694784
+  },
+  "runtime": {
+   "version": "0.26.3-r41",
+   "elapsed_time": 0.1314,
+   "hp": 110,
+   "kills": 0,
+   "level": 1,
+   "game_running": true,
+   "system_paused": false,
+   "waiting_for_upgrade": false,
+   "firepower": {
+    "enemies_live": 0,
+    "projectiles_logical": 0,
+    "friendly_projectiles_visible": 0
+   },
+   "performance": {
+    "draw_calls": 70,
+    "hud_static_layout_updates": 0,
+    "physics_ms": 0.1,
+    "process_ms": 1.2,
+    "render_objects": 396
+   }
+  },
+  "process_memory": {
+   "rows": [
+    {
+     "pid": 2728,
+     "type": "renderer",
+     "private_committed_bytes": 18939904
+    },
+    {
+     "pid": 4800,
+     "type": "renderer",
+     "private_committed_bytes": 45203456
+    },
+    {
+     "pid": 29916,
+     "type": "renderer",
+     "private_committed_bytes": 395169792
+    },
+    {
+     "pid": 41260,
+     "type": "GPU",
+     "private_committed_bytes": 400166912
+    },
+    {
+     "pid": 62036,
+     "type": "browser",
+     "private_committed_bytes": 46747648
+    }
+   ],
+   "private_committed_sum_bytes": 940658688
+  }
+ },
+ "final_sample": {
+  "phase": "battle-final",
+  "now": 25808,
+  "canvas": {
+   "css_width": 844,
+   "css_height": 390,
+   "width": 844,
+   "height": 390
+  },
+  "dpr": 3,
+  "js_memory": {
+   "usedJSHeapSize": 68263971,
+   "totalJSHeapSize": 89962263,
+   "jsHeapSizeLimit": 4395630592
+  },
+  "wasm_memory": {
+   "allocated_linear_memory_bytes": 167444480,
+   "source": "engine.rtenv.HEAPU8.buffer.byteLength",
+   "used_linear_memory_bytes": null
+  },
+  "cdp_heap": {
+   "usedSize": 28855016,
+   "totalSize": 50556928,
+   "embedderHeapUsedSize": 7643216,
+   "backingStorageSize": 39405335
+  },
+  "cdp_metrics": {
+   "Timestamp": 433290.229516,
+   "AudioHandlers": 836,
+   "AudioWorkletProcessors": 13,
+   "Nodes": 93,
+   "ArrayBufferContents": 2073,
+   "LayoutDuration": 0.016744,
+   "ScriptDuration": 16.151943,
+   "TaskDuration": 20.029714,
+   "ProcessTime": 18.104378,
+   "JSHeapUsedSize": 28752716,
+   "JSHeapTotalSize": 50556928
+  },
+  "runtime": {
+   "version": "0.26.3-r41",
+   "elapsed_time": 20.0293249911113,
+   "hp": 158,
+   "kills": 327,
+   "level": 6,
+   "game_running": true,
+   "system_paused": false,
+   "waiting_for_upgrade": false,
+   "firepower": {
+    "enemies_live": 102,
+    "projectiles_logical": 47,
+    "friendly_projectiles_visible": 39
+   },
+   "performance": {
+    "draw_calls": 777,
+    "hud_static_layout_updates": 1,
+    "physics_ms": 63.2,
+    "process_ms": 55.8,
+    "render_objects": 3200
+   }
+  },
+  "process_memory": {
+   "rows": [
+    {
+     "pid": 2728,
+     "type": "renderer",
+     "private_committed_bytes": 18620416
+    },
+    {
+     "pid": 4800,
+     "type": "renderer",
+     "private_committed_bytes": 43773952
+    },
+    {
+     "pid": 29916,
+     "type": "renderer",
+     "private_committed_bytes": 527990784
+    },
+    {
+     "pid": 41260,
+     "type": "GPU",
+     "private_committed_bytes": 476631040
+    },
+    {
+     "pid": 62036,
+     "type": "browser",
+     "private_committed_bytes": 47198208
+    }
+   ],
+   "private_committed_sum_bytes": 1147924480
+  }
+ },
+ "phase_samples": [
+  {
+   "phase": "battle-5",
+   "elapsed_time": 5.2837351111111,
+   "wasm_linear_allocated_bytes": 167444480,
+   "cdp_heap": {
+    "usedSize": 19801248,
+    "totalSize": 31940608,
+    "embedderHeapUsedSize": 7409400,
+    "backingStorageSize": 29199688
+   },
+   "process_private_committed_sum_bytes": 1045307392,
+   "gpu_process": {
+    "pid": 41260,
+    "type": "GPU",
+    "private_committed_bytes": 462159872,
+    "working_set_bytes": 539209728
+   },
+   "runtime_counts": {
+    "enemies_live": 67,
+    "projectiles_logical": 31,
+    "friendly_projectiles_visible": 31
+   }
+  },
+  {
+   "phase": "battle-10",
+   "elapsed_time": 10.8436577777779,
+   "wasm_linear_allocated_bytes": 167444480,
+   "cdp_heap": {
+    "usedSize": 17786836,
+    "totalSize": 38678528,
+    "embedderHeapUsedSize": 2750408,
+    "backingStorageSize": 28475971
+   },
+   "process_private_committed_sum_bytes": 1076715520,
+   "gpu_process": {
+    "pid": 41260,
+    "type": "GPU",
+    "private_committed_bytes": 449392640,
+    "working_set_bytes": 526282752
+   },
+   "runtime_counts": {
+    "enemies_live": 83,
+    "projectiles_logical": 34,
+    "friendly_projectiles_visible": 34
+   }
+  },
+  {
+   "phase": "battle-16",
+   "elapsed_time": 16.2265109911114,
+   "wasm_linear_allocated_bytes": 167444480,
+   "cdp_heap": {
+    "usedSize": 31344348,
+    "totalSize": 52867072,
+    "embedderHeapUsedSize": 8447160,
+    "backingStorageSize": 40188060
+   },
+   "process_private_committed_sum_bytes": 1131122688,
+   "gpu_process": {
+    "pid": 41260,
+    "type": "GPU",
+    "private_committed_bytes": 487989248,
+    "working_set_bytes": 564772864
+   },
+   "runtime_counts": {
+    "enemies_live": 110,
+    "projectiles_logical": 30,
+    "friendly_projectiles_visible": 30
+   }
+  }
+ ],
+ "rendering": {
+  "css": [
+   844,
+   390
+  ],
+  "canvas": [
+   844,
+   390
+  ],
+  "drawing_buffer": [
+   844,
+   390
+  ],
+  "dpr": 3,
+  "context_lost": false,
+  "attributes": {
+   "alpha": false,
+   "antialias": false,
+   "depth": true,
+   "desynchronized": false,
+   "failIfMajorPerformanceCaveat": false,
+   "powerPreference": "high-performance",
+   "premultipliedAlpha": true,
+   "preserveDrawingBuffer": true,
+   "stencil": false,
+   "xrCompatible": false
+  },
+  "renderer": "ANGLE (Intel, Intel(R) Graphics (0x00007D67) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "vendor": "Google Inc. (Intel)"
+ },
+ "nativeGLVerification": {
+  "ready": true,
+  "cachedQueries": 2100,
+  "scissorMatches": true,
+  "drawMatches": true,
+  "readMatches": true
+ },
+ "navigator": {
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "maxTouchPoints": 1,
+  "deviceMemory": 32,
+  "hardwareConcurrency": 20
+ },
+ "wasm_memory_available": true,
+ "long_tasks": {
+  "threshold_ms": 50,
+  "load_before_start": {
+   "count": 2,
+   "total_ms": 2842,
+   "max_ms": 2727,
+   "over200ms": 1
+  },
+  "start_and_combat": {
+   "count": 44,
+   "total_ms": 5077,
+   "max_ms": 673,
+   "over200ms": 5
+  },
+  "all": {
+   "count": 46,
+   "total_ms": 7919,
+   "max_ms": 2727,
+   "over200ms": 6
+  },
+  "largest": [
+   {
+    "startTime": 478.30000001192093,
+    "duration": 2727,
+    "name": "self"
+   },
+   {
+    "startTime": 3966.600000023842,
+    "duration": 673,
+    "name": "self"
+   },
+   {
+    "startTime": 3524.900000035763,
+    "duration": 441,
+    "name": "self"
+   },
+   {
+    "startTime": 22853.100000023842,
+    "duration": 245,
+    "name": "self"
+   },
+   {
+    "startTime": 24706.100000023842,
+    "duration": 242,
+    "name": "self"
+   },
+   {
+    "startTime": 19808.5,
+    "duration": 233,
+    "name": "self"
+   },
+   {
+    "startTime": 22668.900000035763,
+    "duration": 178,
+    "name": "self"
+   },
+   {
+    "startTime": 20403.19999998808,
+    "duration": 156,
+    "name": "self"
+   }
+  ],
+  "observer_error": null,
+  "dropped": 0
+ },
+ "context_events": {
+  "lost": [],
+  "restored": [],
+  "page_crashed": false
+ },
+ "resources": [
+  {
+   "name": "r33-web-focal.png?v=04c40aa0",
+   "duration": 8.700000047683716,
+   "transferSize": 2838805,
+   "encodedBodySize": 2838505,
+   "decodedBodySize": 2838505
+  },
+  {
+   "name": "index.png",
+   "duration": 3,
+   "transferSize": 21743,
+   "encodedBodySize": 21443,
+   "decodedBodySize": 21443
+  },
+  {
+   "name": "index.wasm",
+   "duration": 132.60000002384186,
+   "transferSize": 39509639,
+   "encodedBodySize": 39509339,
+   "decodedBodySize": 39509339
+  },
+  {
+   "name": "index-2f4a5b104eda.pck",
+   "duration": 89.59999996423721,
+   "transferSize": 19631628,
+   "encodedBodySize": 19631328,
+   "decodedBodySize": 19631328
+  }
+ ],
+ "pressure": {
+  "js_heap_cdp": {
+   "count": 6,
+   "min": 9794772,
+   "mean": 19785358.666666668,
+   "max": 31344348
+  },
+  "arraybuffer_backing_cdp": {
+   "count": 6,
+   "min": 21306063,
+   "mean": 43008068.333333336,
+   "max": 99473293
+  },
+  "wasm_linear_allocated": {
+   "count": 6,
+   "min": 58064896,
+   "mean": 149214549.33333334,
+   "max": 167444480
+  },
+  "process_private_commit_bytes": {
+   "count": 6,
+   "min": 713392128,
+   "mean": 1009186816,
+   "max": 1147924480
+  }
+ },
+ "natural_active_seconds": 20.3139539002022,
+ "kills": 338,
+ "errors": [],
+ "failedResponses": [],
+ "limitations": [
+  "Chrome on Windows with phone viewport/touch/DPR emulation; not physical phone, Safari or phone-OS freeze reproduction.",
+  "Localhost cold context load is not public-mobile-network load time.",
+  "Allocated Wasm linear memory is capacity, not live allocations. CDP JS heap and backing storage are distinct metrics; process totals are not GPU VRAM.",
+  "Read-only measurements and long-task observer add small overhead. Screenshot is taken only after the measurement interval.",
+  "Six sparse samples, not leak proof; memory domains overlap. Different natural seed/team/bonds limit comparisons. Final combat longtasks increased; no universal CPU/FPS improvement claim."
+ ],
+ "source_unchanged": true,
+ "chrome_closed_by_finally": true,
+ "evidence": "after.png",
+ "visible_menu_buttons44": {
+  "achievements": {
+   "width": 448,
+   "height": 56,
+   "at_least44": true
+  },
+  "guide": {
+   "width": 220,
+   "height": 56,
+   "at_least44": true
+  },
+  "meta": {
+   "width": 448,
+   "height": 56,
+   "at_least44": true
+  },
+  "seed_start": {
+   "width": 132,
+   "height": 56,
+   "at_least44": true
+  },
+  "settings": {
+   "width": 448,
+   "height": 56,
+   "at_least44": true
+  },
+  "start": {
+   "width": 448,
+   "height": 56,
+   "at_least44": true
+  },
+  "world_map": {
+   "width": 220,
+   "height": 56,
+   "at_least44": true
+  }
+ },
+ "startup_verification": {
+  "menu_ready": true,
+  "final_ready": true,
+  "phase_order": [
+   "loading_engine",
+   "loading_pack",
+   "initializing",
+   "ready"
+  ],
+  "has_loading_pack": true,
+  "no_startup_error": true,
+  "claim_limit": "Phase order observed in actual page; public Engine init-before-pack-before-start call order also has parent export semantic guard. Physical phone startup remains untested."
+ },
+ "orientation_reference": {
+  "file": "after-partial.json",
+  "image": "after-partial-portrait.png",
+  "same_pack": true,
+  "htmlSHA256": "c190c6490056852e5e28dc196029120a2799c83a21f7a615f962c9903700b371",
+  "status": "Performed once on preceding partial HTML: actual portrait buffer390x844; move65worldpx/manualheld true/release held+pending false; all visible controls>=44. Not repeated on final HTML, per parent scope. Sequential bootstrap is verified only by this final run."
+ },
+ "comparison_to_baseline": {
+  "baseline_pack": "index-3304a85dd586.pck",
+  "css_viewport": [
+   844,
+   390
+  ],
+  "native_dpr": 3,
+  "same_renderer": true,
+  "backing_pixels": [
+   2962440,
+   329160
+  ],
+  "backing_to_css_pixel_ratio": [
+   9,
+   1
+  ],
+  "cold_menu_ms": [
+   3095,
+   3209
+  ],
+  "load_longtask_max_ms": [
+   2572,
+   2727
+  ],
+  "start_combat_longtask_count": [
+   3,
+   44
+  ],
+  "start_combat_longtask_total_ms": [
+   1024,
+   5077
+  ],
+  "menu_private_commit_bytes": [
+   1014439936,
+   713392128
+  ],
+  "sampled_peak_private_commit_bytes": [
+   1326526464,
+   1147924480
+  ],
+  "menu_wasm_linear_capacity_bytes": [
+   83689472,
+   58064896
+  ],
+  "arena_wasm_linear_capacity_bytes": [
+   150405120,
+   167444480
+  ],
+  "sampled_peak_js_heap_bytes": [
+   26839676,
+   31344348
+  ],
+  "interpretation": "Backing pixel count and sampled process private commit decreased; startup and combat longtasks did not improve in this run, arena Wasm capacity and sampled JS peak increased. Different natural seed/team/build prevents a fixed performance percentage or universal improvement claim.",
+  "sampled_menu_private_reduction_percent": 29.676257540397145,
+  "sampled_peak_private_reduction_percent": 13.463883974198643
+ },
+ "visual_review": {
+  "image_viewed": true,
+  "battle_nonblank": true,
+  "characters_monsters_landmark_present": true,
+  "missing_texture_or_cjk_tofu_observed": false,
+  "pixel_clarity": "Noticeably softer on DPR3 from1xCSS backing. Do not claim original Retina sharpness preserved.",
+  "physical_phone_or_safari_tested": false
+ },
+ "natural_build_comparison": {
+  "baseline": {
+   "run_seed": 3940845419,
+   "level": 5,
+   "squad_member_count": "NOT_MEASURED",
+   "squad_roster": "NOT_MEASURED",
+   "active_bond_names": [],
+   "leader_weapon_ids": [
+    "arc_chain",
+    "orbit_blades",
+    "riftline_emitter"
+   ],
+   "leader_riftline": {
+    "cooldown_seconds": 0.318859607990247,
+    "damage": 16,
+    "pierce": 2,
+    "projectiles_fired": 768,
+    "projectiles_per_second": 37.4527753663931,
+    "projectiles_rejected": 0,
+    "seconds": 20.5058234666672,
+    "volley_size": 12,
+    "volleys": 64,
+    "weapon_id": "riftline_emitter"
+   },
+   "presentation": {
+    "active": 2,
+    "assets_ready": true,
+    "cap": 16,
+    "channels": 0,
+    "emitted": 113,
+    "free": 6,
+    "peak": 8,
+    "rejected": 0
+   },
+   "spawner_world_view_rect": "[P: (-494.0929, 1381.657), S: (1277.049, 590.1639)]"
+  },
+  "after": {
+   "run_seed": 1918429631,
+   "level": 6,
+   "squad_member_count": "NOT_MEASURED",
+   "squad_roster": "NOT_MEASURED",
+   "active_bond_names": [
+    "燼脈聯爆",
+    "星盾和聲"
+   ],
+   "leader_weapon_ids": [
+    "arc_chain",
+    "orbit_blades",
+    "riftline_emitter"
+   ],
+   "leader_riftline": {
+    "cooldown_seconds": 0.332648468838666,
+    "damage": 16,
+    "pierce": 2,
+    "projectiles_fired": 720,
+    "projectiles_per_second": 35.9472922986433,
+    "projectiles_rejected": 0,
+    "seconds": 20.0293249911113,
+    "volley_size": 12,
+    "volleys": 60,
+    "weapon_id": "riftline_emitter"
+   },
+   "presentation": {
+    "active": 2,
+    "assets_ready": true,
+    "cap": 16,
+    "channels": 1,
+    "emitted": 137,
+    "free": 7,
+    "peak": 9,
+    "rejected": 0
+   },
+   "spawner_world_view_rect": "[P: (-355.4651, 1226.96), S: (1277.049, 590.1639)]"
+  },
+  "interpretation": "Different natural seeds/level/bonds/effects; not an equal-build isolated benchmark. The weapon IDs cover the leader only. Full member count/roster was not captured."
+ },
+ "viewport_measurement_limit": {
+  "actualCanvasScale": "NOT_MEASURED",
+  "logicalViewport": "NOT_MEASURED",
+  "spawner_rect_sizes_match": true,
+  "claim_limit": "Spawner world_view diagnostic size matched1277.049x590.1639, but do not infer complete camera FOV equality from this field."
+ },
+ "cpu_snapshot_limit": "Final physics63.2ms/process55.8ms is one end sample, not stable FPS or a continuous CPU average."
+}

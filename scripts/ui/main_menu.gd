@@ -121,7 +121,11 @@ func _build_background() -> void:
 	background = Node2D.new()
 	background.name = "MenuBackground"
 	background.z_index = -100
-	background.set_script(BACKGROUND_SCRIPT)
+	# Phone key art covers this backdrop. Avoid decoding an unseen gameplay
+	# terrain and landmark atlas during the first menu load.
+	var layout_size := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
+	if not MOBILE_TUNING.use_mobile_ui(layout_size):
+		background.set_script(BACKGROUND_SCRIPT)
 	add_child(background)
 
 

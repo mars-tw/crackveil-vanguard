@@ -7,7 +7,9 @@
 
 Crackveil Vanguard 是一款以小隊編成為核心的 2D survivors roguelite。從世界地圖選擇十個異變戰場，在連發火網中招募英雄、組合羈絆、選擇進化，清除怪群並挑戰各關 Boss。
 
-目前版本：**0.26.2-r40**（與 `project.godot` 一致）。`main` 分支通過檢查後自動更新 GitHub Pages。
+目前版本：**0.26.3-r41**（與 `project.godot` 一致）。`main` 分支通過檢查後自動更新 GitHub Pages。
+
+R41 針對手機載入減量，縮小遊戲包、限制手機畫布像素並調整啟動順序；修改、實測與 iPhone 驗證限制見 [手機載入優化紀錄](docs/R41_IPHONE_LOADING.md)。
 
 R40 統一行走、近戰與施法的方向判定：移動面向跟隨操作，成功出手後固定朝向至收招，避免前搖期間換邊。[方向修正與驗證](docs/R40_FACING_ATTACK.md)。
 
@@ -21,7 +23,7 @@ R39 修正手機操作板遮擋戰場：搖桿與斬擊縮至底部角落，召�
 
 **[立即遊玩 Crackveil Vanguard](https://mars-tw.github.io/crackveil-vanguard/)**
 
-Web 版不需安裝。R38 的 WebAssembly 與遊戲包合計約 83 MiB，行動裝置建議使用橫向畫面。Web 版不提供完整離線遊玩；斷線重新整理會顯示輕量「需要連線」提示，恢復連線後即可重新載入。
+Web 版不需安裝。R41 的 WebAssembly 與遊戲包合計約 56 MiB，行動裝置建議使用橫向畫面。Web 版不提供完整離線遊玩；斷線重新整理會顯示輕量「需要連線」提示，恢復連線後即可重新載入。
 
 ## 最新特色
 

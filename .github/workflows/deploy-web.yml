@@ -161,6 +161,7 @@ jobs:
             R38ArtGate
             R39MobileHUDTest
             R40FacingAttackTest
+            R41RuntimeBudgetTest
             SpawnDensityR32Test
           )
           for scene in "${scenes[@]}"; do
@@ -169,6 +170,7 @@ jobs:
           "${GODOT_BIN}" --headless --fixed-fps 60 --path . res://scenes/debug/R31EndgameGate.tscn -- --qa-endgame=r31
           node tools/test_r32_loading_recovery.mjs
           node tools/test_r36_webgl_state_cache.cjs
+          node tools/test_r41_mobile_startup.cjs
 
       - name: Inject build date
         shell: bash
@@ -205,6 +207,7 @@ jobs:
           mkdir -p public
           "${GODOT_BIN}" --headless --export-release "Web" "public/index.html"
           python3 tools/finalize_r25_web_export.py --dir public
+          node tools/test_r41_mobile_startup.cjs --html public/index.html
           cp assets/art/cover.png public/cover.png
           touch public/.nojekyll
           find public -maxdepth 1 -type f -printf "%f %s bytes\n" | sort
