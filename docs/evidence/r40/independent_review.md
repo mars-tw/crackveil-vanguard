@@ -26,3 +26,5 @@
 最終候選補註：HUD 的 Web runtime probe 追加 PlayerVisual 的唯讀 `get_debug_state()` 結果，仍限 `cv_r32_test=1` 才發布。此追加不修改 physics、布局、美術或遊戲輸入，只讓體驗員讀到朝向／mirror／frame 資料；未因此重跑相同 gates。Windows 最後體驗候選為 `0.26.2-r40`／`index-d2c78c51f7ce.pck`，完整 SHA-256 `d2c78c51f7ceeff633d063756f90333915b70ea97da0f03749867916d2451a0d`；正式 Linux CI 的包身分另見 `deployment.json`，不混用兩種 export hash。
 
 CI 後續發現（run `37254505333`、head `f269cb5`）：WeaponSmoke 的 formation assertion 失敗，最大誤差 177.67，大於既有上限 92；因此 export／Web smoke／Pages 都被跳過。追查到原先這份有界角色覆核未包含的 `SquadManager.get_formation_world_position():605`，仍以新的 canonical `get_facing_direction()` 作隊形方向，導致隊友錨點跟近戰 aim 旋轉。已回報 root 需改用 locomotion facing，保留原驗收閾值。此 CI 阻擋未解除前，不將前述局部來源覆核結論當成完整發布通過。
+
+此後 root 在 `bcb4975` 將隊形錨點改為 `get_locomotion_facing_direction()`，攻擊 Visual 的 canonical lock 保留。已讀回本機 SquadSmoke／WeaponSmoke 兩項 PASS、最大誤差均為 5.74，原上限 92 未放寬；新增 formation movement policy fixture 亦為 `failures=[]`。新 run `37255191976` 的 37 項 scene gates、Web smoke 與 Pages 部署均已 success，本項阻擋解除。最新 Windows export 為 `index-3304a85dd586.pck`，與原本 d2 after-play 候選的來源差異為隊形 consumer 修正及測試／文件，不能混作同一 artifact；完整發布身分及首 run 失敗歷程保存在 `deployment.json`。

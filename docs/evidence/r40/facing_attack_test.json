@@ -31,7 +31,7 @@
 			"axis": "(-1.0, 0.0)",
 			"crossed_living_target_damage": 0.0,
 			"frame": 2,
-			"front_damage": 126.0,
+			"front_damage": 72.0,
 			"fx": {
 				"frame": 0,
 				"kind": "slash_a",
@@ -163,7 +163,7 @@
 			"axis": "(1.0, 0.0)",
 			"crossed_living_target_damage": 0.0,
 			"frame": 2,
-			"front_damage": 126.0,
+			"front_damage": 72.0,
 			"fx": {
 				"frame": 0,
 				"kind": "slash_a",
@@ -299,7 +299,7 @@
 			"fx": {
 				"frame": 0,
 				"kind": "slash_a",
-				"position": "(0.0, -17.33333)",
+				"position": "(0.0, -21.16666)",
 				"rotation": -1.57079637050629,
 				"sprite_animation": "default",
 				"visible": true
@@ -493,7 +493,7 @@
 			"axis": "(0.0, 1.0)",
 			"crossed_living_target_damage": 0.0,
 			"frame": 2,
-			"front_damage": 45.5,
+			"front_damage": 26.0,
 			"fx": {
 				"frame": 0,
 				"kind": "slash_a",
@@ -653,7 +653,7 @@
 			"weapon": "solar_piercer"
 		},
 		{
-			"damage": 42.0,
+			"damage": 24.0,
 			"events": [
 				{
 					"frame": 2,
@@ -835,20 +835,20 @@
 					"authored_combo": true,
 					"body_rotation": 0.0,
 					"facing_direction": [
-						-1.0,
-						0.0
+						0.0,
+						-1.0
 					],
-					"flip_h": true,
+					"flip_h": false,
 					"frame": 0,
 					"impact_active": false,
 					"impact_emitted": true,
 					"pending_heavy_hurt": false
 				},
-				"flip_h": true,
+				"flip_h": false,
 				"lock": "(0.0, -1.0)",
 				"locomotion_facing": "(-1.0, 0.0)",
 				"public_facing": "(-1.0, 0.0)",
-				"raw_facing": "(-1.0, 0.0)",
+				"raw_facing": "(0.0, -1.0)",
 				"root_rotation": 0.0,
 				"sprite_rotation": 0.0,
 				"visual_facing": "(-1.0, 0.0)"
@@ -911,7 +911,7 @@
 						-1.0
 					],
 					"flip_h": true,
-					"frame": 3,
+					"frame": 1,
 					"impact_active": false,
 					"impact_emitted": false,
 					"pending_heavy_hurt": false
@@ -936,7 +936,7 @@
 						1.0
 					],
 					"flip_h": true,
-					"frame": 3,
+					"frame": 2,
 					"impact_active": false,
 					"impact_emitted": false,
 					"pending_heavy_hurt": false
@@ -961,7 +961,7 @@
 						-1.0
 					],
 					"flip_h": false,
-					"frame": 4,
+					"frame": 2,
 					"impact_active": false,
 					"impact_emitted": false,
 					"pending_heavy_hurt": false
@@ -986,7 +986,7 @@
 						1.0
 					],
 					"flip_h": false,
-					"frame": 4,
+					"frame": 3,
 					"impact_active": false,
 					"impact_emitted": false,
 					"pending_heavy_hurt": false
@@ -1008,9 +1008,9 @@
 		"assets_ready": true,
 		"cap": 32,
 		"channels": 0,
-		"emitted": 15,
-		"free": 2,
-		"peak": 2,
+		"emitted": 11,
+		"free": 1,
+		"peak": 1,
 		"rejected": 0
 	},
 	"reactions": {
@@ -1072,5 +1072,5 @@
 		}
 	},
 	"test_kind": "controlled actual physics/animation fixture; not natural DPS",
-	"version": "0.26.2-r40"
+	"version": "0.26.3-r41"
 }

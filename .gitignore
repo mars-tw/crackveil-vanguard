@@ -66,3 +66,10 @@ desktop.ini
 docs/audit_openclose/
 docs/evidence/**/video/
 docs/evidence/**/*.webm
+
+# Generated mobile export intermediates; reproducible from official templates.
+android/
+
+# Native release binaries and generated signing reports.
+release/
+output-ios-unsigned.zip

@@ -66,6 +66,14 @@ static func layout_tier(viewport_size: Vector2, force_phone: bool = false, devic
 	var size := ui_layout_size(viewport_size)
 	var short_side: float = min(size.x, size.y)
 	var hints := device_hints if not device_hints.is_empty() else _runtime_device_hints()
+	# Native exports have no browser UA. Their 1280px design viewport is not
+	# evidence of a desktop: use the physical display's density-based form factor.
+	if bool(hints.get("mobile_os", false)):
+		var native_form_factor := str(hints.get("native_form_factor", ""))
+		if native_form_factor == "phone":
+			return LayoutTier.PHONE
+		if native_form_factor == "tablet":
+			return LayoutTier.TABLET
 	var handset_ua := bool(hints.get("ua_phone", false)) or (bool(hints.get("ua_mobile", false)) and not bool(hints.get("ua_tablet", false)))
 	var confirmed_touch := has_confirmed_touch(hints)
 	if bool(hints.get("ua_tablet", false)) and confirmed_touch:
@@ -99,6 +107,11 @@ static func use_tablet_ui(viewport_size: Vector2, device_hints: Dictionary = {})
 
 static func ui_layout_size(viewport_size: Vector2) -> Vector2:
 	var size := _safe_viewport_size(viewport_size)
+	var native_hints := _runtime_device_hints()
+	if bool(native_hints.get("mobile_os", false)):
+		var native_ui_size: Vector2 = native_hints.get("native_ui_size", Vector2.ZERO)
+		if native_ui_size.x > 0 and native_ui_size.y > 0:
+			return native_ui_size
 	if OS.has_feature("web"):
 		var now := Time.get_ticks_msec()
 		if now - _cached_web_size_msec < 150 and _cached_web_raw_size == size:
@@ -121,7 +134,7 @@ static func apply_web_canvas_scale(layer: CanvasLayer, viewport_size: Vector2, r
 	# path shares a short cache instead of thousands of JS bridge calls.
 	_cached_web_size_msec = -10000
 	var layout_size := ui_layout_size(viewport_size)
-	if layer == null or not OS.has_feature("web"):
+	if layer == null or (not OS.has_feature("web") and not bool(_runtime_device_hints().get("mobile_os", false))):
 		return layout_size
 	var safe_viewport := _safe_viewport_size(viewport_size)
 	var scale_factor: float = safe_viewport.x / maxf(1.0, layout_size.x)
@@ -474,6 +487,14 @@ static func _runtime_device_hints() -> Dictionary:
 	if OS.has_feature("web") and Time.get_ticks_msec() - _cached_web_hints_msec < 250:
 		return _cached_web_hints
 	var mobile_os := OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios")
+	var native_form_factor := ""
+	var native_ui_size := Vector2.ZERO
+	if mobile_os:
+		var native_size := Vector2(DisplayServer.screen_get_size())
+		var native_dpi := maxf(160.0, float(DisplayServer.screen_get_dpi()))
+		var shortest_dp := minf(native_size.x, native_size.y) * 160.0 / native_dpi
+		native_form_factor = "phone" if shortest_dp < 600.0 else "tablet"
+		native_ui_size = Vector2(DisplayServer.window_get_size()) * 160.0 / native_dpi
 	var touch_available := false
 	if DisplayServer.has_method("is_touchscreen_available"):
 		touch_available = DisplayServer.call("is_touchscreen_available") == true
@@ -497,6 +518,8 @@ static func _runtime_device_hints() -> Dictionary:
 			mouse_available = bool(web_hints.get("mouse", mouse_available))
 	var result := {
 		"mobile_os": mobile_os,
+		"native_form_factor": native_form_factor,
+		"native_ui_size": native_ui_size,
 		"ua_mobile": ua_mobile,
 		"ua_phone": ua_phone,
 		"ua_tablet": ua_tablet,
