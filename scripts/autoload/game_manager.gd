@@ -1757,7 +1757,7 @@ func record_elite_kill() -> void:
 		AchievementProgress.record_elite_kill()
 
 
-func record_boss_spawn(boss_name: String = "VEIL GATEKEEPER") -> void:
+func record_boss_spawn(boss_name: String = "裂隙守關者") -> void:
 	boss_spawned = true
 	boss_killed = false
 	boss_phase_two_time = -1.0

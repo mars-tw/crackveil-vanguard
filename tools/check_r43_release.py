@@ -8,9 +8,11 @@ import subprocess
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--previous-version", required=True)
+parser.add_argument("--out", default="docs/evidence/r43-mobile")
 args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]
-out = root / "docs/evidence/r43-mobile"
+out = root / args.out
+out.mkdir(parents=True, exist_ok=True)
 head = lambda name: subprocess.check_output(["git", "show", "HEAD:" + name], cwd=root).decode("utf-8")
 version = re.search(r'^config/version="([^"]+)"', (root / "project.godot").read_text(encoding="utf-8"), re.M).group(1)
 before = json.loads(head("native/build-config.json"))

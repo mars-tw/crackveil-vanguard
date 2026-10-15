@@ -51,6 +51,7 @@ var shards: int = 0
 var lifetime_shards: int = 0
 var upgrades: Dictionary = {}
 var tactical_medals: Dictionary = {}
+var formation_seals: Dictionary = {}
 var save_path: String = SAVE_PATH
 
 
@@ -72,6 +73,7 @@ func load_progress() -> void:
 	lifetime_shards = max(0, int(config.get_value("echo", "lifetime_shards", 0)))
 	for stage in TACTICAL.STAGES.get_stages():
 		tactical_medals[str(stage.id)] = clampi(int(config.get_value("tactical", str(stage.id), 0)), 0, 7)
+		formation_seals[str(stage.id)] = bool(config.get_value("formation_seals", str(stage.id), false))
 	for track in TRACKS:
 		var track_id := str(track.get("id", ""))
 		upgrades[track_id] = clamp(
@@ -87,6 +89,7 @@ func save_progress() -> bool:
 	config.set_value("echo", "lifetime_shards", lifetime_shards)
 	for stage in TACTICAL.STAGES.get_stages():
 		config.set_value("tactical", str(stage.id), int(tactical_medals.get(str(stage.id), 0)))
+		config.set_value("formation_seals", str(stage.id), bool(formation_seals.get(str(stage.id), false)))
 	for track in TRACKS:
 		var track_id := str(track.get("id", ""))
 		config.set_value("upgrades", track_id, get_upgrade_level(track_id))
@@ -227,6 +230,23 @@ func award_tactical_medal(stage_id: String, medal_id: String) -> int:
 	return reward
 
 
+func award_formation_seal(stage_id: String) -> int:
+	if TACTICAL.STAGES.get_stage(stage_id).is_empty():
+		return -1
+	if bool(formation_seals.get(stage_id, false)):
+		return 0
+	formation_seals[stage_id] = true
+	shards += 4
+	lifetime_shards += 4
+	if not save_progress():
+		formation_seals[stage_id] = false
+		shards -= 4
+		lifetime_shards -= 4
+		return -1
+	progress_changed.emit()
+	return 4
+
+
 func get_tactical_medal_count(stage_id: String = "") -> int:
 	if stage_id.is_empty():
 		var total := 0
@@ -272,6 +292,7 @@ func _reset_runtime_defaults() -> void:
 	lifetime_shards = 0
 	upgrades.clear()
 	tactical_medals.clear()
+	formation_seals.clear()
 	for track in TRACKS:
 		upgrades[str(track.get("id", ""))] = 0
 

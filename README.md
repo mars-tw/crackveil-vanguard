@@ -7,7 +7,7 @@
 
 Crackveil Vanguard 是一款以小隊編成為核心的 2D survivors roguelite。從世界地圖選擇十個異變戰場，在連發火網中招募英雄、組合羈絆、選擇進化，清除怪群並挑戰各關 Boss。
 
-目前版本：**0.28.0-r43**（與 `project.godot` 一致）。`main` 分支通過檢查後自動更新 GitHub Pages。
+目前版本：**0.29.0-r44**（與 `project.godot` 一致）。`main` 分支通過檢查後自動更新 GitHub Pages。
 
 R43 加入十關、三十枚戰術徽記：走位並練習三種陣形、追獵兩名菁英、擊破 Boss，各可領取一次殘響；集齊一關另有紀錄與全隊傷害成長。手機長按陣形可直接選擇，支援一指移動、一指換陣；32 秒追獵預告與 Boss 半血護衛讓換陣更有時機。[手機內容優化與驗證](docs/CODEX_RESPONSE_R43_MOBILE.md)。
 

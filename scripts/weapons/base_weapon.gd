@@ -39,7 +39,7 @@ func get_weapon_id() -> String:
 
 func get_display_name() -> String:
 	if data == null:
-		return "未命名武器"
+		return "裂隙武裝"
 	return str(data.get("display_name"))
 
 

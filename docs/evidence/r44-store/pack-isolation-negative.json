@@ -1,0 +1,15 @@
+{
+  "status": "VERIFIED",
+  "method": "Isolated empty project root: old R43 PCK must not resolve eight R44 runtime PNGs even though they exist in the real checkout",
+  "exit_code": 1,
+  "expected_missing_paths": [
+    "res://assets/art/r44-runtime/vfx_boomerang_impact.png:missing",
+    "res://assets/art/r44-runtime/vfx_boomerang_trail.png:missing",
+    "res://assets/art/r44-runtime/vfx_orbit_impact.png:missing",
+    "res://assets/art/r44-runtime/vfx_orbit_trail.png:missing",
+    "res://assets/art/r44-runtime/weapon_far_blade_outbound.png:missing",
+    "res://assets/art/r44-runtime/weapon_far_blade_return.png:missing",
+    "res://assets/art/r44-runtime/weapon_main_blade_a.png:missing",
+    "res://assets/art/r44-runtime/weapon_main_blade_b.png:missing"
+  ]
+}

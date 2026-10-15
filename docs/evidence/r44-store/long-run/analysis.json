@@ -1,0 +1,122 @@
+{
+  "status": "VERIFIED",
+  "performance_note": "並發載量測，僅供參考",
+  "sample_count": 14,
+  "groups": [
+    {
+      "stage": "moon",
+      "guard_enabled": true,
+      "runs": 2,
+      "wins": 2,
+      "win_rate": 1.0,
+      "actual_escort_exposure": 1,
+      "min_hp_ratio": 0.982345579314789,
+      "escort_seconds_before_boss_end": [
+        2.4086666666665906
+      ],
+      "boss_kill_seconds": [
+        99.0743333333292,
+        101.401333333329
+      ]
+    },
+    {
+      "stage": "moon",
+      "guard_enabled": false,
+      "runs": 2,
+      "wins": 2,
+      "win_rate": 1.0,
+      "actual_escort_exposure": 0,
+      "min_hp_ratio": 0.982345579314789,
+      "escort_seconds_before_boss_end": [],
+      "boss_kill_seconds": [
+        99.1743333333291,
+        101.401333333329
+      ]
+    },
+    {
+      "stage": "veil",
+      "guard_enabled": true,
+      "runs": 2,
+      "wins": 2,
+      "win_rate": 1.0,
+      "actual_escort_exposure": 2,
+      "min_hp_ratio": 0.943071098726115,
+      "escort_seconds_before_boss_end": [
+        9.692333333340002,
+        0.11666666666599212
+      ],
+      "boss_kill_seconds": [
+        184.446333333366,
+        180.303666666696
+      ]
+    },
+    {
+      "stage": "veil",
+      "guard_enabled": false,
+      "runs": 2,
+      "wins": 2,
+      "win_rate": 1.0,
+      "actual_escort_exposure": 0,
+      "min_hp_ratio": 0.943071098726115,
+      "escort_seconds_before_boss_end": [],
+      "boss_kill_seconds": [
+        184.3496666667,
+        180.303666666696
+      ]
+    },
+    {
+      "stage": "forge",
+      "guard_enabled": true,
+      "runs": 2,
+      "wins": 1,
+      "win_rate": 0.5,
+      "actual_escort_exposure": 1,
+      "min_hp_ratio": 0.0,
+      "escort_seconds_before_boss_end": [
+        0.8786666666669873
+      ],
+      "boss_kill_seconds": [
+        247.076000000076,
+        -1.0
+      ]
+    },
+    {
+      "stage": "forge",
+      "guard_enabled": false,
+      "runs": 2,
+      "wins": 1,
+      "win_rate": 0.5,
+      "actual_escort_exposure": 0,
+      "min_hp_ratio": 0.0,
+      "escort_seconds_before_boss_end": [],
+      "boss_kill_seconds": [
+        247.026000000076,
+        -1.0
+      ]
+    }
+  ],
+  "idle_outcomes": [
+    {
+      "seed": 44101,
+      "outcome": "win",
+      "seconds": 98.3553333333292,
+      "min_hp_ratio": 1.0
+    },
+    {
+      "seed": 44102,
+      "outcome": "win",
+      "seconds": 101.778666666662,
+      "min_hp_ratio": 1.0
+    }
+  ],
+  "method": "real Arena fixed 60fps; fresh saves; no HP, DPS, enemy or elapsed-time shortcuts; auto-upgrade and auto-channel enabled; shop skipped; orbital avoidance versus idle; paired removal of half-HP escort only",
+  "limitations": [
+    "scripted controller, not human win rate",
+    "two seeds per stage",
+    "three of ten stages",
+    "late stages entered with fresh saves rather than earned meta upgrades",
+    "idle policy supplies zero movement input but built-in attack movement remains enabled",
+    "not device thermals, battery or performance certification",
+    "an enabled escort can be absent when the Boss dies before its warning expires"
+  ]
+}

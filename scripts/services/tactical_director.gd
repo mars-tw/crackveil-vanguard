@@ -12,11 +12,15 @@ var boss_guard_at := -1.0
 var boss_guard_spawned := false
 var tick_timer := 0.0
 var guard_history: Array[Dictionary] = []
+var relay: Node2D
 
 func _ready() -> void:
 	if is_instance_valid(GameManager.player):
 		last_position = GameManager.player.global_position
 	GameManager.boss_phase_transition_requested.connect(_on_boss_phase)
+	relay = preload("res://scripts/services/formation_relay.gd").new()
+	relay.name = "FormationRelay"
+	add_child(relay)
 
 func _process(delta: float) -> void:
 	if not GameManager.game_running or get_tree().paused:
@@ -84,6 +88,8 @@ func _spawn_guard(reason: String) -> bool:
 	return true
 
 func current_hint() -> String:
+	if is_instance_valid(relay) and not relay.completed:
+		return relay.hint()
 	if not claimed.has("maneuver"):
 		if distance_walked < 160.0:
 			return "拖左下移動・自動攻擊｜走位 %d/160" % mini(160, int(distance_walked))
@@ -95,4 +101,5 @@ func current_hint() -> String:
 	return "本關目標完成！回主選單查看收藏"
 
 func progress_text() -> String:
-	return "三陣演練：走位 %d/160・陣形 %d/3\n雙菁追獵：%d/2　守關突破：%s\n徽記 %d/3（首取 +3／+5／+8 殘響）" % [mini(160,int(distance_walked)), formations.size(), mini(2,GameManager.elites_killed), "完成" if claimed.has("clear") else "未完成", MetaProgress.get_tactical_medal_count(GameManager.selected_stage_id)]
+	var seal: String = relay.hint() if is_instance_valid(relay) else "三陣封隙"
+	return seal + "\n三陣演練：走位 %d/160・陣形 %d/3\n雙菁追獵：%d/2　守關突破：%s\n徽記 %d/3（首取 +3／+5／+8 殘響）" % [mini(160,int(distance_walked)), formations.size(), mini(2,GameManager.elites_killed), "完成" if claimed.has("clear") else "未完成", MetaProgress.get_tactical_medal_count(GameManager.selected_stage_id)]

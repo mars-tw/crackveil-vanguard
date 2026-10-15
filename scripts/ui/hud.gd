@@ -92,6 +92,8 @@ var pause_achievements_label: RichTextLabel
 var pause_achievements_grid: GridContainer
 var pause_achievement_dialog: AcceptDialog
 var pause_resume_button: Button
+var pause_menu_button: Button
+var retreat_pending := false
 var virtual_joystick: Control
 var pause_active_tab: String = "settings"
 var force_touch_controls_visible: bool = false
@@ -221,6 +223,9 @@ func _process(_delta: float) -> void:
 func _notification(what: int) -> void:
 	if what in [NOTIFICATION_WM_WINDOW_FOCUS_OUT, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_EXIT_TREE]:
 		_reset_touch_input()
+	# Background time must never silently kill the squad. Resume is explicit.
+	if what in [NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_WM_WINDOW_FOCUS_OUT] and is_inside_tree() and GameManager.game_running:
+		GameManager.set_manual_pause(true)
 
 
 func _reset_touch_input() -> void:
@@ -237,6 +242,15 @@ func _reset_touch_input() -> void:
 func _input(event: InputEvent) -> void:
 	# Handle an independent finger; the first finger can keep the joystick held.
 	var point := Vector2.ZERO
+	# Browsers synthesize a mouse press after ScreenTouch. The touch path owns
+	# the formation gesture; letting Button also receive that mouse release
+	# cycles a second time after a long hold (often selecting the next option
+	# before the player can tap it). Real mouse input keeps its normal signals.
+	if event is InputEventMouseButton and event.device == -1 and is_instance_valid(formation_button):
+		var mouse_point: Vector2 = root.get_canvas_transform().affine_inverse() * event.position
+		if formation_button.get_global_rect().has_point(mouse_point):
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventScreenTouch or event is InputEventScreenDrag:
 		point = root.get_canvas_transform().affine_inverse() * event.position
 	if event is InputEventScreenTouch:
@@ -654,6 +668,12 @@ func _build_pause_overlay() -> void:
 	pause_resume_button.custom_minimum_size = Vector2(160.0, 42.0)
 	pause_resume_button.pressed.connect(_on_resume_button_pressed)
 	pause_overlay.add_child(pause_resume_button)
+	pause_menu_button = Button.new()
+	pause_menu_button.text = "撤退"
+	pause_menu_button.tooltip_text = "結束本局並回主選單，已取得的永久紀錄會保留。"
+	pause_menu_button.custom_minimum_size = Vector2(100, 44)
+	pause_menu_button.pressed.connect(_on_pause_menu_pressed)
+	pause_overlay.add_child(pause_menu_button)
 
 	pause_achievement_dialog = AcceptDialog.new()
 	pause_achievement_dialog.title = "成就"
@@ -1151,10 +1171,14 @@ func _apply_responsive_layout() -> void:
 					(child as Button).custom_minimum_size = Vector2(tab_width, 50.0 if mobile else 44.0)
 		if pause_resume_button != null:
 			var resume_height: float = maxf(44.0, min(touch_height, 54.0)) if mobile else touch_height
-			var resume_width: float = min(overlay_width - 48.0, 190.0 if mobile else 160.0)
-			pause_resume_button.position = Vector2((overlay_width - resume_width) * 0.5, overlay_height - resume_height - 16.0)
+			var resume_width: float = (overlay_width - 46.0) * 0.5
+			pause_resume_button.position = Vector2(18.0, overlay_height - resume_height - 16.0)
 			pause_resume_button.size = Vector2(resume_width, resume_height)
 			pause_resume_button.custom_minimum_size = Vector2(resume_width, resume_height)
+			if is_instance_valid(pause_menu_button):
+				pause_menu_button.position = Vector2(28.0 + resume_width, overlay_height - resume_height - 16.0)
+				pause_menu_button.custom_minimum_size = Vector2(resume_width, resume_height)
+				pause_menu_button.size = Vector2(resume_width, resume_height)
 
 	if pause_scroll != null:
 		var overlay_size: Vector2 = pause_overlay.size if pause_overlay != null else Vector2(430.0, 610.0)
@@ -1333,15 +1357,15 @@ func _apply_r33_battle_layout(size: Vector2, mobile: bool) -> void:
 	theme_label.visible = false
 	gold_icon.visible = false
 	var score_width := 118.0 if mobile and portrait else 188.0
-	score_panel.offset_left = -score_width - 70.0
-	score_panel.offset_right = -70.0
+	score_panel.offset_left = -score_width - 86.0
+	score_panel.offset_right = -86.0
 	score_panel.offset_top = top + 8.0
 	score_panel.offset_bottom = top + 50.0
 	score_panel.add_theme_stylebox_override("panel", style)
 	score_label.anchor_left = 1.0
 	score_label.anchor_right = 1.0
 	score_label.offset_left = score_panel.offset_left + 8
-	score_label.offset_right = -78
+	score_label.offset_right = -94
 	score_label.offset_top = top + 16.0
 	score_label.offset_bottom = top + 40.0
 	score_label.add_theme_font_size_override("font_size", 12 if mobile else 15)
@@ -1352,7 +1376,8 @@ func _apply_r33_battle_layout(size: Vector2, mobile: bool) -> void:
 	time_label.offset_top = top + 10 if not portrait else top + 72
 	time_label.offset_bottom = time_label.offset_top + 29
 	time_label.add_theme_font_size_override("font_size", 20)
-	pause_button.offset_left = -58
+	# Tablet text + theme padding need 60px; a 48px slot grew off-screen.
+	pause_button.offset_left = -74
 	pause_button.offset_right = -10
 	pause_button.offset_top = top + 8
 	pause_button.offset_bottom = top + 52
@@ -1426,7 +1451,7 @@ func _apply_phone_battle_layout(view: Vector2, phone: bool) -> void:
 	summon_button.text = "召喚"
 	toast_panel.offset_left = -110
 	toast_panel.offset_right = 110
-	toast_panel.offset_top = top + (122 if portrait else 72)
+	toast_panel.offset_top = top + (196 if portrait else 138)
 	toast_panel.offset_bottom = toast_panel.offset_top + 44
 	toast_label.add_theme_font_size_override("font_size",12)
 
@@ -1448,6 +1473,7 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"pause_achievements_tab": pause_achievements_tab_button,
 		"pause_run_tab": pause_run_tab_button,
 		"pause_resume": pause_resume_button,
+		"pause_return": pause_menu_button,
 		"quick_controls": quick_controls,
 		"quick_mute": quick_mute_button,
 		"quick_screen_shake": quick_screen_shake_button,
@@ -1470,6 +1496,12 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"paused": pause_overlay != null and pause_overlay.visible,
 		"formation_picker": formation_picker != null and formation_picker.visible,
 		"formation_id": GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else "",
+		"formation_cooldown": GameManager.squad_manager.get_formation_cooldown_remaining() if is_instance_valid(GameManager.squad_manager) else 0.0,
+		"formation_ready": formation_button.is_visible_in_tree() and not formation_button.disabled,
+		"auto_upgrade": GameManager.auto_upgrade_enabled,
+		"relay": GameManager.tactical_director.relay.probe() if is_instance_valid(GameManager.tactical_director) and is_instance_valid(GameManager.tactical_director.relay) else {},
+		"elapsed": GameManager.elapsed_time,
+		"seal_saved": bool(MetaProgress.formation_seals.get(GameManager.selected_stage_id, false)),
 		"confirmed_touch": MOBILE_TUNING.has_confirmed_touch(),
 		"touch_controls_visible": virtual_joystick != null and virtual_joystick.visible
 	})
@@ -1839,6 +1871,17 @@ func _on_pause_button_pressed() -> void:
 
 func _on_resume_button_pressed() -> void:
 	GameManager.set_manual_pause(false)
+
+
+func _on_pause_menu_pressed() -> void:
+	if retreat_pending:
+		return
+	retreat_pending = true
+	pause_menu_button.disabled = true
+	_reset_touch_input()
+	GameManager.clear_time_scale_owners()
+	if is_instance_valid(GameManager.arena):
+		GameManager.arena.call_deferred("_on_main_menu_requested")
 
 
 func _on_virtual_joystick_changed(direction: Vector2) -> void:

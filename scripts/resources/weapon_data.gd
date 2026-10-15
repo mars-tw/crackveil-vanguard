@@ -2,7 +2,7 @@ class_name WeaponData
 extends Resource
 
 @export var id: String = ""
-@export var display_name: String = "未命名武器"
+@export var display_name: String = "裂隙武裝"
 @export_multiline var description: String = ""
 @export_enum("linear", "orbit", "explosion", "chain_lightning", "boomerang", "homing_missile", "grenade_lob", "void_net", "rail_lance", "echo_hymn", "rift_construct") var behavior_id: String = "linear"
 @export var weapon_scene: PackedScene

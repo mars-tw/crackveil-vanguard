@@ -1,0 +1,73 @@
+{
+  "privacy_manifest_path": "export\\native\\ios\\PrivacyInfo.xcprivacy",
+  "sha256": "4b61978794a0d6042d6fb5751bf9474cded649ab89956a1304667a1f0260ab2e",
+  "parsed": {
+    "NSPrivacyAccessedAPITypes": [
+      {
+        "NSPrivacyAccessedAPITypeReasons": [
+          "DDA9.1",
+          "C617.1"
+        ],
+        "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp"
+      },
+      {
+        "NSPrivacyAccessedAPITypeReasons": [
+          "35F9.1"
+        ],
+        "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime"
+      },
+      {
+        "NSPrivacyAccessedAPITypeReasons": [
+          "E174.1",
+          "85F4.1"
+        ],
+        "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace"
+      }
+    ],
+    "NSPrivacyTracking": false
+  },
+  "ios_export_verification": {
+    "appId": "tw.mars.crackveilvanguard",
+    "nativeVersion": "1.0.0",
+    "nativeBuild": 3,
+    "engineVersion": "4.7.2",
+    "sourceVersion": "0.27.0-r42",
+    "target": "ios",
+    "signed": false,
+    "uploaded": false,
+    "physicalDeviceTested": false,
+    "sourceSha": "9517c2fdc27ae3fa8f56c529cb9f31aa1f2764f3",
+    "sourceWorkingTreeDirty": true,
+    "status": "ios-xcode-source-created-not-compiled"
+  },
+  "android_export_verification": {
+    "appId": "tw.mars.crackveilvanguard",
+    "nativeVersion": "1.0.0",
+    "nativeBuild": 3,
+    "engineVersion": "4.7.2",
+    "sourceVersion": "0.27.0-r42",
+    "target": "android",
+    "signed": false,
+    "uploaded": false,
+    "physicalDeviceTested": false,
+    "sourceSha": "9517c2fdc27ae3fa8f56c529cb9f31aa1f2764f3",
+    "sourceWorkingTreeDirty": true,
+    "status": "unsigned-android-verified",
+    "packages": [
+      {
+        "file": "native-unsigned.apk",
+        "bytes": 48997349,
+        "sha256": "38ac2dddb5c934aa6644208e9495c77d0f813516f1fc0779f2b02bce572a651d",
+        "nativeAssets": 658
+      },
+      {
+        "file": "native-unsigned.aab",
+        "bytes": 48938189,
+        "sha256": "0b448134a125983275f8a5b2ef16005095570b097b16e11936864e9b3b834cae",
+        "nativeAssets": 656
+      }
+    ]
+  },
+  "status": "EXECUTED",
+  "note": "historical local export only; not uploaded binary proof"
+}

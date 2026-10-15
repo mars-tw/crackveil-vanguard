@@ -112,6 +112,7 @@ jobs:
           python3 tools/verify_r25_c2pa.py
           python3 tools/check_r37_release_assets.py
           python3 tools/check_r38_content_assets.py
+          python3 tools/check_r44_runtime_assets.py
 
       - name: Import Godot resources
         shell: bash
@@ -165,6 +166,7 @@ jobs:
             SpawnDensityR32Test
             R42FormationTest
             R43MobileTacticsTest
+            R44StoreTest
           )
           for scene in "${scenes[@]}"; do
             "${GODOT_BIN}" --headless --fixed-fps 60 --path . "res://scenes/debug/${scene}.tscn"
@@ -209,6 +211,7 @@ jobs:
           mkdir -p public
           "${GODOT_BIN}" --headless --export-release "Web" "public/index.html"
           python3 tools/finalize_r25_web_export.py --dir public
+          python3 tools/check_r44_packaged_assets.py --godot "${GODOT_BIN}" --pack public/index.pck
           node tools/test_r41_mobile_startup.cjs --html public/index.html
           cp assets/art/cover.png public/cover.png
           touch public/.nojekyll

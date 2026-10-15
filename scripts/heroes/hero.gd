@@ -46,7 +46,7 @@ var squad_manager: Node = null
 var is_leader: bool = false
 var formation_index: int = 0
 var hero_id: String = ""
-var display_name: String = "未命名英雄"
+var display_name: String = "裂隙隊員"
 var passive_id: String = ""
 var passive_value: float = 0.0
 var max_hp: float = 100.0
@@ -777,6 +777,9 @@ func _stop_channel(reset: bool = false) -> void:
 
 
 func _presentation_service() -> Node:
+	# Scene teardown can stop a channel after its actor leaves the tree.
+	if not is_inside_tree():
+		return null
 	var arena_id := GameManager.arena.get_instance_id() if is_instance_valid(GameManager.arena) else 0
 	if presentation_cached_arena_id == arena_id and presentation_cached_generation == reclaim_generation:
 		var cached: Node = presentation_cached_ref.get_ref() if presentation_cached_ref != null else null

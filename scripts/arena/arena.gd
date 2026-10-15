@@ -188,6 +188,9 @@ func _on_seed_restart_requested(seed_text: String) -> void:
 
 
 func _on_main_menu_requested() -> void:
+	# A second queued touch/mouse callback may arrive after scene removal.
+	if not is_inside_tree():
+		return
 	get_tree().paused = false
 	GameManager.game_running = false
 	GameManager.system_pause_owners.clear()

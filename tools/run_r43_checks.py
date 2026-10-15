@@ -8,9 +8,10 @@ import subprocess
 parser = argparse.ArgumentParser()
 parser.add_argument("--godot", required=True)
 parser.add_argument("--node", required=True)
+parser.add_argument("--out", default="docs/evidence/r43-mobile/gates")
 args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]
-out = root / "docs/evidence/r43-mobile/gates"
+out = root / args.out
 out.mkdir(parents=True, exist_ok=True)
 workflow = (root / ".github/workflows/deploy-web.yml").read_text(encoding="utf-8")
 block = workflow.split("scenes=(", 1)[1].split(")", 1)[0]
@@ -28,7 +29,7 @@ for name, command in jobs:
         code, output = -1, str(error)
     output = output.replace("\r\n", "\n").replace("\r", "").rstrip() + "\n"
     (out / f"{name}.txt").write_text(output, encoding="utf-8", newline="\n")
-    passed = code == 0 and "SCRIPT ERROR:" not in output
+    passed = code == 0 and "ERROR:" not in output
     results.append({"name": name, "command": command, "exit_code": code, "status": "VERIFIED" if passed else "BLOCKED"})
     (out / "summary.json").write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"{name}: {'PASS' if passed else 'FAIL'}", flush=True)

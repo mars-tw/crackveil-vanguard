@@ -1,0 +1,71 @@
+{
+  "version": "0.29.0-r44",
+  "status": "VERIFIED",
+  "new_generated_raster_assets": [],
+  "new_audio_assets": [],
+  "image_model_slug": null,
+  "image_service_called": false,
+  "code_ui": [
+    {
+      "file": "scripts/services/formation_relay.gd",
+      "purpose": "World-space targeting rings, wedge/ring/scatter glyphs and completion arc",
+      "type": "functional vector gameplay UI",
+      "replaces_character_or_environment_art": false
+    }
+  ],
+  "existing_art_sources": "CREDITS.md and existing per-round manifests",
+  "missing_new_art": "No new raster art required by the implemented relay; a future cover/character redesign is not part of this delivery.",
+  "relocated_existing_assets": [
+    {
+      "source": "assets/art/r24/weapons/weapon_main_blade_a.png",
+      "runtime": "assets/art/r44-runtime/weapon_main_blade_a.png",
+      "sha256": "0902871e163e9b65589f751089b25b020373119f71ca8cde760018fab38dddff",
+      "bytes_unchanged": true
+    },
+    {
+      "source": "assets/art/r24/weapons/weapon_main_blade_b.png",
+      "runtime": "assets/art/r44-runtime/weapon_main_blade_b.png",
+      "sha256": "ab64b14609c16980c942c174f07b01850988879edf6a8c19e6fb2c415d503e42",
+      "bytes_unchanged": true
+    },
+    {
+      "source": "assets/art/r24/weapons/weapon_far_blade_outbound.png",
+      "runtime": "assets/art/r44-runtime/weapon_far_blade_outbound.png",
+      "sha256": "d476658fea37255aecb9a1f6a33dc9cd1a54baad12da4f7e7d308502b87f4d9f",
+      "bytes_unchanged": true
+    },
+    {
+      "source": "assets/art/r24/weapons/weapon_far_blade_return.png",
+      "runtime": "assets/art/r44-runtime/weapon_far_blade_return.png",
+      "sha256": "5298d9b68d9650534c2a547b0b4831deb7724279c195b54382b8b9a594611bbc",
+      "bytes_unchanged": true
+    },
+    {
+      "source": "assets/art/r24/vfx/vfx_orbit_trail.png",
+      "runtime": "assets/art/r44-runtime/vfx_orbit_trail.png",
+      "sha256": "bd1ca831f6b29a44d1792bc20de746921271916f75e227c76271f61cd87968ab",
+      "bytes_unchanged": true
+    },
+    {
+      "source": "assets/art/r24/vfx/vfx_orbit_impact.png",
+      "runtime": "assets/art/r44-runtime/vfx_orbit_impact.png",
+      "sha256": "7de7b06b9bdb3843f633211ed97f2671ab760e5ab933cb8974c9f4fd3f9f9547",
+      "bytes_unchanged": true
+    },
+    {
+      "source": "assets/art/r24/vfx/vfx_boomerang_trail.png",
+      "runtime": "assets/art/r44-runtime/vfx_boomerang_trail.png",
+      "sha256": "f3bc8f2ac7ee0a779d327b38a9c2aad1b5562839768ae48927ba52b59f1f71aa",
+      "bytes_unchanged": true
+    },
+    {
+      "source": "assets/art/r24/vfx/vfx_boomerang_impact.png",
+      "runtime": "assets/art/r44-runtime/vfx_boomerang_impact.png",
+      "sha256": "e256bd6e13221d81a97871b081adaabf8e9d59343ca8d022cdd6bbf75e8e86fb",
+      "bytes_unchanged": true
+    }
+  ],
+  "original_generation_model_slug": "gpt-image-2",
+  "original_generation_record": "assets/art/r24/manifest.json",
+  "relocation_reason": "Existing weapon PNGs were referenced by runtime resources but excluded under assets/art/r24 by all release presets; preserve pixels and originals without changing protected presets."
+}

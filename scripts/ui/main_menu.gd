@@ -183,7 +183,7 @@ func _build_ui() -> void:
 	menu_box.add_theme_constant_override("separation", 10)
 	root.add_child(menu_box)
 
-	start_button = _make_menu_button("開始出擊")
+	start_button = _make_menu_button("三陣封隙・出擊")
 	start_button.pressed.connect(_on_start_pressed)
 	menu_box.add_child(start_button)
 	world_button = _make_menu_button("世界地圖")
@@ -430,6 +430,7 @@ func _build_tactical_panel() -> void:
 	text.add_theme_font_size_override("font_size", 14)
 	var mask := int(MetaProgress.tactical_medals.get(str(stage.id),0))
 	text.text = "%d/10 %s　%d/3\n" % [tactical_page+1, stage.name, MetaProgress.get_tactical_medal_count(str(stage.id))]
+	text.text += "三陣封隙：%s（首取 +4 殘響）\n" % ("已封合" if MetaProgress.formation_seals.get(str(stage.id), false) else "未封合")
 	for medal in catalog.MEDALS:
 		text.text += "%s %s　首取 +%d 殘響\n" % ["[已]" if mask & int(medal.bit) else "[未]", medal.name, medal.reward]
 	text.text += str(catalog.RECORDS[str(stage.id)]) if mask == 7 else "走位 160 並用過三陣／擊敗兩菁英／Boss。集齊一關傷害 +1%（上限 5%）。"
@@ -653,9 +654,9 @@ func _build_guide_panel() -> void:
 	# R29 P1-4＋文案潤飾：整段長文改逐則列表、字級基準 15（手機縮放後約 29px），
 	# 數字改中文（九人／等級七）、ASCII 詞移離斷行孤兒位，消除「擊敗 Boss／後可繼續」式硬拆。
 	var guide_rows := [
-		["戰場", "世界地圖有十個戰場，分為裂帷群島與遠征新境。曜砂王陵、珊潮遺都、月華靈森及時輪工坊有新的敵潮與守關者。"],
+		["三陣封隙", "十個戰場各有三道陣記。帶隊走進楔形、圓陣、散兵陣記，讓兩名隊友就位一點二秒。每封一陣全隊回復八點生命，每關首次全封可得四枚殘響。"],
 		["無盡", "擊敗 Boss 之後可續戰無盡敵潮，衝擊更高紀錄。"],
-		["契約", "開局先選契約：契約會改變本局的風險與獎勵。"],
+		["契約", "從種子出擊進場可先選契約，改變本局風險與獎勵；一般出擊直接開始封隙。"],
 		["隊伍", "十三位英雄可招募，隊伍最多九人。新英雄包括貫槍突擊的星焰槍騎、緩速與回復的潮汐魔導，以及返場雙刀的影刃遊俠。隊長倒下，全隊撤退。"],
 		["新魔物", "新境會出現曜砂甲蟲、沙境獵將、潮汐海妖、珊瑚巨像、月花靈與機械收割者；留意砂彈、衝鋒、範圍重擊與敵方治療。"],
 		["羈絆", "特定成員同隊會啟用羈絆，改變武器、治療或防禦。"],
@@ -1082,6 +1083,8 @@ func _publish_reachability_probe(viewport_size: Vector2) -> void:
 		"side_panel_visible": side_panel != null and side_panel.visible,
 		"panel_id": active_panel_id,
 		"tactical_page": tactical_page,
+		"seal_saved": bool(MetaProgress.formation_seals.get(GameManager.selected_stage_id, false)),
+		"shards": MetaProgress.shards,
 		"confirmed_touch": MOBILE_TUNING.has_confirmed_touch()
 	})
 

@@ -2,7 +2,7 @@ class_name HeroData
 extends Resource
 
 @export var id: String = ""
-@export var display_name: String = "未命名英雄"
+@export var display_name: String = "裂隙隊員"
 @export var epithet: String = ""
 @export_multiline var quote: String = ""
 @export_multiline var description: String = ""
