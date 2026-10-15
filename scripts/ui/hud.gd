@@ -9,6 +9,7 @@ const MINIMAP := preload("res://scripts/ui/r36_minimap.gd")
 const COMBAT_READOUT := preload("res://scripts/ui/combat_readout.gd")
 const EQUIPMENT_PANEL := preload("res://scripts/ui/equipment_panel.gd")
 const R33_LOOT_BANNER := preload("res://scripts/ui/r33_loot_banner.gd")
+const FORMATION_PICKER := preload("res://scripts/ui/formation_picker.gd")
 
 var root: Control
 var hud_panel: Panel
@@ -42,6 +43,13 @@ var auto_button: Button
 var phone_equipment_button: Button
 var formation_button: Button
 var formation_hint_shown := false
+var formation_picker: PanelContainer
+var formation_hold_time := 0.0
+var formation_press_active := false
+var formation_long_press := false
+var tactical_hint: Label
+var formation_touch_index := -1
+var formation_touch_cancelled := false
 var pause_auto_button: Button
 var touch_input_blocked := false
 var auto_mode := false
@@ -197,6 +205,16 @@ func _process(_delta: float) -> void:
 	if blocked and not touch_input_blocked:
 		_reset_touch_input()
 	touch_input_blocked = blocked
+	if blocked:
+		_close_formation_picker()
+	elif formation_press_active:
+		formation_hold_time += _delta
+		if formation_hold_time >= 0.35 and not formation_long_press:
+			formation_long_press = true
+			_open_formation_picker()
+	if is_instance_valid(formation_picker) and formation_picker.visible and is_instance_valid(GameManager.squad_manager):
+		formation_picker.refresh(GameManager.squad_manager)
+	_update_tactical_hint()
 	_refresh_active_ability_button()
 
 
@@ -206,12 +224,38 @@ func _notification(what: int) -> void:
 
 
 func _reset_touch_input() -> void:
+	_close_formation_picker()
+	formation_touch_index = -1
 	if is_instance_valid(virtual_joystick):
 		virtual_joystick.reset_input()
 	GameManager.set_touch_move_vector(Vector2.ZERO)
 	var actor := GameManager.player
 	if is_instance_valid(actor) and actor.has_method("set_active_ability_held"):
 		actor.set_active_ability_held(false)
+
+
+func _input(event: InputEvent) -> void:
+	# Handle an independent finger; the first finger can keep the joystick held.
+	var point := Vector2.ZERO
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		point = root.get_canvas_transform().affine_inverse() * event.position
+	if event is InputEventScreenTouch:
+		if event.pressed and formation_touch_index == -1 and not get_tree().paused and GameManager.game_running and is_instance_valid(formation_button) and formation_button.is_visible_in_tree() and not formation_button.disabled and formation_button.get_global_rect().has_point(point):
+			formation_touch_index = event.index
+			formation_touch_cancelled = false
+			_on_formation_down()
+			get_viewport().set_input_as_handled()
+		elif not event.pressed and event.index == formation_touch_index:
+			formation_press_active = false
+			formation_touch_index = -1
+			if not formation_touch_cancelled and formation_button.get_global_rect().has_point(point):
+				_cycle_formation()
+			get_viewport().set_input_as_handled()
+	elif event is InputEventScreenDrag and event.index == formation_touch_index:
+		if not formation_button.get_global_rect().has_point(point) and not formation_long_press:
+			formation_touch_cancelled = true
+			formation_press_active = false
+		get_viewport().set_input_as_handled()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -421,7 +465,22 @@ func _build_ui() -> void:
 	formation_button.focus_mode = Control.FOCUS_NONE
 	formation_button.tooltip_text = "切換小隊陣形（Q）：楔形突擊 → 圓陣護衛 → 散兵游擊"
 	formation_button.pressed.connect(_cycle_formation)
+	formation_button.button_down.connect(_on_formation_down)
+	formation_button.button_up.connect(func() -> void: formation_press_active = false)
+	formation_button.mouse_exited.connect(func() -> void: formation_press_active = false)
 	root.add_child(formation_button)
+	formation_picker = FORMATION_PICKER.new()
+	root.add_child(formation_picker)
+	formation_picker.selected.connect(_select_formation)
+	tactical_hint = Label.new()
+	tactical_hint.name = "TacticalHint"
+	tactical_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tactical_hint.add_theme_font_size_override("font_size", 14)
+	tactical_hint.add_theme_color_override("font_outline_color", Color("101b30"))
+	tactical_hint.add_theme_constant_override("outline_size", 4)
+	tactical_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tactical_hint.clip_text = true
+	root.add_child(tactical_hint)
 
 	toast_panel = Panel.new()
 	toast_panel.name = "ToastPanel"
@@ -1401,9 +1460,16 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"auto_battle": auto_button,
 		"equipment_menu": phone_equipment_button,
 		"formation": formation_button,
+		"formation_wedge": formation_picker.buttons.get("wedge"),
+		"formation_ring": formation_picker.buttons.get("ring"),
+		"formation_scatter": formation_picker.buttons.get("scatter"),
+		"formation_cancel": formation_picker.cancel_button,
+		"tactical_hint": tactical_hint,
 		"pause_auto_battle": pause_auto_button
 	}, {
 		"paused": pause_overlay != null and pause_overlay.visible,
+		"formation_picker": formation_picker != null and formation_picker.visible,
+		"formation_id": GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else "",
 		"confirmed_touch": MOBILE_TUNING.has_confirmed_touch(),
 		"touch_controls_visible": virtual_joystick != null and virtual_joystick.visible
 	})
@@ -1445,6 +1511,10 @@ func _compact_pause_controls(mobile: bool) -> void:
 	var ui_multiplier := _ui_scale_multiplier()
 	var viewport_size := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
 	var compact_landscape := mobile and viewport_size.x > viewport_size.y
+	if pause_run_stats_label != null:
+		pause_run_stats_label.add_theme_font_size_override("font_size", roundi(15.0 * ui_multiplier))
+	if pause_run_page != null:
+		pause_run_page.add_theme_constant_override("separation", 6 if compact_landscape else 10)
 	var check_font_size: int = int(round(float(15 if compact_landscape else 20 if mobile else 15) * ui_multiplier))
 	var check_height: float = 44.0 if compact_landscape else 54.0 if mobile else 44.0
 	for control in [pause_mute_check, pause_damage_numbers_check, pause_screen_shake_check, pause_force_joystick_check, pause_high_contrast_check]:
@@ -1650,6 +1720,8 @@ func _on_stats_changed(stats: Dictionary) -> void:
 	if pause_run_stats_label != null:
 		var pause_bond_text := "\n羈絆 %d/4：%s" % [bond_names.size(), " · ".join(bond_names)] if not bond_names.is_empty() else "\n羈絆 0/4"
 		pause_run_stats_label.text = "本局：擊殺 %d   金幣 %d   殘響 %d%s%s" % [kills, gold, echo_shards, pause_bond_text, _formation_status_text()]
+		if is_instance_valid(GameManager.tactical_director):
+			pause_run_stats_label.text = GameManager.tactical_director.progress_text() + "\n\n" + pause_run_stats_label.text
 		for item in stats.get("equipment_slots", []):
 			pause_run_stats_label.text += "\n%s：%s" % [str(item.get("slot_name", "裝備")), str(item.get("name", "空槽"))]
 			if mobile and not str(item.get("description", "")).is_empty():
@@ -1959,11 +2031,61 @@ func _formation_status_text() -> String:
 
 
 func _cycle_formation() -> void:
+	if formation_long_press:
+		formation_long_press = false
+		return
+	if get_tree().paused or not GameManager.game_running:
+		return
 	var squad: Node = GameManager.squad_manager
 	if squad == null or not is_instance_valid(squad) or not squad.has_method("cycle_formation"):
 		return
 	if squad.cycle_formation():
 		formation_hint_shown = true
+
+
+func _on_formation_down() -> void:
+	formation_press_active = true
+	formation_hold_time = 0.0
+	formation_long_press = false
+
+
+func _open_formation_picker() -> void:
+	if not is_instance_valid(GameManager.squad_manager) or get_tree().paused:
+		return
+	var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
+	formation_picker.refresh(GameManager.squad_manager)
+	formation_picker.reset_size()
+	formation_picker.position = Vector2(maxf(8.0, view.x - formation_picker.size.x - 12.0), clampf(formation_button.position.y - formation_picker.size.y - 8.0, 62.0, maxf(62.0, view.y - formation_picker.size.y - 8.0)))
+	formation_picker.show()
+	root.move_child(formation_picker, root.get_child_count() - 1)
+
+
+func _close_formation_picker() -> void:
+	formation_press_active = false
+	if is_instance_valid(formation_picker):
+		formation_picker.hide()
+
+
+func _select_formation(id: String) -> void:
+	if get_tree().paused or not GameManager.game_running:
+		_close_formation_picker()
+		return
+	if is_instance_valid(GameManager.squad_manager) and GameManager.squad_manager.set_formation(id):
+		formation_hint_shown = true
+		_close_formation_picker()
+
+
+func _update_tactical_hint() -> void:
+	if not is_instance_valid(tactical_hint):
+		return
+	tactical_hint.visible = GameManager.game_running and not get_tree().paused and is_instance_valid(GameManager.tactical_director) and GameManager.run_mode == "campaign"
+	if not tactical_hint.visible:
+		return
+	var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
+	tactical_hint.text = GameManager.tactical_director.current_hint()
+	tactical_hint.add_theme_font_size_override("font_size",14)
+	tactical_hint.position = Vector2(8.0, 104.0 if view.y > view.x else 112.0)
+	tactical_hint.size = Vector2(view.x - 16.0, 24.0)
 
 
 func _layout_formation_button(layout: Vector2, touch: bool, phone: bool, blocked: bool, row_y: float, button_height: float) -> void:
@@ -2002,7 +2124,7 @@ func _refresh_formation_button(phone: bool) -> void:
 	var remaining: float = float(squad.get_formation_cooldown_remaining())
 	var short_name := str(definition.get("short", "陣形"))
 	if phone:
-		formation_button.text = short_name if remaining <= 0.05 else "%d" % ceili(remaining)
+		formation_button.text = short_name if remaining <= 0.05 else "%s %d" % [short_name, ceili(remaining)]
 	else:
 		formation_button.text = ("陣形：%s（Q）" % short_name) if remaining <= 0.05 else "陣形：%s　%.1f 秒" % [short_name, remaining]
 	formation_button.disabled = remaining > 0.05 or get_tree().paused or not GameManager.game_running
@@ -2011,8 +2133,7 @@ func _refresh_formation_button(phone: bool) -> void:
 	formation_button.add_theme_color_override("font_disabled_color", Color(color.r, color.g, color.b, 0.55))
 	if not formation_hint_shown and GameManager.game_running and float(GameManager.elapsed_time) >= 6.0 and int(squad.get("formation_switch_count")) == 0:
 		formation_hint_shown = true
-		_on_toast_requested("小隊陣形：按「%s」切換
-楔形突擊 → 圓陣護衛 → 散兵游擊" % ("陣形" if phone else "Q"))
+		_on_toast_requested("點按「%s」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收" % ("陣形" if phone else "Q／陣形"))
 
 
 func _open_phone_equipment() -> void:

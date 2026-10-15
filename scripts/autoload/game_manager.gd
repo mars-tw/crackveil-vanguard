@@ -48,6 +48,7 @@ var auto_upgrade_enabled: bool = false
 var summon_director: Node = null
 var summon_screen: Node = null
 var paid_summon: Dictionary = {}
+var tactical_director: Node = null
 
 const CONTRACT_POOL: Array = [
 	{
@@ -317,6 +318,7 @@ func return_to_world_map() -> void:
 
 
 func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null, reset_player: bool = true) -> void:
+	tactical_director = null
 	clear_time_scale_owners()
 	arena = new_arena
 	player = new_player
@@ -1748,6 +1750,8 @@ func record_elite_spawn() -> void:
 
 func record_elite_kill() -> void:
 	elites_killed += 1
+	if is_instance_valid(tactical_director):
+		tactical_director.check_objectives()
 	elite_kill_times.append(elapsed_time)
 	if AchievementProgress != null and AchievementProgress.has_method("record_elite_kill"):
 		AchievementProgress.record_elite_kill()
@@ -1791,6 +1795,8 @@ func record_boss_kill() -> void:
 	if boss_killed:
 		return
 	boss_killed = true
+	if is_instance_valid(tactical_director):
+		tactical_director.check_objectives()
 	boss_active = false
 	upgrade_entry_token += 1
 	clear_time_scale_owners()

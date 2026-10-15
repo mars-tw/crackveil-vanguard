@@ -1,0 +1,19 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+
+
+R31_HOOK_ISOLATION debug_build+explicit_arg=required web_excludes=scripts/debug/**,scenes/debug/** marker=R31_ENDGAME_QA_HOOK_EXCLUDED
+
+BONDS_ACTIVE=[]
+
+R31_BOSS_REACHED elapsed=90.0 type=stage_boss_moon active=true animation=idle
+
+BONDS_ACTIVE=[]
+
+R31_DEFEAT_REACHED title=任務失敗 death_animation=frame-based retry=triggered main_menu=triggered
+
+BONDS_ACTIVE=[]
+
+R31_VICTORY_REACHED title=蒼月空庭・通關 boss_killed=true summary=visible
+
+R31_ENDGAME_GATE_PASS boss=spawned defeat=visible retry=triggered main_menu=triggered victory=visible web_hook=excluded

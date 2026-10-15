@@ -1,0 +1,43 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+
+
+R38_ROSTER stage=dunes weighted_draws={ "dune_scarab": 63, "sand_stalker": 73, "tank": 12, "normal": 12 } actual_spawns={ "dune_scarab": 20, "normal": 1, "sand_stalker": 5, "tank": 1 }
+
+R38_ROSTER stage=tide weighted_draws={ "tide_siren": 65, "normal": 13, "coral_colossus": 70, "fast": 12 } actual_spawns={ "tide_siren": 20, "normal": 1, "coral_colossus": 5, "fast": 1 }
+
+R38_ROSTER stage=bloom weighted_draws={ "bloom_wisp": 72, "fast": 41, "sand_stalker": 31, "normal": 16 } actual_spawns={ "bloom_wisp": 20, "fast": 3, "sand_stalker": 3, "normal": 1 }
+
+R38_ROSTER stage=forge weighted_draws={ "clockwork_reaper": 73, "tank": 34, "dune_scarab": 37, "normal": 16 } actual_spawns={ "clockwork_reaper": 20, "tank": 3, "dune_scarab": 3, "normal": 1 }
+
+R38_REGULAR skill=coral_colossus frame2=true actual={ "skill": "coral_slam", "casts": 1, "damage_hits": 1, "healing": 0.0, "projectiles_fired": 0, "radius": 145.0, "timer": 1.4 }
+
+R38_REGULAR skill=bloom_wisp frame2=true actual={ "skill": "bloom_support", "casts": 1, "damage_hits": 0, "healing": 12.0, "projectiles_fired": 0, "radius": 260.0, "timer": 1.4 }
+
+R38_REGULAR skill=tide_siren frame2=true actual={ "skill": "tide_bolts", "casts": 1, "damage_hits": 0, "healing": 0.0, "projectiles_fired": 4, "radius": 145.0, "timer": 1.4 }
+
+R38_REGULAR skill=clockwork_reaper frame2=true actual={ "skill": "gear_fan", "casts": 1, "damage_hits": 0, "healing": 0.0, "projectiles_fired": 5, "radius": 145.0, "timer": 1.4 }
+
+R38_BOSS stage=moon name=蒼月石鬼 pattern=moon_cross time=90 base=12 phase2=12 actual_frames=[2, 2] source_fps=12 death_poses=true legendary_claimed=true persisted_clears=1
+
+R38_BOSS stage=garden name=荊棘狼王 pattern=garden_fan time=105 base=7 phase2=11 actual_frames=[2, 2] source_fps=12 death_poses=true legendary_claimed=true persisted_clears=2
+
+R38_BOSS stage=ember name=緋焰刃魔 pattern=ember_spiral time=120 base=9 phase2=16 actual_frames=[2, 2] source_fps=12 death_poses=true legendary_claimed=true persisted_clears=3
+
+R38_BOSS stage=storm name=雷翼獸皇 pattern=storm_star time=135 base=10 phase2=20 actual_frames=[2, 2] source_fps=12 death_poses=true legendary_claimed=true persisted_clears=4
+
+R38_BOSS stage=frost name=霜晶咒王 pattern=ice_frost time=150 base=12 phase2=18 actual_frames=[2, 2] source_fps=12 death_poses=true legendary_claimed=true persisted_clears=5
+
+R38_BOSS stage=veil name=帷幕君主 pattern=veil_eclipse time=165 base=15 phase2=19 actual_frames=[2, 2] source_fps=12 death_poses=true legendary_claimed=true persisted_clears=6
+
+R38_BOSS stage=dunes name=曜砂巨甲 pattern=dune_barrage time=180 base=15 phase2=21 actual_frames=[2, 2] source_fps=12 death_poses=true legendary_claimed=true persisted_clears=7
+
+R38_BOSS stage=tide name=深潮歌后 pattern=tidal_spiral time=195 base=12 phase2=18 actual_frames=[2, 2] source_fps=12 death_poses=true legendary_claimed=true persisted_clears=8
+
+R38_BOSS stage=bloom name=萬花靈主 pattern=bloom_petals time=210 base=12 phase2=24 actual_frames=[2, 2] source_fps=12 death_poses=true legendary_claimed=true persisted_clears=9
+
+R38_BOSS stage=forge name=時輪收割者 pattern=gear_cross time=225 base=16 phase2=24 actual_frames=[2, 2] source_fps=12 death_poses=true legendary_claimed=true persisted_clears=10
+
+BONDS_ACTIVE=[]
+
+R38_CONTENT_PASS stages=10 new_regular_species=6 distinct_boss_patterns=10 frame2=true all_real_legendary_rewards=true persisted_clears=10 endless_forge=true isolated_saves=true watchdog=20s

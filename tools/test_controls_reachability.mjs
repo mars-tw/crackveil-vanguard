@@ -240,7 +240,9 @@ try {
 		await clickProbeControl(page, settingsProbe, "side_close");
 		await page.waitForTimeout(100);
 		const closedProbe = await readProbe(page, "main_menu");
-		await clickProbeControl(page, closedProbe, "start");
+		// Quick start has skipped contracts since R33. The seed launch is the
+		// supported tactical route; retain every contract/guide assertion below.
+		await clickProbeControl(page, closedProbe, "seed_start");
 
 		await waitForProbe(page, "contract", "visible", true);
 		for (let guideStep = 0; guideStep < 8; guideStep += 1) {

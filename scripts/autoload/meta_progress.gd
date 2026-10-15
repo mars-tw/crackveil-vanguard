@@ -3,6 +3,7 @@ extends Node
 signal progress_changed
 
 const SAVE_PATH := "user://veil_echo.cfg"
+const TACTICAL := preload("res://scripts/services/tactical_catalog.gd")
 
 const TRACKS: Array[Dictionary] = [
 	{
@@ -49,6 +50,7 @@ const UNLOCKS: Array[Dictionary] = [
 var shards: int = 0
 var lifetime_shards: int = 0
 var upgrades: Dictionary = {}
+var tactical_medals: Dictionary = {}
 var save_path: String = SAVE_PATH
 
 
@@ -68,6 +70,8 @@ func load_progress() -> void:
 		return
 	shards = max(0, int(config.get_value("echo", "shards", 0)))
 	lifetime_shards = max(0, int(config.get_value("echo", "lifetime_shards", 0)))
+	for stage in TACTICAL.STAGES.get_stages():
+		tactical_medals[str(stage.id)] = clampi(int(config.get_value("tactical", str(stage.id), 0)), 0, 7)
 	for track in TRACKS:
 		var track_id := str(track.get("id", ""))
 		upgrades[track_id] = clamp(
@@ -77,14 +81,19 @@ func load_progress() -> void:
 		)
 
 
-func save_progress() -> void:
+func save_progress() -> bool:
 	var config := ConfigFile.new()
 	config.set_value("echo", "shards", shards)
 	config.set_value("echo", "lifetime_shards", lifetime_shards)
+	for stage in TACTICAL.STAGES.get_stages():
+		config.set_value("tactical", str(stage.id), int(tactical_medals.get(str(stage.id), 0)))
 	for track in TRACKS:
 		var track_id := str(track.get("id", ""))
 		config.set_value("upgrades", track_id, get_upgrade_level(track_id))
-	config.save(save_path)
+	var error := config.save(save_path)
+	if error != OK:
+		GameManager.queue_toast("殘響尚未存好，請確認儲存空間後再試。")
+	return error == OK
 
 
 func reset_progress() -> void:
@@ -195,7 +204,55 @@ func get_pickup_radius_bonus() -> float:
 
 
 func get_damage_multiplier() -> float:
-	return 1.0 + float(get_upgrade_level("echo_focus")) * 0.015
+	return (1.0 + float(get_upgrade_level("echo_focus")) * 0.015) * (1.0 + get_tactical_damage_bonus())
+
+
+func award_tactical_medal(stage_id: String, medal_id: String) -> int:
+	var definition := TACTICAL.medal(medal_id)
+	if definition.is_empty() or TACTICAL.STAGES.get_stage(stage_id).is_empty():
+		return -1
+	var before := int(tactical_medals.get(stage_id, 0))
+	if before & int(definition.bit):
+		return 0
+	var reward := int(definition.reward)
+	tactical_medals[stage_id] = before | int(definition.bit)
+	shards += reward
+	lifetime_shards += reward
+	if not save_progress():
+		tactical_medals[stage_id] = before
+		shards -= reward
+		lifetime_shards -= reward
+		return -1
+	progress_changed.emit()
+	return reward
+
+
+func get_tactical_medal_count(stage_id: String = "") -> int:
+	if stage_id.is_empty():
+		var total := 0
+		for stage in TACTICAL.STAGES.get_stages():
+			total += get_tactical_medal_count(str(stage.id))
+		return total
+	var mask := int(tactical_medals.get(stage_id, 0))
+	return (mask & 1) + ((mask >> 1) & 1) + ((mask >> 2) & 1)
+
+
+func get_tactical_damage_bonus() -> float:
+	var mastered := 0
+	for stage in TACTICAL.STAGES.get_stages():
+		if int(tactical_medals.get(str(stage.id), 0)) == 7:
+			mastered += 1
+	return float(mini(5, mastered)) * 0.01
+
+
+func get_tactical_collection_text() -> String:
+	var text := "戰術收藏 %d/30｜全隊傷害 +%d%%\n每關三徽記：走位換陣／雙菁英／Boss\n首取殘響 +3／+5／+8；集齊一關傷害 +1%%（上限 5%%）" % [get_tactical_medal_count(), roundi(get_tactical_damage_bonus()*100)]
+	for stage in TACTICAL.STAGES.get_stages():
+		text += "\n%s　%d/3" % [stage.name, get_tactical_medal_count(str(stage.id))]
+	var selected := GameManager.selected_stage_id
+	if get_tactical_medal_count(selected) == 3:
+		text += "\n" + str(TACTICAL.RECORDS.get(selected, ""))
+	return text
 
 
 func get_progress_summary() -> Dictionary:
@@ -214,6 +271,7 @@ func _reset_runtime_defaults() -> void:
 	shards = 0
 	lifetime_shards = 0
 	upgrades.clear()
+	tactical_medals.clear()
 	for track in TRACKS:
 		upgrades[str(track.get("id", ""))] = 0
 

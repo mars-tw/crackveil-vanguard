@@ -1,0 +1,21 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+
+
+CAPTAIN_R35_FRAMES unique_regions=18 region=160 foot_offset=54 original_timing_frames=27 same_texture=true
+
+CAPTAIN_R35_COMBO phases=0/1/2 anticipation_damage=0 active_damage=true third_hits_behind=true sequence_rng_free=true
+
+CAPTAIN_R35_GESTURE tap_buffer_to_long_hold=consumed extra_cast_after_release=0
+
+CAPTAIN_R35_CANCEL reserved_cost=8 refund=8 release=authored_recovery late_channel_damage=0
+
+CAPTAIN_R35_PAUSE pending_cancelled=true reservation_refunded=true late_damage_after_resume=0
+
+CAPTAIN_R35_CHANNEL full_bar_impacts=22 cost=176 cardinal_hits=4 held_depleted_stops=true released_regen=32_per_second loop_owners=0
+
+CAPTAIN_R35_HURT light_5.2_keeps_attack=true heavy_20_queues_once=true queued_hurt=real_3_frames resumes_clean=true
+
+CAPTAIN_R35_INPUT keyboard_held=true keyboard_up_clears=true death_clears_owner=true reset_energy=180 reset_combo=0
+
+CAPTAIN_COMBO_CHANNEL_R35_PASS authored_poses=18 shared_atlas=true damage_frame=2 combo=0/1/2 finisher=360 hold=sustained finite_energy=true release_recovery=true owner_cleanup=true

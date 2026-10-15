@@ -362,6 +362,24 @@ func _spawn_special_elite() -> bool:
 	return true
 
 
+func spawn_tactical_guard(profile_id: String) -> Node:
+	if max_enemies <= 0:
+		return null
+	if EntityFactory.get_enemy_live_count() >= max_enemies:
+		if not EntityFactory.reclaim_regular_enemy_for_elite(_elite_reclaim_reference_position()):
+			return null
+	var config := SPECIAL_ELITES.make_config(profile_id, max_enemies)
+	if config.is_empty():
+		return null
+	var stage := STAGE_CATALOG.get_stage(GameManager.selected_stage_id)
+	config["max_hp"] = float(config.max_hp) * (1.0 + 0.06 * float(stage.get("difficulty", 1)))
+	var enemy := EntityFactory.spawn_enemy("tactical_%s" % profile_id, config, _get_spawn_position())
+	if enemy != null:
+		GameManager.record_elite_spawn()
+		GameManager.show_toast("戰術追獵：%s" % str(config.special_elite_name))
+	return enemy
+
+
 func _spawn_boss() -> void:
 	if EntityFactory.get_enemy_live_count() >= max_enemies:
 		if not EntityFactory.reclaim_regular_enemy_for_elite(_elite_reclaim_reference_position()):

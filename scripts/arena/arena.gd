@@ -10,6 +10,7 @@ const PRESENTATION := preload("res://scripts/vfx/combat_presentation.gd")
 const LOOP_WORLD := preload("res://scripts/services/loop_world_topology.gd")
 const SUMMON_DIRECTOR := preload("res://scripts/services/coin_summon_director.gd")
 const SUMMON_SCREEN := preload("res://scripts/ui/summon_shop_screen.gd")
+const TACTICAL_DIRECTOR := preload("res://scripts/services/tactical_director.gd")
 
 @export var run_seed: int = 0
 
@@ -101,6 +102,10 @@ func _ready() -> void:
 			camera.force_update_scroll()
 	_attach_leader_light(leader as Node2D)
 	GameManager.start_run(self, leader, squad_manager, false)
+	var tactics := TACTICAL_DIRECTOR.new()
+	tactics.name = "TacticalDirector"
+	GameManager.tactical_director = tactics
+	add_child(tactics)
 	var summons := SUMMON_DIRECTOR.new()
 	summons.name = "CoinSummonDirector"
 	summons.save_path = GameManager.campaign_save_path.replace(".cfg", "_pets.cfg")

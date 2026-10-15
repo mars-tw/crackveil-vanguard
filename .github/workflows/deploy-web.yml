@@ -163,6 +163,8 @@ jobs:
             R40FacingAttackTest
             R41RuntimeBudgetTest
             SpawnDensityR32Test
+            R42FormationTest
+            R43MobileTacticsTest
           )
           for scene in "${scenes[@]}"; do
             "${GODOT_BIN}" --headless --fixed-fps 60 --path . "res://scenes/debug/${scene}.tscn"

@@ -51,6 +51,11 @@ var active_panel_id: String = "meta"
 var web_window: JavaScriptObject = null
 var web_resize_callback: JavaScriptObject = null
 var web_reflow_pending: bool = false
+var tactical_page := 0
+var tactical_collection_button: Button
+var tactical_previous_button: Button
+var tactical_next_button: Button
+var tactical_detail_label: Label
 
 
 func _ready() -> void:
@@ -323,6 +328,10 @@ func _apply_menu_button_style(button: Button) -> void:
 
 
 func _show_panel(panel_id: String) -> void:
+	tactical_collection_button = null
+	tactical_previous_button = null
+	tactical_next_button = null
+	tactical_detail_label = null
 	active_panel_id = panel_id
 	side_panel.visible = true
 	if panel_backdrop != null:
@@ -352,6 +361,9 @@ func _show_panel(panel_id: String) -> void:
 		"guide":
 			side_title.text = "玩法"
 			_build_guide_panel()
+		"tactical":
+			side_title.text = "戰術收藏"
+			_build_tactical_panel()
 		_:
 			active_panel_id = "meta"
 			side_title.text = "殘響升級"
@@ -380,7 +392,48 @@ func _build_meta_panel() -> void:
 	unlock_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	unlock_label.text = _unlock_text()
 	side_content.add_child(unlock_label)
+	var collection := Button.new()
+	collection.name = "TacticalCollection"
+	collection.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	tactical_collection_button = collection
+	collection.custom_minimum_size.y = 44
+	collection.text = "戰術收藏 %d/30｜傷害 +%d%%" % [MetaProgress.get_tactical_medal_count(), roundi(MetaProgress.get_tactical_damage_bonus()*100)]
+	collection.pressed.connect(_show_panel.bind("tactical"))
+	side_content.add_child(collection)
+	side_content.move_child(collection, 1)
 	_refresh_meta_buttons()
+
+
+func _build_tactical_panel() -> void:
+	var catalog := preload("res://scripts/services/tactical_catalog.gd")
+	var stages := catalog.STAGES.get_stages()
+	tactical_page = clampi(tactical_page, 0, stages.size()-1)
+	var stage: Dictionary = stages[tactical_page]
+	var row := HBoxContainer.new()
+	side_content.add_child(row)
+	for step in [-1, 1]:
+		var button := Button.new()
+		button.custom_minimum_size = Vector2(96,44)
+		button.text = "上一關" if step == -1 else "下一關"
+		button.disabled = tactical_page + step < 0 or tactical_page + step >= stages.size()
+		button.pressed.connect(func() -> void:
+			tactical_page += step
+			_show_panel("tactical"))
+		row.add_child(button)
+		if step == -1:
+			tactical_previous_button = button
+		else:
+			tactical_next_button = button
+	var text := Label.new()
+	tactical_detail_label = text
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.add_theme_font_size_override("font_size", 14)
+	var mask := int(MetaProgress.tactical_medals.get(str(stage.id),0))
+	text.text = "%d/10 %s　%d/3\n" % [tactical_page+1, stage.name, MetaProgress.get_tactical_medal_count(str(stage.id))]
+	for medal in catalog.MEDALS:
+		text.text += "%s %s　首取 +%d 殘響\n" % ["[已]" if mask & int(medal.bit) else "[未]", medal.name, medal.reward]
+	text.text += str(catalog.RECORDS[str(stage.id)]) if mask == 7 else "走位 160 並用過三陣／擊敗兩菁英／Boss。集齊一關傷害 +1%（上限 5%）。"
+	side_content.add_child(text)
 
 
 func _refresh_meta_buttons() -> void:
@@ -656,6 +709,7 @@ func _close_side_panel() -> void:
 	side_panel.visible = false
 	if panel_backdrop != null:
 		panel_backdrop.visible = false
+	call_deferred("_publish_settled_reachability_probe")
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -981,12 +1035,31 @@ func _apply_responsive_layout() -> void:
 				(child as Button).add_theme_font_size_override("font_size", int(round(float(25 if portrait else 18) * ui_multiplier)))
 		seed_input.add_theme_font_size_override("font_size", int(round(float(18 if portrait else 16) * ui_multiplier)))
 		seed_start_button.add_theme_font_size_override("font_size", int(round(float(18 if portrait else 16) * ui_multiplier)))
+	if is_instance_valid(tactical_collection_button):
+		tactical_collection_button.add_theme_font_size_override("font_size",16)
+		tactical_collection_button.custom_minimum_size.y=44
+		tactical_collection_button.reset_size()
+	if is_instance_valid(tactical_detail_label):
+		tactical_detail_label.add_theme_font_size_override("font_size",14)
+	for button in [tactical_previous_button,tactical_next_button]:
+		if is_instance_valid(button):
+			button.add_theme_font_size_override("font_size",16)
+			button.custom_minimum_size=Vector2(96,44)
+			button.reset_size()
 	_apply_accessibility_palette()
-	_publish_reachability_probe(viewport_size)
-	call_deferred("_publish_reachability_probe", viewport_size)
+	call_deferred("_publish_settled_reachability_probe")
 	# Font/minimum notifications are deferred by containers. Apply the measured
 	# width after those notifications so a previous orientation cannot persist.
 	menu_box.set_deferred("size", Vector2(menu_width, menu_block_height))
+
+
+func _publish_settled_reachability_probe() -> void:
+	# Container/font minimums settle after deferred notifications. Publish the
+	# actual final rectangles rather than the previous orientation's width.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if is_inside_tree():
+		_publish_reachability_probe(MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size))
 
 
 func _publish_reachability_probe(viewport_size: Vector2) -> void:
@@ -1001,9 +1074,14 @@ func _publish_reachability_probe(viewport_size: Vector2) -> void:
 		"seed_input": seed_input,
 		"seed_start": seed_start_button,
 		"side_panel": side_panel,
-		"side_close": side_close_button
+		"side_close": side_close_button,
+		"tactical_collection": tactical_collection_button,
+		"tactical_previous": tactical_previous_button,
+		"tactical_next": tactical_next_button
 	}, {
 		"side_panel_visible": side_panel != null and side_panel.visible,
+		"panel_id": active_panel_id,
+		"tactical_page": tactical_page,
 		"confirmed_touch": MOBILE_TUNING.has_confirmed_touch()
 	})
 

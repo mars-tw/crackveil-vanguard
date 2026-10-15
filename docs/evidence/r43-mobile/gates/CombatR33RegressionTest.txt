@@ -1,0 +1,19 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+
+
+COMBAT_R33_FAN targets=5 instant_damage=0 impact_frame=2 death_poses=true outside_cone=ignored cooldown=2.35
+
+COMBAT_R33_BUFFER auto_impact_once=true space_during_recovery=queued next_frame2_hit=true duplicate_queue=false
+
+COMBAT_R33_MOMENTUM charge_seconds=1.15 damage=108.0 charge_consumed=true pool_generation_safe=true
+
+COMBAT_R33_RECLAIM reward_after_death=true delayed_vacuum=0.7_seconds forced_collector=true
+
+COMBAT_R33_DART base_damage=16.0 pierce=2 speed=760.0 long_bloom=false enemy_shape=distinct
+
+COMBAT_R33_MOBILE_SLASH world_origin=stable direction=up gameplay_radius=270 visual_scale=0.84/0.504 up_visual_tip=136.08
+
+COMBAT_R33_VFX desktop_cap=28 mobile_cap=12 composite_cut=true
+
+COMBAT_R33_PASS frame2=true auto_cleave=true space_buffer=true momentum=50_percent cone=true effects_capped=true projectile=data_damage_and_pierce

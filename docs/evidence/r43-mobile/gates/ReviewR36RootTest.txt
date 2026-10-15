@@ -1,0 +1,21 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+
+
+BONDS_ACTIVE=[]
+
+REVIEW_R36_DEVICE actual_view=(1280.0, 1280.0) ui_view=(1280.0, 1280.0) tier=1 hints={ "ua_mobile": true, "ua_tablet": true, "touch_available": true, "mouse_available": false }
+
+REVIEW_R36_ROOT TABLET_ZOOM=PASS actual=1.12 expected=1.12
+
+REVIEW_R36_ROOT ENEMY_REBASE=PASS enemy=(4096.0, 3072.0) expected=(4096.0, 3072.0)
+
+REVIEW_R36_ROOT REBASE_INDEX_ATOMIC=PASS nearest query immediately after topology tick
+
+REVIEW_R36_ROOT PERSISTENT_GROUP_REBASE=PASS hazard=(4096.0, 3072.0) construct=(4096.0, 3072.0) expected=(4096.0, 3072.0)
+
+REVIEW_R36_ROOT INVALID_CHOICE_ATOMIC=PASS gm_paid=true director_pending=true gold=220 after_pay=220
+
+REVIEW_R36_ROOT FAILED_WALLET_SAVE_RETRY=PASS failed storage must retain dirty flag for retry
+
+REVIEW_R36_ROOT_RESULT issues=[] bounded_fixture=true production_unchanged=true independent_context=same_model
