@@ -39,6 +39,75 @@ const FORMATION_OFFSETS: Array[Vector2] = [
 	Vector2(68.0, 170.0)
 ]
 
+# R42 陣形戰術：玩家即時切換小隊站位，站位與數值同時改變，羈絆與四名英雄
+# 的被動會依陣形產生共鳴。這是本作與一般自動射擊生存遊戲最大的差異。
+const FORMATION_ORDER: Array[String] = ["wedge", "ring", "scatter"]
+const FORMATION_SWITCH_COOLDOWN := 4.0
+const FORMATION_GUARD_COOLDOWN_MULTIPLIER := 0.6
+const FORMATION_INDICATOR_DURATION := 1.4
+const FORMATION_DEFINITIONS: Dictionary = {
+	"wedge": {
+		"name": "楔形突擊",
+		"short": "楔形",
+		"summary": "隊友前壓到兩翼：全隊傷害 +15%，受到傷害 +8%",
+		"effect": "傷害 +15%｜受傷 +8%",
+		"damage": 1.15,
+		"incoming": 1.08,
+		"pickup": 1.0,
+		"speed": 1.0,
+		"color": Color(1.0, 0.46, 0.24)
+	},
+	"ring": {
+		"name": "圓陣護衛",
+		"short": "圓陣",
+		"summary": "隊友圍住隊長：受到傷害 -10%，全隊傷害 -8%",
+		"effect": "受傷 -10%｜傷害 -8%",
+		"damage": 0.92,
+		"incoming": 0.90,
+		"pickup": 1.0,
+		"speed": 1.0,
+		"color": Color(0.36, 0.78, 1.0)
+	},
+	"scatter": {
+		"name": "散兵游擊",
+		"short": "散兵",
+		"summary": "隊友大範圍散開：拾取範圍 +60%、移動 +8%，全隊傷害 -5%",
+		"effect": "拾取 +60%｜移動 +8%｜傷害 -5%",
+		"damage": 0.95,
+		"incoming": 1.0,
+		"pickup": 1.6,
+		"speed": 1.08,
+		"color": Color(0.52, 1.0, 0.56)
+	}
+}
+const WEDGE_OFFSETS: Array[Vector2] = [
+	Vector2.ZERO,
+	Vector2(-76.0, -62.0),
+	Vector2(76.0, -62.0),
+	Vector2(-148.0, -18.0),
+	Vector2(148.0, -18.0),
+	Vector2(-46.0, -132.0),
+	Vector2(46.0, -132.0),
+	Vector2(-212.0, 34.0),
+	Vector2(212.0, 34.0)
+]
+const RING_INNER_RADIUS := 96.0
+const RING_OUTER_RADIUS := 158.0
+const SCATTER_RADIUS := 236.0
+# 羈絆 × 陣形共鳴：羈絆成立且處在對應陣形時才生效。
+const BOND_FORMATION_RESONANCE: Dictionary = {
+	"bond_ember_pulse": {"formation": "wedge", "damage": 1.08, "text": "燼脈聯爆 × 楔形：傷害 +8%", "short": "燼脈 傷害+8%"},
+	"bond_void_rail": {"formation": "scatter", "damage": 1.08, "text": "縫獵協議 × 散兵：傷害 +8%", "short": "縫獵 傷害+8%"},
+	"bond_guard_echo": {"formation": "ring", "regen": 1.5, "text": "星盾和聲 × 圓陣：每秒回復 1.5 HP", "short": "星盾 回復1.5/秒"},
+	"bond_captain_shepherd": {"formation": "ring", "damage": 1.08, "text": "牧長裂約 × 圓陣：傷害 +8%", "short": "牧長 傷害+8%"}
+}
+
+var formation_id: String = "wedge"
+var formation_cooldown: float = 0.0
+var formation_switch_count: int = 0
+var formation_indicator_timer: float = 0.0
+var _resonance_regen_accumulator: float = 0.0
+
 const BOND_DEFINITIONS: Array[Dictionary] = [
 	{"id": "bond_ember_pulse", "name": "燼脈聯爆", "hero_ids": ["ember_grenadier", "pulse_artificer"]},
 	{"id": "bond_void_rail", "name": "縫獵協議", "hero_ids": ["void_weaver", "rift_sniper"]},
@@ -160,6 +229,186 @@ func clear_squad() -> void:
 	dead_ids.clear()
 	active_bonds.clear()
 	leader = null
+	formation_id = FORMATION_ORDER[0]
+	formation_cooldown = 0.0
+	formation_switch_count = 0
+	formation_indicator_timer = 0.0
+	_resonance_regen_accumulator = 0.0
+	queue_redraw()
+
+
+func _process(delta: float) -> void:
+	if formation_cooldown > 0.0:
+		formation_cooldown = maxf(0.0, formation_cooldown - delta)
+	if formation_indicator_timer > 0.0:
+		formation_indicator_timer = maxf(0.0, formation_indicator_timer - delta)
+		queue_redraw()
+	_tick_formation_resonance(delta)
+
+
+func _tick_formation_resonance(delta: float) -> void:
+	var regen := get_formation_regen_per_second()
+	if regen <= 0.0 or not GameManager.game_running or get_tree().paused:
+		_resonance_regen_accumulator = 0.0
+		return
+	_resonance_regen_accumulator += delta
+	if _resonance_regen_accumulator >= 1.0:
+		_resonance_regen_accumulator -= 1.0
+		heal_members(regen)
+
+
+# ---------------------------------------------------------------- 陣形戰術
+
+func get_formation_id() -> String:
+	return formation_id
+
+
+func get_formation_definition(id: String = "") -> Dictionary:
+	return FORMATION_DEFINITIONS.get(formation_id if id == "" else id, FORMATION_DEFINITIONS["wedge"])
+
+
+func get_formation_name() -> String:
+	return str(get_formation_definition().get("name", ""))
+
+
+func get_formation_switch_cooldown_duration() -> float:
+	var duration := FORMATION_SWITCH_COOLDOWN
+	if has_living_passive("guard"):
+		duration *= FORMATION_GUARD_COOLDOWN_MULTIPLIER
+	return duration
+
+
+func get_formation_cooldown_remaining() -> float:
+	return formation_cooldown
+
+
+func can_switch_formation() -> bool:
+	return formation_cooldown <= 0.0 and leader != null and is_instance_valid(leader)
+
+
+func cycle_formation() -> bool:
+	var index := FORMATION_ORDER.find(formation_id)
+	return set_formation(FORMATION_ORDER[(index + 1) % FORMATION_ORDER.size()])
+
+
+func set_formation(new_id: String, force: bool = false) -> bool:
+	if not FORMATION_DEFINITIONS.has(new_id) or new_id == formation_id:
+		return false
+	if not force and not can_switch_formation():
+		return false
+	formation_id = new_id
+	formation_switch_count += 1
+	formation_cooldown = get_formation_switch_cooldown_duration()
+	formation_indicator_timer = FORMATION_INDICATOR_DURATION
+	if has_living_passive("guard"):
+		apply_temporary_shield(14.0, 2.5)
+	if AudioManager != null and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("recruit", false, -6.0, 0.88 + 0.08 * float(FORMATION_ORDER.find(new_id)))
+	if GameManager.has_signal("toast_requested"):
+		var text := "%s：%s" % [get_formation_name(), str(get_formation_definition().get("effect", ""))]
+		var shorts := PackedStringArray()
+		for bond_id in get_active_resonance_ids():
+			shorts.append(str(BOND_FORMATION_RESONANCE[bond_id].get("short", bond_id)))
+		if not shorts.is_empty():
+			text += "\n共鳴：" + "、".join(shorts)
+		GameManager.toast_requested.emit(text)
+	if AchievementProgress != null and AchievementProgress.has_method("record_formation_switch"):
+		AchievementProgress.record_formation_switch()
+	queue_redraw()
+	GameManager.queue_stats_emit()
+	return true
+
+
+func has_living_passive(passive: String) -> bool:
+	for member in members:
+		if member != null and is_instance_valid(member) and bool(member.get("is_alive")) and str(member.get("passive_id")) == passive:
+			return true
+	return false
+
+
+func _living_passive_value(passive: String) -> float:
+	for member in members:
+		if member != null and is_instance_valid(member) and bool(member.get("is_alive")) and str(member.get("passive_id")) == passive:
+			var hero_data_value: Variant = member.get("hero_data")
+			if hero_data_value is Resource:
+				return float((hero_data_value as Resource).get("passive_value"))
+	return 0.0
+
+
+func get_active_resonance_ids() -> PackedStringArray:
+	var ids := PackedStringArray()
+	for bond_id in BOND_FORMATION_RESONANCE.keys():
+		if active_bonds.has(bond_id) and str(BOND_FORMATION_RESONANCE[bond_id].get("formation", "")) == formation_id:
+			ids.append(str(bond_id))
+	return ids
+
+
+func get_active_resonance_texts() -> PackedStringArray:
+	var texts := PackedStringArray()
+	for bond_id in get_active_resonance_ids():
+		texts.append(str(BOND_FORMATION_RESONANCE[bond_id].get("text", bond_id)))
+	return texts
+
+
+func get_formation_damage_multiplier() -> float:
+	var multiplier := float(get_formation_definition().get("damage", 1.0))
+	for bond_id in get_active_resonance_ids():
+		multiplier *= float(BOND_FORMATION_RESONANCE[bond_id].get("damage", 1.0))
+	if formation_id == "wedge":
+		multiplier *= 1.0 + _living_passive_value("blast")
+	return multiplier
+
+
+func get_formation_incoming_multiplier() -> float:
+	return float(get_formation_definition().get("incoming", 1.0))
+
+
+func get_formation_pickup_multiplier() -> float:
+	return float(get_formation_definition().get("pickup", 1.0)) * (1.0 + _living_passive_value("support"))
+
+
+func get_formation_speed_multiplier() -> float:
+	return float(get_formation_definition().get("speed", 1.0))
+
+
+func get_follower_speed_multiplier() -> float:
+	return get_formation_speed_multiplier() * (1.0 + _living_passive_value("scout"))
+
+
+func get_formation_regen_per_second() -> float:
+	var regen := 0.0
+	for bond_id in get_active_resonance_ids():
+		regen += float(BOND_FORMATION_RESONANCE[bond_id].get("regen", 0.0))
+	return regen
+
+
+func get_formation_debug_state() -> Dictionary:
+	return {
+		"formation": formation_id,
+		"switches": formation_switch_count,
+		"cooldown": formation_cooldown,
+		"damage": get_formation_damage_multiplier(),
+		"incoming": get_formation_incoming_multiplier(),
+		"pickup": get_formation_pickup_multiplier(),
+		"speed": get_formation_speed_multiplier(),
+		"regen": get_formation_regen_per_second(),
+		"resonance": get_active_resonance_ids()
+	}
+
+
+func _draw() -> void:
+	if formation_indicator_timer <= 0.0 or leader == null or not is_instance_valid(leader):
+		return
+	var alpha := clampf(formation_indicator_timer / FORMATION_INDICATOR_DURATION, 0.0, 1.0)
+	var color: Color = get_formation_definition().get("color", Color.WHITE)
+	var origin := to_local(leader.global_position)
+	var line_color := Color(color.r, color.g, color.b, 0.55 * alpha)
+	for index in range(1, members.size()):
+		var target := to_local(get_formation_world_position(index))
+		draw_line(origin, target, line_color, 2.0, true)
+		draw_arc(target, 15.0, 0.0, TAU, 20, Color(color.r, color.g, color.b, 0.85 * alpha), 2.5, true)
+	var radius := 52.0 + (1.0 - alpha) * 40.0
+	draw_arc(origin, radius, 0.0, TAU, 40, Color(color.r, color.g, color.b, 0.7 * alpha), 3.0, true)
 
 
 func _spawn_member(hero_data: Resource, leader_flag: bool) -> Node:
@@ -611,6 +860,23 @@ func get_formation_world_position(slot_index: int) -> Vector2:
 func get_formation_local_offset(slot_index: int) -> Vector2:
 	if slot_index <= 0:
 		return Vector2.ZERO
+	# Local offsets are (lateral, back); a negative back value is ahead of the captain.
+	match formation_id:
+		"wedge":
+			if slot_index < WEDGE_OFFSETS.size():
+				return WEDGE_OFFSETS[slot_index]
+		"ring":
+			var inner_count := 6
+			var on_inner := slot_index <= inner_count
+			var ring_count := inner_count if on_inner else 8
+			var ring_index := slot_index - 1 if on_inner else slot_index - inner_count - 1
+			var angle := TAU * float(ring_index) / float(ring_count) + (0.0 if on_inner else PI / 8.0)
+			var radius := RING_INNER_RADIUS if on_inner else RING_OUTER_RADIUS
+			return Vector2(cos(angle), sin(angle)) * radius
+		"scatter":
+			var spread_angle := TAU * float(slot_index - 1) / 8.0 + PI / 8.0
+			var spread_radius := SCATTER_RADIUS * (0.78 if slot_index % 2 == 0 else 1.0)
+			return Vector2(cos(spread_angle), sin(spread_angle)) * spread_radius
 	if slot_index < FORMATION_OFFSETS.size():
 		return FORMATION_OFFSETS[slot_index]
 

@@ -24,6 +24,10 @@ func _physics_process(_delta: float) -> void:
 		hero.set_move_direction(input_direction)
 	if Input.is_action_just_pressed("active_ability") and hero.has_method("try_cast_active_ability"):
 		hero.try_cast_active_ability()
+	if Input.is_action_just_pressed("formation_cycle"):
+		var squad: Node = GameManager.squad_manager
+		if squad != null and is_instance_valid(squad) and squad.has_method("cycle_formation"):
+			squad.cycle_formation()
 
 
 func _ensure_input_actions() -> void:
@@ -32,6 +36,7 @@ func _ensure_input_actions() -> void:
 	_add_action_with_keys("move_up", [KEY_W, KEY_UP])
 	_add_action_with_keys("move_down", [KEY_S, KEY_DOWN])
 	_add_action_with_keys("active_ability", [KEY_SPACE])
+	_add_action_with_keys("formation_cycle", [KEY_Q])
 
 
 func _add_action_with_keys(action_name: String, keys: Array[int]) -> void:

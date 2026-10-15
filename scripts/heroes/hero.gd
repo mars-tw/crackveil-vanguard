@@ -429,7 +429,10 @@ func _tick_movement_slow(delta: float) -> void:
 
 
 func _movement_multiplier() -> float:
-	return 1.0 - clamp(movement_slow_strength, 0.0, 0.65)
+	var formation_speed := 1.0
+	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("get_formation_speed_multiplier"):
+		formation_speed = float(squad_manager.get_formation_speed_multiplier())
+	return (1.0 - clamp(movement_slow_strength, 0.0, 0.65)) * formation_speed
 
 
 func get_facing_direction() -> Vector2:
@@ -1272,6 +1275,8 @@ func get_max_hp() -> float:
 
 
 func get_pickup_radius() -> float:
+	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("get_formation_pickup_multiplier"):
+		return pickup_radius * float(squad_manager.get_formation_pickup_multiplier())
 	return pickup_radius
 
 

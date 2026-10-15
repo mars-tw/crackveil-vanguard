@@ -35,4 +35,7 @@ func _physics_process(_delta: float) -> void:
 		return
 
 	var max_speed: float = float(hero.get("move_speed")) * (1.0 + clamp(distance / catchup_distance, 0.0, 0.35))
+	if squad_manager.has_method("get_follower_speed_multiplier"):
+		# Formation speed is already applied in Hero._movement_multiplier; only the scout bonus is extra here.
+		max_speed *= float(squad_manager.get_follower_speed_multiplier()) / maxf(0.01, float(squad_manager.get_formation_speed_multiplier()))
 	hero.set_desired_velocity(to_target.normalized() * max_speed)

@@ -1,0 +1,14 @@
+{
+  "asset": "assets/audio/r42_battle_loop.ogg",
+  "assetSha256": "16775f78421270b17d20b7d389e5b733125e3a13de4ce16de9a75f3c7b98914f",
+  "generator": "ACE-Step v1.5 turbo (acestep_v1.5_turbo.safetensors) via local ComfyUI, dispatched by local_ai_dispatcher 1.0.1 capability=music",
+  "dispatcherTaskId": "dc922135-b7f4-458b-adfd-392f1162411c",
+  "comfyPromptId": "f648eadd-a3d3-4bd6-b7f2-d3ab04c1a9d6",
+  "prompt": "Instrumental fantasy action battle loop, driving taiko drums, dark synth bass, heroic brass stabs, string ostinato, 140 bpm, energetic, no vocals, seamless loop",
+  "seconds": 30,
+  "rawFile": "docs/evidence/r42/audio/r42_battle_ace_step_raw.flac",
+  "rawSha256": "fc298a86cef6c6f3b1c116ea70a4ee4ddcc1ecae79690083a757ffcae03c544b",
+  "postProcess": "ffmpeg: keep 0-26 s (26.1-30 s was silence), 2 s triangular crossfade of the head onto the tail for a seamless loop (24 s), loudnorm I=-18 TP=-1.5, 44.1 kHz, libvorbis q5",
+  "vocalCheck": "local qwen3_asr_17b task f0c31a2b-406a-4f1c-ac11-e6fe3b59731c returned an empty transcription (no detectable lyrics)",
+  "humanListeningReview": "not performed by the AI; the developer should listen once before release"
+}

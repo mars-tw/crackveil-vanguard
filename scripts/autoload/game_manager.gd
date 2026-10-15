@@ -1259,6 +1259,8 @@ func get_outgoing_damage_multiplier(source: Node = null) -> float:
 		multiplier *= float(MetaProgress.get_damage_multiplier())
 	if temporary_squad_damage_timer > 0.0:
 		multiplier *= 1.15
+	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("get_formation_damage_multiplier"):
+		multiplier *= float(squad_manager.get_formation_damage_multiplier())
 	if active_contract_id == "contract_single_thread" and source != null and is_instance_valid(source):
 		if bool(source.get("is_leader")):
 			multiplier *= float(contract_modifiers.get("leader_damage_multiplier", 1.0))
@@ -1290,6 +1292,8 @@ func get_incoming_damage_multiplier(target: Node = null) -> float:
 	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("has_active_bond"):
 		if squad_manager.has_active_bond("bond_guard_echo"):
 			reduction_multiplier *= 0.95
+	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("get_formation_incoming_multiplier"):
+		reduction_multiplier *= float(squad_manager.get_formation_incoming_multiplier())
 	if target != null and is_instance_valid(target) and str(target.get("passive_id")) == "shepherd":
 		var construct_count := mini(4, EntityFactory.get_rift_construct_count_for_owner(target))
 		reduction_multiplier *= 1.0 - float(construct_count) * 0.02

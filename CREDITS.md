@@ -72,3 +72,7 @@ Crackveil Vanguard 的程式與專案自有內容採根目錄 [MIT License](LICE
 - 每個上游檔名、輸出檔與既有 SHA-256 的詳細對照保留於 [assets/CREDITS.md](assets/CREDITS.md)。
 
 CC0 素材依法不要求署名，但本專案保留作者、來源與修改紀錄，以方便稽核及後續維護。
+
+## R42 戰鬥配樂
+
+- `assets/audio/r42_battle_loop.ogg`：本機 ACE-Step v1.5 turbo（ComfyUI，經本機 AI 派工器 `music` 能力）以文字提示生成的原創器樂，再以 ffmpeg 裁去尾段靜音、做 2 秒交叉淡化成 24 秒循環並調整響度。提示詞、原始 FLAC、派工任務編號與 SHA-256 見 `docs/evidence/r42/audio/provenance.json`。ASR 檢查未偵測到人聲歌詞。

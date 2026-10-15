@@ -40,6 +40,8 @@ var energy_bar: ProgressBar
 var summon_button: Button
 var auto_button: Button
 var phone_equipment_button: Button
+var formation_button: Button
+var formation_hint_shown := false
 var pause_auto_button: Button
 var touch_input_blocked := false
 var auto_mode := false
@@ -413,6 +415,13 @@ func _build_ui() -> void:
 	phone_equipment_button.focus_mode = Control.FOCUS_NONE
 	phone_equipment_button.pressed.connect(_open_phone_equipment)
 	root.add_child(phone_equipment_button)
+	formation_button = Button.new()
+	formation_button.name = "FormationButton"
+	formation_button.text = "陣形"
+	formation_button.focus_mode = Control.FOCUS_NONE
+	formation_button.tooltip_text = "切換小隊陣形（Q）：楔形突擊 → 圓陣護衛 → 散兵游擊"
+	formation_button.pressed.connect(_cycle_formation)
+	root.add_child(formation_button)
 
 	toast_panel = Panel.new()
 	toast_panel.name = "ToastPanel"
@@ -1342,7 +1351,7 @@ func _apply_phone_battle_layout(view: Vector2, phone: bool) -> void:
 		layer_control.size = active_ability_button.size
 	if active_ability_cooldown_ring.has_method("set_ring_width"):
 		active_ability_cooldown_ring.set_ring_width(3.0)
-	for button in [summon_button, phone_equipment_button]:
+	for button in [summon_button, phone_equipment_button, formation_button]:
 		button.custom_minimum_size = Vector2(44,44)
 		button.add_theme_font_size_override("font_size", 14)
 		var panel := StyleBoxFlat.new()
@@ -1391,6 +1400,7 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"summon": summon_button,
 		"auto_battle": auto_button,
 		"equipment_menu": phone_equipment_button,
+		"formation": formation_button,
 		"pause_auto_battle": pause_auto_button
 	}, {
 		"paused": pause_overlay != null and pause_overlay.visible,
@@ -1623,7 +1633,8 @@ func _on_stats_changed(stats: Dictionary) -> void:
 	var bond_names: PackedStringArray = stats.get("active_bond_names", PackedStringArray())
 	if theme_label != null:
 		var bond_text := "　羈絆 %d/4　%s" % [bond_names.size(), " · ".join(bond_names)] if not bond_names.is_empty() else "　羈絆 0/4"
-		theme_label.text = ("地圖：%s" % theme_name if theme_name != "" else "") + bond_text
+		theme_label.text = ("地圖：%s" % theme_name if theme_name != "" else "") + bond_text + _formation_status_text().replace("
+", "　")
 		theme_label.visible = not MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size)
 	time_label.text = ("波%d  " % int(stats.get("endless_wave", 1)) if str(stats.get("run_mode", "campaign")) == "endless" else "") + GameManager.format_time(float(stats.get("elapsed_time", 0.0)))
 	var mobile := MOBILE_TUNING.use_mobile_ui(get_viewport().get_visible_rect().size)
@@ -1638,7 +1649,7 @@ func _on_stats_changed(stats: Dictionary) -> void:
 	]
 	if pause_run_stats_label != null:
 		var pause_bond_text := "\n羈絆 %d/4：%s" % [bond_names.size(), " · ".join(bond_names)] if not bond_names.is_empty() else "\n羈絆 0/4"
-		pause_run_stats_label.text = "本局：擊殺 %d   金幣 %d   殘響 %d%s" % [kills, gold, echo_shards, pause_bond_text]
+		pause_run_stats_label.text = "本局：擊殺 %d   金幣 %d   殘響 %d%s%s" % [kills, gold, echo_shards, pause_bond_text, _formation_status_text()]
 		for item in stats.get("equipment_slots", []):
 			pause_run_stats_label.text += "\n%s：%s" % [str(item.get("slot_name", "裝備")), str(item.get("name", "空槽"))]
 			if mobile and not str(item.get("description", "")).is_empty():
@@ -1879,7 +1890,9 @@ func _refresh_active_ability_button() -> void:
 			summon_button.add_theme_font_size_override("font_size",14)
 			phone_equipment_button.size = Vector2(44,44)
 			phone_equipment_button.position = Vector2(utilities_x + 72,utilities_y)
+		_layout_formation_button(layout, touch, phone, blocked, row_y, button_height)
 		pause_auto_button.text = auto_button.text
+	_refresh_formation_button(phone)
 	var channel: Dictionary = active_player.get_channel_debug_state() if is_instance_valid(active_player) and active_player.has_method("get_channel_debug_state") else {}
 	if energy_panel != null:
 		energy_panel.visible = not touch and not channel.is_empty() and GameManager.game_running and not GameManager.is_system_pause_active()
@@ -1930,6 +1943,76 @@ func _open_summon_shop() -> void:
 	_reset_touch_input()
 	if GameManager.has_method("open_summon_shop"):
 		GameManager.open_summon_shop()
+
+
+func _formation_status_text() -> String:
+	var squad: Node = GameManager.squad_manager
+	if squad == null or not is_instance_valid(squad) or not squad.has_method("get_formation_definition"):
+		return ""
+	var text := "
+陣形：%s（%s）" % [str(squad.get_formation_name()), str(squad.get_formation_definition().get("summary", ""))]
+	var resonance: PackedStringArray = squad.get_active_resonance_texts()
+	if not resonance.is_empty():
+		text += "
+共鳴：" + " · ".join(resonance)
+	return text
+
+
+func _cycle_formation() -> void:
+	var squad: Node = GameManager.squad_manager
+	if squad == null or not is_instance_valid(squad) or not squad.has_method("cycle_formation"):
+		return
+	if squad.cycle_formation():
+		formation_hint_shown = true
+
+
+func _layout_formation_button(layout: Vector2, touch: bool, phone: bool, blocked: bool, row_y: float, button_height: float) -> void:
+	if formation_button == null:
+		return
+	formation_button.visible = GameManager.game_running and not blocked
+	formation_button.add_theme_font_size_override("font_size", 14)
+	if phone:
+		# Right thumb zone: directly above the slash button, never over the joystick.
+		var size := Vector2(64, 44)
+		var x := active_ability_button.position.x + (active_ability_button.size.x - size.x) * 0.5
+		var y := active_ability_button.position.y - size.y - 10.0
+		if absf(y - summon_button.position.y) < size.y and summon_button.position.x + 116.0 > x:
+			x = summon_button.position.x - size.x - 8.0
+			y = summon_button.position.y
+		formation_button.custom_minimum_size = size
+		formation_button.size = size
+		formation_button.position = Vector2(clampf(x, 8.0, layout.x - size.x - 8.0), maxf(8.0, y))
+		return
+	formation_button.custom_minimum_size = Vector2(0, 0)
+	# Stack above the summon button: the centred toast and equipment bar own
+	# the bottom middle of the screen on desktop and tablet.
+	var width := 224.0 if not touch else 136.0
+	formation_button.size = Vector2(width, button_height)
+	formation_button.position = Vector2(summon_button.position.x, row_y - button_height - 8.0)
+
+
+func _refresh_formation_button(phone: bool) -> void:
+	if formation_button == null:
+		return
+	var squad: Node = GameManager.squad_manager
+	if squad == null or not is_instance_valid(squad) or not squad.has_method("get_formation_definition"):
+		formation_button.visible = false
+		return
+	var definition: Dictionary = squad.get_formation_definition()
+	var remaining: float = float(squad.get_formation_cooldown_remaining())
+	var short_name := str(definition.get("short", "陣形"))
+	if phone:
+		formation_button.text = short_name if remaining <= 0.05 else "%d" % ceili(remaining)
+	else:
+		formation_button.text = ("陣形：%s（Q）" % short_name) if remaining <= 0.05 else "陣形：%s　%.1f 秒" % [short_name, remaining]
+	formation_button.disabled = remaining > 0.05 or get_tree().paused or not GameManager.game_running
+	var color: Color = definition.get("color", Color.WHITE)
+	formation_button.add_theme_color_override("font_color", color.lightened(0.25))
+	formation_button.add_theme_color_override("font_disabled_color", Color(color.r, color.g, color.b, 0.55))
+	if not formation_hint_shown and GameManager.game_running and float(GameManager.elapsed_time) >= 6.0 and int(squad.get("formation_switch_count")) == 0:
+		formation_hint_shown = true
+		_on_toast_requested("小隊陣形：按「%s」切換
+楔形突擊 → 圓陣護衛 → 散兵游擊" % ("陣形" if phone else "Q"))
 
 
 func _open_phone_equipment() -> void:

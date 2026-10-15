@@ -6,6 +6,10 @@ signal audio_unlocked
 const SAVE_PATH := "user://crackveil_audio.cfg"
 const BUS_NAME := "Master"
 const PLAYER_POOL_SIZE := 12
+# R42：戰鬥背景音樂（本機 ACE-Step 原創生成，來源見 CREDITS.md）。
+const BATTLE_MUSIC_PATH := "res://assets/audio/r42_battle_loop.ogg"
+const BATTLE_MUSIC_DB := -14.0
+const MUSIC_FADE_SECONDS := 1.2
 const SFX_PATHS: Dictionary = {
 	"fire": "res://assets/audio/fire.wav",
 	"hit": "res://assets/audio/hit.wav",
@@ -63,6 +67,8 @@ var next_player_index: int = 0
 var last_play_msec: Dictionary = {}
 var sfx_streams: Dictionary = {}
 var audio_runtime_enabled: bool = true
+var music_player: AudioStreamPlayer = null
+var music_target_db: float = -80.0
 
 
 func _ready() -> void:
@@ -74,6 +80,7 @@ func _ready() -> void:
 		return
 	_load_streams()
 	_build_player_pool()
+	_build_music_player()
 	_apply_bus_settings()
 	get_tree().node_added.connect(_on_scene_node_added)
 	call_deferred("_bind_existing_ui_buttons")
@@ -142,6 +149,40 @@ func set_muted(value: bool) -> void:
 	_apply_bus_settings()
 	_save_settings()
 	settings_changed.emit()
+
+
+func _build_music_player() -> void:
+	var stream := load(BATTLE_MUSIC_PATH) as AudioStream
+	if stream == null:
+		return
+	if stream is AudioStreamOggVorbis:
+		(stream as AudioStreamOggVorbis).loop = true
+	music_player = AudioStreamPlayer.new()
+	music_player.name = "BattleMusic"
+	music_player.bus = BUS_NAME
+	music_player.stream = stream
+	music_player.volume_db = -80.0
+	add_child(music_player)
+
+
+func _process(delta: float) -> void:
+	if music_player == null:
+		return
+	var want := GameManager.game_running and not GameManager.is_game_over and not muted and master_volume > 0.001
+	if OS.has_feature("web") and not unlocked:
+		want = false
+	music_target_db = BATTLE_MUSIC_DB if want else -80.0
+	if want and not music_player.playing:
+		music_player.volume_db = -40.0
+		music_player.play()
+	var step := 60.0 * delta / MUSIC_FADE_SECONDS
+	music_player.volume_db = move_toward(music_player.volume_db, music_target_db, step)
+	if not want and music_player.playing and music_player.volume_db <= -60.0:
+		music_player.stop()
+
+
+func is_battle_music_playing() -> bool:
+	return music_player != null and music_player.playing
 
 
 func _build_player_pool() -> void:
