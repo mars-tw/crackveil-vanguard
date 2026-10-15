@@ -31,10 +31,10 @@ Crackveil Vanguard is a standalone product. Our developer account also lists oth
 No. No other app on the account shares its genre, engine project, controls or content. Its squad, formation, bond, hero and stage systems make up the whole product, and they would not fit as an add-on to any of our other apps.
 
 **7. Shared code, frameworks or assets with other apps on the account**
-The app is its own Godot 4.7 project. It shares no game code, scenes or art assets with our other apps. Shared standard third-party components only: the Godot Engine (MIT) and the Noto Sans CJK font (SIL OFL). Part of the code and some of the original 2D art were produced with AI-assisted tools under the developer's direction; the developer designed, reviewed, edited and integrated everything, and the source-image provenance is kept in the repository.
+The app is its own Godot 4.7 project. It shares no game code, scenes or art assets with our other apps. Shared standard third-party components only: the Godot Engine (MIT) and the Noto Sans CJK font (SIL OFL); a few CC0 sound and art assets from Kenney and OpenGameArt are listed in the app's credits. Part of the code and some of the original 2D art were produced with AI-assisted tools under the developer's direction; the developer designed, reviewed, edited and integrated everything, and the source-image provenance is kept in the repository.
 
 **8. Shared codebase, SDK or content library with third-party apps**
-No. Apart from the open-source Godot Engine and the Noto font listed above, the app contains no third-party SDK, template, analytics or ads library.
+No. Apart from the open-source Godot Engine, the Noto font and the CC0 assets listed above, the app contains no third-party SDK, game template, analytics or ads library.
 
 **9. Built for a client, partner or third party?**
 No. The app was conceived, built and published by the account holder as our own original product. It was not made from a commercial template or by an app-generation service for someone else.
