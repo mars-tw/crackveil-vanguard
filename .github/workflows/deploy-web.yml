@@ -126,7 +126,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          export CV_QA_PROFILE=content_r3_ci
+          export CV_QA_PROFILE=content_r3_r4_ci
           scenes=(
             R14RegressionTest
             R29MenuModalTest
@@ -173,6 +173,7 @@ jobs:
             ContentR2Test
             ContentR21Test
             ContentR3Test
+            ContentR4Test
           )
           for scene in "${scenes[@]}"; do
             "${GODOT_BIN}" --headless --fixed-fps 60 --path . "res://scenes/debug/${scene}.tscn"

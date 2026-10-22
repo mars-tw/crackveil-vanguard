@@ -22,6 +22,10 @@ def prior(path): return subprocess.check_output(['git','show',BASE+':'+path],cwd
 def normalize(text): return text.replace('\r\n','\n')
 
 version=re.search(r'^config/version="([^"]+)"',(ROOT/'project.godot').read_text(encoding='utf-8'),re.M)[1]
+# R4_EXACT_ROUTE_START
+if version=='0.33.0-content-r4':
+    raise SystemExit(subprocess.run([__import__('sys').executable,str(ROOT/'tools/verify_content_r4.py')],cwd=ROOT).returncode)
+# R4_EXACT_ROUTE_END
 # R3_EXACT_ROUTE_START
 # Exact version only: separate current evidence; all archived assertions remain.
 if version=='0.32.0-content-r3':

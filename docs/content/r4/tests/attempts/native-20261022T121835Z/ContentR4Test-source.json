@@ -1,0 +1,3617 @@
+{
+  "before": {
+    ".github/workflows/deploy-web.yml": {
+      "sha256": "bf999c04cf7e059a6d0199479286abf384545c2fbc18fa444c8f3ce895e7694a",
+      "mtime_ns": 1792671163430034700,
+      "bytes": 9893
+    },
+    "assets/fonts/default_theme.tres": {
+      "sha256": "6a17e46b6b01c90ab3f9acbbca0b75909469794f49aa41ec68d7481f590a242c",
+      "mtime_ns": 1784015403253655500,
+      "bytes": 8674
+    },
+    "assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf": {
+      "sha256": "ee2711cec8bf1dd0cf5d69abd20a4d349f3dd5fcd7142a31f7a5cd77f0ac9e06",
+      "mtime_ns": 1792671120516073900,
+      "bytes": 1536772
+    },
+    "export_presets.cfg": {
+      "sha256": "1a4e4dd7940ef0baca1b181eea79b2c75b49c6aee6cfdb89471c7861988be2f0",
+      "mtime_ns": 1792660334921526300,
+      "bytes": 9587
+    },
+    "project.godot": {
+      "sha256": "cc9af94d331c98bcf631a845f3c4bfcb716594c1e86481c447f6d7a883381428",
+      "mtime_ns": 1792670765392421200,
+      "bytes": 1284
+    },
+    "resources/heroes/arc_scout.tres": {
+      "sha256": "25e4a76cc4587f9104ce8a516fa95da6898e5d45d7380cda5d8b7825f074ee65",
+      "mtime_ns": 1792032234969000900,
+      "bytes": 813
+    },
+    "resources/heroes/echo_singer.tres": {
+      "sha256": "a49a61fdf8df5691ac9e61e5d61f76b125850b2244e3800ab2cd8cc67eab6f53",
+      "mtime_ns": 1784450139601214500,
+      "bytes": 849
+    },
+    "resources/heroes/ember_grenadier.tres": {
+      "sha256": "ba17a18b2423c047b908b086fb24b5b4525e4fd7c1eee4243b372febdf1f7ffa",
+      "mtime_ns": 1784450139602720600,
+      "bytes": 875
+    },
+    "resources/heroes/line_mender.tres": {
+      "sha256": "943f0c4ef93506f686f03d650676d4b621375f285e7842a4d0d21a1d96ef3694",
+      "mtime_ns": 1792032234970119200,
+      "bytes": 841
+    },
+    "resources/heroes/orbit_guard.tres": {
+      "sha256": "d9ff1a08d160449edc20bb1f74e338b8e5194f396828b671d9523283498446ea",
+      "mtime_ns": 1792032234970119200,
+      "bytes": 892
+    },
+    "resources/heroes/pulse_artificer.tres": {
+      "sha256": "32aa8d3cae53596d528037b7223760076ff64f3e325966d70e0a94b34fc513d7",
+      "mtime_ns": 1792032234970119200,
+      "bytes": 857
+    },
+    "resources/heroes/rift_captain.tres": {
+      "sha256": "5379851e24b430f3f84a52b6c6ab1e5605b6b41a4cf45c4c556e53beb8dd3301",
+      "mtime_ns": 1784450139618786600,
+      "bytes": 898
+    },
+    "resources/heroes/rift_shepherd.tres": {
+      "sha256": "e1a8196b961854372ede3e0c5b1e10733fa5ebfa2af1ab5758d6396db92d9b70",
+      "mtime_ns": 1784450139621301600,
+      "bytes": 870
+    },
+    "resources/heroes/rift_sniper.tres": {
+      "sha256": "93755aaff73ce210e4a9c4fa4c848889e8c578e365064c5b210fbc7a230ece2c",
+      "mtime_ns": 1784450139623815000,
+      "bytes": 835
+    },
+    "resources/heroes/shadow_ronin.tres": {
+      "sha256": "2bdec38c34e480e325f01b7bdffba6edb4386152c59fe4ff2f7538a338330425",
+      "mtime_ns": 1790998597751527100,
+      "bytes": 813
+    },
+    "resources/heroes/solar_lancer.tres": {
+      "sha256": "00e94c400a1228f382c32d3e774fd55eb8a927efc4bef68ab00c5ac1c7699368",
+      "mtime_ns": 1790998597748537200,
+      "bytes": 801
+    },
+    "resources/heroes/tide_oracle.tres": {
+      "sha256": "3b18d403ca218176f23b183042ed7fdbb9a65271aada6a1e62152f43b89d79ee",
+      "mtime_ns": 1790998597750530500,
+      "bytes": 814
+    },
+    "resources/heroes/void_weaver.tres": {
+      "sha256": "778125d2c6e3b0b85a97203fd7d3b02246971d501d0375977a04af9c893169d6",
+      "mtime_ns": 1784450139626815900,
+      "bytes": 847
+    },
+    "resources/squads/default_squad.tres": {
+      "sha256": "8ae6ed02bb944384e2f192c89759d8e386ce93ef10b99e47546ca61dac2eae08",
+      "mtime_ns": 1790994760118167700,
+      "bytes": 1884
+    },
+    "resources/weapons/arc_chain.tres": {
+      "sha256": "1a1bdb5e65edf1a53d1268c7c2ca508640cf1550055557ffab2c7dde05d94731",
+      "mtime_ns": 1790926224769810400,
+      "bytes": 857
+    },
+    "resources/weapons/echo_hymn.tres": {
+      "sha256": "64a279b50bdbeea4d867543f472a1c81c0e19a9cce7ebaa9d1958b06d18fc5a8",
+      "mtime_ns": 1784104792923131100,
+      "bytes": 806
+    },
+    "resources/weapons/grenade_lob.tres": {
+      "sha256": "22a40183b19dff3825dee975fd3dda9cae1913da534c009166fa134f510245c1",
+      "mtime_ns": 1783784954891495000,
+      "bytes": 990
+    },
+    "resources/weapons/orbit_blades.tres": {
+      "sha256": "2bd15438e96e64df6d0558bffd6872dee5c3f2186f5a35bbc7dcb313b970047c",
+      "mtime_ns": 1792069092074695200,
+      "bytes": 1118
+    },
+    "resources/weapons/pulse_bloom.tres": {
+      "sha256": "ff7bfdc399efb9bdacf6cbe7be92ffe63a4e49e99dc48332716ef577337bb535",
+      "mtime_ns": 1783784954890489100,
+      "bytes": 831
+    },
+    "resources/weapons/rail_lance.tres": {
+      "sha256": "0a9851005e81af708e86edaa257c421b27b5f7feaa331d1c9aeab5c19605aba2",
+      "mtime_ns": 1784104792920124000,
+      "bytes": 805
+    },
+    "resources/weapons/rift_constructs.tres": {
+      "sha256": "137860f2bac33a9131e991108266f4b5cae9f4c337e75e491f29888159609db0",
+      "mtime_ns": 1784191258068624200,
+      "bytes": 869
+    },
+    "resources/weapons/rift_seeker_missiles.tres": {
+      "sha256": "8b31430c2387dd8a6df5e3c1c1302dc8676d0383c99bf235bb81fa869109ca0b",
+      "mtime_ns": 1790934122593656300,
+      "bytes": 967
+    },
+    "resources/weapons/rift_shield_boomerang.tres": {
+      "sha256": "ef036056c0e22c7ef8ead948e0d8dfb09665e54b531e8c7673ba24eba625cdb2",
+      "mtime_ns": 1792069092074695200,
+      "bytes": 1244
+    },
+    "resources/weapons/riftline_emitter.tres": {
+      "sha256": "790c89bd32574b3f1b42322982836eedce5603e867400c587b82b04facaa6966",
+      "mtime_ns": 1790934122593656300,
+      "bytes": 883
+    },
+    "resources/weapons/shadow_twinblades.tres": {
+      "sha256": "78e0b39925273d3a8e95a99d711ca9a1507deb475160d020a3013a099cc96e73",
+      "mtime_ns": 1792069092074695200,
+      "bytes": 1214
+    },
+    "resources/weapons/solar_piercer.tres": {
+      "sha256": "8c944b5bb0b0c64883d0f474ed238533c9a82560186089f802906a9b2673f85f",
+      "mtime_ns": 1790994760112667600,
+      "bytes": 752
+    },
+    "resources/weapons/tidal_covenant.tres": {
+      "sha256": "fa2a576947750f65c8148db76820a9a299d8ed3f7c4cbba5a4d11fc52c287359",
+      "mtime_ns": 1790994801403058100,
+      "bytes": 850
+    },
+    "resources/weapons/void_net.tres": {
+      "sha256": "19aa632e23a844c7224fd24fa88598b966907c157fcb031ff9f46f7b389ecdd7",
+      "mtime_ns": 1783873561094458100,
+      "bytes": 718
+    },
+    "resources/weapons/weapon_catalog.tres": {
+      "sha256": "74c3a17db1caca50c50e0b39e2be040830821de8e003c293ea051260cc86107d",
+      "mtime_ns": 1790994760116174300,
+      "bytes": 2066
+    },
+    "scenes/arena/Arena.tscn": {
+      "sha256": "9b36103c20eb942d1485071e918d597364586842142f4dfaa86b453b5d42cb60",
+      "mtime_ns": 1783651779220672600,
+      "bytes": 1897
+    },
+    "scenes/debug/ArenaInstrumentationRun.tscn": {
+      "sha256": "e177d68b85267ff160ebd8380284f16baa9ec546af60e424062ca6dbdd883f81",
+      "mtime_ns": 1783694442800259600,
+      "bytes": 215
+    },
+    "scenes/debug/AttackVfxR34PoolTest.tscn": {
+      "sha256": "8c577eb1ccbf6930d851a5a1df135f5a68d50e156c19a9201a5347ba40f08758",
+      "mtime_ns": 1790926044525870000,
+      "bytes": 199
+    },
+    "scenes/debug/AutoChannelR36Test.tscn": {
+      "sha256": "f0e63425cc305b2e32adb315d53ef0b12eb2deec1ca0e584b664c3d7b0807e96",
+      "mtime_ns": 1790934978716526600,
+      "bytes": 194
+    },
+    "scenes/debug/BalanceMockRun.tscn": {
+      "sha256": "9fde7094bfdd71e2b70ba8c60999a69fc509f89a1ca2204ca013507253716f8c",
+      "mtime_ns": 1783646792959107600,
+      "bytes": 201
+    },
+    "scenes/debug/CaptainComboChannelR35Test.tscn": {
+      "sha256": "b3313a1dc534dbf36da8e7dfcb4486823f1be1edb2e9057820a0b9130cf7c23f",
+      "mtime_ns": 1790929838665326200,
+      "bytes": 211
+    },
+    "scenes/debug/CombatPolishR37Test.tscn": {
+      "sha256": "14dd002d06c5d62512b2038c6c271ec655609b36a35c4c8dee6d91fa0f48503c",
+      "mtime_ns": 1790955346116643000,
+      "bytes": 196
+    },
+    "scenes/debug/CombatR32RegressionTest.tscn": {
+      "sha256": "4292a4807de98445b1925090cf635fe723c447c858672d3a25951292459c4844",
+      "mtime_ns": 1790914467654908500,
+      "bytes": 204
+    },
+    "scenes/debug/CombatR33RegressionTest.tscn": {
+      "sha256": "9a2923eea34abd1fdba36924ee50f5c8da2faa7b10c377f87d6c256a39e2f99d",
+      "mtime_ns": 1790918828595092700,
+      "bytes": 204
+    },
+    "scenes/debug/ContentR1NavigationTest.tscn": {
+      "sha256": "b0e258b5b3599ccce98efadb6b8e639395b03afc2bc3adafe7e2629dbf58586b",
+      "mtime_ns": 1792646560899116700,
+      "bytes": 202
+    },
+    "scenes/debug/ContentR1Review.tscn": {
+      "sha256": "97c4c7813bc1be568116644e0dda59f135689881b1bc16d53d7e49b562dd2c7c",
+      "mtime_ns": 1792643861904849200,
+      "bytes": 185
+    },
+    "scenes/debug/ContentR1Test.tscn": {
+      "sha256": "b3a958bd255ed3fb93e3bde590c785ea2e3a96a318358db0d510144f82e9037b",
+      "mtime_ns": 1792643723772072400,
+      "bytes": 183
+    },
+    "scenes/debug/ContentR21Review.tscn": {
+      "sha256": "2808ca3b5286c0501f65a9f7c8b33ef5631bc85528002e0f147a666630d60881",
+      "mtime_ns": 1792659403103049300,
+      "bytes": 190
+    },
+    "scenes/debug/ContentR21Test.tscn": {
+      "sha256": "5c2f0c3930a674119084717d20e94e8393e4ffe77f9055ff2927ab2890bda3e2",
+      "mtime_ns": 1792659403101375500,
+      "bytes": 188
+    },
+    "scenes/debug/ContentR2Review.tscn": {
+      "sha256": "abb6cb2edd9faccc107bacfca733fb671108579c5705894b6d589b9624a3f66e",
+      "mtime_ns": 1792649314148046300,
+      "bytes": 185
+    },
+    "scenes/debug/ContentR2Run.tscn": {
+      "sha256": "5d2c8bcaf9298986312231d633ef8351376607c5d6edba2cd3e519a53add8d0b",
+      "mtime_ns": 1792649180669505200,
+      "bytes": 179
+    },
+    "scenes/debug/ContentR2Test.tscn": {
+      "sha256": "e776d3709a8270604423afb3d4e24347e3295be842d02442f46607a489daf67c",
+      "mtime_ns": 1792649111559078300,
+      "bytes": 183
+    },
+    "scenes/debug/ContentR3Review.tscn": {
+      "sha256": "35fa4cb74d258e6bc6a6c8cc9d3b97503b15fdd9ac0a06312b762761fd936adb",
+      "mtime_ns": 1792664771764573200,
+      "bytes": 187
+    },
+    "scenes/debug/ContentR3Run.tscn": {
+      "sha256": "95fba7e65b38f8d558a188f0c525554f1c79d2f63012b9bd1943b3f8b8899375",
+      "mtime_ns": 1792664451193499900,
+      "bytes": 181
+    },
+    "scenes/debug/ContentR3Test.tscn": {
+      "sha256": "5cd999ee556cb5f3f91150f70d6a0bd9f64a0cb54981cdef7fc808bcc54accc8",
+      "mtime_ns": 1792662094044741800,
+      "bytes": 183
+    },
+    "scenes/debug/ContentR4Review.tscn": {
+      "sha256": "f374e92866aacfe3008345ef38bf0def3036bf65f0fbd0817c7db2439d0ff342",
+      "mtime_ns": 1792671145811258900,
+      "bytes": 193
+    },
+    "scenes/debug/ContentR4Run.tscn": {
+      "sha256": "962550b738d2faeac0bf6441600d02b6459f2194ba30e3d77be1f49d071becc2",
+      "mtime_ns": 1792671145811258900,
+      "bytes": 187
+    },
+    "scenes/debug/ContentR4Test.tscn": {
+      "sha256": "f4544c97fa5486babd1a7ac733daaec521d1cc6c9ab0e83bb181f8f2ef50e099",
+      "mtime_ns": 1792670876341800400,
+      "bytes": 183
+    },
+    "scenes/debug/EnemyArtRegressionTest.tscn": {
+      "sha256": "773c5ece93ba1529f5a8274b46c9f8d4b31429591dd07e26059910c571a73097",
+      "mtime_ns": 1783916786260486800,
+      "bytes": 222
+    },
+    "scenes/debug/FirepowerR36Test.tscn": {
+      "sha256": "f449605119f62ad8cf8051185b53890be5f7c0ecb912b84150ebf4b0fead4124",
+      "mtime_ns": 1790934566580776800,
+      "bytes": 189
+    },
+    "scenes/debug/GameplayCapTest.tscn": {
+      "sha256": "b3ec427d75f9da2faecbbc75d557444cbbf147c493285ee117a90cfb00789bec",
+      "mtime_ns": 1783588605521128200,
+      "bytes": 213
+    },
+    "scenes/debug/Hero10BalanceInstrument.tscn": {
+      "sha256": "a680ac56e30496027fa1ef916e916df39a0f6fcb931385eebf9f013a8e20f33b",
+      "mtime_ns": 1784046825285832000,
+      "bytes": 213
+    },
+    "scenes/debug/Hero10ClosureTest.tscn": {
+      "sha256": "536b2dcce38bfd26d21763c2f6418648448d7a11856256510f7f3f86199e4b1f",
+      "mtime_ns": 1784046642033379600,
+      "bytes": 201
+    },
+    "scenes/debug/IndependentStageR34Probe.tscn": {
+      "sha256": "c3153ec79d50412da94187f47f2247674b075272377739b5aa884b31d006df8a",
+      "mtime_ns": 1790927181850991700,
+      "bytes": 206
+    },
+    "scenes/debug/M1RegressionTest.tscn": {
+      "sha256": "b5430f9c9a894dc05d1d15057757f8729d3c73b41674bc16ebbef54461a508dd",
+      "mtime_ns": 1783774226915242400,
+      "bytes": 195
+    },
+    "scenes/debug/M2RegressionTest.tscn": {
+      "sha256": "3e0728b9b6861a0eeea3099bbea8c3b865ff7d92eb9fd8fa5fdf9a94decd5171",
+      "mtime_ns": 1783783076460557700,
+      "bytes": 195
+    },
+    "scenes/debug/M3RegressionTest.tscn": {
+      "sha256": "8efff2fdde500a0e587c3f61ab67b7afa78d080594f52c76c21e1ad142bbe032",
+      "mtime_ns": 1783785131839625700,
+      "bytes": 195
+    },
+    "scenes/debug/M4RegressionTest.tscn": {
+      "sha256": "f860e42783d0f9174f258a16d947515ee6c5d80ea60356b34ed447cc23470e89",
+      "mtime_ns": 1783862538346740800,
+      "bytes": 195
+    },
+    "scenes/debug/MobileInputSmokeTest.tscn": {
+      "sha256": "1d466b8f2dfd9d1e66199751a828e496e2bd27b33911385e3c465e08d5c11902",
+      "mtime_ns": 1783590051143072600,
+      "bytes": 224
+    },
+    "scenes/debug/MobileLodStressTest.tscn": {
+      "sha256": "9b2e3dfb08210912ff963df2a706f05c86d007eadd519324e204deb916fc11a0",
+      "mtime_ns": 1783774127060472700,
+      "bytes": 226
+    },
+    "scenes/debug/OrbitBladeHitRepro.tscn": {
+      "sha256": "960d5cad72bb0eb5b29ee5f5644684440a46eef8ab48032b281a195fae87386f",
+      "mtime_ns": 1783683790836763500,
+      "bytes": 206
+    },
+    "scenes/debug/PoolContractTest.tscn": {
+      "sha256": "003a99e9872b9fa432876aa172fa050d2ba37daf252a945bf7556ca2e1c2dd74",
+      "mtime_ns": 1783585945113828500,
+      "bytes": 217
+    },
+    "scenes/debug/ProjectilePerformanceR36Test.tscn": {
+      "sha256": "b4642314b3726550c0b9261d8d4fa39dae0676e7a5f319dc8cfb397ff24a27c2",
+      "mtime_ns": 1790937479934605300,
+      "bytes": 214
+    },
+    "scenes/debug/R10_5RegressionTest.tscn": {
+      "sha256": "ad14532e98f0408bb4b4dd9277b27917ddedc2811960873dc57ad3fdde371c81",
+      "mtime_ns": 1783684699324608400,
+      "bytes": 205
+    },
+    "scenes/debug/R11RegressionTest.tscn": {
+      "sha256": "8b7493ce5a63d54efcf544c852b567dcb95eb5b20d5f02df6286ce181dffe7c1",
+      "mtime_ns": 1783689269878609700,
+      "bytes": 199
+    },
+    "scenes/debug/R12RegressionTest.tscn": {
+      "sha256": "71b4398c20542ecb66db5bcdfb01f51381f679a0e2f52bbc4ae44494b117e2bf",
+      "mtime_ns": 1783696625600344300,
+      "bytes": 199
+    },
+    "scenes/debug/R13RegressionTest.tscn": {
+      "sha256": "d145675e31ddc8dd6abbc848246eda872b70e5defb92bb84ff48d70143f1beb1",
+      "mtime_ns": 1783743400274368700,
+      "bytes": 201
+    },
+    "scenes/debug/R14RegressionTest.tscn": {
+      "sha256": "05e2d24fb11f95f5054db6a68f21542146d013aab6285b5e93d811174b39562d",
+      "mtime_ns": 1783745925430159000,
+      "bytes": 199
+    },
+    "scenes/debug/R25ParallaxRegressionTest.tscn": {
+      "sha256": "a68f1c9099ddbe2caa135d925954c572f26cbca6a3eb71fc8f9516c42a09d279",
+      "mtime_ns": 1784280272591085700,
+      "bytes": 216
+    },
+    "scenes/debug/R29MenuModalTest.tscn": {
+      "sha256": "f09d3db84961af97c011f490849609607385dcfabc9237fdc01881d1bdb6a6da",
+      "mtime_ns": 1784471530430918100,
+      "bytes": 198
+    },
+    "scenes/debug/R30PlaytestFixTest.tscn": {
+      "sha256": "7fb661cb8bf987b760e72dc9c6161317319272de71ad3bb96566fb43a64d44ce",
+      "mtime_ns": 1784540789568506900,
+      "bytes": 202
+    },
+    "scenes/debug/R31EndgameGate.tscn": {
+      "sha256": "6453d69cadb1342ebdfe309a25ff2ff6c50be0783f1b7c1c2edf17962ec1e2da",
+      "mtime_ns": 1784709195670225100,
+      "bytes": 195
+    },
+    "scenes/debug/R32ExperienceTest.tscn": {
+      "sha256": "7ac68609aca859662806cd3db106e67d6b6fbd0361cca04496a04f20d345d696",
+      "mtime_ns": 1790914949869492500,
+      "bytes": 191
+    },
+    "scenes/debug/R32LootTest.tscn": {
+      "sha256": "c2bdc8155fc1cf36d7a1fcfbcd4103b8a12a1d5ac95fc0a6409e25d39c42eb87",
+      "mtime_ns": 1790914640385400900,
+      "bytes": 189
+    },
+    "scenes/debug/R33ArtProbe.tscn": {
+      "sha256": "a3fa922e25f7993616812f802fd47667aa434e1f166f02cb6f7405b71b500ea1",
+      "mtime_ns": 1790918937246868400,
+      "bytes": 179
+    },
+    "scenes/debug/R33ExperienceRegressionTest.tscn": {
+      "sha256": "649b4fd4dd00a11eafda62789f1fc140f28042e4b232f98c4f5d9410c84d365a",
+      "mtime_ns": 1790920147027854800,
+      "bytes": 210
+    },
+    "scenes/debug/R33SpriteBake.tscn": {
+      "sha256": "21fe0077741c8d17e3d5ddd06fa9aa9bc8a5a8e7085bf84fd8210f73d7308120",
+      "mtime_ns": 1790918861509491400,
+      "bytes": 181
+    },
+    "scenes/debug/R34ArtProbe.tscn": {
+      "sha256": "024591a5b81fb79d3bd07c4784a0b384b685814149a810cd1ded1bc84eb35467",
+      "mtime_ns": 1790924365520159700,
+      "bytes": 179
+    },
+    "scenes/debug/R34CampaignTransitionTest.tscn": {
+      "sha256": "b5a2eb83aac9d5593924342a9206482eacf1d4c99d325d21ebaaa5bb068bf699",
+      "mtime_ns": 1790928101021403600,
+      "bytes": 213
+    },
+    "scenes/debug/R34CompositionProbe.tscn": {
+      "sha256": "ecb2805778c380468e67f4191eb988b6e662afaf2ceb3e72bcc3e876ca811771",
+      "mtime_ns": 1790925821990672900,
+      "bytes": 195
+    },
+    "scenes/debug/R34FinalStormProbe.tscn": {
+      "sha256": "b66e5eab522067ada835cfde5ac756c91636d777e3a2d4eff866d4e78551ee95",
+      "mtime_ns": 1790927802722668000,
+      "bytes": 194
+    },
+    "scenes/debug/R34WorldMapUITest.tscn": {
+      "sha256": "f6d60051d9ff54a111797bdbbcbaf1845fb023ea610feb2c9c72177eb33d49ce",
+      "mtime_ns": 1790926988958375800,
+      "bytes": 203
+    },
+    "scenes/debug/R35EndlessCriticalTest.tscn": {
+      "sha256": "ac24d6e5854708a99347f67a0ab8836591ac631fd645cb267d90f1e8765f49ba",
+      "mtime_ns": 1790929660959966900,
+      "bytes": 207
+    },
+    "scenes/debug/R35NativeCombatReview.tscn": {
+      "sha256": "bcb21bec4b283565db488f621842ee5ed87c83000171c9b0458e0b347aad6de1",
+      "mtime_ns": 1790931091741499100,
+      "bytes": 200
+    },
+    "scenes/debug/R36LatestVisualReview.tscn": {
+      "sha256": "4c0b489833a4cf40aac57f2dca9eb9217909e039dab14c87bff3c08d04deec9b",
+      "mtime_ns": 1790936764580865200,
+      "bytes": 200
+    },
+    "scenes/debug/R36SummonIntegrationTest.tscn": {
+      "sha256": "8ad0990fd950bf27621bce3471a84a601a70d375612031a4df3ecac7d93ba077",
+      "mtime_ns": 1790935183691972800,
+      "bytes": 206
+    },
+    "scenes/debug/R36SummonRegressionTest.tscn": {
+      "sha256": "ac30e8550f2fb3da6c0fb4e03c1d6e1cde4bfe07916bc5bdcadb896ce5f2110f",
+      "mtime_ns": 1790935467457698900,
+      "bytes": 202
+    },
+    "scenes/debug/R36TouchClearanceTest.tscn": {
+      "sha256": "df0c8de7be8aba75a045431df62f91ee78510a7c112e5d7602fb73b306b99069",
+      "mtime_ns": 1790939602583492200,
+      "bytes": 198
+    },
+    "scenes/debug/R36WorldEliteTest.tscn": {
+      "sha256": "66c76542130873b00ba61f3e874c2a55b4690b4c66a0cc23c0b8eb1d48e3cdc2",
+      "mtime_ns": 1790934805374774500,
+      "bytes": 192
+    },
+    "scenes/debug/R37WorldPolishTest.tscn": {
+      "sha256": "a5866c2ad90e0e0e0737e96731cbe8e1963c41440ec748485518062ec0ccb2c0",
+      "mtime_ns": 1790954972679690600,
+      "bytes": 194
+    },
+    "scenes/debug/R38ArtGate.tscn": {
+      "sha256": "7156dbfda088dd73dbaf739cbbe64d3598c58edda4b98513f2af3902fa904d17",
+      "mtime_ns": 1790995742563924900,
+      "bytes": 177
+    },
+    "scenes/debug/R38ContentTest.tscn": {
+      "sha256": "01a827602e39882df094ef2dbc877b000fa14e1435546da86ad2a6418df5c3e8",
+      "mtime_ns": 1790995322696663700,
+      "bytes": 185
+    },
+    "scenes/debug/R38HeroWeaponTest.tscn": {
+      "sha256": "9c20ec0c33c4460ddabba1d7d1ca89266bebad78017dc87d7081e83ccd793196",
+      "mtime_ns": 1790995003063164200,
+      "bytes": 200
+    },
+    "scenes/debug/R38MapExpansionTest.tscn": {
+      "sha256": "9b73c82261951d7ddb29321df18004b57c36bcb00da9824d622e3c2f9046d6fe",
+      "mtime_ns": 1790995559878255700,
+      "bytes": 196
+    },
+    "scenes/debug/R39MobileHUDTest.tscn": {
+      "sha256": "fbe3caff38ad52d77ce555b720686e73062b8c5c75006d3350e2118d248a93a4",
+      "mtime_ns": 1791013597258832100,
+      "bytes": 198
+    },
+    "scenes/debug/R40FacingAttackTest.tscn": {
+      "sha256": "f15b92bd1ecd76f61f5d507c913fa0bddf72c45325fa7a8ec2b256578f195da4",
+      "mtime_ns": 1791165488869868500,
+      "bytes": 204
+    },
+    "scenes/debug/R41RuntimeBudgetTest.tscn": {
+      "sha256": "ac03fc788658339e2e0e38bdcd1145a1ac8b90ed5d52c98b07ea3147610c37a7",
+      "mtime_ns": 1791278271093197400,
+      "bytes": 198
+    },
+    "scenes/debug/R42FormationCapture.tscn": {
+      "sha256": "41f80300634fc0af938b0d8bf2bb7ca50fdb1ce678ad716dac9d822b9dc51305",
+      "mtime_ns": 1792032927554048600,
+      "bytes": 201
+    },
+    "scenes/debug/R42FormationTest.tscn": {
+      "sha256": "2da41eb226008a0bbfbdf82223b670120f8b3e93b2408d76fa598acf34a82518",
+      "mtime_ns": 1792032294805870300,
+      "bytes": 197
+    },
+    "scenes/debug/R43MobileTacticsTest.tscn": {
+      "sha256": "61af598769f2b07a4b918b83ae0e56e3d926d2c193e5e0aadf3671ea1f501f39",
+      "mtime_ns": 1792056804739930800,
+      "bytes": 196
+    },
+    "scenes/debug/R44LongRun.tscn": {
+      "sha256": "27b04b93ae9c08e2fb64d8390601013a39593833b038378bbd299aa95537fea6",
+      "mtime_ns": 1792066977705957800,
+      "bytes": 177
+    },
+    "scenes/debug/R44StoreTest.tscn": {
+      "sha256": "3da7cd4e0d4b1f4a856f46441eb5f8a6e71f1897742f620ff47aeb808253a060",
+      "mtime_ns": 1792066927584044500,
+      "bytes": 181
+    },
+    "scenes/debug/R5RegressionTest.tscn": {
+      "sha256": "0a6ff3d7cb3a29db6ee16ba2cba199fa2a0b02f088f6344269242bc209617e34",
+      "mtime_ns": 1783649931145779600,
+      "bytes": 217
+    },
+    "scenes/debug/R6RegressionTest.tscn": {
+      "sha256": "2e7b8fee8d29fd563cead3f37da3f5922f2243b8e27c07aa05fe8c37f5d2523c",
+      "mtime_ns": 1783652038111623500,
+      "bytes": 195
+    },
+    "scenes/debug/R7RegressionTest.tscn": {
+      "sha256": "57bc51df5cac0ad5b4f00e2b2e6e2ebf41cb4d22fc84498ccb53411c9fe72851",
+      "mtime_ns": 1783666040298884800,
+      "bytes": 195
+    },
+    "scenes/debug/ReviewR32IntegrationTest.tscn": {
+      "sha256": "84a66f310f24260d3686570403483af51e3077e299cfe759111ca052b16d6dcc",
+      "mtime_ns": 1790915032212399700,
+      "bytes": 206
+    },
+    "scenes/debug/ReviewR36RootTest.tscn": {
+      "sha256": "a04106342ed6596dcd1ad88713e535a98f1ce2b05dcc6343791fc3273798c1fb",
+      "mtime_ns": 1790936021663224200,
+      "bytes": 192
+    },
+    "scenes/debug/RewardSpecialR36Test.tscn": {
+      "sha256": "c1d916391c07f741b1c0af5eaf5804de4309103dac0d935b1239d0ac59514729",
+      "mtime_ns": 1790938648645868100,
+      "bytes": 198
+    },
+    "scenes/debug/SpawnDensityR32Test.tscn": {
+      "sha256": "7fd51e4303260597c1f30cb13678600ae9fa8dc1aad979516237628f5daa1c46",
+      "mtime_ns": 1790915858401734500,
+      "bytes": 198
+    },
+    "scenes/debug/SquadSmokeTest.tscn": {
+      "sha256": "c924637f36da861e1f4b07fbec5a86f1cef98ca488894b2afe45b2a338342f9a",
+      "mtime_ns": 1784211055089187400,
+      "bytes": 197
+    },
+    "scenes/debug/StressTest.tscn": {
+      "sha256": "f2bd140eb7c44e9e08774d6bd1bd5428bab9669f80397bc71db136da9d8e9f7b",
+      "mtime_ns": 1783584622618490000,
+      "bytes": 190
+    },
+    "scenes/debug/TrueAnimationRegressionTest.tscn": {
+      "sha256": "b96f054e762415f1f2803b740ac0140ced0023390c9083b1d12bf875e7d9cb5c",
+      "mtime_ns": 1783996979470604000,
+      "bytes": 222
+    },
+    "scenes/debug/WeaponSmokeTest.tscn": {
+      "sha256": "91c626737ae2aeb13135a05fb7735f3e989fa15f6f926eb1b85178affc6772de",
+      "mtime_ns": 1783581154924255800,
+      "bytes": 199
+    },
+    "scenes/enemies/Enemy.tscn": {
+      "sha256": "990f7489f914461186610d7fb55cd95b1f84edb32b3a3b4fbf3b48b0577d108a",
+      "mtime_ns": 1783579778999233500,
+      "bytes": 415
+    },
+    "scenes/heroes/Hero.tscn": {
+      "sha256": "bbeb5cf3bbbcf36026acb7d7da995cea1531cfc5227ccaf7c73d1a536b0d0292",
+      "mtime_ns": 1783581672182029900,
+      "bytes": 911
+    },
+    "scenes/pets/CompanionPet.tscn": {
+      "sha256": "a2537ec79720406ef3e2f3f78dc72a01085a531491d8549d1b423d37c35ee66a",
+      "mtime_ns": 1790934413945807500,
+      "bytes": 179
+    },
+    "scenes/pickups/CoinPickup.tscn": {
+      "sha256": "b2a4ffb397869c8b53e7c02546a913215855b45482981738d05352050f0eb103",
+      "mtime_ns": 1783587800953410100,
+      "bytes": 513
+    },
+    "scenes/pickups/XPGem.tscn": {
+      "sha256": "938459cf907ae5599bb92e61286a4bbf29fa7b755399f8ab5200a46d1b901397",
+      "mtime_ns": 1783587800952067600,
+      "bytes": 500
+    },
+    "scenes/player/Player.tscn": {
+      "sha256": "f76a9dffaf27dffa6fb896d09eb709f9256999900f1acb38cb910b70f9d0458b",
+      "mtime_ns": 1783581672188068800,
+      "bytes": 921
+    },
+    "scenes/projectiles/ExplosionArea.tscn": {
+      "sha256": "636c98d95052fd5d1c7da767aff98025f2b7c46c53ea9415720b6cd6621943e0",
+      "mtime_ns": 1783580788735122000,
+      "bytes": 233
+    },
+    "scenes/projectiles/HazardZone.tscn": {
+      "sha256": "44ec9e4f8e97bdd9b5cb4ed70dc87db4c10c0646d0030c93209f3bf43826b77e",
+      "mtime_ns": 1783646034548211100,
+      "bytes": 198
+    },
+    "scenes/projectiles/OrbitProjectile.tscn": {
+      "sha256": "fb8f6e3758d377ae7aadc0693446cc99f162c231e56358e09381d6f5cd17f095",
+      "mtime_ns": 1783584515209704100,
+      "bytes": 491
+    },
+    "scenes/projectiles/Projectile.tscn": {
+      "sha256": "9c82a60c3bd2dc2aba5ae86dcfb9a80044f0914ab6c7f03c7455623206648d35",
+      "mtime_ns": 1783579779001244400,
+      "bytes": 477
+    },
+    "scenes/projectiles/RiftConstruct.tscn": {
+      "sha256": "ad630bbcbfd917cee908315976dfa1abee2c9aa01a6afccb11ac92e087986d94",
+      "mtime_ns": 1784029776349466700,
+      "bytes": 223
+    },
+    "scenes/ui/ContractScreen.tscn": {
+      "sha256": "83352bdc3fd2b7e8aace6ce35dfd8bd4c12e9474440b99c758ccdaa9ea186495",
+      "mtime_ns": 1783667575333198200,
+      "bytes": 217
+    },
+    "scenes/ui/GameOverScreen.tscn": {
+      "sha256": "793a79d45a74fe71d146c057232fd46ea68fa75f27227e10e7ebf46030506f87",
+      "mtime_ns": 1783579779015788700,
+      "bytes": 218
+    },
+    "scenes/ui/HUD.tscn": {
+      "sha256": "5c0f833debdb79044bf68d2995adde342ee315bf793484e0dc4f1cfba56637a7",
+      "mtime_ns": 1783579779007268800,
+      "bytes": 184
+    },
+    "scenes/ui/LevelUpScreen.tscn": {
+      "sha256": "0e4ae7f261f379370b76d56a3874794ffab2c3d9c11b3228daf331b073cb200e",
+      "mtime_ns": 1783579779008269600,
+      "bytes": 210
+    },
+    "scenes/ui/MainMenu.tscn": {
+      "sha256": "d146cb554d21d894fb8c9e05b37f68852e018bef8f1a5782854eeaed579c146f",
+      "mtime_ns": 1783684522435418900,
+      "bytes": 179
+    },
+    "scenes/ui/RiftShopScreen.tscn": {
+      "sha256": "5d53384129afc27057b5dcbbbaa7dea830949f71f4da867ecb14ec8644fc7963",
+      "mtime_ns": 1783667575334112000,
+      "bytes": 210
+    },
+    "scenes/ui/StageVictoryScreen.tscn": {
+      "sha256": "afd9c803d080606879ed1b43b37a27f3cc65162a1e6d55be3e046d53d5b9e92e",
+      "mtime_ns": 1783667575335108900,
+      "bytes": 220
+    },
+    "scenes/ui/SummonShopScreen.tscn": {
+      "sha256": "f0ff237873a807cdf3fe7d90ededa53bbbf892a41ccd524d751d17d4b95d345d",
+      "mtime_ns": 1790934711449490900,
+      "bytes": 191
+    },
+    "scenes/ui/WorldMap.tscn": {
+      "sha256": "6d0ff20fc5f64847284e012259b20498778b147606f3d00551f0a767e6586324",
+      "mtime_ns": 1790926856608216000,
+      "bytes": 188
+    },
+    "scenes/vfx/CorpseGhost.tscn": {
+      "sha256": "e8cff6506849308368efc591927d5477de633def88c3d68be971ec72ea9de76f",
+      "mtime_ns": 1783757301250143000,
+      "bytes": 190
+    },
+    "scenes/vfx/DamageNumber.tscn": {
+      "sha256": "938c535faae6b63ddb3d18075de7aa40116db4e1af3f62a9241c2e96e62b1b4c",
+      "mtime_ns": 1783579779005269700,
+      "bytes": 208
+    },
+    "scenes/vfx/DeathBurst.tscn": {
+      "sha256": "0640327a249405f1baaf3f62c9c5377e1bf4c6d1f56c386fa5e18b81f5b3794b",
+      "mtime_ns": 1783579779006270400,
+      "bytes": 201
+    },
+    "scenes/vfx/LightningArc.tscn": {
+      "sha256": "45c346507c633b3ec9a37e1fd8979d556e6275456ec3170832ddd75d9e225f5e",
+      "mtime_ns": 1783580788737121100,
+      "bytes": 201
+    },
+    "scenes/weapons/BoomerangWeapon.tscn": {
+      "sha256": "24a6fa5c44fd30ff5d742f791cb2b01350e5cce332b58ae863368048b94cef6b",
+      "mtime_ns": 1783688790939263900,
+      "bytes": 210
+    },
+    "scenes/weapons/ChainLightningWeapon.tscn": {
+      "sha256": "899beca5a51a8a8201995b49c449d43ed2a0f27a94ab9807eab2426d5595d27c",
+      "mtime_ns": 1783580788731606100,
+      "bytes": 213
+    },
+    "scenes/weapons/EchoHymnWeapon.tscn": {
+      "sha256": "cd11cefc1eadc718fe349a7dafff10a41d91155bcb329077867af988ba700405",
+      "mtime_ns": 1783766453487139000,
+      "bytes": 203
+    },
+    "scenes/weapons/ExplosionWeapon.tscn": {
+      "sha256": "f998b9f2a9c8f361c4862fc785a30df8982f2c90def555e7fdfff2e2e413c17c",
+      "mtime_ns": 1783580788729610300,
+      "bytes": 210
+    },
+    "scenes/weapons/GrenadeLobWeapon.tscn": {
+      "sha256": "cc5e2b5d63aeb8fda57053eb68c17bb511ba9460bb8a492c321eb3353120ce56",
+      "mtime_ns": 1783766453482148700,
+      "bytes": 207
+    },
+    "scenes/weapons/HomingMissileWeapon.tscn": {
+      "sha256": "fb024f4a20098388548aa9d4a0e9135d02d51411a73788ab764f20ddda17667e",
+      "mtime_ns": 1783688790940270700,
+      "bytes": 213
+    },
+    "scenes/weapons/LinearBulletWeapon.tscn": {
+      "sha256": "a47f7a3d2024763870660b46252db1a662dd51584745b77ea49b8bd0293d7fca",
+      "mtime_ns": 1783579778998213200,
+      "bytes": 211
+    },
+    "scenes/weapons/OrbitWeapon.tscn": {
+      "sha256": "6dfb9ad4fc60d681585bec5df0c21f618b97d4dd1113e1d33286a29f8c0c92ce",
+      "mtime_ns": 1783580788727614500,
+      "bytes": 194
+    },
+    "scenes/weapons/RailLanceWeapon.tscn": {
+      "sha256": "dc9d9e60e18fca2fb9c9bad00a772a9d261740ecf4aea2361eff0c437a4a9ef9",
+      "mtime_ns": 1783766453486139700,
+      "bytes": 205
+    },
+    "scenes/weapons/RiftConstructWeapon.tscn": {
+      "sha256": "041a98302700cb2f7563bce0be9b06f412f29dae12df05944e2bbe661d82ffed",
+      "mtime_ns": 1784029776350970900,
+      "bytes": 213
+    },
+    "scenes/weapons/ShadowTwinbladesWeapon.tscn": {
+      "sha256": "4b2e1a839b2b473563bdbdb576ab3c8c3526c7bac1f26a8f127a86cc9d304746",
+      "mtime_ns": 1790994760112667600,
+      "bytes": 217
+    },
+    "scenes/weapons/SolarPiercerWeapon.tscn": {
+      "sha256": "188ba573379f6ee371a00730c6973089d4d1d6ea0bbd7793ea5810249ccfedc6",
+      "mtime_ns": 1790994760111412700,
+      "bytes": 209
+    },
+    "scenes/weapons/TidalCovenantWeapon.tscn": {
+      "sha256": "f08c2f5747b9efad8f1004c340c07e5c2d41cf47deed13c6e87c48b8025e6d6f",
+      "mtime_ns": 1790994760111412700,
+      "bytes": 211
+    },
+    "scenes/weapons/VoidNetWeapon.tscn": {
+      "sha256": "dae31df3513cdb4c5848f8f1561757d1ced8905dc24a3c1731fd07183a3bb7da",
+      "mtime_ns": 1783766453484138900,
+      "bytes": 201
+    },
+    "scripts/animation/true_animation_library.gd": {
+      "sha256": "e17a90246bef150f678e5c390f28fa353dc4c8b93d8d06aa95f477fa0e21c7f9",
+      "mtime_ns": 1790995555398921800,
+      "bytes": 5119
+    },
+    "scripts/arena/arena.gd": {
+      "sha256": "6b4e3c7fc93722c27a3a924657944c6d62f0a7d11c8a68d23fd51629540ab5eb",
+      "mtime_ns": 1792671063703025000,
+      "bytes": 12597
+    },
+    "scripts/arena/arena_background.gd": {
+      "sha256": "7722a58989361c07d780a7acdd3a74eaa1705ef8ff064eb98d388d66adbea2e2",
+      "mtime_ns": 1790934251960427800,
+      "bytes": 60
+    },
+    "scripts/arena/r33_art_probe.gd": {
+      "sha256": "cc42374cbbfd25710b52e72e97494e5988d5834df6c1df90be1f742ee10e9c5e",
+      "mtime_ns": 1790919145706335700,
+      "bytes": 5082
+    },
+    "scripts/arena/r33_ground.gdshader": {
+      "sha256": "b208911314dfaa1afcf8e0f13b7f782155cccc431589432b76efd2dd51ad5304",
+      "mtime_ns": 1790918991163035000,
+      "bytes": 737
+    },
+    "scripts/arena/r33_world_background.gd": {
+      "sha256": "7688e44c1484b1125f0f251e5628588520fc63276349ac0bd13cf7e019db0862",
+      "mtime_ns": 1790919125754566300,
+      "bytes": 16016
+    },
+    "scripts/arena/r34_art_probe.gd": {
+      "sha256": "d02f0ff3e66502d22bfce1df1a39301cdf49b399fa8ff8b1326e51614442c4fd",
+      "mtime_ns": 1790927102552286100,
+      "bytes": 5844
+    },
+    "scripts/arena/r34_composition_probe.gd": {
+      "sha256": "2f9545b1dbce6269cfc563ce588ddecd31c38abdf3d8f85c5748e3c9ddf1cd9c",
+      "mtime_ns": 1790926439941270800,
+      "bytes": 4864
+    },
+    "scripts/arena/r34_final_storm_probe.gd": {
+      "sha256": "a522dc3fc9ba1022870ac32cbd08d7d43a95511a19b7bf6a54ff68b157710cdb",
+      "mtime_ns": 1790927802721659800,
+      "bytes": 6026
+    },
+    "scripts/arena/r34_raster_ground.gdshader": {
+      "sha256": "2b5f6b4f99bf805bdb7ac70c3785c1720798d4e0f138674f315b12dab836a41c",
+      "mtime_ns": 1790926030834757700,
+      "bytes": 657
+    },
+    "scripts/arena/r34_world_background.gd": {
+      "sha256": "1c6b6b17f98ebf3be38ec54a8270b7ba3027efee03aff702651ecc2584deb1f0",
+      "mtime_ns": 1790926796546880800,
+      "bytes": 13203
+    },
+    "scripts/arena/r36_loop_world_background.gd": {
+      "sha256": "799785e5a3f0ef2e132afbf89e35e514925310951bbd8f66fd060d2f26c0c1ca",
+      "mtime_ns": 1790994651155540900,
+      "bytes": 11639
+    },
+    "scripts/arena/r36_loop_world_ground.gdshader": {
+      "sha256": "2bdfbf0476c1185ec753c76b34b04b7c74db2c0d6ad3e8b2a85969c686bfc7ba",
+      "mtime_ns": 1790954840557366300,
+      "bytes": 3427
+    },
+    "scripts/arena/r4_battle_identity.gd": {
+      "sha256": "f2e42024fa7937cf1880ca5ed90f8a2f05a1f24f9c7750ceeecd7d60406a866a",
+      "mtime_ns": 1792671063700686400,
+      "bytes": 3044
+    },
+    "scripts/arena/r4_encounter_landmarks.gd": {
+      "sha256": "1cdad9c29636dc744c2a45c6fdd8c5eaa30d1e173a137d9a35154e83715a1782",
+      "mtime_ns": 1792671063702028000,
+      "bytes": 2069
+    },
+    "scripts/arena/run_theme.gd": {
+      "sha256": "b0f92fd796519620c79aab5f5b30c6d2533b0d6d93dd4dd68d813af78e2f4c7c",
+      "mtime_ns": 1790994651155540900,
+      "bytes": 1082
+    },
+    "scripts/autoload/achievement_progress.gd": {
+      "sha256": "e5c29af0a9ba7408b8a9767dccb7a4c15491c31c5f6afd44a3437e7e84c06352",
+      "mtime_ns": 1792661812200536400,
+      "bytes": 5354
+    },
+    "scripts/autoload/audio_manager.gd": {
+      "sha256": "99339b539f87ed6d596ec5502a483fa0a861f2b1bf85dac5e569d204d30628fd",
+      "mtime_ns": 1792661812201552600,
+      "bytes": 15637
+    },
+    "scripts/autoload/entity_factory.gd": {
+      "sha256": "b04b99b88183e6b064c39ac9f8c992f86026d288d7726084e8b73857a1908a25",
+      "mtime_ns": 1792671063703348200,
+      "bytes": 48464
+    },
+    "scripts/autoload/game_manager.gd": {
+      "sha256": "88527592584a10648673de9790de64f9a71e7bdeda770d799da8842c90e743ae",
+      "mtime_ns": 1792671434904654800,
+      "bytes": 77032
+    },
+    "scripts/autoload/meta_progress.gd": {
+      "sha256": "977736c6a14c66e72b69fb3f15c33260b509987fbf89780f171d9a3233edf02c",
+      "mtime_ns": 1792670411506327500,
+      "bytes": 19609
+    },
+    "scripts/autoload/player_settings.gd": {
+      "sha256": "4b6ec4f896e6c0dc08eba4a0f734667d3a7709a450d7e2e84380b3a6ceec9f8a",
+      "mtime_ns": 1792661812200536400,
+      "bytes": 4047
+    },
+    "scripts/debug/arena_instrumentation_run.gd": {
+      "sha256": "8c6f5d21bc58ee5476448ff29e932fc47ae0505b66d377b00a4ade3cdf2b836f",
+      "mtime_ns": 1784191645579843400,
+      "bytes": 9776
+    },
+    "scripts/debug/attack_vfx_r34_pool_test.gd": {
+      "sha256": "a155be703cd2f9721c7de347bf37cf498469f2c157232b948f8b32c57ea3118b",
+      "mtime_ns": 1790935114432615600,
+      "bytes": 11071
+    },
+    "scripts/debug/auto_channel_r36_test.gd": {
+      "sha256": "be1afe5fb7a505d023d07749afa40f181116c61cc38f33f45ad668920154cf30",
+      "mtime_ns": 1790934978716526600,
+      "bytes": 4364
+    },
+    "scripts/debug/balance_mock_run.gd": {
+      "sha256": "41097dc878dc69097f267cb35a024e6a6f95636751a771be6fcc9ec2b81978fc",
+      "mtime_ns": 1784191645581348700,
+      "bytes": 13113
+    },
+    "scripts/debug/captain_combo_channel_r35_test.gd": {
+      "sha256": "9f21408fca5a135e86f9866f1232a95e8ba2d9d59f43791a1be62bb33ee3b740",
+      "mtime_ns": 1790934978715536600,
+      "bytes": 14385
+    },
+    "scripts/debug/combat_polish_r37_test.gd": {
+      "sha256": "4ece3f0b0178263c9210ace4c33753c8b6b7a5de0e9d44169e37e1482c121968",
+      "mtime_ns": 1790955572429030800,
+      "bytes": 12744
+    },
+    "scripts/debug/combat_r32_regression_test.gd": {
+      "sha256": "249c9128fcae22cc195a9880663c76dd828e5a75c4256438d1da17a653446ac5",
+      "mtime_ns": 1790929423894023000,
+      "bytes": 10682
+    },
+    "scripts/debug/combat_r33_regression_test.gd": {
+      "sha256": "8490fe41bdb8628cad5986c1cbea8fc144dd3cf3f2a9c9257bf90c7c23478f1f",
+      "mtime_ns": 1790935282341372100,
+      "bytes": 12221
+    },
+    "scripts/debug/content_r1_navigation_test.gd": {
+      "sha256": "d23a8ea80a9a1b2f403e04b1b65a84bb0c2498756a68cfbfa5e182bbfcda01fc",
+      "mtime_ns": 1792646704895165100,
+      "bytes": 3592
+    },
+    "scripts/debug/content_r1_review.gd": {
+      "sha256": "54e026dd1b9bd368ea00ffb5cfb9994c84f1ebdb7244ee81cb9fb09a85f1f210",
+      "mtime_ns": 1792647548119026900,
+      "bytes": 4007
+    },
+    "scripts/debug/content_r1_test.gd": {
+      "sha256": "4f77d71005dba17da7fcf83eec8169abd405f57e66cd6e0a79b17fc85fef40e4",
+      "mtime_ns": 1792660061096280200,
+      "bytes": 12111
+    },
+    "scripts/debug/content_r2_1_review.gd": {
+      "sha256": "820ea17a4110b87bd6063aec94014a2f6d416682524d0ef05eb1716a400d933d",
+      "mtime_ns": 1792660303441008700,
+      "bytes": 14248
+    },
+    "scripts/debug/content_r2_review.gd": {
+      "sha256": "b105ecd86c2a289d79dee20f5a4f045eac22841169fd23441c239ee2136c60f1",
+      "mtime_ns": 1792650514817326600,
+      "bytes": 5461
+    },
+    "scripts/debug/content_r2_run.gd": {
+      "sha256": "680d02e93d59ef66e4c8bc0bbcbbe5d2218853cc09787e36be93f7fe67a6aacb",
+      "mtime_ns": 1792651390425555500,
+      "bytes": 5284
+    },
+    "scripts/debug/content_r2_test.gd": {
+      "sha256": "7b35f29bf55b02dd63e1b9525cb1a9ad40c52711beb16dcea3f4ce00c96a03f1",
+      "mtime_ns": 1792659296253855000,
+      "bytes": 19601
+    },
+    "scripts/debug/content_r3_review.gd": {
+      "sha256": "71cad71106b1f7555b08d03f2420beed382961e1f99e302d330497e3bd23877f",
+      "mtime_ns": 1792666470100263800,
+      "bytes": 8226
+    },
+    "scripts/debug/content_r3_run.gd": {
+      "sha256": "f1ba9811d95aa4fb6d666d08e560b4e0911726170336e9775c978a2ac35bd9e3",
+      "mtime_ns": 1792665728794455700,
+      "bytes": 7111
+    },
+    "scripts/debug/content_r3_test.gd": {
+      "sha256": "36894376d64357fa4e61683cdfc10784096b47b0a6d0f924fd557e72019ad510",
+      "mtime_ns": 1792666470099032000,
+      "bytes": 32432
+    },
+    "scripts/debug/content_r4_pilot.gd": {
+      "sha256": "c883e8a0bb1711e493fcdec0df2c57d824d8dda221ea0ddcbf5feda481be24be",
+      "mtime_ns": 1792671145810221700,
+      "bytes": 6012
+    },
+    "scripts/debug/content_r4_review.gd": {
+      "sha256": "0810816d6ff6515f857a19c84f11fe0caee6f3f9654d8501e117128bcb37d69f",
+      "mtime_ns": 1792671145811258900,
+      "bytes": 8773
+    },
+    "scripts/debug/content_r4_run.gd": {
+      "sha256": "9272e0bc446e8f97c80c6a0d3e2e3ad018642b0e47838632556279d590f105dc",
+      "mtime_ns": 1792671145810221700,
+      "bytes": 7246
+    },
+    "scripts/debug/content_r4_test.gd": {
+      "sha256": "4653f233e128b7db6ec6621760d934fa0c551a775af025ade573f5b5b7d396e5",
+      "mtime_ns": 1792671481208687700,
+      "bytes": 7611
+    },
+    "scripts/debug/enemy_art_regression_test.gd": {
+      "sha256": "5aaf446b8392993f0c42d0471459e737f04a8e54065ea6709a212a1a64193a20",
+      "mtime_ns": 1791276657002768800,
+      "bytes": 7743
+    },
+    "scripts/debug/firepower_r36_test.gd": {
+      "sha256": "448ce7a745659791e34b295f20636c7f6be542638871d11d267a7a2d7e99dd91",
+      "mtime_ns": 1790934724224537500,
+      "bytes": 8502
+    },
+    "scripts/debug/gameplay_cap_test.gd": {
+      "sha256": "0eb4cad85e84689992e5e7ef11a82b6f9260f0685e75f5301e2f97a5123928b1",
+      "mtime_ns": 1790920573953007100,
+      "bytes": 5247
+    },
+    "scripts/debug/hero10_balance_instrument.gd": {
+      "sha256": "6299db605cf4600d2d0c535ba365bbc2418dd1997174e97868652ca80fd39d3e",
+      "mtime_ns": 1784195230511058000,
+      "bytes": 7486
+    },
+    "scripts/debug/hero10_closure_test.gd": {
+      "sha256": "b207d02daeebe2d6eb68122bd18c39439f5e4f4ca5ebd9654556f76644589059",
+      "mtime_ns": 1784046727941224600,
+      "bytes": 8571
+    },
+    "scripts/debug/independent_stage_r34_probe.gd": {
+      "sha256": "d4f9b728ffef4471f7703e07c1d9c6426a6538ece14c75e5f8b5e8a5142f763a",
+      "mtime_ns": 1790996377583816200,
+      "bytes": 9727
+    },
+    "scripts/debug/m1_regression_test.gd": {
+      "sha256": "8d18b76c5c5fabde1cd453b22e150946d6103e9870d0d7887567b5089a14a545",
+      "mtime_ns": 1783904671982925900,
+      "bytes": 20438
+    },
+    "scripts/debug/m2_regression_test.gd": {
+      "sha256": "22852d5c42adedf0d09603477f5e2b40f2ef94f610164c29cd400c92dce48478",
+      "mtime_ns": 1783783698108843600,
+      "bytes": 9477
+    },
+    "scripts/debug/m3_regression_test.gd": {
+      "sha256": "7b8dbd526b0a67a9f2d4e0dc4121b86be4e45a2830cc01929c23a8fdf9f1237b",
+      "mtime_ns": 1783785156291009000,
+      "bytes": 2615
+    },
+    "scripts/debug/m4_regression_test.gd": {
+      "sha256": "f1cfe0b5602b7d2c190eaffaadd0dff0fcaa6712da909805b72013c7d0c9551b",
+      "mtime_ns": 1783997162224025900,
+      "bytes": 9254
+    },
+    "scripts/debug/mobile_input_smoke_test.gd": {
+      "sha256": "9150edc3c88ac16ab222caefeeb39689669ce63d391b6497cce893f8dcfaa5d8",
+      "mtime_ns": 1783905008203392400,
+      "bytes": 6594
+    },
+    "scripts/debug/orbit_blade_hit_repro.gd": {
+      "sha256": "9e4878c30a951865d1d30699f20cea8a303dc9cbff7011c017ccf3079b76ef87",
+      "mtime_ns": 1783689296462994700,
+      "bytes": 4292
+    },
+    "scripts/debug/pool_contract_test.gd": {
+      "sha256": "60fce1dfcbb3feefcc418ff5a77e94c4738c8eb944dfbe90ca585f9103c4b7bf",
+      "mtime_ns": 1790920573951566300,
+      "bytes": 7612
+    },
+    "scripts/debug/projectile_performance_r36_test.gd": {
+      "sha256": "4f0c806758c7c863ab86bbd4292c2bad189a84f9f3be11188013941dbcbe9461",
+      "mtime_ns": 1790937502160251500,
+      "bytes": 3476
+    },
+    "scripts/debug/r10_5_regression_test.gd": {
+      "sha256": "c626079e008bd42a21775548f4c225c26602e5ff7401393d273ad6b06d404717",
+      "mtime_ns": 1790927518372318000,
+      "bytes": 11754
+    },
+    "scripts/debug/r11_regression_test.gd": {
+      "sha256": "75bcf9d9b85e55e3fe2b9cb28b0f3d6cd9fac7bac1321f8e107db80c8dafb7aa",
+      "mtime_ns": 1784004250832850500,
+      "bytes": 16892
+    },
+    "scripts/debug/r12_regression_test.gd": {
+      "sha256": "02bb336ba0a48f65d0c500819ab3ba5f68fc98752a76b7a8e3ed7ba2082e2831",
+      "mtime_ns": 1783996911293248800,
+      "bytes": 5007
+    },
+    "scripts/debug/r13_regression_test.gd": {
+      "sha256": "6f81665442707414256d72f00c73023e96bcb606f02de11a9cbb8f8f7c8d612b",
+      "mtime_ns": 1790921106887799700,
+      "bytes": 7895
+    },
+    "scripts/debug/r14_regression_test.gd": {
+      "sha256": "6c4c1e24bf07a16d79f9479d3c4b0b9a1f161810a185ab63081af15b1084ebd7",
+      "mtime_ns": 1792670765397578600,
+      "bytes": 46963
+    },
+    "scripts/debug/r25_parallax_regression_test.gd": {
+      "sha256": "fcf6837c5d4024a5f93ad63b1905e68fb4ebb999445f02d2bafe8ec07d0522fc",
+      "mtime_ns": 1784280272590086000,
+      "bytes": 3465
+    },
+    "scripts/debug/r29_menu_modal_test.gd": {
+      "sha256": "e40d1ef2a50f780f26406c492015cdd11ff418a1ef67125bb68a3202463b5476",
+      "mtime_ns": 1790996285211139000,
+      "bytes": 9516
+    },
+    "scripts/debug/r30_playtest_fix_test.gd": {
+      "sha256": "98bfce5647fad2c73df1f1e637fef20acc8a89702340b77534ca706ccf31471d",
+      "mtime_ns": 1784541089495476100,
+      "bytes": 6653
+    },
+    "scripts/debug/r31_endgame_gate.gd": {
+      "sha256": "436987c6e21950c34dd93420bab60649e228fb294d40f60ebac90a25dff3f47e",
+      "mtime_ns": 1790928003361781800,
+      "bytes": 11678
+    },
+    "scripts/debug/r31_endgame_qa_hook.gd": {
+      "sha256": "7a25f1ac04b4a3387a9ffea728c25deaaca3f19d52b8586c399f587c9f84a8d8",
+      "mtime_ns": 1792651294866755600,
+      "bytes": 4503
+    },
+    "scripts/debug/r32_experience_test.gd": {
+      "sha256": "d4b36ef3fd3bb21d7cc07e90088e1537ff32ea0e21d5f003396435d1d89f6b9b",
+      "mtime_ns": 1790915632876247900,
+      "bytes": 4322
+    },
+    "scripts/debug/r32_loot_test.gd": {
+      "sha256": "cb527cfc6fd06b02f52b46a143b01ce9a9738a7404a76692ad864eaa3628e9ff",
+      "mtime_ns": 1790926826922710400,
+      "bytes": 15090
+    },
+    "scripts/debug/r33_experience_regression_test.gd": {
+      "sha256": "fd57f2d385398e27d320a97eb36d9f07f99eae2779a7c7b03ed7adbe66a3c41b",
+      "mtime_ns": 1790920147027854800,
+      "bytes": 2200
+    },
+    "scripts/debug/r33_sprite_bake.gd": {
+      "sha256": "01fa780b41036ae34d710dbabb078cdb8166318a36c2cb0dbb888ba6be67d72c",
+      "mtime_ns": 1790918861509491400,
+      "bytes": 1278
+    },
+    "scripts/debug/r34_campaign_transition_test.gd": {
+      "sha256": "2f26e9ceecab7705962dc5277fc84c7353fe31660403261161930ecea5dcd2ab",
+      "mtime_ns": 1792651294866755600,
+      "bytes": 11910
+    },
+    "scripts/debug/r34_world_map_ui_test.gd": {
+      "sha256": "1776c1aac237a4f5ecd52349ce8849b991594728897efab33247a26161fb1c27",
+      "mtime_ns": 1790995126019299500,
+      "bytes": 4211
+    },
+    "scripts/debug/r35_endless_critical_test.gd": {
+      "sha256": "5dcd536663baf12ac8ac77292f96153848548ddc4f8aa1f8009b8a2c39cdca75",
+      "mtime_ns": 1792651294866755600,
+      "bytes": 23852
+    },
+    "scripts/debug/r35_native_combat_review.gd": {
+      "sha256": "6aedd131cb63f83df4d9c5a679807ca4b84955d41bfa95fc5b21ba8ad7041da6",
+      "mtime_ns": 1790931941068504200,
+      "bytes": 11598
+    },
+    "scripts/debug/r36_camera_diagnostic.gd": {
+      "sha256": "bfec52eaebf7b774889c577fc67130b8d501f69791b234a5fbed5f2d1fcc88dd",
+      "mtime_ns": 1790957362335980100,
+      "bytes": 774
+    },
+    "scripts/debug/r36_latest_visual_review.gd": {
+      "sha256": "9b4d6eb27e4f5b89b372ab2a19a7a0afa0fb752db501d0505872503de90798b9",
+      "mtime_ns": 1790936764579724800,
+      "bytes": 4914
+    },
+    "scripts/debug/r36_summon_integration_test.gd": {
+      "sha256": "c773d158e64ef3f4d40b6b9887d9998b4f0b8aa4599e227f84229a1c8c049c70",
+      "mtime_ns": 1790935485264358400,
+      "bytes": 3686
+    },
+    "scripts/debug/r36_summon_regression_test.gd": {
+      "sha256": "8948f902691b6fee0ffe844210171f3ccba87ae1444d361b5b699ee13ffcfbb5",
+      "mtime_ns": 1790938301615191200,
+      "bytes": 13973
+    },
+    "scripts/debug/r36_touch_clearance_test.gd": {
+      "sha256": "7cf10d91a9d3b322593d5537c1d7818cd164235788397ed55cc80bf3f9c14cb3",
+      "mtime_ns": 1791013597259333300,
+      "bytes": 4660
+    },
+    "scripts/debug/r36_world_elite_test.gd": {
+      "sha256": "badfb990838cba1efc55285ed5fc7586fee247c1c50e1760cd6cf079dc732feb",
+      "mtime_ns": 1790936666243718200,
+      "bytes": 4300
+    },
+    "scripts/debug/r37_world_polish_test.gd": {
+      "sha256": "821342bb541dc45b4c40f6ce23c058a97c1c8bd5a476b3d960346b704c42a968",
+      "mtime_ns": 1790954972679690600,
+      "bytes": 4081
+    },
+    "scripts/debug/r38_art_gate.gd": {
+      "sha256": "0be67488281a67255373b0af31c619a7e874fe2c04f025a45ff1c01c2e432ca9",
+      "mtime_ns": 1790995742563924900,
+      "bytes": 5094
+    },
+    "scripts/debug/r38_content_test.gd": {
+      "sha256": "3a16c65f7c2be3b4dd5f948548a7252a9ca0356ea225538faf1e7ef6632b6a1c",
+      "mtime_ns": 1792650378716474300,
+      "bytes": 14529
+    },
+    "scripts/debug/r38_hero_weapon_test.gd": {
+      "sha256": "2e097370aefedc79e6d6bb39b398ac5bf67e936d27d82c29305e3a5c59fedc44",
+      "mtime_ns": 1790995895430376400,
+      "bytes": 17578
+    },
+    "scripts/debug/r38_map_expansion_test.gd": {
+      "sha256": "c564eadea88d1fcc1c9a8941205fb5b467cf67756110399c66730bc0d54bd2d6",
+      "mtime_ns": 1790995559877228400,
+      "bytes": 3451
+    },
+    "scripts/debug/r39_mobile_hud_test.gd": {
+      "sha256": "302534341c7202e7682f6818280afcfa2622ac53ff4b33db5154719b6e41035b",
+      "mtime_ns": 1792659296255155500,
+      "bytes": 15366
+    },
+    "scripts/debug/r40_facing_attack_test.gd": {
+      "sha256": "10c0d72760a61911a4c63ac3fe4c3f82847853338d758099b82cdfae27808657",
+      "mtime_ns": 1791166899642806100,
+      "bytes": 22800
+    },
+    "scripts/debug/r41_runtime_budget_test.gd": {
+      "sha256": "11dc2d6d61622e934b2d168c6f43f0fe3ac9d898247fa78530817eb1cb2584e4",
+      "mtime_ns": 1791278271092682500,
+      "bytes": 2109
+    },
+    "scripts/debug/r42_formation_capture.gd": {
+      "sha256": "4cd2b2e0b4a8541b48ad651f6ac633e580a3989aa8ad347d0ea50a64b472139d",
+      "mtime_ns": 1792032924245994700,
+      "bytes": 2103
+    },
+    "scripts/debug/r42_formation_test.gd": {
+      "sha256": "822433f4fa3efc0f2a81cc1e8ba04a28a6b83dc44dd5b276d79b131b15a589fa",
+      "mtime_ns": 1792659296253855000,
+      "bytes": 12914
+    },
+    "scripts/debug/r43_mobile_tactics_test.gd": {
+      "sha256": "b3ca2c43359adacabf2cea324b9b6d70995987efb69c6709bbcf5ee3b18b9828",
+      "mtime_ns": 1792659296253855000,
+      "bytes": 15564
+    },
+    "scripts/debug/r44_long_run.gd": {
+      "sha256": "497908a397b373646820bfebd68fdf6d8af80f5346202c7fd5087481c1f53aef",
+      "mtime_ns": 1792067212349007300,
+      "bytes": 4955
+    },
+    "scripts/debug/r44_store_test.gd": {
+      "sha256": "6de0a08706b9a7186cfb7fa3f70bf3041d3e36d86b9dc57528d4d1d628bacad9",
+      "mtime_ns": 1792650084773137000,
+      "bytes": 10075
+    },
+    "scripts/debug/r5_regression_test.gd": {
+      "sha256": "fe6abd4cb162b7786e720532d92e93d6e462ba825c8799c460a01dcff5ec04cc",
+      "mtime_ns": 1784003888795971000,
+      "bytes": 14085
+    },
+    "scripts/debug/r6_regression_test.gd": {
+      "sha256": "2d72c67ad90810da6de30ee033b45dbc5bae9ad7e7f8d31ac6734f8c8fabf386",
+      "mtime_ns": 1783652136323411600,
+      "bytes": 10085
+    },
+    "scripts/debug/r7_regression_test.gd": {
+      "sha256": "25fcd5c91a1ac0231fc2222e975c82dcbf7b4da50e4bfd52e26f10a8007023e0",
+      "mtime_ns": 1783996882599796300,
+      "bytes": 30453
+    },
+    "scripts/debug/review_r32_integration_test.gd": {
+      "sha256": "6445af0e475ed3a5418d070442679ad34442b2b2166d6eecb40749fb9916e031",
+      "mtime_ns": 1790957362336976800,
+      "bytes": 9774
+    },
+    "scripts/debug/review_r36_root_test.gd": {
+      "sha256": "80a3e030d304a64e44346afc2e333c4c0805bc798d03e152c9111218c72ce499",
+      "mtime_ns": 1790936485750176300,
+      "bytes": 5616
+    },
+    "scripts/debug/reward_special_r36_test.gd": {
+      "sha256": "0981e569a25587821718a020d0e3c706932ac0e29edec663af768ad1a4d3a30c",
+      "mtime_ns": 1790938717176974000,
+      "bytes": 8662
+    },
+    "scripts/debug/spawn_density_r32_test.gd": {
+      "sha256": "dfe0b246f00563ee7150fac72731da85758e6da463583f82cb19595e1151314b",
+      "mtime_ns": 1790936666244860800,
+      "bytes": 7552
+    },
+    "scripts/debug/squad_smoke_test.gd": {
+      "sha256": "d094d67737d016ea4fdf2f891a4518eff170baa7f73224e2057ddfafac84898a",
+      "mtime_ns": 1784211055091702900,
+      "bytes": 52
+    },
+    "scripts/debug/stress_test.gd": {
+      "sha256": "0f49059083d7227770871057d7ecc47efba562d1d782ae215d8a77fc3d653587",
+      "mtime_ns": 1784196021380817700,
+      "bytes": 28406
+    },
+    "scripts/debug/true_animation_regression_test.gd": {
+      "sha256": "cb004497cc0911699a8c1421a38a17b4d009570285c6bfb22545850b5eb1d296",
+      "mtime_ns": 1784055481419846200,
+      "bytes": 18711
+    },
+    "scripts/debug/weapon_smoke_test.gd": {
+      "sha256": "af5fa00ade237d29212a29c01854d83df59eb839ad88ff445cc1a00315835760",
+      "mtime_ns": 1784030496336859500,
+      "bytes": 4701
+    },
+    "scripts/enemies/enemy.gd": {
+      "sha256": "b4b138e2dd67cb039f9a4d84b3f6acdfd26bbca83b9f2efd096205e4de94d68a",
+      "mtime_ns": 1792661598483684500,
+      "bytes": 77199
+    },
+    "scripts/enemies/enemy_spawner.gd": {
+      "sha256": "39362f50ebeba3400d2059fcd5665a9ed492df4f6aeeeda83162a1f5330f3833",
+      "mtime_ns": 1792648969498828500,
+      "bytes": 21569
+    },
+    "scripts/heroes/follower_controller.gd": {
+      "sha256": "f1eeb7887cf1d096f4c244bd9090a8b75e64e643d47ffacbeb079ebfe33a8edb",
+      "mtime_ns": 1792032182004266400,
+      "bytes": 1411
+    },
+    "scripts/heroes/hero.gd": {
+      "sha256": "29c5388289f8c6440191ab92e5b680c8021d498249a2b1e27dc96e6b4b2e5af6",
+      "mtime_ns": 1792661766371304000,
+      "bytes": 52626
+    },
+    "scripts/heroes/player_controller.gd": {
+      "sha256": "7db0ee65feab256ce44ce1d1a1c96392449e7f046355353f1b81eb2243fca561",
+      "mtime_ns": 1792032182012099400,
+      "bytes": 1806
+    },
+    "scripts/heroes/squad_manager.gd": {
+      "sha256": "890f3f4977ffe34f42cd6743596372996e448ca8e0ed391755b5937fa8e16028",
+      "mtime_ns": 1792662802055718600,
+      "bytes": 42106
+    },
+    "scripts/pets/companion_pet.gd": {
+      "sha256": "208b34d60a8ccd65e69112d64a7e68643cbf4c04f81a1d84cd560731a2cb0627",
+      "mtime_ns": 1792650367360281200,
+      "bytes": 8542
+    },
+    "scripts/pets/pet_fireball.gd": {
+      "sha256": "ff1f07c571e4c66b4d739c05fb39092b14423da3bbac8fa170f03d971ed8368b",
+      "mtime_ns": 1792650323299335300,
+      "bytes": 2421
+    },
+    "scripts/pets/summoned_skill.gd": {
+      "sha256": "4c826c637bcbbdd343c92f36a73a749c1f7a55f14bbe2b5f4f499edda7bbbdf5",
+      "mtime_ns": 1790936266903828800,
+      "bytes": 5046
+    },
+    "scripts/pickups/equipment_pickup.gd": {
+      "sha256": "08a2aeb64479da455ff8a87937ff10672835d7490bddbc06537fb3efe7866a3d",
+      "mtime_ns": 1792652423166246700,
+      "bytes": 5958
+    },
+    "scripts/pickups/pickup.gd": {
+      "sha256": "1e4ced08922cf5a817304b1566e3db7dafac504fb50b702855ebb240451de1d3",
+      "mtime_ns": 1792671063704351400,
+      "bytes": 8670
+    },
+    "scripts/player/player.gd": {
+      "sha256": "c4861c2a9adad0c6c49699cb29acfe9012af3f3e04e709ea3a6d932e980aff8b",
+      "mtime_ns": 1783581672186076100,
+      "bytes": 39
+    },
+    "scripts/player/player_visual.gd": {
+      "sha256": "32bbba692cd48a725de430d86666ae136b881934a11a83b869de524d33fba895",
+      "mtime_ns": 1791165348937421100,
+      "bytes": 15226
+    },
+    "scripts/pooling/node_pool.gd": {
+      "sha256": "4fa578c2bafcd40e254bab1d02dfbb69941ff30fcafe2e986904baa2e9fa84ee",
+      "mtime_ns": 1790929824963755600,
+      "bytes": 3773
+    },
+    "scripts/projectiles/explosion_area.gd": {
+      "sha256": "213b46a310568a699094aca771f75789b55dea87150b05dce789df19952f19be",
+      "mtime_ns": 1790937429586315400,
+      "bytes": 9071
+    },
+    "scripts/projectiles/hazard_zone.gd": {
+      "sha256": "d18428ecfc208e871a6fde91dc2f2b0808a3a1978b558d0c9be7a7a43ccbfc74",
+      "mtime_ns": 1792648930540261900,
+      "bytes": 6558
+    },
+    "scripts/projectiles/orbit_projectile.gd": {
+      "sha256": "3ca70da57c9b76ffbcb77a35c2933ca329d2037e9482dedf5cb701f57d3e702e",
+      "mtime_ns": 1792648930539746800,
+      "bytes": 12481
+    },
+    "scripts/projectiles/projectile.gd": {
+      "sha256": "56aa66be6053a44d061e2c985034d5f7ab670b178f344ebb15ffb8f82878dd64",
+      "mtime_ns": 1792648930539211900,
+      "bytes": 34848
+    },
+    "scripts/projectiles/rift_construct.gd": {
+      "sha256": "368dde9bc216b9e8dd110f66f7747c961c8339959cb2cf96f9c08ec2837f83a4",
+      "mtime_ns": 1792648930539746800,
+      "bytes": 7331
+    },
+    "scripts/resources/hero_data.gd": {
+      "sha256": "57540356be8c3b3b2ddec44cca8329f309995edbda8eeabe2e88075fdeeebfb1",
+      "mtime_ns": 1792067212347013800,
+      "bytes": 825
+    },
+    "scripts/resources/r38_weapon_data.gd": {
+      "sha256": "8ffec2baa32879f0e563f43111dd875290a9fac1a6a59a3555f4c3ec0bbc5bb4",
+      "mtime_ns": 1790995079561481400,
+      "bytes": 4203
+    },
+    "scripts/resources/squad_data.gd": {
+      "sha256": "92251bbd21672449062b592772fcfd1a19289b0fce846bf8bf2c0460906f168c",
+      "mtime_ns": 1783766711939097900,
+      "bytes": 357
+    },
+    "scripts/resources/weapon_catalog.gd": {
+      "sha256": "9d3d4c8769e3f78de5ee82379a1ed2c393b3fa2a3f6cba44e64329b9f921fa9d",
+      "mtime_ns": 1783581039399387100,
+      "bytes": 345
+    },
+    "scripts/resources/weapon_data.gd": {
+      "sha256": "25a5e07519e365c53b727c4aa3ef5fb4ddfb3a5fa31f2e58c8d051cf18a7facb",
+      "mtime_ns": 1792067212348010300,
+      "bytes": 17181
+    },
+    "scripts/services/art_resources.gd": {
+      "sha256": "1c3fce7cf7d36e4d3fa8cb4463c22567c27f8463b9aa0df454622c99ed839175",
+      "mtime_ns": 1783757346370392900,
+      "bytes": 1950
+    },
+    "scripts/services/coin_summon_director.gd": {
+      "sha256": "3cecbe4490ceab8664182de6e7f366c0f624388d90ba7bdf7bdf2c3e3d296d49",
+      "mtime_ns": 1790938301614153600,
+      "bytes": 11701
+    },
+    "scripts/services/critical_strike_resolver.gd": {
+      "sha256": "e178fc351e3e2feebf3092d21be29b75a692b2e945e0427b5ef4f38b8c007c0c",
+      "mtime_ns": 1790928873376834900,
+      "bytes": 515
+    },
+    "scripts/services/encounter_pressure.gd": {
+      "sha256": "afcd0c93aaf4e431afcebbc4d341961786ac11b910e1b630a56d71385042fc4f",
+      "mtime_ns": 1792670827699740100,
+      "bytes": 5745
+    },
+    "scripts/services/enemy_spatial_index.gd": {
+      "sha256": "9f6ba036e1eb9663b6b523f9faff3e9e6d36614bb2ed90752b57918ac14b4a8f",
+      "mtime_ns": 1783646653229454200,
+      "bytes": 3888
+    },
+    "scripts/services/equipment_catalog.gd": {
+      "sha256": "1093f47cc79fd9ff635927a41a893946aa833b44ffe61fea4e002906a1de755e",
+      "mtime_ns": 1790914717900497600,
+      "bytes": 3415
+    },
+    "scripts/services/formation_relay.gd": {
+      "sha256": "2a114395dfa7471922cc938b3ca858f3282d3560356b8f6ffc114e5652bad4b0",
+      "mtime_ns": 1792670827699740100,
+      "bytes": 12222
+    },
+    "scripts/services/loop_world_topology.gd": {
+      "sha256": "d061fd6e8f621cf054caacf0e87d8bcdb0050b3dbd5ce2b0365e258fc5a8993c",
+      "mtime_ns": 1790935801730979500,
+      "bytes": 3156
+    },
+    "scripts/services/loot_director.gd": {
+      "sha256": "1f0d608f1f6cfdbfe16c71dafb4ca303da07dec50049e1106074eff32fee24c3",
+      "mtime_ns": 1790919467708777500,
+      "bytes": 9301
+    },
+    "scripts/services/mobile_tuning.gd": {
+      "sha256": "1afce66b5b39531ad051367c15963e385014b904de16eb3258cca6a817a6c1b5",
+      "mtime_ns": 1792671063704351400,
+      "bytes": 24396
+    },
+    "scripts/services/pet_catalog.gd": {
+      "sha256": "c6060c95315f25aad13e0c060079342db16b6590ff966c9b83d8afd0bcf2b594",
+      "mtime_ns": 1790934159736797100,
+      "bytes": 2579
+    },
+    "scripts/services/qa_profile.gd": {
+      "sha256": "e2e13f161e3f401081c69b661a23c696cf10645237d5c0d9695ddbcff6141c14",
+      "mtime_ns": 1792661812197262300,
+      "bytes": 518
+    },
+    "scripts/services/r33_sprite_painter.gd": {
+      "sha256": "ffdcaa5a137d3a10dd246abe07d341c0115e0d273a2e7c89a4e63cd01babe7e4",
+      "mtime_ns": 1790920992519580600,
+      "bytes": 10308
+    },
+    "scripts/services/r38_enemy_catalog.gd": {
+      "sha256": "df3cc083e38721568483727a57ba3998202b58595ab91042fe67d620c073de07",
+      "mtime_ns": 1790994906765036700,
+      "bytes": 3227
+    },
+    "scripts/services/skill_catalog.gd": {
+      "sha256": "186beefa7c4fecd9b0fe0ddabc9ecbe8d96010215d496d2ef027aef9d85d763c",
+      "mtime_ns": 1790995125540819400,
+      "bytes": 3241
+    },
+    "scripts/services/special_elite_catalog.gd": {
+      "sha256": "7712b6a0e03ebd811fb2e551b0584e09bce0d431671968b4cbd18b834f9c548a",
+      "mtime_ns": 1790934166472404300,
+      "bytes": 2526
+    },
+    "scripts/services/sprite_loader.gd": {
+      "sha256": "a82c61b8aeb50826fe7b506323c6644f98a5279f9ab282ce5d35c1865da4cebd",
+      "mtime_ns": 1791276480839956300,
+      "bytes": 3000
+    },
+    "scripts/services/stage_catalog.gd": {
+      "sha256": "7067185fc22ab5b8c6651b07649ac2a2e5bedf5224833a784a452948cb4287b3",
+      "mtime_ns": 1790994906763781600,
+      "bytes": 5823
+    },
+    "scripts/services/starting_build_catalog.gd": {
+      "sha256": "7b72628c194d440f71961d01d1a95acc26b4eed2360a4fe684f9a8159cd4b337",
+      "mtime_ns": 1792662767415172200,
+      "bytes": 4695
+    },
+    "scripts/services/tactical_catalog.gd": {
+      "sha256": "65378acf377b099c1292b7b73f8dc7188983ccba8eadd200124162ea94e790cc",
+      "mtime_ns": 1792056484560354200,
+      "bytes": 1498
+    },
+    "scripts/services/tactical_director.gd": {
+      "sha256": "410fe0080ecf6d5becea38d5c8d960592c6da367a368ea930497d085ba33bcec",
+      "mtime_ns": 1792670827699740100,
+      "bytes": 6279
+    },
+    "scripts/services/upgrade_preview.gd": {
+      "sha256": "da8cb658253f9ff51a3f6063bd68c42409c81a82e5d51b3aafcca2d765255bea",
+      "mtime_ns": 1790914912491689900,
+      "bytes": 6036
+    },
+    "scripts/services/web_reachability_probe.gd": {
+      "sha256": "8a05990710ca2a379e4ac607adabdff23efeeab328a68d75d76595155ebb0974",
+      "mtime_ns": 1784187353832921600,
+      "bytes": 1410
+    },
+    "scripts/shaders/friendly_attack.gdshader": {
+      "sha256": "1de3b091259bd4bb4a8b588945e7f93b8f3050cc46fa17a6cedbddc9e42b9515",
+      "mtime_ns": 1792648969496775900,
+      "bytes": 361
+    },
+    "scripts/shaders/hero_silhouette.gdshader": {
+      "sha256": "9deb2a095b76249425d0345082f0cbab8b672795f37f0fc22b588030f442fdb0",
+      "mtime_ns": 1790914949868494500,
+      "bytes": 731
+    },
+    "scripts/ui/battle_layout.gd": {
+      "sha256": "c6781c31b865956d206d1bab53ec6ce06bb5232b58ec118d7de693d6340eba3e",
+      "mtime_ns": 1792645479940793000,
+      "bytes": 1842
+    },
+    "scripts/ui/build_preparation.gd": {
+      "sha256": "b49c37644174ad5bf7ffbac103d3c03b829b51842ccf3b50874d81065b3b703a",
+      "mtime_ns": 1792670411807402500,
+      "bytes": 51
+    },
+    "scripts/ui/combat_readout.gd": {
+      "sha256": "71bcd895980b706e2fde1d128bf6c634b8602499fe0ed506f7f3d42cc9f56317",
+      "mtime_ns": 1792670876339763300,
+      "bytes": 5430
+    },
+    "scripts/ui/contract_screen.gd": {
+      "sha256": "e299925d24b91eb7ec6756b5004bbef971fe2fd828e4d2e2cc568c9f3c31d3fe",
+      "mtime_ns": 1784450275491207600,
+      "bytes": 22825
+    },
+    "scripts/ui/cooldown_ring.gd": {
+      "sha256": "444c42852fd94b7ba985214955994d9083e45c217cb8cef8a71e6d343f042938",
+      "mtime_ns": 1790956158830343100,
+      "bytes": 1095
+    },
+    "scripts/ui/equipment_panel.gd": {
+      "sha256": "b938dfa8e4a991e8ae48b95ad8dd5fb96d3261ed636f1a7f2085b0bdf3355e7e",
+      "mtime_ns": 1791013441861085700,
+      "bytes": 8035
+    },
+    "scripts/ui/first_run_guide.gd": {
+      "sha256": "fcf40c7d6cce7b88fcae733634ba91fb10ebb2ca21e701a24fc19385ed7471d3",
+      "mtime_ns": 1792649512762619500,
+      "bytes": 11935
+    },
+    "scripts/ui/formation_picker.gd": {
+      "sha256": "3c10de73c44ffdc1f66e113e03ea933dba1d2a78e2175fb1182d080c0f1caf00",
+      "mtime_ns": 1792648930541803500,
+      "bytes": 5048
+    },
+    "scripts/ui/game_over_screen.gd": {
+      "sha256": "31eabe2764dd009c5f24ca2676202a3aef6a77dbb2988a7d71ab66963ed452bf",
+      "mtime_ns": 1792670765397578600,
+      "bytes": 48
+    },
+    "scripts/ui/hud.gd": {
+      "sha256": "a77435bafd35053fc05a5a52af0fa139081f0680fc8dccb6b963f512e42ca6f3",
+      "mtime_ns": 1792671355107492300,
+      "bytes": 131959
+    },
+    "scripts/ui/level_up_screen.gd": {
+      "sha256": "f2168eae4c82f2d57060fdc2b11f925785dcd1cd047f674b346ac39eb2eeccf8",
+      "mtime_ns": 1790920504236047500,
+      "bytes": 20295
+    },
+    "scripts/ui/main_menu.gd": {
+      "sha256": "bcf8eb25b30b8426e160144d17aa98d7cf08fae07336afb3069b9c2ca84c6c19",
+      "mtime_ns": 1792665623511281000,
+      "bytes": 52734
+    },
+    "scripts/ui/r33_loot_banner.gd": {
+      "sha256": "1148d10e08a57917bc84ad78a5203d755a3a16b21aa058e5fc5d1c49eeb1db34",
+      "mtime_ns": 1792659265489396000,
+      "bytes": 4251
+    },
+    "scripts/ui/r36_minimap.gd": {
+      "sha256": "caa7ffdf7eb26ffe434bea3a4c97e940b4a9fb3b7e8a836217103f09f920860c",
+      "mtime_ns": 1792643444417779500,
+      "bytes": 2560
+    },
+    "scripts/ui/r4_battle_journal.gd": {
+      "sha256": "4d5bdb1f83ffae3e03457cbb034f309253ba07d4fbb20aedd40f4e8273b742fa",
+      "mtime_ns": 1792671481207713800,
+      "bytes": 5897
+    },
+    "scripts/ui/r4_build_preparation.gd": {
+      "sha256": "2f517d7337f64313e7b0d3af4f2c106cc870db85df2d0a95e822042e60ca85bb",
+      "mtime_ns": 1792671434903602400,
+      "bytes": 15174
+    },
+    "scripts/ui/r4_result_screen.gd": {
+      "sha256": "ce0cb1fa70c98c6c4887c2d7cb477a2c25d3e0d783dcce65e66ac9cdb64fd0b6",
+      "mtime_ns": 1792671481206409200,
+      "bytes": 12896
+    },
+    "scripts/ui/rift_shop_screen.gd": {
+      "sha256": "d282c13974163720e0323719828bd7792cd384d0c2af5653cb9d1c2e377cf885",
+      "mtime_ns": 1784142651227577000,
+      "bytes": 10713
+    },
+    "scripts/ui/stage_victory_screen.gd": {
+      "sha256": "00788271b34686de4c6cb57c2e2e7a0e3a29eb728b4a3dab31cf6ae47e2e6f9f",
+      "mtime_ns": 1792670765397578600,
+      "bytes": 88
+    },
+    "scripts/ui/summon_shop_screen.gd": {
+      "sha256": "d86502947cfe61e5bbe2ce0b5c2a99a93892a1aea7946776c66ea7e6580d6d88",
+      "mtime_ns": 1790938301615191200,
+      "bytes": 16506
+    },
+    "scripts/ui/virtual_joystick.gd": {
+      "sha256": "81ab8ebaa4e0724f8aa1f849494004234d6df34cd6943a591bf72e4a28966931",
+      "mtime_ns": 1791354173838772600,
+      "bytes": 7265
+    },
+    "scripts/ui/world_map.gd": {
+      "sha256": "0f3fb5e98985067f8984594d2e481268258c94c56ece6a7a3a86227a4ff7232c",
+      "mtime_ns": 1790994848332622100,
+      "bytes": 22948
+    },
+    "scripts/vfx/combat_feedback.gd": {
+      "sha256": "e2adf0296f7f33ecc6b6560ec063855db531257d7a6be80f1efbee1f9704506d",
+      "mtime_ns": 1792648969499534000,
+      "bytes": 10552
+    },
+    "scripts/vfx/combat_presentation.gd": {
+      "sha256": "1d536a5ed08437b7137b3365a42660870dd950f73ec40ab1d1ec36916cd86c96",
+      "mtime_ns": 1792671063904453000,
+      "bytes": 5940
+    },
+    "scripts/vfx/corpse_ghost.gd": {
+      "sha256": "817dc286985b231dd8a54f33dadef50804e4a5d20cb17c8c852ebd3c976a0cdd",
+      "mtime_ns": 1783757878320352800,
+      "bytes": 2488
+    },
+    "scripts/vfx/damage_number.gd": {
+      "sha256": "554e223e1ae09536ef8022a6d56bc68cf613e29e8122fc1e9d40e6c794323e00",
+      "mtime_ns": 1792644894819982100,
+      "bytes": 7103
+    },
+    "scripts/vfx/death_burst.gd": {
+      "sha256": "498c529b57ed5f1ae823ddf59335227cdbbd89b34eed451981832170a3ecb1af",
+      "mtime_ns": 1790925930242805500,
+      "bytes": 18951
+    },
+    "scripts/vfx/lightning_arc.gd": {
+      "sha256": "55718116391820b0a00f344cfd037556b19661b917b8287ff8b784504c4274e6",
+      "mtime_ns": 1790925858720665900,
+      "bytes": 3371
+    },
+    "scripts/vfx/monster_attack_telegraph.gd": {
+      "sha256": "b77afe7b6d860d29df88c7f8050afd59cb84ac01216a1c74720e0a84c611ae07",
+      "mtime_ns": 1792643511146558700,
+      "bytes": 3922
+    },
+    "scripts/vfx/newskill_fx_catalog.gd": {
+      "sha256": "9368f74109e3660d7a7e50485395ee53fb13388d03e20845a46d75f918f7d268",
+      "mtime_ns": 1790929672864823800,
+      "bytes": 3025
+    },
+    "scripts/weapons/base_weapon.gd": {
+      "sha256": "8c18535c4c7b9f660cb934fcdadf5e54f87f6510e2655d5756de4e53d5a6421f",
+      "mtime_ns": 1792643946951634400,
+      "bytes": 5900
+    },
+    "scripts/weapons/boomerang_weapon.gd": {
+      "sha256": "c0a9c28d7250e3ef00c23239f926211897510796d2a99d22f5873eb3b41e07ae",
+      "mtime_ns": 1790934122600102600,
+      "bytes": 2444
+    },
+    "scripts/weapons/chain_lightning_weapon.gd": {
+      "sha256": "84ffc119999fd2aecddc1ee90fd78a647184418e838882d8b98afdd26aa766ad",
+      "mtime_ns": 1792648930540261900,
+      "bytes": 5874
+    },
+    "scripts/weapons/echo_hymn_weapon.gd": {
+      "sha256": "59f4fa30bb4df04787cbc77736ffbe06112b5d92fff68e83ac43eba4accda13c",
+      "mtime_ns": 1792662567807625700,
+      "bytes": 5617
+    },
+    "scripts/weapons/explosion_weapon.gd": {
+      "sha256": "6ead0931f5ac489d12a24ad2316f4cb098206f89901bec25c74b78ef109f3ebf",
+      "mtime_ns": 1792662567808634500,
+      "bytes": 3603
+    },
+    "scripts/weapons/grenade_lob_weapon.gd": {
+      "sha256": "337aa2a89d315f6bd2978f01c249f018169ba1529866db21b0abe20c7e29c31d",
+      "mtime_ns": 1784029986282700200,
+      "bytes": 4908
+    },
+    "scripts/weapons/homing_missile_weapon.gd": {
+      "sha256": "70d9966cc593f1cfc57b6db905cee60742cd78cfb3817dd19708e46a90a51bcc",
+      "mtime_ns": 1790934122598109500,
+      "bytes": 2746
+    },
+    "scripts/weapons/impact_weapon_base.gd": {
+      "sha256": "f560f33f7709d167879965500e1e0bd5490c840cb8c05fad8a38eec3b250ddf2",
+      "mtime_ns": 1792648930541288500,
+      "bytes": 4383
+    },
+    "scripts/weapons/linear_bullet_weapon.gd": {
+      "sha256": "84e6ee89554a2599ba31ee792c7559754e5453ef0d972c0945ca7caf6e110be5",
+      "mtime_ns": 1790956159275046300,
+      "bytes": 2302
+    },
+    "scripts/weapons/orbit_weapon.gd": {
+      "sha256": "cee2e8b4d14db3aac937f264515534b72ff35035ef449bfad7ce9c098a14334c",
+      "mtime_ns": 1783585805255877500,
+      "bytes": 1894
+    },
+    "scripts/weapons/rail_lance_weapon.gd": {
+      "sha256": "a70440b491e3cece19a3b0f0c18f037b175767ed0c472879ab10ea403c7351d7",
+      "mtime_ns": 1792648930540777100,
+      "bytes": 5051
+    },
+    "scripts/weapons/rift_construct_weapon.gd": {
+      "sha256": "ebf2a98bf92773075fbb36da96749075e450d117e9ad9ec14a7ab79764acd276",
+      "mtime_ns": 1792661598484754000,
+      "bytes": 9955
+    },
+    "scripts/weapons/shadow_twinblades_weapon.gd": {
+      "sha256": "f2c9a0b6628ca467aed0c2155757b0b2f8f2d842f0f6fe524521fe9f3fe8e01d",
+      "mtime_ns": 1790994630709889500,
+      "bytes": 1120
+    },
+    "scripts/weapons/solar_piercer_weapon.gd": {
+      "sha256": "bfe174edd3fca786e0a46414816f73accd28b23ad14b7efe483b106e383f1903",
+      "mtime_ns": 1790994630708246100,
+      "bytes": 2492
+    },
+    "scripts/weapons/tidal_covenant_weapon.gd": {
+      "sha256": "bb56cd59edd4f7b4c630821bf9c6061e184f3efc0953ee11cefe49c28c027e6c",
+      "mtime_ns": 1790994630708747600,
+      "bytes": 2453
+    },
+    "scripts/weapons/void_net_weapon.gd": {
+      "sha256": "f202bdd56e2de3da5bfc0c837c045e9bab557848372f5c87139e0732a8d28df9",
+      "mtime_ns": 1784029986283703800,
+      "bytes": 2077
+    }
+  },
+  "after": {
+    ".github/workflows/deploy-web.yml": {
+      "sha256": "bf999c04cf7e059a6d0199479286abf384545c2fbc18fa444c8f3ce895e7694a",
+      "mtime_ns": 1792671163430034700,
+      "bytes": 9893
+    },
+    "assets/fonts/default_theme.tres": {
+      "sha256": "6a17e46b6b01c90ab3f9acbbca0b75909469794f49aa41ec68d7481f590a242c",
+      "mtime_ns": 1784015403253655500,
+      "bytes": 8674
+    },
+    "assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf": {
+      "sha256": "ee2711cec8bf1dd0cf5d69abd20a4d349f3dd5fcd7142a31f7a5cd77f0ac9e06",
+      "mtime_ns": 1792671120516073900,
+      "bytes": 1536772
+    },
+    "export_presets.cfg": {
+      "sha256": "1a4e4dd7940ef0baca1b181eea79b2c75b49c6aee6cfdb89471c7861988be2f0",
+      "mtime_ns": 1792660334921526300,
+      "bytes": 9587
+    },
+    "project.godot": {
+      "sha256": "cc9af94d331c98bcf631a845f3c4bfcb716594c1e86481c447f6d7a883381428",
+      "mtime_ns": 1792670765392421200,
+      "bytes": 1284
+    },
+    "resources/heroes/arc_scout.tres": {
+      "sha256": "25e4a76cc4587f9104ce8a516fa95da6898e5d45d7380cda5d8b7825f074ee65",
+      "mtime_ns": 1792032234969000900,
+      "bytes": 813
+    },
+    "resources/heroes/echo_singer.tres": {
+      "sha256": "a49a61fdf8df5691ac9e61e5d61f76b125850b2244e3800ab2cd8cc67eab6f53",
+      "mtime_ns": 1784450139601214500,
+      "bytes": 849
+    },
+    "resources/heroes/ember_grenadier.tres": {
+      "sha256": "ba17a18b2423c047b908b086fb24b5b4525e4fd7c1eee4243b372febdf1f7ffa",
+      "mtime_ns": 1784450139602720600,
+      "bytes": 875
+    },
+    "resources/heroes/line_mender.tres": {
+      "sha256": "943f0c4ef93506f686f03d650676d4b621375f285e7842a4d0d21a1d96ef3694",
+      "mtime_ns": 1792032234970119200,
+      "bytes": 841
+    },
+    "resources/heroes/orbit_guard.tres": {
+      "sha256": "d9ff1a08d160449edc20bb1f74e338b8e5194f396828b671d9523283498446ea",
+      "mtime_ns": 1792032234970119200,
+      "bytes": 892
+    },
+    "resources/heroes/pulse_artificer.tres": {
+      "sha256": "32aa8d3cae53596d528037b7223760076ff64f3e325966d70e0a94b34fc513d7",
+      "mtime_ns": 1792032234970119200,
+      "bytes": 857
+    },
+    "resources/heroes/rift_captain.tres": {
+      "sha256": "5379851e24b430f3f84a52b6c6ab1e5605b6b41a4cf45c4c556e53beb8dd3301",
+      "mtime_ns": 1784450139618786600,
+      "bytes": 898
+    },
+    "resources/heroes/rift_shepherd.tres": {
+      "sha256": "e1a8196b961854372ede3e0c5b1e10733fa5ebfa2af1ab5758d6396db92d9b70",
+      "mtime_ns": 1784450139621301600,
+      "bytes": 870
+    },
+    "resources/heroes/rift_sniper.tres": {
+      "sha256": "93755aaff73ce210e4a9c4fa4c848889e8c578e365064c5b210fbc7a230ece2c",
+      "mtime_ns": 1784450139623815000,
+      "bytes": 835
+    },
+    "resources/heroes/shadow_ronin.tres": {
+      "sha256": "2bdec38c34e480e325f01b7bdffba6edb4386152c59fe4ff2f7538a338330425",
+      "mtime_ns": 1790998597751527100,
+      "bytes": 813
+    },
+    "resources/heroes/solar_lancer.tres": {
+      "sha256": "00e94c400a1228f382c32d3e774fd55eb8a927efc4bef68ab00c5ac1c7699368",
+      "mtime_ns": 1790998597748537200,
+      "bytes": 801
+    },
+    "resources/heroes/tide_oracle.tres": {
+      "sha256": "3b18d403ca218176f23b183042ed7fdbb9a65271aada6a1e62152f43b89d79ee",
+      "mtime_ns": 1790998597750530500,
+      "bytes": 814
+    },
+    "resources/heroes/void_weaver.tres": {
+      "sha256": "778125d2c6e3b0b85a97203fd7d3b02246971d501d0375977a04af9c893169d6",
+      "mtime_ns": 1784450139626815900,
+      "bytes": 847
+    },
+    "resources/squads/default_squad.tres": {
+      "sha256": "8ae6ed02bb944384e2f192c89759d8e386ce93ef10b99e47546ca61dac2eae08",
+      "mtime_ns": 1790994760118167700,
+      "bytes": 1884
+    },
+    "resources/weapons/arc_chain.tres": {
+      "sha256": "1a1bdb5e65edf1a53d1268c7c2ca508640cf1550055557ffab2c7dde05d94731",
+      "mtime_ns": 1790926224769810400,
+      "bytes": 857
+    },
+    "resources/weapons/echo_hymn.tres": {
+      "sha256": "64a279b50bdbeea4d867543f472a1c81c0e19a9cce7ebaa9d1958b06d18fc5a8",
+      "mtime_ns": 1784104792923131100,
+      "bytes": 806
+    },
+    "resources/weapons/grenade_lob.tres": {
+      "sha256": "22a40183b19dff3825dee975fd3dda9cae1913da534c009166fa134f510245c1",
+      "mtime_ns": 1783784954891495000,
+      "bytes": 990
+    },
+    "resources/weapons/orbit_blades.tres": {
+      "sha256": "2bd15438e96e64df6d0558bffd6872dee5c3f2186f5a35bbc7dcb313b970047c",
+      "mtime_ns": 1792069092074695200,
+      "bytes": 1118
+    },
+    "resources/weapons/pulse_bloom.tres": {
+      "sha256": "ff7bfdc399efb9bdacf6cbe7be92ffe63a4e49e99dc48332716ef577337bb535",
+      "mtime_ns": 1783784954890489100,
+      "bytes": 831
+    },
+    "resources/weapons/rail_lance.tres": {
+      "sha256": "0a9851005e81af708e86edaa257c421b27b5f7feaa331d1c9aeab5c19605aba2",
+      "mtime_ns": 1784104792920124000,
+      "bytes": 805
+    },
+    "resources/weapons/rift_constructs.tres": {
+      "sha256": "137860f2bac33a9131e991108266f4b5cae9f4c337e75e491f29888159609db0",
+      "mtime_ns": 1784191258068624200,
+      "bytes": 869
+    },
+    "resources/weapons/rift_seeker_missiles.tres": {
+      "sha256": "8b31430c2387dd8a6df5e3c1c1302dc8676d0383c99bf235bb81fa869109ca0b",
+      "mtime_ns": 1790934122593656300,
+      "bytes": 967
+    },
+    "resources/weapons/rift_shield_boomerang.tres": {
+      "sha256": "ef036056c0e22c7ef8ead948e0d8dfb09665e54b531e8c7673ba24eba625cdb2",
+      "mtime_ns": 1792069092074695200,
+      "bytes": 1244
+    },
+    "resources/weapons/riftline_emitter.tres": {
+      "sha256": "790c89bd32574b3f1b42322982836eedce5603e867400c587b82b04facaa6966",
+      "mtime_ns": 1790934122593656300,
+      "bytes": 883
+    },
+    "resources/weapons/shadow_twinblades.tres": {
+      "sha256": "78e0b39925273d3a8e95a99d711ca9a1507deb475160d020a3013a099cc96e73",
+      "mtime_ns": 1792069092074695200,
+      "bytes": 1214
+    },
+    "resources/weapons/solar_piercer.tres": {
+      "sha256": "8c944b5bb0b0c64883d0f474ed238533c9a82560186089f802906a9b2673f85f",
+      "mtime_ns": 1790994760112667600,
+      "bytes": 752
+    },
+    "resources/weapons/tidal_covenant.tres": {
+      "sha256": "fa2a576947750f65c8148db76820a9a299d8ed3f7c4cbba5a4d11fc52c287359",
+      "mtime_ns": 1790994801403058100,
+      "bytes": 850
+    },
+    "resources/weapons/void_net.tres": {
+      "sha256": "19aa632e23a844c7224fd24fa88598b966907c157fcb031ff9f46f7b389ecdd7",
+      "mtime_ns": 1783873561094458100,
+      "bytes": 718
+    },
+    "resources/weapons/weapon_catalog.tres": {
+      "sha256": "74c3a17db1caca50c50e0b39e2be040830821de8e003c293ea051260cc86107d",
+      "mtime_ns": 1790994760116174300,
+      "bytes": 2066
+    },
+    "scenes/arena/Arena.tscn": {
+      "sha256": "9b36103c20eb942d1485071e918d597364586842142f4dfaa86b453b5d42cb60",
+      "mtime_ns": 1783651779220672600,
+      "bytes": 1897
+    },
+    "scenes/debug/ArenaInstrumentationRun.tscn": {
+      "sha256": "e177d68b85267ff160ebd8380284f16baa9ec546af60e424062ca6dbdd883f81",
+      "mtime_ns": 1783694442800259600,
+      "bytes": 215
+    },
+    "scenes/debug/AttackVfxR34PoolTest.tscn": {
+      "sha256": "8c577eb1ccbf6930d851a5a1df135f5a68d50e156c19a9201a5347ba40f08758",
+      "mtime_ns": 1790926044525870000,
+      "bytes": 199
+    },
+    "scenes/debug/AutoChannelR36Test.tscn": {
+      "sha256": "f0e63425cc305b2e32adb315d53ef0b12eb2deec1ca0e584b664c3d7b0807e96",
+      "mtime_ns": 1790934978716526600,
+      "bytes": 194
+    },
+    "scenes/debug/BalanceMockRun.tscn": {
+      "sha256": "9fde7094bfdd71e2b70ba8c60999a69fc509f89a1ca2204ca013507253716f8c",
+      "mtime_ns": 1783646792959107600,
+      "bytes": 201
+    },
+    "scenes/debug/CaptainComboChannelR35Test.tscn": {
+      "sha256": "b3313a1dc534dbf36da8e7dfcb4486823f1be1edb2e9057820a0b9130cf7c23f",
+      "mtime_ns": 1790929838665326200,
+      "bytes": 211
+    },
+    "scenes/debug/CombatPolishR37Test.tscn": {
+      "sha256": "14dd002d06c5d62512b2038c6c271ec655609b36a35c4c8dee6d91fa0f48503c",
+      "mtime_ns": 1790955346116643000,
+      "bytes": 196
+    },
+    "scenes/debug/CombatR32RegressionTest.tscn": {
+      "sha256": "4292a4807de98445b1925090cf635fe723c447c858672d3a25951292459c4844",
+      "mtime_ns": 1790914467654908500,
+      "bytes": 204
+    },
+    "scenes/debug/CombatR33RegressionTest.tscn": {
+      "sha256": "9a2923eea34abd1fdba36924ee50f5c8da2faa7b10c377f87d6c256a39e2f99d",
+      "mtime_ns": 1790918828595092700,
+      "bytes": 204
+    },
+    "scenes/debug/ContentR1NavigationTest.tscn": {
+      "sha256": "b0e258b5b3599ccce98efadb6b8e639395b03afc2bc3adafe7e2629dbf58586b",
+      "mtime_ns": 1792646560899116700,
+      "bytes": 202
+    },
+    "scenes/debug/ContentR1Review.tscn": {
+      "sha256": "97c4c7813bc1be568116644e0dda59f135689881b1bc16d53d7e49b562dd2c7c",
+      "mtime_ns": 1792643861904849200,
+      "bytes": 185
+    },
+    "scenes/debug/ContentR1Test.tscn": {
+      "sha256": "b3a958bd255ed3fb93e3bde590c785ea2e3a96a318358db0d510144f82e9037b",
+      "mtime_ns": 1792643723772072400,
+      "bytes": 183
+    },
+    "scenes/debug/ContentR21Review.tscn": {
+      "sha256": "2808ca3b5286c0501f65a9f7c8b33ef5631bc85528002e0f147a666630d60881",
+      "mtime_ns": 1792659403103049300,
+      "bytes": 190
+    },
+    "scenes/debug/ContentR21Test.tscn": {
+      "sha256": "5c2f0c3930a674119084717d20e94e8393e4ffe77f9055ff2927ab2890bda3e2",
+      "mtime_ns": 1792659403101375500,
+      "bytes": 188
+    },
+    "scenes/debug/ContentR2Review.tscn": {
+      "sha256": "abb6cb2edd9faccc107bacfca733fb671108579c5705894b6d589b9624a3f66e",
+      "mtime_ns": 1792649314148046300,
+      "bytes": 185
+    },
+    "scenes/debug/ContentR2Run.tscn": {
+      "sha256": "5d2c8bcaf9298986312231d633ef8351376607c5d6edba2cd3e519a53add8d0b",
+      "mtime_ns": 1792649180669505200,
+      "bytes": 179
+    },
+    "scenes/debug/ContentR2Test.tscn": {
+      "sha256": "e776d3709a8270604423afb3d4e24347e3295be842d02442f46607a489daf67c",
+      "mtime_ns": 1792649111559078300,
+      "bytes": 183
+    },
+    "scenes/debug/ContentR3Review.tscn": {
+      "sha256": "35fa4cb74d258e6bc6a6c8cc9d3b97503b15fdd9ac0a06312b762761fd936adb",
+      "mtime_ns": 1792664771764573200,
+      "bytes": 187
+    },
+    "scenes/debug/ContentR3Run.tscn": {
+      "sha256": "95fba7e65b38f8d558a188f0c525554f1c79d2f63012b9bd1943b3f8b8899375",
+      "mtime_ns": 1792664451193499900,
+      "bytes": 181
+    },
+    "scenes/debug/ContentR3Test.tscn": {
+      "sha256": "5cd999ee556cb5f3f91150f70d6a0bd9f64a0cb54981cdef7fc808bcc54accc8",
+      "mtime_ns": 1792662094044741800,
+      "bytes": 183
+    },
+    "scenes/debug/ContentR4Review.tscn": {
+      "sha256": "f374e92866aacfe3008345ef38bf0def3036bf65f0fbd0817c7db2439d0ff342",
+      "mtime_ns": 1792671145811258900,
+      "bytes": 193
+    },
+    "scenes/debug/ContentR4Run.tscn": {
+      "sha256": "962550b738d2faeac0bf6441600d02b6459f2194ba30e3d77be1f49d071becc2",
+      "mtime_ns": 1792671145811258900,
+      "bytes": 187
+    },
+    "scenes/debug/ContentR4Test.tscn": {
+      "sha256": "f4544c97fa5486babd1a7ac733daaec521d1cc6c9ab0e83bb181f8f2ef50e099",
+      "mtime_ns": 1792670876341800400,
+      "bytes": 183
+    },
+    "scenes/debug/EnemyArtRegressionTest.tscn": {
+      "sha256": "773c5ece93ba1529f5a8274b46c9f8d4b31429591dd07e26059910c571a73097",
+      "mtime_ns": 1783916786260486800,
+      "bytes": 222
+    },
+    "scenes/debug/FirepowerR36Test.tscn": {
+      "sha256": "f449605119f62ad8cf8051185b53890be5f7c0ecb912b84150ebf4b0fead4124",
+      "mtime_ns": 1790934566580776800,
+      "bytes": 189
+    },
+    "scenes/debug/GameplayCapTest.tscn": {
+      "sha256": "b3ec427d75f9da2faecbbc75d557444cbbf147c493285ee117a90cfb00789bec",
+      "mtime_ns": 1783588605521128200,
+      "bytes": 213
+    },
+    "scenes/debug/Hero10BalanceInstrument.tscn": {
+      "sha256": "a680ac56e30496027fa1ef916e916df39a0f6fcb931385eebf9f013a8e20f33b",
+      "mtime_ns": 1784046825285832000,
+      "bytes": 213
+    },
+    "scenes/debug/Hero10ClosureTest.tscn": {
+      "sha256": "536b2dcce38bfd26d21763c2f6418648448d7a11856256510f7f3f86199e4b1f",
+      "mtime_ns": 1784046642033379600,
+      "bytes": 201
+    },
+    "scenes/debug/IndependentStageR34Probe.tscn": {
+      "sha256": "c3153ec79d50412da94187f47f2247674b075272377739b5aa884b31d006df8a",
+      "mtime_ns": 1790927181850991700,
+      "bytes": 206
+    },
+    "scenes/debug/M1RegressionTest.tscn": {
+      "sha256": "b5430f9c9a894dc05d1d15057757f8729d3c73b41674bc16ebbef54461a508dd",
+      "mtime_ns": 1783774226915242400,
+      "bytes": 195
+    },
+    "scenes/debug/M2RegressionTest.tscn": {
+      "sha256": "3e0728b9b6861a0eeea3099bbea8c3b865ff7d92eb9fd8fa5fdf9a94decd5171",
+      "mtime_ns": 1783783076460557700,
+      "bytes": 195
+    },
+    "scenes/debug/M3RegressionTest.tscn": {
+      "sha256": "8efff2fdde500a0e587c3f61ab67b7afa78d080594f52c76c21e1ad142bbe032",
+      "mtime_ns": 1783785131839625700,
+      "bytes": 195
+    },
+    "scenes/debug/M4RegressionTest.tscn": {
+      "sha256": "f860e42783d0f9174f258a16d947515ee6c5d80ea60356b34ed447cc23470e89",
+      "mtime_ns": 1783862538346740800,
+      "bytes": 195
+    },
+    "scenes/debug/MobileInputSmokeTest.tscn": {
+      "sha256": "1d466b8f2dfd9d1e66199751a828e496e2bd27b33911385e3c465e08d5c11902",
+      "mtime_ns": 1783590051143072600,
+      "bytes": 224
+    },
+    "scenes/debug/MobileLodStressTest.tscn": {
+      "sha256": "9b2e3dfb08210912ff963df2a706f05c86d007eadd519324e204deb916fc11a0",
+      "mtime_ns": 1783774127060472700,
+      "bytes": 226
+    },
+    "scenes/debug/OrbitBladeHitRepro.tscn": {
+      "sha256": "960d5cad72bb0eb5b29ee5f5644684440a46eef8ab48032b281a195fae87386f",
+      "mtime_ns": 1783683790836763500,
+      "bytes": 206
+    },
+    "scenes/debug/PoolContractTest.tscn": {
+      "sha256": "003a99e9872b9fa432876aa172fa050d2ba37daf252a945bf7556ca2e1c2dd74",
+      "mtime_ns": 1783585945113828500,
+      "bytes": 217
+    },
+    "scenes/debug/ProjectilePerformanceR36Test.tscn": {
+      "sha256": "b4642314b3726550c0b9261d8d4fa39dae0676e7a5f319dc8cfb397ff24a27c2",
+      "mtime_ns": 1790937479934605300,
+      "bytes": 214
+    },
+    "scenes/debug/R10_5RegressionTest.tscn": {
+      "sha256": "ad14532e98f0408bb4b4dd9277b27917ddedc2811960873dc57ad3fdde371c81",
+      "mtime_ns": 1783684699324608400,
+      "bytes": 205
+    },
+    "scenes/debug/R11RegressionTest.tscn": {
+      "sha256": "8b7493ce5a63d54efcf544c852b567dcb95eb5b20d5f02df6286ce181dffe7c1",
+      "mtime_ns": 1783689269878609700,
+      "bytes": 199
+    },
+    "scenes/debug/R12RegressionTest.tscn": {
+      "sha256": "71b4398c20542ecb66db5bcdfb01f51381f679a0e2f52bbc4ae44494b117e2bf",
+      "mtime_ns": 1783696625600344300,
+      "bytes": 199
+    },
+    "scenes/debug/R13RegressionTest.tscn": {
+      "sha256": "d145675e31ddc8dd6abbc848246eda872b70e5defb92bb84ff48d70143f1beb1",
+      "mtime_ns": 1783743400274368700,
+      "bytes": 201
+    },
+    "scenes/debug/R14RegressionTest.tscn": {
+      "sha256": "05e2d24fb11f95f5054db6a68f21542146d013aab6285b5e93d811174b39562d",
+      "mtime_ns": 1783745925430159000,
+      "bytes": 199
+    },
+    "scenes/debug/R25ParallaxRegressionTest.tscn": {
+      "sha256": "a68f1c9099ddbe2caa135d925954c572f26cbca6a3eb71fc8f9516c42a09d279",
+      "mtime_ns": 1784280272591085700,
+      "bytes": 216
+    },
+    "scenes/debug/R29MenuModalTest.tscn": {
+      "sha256": "f09d3db84961af97c011f490849609607385dcfabc9237fdc01881d1bdb6a6da",
+      "mtime_ns": 1784471530430918100,
+      "bytes": 198
+    },
+    "scenes/debug/R30PlaytestFixTest.tscn": {
+      "sha256": "7fb661cb8bf987b760e72dc9c6161317319272de71ad3bb96566fb43a64d44ce",
+      "mtime_ns": 1784540789568506900,
+      "bytes": 202
+    },
+    "scenes/debug/R31EndgameGate.tscn": {
+      "sha256": "6453d69cadb1342ebdfe309a25ff2ff6c50be0783f1b7c1c2edf17962ec1e2da",
+      "mtime_ns": 1784709195670225100,
+      "bytes": 195
+    },
+    "scenes/debug/R32ExperienceTest.tscn": {
+      "sha256": "7ac68609aca859662806cd3db106e67d6b6fbd0361cca04496a04f20d345d696",
+      "mtime_ns": 1790914949869492500,
+      "bytes": 191
+    },
+    "scenes/debug/R32LootTest.tscn": {
+      "sha256": "c2bdc8155fc1cf36d7a1fcfbcd4103b8a12a1d5ac95fc0a6409e25d39c42eb87",
+      "mtime_ns": 1790914640385400900,
+      "bytes": 189
+    },
+    "scenes/debug/R33ArtProbe.tscn": {
+      "sha256": "a3fa922e25f7993616812f802fd47667aa434e1f166f02cb6f7405b71b500ea1",
+      "mtime_ns": 1790918937246868400,
+      "bytes": 179
+    },
+    "scenes/debug/R33ExperienceRegressionTest.tscn": {
+      "sha256": "649b4fd4dd00a11eafda62789f1fc140f28042e4b232f98c4f5d9410c84d365a",
+      "mtime_ns": 1790920147027854800,
+      "bytes": 210
+    },
+    "scenes/debug/R33SpriteBake.tscn": {
+      "sha256": "21fe0077741c8d17e3d5ddd06fa9aa9bc8a5a8e7085bf84fd8210f73d7308120",
+      "mtime_ns": 1790918861509491400,
+      "bytes": 181
+    },
+    "scenes/debug/R34ArtProbe.tscn": {
+      "sha256": "024591a5b81fb79d3bd07c4784a0b384b685814149a810cd1ded1bc84eb35467",
+      "mtime_ns": 1790924365520159700,
+      "bytes": 179
+    },
+    "scenes/debug/R34CampaignTransitionTest.tscn": {
+      "sha256": "b5a2eb83aac9d5593924342a9206482eacf1d4c99d325d21ebaaa5bb068bf699",
+      "mtime_ns": 1790928101021403600,
+      "bytes": 213
+    },
+    "scenes/debug/R34CompositionProbe.tscn": {
+      "sha256": "ecb2805778c380468e67f4191eb988b6e662afaf2ceb3e72bcc3e876ca811771",
+      "mtime_ns": 1790925821990672900,
+      "bytes": 195
+    },
+    "scenes/debug/R34FinalStormProbe.tscn": {
+      "sha256": "b66e5eab522067ada835cfde5ac756c91636d777e3a2d4eff866d4e78551ee95",
+      "mtime_ns": 1790927802722668000,
+      "bytes": 194
+    },
+    "scenes/debug/R34WorldMapUITest.tscn": {
+      "sha256": "f6d60051d9ff54a111797bdbbcbaf1845fb023ea610feb2c9c72177eb33d49ce",
+      "mtime_ns": 1790926988958375800,
+      "bytes": 203
+    },
+    "scenes/debug/R35EndlessCriticalTest.tscn": {
+      "sha256": "ac24d6e5854708a99347f67a0ab8836591ac631fd645cb267d90f1e8765f49ba",
+      "mtime_ns": 1790929660959966900,
+      "bytes": 207
+    },
+    "scenes/debug/R35NativeCombatReview.tscn": {
+      "sha256": "bcb21bec4b283565db488f621842ee5ed87c83000171c9b0458e0b347aad6de1",
+      "mtime_ns": 1790931091741499100,
+      "bytes": 200
+    },
+    "scenes/debug/R36LatestVisualReview.tscn": {
+      "sha256": "4c0b489833a4cf40aac57f2dca9eb9217909e039dab14c87bff3c08d04deec9b",
+      "mtime_ns": 1790936764580865200,
+      "bytes": 200
+    },
+    "scenes/debug/R36SummonIntegrationTest.tscn": {
+      "sha256": "8ad0990fd950bf27621bce3471a84a601a70d375612031a4df3ecac7d93ba077",
+      "mtime_ns": 1790935183691972800,
+      "bytes": 206
+    },
+    "scenes/debug/R36SummonRegressionTest.tscn": {
+      "sha256": "ac30e8550f2fb3da6c0fb4e03c1d6e1cde4bfe07916bc5bdcadb896ce5f2110f",
+      "mtime_ns": 1790935467457698900,
+      "bytes": 202
+    },
+    "scenes/debug/R36TouchClearanceTest.tscn": {
+      "sha256": "df0c8de7be8aba75a045431df62f91ee78510a7c112e5d7602fb73b306b99069",
+      "mtime_ns": 1790939602583492200,
+      "bytes": 198
+    },
+    "scenes/debug/R36WorldEliteTest.tscn": {
+      "sha256": "66c76542130873b00ba61f3e874c2a55b4690b4c66a0cc23c0b8eb1d48e3cdc2",
+      "mtime_ns": 1790934805374774500,
+      "bytes": 192
+    },
+    "scenes/debug/R37WorldPolishTest.tscn": {
+      "sha256": "a5866c2ad90e0e0e0737e96731cbe8e1963c41440ec748485518062ec0ccb2c0",
+      "mtime_ns": 1790954972679690600,
+      "bytes": 194
+    },
+    "scenes/debug/R38ArtGate.tscn": {
+      "sha256": "7156dbfda088dd73dbaf739cbbe64d3598c58edda4b98513f2af3902fa904d17",
+      "mtime_ns": 1790995742563924900,
+      "bytes": 177
+    },
+    "scenes/debug/R38ContentTest.tscn": {
+      "sha256": "01a827602e39882df094ef2dbc877b000fa14e1435546da86ad2a6418df5c3e8",
+      "mtime_ns": 1790995322696663700,
+      "bytes": 185
+    },
+    "scenes/debug/R38HeroWeaponTest.tscn": {
+      "sha256": "9c20ec0c33c4460ddabba1d7d1ca89266bebad78017dc87d7081e83ccd793196",
+      "mtime_ns": 1790995003063164200,
+      "bytes": 200
+    },
+    "scenes/debug/R38MapExpansionTest.tscn": {
+      "sha256": "9b73c82261951d7ddb29321df18004b57c36bcb00da9824d622e3c2f9046d6fe",
+      "mtime_ns": 1790995559878255700,
+      "bytes": 196
+    },
+    "scenes/debug/R39MobileHUDTest.tscn": {
+      "sha256": "fbe3caff38ad52d77ce555b720686e73062b8c5c75006d3350e2118d248a93a4",
+      "mtime_ns": 1791013597258832100,
+      "bytes": 198
+    },
+    "scenes/debug/R40FacingAttackTest.tscn": {
+      "sha256": "f15b92bd1ecd76f61f5d507c913fa0bddf72c45325fa7a8ec2b256578f195da4",
+      "mtime_ns": 1791165488869868500,
+      "bytes": 204
+    },
+    "scenes/debug/R41RuntimeBudgetTest.tscn": {
+      "sha256": "ac03fc788658339e2e0e38bdcd1145a1ac8b90ed5d52c98b07ea3147610c37a7",
+      "mtime_ns": 1791278271093197400,
+      "bytes": 198
+    },
+    "scenes/debug/R42FormationCapture.tscn": {
+      "sha256": "41f80300634fc0af938b0d8bf2bb7ca50fdb1ce678ad716dac9d822b9dc51305",
+      "mtime_ns": 1792032927554048600,
+      "bytes": 201
+    },
+    "scenes/debug/R42FormationTest.tscn": {
+      "sha256": "2da41eb226008a0bbfbdf82223b670120f8b3e93b2408d76fa598acf34a82518",
+      "mtime_ns": 1792032294805870300,
+      "bytes": 197
+    },
+    "scenes/debug/R43MobileTacticsTest.tscn": {
+      "sha256": "61af598769f2b07a4b918b83ae0e56e3d926d2c193e5e0aadf3671ea1f501f39",
+      "mtime_ns": 1792056804739930800,
+      "bytes": 196
+    },
+    "scenes/debug/R44LongRun.tscn": {
+      "sha256": "27b04b93ae9c08e2fb64d8390601013a39593833b038378bbd299aa95537fea6",
+      "mtime_ns": 1792066977705957800,
+      "bytes": 177
+    },
+    "scenes/debug/R44StoreTest.tscn": {
+      "sha256": "3da7cd4e0d4b1f4a856f46441eb5f8a6e71f1897742f620ff47aeb808253a060",
+      "mtime_ns": 1792066927584044500,
+      "bytes": 181
+    },
+    "scenes/debug/R5RegressionTest.tscn": {
+      "sha256": "0a6ff3d7cb3a29db6ee16ba2cba199fa2a0b02f088f6344269242bc209617e34",
+      "mtime_ns": 1783649931145779600,
+      "bytes": 217
+    },
+    "scenes/debug/R6RegressionTest.tscn": {
+      "sha256": "2e7b8fee8d29fd563cead3f37da3f5922f2243b8e27c07aa05fe8c37f5d2523c",
+      "mtime_ns": 1783652038111623500,
+      "bytes": 195
+    },
+    "scenes/debug/R7RegressionTest.tscn": {
+      "sha256": "57bc51df5cac0ad5b4f00e2b2e6e2ebf41cb4d22fc84498ccb53411c9fe72851",
+      "mtime_ns": 1783666040298884800,
+      "bytes": 195
+    },
+    "scenes/debug/ReviewR32IntegrationTest.tscn": {
+      "sha256": "84a66f310f24260d3686570403483af51e3077e299cfe759111ca052b16d6dcc",
+      "mtime_ns": 1790915032212399700,
+      "bytes": 206
+    },
+    "scenes/debug/ReviewR36RootTest.tscn": {
+      "sha256": "a04106342ed6596dcd1ad88713e535a98f1ce2b05dcc6343791fc3273798c1fb",
+      "mtime_ns": 1790936021663224200,
+      "bytes": 192
+    },
+    "scenes/debug/RewardSpecialR36Test.tscn": {
+      "sha256": "c1d916391c07f741b1c0af5eaf5804de4309103dac0d935b1239d0ac59514729",
+      "mtime_ns": 1790938648645868100,
+      "bytes": 198
+    },
+    "scenes/debug/SpawnDensityR32Test.tscn": {
+      "sha256": "7fd51e4303260597c1f30cb13678600ae9fa8dc1aad979516237628f5daa1c46",
+      "mtime_ns": 1790915858401734500,
+      "bytes": 198
+    },
+    "scenes/debug/SquadSmokeTest.tscn": {
+      "sha256": "c924637f36da861e1f4b07fbec5a86f1cef98ca488894b2afe45b2a338342f9a",
+      "mtime_ns": 1784211055089187400,
+      "bytes": 197
+    },
+    "scenes/debug/StressTest.tscn": {
+      "sha256": "f2bd140eb7c44e9e08774d6bd1bd5428bab9669f80397bc71db136da9d8e9f7b",
+      "mtime_ns": 1783584622618490000,
+      "bytes": 190
+    },
+    "scenes/debug/TrueAnimationRegressionTest.tscn": {
+      "sha256": "b96f054e762415f1f2803b740ac0140ced0023390c9083b1d12bf875e7d9cb5c",
+      "mtime_ns": 1783996979470604000,
+      "bytes": 222
+    },
+    "scenes/debug/WeaponSmokeTest.tscn": {
+      "sha256": "91c626737ae2aeb13135a05fb7735f3e989fa15f6f926eb1b85178affc6772de",
+      "mtime_ns": 1783581154924255800,
+      "bytes": 199
+    },
+    "scenes/enemies/Enemy.tscn": {
+      "sha256": "990f7489f914461186610d7fb55cd95b1f84edb32b3a3b4fbf3b48b0577d108a",
+      "mtime_ns": 1783579778999233500,
+      "bytes": 415
+    },
+    "scenes/heroes/Hero.tscn": {
+      "sha256": "bbeb5cf3bbbcf36026acb7d7da995cea1531cfc5227ccaf7c73d1a536b0d0292",
+      "mtime_ns": 1783581672182029900,
+      "bytes": 911
+    },
+    "scenes/pets/CompanionPet.tscn": {
+      "sha256": "a2537ec79720406ef3e2f3f78dc72a01085a531491d8549d1b423d37c35ee66a",
+      "mtime_ns": 1790934413945807500,
+      "bytes": 179
+    },
+    "scenes/pickups/CoinPickup.tscn": {
+      "sha256": "b2a4ffb397869c8b53e7c02546a913215855b45482981738d05352050f0eb103",
+      "mtime_ns": 1783587800953410100,
+      "bytes": 513
+    },
+    "scenes/pickups/XPGem.tscn": {
+      "sha256": "938459cf907ae5599bb92e61286a4bbf29fa7b755399f8ab5200a46d1b901397",
+      "mtime_ns": 1783587800952067600,
+      "bytes": 500
+    },
+    "scenes/player/Player.tscn": {
+      "sha256": "f76a9dffaf27dffa6fb896d09eb709f9256999900f1acb38cb910b70f9d0458b",
+      "mtime_ns": 1783581672188068800,
+      "bytes": 921
+    },
+    "scenes/projectiles/ExplosionArea.tscn": {
+      "sha256": "636c98d95052fd5d1c7da767aff98025f2b7c46c53ea9415720b6cd6621943e0",
+      "mtime_ns": 1783580788735122000,
+      "bytes": 233
+    },
+    "scenes/projectiles/HazardZone.tscn": {
+      "sha256": "44ec9e4f8e97bdd9b5cb4ed70dc87db4c10c0646d0030c93209f3bf43826b77e",
+      "mtime_ns": 1783646034548211100,
+      "bytes": 198
+    },
+    "scenes/projectiles/OrbitProjectile.tscn": {
+      "sha256": "fb8f6e3758d377ae7aadc0693446cc99f162c231e56358e09381d6f5cd17f095",
+      "mtime_ns": 1783584515209704100,
+      "bytes": 491
+    },
+    "scenes/projectiles/Projectile.tscn": {
+      "sha256": "9c82a60c3bd2dc2aba5ae86dcfb9a80044f0914ab6c7f03c7455623206648d35",
+      "mtime_ns": 1783579779001244400,
+      "bytes": 477
+    },
+    "scenes/projectiles/RiftConstruct.tscn": {
+      "sha256": "ad630bbcbfd917cee908315976dfa1abee2c9aa01a6afccb11ac92e087986d94",
+      "mtime_ns": 1784029776349466700,
+      "bytes": 223
+    },
+    "scenes/ui/ContractScreen.tscn": {
+      "sha256": "83352bdc3fd2b7e8aace6ce35dfd8bd4c12e9474440b99c758ccdaa9ea186495",
+      "mtime_ns": 1783667575333198200,
+      "bytes": 217
+    },
+    "scenes/ui/GameOverScreen.tscn": {
+      "sha256": "793a79d45a74fe71d146c057232fd46ea68fa75f27227e10e7ebf46030506f87",
+      "mtime_ns": 1783579779015788700,
+      "bytes": 218
+    },
+    "scenes/ui/HUD.tscn": {
+      "sha256": "5c0f833debdb79044bf68d2995adde342ee315bf793484e0dc4f1cfba56637a7",
+      "mtime_ns": 1783579779007268800,
+      "bytes": 184
+    },
+    "scenes/ui/LevelUpScreen.tscn": {
+      "sha256": "0e4ae7f261f379370b76d56a3874794ffab2c3d9c11b3228daf331b073cb200e",
+      "mtime_ns": 1783579779008269600,
+      "bytes": 210
+    },
+    "scenes/ui/MainMenu.tscn": {
+      "sha256": "d146cb554d21d894fb8c9e05b37f68852e018bef8f1a5782854eeaed579c146f",
+      "mtime_ns": 1783684522435418900,
+      "bytes": 179
+    },
+    "scenes/ui/RiftShopScreen.tscn": {
+      "sha256": "5d53384129afc27057b5dcbbbaa7dea830949f71f4da867ecb14ec8644fc7963",
+      "mtime_ns": 1783667575334112000,
+      "bytes": 210
+    },
+    "scenes/ui/StageVictoryScreen.tscn": {
+      "sha256": "afd9c803d080606879ed1b43b37a27f3cc65162a1e6d55be3e046d53d5b9e92e",
+      "mtime_ns": 1783667575335108900,
+      "bytes": 220
+    },
+    "scenes/ui/SummonShopScreen.tscn": {
+      "sha256": "f0ff237873a807cdf3fe7d90ededa53bbbf892a41ccd524d751d17d4b95d345d",
+      "mtime_ns": 1790934711449490900,
+      "bytes": 191
+    },
+    "scenes/ui/WorldMap.tscn": {
+      "sha256": "6d0ff20fc5f64847284e012259b20498778b147606f3d00551f0a767e6586324",
+      "mtime_ns": 1790926856608216000,
+      "bytes": 188
+    },
+    "scenes/vfx/CorpseGhost.tscn": {
+      "sha256": "e8cff6506849308368efc591927d5477de633def88c3d68be971ec72ea9de76f",
+      "mtime_ns": 1783757301250143000,
+      "bytes": 190
+    },
+    "scenes/vfx/DamageNumber.tscn": {
+      "sha256": "938c535faae6b63ddb3d18075de7aa40116db4e1af3f62a9241c2e96e62b1b4c",
+      "mtime_ns": 1783579779005269700,
+      "bytes": 208
+    },
+    "scenes/vfx/DeathBurst.tscn": {
+      "sha256": "0640327a249405f1baaf3f62c9c5377e1bf4c6d1f56c386fa5e18b81f5b3794b",
+      "mtime_ns": 1783579779006270400,
+      "bytes": 201
+    },
+    "scenes/vfx/LightningArc.tscn": {
+      "sha256": "45c346507c633b3ec9a37e1fd8979d556e6275456ec3170832ddd75d9e225f5e",
+      "mtime_ns": 1783580788737121100,
+      "bytes": 201
+    },
+    "scenes/weapons/BoomerangWeapon.tscn": {
+      "sha256": "24a6fa5c44fd30ff5d742f791cb2b01350e5cce332b58ae863368048b94cef6b",
+      "mtime_ns": 1783688790939263900,
+      "bytes": 210
+    },
+    "scenes/weapons/ChainLightningWeapon.tscn": {
+      "sha256": "899beca5a51a8a8201995b49c449d43ed2a0f27a94ab9807eab2426d5595d27c",
+      "mtime_ns": 1783580788731606100,
+      "bytes": 213
+    },
+    "scenes/weapons/EchoHymnWeapon.tscn": {
+      "sha256": "cd11cefc1eadc718fe349a7dafff10a41d91155bcb329077867af988ba700405",
+      "mtime_ns": 1783766453487139000,
+      "bytes": 203
+    },
+    "scenes/weapons/ExplosionWeapon.tscn": {
+      "sha256": "f998b9f2a9c8f361c4862fc785a30df8982f2c90def555e7fdfff2e2e413c17c",
+      "mtime_ns": 1783580788729610300,
+      "bytes": 210
+    },
+    "scenes/weapons/GrenadeLobWeapon.tscn": {
+      "sha256": "cc5e2b5d63aeb8fda57053eb68c17bb511ba9460bb8a492c321eb3353120ce56",
+      "mtime_ns": 1783766453482148700,
+      "bytes": 207
+    },
+    "scenes/weapons/HomingMissileWeapon.tscn": {
+      "sha256": "fb024f4a20098388548aa9d4a0e9135d02d51411a73788ab764f20ddda17667e",
+      "mtime_ns": 1783688790940270700,
+      "bytes": 213
+    },
+    "scenes/weapons/LinearBulletWeapon.tscn": {
+      "sha256": "a47f7a3d2024763870660b46252db1a662dd51584745b77ea49b8bd0293d7fca",
+      "mtime_ns": 1783579778998213200,
+      "bytes": 211
+    },
+    "scenes/weapons/OrbitWeapon.tscn": {
+      "sha256": "6dfb9ad4fc60d681585bec5df0c21f618b97d4dd1113e1d33286a29f8c0c92ce",
+      "mtime_ns": 1783580788727614500,
+      "bytes": 194
+    },
+    "scenes/weapons/RailLanceWeapon.tscn": {
+      "sha256": "dc9d9e60e18fca2fb9c9bad00a772a9d261740ecf4aea2361eff0c437a4a9ef9",
+      "mtime_ns": 1783766453486139700,
+      "bytes": 205
+    },
+    "scenes/weapons/RiftConstructWeapon.tscn": {
+      "sha256": "041a98302700cb2f7563bce0be9b06f412f29dae12df05944e2bbe661d82ffed",
+      "mtime_ns": 1784029776350970900,
+      "bytes": 213
+    },
+    "scenes/weapons/ShadowTwinbladesWeapon.tscn": {
+      "sha256": "4b2e1a839b2b473563bdbdb576ab3c8c3526c7bac1f26a8f127a86cc9d304746",
+      "mtime_ns": 1790994760112667600,
+      "bytes": 217
+    },
+    "scenes/weapons/SolarPiercerWeapon.tscn": {
+      "sha256": "188ba573379f6ee371a00730c6973089d4d1d6ea0bbd7793ea5810249ccfedc6",
+      "mtime_ns": 1790994760111412700,
+      "bytes": 209
+    },
+    "scenes/weapons/TidalCovenantWeapon.tscn": {
+      "sha256": "f08c2f5747b9efad8f1004c340c07e5c2d41cf47deed13c6e87c48b8025e6d6f",
+      "mtime_ns": 1790994760111412700,
+      "bytes": 211
+    },
+    "scenes/weapons/VoidNetWeapon.tscn": {
+      "sha256": "dae31df3513cdb4c5848f8f1561757d1ced8905dc24a3c1731fd07183a3bb7da",
+      "mtime_ns": 1783766453484138900,
+      "bytes": 201
+    },
+    "scripts/animation/true_animation_library.gd": {
+      "sha256": "e17a90246bef150f678e5c390f28fa353dc4c8b93d8d06aa95f477fa0e21c7f9",
+      "mtime_ns": 1790995555398921800,
+      "bytes": 5119
+    },
+    "scripts/arena/arena.gd": {
+      "sha256": "6b4e3c7fc93722c27a3a924657944c6d62f0a7d11c8a68d23fd51629540ab5eb",
+      "mtime_ns": 1792671063703025000,
+      "bytes": 12597
+    },
+    "scripts/arena/arena_background.gd": {
+      "sha256": "7722a58989361c07d780a7acdd3a74eaa1705ef8ff064eb98d388d66adbea2e2",
+      "mtime_ns": 1790934251960427800,
+      "bytes": 60
+    },
+    "scripts/arena/r33_art_probe.gd": {
+      "sha256": "cc42374cbbfd25710b52e72e97494e5988d5834df6c1df90be1f742ee10e9c5e",
+      "mtime_ns": 1790919145706335700,
+      "bytes": 5082
+    },
+    "scripts/arena/r33_ground.gdshader": {
+      "sha256": "b208911314dfaa1afcf8e0f13b7f782155cccc431589432b76efd2dd51ad5304",
+      "mtime_ns": 1790918991163035000,
+      "bytes": 737
+    },
+    "scripts/arena/r33_world_background.gd": {
+      "sha256": "7688e44c1484b1125f0f251e5628588520fc63276349ac0bd13cf7e019db0862",
+      "mtime_ns": 1790919125754566300,
+      "bytes": 16016
+    },
+    "scripts/arena/r34_art_probe.gd": {
+      "sha256": "d02f0ff3e66502d22bfce1df1a39301cdf49b399fa8ff8b1326e51614442c4fd",
+      "mtime_ns": 1790927102552286100,
+      "bytes": 5844
+    },
+    "scripts/arena/r34_composition_probe.gd": {
+      "sha256": "2f9545b1dbce6269cfc563ce588ddecd31c38abdf3d8f85c5748e3c9ddf1cd9c",
+      "mtime_ns": 1790926439941270800,
+      "bytes": 4864
+    },
+    "scripts/arena/r34_final_storm_probe.gd": {
+      "sha256": "a522dc3fc9ba1022870ac32cbd08d7d43a95511a19b7bf6a54ff68b157710cdb",
+      "mtime_ns": 1790927802721659800,
+      "bytes": 6026
+    },
+    "scripts/arena/r34_raster_ground.gdshader": {
+      "sha256": "2b5f6b4f99bf805bdb7ac70c3785c1720798d4e0f138674f315b12dab836a41c",
+      "mtime_ns": 1790926030834757700,
+      "bytes": 657
+    },
+    "scripts/arena/r34_world_background.gd": {
+      "sha256": "1c6b6b17f98ebf3be38ec54a8270b7ba3027efee03aff702651ecc2584deb1f0",
+      "mtime_ns": 1790926796546880800,
+      "bytes": 13203
+    },
+    "scripts/arena/r36_loop_world_background.gd": {
+      "sha256": "799785e5a3f0ef2e132afbf89e35e514925310951bbd8f66fd060d2f26c0c1ca",
+      "mtime_ns": 1790994651155540900,
+      "bytes": 11639
+    },
+    "scripts/arena/r36_loop_world_ground.gdshader": {
+      "sha256": "2bdfbf0476c1185ec753c76b34b04b7c74db2c0d6ad3e8b2a85969c686bfc7ba",
+      "mtime_ns": 1790954840557366300,
+      "bytes": 3427
+    },
+    "scripts/arena/r4_battle_identity.gd": {
+      "sha256": "f2e42024fa7937cf1880ca5ed90f8a2f05a1f24f9c7750ceeecd7d60406a866a",
+      "mtime_ns": 1792671063700686400,
+      "bytes": 3044
+    },
+    "scripts/arena/r4_encounter_landmarks.gd": {
+      "sha256": "1cdad9c29636dc744c2a45c6fdd8c5eaa30d1e173a137d9a35154e83715a1782",
+      "mtime_ns": 1792671063702028000,
+      "bytes": 2069
+    },
+    "scripts/arena/run_theme.gd": {
+      "sha256": "b0f92fd796519620c79aab5f5b30c6d2533b0d6d93dd4dd68d813af78e2f4c7c",
+      "mtime_ns": 1790994651155540900,
+      "bytes": 1082
+    },
+    "scripts/autoload/achievement_progress.gd": {
+      "sha256": "e5c29af0a9ba7408b8a9767dccb7a4c15491c31c5f6afd44a3437e7e84c06352",
+      "mtime_ns": 1792661812200536400,
+      "bytes": 5354
+    },
+    "scripts/autoload/audio_manager.gd": {
+      "sha256": "99339b539f87ed6d596ec5502a483fa0a861f2b1bf85dac5e569d204d30628fd",
+      "mtime_ns": 1792661812201552600,
+      "bytes": 15637
+    },
+    "scripts/autoload/entity_factory.gd": {
+      "sha256": "b04b99b88183e6b064c39ac9f8c992f86026d288d7726084e8b73857a1908a25",
+      "mtime_ns": 1792671063703348200,
+      "bytes": 48464
+    },
+    "scripts/autoload/game_manager.gd": {
+      "sha256": "88527592584a10648673de9790de64f9a71e7bdeda770d799da8842c90e743ae",
+      "mtime_ns": 1792671434904654800,
+      "bytes": 77032
+    },
+    "scripts/autoload/meta_progress.gd": {
+      "sha256": "977736c6a14c66e72b69fb3f15c33260b509987fbf89780f171d9a3233edf02c",
+      "mtime_ns": 1792670411506327500,
+      "bytes": 19609
+    },
+    "scripts/autoload/player_settings.gd": {
+      "sha256": "4b6ec4f896e6c0dc08eba4a0f734667d3a7709a450d7e2e84380b3a6ceec9f8a",
+      "mtime_ns": 1792661812200536400,
+      "bytes": 4047
+    },
+    "scripts/debug/arena_instrumentation_run.gd": {
+      "sha256": "8c6f5d21bc58ee5476448ff29e932fc47ae0505b66d377b00a4ade3cdf2b836f",
+      "mtime_ns": 1784191645579843400,
+      "bytes": 9776
+    },
+    "scripts/debug/attack_vfx_r34_pool_test.gd": {
+      "sha256": "a155be703cd2f9721c7de347bf37cf498469f2c157232b948f8b32c57ea3118b",
+      "mtime_ns": 1790935114432615600,
+      "bytes": 11071
+    },
+    "scripts/debug/auto_channel_r36_test.gd": {
+      "sha256": "be1afe5fb7a505d023d07749afa40f181116c61cc38f33f45ad668920154cf30",
+      "mtime_ns": 1790934978716526600,
+      "bytes": 4364
+    },
+    "scripts/debug/balance_mock_run.gd": {
+      "sha256": "41097dc878dc69097f267cb35a024e6a6f95636751a771be6fcc9ec2b81978fc",
+      "mtime_ns": 1784191645581348700,
+      "bytes": 13113
+    },
+    "scripts/debug/captain_combo_channel_r35_test.gd": {
+      "sha256": "9f21408fca5a135e86f9866f1232a95e8ba2d9d59f43791a1be62bb33ee3b740",
+      "mtime_ns": 1790934978715536600,
+      "bytes": 14385
+    },
+    "scripts/debug/combat_polish_r37_test.gd": {
+      "sha256": "4ece3f0b0178263c9210ace4c33753c8b6b7a5de0e9d44169e37e1482c121968",
+      "mtime_ns": 1790955572429030800,
+      "bytes": 12744
+    },
+    "scripts/debug/combat_r32_regression_test.gd": {
+      "sha256": "249c9128fcae22cc195a9880663c76dd828e5a75c4256438d1da17a653446ac5",
+      "mtime_ns": 1790929423894023000,
+      "bytes": 10682
+    },
+    "scripts/debug/combat_r33_regression_test.gd": {
+      "sha256": "8490fe41bdb8628cad5986c1cbea8fc144dd3cf3f2a9c9257bf90c7c23478f1f",
+      "mtime_ns": 1790935282341372100,
+      "bytes": 12221
+    },
+    "scripts/debug/content_r1_navigation_test.gd": {
+      "sha256": "d23a8ea80a9a1b2f403e04b1b65a84bb0c2498756a68cfbfa5e182bbfcda01fc",
+      "mtime_ns": 1792646704895165100,
+      "bytes": 3592
+    },
+    "scripts/debug/content_r1_review.gd": {
+      "sha256": "54e026dd1b9bd368ea00ffb5cfb9994c84f1ebdb7244ee81cb9fb09a85f1f210",
+      "mtime_ns": 1792647548119026900,
+      "bytes": 4007
+    },
+    "scripts/debug/content_r1_test.gd": {
+      "sha256": "4f77d71005dba17da7fcf83eec8169abd405f57e66cd6e0a79b17fc85fef40e4",
+      "mtime_ns": 1792660061096280200,
+      "bytes": 12111
+    },
+    "scripts/debug/content_r2_1_review.gd": {
+      "sha256": "820ea17a4110b87bd6063aec94014a2f6d416682524d0ef05eb1716a400d933d",
+      "mtime_ns": 1792660303441008700,
+      "bytes": 14248
+    },
+    "scripts/debug/content_r2_review.gd": {
+      "sha256": "b105ecd86c2a289d79dee20f5a4f045eac22841169fd23441c239ee2136c60f1",
+      "mtime_ns": 1792650514817326600,
+      "bytes": 5461
+    },
+    "scripts/debug/content_r2_run.gd": {
+      "sha256": "680d02e93d59ef66e4c8bc0bbcbbe5d2218853cc09787e36be93f7fe67a6aacb",
+      "mtime_ns": 1792651390425555500,
+      "bytes": 5284
+    },
+    "scripts/debug/content_r2_test.gd": {
+      "sha256": "7b35f29bf55b02dd63e1b9525cb1a9ad40c52711beb16dcea3f4ce00c96a03f1",
+      "mtime_ns": 1792659296253855000,
+      "bytes": 19601
+    },
+    "scripts/debug/content_r3_review.gd": {
+      "sha256": "71cad71106b1f7555b08d03f2420beed382961e1f99e302d330497e3bd23877f",
+      "mtime_ns": 1792666470100263800,
+      "bytes": 8226
+    },
+    "scripts/debug/content_r3_run.gd": {
+      "sha256": "f1ba9811d95aa4fb6d666d08e560b4e0911726170336e9775c978a2ac35bd9e3",
+      "mtime_ns": 1792665728794455700,
+      "bytes": 7111
+    },
+    "scripts/debug/content_r3_test.gd": {
+      "sha256": "36894376d64357fa4e61683cdfc10784096b47b0a6d0f924fd557e72019ad510",
+      "mtime_ns": 1792666470099032000,
+      "bytes": 32432
+    },
+    "scripts/debug/content_r4_pilot.gd": {
+      "sha256": "c883e8a0bb1711e493fcdec0df2c57d824d8dda221ea0ddcbf5feda481be24be",
+      "mtime_ns": 1792671145810221700,
+      "bytes": 6012
+    },
+    "scripts/debug/content_r4_review.gd": {
+      "sha256": "0810816d6ff6515f857a19c84f11fe0caee6f3f9654d8501e117128bcb37d69f",
+      "mtime_ns": 1792671145811258900,
+      "bytes": 8773
+    },
+    "scripts/debug/content_r4_run.gd": {
+      "sha256": "9272e0bc446e8f97c80c6a0d3e2e3ad018642b0e47838632556279d590f105dc",
+      "mtime_ns": 1792671145810221700,
+      "bytes": 7246
+    },
+    "scripts/debug/content_r4_test.gd": {
+      "sha256": "4653f233e128b7db6ec6621760d934fa0c551a775af025ade573f5b5b7d396e5",
+      "mtime_ns": 1792671481208687700,
+      "bytes": 7611
+    },
+    "scripts/debug/enemy_art_regression_test.gd": {
+      "sha256": "5aaf446b8392993f0c42d0471459e737f04a8e54065ea6709a212a1a64193a20",
+      "mtime_ns": 1791276657002768800,
+      "bytes": 7743
+    },
+    "scripts/debug/firepower_r36_test.gd": {
+      "sha256": "448ce7a745659791e34b295f20636c7f6be542638871d11d267a7a2d7e99dd91",
+      "mtime_ns": 1790934724224537500,
+      "bytes": 8502
+    },
+    "scripts/debug/gameplay_cap_test.gd": {
+      "sha256": "0eb4cad85e84689992e5e7ef11a82b6f9260f0685e75f5301e2f97a5123928b1",
+      "mtime_ns": 1790920573953007100,
+      "bytes": 5247
+    },
+    "scripts/debug/hero10_balance_instrument.gd": {
+      "sha256": "6299db605cf4600d2d0c535ba365bbc2418dd1997174e97868652ca80fd39d3e",
+      "mtime_ns": 1784195230511058000,
+      "bytes": 7486
+    },
+    "scripts/debug/hero10_closure_test.gd": {
+      "sha256": "b207d02daeebe2d6eb68122bd18c39439f5e4f4ca5ebd9654556f76644589059",
+      "mtime_ns": 1784046727941224600,
+      "bytes": 8571
+    },
+    "scripts/debug/independent_stage_r34_probe.gd": {
+      "sha256": "d4f9b728ffef4471f7703e07c1d9c6426a6538ece14c75e5f8b5e8a5142f763a",
+      "mtime_ns": 1790996377583816200,
+      "bytes": 9727
+    },
+    "scripts/debug/m1_regression_test.gd": {
+      "sha256": "8d18b76c5c5fabde1cd453b22e150946d6103e9870d0d7887567b5089a14a545",
+      "mtime_ns": 1783904671982925900,
+      "bytes": 20438
+    },
+    "scripts/debug/m2_regression_test.gd": {
+      "sha256": "22852d5c42adedf0d09603477f5e2b40f2ef94f610164c29cd400c92dce48478",
+      "mtime_ns": 1783783698108843600,
+      "bytes": 9477
+    },
+    "scripts/debug/m3_regression_test.gd": {
+      "sha256": "7b8dbd526b0a67a9f2d4e0dc4121b86be4e45a2830cc01929c23a8fdf9f1237b",
+      "mtime_ns": 1783785156291009000,
+      "bytes": 2615
+    },
+    "scripts/debug/m4_regression_test.gd": {
+      "sha256": "f1cfe0b5602b7d2c190eaffaadd0dff0fcaa6712da909805b72013c7d0c9551b",
+      "mtime_ns": 1783997162224025900,
+      "bytes": 9254
+    },
+    "scripts/debug/mobile_input_smoke_test.gd": {
+      "sha256": "9150edc3c88ac16ab222caefeeb39689669ce63d391b6497cce893f8dcfaa5d8",
+      "mtime_ns": 1783905008203392400,
+      "bytes": 6594
+    },
+    "scripts/debug/orbit_blade_hit_repro.gd": {
+      "sha256": "9e4878c30a951865d1d30699f20cea8a303dc9cbff7011c017ccf3079b76ef87",
+      "mtime_ns": 1783689296462994700,
+      "bytes": 4292
+    },
+    "scripts/debug/pool_contract_test.gd": {
+      "sha256": "60fce1dfcbb3feefcc418ff5a77e94c4738c8eb944dfbe90ca585f9103c4b7bf",
+      "mtime_ns": 1790920573951566300,
+      "bytes": 7612
+    },
+    "scripts/debug/projectile_performance_r36_test.gd": {
+      "sha256": "4f0c806758c7c863ab86bbd4292c2bad189a84f9f3be11188013941dbcbe9461",
+      "mtime_ns": 1790937502160251500,
+      "bytes": 3476
+    },
+    "scripts/debug/r10_5_regression_test.gd": {
+      "sha256": "c626079e008bd42a21775548f4c225c26602e5ff7401393d273ad6b06d404717",
+      "mtime_ns": 1790927518372318000,
+      "bytes": 11754
+    },
+    "scripts/debug/r11_regression_test.gd": {
+      "sha256": "75bcf9d9b85e55e3fe2b9cb28b0f3d6cd9fac7bac1321f8e107db80c8dafb7aa",
+      "mtime_ns": 1784004250832850500,
+      "bytes": 16892
+    },
+    "scripts/debug/r12_regression_test.gd": {
+      "sha256": "02bb336ba0a48f65d0c500819ab3ba5f68fc98752a76b7a8e3ed7ba2082e2831",
+      "mtime_ns": 1783996911293248800,
+      "bytes": 5007
+    },
+    "scripts/debug/r13_regression_test.gd": {
+      "sha256": "6f81665442707414256d72f00c73023e96bcb606f02de11a9cbb8f8f7c8d612b",
+      "mtime_ns": 1790921106887799700,
+      "bytes": 7895
+    },
+    "scripts/debug/r14_regression_test.gd": {
+      "sha256": "6c4c1e24bf07a16d79f9479d3c4b0b9a1f161810a185ab63081af15b1084ebd7",
+      "mtime_ns": 1792670765397578600,
+      "bytes": 46963
+    },
+    "scripts/debug/r25_parallax_regression_test.gd": {
+      "sha256": "fcf6837c5d4024a5f93ad63b1905e68fb4ebb999445f02d2bafe8ec07d0522fc",
+      "mtime_ns": 1784280272590086000,
+      "bytes": 3465
+    },
+    "scripts/debug/r29_menu_modal_test.gd": {
+      "sha256": "e40d1ef2a50f780f26406c492015cdd11ff418a1ef67125bb68a3202463b5476",
+      "mtime_ns": 1790996285211139000,
+      "bytes": 9516
+    },
+    "scripts/debug/r30_playtest_fix_test.gd": {
+      "sha256": "98bfce5647fad2c73df1f1e637fef20acc8a89702340b77534ca706ccf31471d",
+      "mtime_ns": 1784541089495476100,
+      "bytes": 6653
+    },
+    "scripts/debug/r31_endgame_gate.gd": {
+      "sha256": "436987c6e21950c34dd93420bab60649e228fb294d40f60ebac90a25dff3f47e",
+      "mtime_ns": 1790928003361781800,
+      "bytes": 11678
+    },
+    "scripts/debug/r31_endgame_qa_hook.gd": {
+      "sha256": "7a25f1ac04b4a3387a9ffea728c25deaaca3f19d52b8586c399f587c9f84a8d8",
+      "mtime_ns": 1792651294866755600,
+      "bytes": 4503
+    },
+    "scripts/debug/r32_experience_test.gd": {
+      "sha256": "d4b36ef3fd3bb21d7cc07e90088e1537ff32ea0e21d5f003396435d1d89f6b9b",
+      "mtime_ns": 1790915632876247900,
+      "bytes": 4322
+    },
+    "scripts/debug/r32_loot_test.gd": {
+      "sha256": "cb527cfc6fd06b02f52b46a143b01ce9a9738a7404a76692ad864eaa3628e9ff",
+      "mtime_ns": 1790926826922710400,
+      "bytes": 15090
+    },
+    "scripts/debug/r33_experience_regression_test.gd": {
+      "sha256": "fd57f2d385398e27d320a97eb36d9f07f99eae2779a7c7b03ed7adbe66a3c41b",
+      "mtime_ns": 1790920147027854800,
+      "bytes": 2200
+    },
+    "scripts/debug/r33_sprite_bake.gd": {
+      "sha256": "01fa780b41036ae34d710dbabb078cdb8166318a36c2cb0dbb888ba6be67d72c",
+      "mtime_ns": 1790918861509491400,
+      "bytes": 1278
+    },
+    "scripts/debug/r34_campaign_transition_test.gd": {
+      "sha256": "2f26e9ceecab7705962dc5277fc84c7353fe31660403261161930ecea5dcd2ab",
+      "mtime_ns": 1792651294866755600,
+      "bytes": 11910
+    },
+    "scripts/debug/r34_world_map_ui_test.gd": {
+      "sha256": "1776c1aac237a4f5ecd52349ce8849b991594728897efab33247a26161fb1c27",
+      "mtime_ns": 1790995126019299500,
+      "bytes": 4211
+    },
+    "scripts/debug/r35_endless_critical_test.gd": {
+      "sha256": "5dcd536663baf12ac8ac77292f96153848548ddc4f8aa1f8009b8a2c39cdca75",
+      "mtime_ns": 1792651294866755600,
+      "bytes": 23852
+    },
+    "scripts/debug/r35_native_combat_review.gd": {
+      "sha256": "6aedd131cb63f83df4d9c5a679807ca4b84955d41bfa95fc5b21ba8ad7041da6",
+      "mtime_ns": 1790931941068504200,
+      "bytes": 11598
+    },
+    "scripts/debug/r36_camera_diagnostic.gd": {
+      "sha256": "bfec52eaebf7b774889c577fc67130b8d501f69791b234a5fbed5f2d1fcc88dd",
+      "mtime_ns": 1790957362335980100,
+      "bytes": 774
+    },
+    "scripts/debug/r36_latest_visual_review.gd": {
+      "sha256": "9b4d6eb27e4f5b89b372ab2a19a7a0afa0fb752db501d0505872503de90798b9",
+      "mtime_ns": 1790936764579724800,
+      "bytes": 4914
+    },
+    "scripts/debug/r36_summon_integration_test.gd": {
+      "sha256": "c773d158e64ef3f4d40b6b9887d9998b4f0b8aa4599e227f84229a1c8c049c70",
+      "mtime_ns": 1790935485264358400,
+      "bytes": 3686
+    },
+    "scripts/debug/r36_summon_regression_test.gd": {
+      "sha256": "8948f902691b6fee0ffe844210171f3ccba87ae1444d361b5b699ee13ffcfbb5",
+      "mtime_ns": 1790938301615191200,
+      "bytes": 13973
+    },
+    "scripts/debug/r36_touch_clearance_test.gd": {
+      "sha256": "7cf10d91a9d3b322593d5537c1d7818cd164235788397ed55cc80bf3f9c14cb3",
+      "mtime_ns": 1791013597259333300,
+      "bytes": 4660
+    },
+    "scripts/debug/r36_world_elite_test.gd": {
+      "sha256": "badfb990838cba1efc55285ed5fc7586fee247c1c50e1760cd6cf079dc732feb",
+      "mtime_ns": 1790936666243718200,
+      "bytes": 4300
+    },
+    "scripts/debug/r37_world_polish_test.gd": {
+      "sha256": "821342bb541dc45b4c40f6ce23c058a97c1c8bd5a476b3d960346b704c42a968",
+      "mtime_ns": 1790954972679690600,
+      "bytes": 4081
+    },
+    "scripts/debug/r38_art_gate.gd": {
+      "sha256": "0be67488281a67255373b0af31c619a7e874fe2c04f025a45ff1c01c2e432ca9",
+      "mtime_ns": 1790995742563924900,
+      "bytes": 5094
+    },
+    "scripts/debug/r38_content_test.gd": {
+      "sha256": "3a16c65f7c2be3b4dd5f948548a7252a9ca0356ea225538faf1e7ef6632b6a1c",
+      "mtime_ns": 1792650378716474300,
+      "bytes": 14529
+    },
+    "scripts/debug/r38_hero_weapon_test.gd": {
+      "sha256": "2e097370aefedc79e6d6bb39b398ac5bf67e936d27d82c29305e3a5c59fedc44",
+      "mtime_ns": 1790995895430376400,
+      "bytes": 17578
+    },
+    "scripts/debug/r38_map_expansion_test.gd": {
+      "sha256": "c564eadea88d1fcc1c9a8941205fb5b467cf67756110399c66730bc0d54bd2d6",
+      "mtime_ns": 1790995559877228400,
+      "bytes": 3451
+    },
+    "scripts/debug/r39_mobile_hud_test.gd": {
+      "sha256": "302534341c7202e7682f6818280afcfa2622ac53ff4b33db5154719b6e41035b",
+      "mtime_ns": 1792659296255155500,
+      "bytes": 15366
+    },
+    "scripts/debug/r40_facing_attack_test.gd": {
+      "sha256": "10c0d72760a61911a4c63ac3fe4c3f82847853338d758099b82cdfae27808657",
+      "mtime_ns": 1791166899642806100,
+      "bytes": 22800
+    },
+    "scripts/debug/r41_runtime_budget_test.gd": {
+      "sha256": "11dc2d6d61622e934b2d168c6f43f0fe3ac9d898247fa78530817eb1cb2584e4",
+      "mtime_ns": 1791278271092682500,
+      "bytes": 2109
+    },
+    "scripts/debug/r42_formation_capture.gd": {
+      "sha256": "4cd2b2e0b4a8541b48ad651f6ac633e580a3989aa8ad347d0ea50a64b472139d",
+      "mtime_ns": 1792032924245994700,
+      "bytes": 2103
+    },
+    "scripts/debug/r42_formation_test.gd": {
+      "sha256": "822433f4fa3efc0f2a81cc1e8ba04a28a6b83dc44dd5b276d79b131b15a589fa",
+      "mtime_ns": 1792659296253855000,
+      "bytes": 12914
+    },
+    "scripts/debug/r43_mobile_tactics_test.gd": {
+      "sha256": "b3ca2c43359adacabf2cea324b9b6d70995987efb69c6709bbcf5ee3b18b9828",
+      "mtime_ns": 1792659296253855000,
+      "bytes": 15564
+    },
+    "scripts/debug/r44_long_run.gd": {
+      "sha256": "497908a397b373646820bfebd68fdf6d8af80f5346202c7fd5087481c1f53aef",
+      "mtime_ns": 1792067212349007300,
+      "bytes": 4955
+    },
+    "scripts/debug/r44_store_test.gd": {
+      "sha256": "6de0a08706b9a7186cfb7fa3f70bf3041d3e36d86b9dc57528d4d1d628bacad9",
+      "mtime_ns": 1792650084773137000,
+      "bytes": 10075
+    },
+    "scripts/debug/r5_regression_test.gd": {
+      "sha256": "fe6abd4cb162b7786e720532d92e93d6e462ba825c8799c460a01dcff5ec04cc",
+      "mtime_ns": 1784003888795971000,
+      "bytes": 14085
+    },
+    "scripts/debug/r6_regression_test.gd": {
+      "sha256": "2d72c67ad90810da6de30ee033b45dbc5bae9ad7e7f8d31ac6734f8c8fabf386",
+      "mtime_ns": 1783652136323411600,
+      "bytes": 10085
+    },
+    "scripts/debug/r7_regression_test.gd": {
+      "sha256": "25fcd5c91a1ac0231fc2222e975c82dcbf7b4da50e4bfd52e26f10a8007023e0",
+      "mtime_ns": 1783996882599796300,
+      "bytes": 30453
+    },
+    "scripts/debug/review_r32_integration_test.gd": {
+      "sha256": "6445af0e475ed3a5418d070442679ad34442b2b2166d6eecb40749fb9916e031",
+      "mtime_ns": 1790957362336976800,
+      "bytes": 9774
+    },
+    "scripts/debug/review_r36_root_test.gd": {
+      "sha256": "80a3e030d304a64e44346afc2e333c4c0805bc798d03e152c9111218c72ce499",
+      "mtime_ns": 1790936485750176300,
+      "bytes": 5616
+    },
+    "scripts/debug/reward_special_r36_test.gd": {
+      "sha256": "0981e569a25587821718a020d0e3c706932ac0e29edec663af768ad1a4d3a30c",
+      "mtime_ns": 1790938717176974000,
+      "bytes": 8662
+    },
+    "scripts/debug/spawn_density_r32_test.gd": {
+      "sha256": "dfe0b246f00563ee7150fac72731da85758e6da463583f82cb19595e1151314b",
+      "mtime_ns": 1790936666244860800,
+      "bytes": 7552
+    },
+    "scripts/debug/squad_smoke_test.gd": {
+      "sha256": "d094d67737d016ea4fdf2f891a4518eff170baa7f73224e2057ddfafac84898a",
+      "mtime_ns": 1784211055091702900,
+      "bytes": 52
+    },
+    "scripts/debug/stress_test.gd": {
+      "sha256": "0f49059083d7227770871057d7ecc47efba562d1d782ae215d8a77fc3d653587",
+      "mtime_ns": 1784196021380817700,
+      "bytes": 28406
+    },
+    "scripts/debug/true_animation_regression_test.gd": {
+      "sha256": "cb004497cc0911699a8c1421a38a17b4d009570285c6bfb22545850b5eb1d296",
+      "mtime_ns": 1784055481419846200,
+      "bytes": 18711
+    },
+    "scripts/debug/weapon_smoke_test.gd": {
+      "sha256": "af5fa00ade237d29212a29c01854d83df59eb839ad88ff445cc1a00315835760",
+      "mtime_ns": 1784030496336859500,
+      "bytes": 4701
+    },
+    "scripts/enemies/enemy.gd": {
+      "sha256": "b4b138e2dd67cb039f9a4d84b3f6acdfd26bbca83b9f2efd096205e4de94d68a",
+      "mtime_ns": 1792661598483684500,
+      "bytes": 77199
+    },
+    "scripts/enemies/enemy_spawner.gd": {
+      "sha256": "39362f50ebeba3400d2059fcd5665a9ed492df4f6aeeeda83162a1f5330f3833",
+      "mtime_ns": 1792648969498828500,
+      "bytes": 21569
+    },
+    "scripts/heroes/follower_controller.gd": {
+      "sha256": "f1eeb7887cf1d096f4c244bd9090a8b75e64e643d47ffacbeb079ebfe33a8edb",
+      "mtime_ns": 1792032182004266400,
+      "bytes": 1411
+    },
+    "scripts/heroes/hero.gd": {
+      "sha256": "29c5388289f8c6440191ab92e5b680c8021d498249a2b1e27dc96e6b4b2e5af6",
+      "mtime_ns": 1792661766371304000,
+      "bytes": 52626
+    },
+    "scripts/heroes/player_controller.gd": {
+      "sha256": "7db0ee65feab256ce44ce1d1a1c96392449e7f046355353f1b81eb2243fca561",
+      "mtime_ns": 1792032182012099400,
+      "bytes": 1806
+    },
+    "scripts/heroes/squad_manager.gd": {
+      "sha256": "890f3f4977ffe34f42cd6743596372996e448ca8e0ed391755b5937fa8e16028",
+      "mtime_ns": 1792662802055718600,
+      "bytes": 42106
+    },
+    "scripts/pets/companion_pet.gd": {
+      "sha256": "208b34d60a8ccd65e69112d64a7e68643cbf4c04f81a1d84cd560731a2cb0627",
+      "mtime_ns": 1792650367360281200,
+      "bytes": 8542
+    },
+    "scripts/pets/pet_fireball.gd": {
+      "sha256": "ff1f07c571e4c66b4d739c05fb39092b14423da3bbac8fa170f03d971ed8368b",
+      "mtime_ns": 1792650323299335300,
+      "bytes": 2421
+    },
+    "scripts/pets/summoned_skill.gd": {
+      "sha256": "4c826c637bcbbdd343c92f36a73a749c1f7a55f14bbe2b5f4f499edda7bbbdf5",
+      "mtime_ns": 1790936266903828800,
+      "bytes": 5046
+    },
+    "scripts/pickups/equipment_pickup.gd": {
+      "sha256": "08a2aeb64479da455ff8a87937ff10672835d7490bddbc06537fb3efe7866a3d",
+      "mtime_ns": 1792652423166246700,
+      "bytes": 5958
+    },
+    "scripts/pickups/pickup.gd": {
+      "sha256": "1e4ced08922cf5a817304b1566e3db7dafac504fb50b702855ebb240451de1d3",
+      "mtime_ns": 1792671063704351400,
+      "bytes": 8670
+    },
+    "scripts/player/player.gd": {
+      "sha256": "c4861c2a9adad0c6c49699cb29acfe9012af3f3e04e709ea3a6d932e980aff8b",
+      "mtime_ns": 1783581672186076100,
+      "bytes": 39
+    },
+    "scripts/player/player_visual.gd": {
+      "sha256": "32bbba692cd48a725de430d86666ae136b881934a11a83b869de524d33fba895",
+      "mtime_ns": 1791165348937421100,
+      "bytes": 15226
+    },
+    "scripts/pooling/node_pool.gd": {
+      "sha256": "4fa578c2bafcd40e254bab1d02dfbb69941ff30fcafe2e986904baa2e9fa84ee",
+      "mtime_ns": 1790929824963755600,
+      "bytes": 3773
+    },
+    "scripts/projectiles/explosion_area.gd": {
+      "sha256": "213b46a310568a699094aca771f75789b55dea87150b05dce789df19952f19be",
+      "mtime_ns": 1790937429586315400,
+      "bytes": 9071
+    },
+    "scripts/projectiles/hazard_zone.gd": {
+      "sha256": "d18428ecfc208e871a6fde91dc2f2b0808a3a1978b558d0c9be7a7a43ccbfc74",
+      "mtime_ns": 1792648930540261900,
+      "bytes": 6558
+    },
+    "scripts/projectiles/orbit_projectile.gd": {
+      "sha256": "3ca70da57c9b76ffbcb77a35c2933ca329d2037e9482dedf5cb701f57d3e702e",
+      "mtime_ns": 1792648930539746800,
+      "bytes": 12481
+    },
+    "scripts/projectiles/projectile.gd": {
+      "sha256": "56aa66be6053a44d061e2c985034d5f7ab670b178f344ebb15ffb8f82878dd64",
+      "mtime_ns": 1792648930539211900,
+      "bytes": 34848
+    },
+    "scripts/projectiles/rift_construct.gd": {
+      "sha256": "368dde9bc216b9e8dd110f66f7747c961c8339959cb2cf96f9c08ec2837f83a4",
+      "mtime_ns": 1792648930539746800,
+      "bytes": 7331
+    },
+    "scripts/resources/hero_data.gd": {
+      "sha256": "57540356be8c3b3b2ddec44cca8329f309995edbda8eeabe2e88075fdeeebfb1",
+      "mtime_ns": 1792067212347013800,
+      "bytes": 825
+    },
+    "scripts/resources/r38_weapon_data.gd": {
+      "sha256": "8ffec2baa32879f0e563f43111dd875290a9fac1a6a59a3555f4c3ec0bbc5bb4",
+      "mtime_ns": 1790995079561481400,
+      "bytes": 4203
+    },
+    "scripts/resources/squad_data.gd": {
+      "sha256": "92251bbd21672449062b592772fcfd1a19289b0fce846bf8bf2c0460906f168c",
+      "mtime_ns": 1783766711939097900,
+      "bytes": 357
+    },
+    "scripts/resources/weapon_catalog.gd": {
+      "sha256": "9d3d4c8769e3f78de5ee82379a1ed2c393b3fa2a3f6cba44e64329b9f921fa9d",
+      "mtime_ns": 1783581039399387100,
+      "bytes": 345
+    },
+    "scripts/resources/weapon_data.gd": {
+      "sha256": "25a5e07519e365c53b727c4aa3ef5fb4ddfb3a5fa31f2e58c8d051cf18a7facb",
+      "mtime_ns": 1792067212348010300,
+      "bytes": 17181
+    },
+    "scripts/services/art_resources.gd": {
+      "sha256": "1c3fce7cf7d36e4d3fa8cb4463c22567c27f8463b9aa0df454622c99ed839175",
+      "mtime_ns": 1783757346370392900,
+      "bytes": 1950
+    },
+    "scripts/services/coin_summon_director.gd": {
+      "sha256": "3cecbe4490ceab8664182de6e7f366c0f624388d90ba7bdf7bdf2c3e3d296d49",
+      "mtime_ns": 1790938301614153600,
+      "bytes": 11701
+    },
+    "scripts/services/critical_strike_resolver.gd": {
+      "sha256": "e178fc351e3e2feebf3092d21be29b75a692b2e945e0427b5ef4f38b8c007c0c",
+      "mtime_ns": 1790928873376834900,
+      "bytes": 515
+    },
+    "scripts/services/encounter_pressure.gd": {
+      "sha256": "afcd0c93aaf4e431afcebbc4d341961786ac11b910e1b630a56d71385042fc4f",
+      "mtime_ns": 1792670827699740100,
+      "bytes": 5745
+    },
+    "scripts/services/enemy_spatial_index.gd": {
+      "sha256": "9f6ba036e1eb9663b6b523f9faff3e9e6d36614bb2ed90752b57918ac14b4a8f",
+      "mtime_ns": 1783646653229454200,
+      "bytes": 3888
+    },
+    "scripts/services/equipment_catalog.gd": {
+      "sha256": "1093f47cc79fd9ff635927a41a893946aa833b44ffe61fea4e002906a1de755e",
+      "mtime_ns": 1790914717900497600,
+      "bytes": 3415
+    },
+    "scripts/services/formation_relay.gd": {
+      "sha256": "2a114395dfa7471922cc938b3ca858f3282d3560356b8f6ffc114e5652bad4b0",
+      "mtime_ns": 1792670827699740100,
+      "bytes": 12222
+    },
+    "scripts/services/loop_world_topology.gd": {
+      "sha256": "d061fd6e8f621cf054caacf0e87d8bcdb0050b3dbd5ce2b0365e258fc5a8993c",
+      "mtime_ns": 1790935801730979500,
+      "bytes": 3156
+    },
+    "scripts/services/loot_director.gd": {
+      "sha256": "1f0d608f1f6cfdbfe16c71dafb4ca303da07dec50049e1106074eff32fee24c3",
+      "mtime_ns": 1790919467708777500,
+      "bytes": 9301
+    },
+    "scripts/services/mobile_tuning.gd": {
+      "sha256": "1afce66b5b39531ad051367c15963e385014b904de16eb3258cca6a817a6c1b5",
+      "mtime_ns": 1792671063704351400,
+      "bytes": 24396
+    },
+    "scripts/services/pet_catalog.gd": {
+      "sha256": "c6060c95315f25aad13e0c060079342db16b6590ff966c9b83d8afd0bcf2b594",
+      "mtime_ns": 1790934159736797100,
+      "bytes": 2579
+    },
+    "scripts/services/qa_profile.gd": {
+      "sha256": "e2e13f161e3f401081c69b661a23c696cf10645237d5c0d9695ddbcff6141c14",
+      "mtime_ns": 1792661812197262300,
+      "bytes": 518
+    },
+    "scripts/services/r33_sprite_painter.gd": {
+      "sha256": "ffdcaa5a137d3a10dd246abe07d341c0115e0d273a2e7c89a4e63cd01babe7e4",
+      "mtime_ns": 1790920992519580600,
+      "bytes": 10308
+    },
+    "scripts/services/r38_enemy_catalog.gd": {
+      "sha256": "df3cc083e38721568483727a57ba3998202b58595ab91042fe67d620c073de07",
+      "mtime_ns": 1790994906765036700,
+      "bytes": 3227
+    },
+    "scripts/services/skill_catalog.gd": {
+      "sha256": "186beefa7c4fecd9b0fe0ddabc9ecbe8d96010215d496d2ef027aef9d85d763c",
+      "mtime_ns": 1790995125540819400,
+      "bytes": 3241
+    },
+    "scripts/services/special_elite_catalog.gd": {
+      "sha256": "7712b6a0e03ebd811fb2e551b0584e09bce0d431671968b4cbd18b834f9c548a",
+      "mtime_ns": 1790934166472404300,
+      "bytes": 2526
+    },
+    "scripts/services/sprite_loader.gd": {
+      "sha256": "a82c61b8aeb50826fe7b506323c6644f98a5279f9ab282ce5d35c1865da4cebd",
+      "mtime_ns": 1791276480839956300,
+      "bytes": 3000
+    },
+    "scripts/services/stage_catalog.gd": {
+      "sha256": "7067185fc22ab5b8c6651b07649ac2a2e5bedf5224833a784a452948cb4287b3",
+      "mtime_ns": 1790994906763781600,
+      "bytes": 5823
+    },
+    "scripts/services/starting_build_catalog.gd": {
+      "sha256": "7b72628c194d440f71961d01d1a95acc26b4eed2360a4fe684f9a8159cd4b337",
+      "mtime_ns": 1792662767415172200,
+      "bytes": 4695
+    },
+    "scripts/services/tactical_catalog.gd": {
+      "sha256": "65378acf377b099c1292b7b73f8dc7188983ccba8eadd200124162ea94e790cc",
+      "mtime_ns": 1792056484560354200,
+      "bytes": 1498
+    },
+    "scripts/services/tactical_director.gd": {
+      "sha256": "410fe0080ecf6d5becea38d5c8d960592c6da367a368ea930497d085ba33bcec",
+      "mtime_ns": 1792670827699740100,
+      "bytes": 6279
+    },
+    "scripts/services/upgrade_preview.gd": {
+      "sha256": "da8cb658253f9ff51a3f6063bd68c42409c81a82e5d51b3aafcca2d765255bea",
+      "mtime_ns": 1790914912491689900,
+      "bytes": 6036
+    },
+    "scripts/services/web_reachability_probe.gd": {
+      "sha256": "8a05990710ca2a379e4ac607adabdff23efeeab328a68d75d76595155ebb0974",
+      "mtime_ns": 1784187353832921600,
+      "bytes": 1410
+    },
+    "scripts/shaders/friendly_attack.gdshader": {
+      "sha256": "1de3b091259bd4bb4a8b588945e7f93b8f3050cc46fa17a6cedbddc9e42b9515",
+      "mtime_ns": 1792648969496775900,
+      "bytes": 361
+    },
+    "scripts/shaders/hero_silhouette.gdshader": {
+      "sha256": "9deb2a095b76249425d0345082f0cbab8b672795f37f0fc22b588030f442fdb0",
+      "mtime_ns": 1790914949868494500,
+      "bytes": 731
+    },
+    "scripts/ui/battle_layout.gd": {
+      "sha256": "c6781c31b865956d206d1bab53ec6ce06bb5232b58ec118d7de693d6340eba3e",
+      "mtime_ns": 1792645479940793000,
+      "bytes": 1842
+    },
+    "scripts/ui/build_preparation.gd": {
+      "sha256": "b49c37644174ad5bf7ffbac103d3c03b829b51842ccf3b50874d81065b3b703a",
+      "mtime_ns": 1792670411807402500,
+      "bytes": 51
+    },
+    "scripts/ui/combat_readout.gd": {
+      "sha256": "71bcd895980b706e2fde1d128bf6c634b8602499fe0ed506f7f3d42cc9f56317",
+      "mtime_ns": 1792670876339763300,
+      "bytes": 5430
+    },
+    "scripts/ui/contract_screen.gd": {
+      "sha256": "e299925d24b91eb7ec6756b5004bbef971fe2fd828e4d2e2cc568c9f3c31d3fe",
+      "mtime_ns": 1784450275491207600,
+      "bytes": 22825
+    },
+    "scripts/ui/cooldown_ring.gd": {
+      "sha256": "444c42852fd94b7ba985214955994d9083e45c217cb8cef8a71e6d343f042938",
+      "mtime_ns": 1790956158830343100,
+      "bytes": 1095
+    },
+    "scripts/ui/equipment_panel.gd": {
+      "sha256": "b938dfa8e4a991e8ae48b95ad8dd5fb96d3261ed636f1a7f2085b0bdf3355e7e",
+      "mtime_ns": 1791013441861085700,
+      "bytes": 8035
+    },
+    "scripts/ui/first_run_guide.gd": {
+      "sha256": "fcf40c7d6cce7b88fcae733634ba91fb10ebb2ca21e701a24fc19385ed7471d3",
+      "mtime_ns": 1792649512762619500,
+      "bytes": 11935
+    },
+    "scripts/ui/formation_picker.gd": {
+      "sha256": "3c10de73c44ffdc1f66e113e03ea933dba1d2a78e2175fb1182d080c0f1caf00",
+      "mtime_ns": 1792648930541803500,
+      "bytes": 5048
+    },
+    "scripts/ui/game_over_screen.gd": {
+      "sha256": "31eabe2764dd009c5f24ca2676202a3aef6a77dbb2988a7d71ab66963ed452bf",
+      "mtime_ns": 1792670765397578600,
+      "bytes": 48
+    },
+    "scripts/ui/hud.gd": {
+      "sha256": "a77435bafd35053fc05a5a52af0fa139081f0680fc8dccb6b963f512e42ca6f3",
+      "mtime_ns": 1792671355107492300,
+      "bytes": 131959
+    },
+    "scripts/ui/level_up_screen.gd": {
+      "sha256": "f2168eae4c82f2d57060fdc2b11f925785dcd1cd047f674b346ac39eb2eeccf8",
+      "mtime_ns": 1790920504236047500,
+      "bytes": 20295
+    },
+    "scripts/ui/main_menu.gd": {
+      "sha256": "bcf8eb25b30b8426e160144d17aa98d7cf08fae07336afb3069b9c2ca84c6c19",
+      "mtime_ns": 1792665623511281000,
+      "bytes": 52734
+    },
+    "scripts/ui/r33_loot_banner.gd": {
+      "sha256": "1148d10e08a57917bc84ad78a5203d755a3a16b21aa058e5fc5d1c49eeb1db34",
+      "mtime_ns": 1792659265489396000,
+      "bytes": 4251
+    },
+    "scripts/ui/r36_minimap.gd": {
+      "sha256": "caa7ffdf7eb26ffe434bea3a4c97e940b4a9fb3b7e8a836217103f09f920860c",
+      "mtime_ns": 1792643444417779500,
+      "bytes": 2560
+    },
+    "scripts/ui/r4_battle_journal.gd": {
+      "sha256": "4d5bdb1f83ffae3e03457cbb034f309253ba07d4fbb20aedd40f4e8273b742fa",
+      "mtime_ns": 1792671481207713800,
+      "bytes": 5897
+    },
+    "scripts/ui/r4_build_preparation.gd": {
+      "sha256": "2f517d7337f64313e7b0d3af4f2c106cc870db85df2d0a95e822042e60ca85bb",
+      "mtime_ns": 1792671434903602400,
+      "bytes": 15174
+    },
+    "scripts/ui/r4_result_screen.gd": {
+      "sha256": "ce0cb1fa70c98c6c4887c2d7cb477a2c25d3e0d783dcce65e66ac9cdb64fd0b6",
+      "mtime_ns": 1792671481206409200,
+      "bytes": 12896
+    },
+    "scripts/ui/rift_shop_screen.gd": {
+      "sha256": "d282c13974163720e0323719828bd7792cd384d0c2af5653cb9d1c2e377cf885",
+      "mtime_ns": 1784142651227577000,
+      "bytes": 10713
+    },
+    "scripts/ui/stage_victory_screen.gd": {
+      "sha256": "00788271b34686de4c6cb57c2e2e7a0e3a29eb728b4a3dab31cf6ae47e2e6f9f",
+      "mtime_ns": 1792670765397578600,
+      "bytes": 88
+    },
+    "scripts/ui/summon_shop_screen.gd": {
+      "sha256": "d86502947cfe61e5bbe2ce0b5c2a99a93892a1aea7946776c66ea7e6580d6d88",
+      "mtime_ns": 1790938301615191200,
+      "bytes": 16506
+    },
+    "scripts/ui/virtual_joystick.gd": {
+      "sha256": "81ab8ebaa4e0724f8aa1f849494004234d6df34cd6943a591bf72e4a28966931",
+      "mtime_ns": 1791354173838772600,
+      "bytes": 7265
+    },
+    "scripts/ui/world_map.gd": {
+      "sha256": "0f3fb5e98985067f8984594d2e481268258c94c56ece6a7a3a86227a4ff7232c",
+      "mtime_ns": 1790994848332622100,
+      "bytes": 22948
+    },
+    "scripts/vfx/combat_feedback.gd": {
+      "sha256": "e2adf0296f7f33ecc6b6560ec063855db531257d7a6be80f1efbee1f9704506d",
+      "mtime_ns": 1792648969499534000,
+      "bytes": 10552
+    },
+    "scripts/vfx/combat_presentation.gd": {
+      "sha256": "1d536a5ed08437b7137b3365a42660870dd950f73ec40ab1d1ec36916cd86c96",
+      "mtime_ns": 1792671063904453000,
+      "bytes": 5940
+    },
+    "scripts/vfx/corpse_ghost.gd": {
+      "sha256": "817dc286985b231dd8a54f33dadef50804e4a5d20cb17c8c852ebd3c976a0cdd",
+      "mtime_ns": 1783757878320352800,
+      "bytes": 2488
+    },
+    "scripts/vfx/damage_number.gd": {
+      "sha256": "554e223e1ae09536ef8022a6d56bc68cf613e29e8122fc1e9d40e6c794323e00",
+      "mtime_ns": 1792644894819982100,
+      "bytes": 7103
+    },
+    "scripts/vfx/death_burst.gd": {
+      "sha256": "498c529b57ed5f1ae823ddf59335227cdbbd89b34eed451981832170a3ecb1af",
+      "mtime_ns": 1790925930242805500,
+      "bytes": 18951
+    },
+    "scripts/vfx/lightning_arc.gd": {
+      "sha256": "55718116391820b0a00f344cfd037556b19661b917b8287ff8b784504c4274e6",
+      "mtime_ns": 1790925858720665900,
+      "bytes": 3371
+    },
+    "scripts/vfx/monster_attack_telegraph.gd": {
+      "sha256": "b77afe7b6d860d29df88c7f8050afd59cb84ac01216a1c74720e0a84c611ae07",
+      "mtime_ns": 1792643511146558700,
+      "bytes": 3922
+    },
+    "scripts/vfx/newskill_fx_catalog.gd": {
+      "sha256": "9368f74109e3660d7a7e50485395ee53fb13388d03e20845a46d75f918f7d268",
+      "mtime_ns": 1790929672864823800,
+      "bytes": 3025
+    },
+    "scripts/weapons/base_weapon.gd": {
+      "sha256": "8c18535c4c7b9f660cb934fcdadf5e54f87f6510e2655d5756de4e53d5a6421f",
+      "mtime_ns": 1792643946951634400,
+      "bytes": 5900
+    },
+    "scripts/weapons/boomerang_weapon.gd": {
+      "sha256": "c0a9c28d7250e3ef00c23239f926211897510796d2a99d22f5873eb3b41e07ae",
+      "mtime_ns": 1790934122600102600,
+      "bytes": 2444
+    },
+    "scripts/weapons/chain_lightning_weapon.gd": {
+      "sha256": "84ffc119999fd2aecddc1ee90fd78a647184418e838882d8b98afdd26aa766ad",
+      "mtime_ns": 1792648930540261900,
+      "bytes": 5874
+    },
+    "scripts/weapons/echo_hymn_weapon.gd": {
+      "sha256": "59f4fa30bb4df04787cbc77736ffbe06112b5d92fff68e83ac43eba4accda13c",
+      "mtime_ns": 1792662567807625700,
+      "bytes": 5617
+    },
+    "scripts/weapons/explosion_weapon.gd": {
+      "sha256": "6ead0931f5ac489d12a24ad2316f4cb098206f89901bec25c74b78ef109f3ebf",
+      "mtime_ns": 1792662567808634500,
+      "bytes": 3603
+    },
+    "scripts/weapons/grenade_lob_weapon.gd": {
+      "sha256": "337aa2a89d315f6bd2978f01c249f018169ba1529866db21b0abe20c7e29c31d",
+      "mtime_ns": 1784029986282700200,
+      "bytes": 4908
+    },
+    "scripts/weapons/homing_missile_weapon.gd": {
+      "sha256": "70d9966cc593f1cfc57b6db905cee60742cd78cfb3817dd19708e46a90a51bcc",
+      "mtime_ns": 1790934122598109500,
+      "bytes": 2746
+    },
+    "scripts/weapons/impact_weapon_base.gd": {
+      "sha256": "f560f33f7709d167879965500e1e0bd5490c840cb8c05fad8a38eec3b250ddf2",
+      "mtime_ns": 1792648930541288500,
+      "bytes": 4383
+    },
+    "scripts/weapons/linear_bullet_weapon.gd": {
+      "sha256": "84e6ee89554a2599ba31ee792c7559754e5453ef0d972c0945ca7caf6e110be5",
+      "mtime_ns": 1790956159275046300,
+      "bytes": 2302
+    },
+    "scripts/weapons/orbit_weapon.gd": {
+      "sha256": "cee2e8b4d14db3aac937f264515534b72ff35035ef449bfad7ce9c098a14334c",
+      "mtime_ns": 1783585805255877500,
+      "bytes": 1894
+    },
+    "scripts/weapons/rail_lance_weapon.gd": {
+      "sha256": "a70440b491e3cece19a3b0f0c18f037b175767ed0c472879ab10ea403c7351d7",
+      "mtime_ns": 1792648930540777100,
+      "bytes": 5051
+    },
+    "scripts/weapons/rift_construct_weapon.gd": {
+      "sha256": "ebf2a98bf92773075fbb36da96749075e450d117e9ad9ec14a7ab79764acd276",
+      "mtime_ns": 1792661598484754000,
+      "bytes": 9955
+    },
+    "scripts/weapons/shadow_twinblades_weapon.gd": {
+      "sha256": "f2c9a0b6628ca467aed0c2155757b0b2f8f2d842f0f6fe524521fe9f3fe8e01d",
+      "mtime_ns": 1790994630709889500,
+      "bytes": 1120
+    },
+    "scripts/weapons/solar_piercer_weapon.gd": {
+      "sha256": "bfe174edd3fca786e0a46414816f73accd28b23ad14b7efe483b106e383f1903",
+      "mtime_ns": 1790994630708246100,
+      "bytes": 2492
+    },
+    "scripts/weapons/tidal_covenant_weapon.gd": {
+      "sha256": "bb56cd59edd4f7b4c630821bf9c6061e184f3efc0953ee11cefe49c28c027e6c",
+      "mtime_ns": 1790994630708747600,
+      "bytes": 2453
+    },
+    "scripts/weapons/void_net_weapon.gd": {
+      "sha256": "f202bdd56e2de3da5bfc0c837c045e9bab557848372f5c87139e0732a8d28df9",
+      "mtime_ns": 1784029986283703800,
+      "bytes": 2077
+    }
+  },
+  "unchanged": true
+}

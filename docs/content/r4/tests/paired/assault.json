@@ -1,0 +1,416 @@
+{
+	"benefits": {
+		"alternative_hold": 0.0,
+		"counter_hits": 0,
+		"healing": 0.0,
+		"healing_forgone": 0.0,
+		"hymn_casts": 0,
+		"moving_hits": 0,
+		"relay_blasts": 0,
+		"shield_damage": 59.32423520375,
+		"step_seconds": 0.0
+	},
+	"campaign_clear": true,
+	"contributions": {
+		"arc_scout": {
+			"damage": 2763.21481795963,
+			"healing": 0.0,
+			"kills": 124,
+			"name": "裂弧斥候",
+			"prevented": 0.0,
+			"taken": 7.104508272
+		},
+		"echo_singer": {
+			"damage": 10.0500786936,
+			"healing": 202.398759803652,
+			"kills": 0,
+			"name": "迴響歌者",
+			"prevented": 0.0,
+			"taken": 33.9183951011581
+		},
+		"ember_grenadier": {
+			"damage": 1269.83833766176,
+			"healing": 0.0,
+			"kills": 46,
+			"name": "燼焰擲彈兵",
+			"prevented": 0.0,
+			"taken": 41.648232604
+		},
+		"orbit_guard": {
+			"damage": 1683.67055639945,
+			"healing": 0.0,
+			"kills": 38,
+			"name": "星環護衛",
+			"prevented": 7.17062098123408,
+			"taken": 21.257008272
+		},
+		"pulse_artificer": {
+			"damage": 2075.03895410787,
+			"healing": 0.0,
+			"kills": 92,
+			"name": "脈衝工匠",
+			"prevented": 0.0,
+			"taken": 15.8742123142
+		},
+		"rift_captain": {
+			"damage": 81420.5628494302,
+			"healing": 0.0,
+			"kills": 2587,
+			"name": "裂隙隊長",
+			"prevented": 0.0,
+			"taken": 15.1246657751948
+		},
+		"rift_shepherd": {
+			"damage": 2779.26194156902,
+			"healing": 0.0,
+			"kills": 88,
+			"name": "裂隙牧者",
+			"prevented": 0.0,
+			"taken": 30.5014750212306
+		},
+		"rift_sniper": {
+			"damage": 1702.4085694113,
+			"healing": 0.0,
+			"kills": 54,
+			"name": "裂光狙擊手",
+			"prevented": 0.0,
+			"taken": 29.8561197188689
+		},
+		"unattributed": {
+			"damage": 0.0,
+			"healing": 0.0,
+			"kills": 0,
+			"name": "其他來源",
+			"prevented": 0.0,
+			"taken": 0.0
+		},
+		"void_weaver": {
+			"damage": 545.886392975037,
+			"healing": 0.0,
+			"kills": 5,
+			"name": "虛空織網者",
+			"prevented": 0.0,
+			"taken": 17.9135413535436
+		}
+	},
+	"ending": {
+		"all_recruited_max_hp": 1491.0,
+		"current_max_hp": 1491.0,
+		"healing": 202.398759803652,
+		"hp": 1487.83424177146,
+		"hp_retention": 0.997876755044572,
+		"kills": 3034,
+		"living": 9,
+		"prevented": 7.17062098123408,
+		"roster": [
+			"rift_captain",
+			"arc_scout",
+			"pulse_artificer",
+			"ember_grenadier",
+			"echo_singer",
+			"rift_shepherd",
+			"orbit_guard",
+			"rift_sniper",
+			"void_weaver"
+		],
+		"taken": 213.198158432196,
+		"time": 104.787333333329
+	},
+	"entry_steps": [
+		"normal preparation team selection",
+		"normal initial-choice unlock then exclusive equip",
+		"normal seed field submit",
+		"normal auto-battle button handler enabled battle"
+	],
+	"evidence_token": "0043ce80c1124a30913ab6b4b3703461",
+	"guards": [
+		{
+			"death_finalized_at": 47.7979999999986,
+			"impacts": 2,
+			"last_recovery_at": 46.4906666666654,
+			"profile": "shield",
+			"reason": "hunt",
+			"recoveries": 2,
+			"stage": "moon",
+			"time": 38.0043333333325
+		},
+		{
+			"death_finalized_at": 104.787333333329,
+			"impacts": 2,
+			"last_recovery_at": 104.091999999996,
+			"profile": "shield",
+			"reason": "boss_guard",
+			"recoveries": 2,
+			"stage": "moon",
+			"time": 100.363666666662
+		}
+	],
+	"history": [
+		{
+			"cycles": 2,
+			"followers": 6,
+			"formation": "wedge",
+			"pressure": "front",
+			"time": 23.5343333333333
+		},
+		{
+			"cycles": 2,
+			"followers": 8,
+			"formation": "ring",
+			"pressure": "pincer",
+			"time": 57.1106666666648
+		},
+		{
+			"cycles": 2,
+			"followers": 8,
+			"formation": "scatter",
+			"pressure": "artillery",
+			"time": 96.548999999996
+		}
+	],
+	"initial": {
+		"campaign_clears": [],
+		"lifetime": 0,
+		"node": "spec_shield",
+		"roster": [
+			{
+				"hp": 110.0,
+				"id": "rift_captain",
+				"max_hp": 110.0
+			},
+			{
+				"hp": 82.0,
+				"id": "arc_scout",
+				"max_hp": 82.0
+			},
+			{
+				"hp": 86.0,
+				"id": "pulse_artificer",
+				"max_hp": 86.0
+			}
+		],
+		"shards": 0,
+		"team": "assault",
+		"total_hp": 278.0,
+		"total_max_hp": 278.0,
+		"upgrades": {
+			"echo_focus": 0,
+			"echo_magnetism": 0,
+			"echo_vitality": 0
+		},
+		"valid_settlements": 0,
+		"vouchers": 0,
+		"wallet_gold": 0
+	},
+	"input_policy": "normal menu pressed/text_submitted signals, auto-battle handler and virtual movement/formation; no HP/DPS/time/completion injection",
+	"node": "spec_shield",
+	"outcome": "win",
+	"phases": {
+		"0": {
+			"actual_formation": "wedge",
+			"end": {
+				"all_recruited_max_hp": 932.0,
+				"current_max_hp": 932.0,
+				"healing": 4.372876125,
+				"hp": 932.0,
+				"hp_retention": 1.0,
+				"kills": 503,
+				"living": 7,
+				"prevented": 0.230151375,
+				"roster": [
+					"rift_captain",
+					"arc_scout",
+					"pulse_artificer",
+					"ember_grenadier",
+					"echo_singer",
+					"rift_shepherd",
+					"orbit_guard"
+				],
+				"taken": 4.372876125,
+				"time": 23.5373333333333
+			},
+			"first_second_guards": [
+				{
+					"animation": "hurt",
+					"fraction": 0.457678408399269,
+					"hp": 150.393125,
+					"max_hp": 328.6
+				}
+			],
+			"healing_delta": 4.372876125,
+			"kind": "front",
+			"prevented_delta": 0.230151375,
+			"probe_time": 12.8303333333336,
+			"seal_seconds": 11.5189999999998,
+			"start": {
+				"all_recruited_max_hp": 314.0,
+				"current_max_hp": 314.0,
+				"healing": 0.0,
+				"hp": 314.0,
+				"hp_retention": 1.0,
+				"kills": 171,
+				"living": 3,
+				"prevented": 0.0,
+				"roster": [
+					"rift_captain",
+					"arc_scout",
+					"pulse_artificer"
+				],
+				"taken": 0.0,
+				"time": 12.0183333333335
+			},
+			"taken_delta": 4.372876125,
+			"taken_per_start_capacity": 0.0139263570859873
+		},
+		"1": {
+			"actual_formation": "ring",
+			"end": {
+				"all_recruited_max_hp": 1257.0,
+				"current_max_hp": 1257.0,
+				"healing": 151.971195619,
+				"hp": 1257.0,
+				"hp_retention": 1.0,
+				"kills": 1490,
+				"living": 9,
+				"prevented": 4.72791534700001,
+				"roster": [
+					"rift_captain",
+					"arc_scout",
+					"pulse_artificer",
+					"ember_grenadier",
+					"echo_singer",
+					"rift_shepherd",
+					"orbit_guard",
+					"rift_sniper",
+					"void_weaver"
+				],
+				"taken": 159.604836019,
+				"time": 57.1136666666648
+			},
+			"first_second_guards": [
+				{
+					"animation": "idle",
+					"fraction": 0.12,
+					"hp": 26.712,
+					"max_hp": 222.6
+				},
+				{
+					"animation": "idle",
+					"fraction": 0.12,
+					"hp": 26.712,
+					"max_hp": 222.6
+				}
+			],
+			"healing_delta": 136.548319494,
+			"kind": "pincer",
+			"prevented_delta": 4.48482897200001,
+			"probe_time": 46.8299999999987,
+			"seal_seconds": 11.0926666666661,
+			"start": {
+				"all_recruited_max_hp": 1194.0,
+				"current_max_hp": 1194.0,
+				"healing": 15.422876125,
+				"hp": 1194.0,
+				"hp_retention": 1.0,
+				"kills": 1192,
+				"living": 9,
+				"prevented": 0.243086375000003,
+				"roster": [
+					"rift_captain",
+					"arc_scout",
+					"pulse_artificer",
+					"ember_grenadier",
+					"echo_singer",
+					"rift_shepherd",
+					"orbit_guard",
+					"rift_sniper",
+					"void_weaver"
+				],
+				"taken": 15.422876125,
+				"time": 46.0209999999987
+			},
+			"taken_delta": 144.181959894,
+			"taken_per_start_capacity": 0.120755410296482
+		},
+		"2": {
+			"actual_formation": "scatter",
+			"end": {
+				"all_recruited_max_hp": 1311.0,
+				"current_max_hp": 1311.0,
+				"healing": 185.255690993988,
+				"hp": 1311.0,
+				"hp_retention": 1.0,
+				"kills": 2902,
+				"living": 9,
+				"prevented": 6.1017353476442,
+				"roster": [
+					"rift_captain",
+					"arc_scout",
+					"pulse_artificer",
+					"ember_grenadier",
+					"echo_singer",
+					"rift_shepherd",
+					"orbit_guard",
+					"rift_sniper",
+					"void_weaver"
+				],
+				"taken": 192.889331393988,
+				"time": 96.551999999996
+			},
+			"first_second_guards": [
+				{
+					"animation": "idle",
+					"fraction": 0.12,
+					"hp": 31.8,
+					"max_hp": 265.0
+				},
+				{
+					"animation": "idle",
+					"fraction": 0.12,
+					"hp": 31.8,
+					"max_hp": 265.0
+				}
+			],
+			"healing_delta": 30.5219953749884,
+			"kind": "artillery",
+			"prevented_delta": 1.37382000064419,
+			"probe_time": 84.8243333333299,
+			"seal_seconds": 12.5289999999993,
+			"start": {
+				"all_recruited_max_hp": 1266.0,
+				"current_max_hp": 1266.0,
+				"healing": 154.733695619,
+				"hp": 1266.0,
+				"hp_retention": 1.0,
+				"kills": 2492,
+				"living": 9,
+				"prevented": 4.72791534700001,
+				"roster": [
+					"rift_captain",
+					"arc_scout",
+					"pulse_artificer",
+					"ember_grenadier",
+					"echo_singer",
+					"rift_shepherd",
+					"orbit_guard",
+					"rift_sniper",
+					"void_weaver"
+				],
+				"taken": 162.367336019,
+				"time": 84.0229999999967
+			},
+			"taken_delta": 30.5219953749884,
+			"taken_per_start_capacity": 0.0241090010860888
+		}
+	},
+	"seals": 3,
+	"seed": 55210,
+	"stage": "moon",
+	"starting_run_id": "1792675046475000-2329499-1",
+	"status": "VERIFIED",
+	"team": "assault",
+	"time": 104.787333333329,
+	"version": "0.33.0-content-r4",
+	"wall_seconds": 76.569,
+	"wrong": 0
+}

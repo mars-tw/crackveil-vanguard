@@ -345,7 +345,7 @@ func set_formation(new_id: String, force: bool = false) -> bool:
 			shorts.append(str(BOND_FORMATION_RESONANCE[bond_id].get("short", bond_id)))
 		if not shorts.is_empty():
 			text += "\n共鳴：" + "、".join(shorts)
-		GameManager.toast_requested.emit(text)
+		GameManager.show_toast(text,"formation")
 	if AchievementProgress != null and AchievementProgress.has_method("record_formation_switch"):
 		AchievementProgress.record_formation_switch()
 	queue_redraw()
@@ -892,7 +892,7 @@ func recompute_bonds() -> void:
 				effect += "・圓陣回復 1.5 HP／秒"
 			bond_reveal_text = "%s｜%s\n%s" % [definition.name, "＋".join(names), effect]
 			bond_reveal_timer = 4.0
-			GameManager.show_toast(bond_reveal_text)
+			GameManager.show_toast(bond_reveal_text,"bond")
 	if OS.is_debug_build():
 		print("BONDS_ACTIVE=%s" % str(active_bonds.keys()))
 	GameManager.queue_stats_emit()

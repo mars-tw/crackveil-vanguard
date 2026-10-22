@@ -71,7 +71,7 @@ func _lock_warning() -> void:
 			if member.is_alive and targets.size() < 3:
 				targets.append(member.global_position)
 	events.append({"phase":"warning","kind":kind,"time":GameManager.elapsed_time,"cycle":cycles + 1})
-	GameManager.show_toast("%s｜預警 2 秒，留意地面刻線" % NAMES[kind])
+	GameManager.show_toast("%s｜預警 2 秒，留意地面刻線" % NAMES[kind], "battle", true)
 
 func _process(delta: float) -> void:
 	if not enabled or not started or get_tree().paused or not GameManager.game_running:

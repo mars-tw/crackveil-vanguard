@@ -1,0 +1,248 @@
+{
+	"atomic_cases": [
+		{
+			"after_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"committed": false,
+			"existing": false,
+			"fault": "valid_prefix",
+			"recovered": true
+		},
+		{
+			"after_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"committed": false,
+			"existing": false,
+			"fault": "replace_after_remove",
+			"recovered": true
+		},
+		{
+			"after_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"committed": false,
+			"existing": false,
+			"fault": "interrupt_before_replace",
+			"recovered": true
+		},
+		{
+			"after_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"committed": false,
+			"existing": false,
+			"fault": "interrupt_during_journal",
+			"recovered": true
+		},
+		{
+			"after_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"committed": false,
+			"existing": false,
+			"fault": "interrupt_after_remove",
+			"recovered": true
+		},
+		{
+			"after_sha256": "eb9e44c09283c8de88e2335eb672cfed5501ba4ce9c71a6902b06b529b5b7d6b",
+			"before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"committed": true,
+			"existing": false,
+			"fault": "interrupt_after_install",
+			"recovered": true
+		},
+		{
+			"after_sha256": "58150d692f0d408c25df8ec0a97f401fd7185181db79b73b218bd38bd1dd09ba",
+			"before_sha256": "58150d692f0d408c25df8ec0a97f401fd7185181db79b73b218bd38bd1dd09ba",
+			"committed": false,
+			"existing": true,
+			"fault": "valid_prefix",
+			"recovered": true
+		},
+		{
+			"after_sha256": "58150d692f0d408c25df8ec0a97f401fd7185181db79b73b218bd38bd1dd09ba",
+			"before_sha256": "58150d692f0d408c25df8ec0a97f401fd7185181db79b73b218bd38bd1dd09ba",
+			"committed": false,
+			"existing": true,
+			"fault": "replace_after_remove",
+			"recovered": true
+		},
+		{
+			"after_sha256": "58150d692f0d408c25df8ec0a97f401fd7185181db79b73b218bd38bd1dd09ba",
+			"before_sha256": "58150d692f0d408c25df8ec0a97f401fd7185181db79b73b218bd38bd1dd09ba",
+			"committed": false,
+			"existing": true,
+			"fault": "interrupt_before_replace",
+			"recovered": true
+		},
+		{
+			"after_sha256": "58150d692f0d408c25df8ec0a97f401fd7185181db79b73b218bd38bd1dd09ba",
+			"before_sha256": "58150d692f0d408c25df8ec0a97f401fd7185181db79b73b218bd38bd1dd09ba",
+			"committed": false,
+			"existing": true,
+			"fault": "interrupt_during_journal",
+			"recovered": true
+		},
+		{
+			"after_sha256": "58150d692f0d408c25df8ec0a97f401fd7185181db79b73b218bd38bd1dd09ba",
+			"before_sha256": "58150d692f0d408c25df8ec0a97f401fd7185181db79b73b218bd38bd1dd09ba",
+			"committed": false,
+			"existing": true,
+			"fault": "interrupt_after_remove",
+			"recovered": true
+		},
+		{
+			"after_sha256": "df61ce7641b89da439c346555559dfa8ee896461f6df42b07b833807519c17d8",
+			"before_sha256": "58150d692f0d408c25df8ec0a97f401fd7185181db79b73b218bd38bd1dd09ba",
+			"committed": true,
+			"existing": true,
+			"fault": "interrupt_after_install",
+			"recovered": true
+		}
+	],
+	"checks": 9743,
+	"failures": [],
+	"fixture": "controlled real Arena mechanics, transactional files and UI geometry; not a natural gameplay win",
+	"nodes": [
+		{
+			"failures": 0,
+			"id": "crew_guard",
+			"roster": [
+				"rift_captain",
+				"orbit_guard",
+				"solar_lancer"
+			]
+		},
+		{
+			"failures": 0,
+			"id": "crew_singer",
+			"roster": [
+				"rift_captain",
+				"orbit_guard",
+				"echo_singer"
+			]
+		},
+		{
+			"failures": 0,
+			"id": "crew_scout",
+			"roster": [
+				"rift_captain",
+				"arc_scout",
+				"void_weaver"
+			]
+		},
+		{
+			"failures": 0,
+			"id": "crew_gunner",
+			"roster": [
+				"rift_captain",
+				"ember_grenadier",
+				"pulse_artificer"
+			]
+		},
+		{
+			"failures": 0,
+			"id": "crew_shepherd",
+			"roster": [
+				"rift_captain",
+				"rift_shepherd",
+				"orbit_guard"
+			]
+		},
+		{
+			"failures": 0,
+			"id": "bond_harmony",
+			"roster": [
+				"rift_captain",
+				"orbit_guard",
+				"echo_singer"
+			]
+		},
+		{
+			"failures": 0,
+			"id": "bond_rail",
+			"roster": [
+				"rift_captain",
+				"void_weaver",
+				"rift_sniper"
+			]
+		},
+		{
+			"failures": 0,
+			"id": "bond_relay",
+			"roster": [
+				"rift_captain",
+				"ember_grenadier",
+				"pulse_artificer"
+			]
+		},
+		{
+			"failures": 0,
+			"id": "bond_construct",
+			"roster": [
+				"rift_captain",
+				"rift_shepherd",
+				"orbit_guard"
+			]
+		},
+		{
+			"failures": 0,
+			"id": "bond_reserve",
+			"roster": [
+				"rift_captain",
+				"arc_scout",
+				"line_mender",
+				"orbit_guard"
+			]
+		},
+		{
+			"failures": 0,
+			"id": "spec_shield",
+			"roster": [
+				"rift_captain",
+				"arc_scout",
+				"pulse_artificer"
+			]
+		},
+		{
+			"failures": 0,
+			"id": "spec_escort",
+			"roster": [
+				"rift_captain",
+				"arc_scout",
+				"pulse_artificer"
+			]
+		},
+		{
+			"failures": 0,
+			"id": "spec_collect",
+			"roster": [
+				"rift_captain",
+				"arc_scout",
+				"pulse_artificer"
+			]
+		},
+		{
+			"failures": 0,
+			"id": "spec_step",
+			"roster": [
+				"rift_captain",
+				"arc_scout",
+				"pulse_artificer"
+			]
+		},
+		{
+			"failures": 0,
+			"id": "spec_prepare",
+			"roster": [
+				"rift_captain",
+				"arc_scout",
+				"pulse_artificer"
+			]
+		}
+	],
+	"qa_paths": {
+		"audio": "user://qa_content_r3_r4_ci_crackveil_audio.cfg",
+		"campaign": "user://qa_content_r3_r4_ci_campaign.cfg",
+		"meta": "user://qa_content_r3_r4_ci_veil_echo.cfg"
+	},
+	"status": "VERIFIED",
+	"user_data_dir": "C:/Users/digimkt/Desktop/遊戲/rift-survivors/.audit-tmp/content-r4/native-profiles/suite/ContentR3Test/f4f61dab60b9499eb624042b3d78b58f/roaming/Godot/app_userdata/Crackveil Vanguard"
+}

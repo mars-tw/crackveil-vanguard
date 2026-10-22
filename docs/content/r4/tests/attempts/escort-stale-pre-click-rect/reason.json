@@ -1,0 +1,11 @@
+{
+  "status": "REJECTED_VISUAL_AUDIT",
+  "actor": "Claude Code takeover (session 3cd65322), sole writer after Codex idle since 21:45",
+  "cause": "probe reported stale pre-click slider rect width260 stable x3; real rendered slider width492; endpoint click x435 landed at midpoint, screenshot shows 介面大小：標準 not maximum; ACK deliberately not written so driver failed closed before battle checkpoints",
+  "driver_sha256": "769f8ec776634fc08e5299f809a390c7d8f60c281a0388940240f891ba10908d",
+  "image_sha256": "8ca2c32b3aab4eb75ca415a4b1a784efe27ba1de09e978ac6016644c0c99dfba",
+  "checkpoint_id": "58ecfcc9-f6f2-40f2-941c-470d2d8b5ebc",
+  "natural_outcome": "not_observed",
+  "captured_checkpoint_count": 0,
+  "extra_visual_defect": "pause title 暫停 is overlapped by settings/achievement/run tab row at 844x390 DPR3"
+}

@@ -248,8 +248,8 @@ func _apply_sprite() -> void:
 		sprite.visible = false
 		return
 	sprite.visible = true
-	var target_size: float = 13.0 + clamp(float(value) * 0.4, 0.0, 4.0)
-	sprite.modulate = Color(0.76, 0.82, 0.88, 0.86)
+	var target_size: float = 10.0 + clamp(float(value) * 0.4, 0.0, 4.0)
+	sprite.modulate = Color(0.70, 0.78, 0.84, 0.76)
 	SPRITE_LOADER.fit_sprite(sprite, texture, target_size, sprite_scale)
 	if shadow != null:
 		shadow.visible = true

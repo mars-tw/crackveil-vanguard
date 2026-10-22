@@ -1,0 +1,31 @@
+[
+  {
+    "scene": "R31EndgameGate",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r4\\regression-project",
+      "res://scenes/debug/R31EndgameGate.tscn",
+      "--",
+      "--qa-endgame=r31"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "518fc4c62d3384bcb851da7fb491a4e029158de88e8f498dbb3c8f924a70280f",
+    "source_receipt": "tests/r31-followup/R31EndgameGate-source.json",
+    "source_receipt_sha256": "3bf600206e7f307c3a913a926afc69abff2428e0b8d14e917b6d1f94e6977f7a",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 4.656,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_r31-followup",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r4\\native-profiles\\r31-followup\\R31EndgameGate\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r4\\native-profiles\\r31-followup\\R31EndgameGate\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r4\\regression-project"
+  }
+]

@@ -112,6 +112,12 @@ func _ready() -> void:
 	tactics.name = "TacticalDirector"
 	GameManager.tactical_director = tactics
 	add_child(tactics)
+	var identity:=preload("res://scripts/arena/r4_battle_identity.gd").new()
+	identity.name="BattleIdentity"
+	add_child(identity)
+	var landmarks:=preload("res://scripts/arena/r4_encounter_landmarks.gd").new()
+	landmarks.name="EncounterLandmarks"
+	add_child(landmarks)
 	var summons := SUMMON_DIRECTOR.new()
 	summons.name = "CoinSummonDirector"
 	summons.save_path = GameManager.campaign_save_path.replace(".cfg", "_pets.cfg")

@@ -1,0 +1,27 @@
+{
+  "scene": "ContentR4Test",
+  "command": [
+    "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+    "--headless",
+    "--audio-driver",
+    "Dummy",
+    "--fixed-fps",
+    "60",
+    "--path",
+    "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors",
+    "res://scenes/debug/ContentR4Test.tscn"
+  ],
+  "exit_code": 0,
+  "status": "VERIFIED",
+  "log_sha256": "7957a35607ac71e923d6dfbce163289ce8ac6387c8fda3760e5cf0f3929d10eb",
+  "source_receipt": "tests/unit/ContentR4Test-source.json",
+  "source_receipt_sha256": "c91730b3f17c4982798d1a0f67ebb9049fe4c9565881fb686dff77465b2b318c",
+  "runner_timeout_seconds": 180,
+  "wall_seconds": 3.563,
+  "environment_override": {
+    "CV_QA_PROFILE": "content_r3_r4_unit",
+    "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r4\\native-profiles\\unit\\ContentR4Test\\roaming",
+    "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r4\\native-profiles\\unit\\ContentR4Test\\local"
+  },
+  "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors"
+}

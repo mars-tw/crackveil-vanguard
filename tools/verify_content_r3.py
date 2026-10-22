@@ -4,6 +4,10 @@ import hashlib,json,re,subprocess
 from PIL import Image
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'docs/content/r3'
 VERSION='0.32.0-content-r3';BASE='ce94e02'
+# R4_EXACT_ROUTE_START
+if re.search(r'^config/version="([^"]+)"',(ROOT/'project.godot').read_text(encoding='utf8'),re.M)[1]=='0.33.0-content-r4':
+    raise SystemExit(subprocess.run([__import__('sys').executable,str(ROOT/'tools/verify_content_r4.py')],cwd=ROOT).returncode)
+# R4_EXACT_ROUTE_END
 checks=0;failures=[]
 def check(value,message):
     global checks

@@ -1,0 +1,10 @@
+--- rejected-e8fc.cjs
++++ current-capture.cjs
+@@ -134,6 +134,7 @@
+  if(team==='escort'){
+   // Review's two-frame menu is already outside the tree. Use visible official
+   // settings controls, then the same run's final preparation live setting.
++  await s.page.waitForFunction(()=>{const h=window.__cvR19Controls?.hud?.flags;return h?.elapsed>0&&h.paused===false;},null,{timeout:90000});invariant(!s.errors.length,'official gate handoff diagnostic '+JSON.stringify(s.errors));
+   await click(s,'hud','pause');await wait(s,'hud','paused',true);await click(s,'hud','pause_settings_tab');
+   let hud=await probe(s,'hud'),slider=hud.controls.pause_ui_scale;invariant(slider?.visible,'official pause scale control missing');
+   if(slider.y<0||slider.y+slider.height>s.height-60){const panel=hud.controls.pause_overlay;await s.page.mouse.move(panel.center_x,panel.center_y);await s.page.mouse.wheel(0,1400);await s.page.waitForTimeout(200);await s.page.setViewportSize({width:s.width+1,height:s.height});await s.page.waitForTimeout(150);await s.page.setViewportSize({width:s.width,height:s.height});await s.page.waitForTimeout(200);slider=(await probe(s,'hud')).controls.pause_ui_scale;}

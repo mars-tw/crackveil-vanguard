@@ -1,0 +1,25 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+BONDS_ACTIVE=[]
+R40_LOCOMOTION left_input_enemy_right=left vertical_vectors=up/down mirror_preserved=true sprite_rotation=0 zero_ignored=true
+R40_CONTROLLER same_frame_left_ability=true actual_controller=true locked_left=true authored_frame2=true
+R40_CAPTAIN axis=(-1.0, 0.0) mode=manual impact_frame=2 front_damage=82.80 rear_damage=0.00 crossed_target_lock=true fx_direction=true
+R40_CAPTAIN axis=(-1.0, 0.0) mode=auto impact_frame=2 front_damage=29.90 rear_damage=0.00 crossed_target_lock=true fx_direction=true
+R40_CAPTAIN axis=(1.0, 0.0) mode=manual impact_frame=2 front_damage=82.80 rear_damage=0.00 crossed_target_lock=true fx_direction=true
+R40_CAPTAIN axis=(1.0, 0.0) mode=auto impact_frame=2 front_damage=29.90 rear_damage=0.00 crossed_target_lock=true fx_direction=true
+R40_CAPTAIN axis=(0.0, -1.0) mode=manual impact_frame=2 front_damage=82.80 rear_damage=0.00 crossed_target_lock=true fx_direction=true
+R40_CAPTAIN axis=(0.0, -1.0) mode=auto impact_frame=2 front_damage=29.90 rear_damage=0.00 crossed_target_lock=true fx_direction=true
+R40_CAPTAIN axis=(0.0, 1.0) mode=manual impact_frame=2 front_damage=82.80 rear_damage=0.00 crossed_target_lock=true fx_direction=true
+R40_CAPTAIN axis=(0.0, 1.0) mode=auto impact_frame=2 front_damage=29.90 rear_damage=0.00 crossed_target_lock=true fx_direction=true
+R40_FORMATION aim=(-1.0, 0.0) legal_slots=8 travel_right_anchors_stable=true frame2=true recovery_stable=true inputLeft_policy=false max_error=0.0000
+R40_FORMATION aim=(0.0, -1.0) legal_slots=8 travel_right_anchors_stable=true frame2=true recovery_stable=true inputLeft_policy=true max_error=0.0000
+R40_REACTIONS hurt_death_preserve_left=true reset_right=true sprite_rotation=0
+BONDS_ACTIVE=["bond_captain_shepherd"]
+R40_FOLLOWER hero=rift_shepherd weapon=rift_constructs actual_frame2=true locked_left=true
+BONDS_ACTIVE=["bond_captain_shepherd"]
+R40_FOLLOWER hero=solar_lancer weapon=solar_piercer actual_frame2=true locked_left=true
+BONDS_ACTIVE=["bond_captain_shepherd"]
+R40_FOLLOWER hero=tide_oracle weapon=tidal_covenant actual_frame2=true locked_left=true
+BONDS_ACTIVE=["bond_captain_shepherd"]
+R40_FOLLOWER hero=shadow_ronin weapon=shadow_twinblades actual_frame2=true locked_left=true
+R40_FACING_ATTACK_PASS physics=true authored_frame2=true art=horizontal_mirror_not8way

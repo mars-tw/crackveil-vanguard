@@ -8,6 +8,7 @@ signal shop_requested(options: Array)
 signal stage_victory_requested(summary: Dictionary)
 signal contract_requested(options: Array)
 signal toast_requested(message: String)
+signal battle_notice_requested(message: String, kind: String, urgent: bool)
 signal guide_replay_requested
 signal level_flash_requested
 signal combo_pulse_requested(combo_count: int)
@@ -453,10 +454,11 @@ func _schedule_survival_achievement_timer(token: int) -> void:
 		AchievementProgress.record_survival_time(elapsed_time)
 
 
-func show_toast(message: String) -> void:
+func show_toast(message: String, kind: String = "general", urgent: bool = false) -> void:
 	if message == "":
 		return
 	toast_requested.emit(message)
+	battle_notice_requested.emit(message,kind,urgent)
 
 
 func request_captain_ability_hit_flash() -> void:
@@ -1751,7 +1753,28 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 	if MetaProgress.has_method("get_progress_summary"):
 		enriched["echo_progress"] = MetaProgress.get_progress_summary()
 	enriched["run_seed"] = current_run_seed
+	enriched["starting_mode"]=run_mode
+	if is_instance_valid(squad_manager):
+		# recruited_once contains only real party heroes, including the initial
+		# three and fallen recruits. Constructs never enter this dictionary.
+		for id in squad_manager.recruited_once:
+			var row:=contribution_row(id)
+			var data: Resource=squad_manager.squad_data.get_hero_data(id)
+			if data!=null:row["name"]=str(data.get("display_name"))
 	enriched["contribution_text"] = contribution_text()
+	enriched["contribution_rows"] = []
+	for id in contribution:
+		var row: Dictionary=contribution[id].duplicate(true)
+		if id=="unattributed" and float(row.damage)<0.001 and int(row.kills)==0:continue
+		row["id"]=id
+		enriched.contribution_rows.append(row)
+	enriched["bond_benefits"]=bond_benefits.duplicate(true)
+	enriched["squad_alive"]=0
+	enriched["squad_total"]=0
+	if is_instance_valid(squad_manager):
+		enriched.squad_total=squad_manager.recruited_once.size()
+		for member in squad_manager.get_members():
+			if member.is_alive:enriched.squad_alive+=1
 	enriched["starting_build_text"] = starting_build_text()
 	enriched["starting_build"] = {"team":active_starting_team,"node":active_starting_node,"benefits":starting_benefits.duplicate(true),"run_id":starting_run_id,"valid_settlements":MetaProgress.starting_settlements.size(),"vouchers":MetaProgress.starting_vouchers}
 	if AchievementProgress != null and AchievementProgress.has_method("get_run_unlocked_definitions"):

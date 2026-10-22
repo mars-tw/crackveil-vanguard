@@ -1,0 +1,124 @@
+{
+  "native_paired_calls": [
+    {
+      "classification": "wrong_destination_win",
+      "runner": "tests/attempts/misrouted-native-output/paired/runner.json",
+      "runner_sha256": "8a047cec55ffce90d17b86b94c1b7f5ad4e96583fe8f01ae7666838f47d7c9ef",
+      "team": "assault",
+      "exit_code": 0,
+      "raw_log_sha256": "17df55d8690fb929157e9c61d33b00c0f1b607bf2995f407c80582220566ce44",
+      "included_in_total": true
+    },
+    {
+      "classification": "terminated",
+      "runner": "tests/attempts/misrouted-native-output/paired/runner.json",
+      "runner_sha256": "8a047cec55ffce90d17b86b94c1b7f5ad4e96583fe8f01ae7666838f47d7c9ef",
+      "team": "escort",
+      "exit_code": 4294967295,
+      "raw_log_sha256": "a939e6b578660864364afa7e908b40efe29ce80810c5fee47af8a1461f888231",
+      "included_in_total": true
+    },
+    {
+      "classification": "accepted_final_win",
+      "runner": "tests/paired/runner.json",
+      "runner_sha256": "a9d4598e6967e7ed7cb78c5ddec2b0e9bef3a2fe4a7d05372b226d65ed2ef755",
+      "team": "assault",
+      "exit_code": 0,
+      "raw_log_sha256": "17df55d8690fb929157e9c61d33b00c0f1b607bf2995f407c80582220566ce44",
+      "included_in_total": true
+    },
+    {
+      "classification": "accepted_final_win",
+      "runner": "tests/paired/runner.json",
+      "runner_sha256": "a9d4598e6967e7ed7cb78c5ddec2b0e9bef3a2fe4a7d05372b226d65ed2ef755",
+      "team": "escort",
+      "exit_code": 0,
+      "raw_log_sha256": "78c94f158d14204e1124bae96c5ddc59c97129eb6856c0de195e82259d0f8d7f",
+      "included_in_total": true
+    }
+  ],
+  "native_counts": {
+    "total": 4,
+    "wrong_destination_win": 1,
+    "terminated": 1,
+    "accepted_final_wins": 2
+  },
+  "browser_pilot_calls": [
+    {
+      "classification": "setup_setting_proof_blocked_before_combat",
+      "team": "escort",
+      "accepted_combat_checkpoints": 0,
+      "rejected_partial_checkpoints": 0,
+      "runner": "tests/attempts/escort-setting-probe-blocked/runner.json",
+      "runner_sha256": "0db699566ca92dd82d4e8fb7e5cb374bedc5ed83d8bcd528abefc9866f3fd91f",
+      "exit_code": 1,
+      "raw_log_sha256": "a0f6c5acbf72df112d53d1dcd4ff428d7aa362dd2c13909e790e3fde21889e44"
+    },
+    {
+      "classification": "setup_gate_handoff_race",
+      "team": "escort",
+      "accepted_combat_checkpoints": 0,
+      "rejected_partial_checkpoints": 0,
+      "runner": "tests/attempts/escort-gate-handoff-race/runner.json",
+      "runner_sha256": "020d2438af88f1fe08d83db4d4071298efbf2a22bd38c1171db2736b79403b60",
+      "exit_code": 1,
+      "raw_log_sha256": "521b913d8f8a620b48f766f1f50c93c62d1e3997729498eea0ac892a9284ad98"
+    },
+    {
+      "classification": "terminated_setting_not_maximum_after_partial_natural_run",
+      "team": "escort",
+      "accepted_combat_checkpoints": 0,
+      "rejected_partial_checkpoints": 1,
+      "runner": "tests/attempts/escort-slider-layout-race/runner.json",
+      "runner_sha256": "25ef217073b31e655dc523cb4220ecef73298c3629e813a9f4f8972cfe01fcfb",
+      "exit_code": 4294967295,
+      "raw_log_sha256": "a8f9c9bacd3842392b0c526755784775d47de19b3211dca4266cfad0eb9ee4e7"
+    },
+    {
+      "classification": "setup_post_click_layout_assertion",
+      "team": "escort",
+      "accepted_combat_checkpoints": 0,
+      "rejected_partial_checkpoints": 0,
+      "runner": "tests/attempts/escort-post-max-layout-assertion/runner.json",
+      "runner_sha256": "f4648da0e7dbb7b2048924fbb5c18551ec6927b7bb5db65bdd584ddc29f1f9c7",
+      "exit_code": 1,
+      "raw_log_sha256": "3c1179949d913ff3e7313c5979f7d6f1bae6d41108b0f8346a1092e5bea72802"
+    },
+    {
+      "classification": "setup_visual_audit_rejected_setting_standard",
+      "team": "escort",
+      "accepted_combat_checkpoints": 0,
+      "rejected_partial_checkpoints": 0,
+      "runner": "tests/attempts/escort-stale-pre-click-rect/runner.json",
+      "runner_sha256": "02ec6e3577d1e2e337242d26a6e6dbbb493f843d9c2e8129d81d054ad54f6ebc",
+      "exit_code": 1,
+      "raw_log_sha256": "8b80b49046fcad4e0c90e0ad609967c02ba5c9c1db6a79a0dc11b0e253fa5896"
+    },
+    {
+      "classification": "accepted_final_win",
+      "team": "assault",
+      "combat_started": true,
+      "runner": "tests/browser-ledger.json",
+      "runner_sha256": "03d6c03273cdd3f9169592d723a669b8ba9214c49513f8f31ff24644b58a4a06",
+      "exit_code": 0,
+      "raw_log_sha256": "227e0c5bdf6df68997d7b6253f927a907058e91e4b84d2957e495ede3980ab74"
+    },
+    {
+      "classification": "accepted_final_win",
+      "team": "escort",
+      "combat_started": true,
+      "runner": "tests/browser-ledger.json",
+      "runner_sha256": "03d6c03273cdd3f9169592d723a669b8ba9214c49513f8f31ff24644b58a4a06",
+      "exit_code": 0,
+      "raw_log_sha256": "8dc62a2238927a6229d7f0a4e76e3ddf4cd412a1bac97a599a612085802dc2aa"
+    }
+  ],
+  "browser_counts": {
+    "total": 7,
+    "setup_blocked": 4,
+    "terminated_partial": 1,
+    "accepted_final_wins": 2
+  },
+  "separate_setup_diagnostic": "tests/setting-namespace-diagnostic-status.json",
+  "scope": "all R4 paired/native and natural Web pilot invocations; controls/preparation/milestone fixture and read-only setup diagnosis are separate, not natural wins"
+}

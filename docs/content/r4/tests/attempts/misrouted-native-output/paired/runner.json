@@ -1,0 +1,62 @@
+[
+  {
+    "scene": "ContentR4Run",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors",
+      "res://scenes/debug/ContentR4Run.tscn",
+      "--",
+      "team=assault",
+      "seed=55210"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "17df55d8690fb929157e9c61d33b00c0f1b607bf2995f407c80582220566ce44",
+    "source_receipt": "tests/paired-assault/ContentR4Run-source.json",
+    "source_receipt_sha256": "637ce1baf46d1e6b1bb9abead588259841f8a6d9fe8f8dc12f1d8937d35d81a9",
+    "runner_timeout_seconds": 360,
+    "wall_seconds": 86.734,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_paired-assault",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r4\\native-profiles\\paired-assault\\ContentR4Run\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r4\\native-profiles\\paired-assault\\ContentR4Run\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors"
+  },
+  {
+    "scene": "ContentR4Run",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors",
+      "res://scenes/debug/ContentR4Run.tscn",
+      "--",
+      "team=escort",
+      "seed=55210"
+    ],
+    "exit_code": 4294967295,
+    "status": "BLOCKED",
+    "log_sha256": "a939e6b578660864364afa7e908b40efe29ce80810c5fee47af8a1461f888231",
+    "source_receipt": "tests/paired-escort/ContentR4Run-source.json",
+    "source_receipt_sha256": "637ce1baf46d1e6b1bb9abead588259841f8a6d9fe8f8dc12f1d8937d35d81a9",
+    "runner_timeout_seconds": 360,
+    "wall_seconds": 76.015,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_paired-escort",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r4\\native-profiles\\paired-escort\\ContentR4Run\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r4\\native-profiles\\paired-escort\\ContentR4Run\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors"
+  }
+]

@@ -1,0 +1,33 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+BONDS_ACTIVE=[]
+REWARD_SPECIAL_R36 REAL_SPECIAL_SPAWN=PASS actual EntityFactory spawn from production spawner
+REWARD_SPECIAL_R36 CONTRACT_AND_LURE=PASS gold=27 expected=27 xp_bonus=44 expected=44 pending=0 expected=0
+REWARD_SPECIAL_R36 EXHAUSTED_POOL_PRESERVES_LURE=PASS spawn=false pending=20 history_unchanged=true cycle_unchanged=true exhausted=1
+REWARD_SPECIAL_R36 LEGACY_FAILURE_PRESERVES_LURE=PASS spawn=false pending=20
+REWARD_SPECIAL_R36 VISIBLE_CHARGE_WINDUP=PASS production dash branch entered windup with active cue
+REWARD_SPECIAL_R36 CHARGE_INTERRUPT=PASS animation=hurt behavior=recover velocity=(0.0, 0.0) cue=false
+REWARD_SPECIAL_R36 NO_BLIND_DASH_AFTER_HURT=PASS behavior=recover velocity=(0.0, 0.0)
+REWARD_SPECIAL_R36 REQUIRES_FRESH_WINDUP=PASS behavior=windup cue=true
+REWARD_SPECIAL_R36 REAL_ACTIVE_DASH=PASS behavior=dash velocity=(-446.7334, -246.0271)
+REWARD_SPECIAL_R36 ACTIVE_DASH_INTERRUPT=PASS animation=hurt behavior=recover velocity=(0.0, 0.0)
+REWARD_SPECIAL_R36 SHIELD_CUE_MATCHES_DAMAGE=PASS reach=145.0 scale=(1.0, 1.0) position=(0.0, 0.0) expected=145/ONE/ZERO
+REWARD_SPECIAL_R36 POOLED_REGULAR_CLEARS_SPECIAL_STATE=PASS same_node=true id= skill= shield=false name_visible=false gold_drop_counter=0
+REWARD_SPECIAL_R36_PASS contract_gold=true paid_lure=true failed_spawn_atomic=true charge_interrupt=true independent_context=true
+WARNING: Pool exhausted: enemy. Spawn skipped to avoid hot-path instantiate.
+   at: push_warning (core/variant/variant_utility.cpp:1033)
+   GDScript backtrace (most recent call first):
+       [0] acquire (res://scripts/pooling/node_pool.gd:56)
+       [1] _acquire (res://scripts/autoload/entity_factory.gd:1301)
+       [2] spawn_enemy (res://scripts/autoload/entity_factory.gd:185)
+       [3] _spawn_special_elite (res://scripts/enemies/enemy_spawner.gd:351)
+       [4] _spawn_elite (res://scripts/enemies/enemy_spawner.gd:314)
+       [5] _run (res://scripts/debug/reward_special_r36_test.gd:75)
+WARNING: Pool exhausted: enemy. Spawn skipped to avoid hot-path instantiate.
+   at: push_warning (core/variant/variant_utility.cpp:1033)
+   GDScript backtrace (most recent call first):
+       [0] acquire (res://scripts/pooling/node_pool.gd:56)
+       [1] _acquire (res://scripts/autoload/entity_factory.gd:1301)
+       [2] spawn_enemy (res://scripts/autoload/entity_factory.gd:185)
+       [3] _spawn_elite (res://scripts/enemies/enemy_spawner.gd:327)
+       [4] _run (res://scripts/debug/reward_special_r36_test.gd:78)

@@ -160,7 +160,7 @@ func advance(delta: float) -> void:
 		wrong_timer = 2.5
 		wrong_penalties += 1
 		captain.take_damage(8.0,anchor+Vector2(1,0))
-		GameManager.show_toast("錯陣反噬：封合中斷，觀察敵軍攻勢再換陣")
+		GameManager.show_toast("錯陣反噬：封合中斷，觀察敵軍攻勢再換陣", "battle", true)
 	if correct:
 		for member in squad.get_members():
 			if not is_instance_valid(member) or member == captain or not member.is_alive:
@@ -205,11 +205,11 @@ func advance(delta: float) -> void:
 		reward_saved = reward >= 0
 		retry_timer = 2.0
 		var record := "首次封隙殘響 +4。" if reward > 0 else "本關封隙已收藏。" if reward == 0 else "紀錄尚未存好，稍後重試。"
-		GameManager.show_toast(("三陣封隙完成！放棄治療・反擊 +20%，10 秒；" if GameManager.active_starting_node=="spec_prepare" else "三陣封隙完成！全隊整補；") + record)
+		GameManager.show_toast(("三陣封隙完成！放棄治療・反擊 +20%，10 秒；" if GameManager.active_starting_node=="spec_prepare" else "三陣封隙完成！全隊整補；") + record, "battle", true)
 	else:
 		anchor += Vector2(0, -170) if step == 1 else Vector2(-210, 0)
 		pressure.configure(anchor,step)
-		GameManager.show_toast("封隙 %d/3｜放棄治療・反擊傷害 +20%%，10 秒" % step if GameManager.active_starting_node=="spec_prepare" else "封隙 %d/3｜對陣整補 +8・反擊傷害 +20%%，5 秒" % step)
+		GameManager.show_toast("封隙 %d/3｜放棄治療・反擊傷害 +20%%，10 秒" % step if GameManager.active_starting_node=="spec_prepare" else "封隙 %d/3｜對陣整補 +8・反擊傷害 +20%%，5 秒" % step, "battle", true)
 	if AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("level_up")
 

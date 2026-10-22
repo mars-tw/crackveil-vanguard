@@ -122,7 +122,7 @@ func _process(delta: float) -> void:
 		if slot.kind == "cyclone":
 			# Rotating short arcs are attack marks; no stable filled blue disk.
 			slot.sprite.rotation = slot.age * 18.0
-			slot.sprite.modulate.a = 0.40 + 0.50 * absf(sin(slot.age*20.0))
+			slot.sprite.modulate.a = 0.28 + 0.30 * absf(sin(slot.age*20.0))
 		if slot.held:
 			var actor: Object = slot.owner_ref.get_ref() if slot.owner_ref != null else null
 			if actor == null or not is_instance_valid(actor) or not GameManager.game_running or actor.get("is_alive") == false:
@@ -131,13 +131,13 @@ func _process(delta: float) -> void:
 		if not slot.held:
 			if slot.release_age >= 0.0:
 				slot.release_age += delta
-				slot.modulate.a = maxf(0.0, 1.0 - slot.release_age / 0.10) * (0.68 if slot.kind in ["slash_a", "slash_b", "cyclone"] else 1.0)
+				slot.modulate.a = maxf(0.0, 1.0 - slot.release_age / 0.10) * (0.46 if slot.kind in ["slash_a", "slash_b", "cyclone"] else 1.0)
 				if slot.release_age >= 0.10:
 					_release(slot)
 			elif slot.age >= slot.life:
 				_release(slot)
 			else:
-				slot.modulate.a = minf(1.0, (slot.life - slot.age) / 0.07) * (0.68 if slot.kind in ["slash_a", "slash_b", "cyclone"] else 1.0)
+				slot.modulate.a = minf(1.0, (slot.life - slot.age) / 0.07) * (0.46 if slot.kind in ["slash_a", "slash_b", "cyclone"] else 1.0)
 	if active.is_empty():
 		set_process(false)
 

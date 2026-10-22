@@ -45,7 +45,7 @@ func _process(delta: float) -> void:
 		return
 	if GameManager.elapsed_time >= 32.0 and not hunt_announced:
 		hunt_announced = true
-		GameManager.show_toast("追獵預告：6 秒後菁英抵達。圓陣護衛，楔形反擊。")
+		GameManager.show_toast("追獵預告：6 秒後菁英抵達。圓陣護衛，楔形反擊。", "hunt", false)
 	if GameManager.elapsed_time >= 38.0 and not hunt_spawned and not GameManager.boss_active:
 		hunt_spawned = _spawn_guard("hunt")
 	if boss_guard_at >= 0.0 and GameManager.elapsed_time >= boss_guard_at and GameManager.boss_active and not boss_guard_spawned:
@@ -69,15 +69,15 @@ func _claim(id: String) -> void:
 		return # A failed disk write remains retryable.
 	claimed[id] = true
 	var definition := CATALOG.medal(id)
-	GameManager.show_toast("%s完成%s" % [definition.name, "：殘響 +%d" % result if result > 0 else "（已收藏）"])
+	GameManager.show_toast("%s完成%s" % [definition.name, "：殘響 +%d" % result if result > 0 else "（已收藏）"], "hunt", false)
 	if id == "clear":
-		GameManager.show_toast(str(CATALOG.RECORDS.get(GameManager.selected_stage_id, "")))
+		GameManager.show_toast(str(CATALOG.RECORDS.get(GameManager.selected_stage_id, "")), "hunt", false)
 
 func _on_boss_phase() -> void:
 	if boss_guard_at >= 0.0 or GameManager.run_mode != "campaign":
 		return
 	boss_guard_at = GameManager.elapsed_time + 2.0
-	GameManager.show_toast("守關者呼叫護衛！2 秒後抵達，留出退路。")
+	GameManager.show_toast("守關者呼叫護衛！2 秒後抵達，留出退路。", "battle", true)
 
 func _spawn_guard(reason: String) -> bool:
 	var spawner := get_parent().get_node_or_null("EnemySpawner")

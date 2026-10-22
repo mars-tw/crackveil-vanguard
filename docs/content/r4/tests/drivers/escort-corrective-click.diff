@@ -1,0 +1,40 @@
+--- verified-c1d5-capture.cjs
++++ current-capture.cjs
+@@ -125,12 +125,36 @@
+   if(tab<2)invariant(JSON.stringify(ids)===JSON.stringify(expected),'real touch pages omitted/duplicated hero IDs');visited[tab]=ids;
+  }
+  const beforeFooter=await probe(s,'result');geometry(beforeFooter,s);await click(s,'result','menu',true);const preparation=await wait(s,'build_preparation','visible',true);
++ invariant(preparation.flags.ui_scale_index===2,'same natural run lost its live maximum font setting');settingProof.final_live_ui_scale_index=preparation.flags.ui_scale_index;
+  await write('tests/result-controls.json',{status:'VERIFIED',width:320,height:568,input:'touch',scale:2,setting_saved_reload:settingProof,expected_ids:expected,visited_ids:visited,pages:records,footer_before:beforeFooter,preparation_after:preparation,controlled_hero_injection:false,provenance:'same uninterrupted natural escort victory -> portrait screenshot -> 320x568 maximum-font actual touch pages -> fixed preparation footer',capture_driver_sha256:process.env.CONTENT_DRIVER_SHA256,...builds.review});
+ }
+ async function battle(team){
+  const s=await surface(844,390);let settingProof=null;if(team==='escort')settingProof=await saveMaximumSetting(s);await s.page.goto(url+`/review/index.html?cv_r19_test=1&team=${team}`,{timeout:90000});
+  await s.page.waitForFunction(()=>window.__cvContentR4Gate,{timeout:90000});let g=await s.page.evaluate(()=>window.__cvContentR4Gate);await s.page.mouse.click(g.rect[0]+g.rect[2]/2,g.rect[1]+g.rect[3]/2);
+- if(team==='escort'){const live=await probe(s,'main_menu');invariant(live?.flags.ui_scale_index===2,'review boot did not load the actual saved maximum UI setting');settingProof.review_boot=live;}
++ if(team==='escort'){
++  // Review's two-frame menu is already outside the tree. Use visible official
++  // settings controls, then the same run's final preparation live setting.
++  await s.page.waitForFunction(()=>{const h=window.__cvR19Controls?.hud?.flags;return h?.elapsed>0&&h.paused===false;},null,{timeout:90000});invariant(!s.errors.length,'official gate handoff diagnostic '+JSON.stringify(s.errors));
++  await click(s,'hud','pause');await wait(s,'hud','paused',true);await click(s,'hud','pause_settings_tab');
++  let hud=await probe(s,'hud'),slider=hud.controls.pause_ui_scale;invariant(slider?.visible,'official pause scale control missing');
++  if(slider.y<0||slider.y+slider.height>s.height-60){const panel=hud.controls.pause_overlay;await s.page.mouse.move(panel.center_x,panel.center_y);await s.page.mouse.wheel(0,1400);await s.page.waitForTimeout(200);await s.page.setViewportSize({width:s.width+1,height:s.height});await s.page.waitForTimeout(150);await s.page.setViewportSize({width:s.width,height:s.height});await s.page.waitForTimeout(200);slider=(await probe(s,'hud')).controls.pause_ui_scale;}
++  const sliderLayout=[];let stable=0,previous='';const settleDeadline=Date.now()+8000;
++  while(stable<3&&Date.now()<settleDeadline){await s.page.waitForTimeout(150);const layout=await probe(s,'hud');slider=layout.controls.pause_ui_scale;invariant(layout.viewport_width===s.width&&layout.viewport_height===s.height,'pause probe viewport mismatch');const shape=JSON.stringify([layout.viewport_width,layout.viewport_height,slider.x,slider.y,slider.width,slider.height]);sliderLayout.push(slider);stable=shape===previous?stable+1:0;previous=shape;}
++  invariant(stable===3,'official pause scale rectangle never settled');invariant(slider.x>=0&&slider.y>=0&&slider.x+slider.width<=s.width&&slider.y+slider.height<=s.height,'official pause scale endpoint outside viewport');
++  const clickedSlider=slider;await s.page.mouse.click(slider.x+slider.width-5,slider.center_y);
++  const postClickLayout=[];stable=0;previous='';const postDeadline=Date.now()+8000;
++  while(stable<3&&Date.now()<postDeadline){await s.page.waitForTimeout(150);const layout=await probe(s,'hud');slider=layout.controls.pause_ui_scale;invariant(layout.viewport_width===s.width&&layout.viewport_height===s.height,'post-click pause viewport mismatch');const shape=JSON.stringify([layout.viewport_width,layout.viewport_height,slider.x,slider.y,slider.width,slider.height]);postClickLayout.push(slider);stable=shape===previous?stable+1:0;previous=shape;}
++  // Probe may report a stale narrow rect until first input; if the settled
++  // rect differs from the clicked one, click the settled endpoint once more.
++  const correctiveClicks=[];if(stable===3&&(slider.x!==clickedSlider.x||slider.width!==clickedSlider.width)){correctiveClicks.push(slider);await s.page.mouse.click(slider.x+slider.width-5,slider.center_y);stable=0;previous='';const fixDeadline=Date.now()+8000;while(stable<3&&Date.now()<fixDeadline){await s.page.waitForTimeout(150);const layout=await probe(s,'hud');slider=layout.controls.pause_ui_scale;const shape=JSON.stringify([layout.viewport_width,layout.viewport_height,slider.x,slider.y,slider.width,slider.height]);postClickLayout.push(slider);stable=shape===previous?stable+1:0;previous=shape;}}
++  await write('tests/settings-slider-layout.json',{pre_click:sliderLayout,clicked_rect:clickedSlider,corrective_clicks:correctiveClicks,post_click:postClickLayout,post_click_stable:stable===3,capture_driver_sha256:process.env.CONTENT_DRIVER_SHA256});invariant(stable===3,'post-click maximum font layout never settled');
++  const file='tests/settings-review-max.png';await s.page.screenshot({path:await writable(file)});
++  settingProof.review_live_ui={file,sha256:sha(await fs.readFile(evidencePath(file))),checkpoint_id:crypto.randomUUID(),captured_utc:new Date().toISOString(),capture_driver_sha256:process.env.CONTENT_DRIVER_SHA256,endpoint_rect:slider,slider_layout:sliderLayout,paused:await probe(s,'hud'),provenance:'official gate center click, normal pause/settings and maximum endpoint pointer after actual rectangle settles; original screenshot requires visual audit before resume; no setter/storage/HTML/PCK substitution',...builds.review};
++  await write('tests/settings-review-max.json',settingProof);console.log('WAITING_SETTING_VISUAL_AUDIT '+settingProof.review_live_ui.checkpoint_id+' '+settingProof.review_live_ui.sha256);
++  const ackPath=path.resolve(__dirname,'../../_整理紀錄/20261022/r4-setting-visual-acceptance.json'),ackDeadline=Date.now()+180000;let accepted=null;
++  while(Date.now()<ackDeadline){try{const ack=JSON.parse(await fs.readFile(ackPath,'utf8'));if(ack.status==='VERIFIED'&&ack.checkpoint_id===settingProof.review_live_ui.checkpoint_id&&ack.image_sha256===settingProof.review_live_ui.sha256&&ack.driver_sha256===process.env.CONTENT_DRIVER_SHA256){accepted=ack;break;}}catch(e){if(e.code!=='ENOENT')throw e;}await s.page.waitForTimeout(150);}
++  invariant(accepted,'live maximum setting visual audit missing');await write('tests/settings-review-visual-acceptance.json',accepted);await click(s,'hud','pause_resume');await wait(s,'hud','paused',false);
++ }
+  let index=0;const expected=team==='assault'?['front-active','pincer-active','artillery-active','guard-warning','guard-impact','guard-recovery','victory']:['front-active','pincer-active','artillery-active','victory'];const numbers=team==='assault'?[4,6,8,9,10,11,12]:[5,7,0,13];
+  for(const label of expected){
+   const deadline=Date.now()+420000;let ready=false;

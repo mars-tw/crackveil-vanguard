@@ -90,15 +90,15 @@ func _refresh() -> void:
 	if boss != null:
 		headline.text = "裂隙守門者"
 		meter.value = clampf(float(boss.get("hp")) / maxf(1.0, float(boss.get("max_hp"))), 0.0, 1.0)
-		detail.text = "攻防 %d/2・%s" % [mini(2,boss.attack_impact_count), "半血增援" if boss.boss_phase_two_triggered else "躲預警再反擊"]
+		detail.text = "完成攻防 %d/2・%s" % [mini(2,boss.attack_impact_count), "半血增援" if boss.boss_phase_two_triggered else "躲預警再反擊"]
 		if is_instance_valid(GameManager.tactical_director):
 			var pending_at: float=GameManager.tactical_director.boss_guard_at
 			if pending_at>GameManager.elapsed_time:
 				detail.text="增援 %.1f 秒・護甲維持" % (pending_at-GameManager.elapsed_time)
 	elif guard != null:
-		headline.text = "%s・護甲 %d/2" % [guard.special_elite_name, mini(2,guard.tactical_recoveries)]
+		headline.text = "%s・破甲 %d/2" % [guard.special_elite_name, mini(2,guard.tactical_recoveries)]
 		meter.value = guard.hp/guard.max_hp
-		detail.text = "護甲已破・反擊" if guard.tactical_recoveries>=2 else "預警出招・閃開刻線" if guard.current_animation_name==&"attack" else "兩輪攻防後破甲"
+		detail.text = "護甲已破・反擊" if guard.tactical_recoveries>=2 else "預警出招・閃開刻線" if guard.current_animation_name==&"attack" else "已完成攻防 %d/2 輪" % mini(2,guard.tactical_recoveries)
 	elif GameManager.combo_count >= 3:
 		headline.text = "%d 連斬" % GameManager.combo_count
 		meter.value = clampf(1.0 - (GameManager.elapsed_time - GameManager.combo_last_kill_time) / GameManager.COMBO_WINDOW, 0.0, 1.0)

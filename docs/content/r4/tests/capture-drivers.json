@@ -1,0 +1,53 @@
+{
+  "previous_sha256": "c1d5a6f18b1a27e9b9fa1d3ba5ff5ac1f0648974a0d74da13701559744ead929",
+  "current_sha256": "1c87ba03562740fe855fa7b3b33a0ea45b169e8c374d193aa8b76267f36bb4e0",
+  "previous_copy": "tests/drivers/capture-c1d5a6f18b1a27e9b9fa1d3ba5ff5ac1f0648974a0d74da13701559744ead929.cjs",
+  "current_copy": "tests/drivers/capture-1c87ba03562740fe855fa7b3b33a0ea45b169e8c374d193aa8b76267f36bb4e0.cjs",
+  "diff": "tests/drivers/escort-corrective-click.diff",
+  "diff_sha256": "2d88930f7f3f4d1ec34be1bd5969f9add99750871c11cb024a3f8b47fbd2b0d3",
+  "previous_accepted_modes": [
+    "controls",
+    "preparation",
+    "milestone",
+    "assault"
+  ],
+  "current_accepted_modes": [
+    "escort"
+  ],
+  "current_capture_indices": [
+    5,
+    7,
+    13
+  ],
+  "changed_scope": "escort only, relative to c1d5 used by controls/preparation/milestone/assault: official pause settings live maximum-setting checkpoint with settle + one corrective endpoint click + visual ACK, and final same-run preparation live scale assertion; other modes unchanged",
+  "runtime_or_ci_inputs_changed": false,
+  "independent_review": "Claude Code takeover author; visual max-setting audit by Claude on original screenshot; Codex not available to review",
+  "history": [
+    {
+      "previous_sha256": "c1d5a6f18b1a27e9b9fa1d3ba5ff5ac1f0648974a0d74da13701559744ead929",
+      "current_sha256": "769f8ec776634fc08e5299f809a390c7d8f60c281a0388940240f891ba10908d",
+      "previous_copy": "tests/drivers/capture-c1d5a6f18b1a27e9b9fa1d3ba5ff5ac1f0648974a0d74da13701559744ead929.cjs",
+      "current_copy": "tests/drivers/capture-769f8ec776634fc08e5299f809a390c7d8f60c281a0388940240f891ba10908d.cjs",
+      "diff": "tests/drivers/escort-live-setting.diff",
+      "diff_sha256": "13981c30dedb015db61367326f1615c458860eaf31152c959078b58c7fa02fa3",
+      "previous_accepted_modes": [
+        "controls",
+        "preparation",
+        "milestone",
+        "assault"
+      ],
+      "current_accepted_modes": [
+        "escort"
+      ],
+      "current_capture_indices": [
+        5,
+        7,
+        13
+      ],
+      "changed_scope": "only escort maximum-setting live official controls plus final same-run preparation live scale assertion; output boundary/shot/protection/other modes unchanged",
+      "runtime_or_ci_inputs_changed": false,
+      "independent_review": "primary supervisor read exact c1d-to-e8fc diff and node syntax, checked all 897 CI sources unchanged before escort invocation; conversation message 2026-10-22"
+    }
+  ],
+  "line_endings": "1c87 stored with LF (other drivers CRLF); verifier compares CRLF-normalized text; bytes kept exactly as executed"
+}

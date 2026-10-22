@@ -1,0 +1,75 @@
+{
+  "status": "VERIFIED",
+  "checks": [
+    {
+      "case": "python syntax tools/content_r4_boundary.py",
+      "pass": true
+    },
+    {
+      "case": "python syntax tools/content_r4_native.py",
+      "pass": true
+    },
+    {
+      "case": "python syntax tools/content_r4_pipeline.py",
+      "pass": true
+    },
+    {
+      "case": "python syntax tools/finish_content_r4.py",
+      "pass": true
+    },
+    {
+      "case": "python syntax tools/verify_content_r4.py",
+      "pass": true
+    },
+    {
+      "case": "old R3 destination",
+      "pass": true
+    },
+    {
+      "case": "relative traversal",
+      "pass": true
+    },
+    {
+      "case": "runtime junction escape",
+      "pass": true
+    },
+    {
+      "case": "immutable input manifest",
+      "pass": true
+    },
+    {
+      "case": "native ROOT project rejected",
+      "pass": true
+    },
+    {
+      "case": "independent sandbox docs accepted",
+      "pass": true
+    },
+    {
+      "case": "exact R4 output accepted",
+      "pass": true
+    },
+    {
+      "case": "669 historical and 2675 initial bytes unchanged",
+      "pass": true
+    },
+    {
+      "case": "boundary import dependency included in CI source state",
+      "pass": true
+    }
+  ],
+  "protection": {
+    "status": "VERIFIED",
+    "failures": [],
+    "history_files": 669,
+    "initial_files": 2675,
+    "manifest_pins": {
+      "tests/historical.json": "0ef9d86d9b974252ebcf1aa5e94c4ff07893ab21f99a2be06ddc781e36c376e2",
+      "tests/initial-files.json": "b3ec79620d18a5ba874939195b77cf6074cc3a19a0b7ea21fee045ddc0be4bce",
+      "tests/default-profile-before.json": "b569c4ebb24b3bc49a0862663c6a729bd6b127b22d29b53bad7173829494f433"
+    },
+    "captured_unix_ns": 1792674133916973800
+  },
+  "child_processes_started": false,
+  "scope": "static Python parsing and pure guard calls only; no Godot/browser/native pilot launched"
+}

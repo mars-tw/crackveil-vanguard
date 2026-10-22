@@ -11,6 +11,8 @@ const EQUIPMENT_PANEL := preload("res://scripts/ui/equipment_panel.gd")
 const R33_LOOT_BANNER := preload("res://scripts/ui/r33_loot_banner.gd")
 const FORMATION_PICKER := preload("res://scripts/ui/formation_picker.gd")
 const BATTLE_LAYOUT := preload("res://scripts/ui/battle_layout.gd")
+const BATTLE_JOURNAL := preload("res://scripts/ui/r4_battle_journal.gd")
+var battle_journal: Control
 
 var root: Control
 var hud_panel: Panel
@@ -134,9 +136,13 @@ func attach_equipment_panel(director: Node) -> void:
 	var loot_banner := R33_LOOT_BANNER.new()
 	loot_banner.name = "LootBanner"
 	root.add_child(loot_banner)
-	director.loot_collected.connect(loot_banner.show_item)
+	director.loot_collected.connect(_on_battle_loot)
 	_layout_equipment_panel()
 	ability_layout_signature.clear()
+
+func _on_battle_loot(item: Dictionary,_replaced: Dictionary,equipped: bool) -> void:
+	if is_instance_valid(battle_journal):
+		battle_journal.record("%s・%s\n%s" % ["已裝備" if equipped else "裝備回收",str(item.get("name","裝備")),str(item.get("description",""))],"loot")
 
 
 func _layout_equipment_panel() -> void:
@@ -165,6 +171,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_process(true)
 	_build_ui()
+	battle_journal=BATTLE_JOURNAL.new()
+	root.add_child(battle_journal)
 	if not get_viewport().size_changed.is_connected(_apply_responsive_layout):
 		get_viewport().size_changed.connect(_apply_responsive_layout)
 
@@ -172,8 +180,7 @@ func _ready() -> void:
 		GameManager.stats_changed.connect(_on_stats_changed)
 	if not GameManager.pause_changed.is_connected(_on_pause_changed):
 		GameManager.pause_changed.connect(_on_pause_changed)
-	if GameManager.has_signal("toast_requested") and not GameManager.toast_requested.is_connected(_on_toast_requested):
-		GameManager.toast_requested.connect(_on_toast_requested)
+	GameManager.battle_notice_requested.connect(_on_battle_notice)
 	if GameManager.has_signal("level_flash_requested") and not GameManager.level_flash_requested.is_connected(_on_level_flash_requested):
 		GameManager.level_flash_requested.connect(_on_level_flash_requested)
 	if GameManager.has_signal("captain_ability_hit_flash_requested") and not GameManager.captain_ability_hit_flash_requested.is_connected(_on_captain_ability_hit_flash_requested):
@@ -224,7 +231,7 @@ func _process(_delta: float) -> void:
 	_refresh_active_ability_button()
 	var loot_notice := root.get_node_or_null("LootBanner")
 	var squad: Node = GameManager.squad_manager
-	var bond_active: bool = is_instance_valid(squad) and squad.bond_reveal_timer > 0.0
+	var bond_active: bool = is_instance_valid(squad) and squad.bond_reveal_timer > 0.0 and not _dangerous_battle()
 	var urgent := has_urgent_toast()
 	toast_label.text = squad.bond_reveal_text if bond_active and not urgent else toast_current_text
 	if urgent and is_instance_valid(loot_notice):
@@ -2731,8 +2738,15 @@ func _drain_pending_toasts() -> void:
 		return
 	var messages: Array[String] = GameManager.consume_pending_toasts()
 	for message in messages:
-		_on_toast_requested(message)
-		await get_tree().create_timer(1.6, true).timeout
+		battle_journal.record(message,"pending")
+
+func _dangerous_battle() -> bool:
+	var director: Node=GameManager.tactical_director
+	return is_instance_valid(director) and is_instance_valid(director.relay) and is_instance_valid(director.relay.pressure) and director.relay.pressure.enabled and director.relay.pressure.phase in ["warning","active"]
+
+func _on_battle_notice(message: String,kind: String,urgent: bool) -> void:
+	battle_journal.record(message,kind,urgent)
+	if urgent:_on_toast_requested(message)
 
 
 func is_urgent_toast(message: String) -> bool:

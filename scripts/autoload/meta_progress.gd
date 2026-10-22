@@ -1,5 +1,10 @@
 extends Node
 
+func starting_choice_progress_text() -> String:
+	if starting_second_granted:
+		return "四次目標已完成・免費 %d 次可用" % starting_vouchers if starting_vouchers>0 else "第二次免費選擇已使用"
+	return "第二次免費選擇 %d/4 次結算" % mini(4,starting_settlements.size())
+
 signal progress_changed
 
 const SAVE_PATH := "user://veil_echo.cfg"

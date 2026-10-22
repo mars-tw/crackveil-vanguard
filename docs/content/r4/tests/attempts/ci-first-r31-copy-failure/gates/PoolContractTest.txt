@@ -1,0 +1,12 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+BONDS_ACTIVE=[]
+POOL_CONTRACT_LINEAR token_a=13 token_b=14 reused_instance=true
+POOL_CONTRACT_ORBIT token_a=15 token_b=16 reused_instance=true
+POOL_CONTRACT_DOUBLE_RELEASE duplicate_releases=1 duplicate_free=0
+POOL_CONTRACT_PASS
+WARNING: Pool double release ignored: projectile node=@Area2D@849
+   at: push_warning (core/variant/variant_utility.cpp:1033)
+   GDScript backtrace (most recent call first):
+       [0] release (res://scripts/pooling/node_pool.gd:85)
+       [1] _release (res://scripts/autoload/entity_factory.gd:1313)

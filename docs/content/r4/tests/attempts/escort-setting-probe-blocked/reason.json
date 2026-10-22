@@ -1,0 +1,9 @@
+{
+  "status": "BLOCKED_BEFORE_COMBAT",
+  "classification": "setup/setting-proof blocked before combat",
+  "raw_log_sha256": "a0f6c5acbf72df112d53d1dcd4ff428d7aa362dd2c13909e790e3fde21889e44",
+  "driver_sha256": "c1d5a6f18b1a27e9b9fa1d3ba5ff5ac1f0648974a0d74da13701559744ead929",
+  "cause": "driver read a MainMenu probe that was never published after that scene left the tree; no evidence of a lost live setting",
+  "counts_in_natural_pilot_invocations": true,
+  "combat_started": false
+}
