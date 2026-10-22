@@ -1,6 +1,6 @@
 """Audit R2's evidence, actual run results and isolated local release contract."""
 from pathlib import Path
-import hashlib,json,os,re,subprocess
+import hashlib,json,os,re,subprocess,sys
 from PIL import Image
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'docs/content/r2'
@@ -12,6 +12,10 @@ def check(value,message):
 def read(p):return json.loads((OUT/p).read_text(encoding='utf-8'))
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 version=re.search(r'^config/version="([^"]+)"',(ROOT/'project.godot').read_text(encoding='utf-8'),re.M)[1]
+# R2 remains frozen at f384969. The patch has separate source/build/screenshots
+# and a narrower, explicitly reported gate scope; never rewrite R2's receipts.
+if version=='0.31.1-content-r2.1':
+ raise SystemExit(subprocess.run([sys.executable,str(ROOT/'tools/verify_content_r2_1.py')],cwd=ROOT).returncode)
 check(version=='0.31.0-content-r2','wrong version')
 check(version in (ROOT/'README.md').read_text(encoding='utf-8'),'README version mismatch')
 check(subprocess.check_output(['git','branch','--show-current'],cwd=ROOT).strip()==b'main','wrong branch')

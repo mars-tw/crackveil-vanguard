@@ -105,6 +105,7 @@ var toast_token: int = 0
 var toast_queue: Array[String] = []
 var toast_showing: bool = false
 var toast_current_text := ""
+var toast_remaining := 0.0
 var reset_meta_confirm_pending: bool = false
 var level_flash_tween: Tween = null
 var captain_hit_flash_tween: Tween = null
@@ -224,8 +225,17 @@ func _process(_delta: float) -> void:
 	var loot_notice := root.get_node_or_null("LootBanner")
 	var squad: Node = GameManager.squad_manager
 	var bond_active: bool = is_instance_valid(squad) and squad.bond_reveal_timer > 0.0
-	toast_label.text = squad.bond_reveal_text if bond_active else toast_current_text
-	toast_panel.visible = (toast_showing or bond_active) and not blocked and not formation_picker.visible and (bond_active or not (is_instance_valid(loot_notice) and loot_notice.visible))
+	var urgent := has_urgent_toast()
+	toast_label.text = squad.bond_reveal_text if bond_active and not urgent else toast_current_text
+	if urgent and is_instance_valid(loot_notice):
+		loot_notice.hide()
+	toast_panel.visible = (toast_showing or bond_active) and not blocked and not formation_picker.visible and (urgent or bond_active or not (is_instance_valid(loot_notice) and loot_notice.visible))
+	# Hidden routine notices keep their readable time instead of expiring behind
+	# loot, bond reveals or a modal. Urgent battle messages own the notice lane.
+	if toast_showing and toast_panel.visible and (urgent or not bond_active):
+		toast_remaining -= _delta
+		if toast_remaining <= 0.0:
+			_play_toast_queue()
 
 
 func _notification(what: int) -> void:
@@ -501,6 +511,7 @@ func _build_ui() -> void:
 	formation_picker = FORMATION_PICKER.new()
 	root.add_child(formation_picker)
 	formation_picker.selected.connect(_select_formation)
+	formation_picker.visibility_changed.connect(_refresh_objective_marker)
 	tactical_hint = Label.new()
 	tactical_hint.name = "TacticalHint"
 	tactical_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1915,7 +1926,10 @@ func _refresh_primary_stat_labels(compact_landscape: bool) -> void:
 
 func _on_pause_changed(is_paused: bool) -> void:
 	if is_instance_valid(GameManager.tactical_director) and is_instance_valid(GameManager.tactical_director.relay.marker_label):
-		GameManager.tactical_director.relay.marker_label.visible = not is_paused and not GameManager.tactical_director.relay.completed
+		if is_paused:
+			GameManager.tactical_director.relay.marker_label.hide()
+		else:
+			_refresh_objective_marker()
 	if get_tree().paused or is_paused:
 		_reset_touch_input()
 	if pause_overlay != null:
@@ -2193,6 +2207,11 @@ func _open_formation_picker() -> void:
 	toast_panel.visible = false
 	formation_picker.show()
 	root.move_child(formation_picker, root.get_child_count() - 1)
+
+
+func _refresh_objective_marker() -> void:
+	if is_instance_valid(GameManager.tactical_director) and is_instance_valid(GameManager.tactical_director.relay):
+		GameManager.tactical_director.relay._update_label()
 
 
 func _close_formation_picker() -> void:
@@ -2716,41 +2735,53 @@ func _drain_pending_toasts() -> void:
 		await get_tree().create_timer(1.6, true).timeout
 
 
+func is_urgent_toast(message: String) -> bool:
+	return message.contains("預警") or message.contains("反噬") or message.contains("封隙") or message.contains("護衛")
+
+
+func has_urgent_toast() -> bool:
+	return toast_showing and is_urgent_toast(toast_current_text)
+
+
 func _on_toast_requested(message: String) -> void:
 	if toast_panel == null or toast_label == null:
 		return
 	if message == "":
 		return
-	var urgent := message.contains("預警") or message.contains("反噬") or message.contains("封隙") or message.contains("護衛")
+	var urgent := is_urgent_toast(message)
 	if urgent:
-		toast_queue.clear()
-		if toast_showing:
-			toast_current_text = message
-			toast_label.text = message
-			return
-	toast_queue.append(message)
+		var insertion := 0
+		while insertion < toast_queue.size() and is_urgent_toast(toast_queue[insertion]):
+			insertion += 1
+		toast_queue.insert(insertion, message)
+		if not has_urgent_toast():
+			_play_toast_queue()
+	else:
+		toast_queue.append(message)
 	# Loot bursts should not leave old notices playing for half a minute.
 	if toast_queue.size() > 4:
-		toast_queue.pop_front()
+		for index in range(toast_queue.size() - 1, -1, -1):
+			if not is_urgent_toast(toast_queue[index]):
+				toast_queue.remove_at(index)
+				break
 	if not toast_showing:
 		_play_toast_queue()
 
 
 func _play_toast_queue() -> void:
-	toast_showing = true
-	while not toast_queue.is_empty():
-		toast_token += 1
-		toast_current_text = toast_queue.pop_front()
-		toast_label.text = toast_current_text
-		var mobile := MOBILE_TUNING.use_mobile_ui(MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size))
-		toast_label.add_theme_font_size_override("font_size", 13)
-		var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
-		BATTLE_LAYOUT.place(toast_panel, BATTLE_LAYOUT.regions(view, mobile).notice)
-		toast_panel.visible = not get_tree().paused
-		await get_tree().create_timer(1.5, true).timeout
-	if toast_panel != null:
+	toast_showing = not toast_queue.is_empty()
+	if not toast_showing:
 		toast_panel.visible = false
-	toast_showing = false
+		return
+	toast_token += 1
+	toast_current_text = toast_queue.pop_front()
+	toast_remaining = 1.5
+	toast_label.text = toast_current_text
+	var mobile := MOBILE_TUNING.use_mobile_ui(MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size))
+	toast_label.add_theme_font_size_override("font_size", 13)
+	var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
+	BATTLE_LAYOUT.place(toast_panel, BATTLE_LAYOUT.regions(view, mobile).notice)
+	toast_panel.visible = not get_tree().paused and not formation_picker.visible
 
 
 func _build_version_text() -> String:

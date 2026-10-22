@@ -48,8 +48,10 @@ func _run() -> void:
 	MOBILE.set_device_hints_override_for_tests({})
 	get_tree().paused = false
 	evidence["failures"] = failures
-	DirAccess.make_dir_recursive_absolute("res://docs/evidence/r42")
-	var file := FileAccess.open("res://docs/evidence/r42/formation_test.json", FileAccess.WRITE)
+	var evidence_dir := OS.get_environment("CV_TEST_EVIDENCE_DIR")
+	if evidence_dir.is_empty(): evidence_dir = "res://docs/evidence/r42"
+	DirAccess.make_dir_recursive_absolute(evidence_dir)
+	var file := FileAccess.open(evidence_dir.path_join("formation_test.json"), FileAccess.WRITE)
 	if file != null:
 		file.store_string(JSON.stringify(evidence, "\t"))
 	print("R42_FORMATION_" + ("PASS" if failures.is_empty() else "FAIL") + " layouts=%d failures=%d" % [LAYOUTS.size(), failures.size()])

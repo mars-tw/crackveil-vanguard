@@ -45,6 +45,11 @@ func show_item(item: Dictionary, _replaced: Dictionary, equipped: bool) -> void:
 func _process(delta: float) -> void:
 	if not active:
 		return
+	# Equipment is informational. Keep both its contents and display time until
+	# telegraphed danger and important battle feedback have cleared.
+	if _notification_blocked():
+		visible = false
+		return
 	age += delta
 	if age > 1.7:
 		active = false
@@ -68,6 +73,19 @@ func _process(delta: float) -> void:
 	visible = not choosing and not bond_active and not GameManager.is_system_pause_active() and not GameManager.manual_paused and GameManager.game_running
 	modulate.a = minf(1.0, age / 0.08) * minf(1.0, (1.7 - age) / 0.24)
 	queue_redraw()
+
+func _notification_blocked() -> bool:
+	var director: Node = GameManager.tactical_director
+	if is_instance_valid(director) and is_instance_valid(director.relay):
+		var pressure: Node = director.relay.pressure
+		if is_instance_valid(pressure) and pressure.enabled and pressure.started and pressure.phase in ["warning", "active"]:
+			return true
+	var hud := get_parent().get_parent()
+	if hud.has_method("has_urgent_toast") and hud.has_urgent_toast():
+		return true
+	var squad: Node = GameManager.squad_manager
+	var picker := get_parent().get_node_or_null("FormationPicker")
+	return (is_instance_valid(picker) and picker.visible) or (is_instance_valid(squad) and squad.bond_reveal_timer > 0.0) or get_tree().paused or not GameManager.game_running
 
 func _draw() -> void:
 	if not active:

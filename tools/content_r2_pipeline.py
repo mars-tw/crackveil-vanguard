@@ -5,9 +5,11 @@ from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from functools import partial
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / 'docs/content/r2'
-TMP = ROOT / '.audit-tmp/content-r2'
-BUILD = ROOT / 'export/content-r2'
+ROUND = os.environ.get('CONTENT_ROUND', 'r2')
+if ROUND not in {'r2', 'r2-1'}: raise ValueError('unsupported content round')
+OUT = ROOT / ('docs/content/' + ROUND)
+TMP = ROOT / ('.audit-tmp/content-' + ROUND)
+BUILD = ROOT / ('export/content-' + ROUND)
 GODOT = Path.home()/'.codex/tools/godot-4.7-stable/Godot_v4.7-stable_win64_console.exe'
 def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
 def write(p,v):
@@ -25,10 +27,13 @@ def init():
     for e in entries:
         if not e: continue
         name=e[3:]
-        if name.startswith(('docs/content/r2/','tools/content_r2','docs/OPTIM_PLAN_CONTENT_R2')):continue
+        if name.startswith(('docs/content/'+ROUND+'/','tools/content_r2','docs/OPTIM_PLAN_CONTENT_R2')):continue
         p=ROOT/name
         if p.is_file(): files[name]={'sha256':sha(p),'size':p.stat().st_size,'status':e[:2]}
     write(OUT/'tests/initial-files.json',files)
+    if ROUND == 'r2-1':
+        frozen={p.relative_to(ROOT).as_posix():sha(p) for p in (ROOT/'docs/content/r2').rglob('*') if p.is_file()}
+        write(OUT/'tests/historical-r2.json',{'commit':'f384969','files':frozen,'status_at_start':subprocess.check_output(['git','status','--porcelain=v1','--untracked-files=all'],cwd=ROOT).decode('utf-8')})
     shutil.copyfile(ROOT/'docs/content/r1/tests/delivery-check.json',OUT/'tests/r1-baseline-verification.json')
     print('protected',len(files))
 def export(kind):
@@ -36,6 +41,7 @@ def export(kind):
     project=ROOT/'project.godot';preset=ROOT/'export_presets.cfg'
     orig=project.read_bytes();op=preset.read_bytes()
     allowed_debug={'content_r2_review.gd','content_r2_run.gd','ContentR2Review.tscn'}
+    if ROUND == 'r2-1': allowed_debug={'content_r2_1_review.gd','ContentR21Review.tscn'}
     names=[p for folder in ['scripts','scenes','resources'] for p in (ROOT/folder).rglob('*') if p.is_file() and p.suffix in {'.gd','.gdshader','.tscn','.tres'} and ('debug' not in p.parts or p.name in allowed_debug)]
     names += [project,preset,ROOT/'assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf']
     sources={p.relative_to(ROOT).as_posix():sha(p) for p in names}
@@ -44,7 +50,8 @@ def export(kind):
     target=BUILD/kind;target.mkdir(exist_ok=True)
     try:
         if kind=='review':
-            project.write_bytes(orig.replace(b'res://scenes/ui/MainMenu.tscn',b'res://scenes/debug/ContentR2Review.tscn'))
+            entry=b'res://scenes/debug/ContentR21Review.tscn' if ROUND == 'r2-1' else b'res://scenes/debug/ContentR2Review.tscn'
+            project.write_bytes(orig.replace(b'res://scenes/ui/MainMenu.tscn',entry))
             text=op.decode('utf-8').replace('scripts/debug/**,scenes/debug/**,','')
             import re
             excluded=[p.relative_to(ROOT).as_posix() for folder in ['scripts/debug','scenes/debug'] for p in (ROOT/folder).rglob('*') if p.is_file() and p.suffix in {'.gd','.tscn'} and p.name not in allowed_debug]
@@ -66,17 +73,22 @@ def browser(script,extra):
     server=ThreadingHTTPServer(('127.0.0.1',8152),partial(Quiet,directory=str(BUILD)))
     threading.Thread(target=server.serve_forever,daemon=True).start()
     env=os.environ.copy();env['UI_CAPTURE_PLAYWRIGHT']=str(TMP/'node_modules');env['UI_CAPTURE_URL']='http://127.0.0.1:8152/release/'
+    if ROUND == 'r2-1':
+        env['UI_CAPTURE_PLAYWRIGHT']=os.environ['UI_CAPTURE_PLAYWRIGHT']
+        env['CONTENT_EVIDENCE_DIR']=str(OUT)
+        env['CONTENT_BUILD_URL']='http://127.0.0.1:8152'
+        env['UI_CAPTURE_EVIDENCE_DIR']=str(OUT/'tests/controls')
     env.setdefault('UI_CAPTURE_CHROME','C:/Program Files/Google/Chrome/Application/chrome.exe')
     env.setdefault('R33_WEB_SMOKE_OUT',str(OUT/'tests/web-smoke.json'))
     try:
         r=subprocess.run(['node',script]+extra,cwd=ROOT,env=env,capture_output=True,creationflags=subprocess.CREATE_NO_WINDOW)
-        log=(r.stdout+r.stderr).decode('utf-8',errors='replace')
-        (OUT/'tests'/(Path(script).stem+('-'+extra[0] if extra else '')+'.txt')).write_text(log,encoding='utf-8')
+        log=(r.stdout+r.stderr).decode('utf-8',errors='replace').replace('\r\n','\n').replace('\r','\n').rstrip()+'\n'
+        (OUT/'tests'/(Path(script).stem+('-'+extra[0] if extra else '')+'.txt')).write_text(log,encoding='utf-8',newline='\n')
         ledger=OUT/'tests/browser-ledger.json'
         records=json.loads(ledger.read_text(encoding='utf-8')) if ledger.exists() else []
         key=script+' '+' '.join(extra)
         records=[record for record in records if record['key']!=key]
-        kind='review' if Path(script).name=='content_r2_samples.cjs' else 'release'
+        kind='review' if Path(script).name in {'content_r2_samples.cjs','content_r2_1_capture.cjs'} else 'release'
         records.append({'key':key,'script':script,'arguments':extra,'exit_code':r.returncode,'pack_sha256':sha(BUILD/kind/'index.pck'),'source_manifest_sha256':sha(OUT/'tests/source-hashes.json')})
         write(ledger,records)
         print(log,flush=True)
@@ -99,14 +111,15 @@ def cleanup():
         p.unlink()
     save_root=Path.home()/'AppData/Roaming/Godot/app_userdata/Crackveil Vanguard'
     save_names=[f'content_r2_{kind}_{name}.cfg' for kind in ['run','test'] for name in ['campaign','campaign_pets','meta','settings','achievements']]
+    if ROUND == 'r2-1': save_names=[f'content_r21_test_{name}.cfg' for name in ['campaign','campaign_pets','meta','settings','achievements']]
     for name in save_names:
         p=save_root/name
-        assert p.resolve().parent==save_root.resolve() and p.name.startswith('content_r2_')
+        assert p.resolve().parent==save_root.resolve() and p.name.startswith('content_r21_' if ROUND == 'r2-1' else 'content_r2_')
         if p.is_file():
             auxiliary.append({'path':str(p.resolve()),'bytes':p.stat().st_size})
             p.unlink()
     for target in [BUILD,TMP]:
-        assert target.resolve() in [ROOT/'export/content-r2',ROOT/'.audit-tmp/content-r2']
+        assert target.resolve() in [ROOT/('export/content-'+ROUND),ROOT/('.audit-tmp/content-'+ROUND)]
         files=[p for p in target.rglob('*') if p.is_file()]
         assert not any(p.relative_to(ROOT).as_posix() in initial for p in files)
         rows.append({'target':str(target.resolve()),'files':len(files),'bytes':sum(p.stat().st_size for p in files)})
@@ -115,6 +128,7 @@ def cleanup():
     changed=[p for p,v in initial.items() if (ROOT/p).is_file() and sha(ROOT/p)!=v['sha256']]
     write(OUT/'tests/cleanup.json',{'status':'VERIFIED' if not missing else 'BLOCKED','targets':rows,'pruned_evidence':pruned,'auxiliary':auxiliary,'missing_initial':missing,'changed_initial':changed,'deleted_files':sum(r['files'] for r in rows)+len(pruned)+len(auxiliary),'freed_bytes':sum(r['bytes'] for r in rows)+sum(r['bytes'] for r in pruned)+sum(r['bytes'] for r in auxiliary)})
 if __name__=='__main__':
+    sys.stdout.reconfigure(encoding='utf-8')
     a=sys.argv[1:]
     if a[0]=='init':init()
     elif a[0]=='export':export(a[1])

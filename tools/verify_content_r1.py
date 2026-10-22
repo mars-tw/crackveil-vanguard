@@ -23,7 +23,7 @@ version=re.search(r'^config/version="([^"]+)"',(root/'project.godot').read_text(
 # and a different encounter contract; the established entry point dispatches
 # that exact version to its stricter current-round verifier rather than rewriting
 # R1's archived expected values or pretending R1 hashes describe the new game.
-if version=='0.31.0-content-r2':
+if version in {'0.31.0-content-r2', '0.31.1-content-r2.1'}:
     raise SystemExit(subprocess.run([sys.executable,str(root/'tools/verify_content_r2.py')],cwd=root).returncode)
 check(version=='0.30.0-content-r1','version drift')
 check(version in (root/'README.md').read_text(encoding='utf-8'),'README version mismatch')

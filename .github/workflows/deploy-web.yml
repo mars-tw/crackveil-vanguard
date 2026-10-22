@@ -170,6 +170,7 @@ jobs:
             ContentR1Test
             ContentR1NavigationTest
             ContentR2Test
+            ContentR21Test
           )
           for scene in "${scenes[@]}"; do
             "${GODOT_BIN}" --headless --fixed-fps 60 --path . "res://scenes/debug/${scene}.tscn"

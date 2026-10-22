@@ -159,8 +159,10 @@ func _run() -> void:
 		await get_tree().process_frame
 	MOBILE.set_device_hints_override_for_tests({})
 	get_tree().paused = false
-	DirAccess.make_dir_recursive_absolute("res://docs/content/r1/tests")
-	var file := FileAccess.open("res://docs/content/r1/tests/mechanics.json",FileAccess.WRITE)
+	var evidence_dir := OS.get_environment("CV_TEST_EVIDENCE_DIR")
+	if evidence_dir.is_empty(): evidence_dir = "res://docs/content/r1/tests"
+	DirAccess.make_dir_recursive_absolute(evidence_dir)
+	var file := FileAccess.open(evidence_dir.path_join("mechanics.json"),FileAccess.WRITE)
 	file.store_string(JSON.stringify({"status":"VERIFIED" if failures.is_empty() else "BLOCKED","checks":checks,"failures":failures,"viewports":evidence},"\t"))
 	print("CONTENT_R1_%s checks=%d failures=%d" % ["PASS" if failures.is_empty() else "FAIL",checks,failures.size()])
 	get_tree().quit(0 if failures.is_empty() else 1)

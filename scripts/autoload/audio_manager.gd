@@ -62,6 +62,13 @@ const SFX_COOLDOWNS: Dictionary = {
 var master_volume: float = 0.75
 var muted: bool = false
 var unlocked: bool = false
+var unlock_mouse_button := 0
+var unlock_touch_index := -1
+var unlock_keycode := 0
+var unlock_joy_button := -1
+var unlock_joy_device := -1
+var unlock_emulation_until := 0
+var unlock_emulated_mouse_pending_touch := false
 var players: Array[AudioStreamPlayer] = []
 var next_player_index: int = 0
 var last_play_msec: Dictionary = {}
@@ -87,10 +94,92 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if _consume_unlock_tail(event):
+		get_viewport().set_input_as_handled()
+		return
 	if unlocked:
 		return
 	if _is_unlock_event(event):
+		# The audio signal hides the start gate during _input, before GUI input.
+		# Consume this gate gesture first so it cannot press the newly exposed
+		# summon/equipment button. Menu gestures without a gate keep their action.
+		if _visible_unlock_gate():
+			_arm_unlock_tail(event)
+			get_viewport().set_input_as_handled()
 		unlock_audio()
+
+
+func _visible_unlock_gate() -> bool:
+	if not OS.has_feature("web") or not is_instance_valid(GameManager.arena):
+		return false
+	var hud := GameManager.arena.get_node_or_null("HUD")
+	return is_instance_valid(hud) and is_instance_valid(hud.audio_prompt_button) and hud.audio_prompt_button.is_visible_in_tree()
+
+
+func _arm_unlock_tail(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		# Wheel pulses have no matching release event.
+		if event.button_index not in [MOUSE_BUTTON_WHEEL_UP,MOUSE_BUTTON_WHEEL_DOWN,MOUSE_BUTTON_WHEEL_LEFT,MOUSE_BUTTON_WHEEL_RIGHT]:
+			unlock_mouse_button = event.button_index
+		if event.device == InputEvent.DEVICE_ID_EMULATION:
+			# Web may deliver the emulated mouse BEFORE its raw ScreenTouch.
+			unlock_emulated_mouse_pending_touch = true
+			unlock_emulation_until = Time.get_ticks_msec() + 600
+	elif event is InputEventScreenTouch:
+		unlock_touch_index = event.index
+		unlock_emulation_until = Time.get_ticks_msec() + 600
+	elif event is InputEventKey:
+		unlock_keycode = event.physical_keycode if event.physical_keycode != 0 else event.keycode
+	elif event is InputEventJoypadButton:
+		unlock_joy_button = event.button_index
+		unlock_joy_device = event.device
+
+
+func _consume_unlock_tail(event: InputEvent) -> bool:
+	if event is InputEventScreenTouch and event.pressed and unlock_emulated_mouse_pending_touch and Time.get_ticks_msec() <= unlock_emulation_until:
+		unlock_touch_index = event.index
+		unlock_emulated_mouse_pending_touch = false
+		return true
+	if event is InputEventMouseButton and unlock_mouse_button != 0 and event.button_index == unlock_mouse_button:
+		if not event.pressed: unlock_mouse_button = 0
+		return true
+	if event is InputEventMouseMotion and unlock_mouse_button != 0:
+		return true
+	if event is InputEventScreenTouch and event.index == unlock_touch_index:
+		if not event.pressed:
+			unlock_touch_index = -1
+			unlock_emulation_until = Time.get_ticks_msec() + 600
+		return true
+	if event is InputEventScreenDrag and event.index == unlock_touch_index:
+		return true
+	if event is InputEventScreenTouch and event.pressed and unlock_touch_index == -1:
+		# A new real touch owns its own emulated mouse events, even if it starts
+		# immediately after the unlock tap.
+		unlock_emulation_until = 0
+		unlock_emulated_mouse_pending_touch = false
+	# Godot can emit a mouse press/release for the touch that opened audio.
+	# Suppress only emulated events; a subsequent real mouse click still works.
+	if (event is InputEventMouseButton or event is InputEventMouseMotion) and event.device == InputEvent.DEVICE_ID_EMULATION and Time.get_ticks_msec() <= unlock_emulation_until:
+		if event is InputEventMouseButton and not event.pressed: unlock_emulation_until = 0
+		return true
+	if event is InputEventKey and unlock_keycode != 0 and (event.physical_keycode == unlock_keycode or event.keycode == unlock_keycode):
+		if not event.pressed: unlock_keycode = 0
+		return true
+	if event is InputEventJoypadButton and event.device == unlock_joy_device and event.button_index == unlock_joy_button:
+		if not event.pressed: unlock_joy_button = -1
+		return true
+	return false
+
+
+func _notification(what: int) -> void:
+	if what in [NOTIFICATION_WM_WINDOW_FOCUS_OUT,NOTIFICATION_APPLICATION_FOCUS_OUT,NOTIFICATION_APPLICATION_PAUSED]:
+		unlock_mouse_button = 0
+		unlock_touch_index = -1
+		unlock_keycode = 0
+		unlock_joy_button = -1
+		unlock_joy_device = -1
+		unlock_emulation_until = 0
+		unlock_emulated_mouse_pending_touch = false
 
 
 func _exit_tree() -> void:

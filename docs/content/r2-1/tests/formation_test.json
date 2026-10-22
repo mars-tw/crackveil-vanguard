@@ -1,0 +1,126 @@
+{
+	"failures": [],
+	"layouts": [
+		{
+			"phone": true,
+			"rect": [
+				314.0,
+				692.0,
+				64.0,
+				44.0
+			],
+			"size": [
+				390,
+				844
+			],
+			"text": "楔形"
+		},
+		{
+			"phone": true,
+			"rect": [
+				770.0,
+				252.0,
+				64.0,
+				44.0
+			],
+			"size": [
+				844,
+				390
+			],
+			"text": "楔形"
+		},
+		{
+			"phone": true,
+			"rect": [
+				248.0,
+				424.0,
+				64.0,
+				44.0
+			],
+			"size": [
+				320,
+				568
+			],
+			"text": "楔形"
+		},
+		{
+			"phone": true,
+			"rect": [
+				593.0,
+				237.0,
+				64.0,
+				44.0
+			],
+			"size": [
+				667,
+				375
+			],
+			"text": "楔形"
+		},
+		{
+			"phone": false,
+			"rect": [
+				20.0,
+				550.0,
+				224.0,
+				44.0
+			],
+			"size": [
+				1280,
+				720
+			],
+			"text": "陣形：楔形（Q）"
+		},
+		{
+			"phone": false,
+			"rect": [
+				20.0,
+				430.0,
+				224.0,
+				44.0
+			],
+			"size": [
+				1366,
+				600
+			],
+			"text": "陣形：楔形（Q）"
+		}
+	],
+	"mechanics": {
+		"base_states": {
+			"guard_cooldown": 2.4,
+			"ring_damage": 0.92,
+			"ring_incoming_total": 0.85,
+			"wedge_damage": 1.15
+		},
+		"inputs": {
+			"action_switch": "ring->scatter",
+			"button_switch": "scatter->wedge"
+		},
+		"passives": {
+			"blast": "wedge damage x1.10",
+			"guard": "cooldown x0.6 + shield 14",
+			"scout": "followers +10%",
+			"support": "pickup x1.2"
+		},
+		"resonance": {
+			"cooldown": 1.17733333333334,
+			"damage": 0.92,
+			"formation": "ring",
+			"incoming": 0.9,
+			"pickup": 1.2,
+			"regen": 1.5,
+			"resonance": [
+				"bond_guard_echo"
+			],
+			"speed": 1.0,
+			"switches": 4
+		},
+		"ring_arrival_max_error_px": 7.34268188476563
+	},
+	"music": {
+		"headless_playback": "not executed (audio runtime disabled in headless)",
+		"path": "res://assets/audio/r42_battle_loop.ogg",
+		"seconds": 24.0
+	}
+}

@@ -42,7 +42,10 @@ func _run() -> void:
 	get_tree().paused = false
 	evidence["checks"] = checks
 	evidence["failures"] = failures
-	var file := FileAccess.open("res://docs/evidence/r43-mobile/mechanics.json",FileAccess.WRITE)
+	var evidence_dir := OS.get_environment("CV_TEST_EVIDENCE_DIR")
+	if evidence_dir.is_empty(): evidence_dir = "res://docs/evidence/r43-mobile"
+	DirAccess.make_dir_recursive_absolute(evidence_dir)
+	var file := FileAccess.open(evidence_dir.path_join("mobile_tactics.json" if not OS.get_environment("CV_TEST_EVIDENCE_DIR").is_empty() else "mechanics.json"),FileAccess.WRITE)
 	file.store_string(JSON.stringify(evidence,"\t"))
 	print("R43_MOBILE_TACTICS_%s checks=%d failures=%d" % ["PASS" if failures.is_empty() else "FAIL", checks, failures.size()])
 	get_tree().quit(0 if failures.is_empty() else 1)

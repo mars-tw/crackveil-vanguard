@@ -154,8 +154,10 @@ func _run() -> void:
 		await get_tree().process_frame
 		await get_tree().process_frame
 	await _layout_test()
-	DirAccess.make_dir_recursive_absolute("res://docs/content/r2/tests")
-	var file := FileAccess.open("res://docs/content/r2/tests/mechanics.json",FileAccess.WRITE)
+	var evidence_dir := OS.get_environment("CV_TEST_EVIDENCE_DIR")
+	if evidence_dir.is_empty(): evidence_dir = "res://docs/content/r2/tests"
+	DirAccess.make_dir_recursive_absolute(evidence_dir)
+	var file := FileAccess.open(evidence_dir.path_join("mechanics.json"),FileAccess.WRITE)
 	file.store_string(JSON.stringify({"status":"VERIFIED" if failures.is_empty() else "BLOCKED","checks":checks,"failures":failures,"scenarios":rows},"\t"))
 	print("CONTENT_R2_%s checks=%d failures=%d" % ["PASS" if failures.is_empty() else "FAIL",checks,failures.size()])
 	get_tree().quit(0 if failures.is_empty() else 1)

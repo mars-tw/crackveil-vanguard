@@ -1,0 +1,20 @@
+{
+  "status": "VERIFIED",
+  "checks": 25665,
+  "failures": [],
+  "version": "0.31.1-content-r2.1",
+  "historical_reference": "f384969",
+  "runtime_delta": [
+    "scripts/autoload/audio_manager.gd",
+    "scripts/services/formation_relay.gd",
+    "scripts/ui/hud.gd",
+    "scripts/ui/r33_loot_banner.gd",
+    "project.godot"
+  ],
+  "gate_scope": "8 relevant Godot CI scenes plus 8 viewport controls, 3 viewport UI checkpoints and 5 real centre gesture/next-input checks; full historical 47-gate suite NOT rerun",
+  "screenshot_count": 21,
+  "secret_scan_files": 24793,
+  "secret_scan_hit_paths": [],
+  "performance": "not measured; SwiftShader screenshots are not device p95 evidence",
+  "overall_quality_score": "not established; no claim of >=9/10"
+}

@@ -57,8 +57,10 @@ func _run() -> void:
 		"test_input": "not executed (font/style diagnostic only)" if diagnose else "SubViewport.push_input physical ScreenTouch index7/ScreenDrag and MouseButton routing",
 		"fixture_setup": "isolated save paths/reset defaults and wallet0; combat processing disabled only in test fixture",
 		"input_interval_state_checks": "not executed" if diagnose else "HP/current run seed/private draw RNG unchanged; no purchases or injected HP/RNG", "cleanup_paused": get_tree().paused}
-	DirAccess.make_dir_recursive_absolute("res://docs/evidence/r39")
-	var file := FileAccess.open("res://docs/evidence/r39/" + ("mobile_hud_diagnostic.json" if diagnose else "mobile_hud_test.json"), FileAccess.WRITE)
+	var evidence_dir := OS.get_environment("CV_TEST_EVIDENCE_DIR")
+	if evidence_dir.is_empty(): evidence_dir = "res://docs/evidence/r39"
+	DirAccess.make_dir_recursive_absolute(evidence_dir)
+	var file := FileAccess.open(evidence_dir.path_join("mobile_hud_diagnostic.json" if diagnose else "mobile_hud_test.json"), FileAccess.WRITE)
 	if file != null:
 		file.store_string(JSON.stringify(result, "\t"))
 	if diagnose:

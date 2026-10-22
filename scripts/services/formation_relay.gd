@@ -48,7 +48,9 @@ func next_action() -> String:
 func _update_label() -> void:
 	if not is_instance_valid(marker_label) or not is_instance_valid(GameManager.player):
 		return
-	marker_label.visible = GameManager.game_running and not completed and not get_tree().paused
+	var picker := marker_label.get_parent().get_node_or_null("FormationPicker")
+	var choosing: bool = is_instance_valid(picker) and picker.visible
+	marker_label.visible = GameManager.game_running and not completed and not get_tree().paused and not choosing
 	if not marker_label.visible:
 		return
 	# Reassert the CSS font after the HUD's general accessibility pass.

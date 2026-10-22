@@ -1,0 +1,2473 @@
+[
+  {
+    "width": 844,
+    "height": 390,
+    "input": "mouse",
+    "gate_only": false,
+    "result": {
+      "checks": 33,
+      "failures": [],
+      "fixture": "real arena UI; deterministic debug checkpoints; combat physics disabled for UI isolation; no gameplay balance claims",
+      "gate_only": false,
+      "records": [
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "picker-open",
+          "loot_active": false,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": false,
+          "phase": "waiting",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": true,
+          "sample": 0,
+          "screenshot": true,
+          "toast_remaining": 1.02653333333333,
+          "toast_text": "點按「陣形」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收",
+          "toast_visible": false,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "picker-closed",
+          "loot_active": false,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "waiting",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 1,
+          "screenshot": true,
+          "toast_remaining": 1.00986666666667,
+          "toast_text": "點按「陣形」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "front-warning",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "warning",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 2,
+          "screenshot": false,
+          "toast_remaining": 1.31586666666667,
+          "toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "front-active",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "active",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 3,
+          "screenshot": true,
+          "toast_remaining": 1.0247,
+          "toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "front-recovery",
+          "loot_active": true,
+          "loot_age": 0.167766666666667,
+          "loot_visible": true,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 4,
+          "screenshot": false,
+          "toast_remaining": -0.665733333333333,
+          "toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+          "toast_visible": false,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "pincer",
+          "label": "pincer-warning",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "warning",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 5,
+          "screenshot": false,
+          "toast_remaining": 1.3052,
+          "toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "pincer",
+          "label": "pincer-active",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "active",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 6,
+          "screenshot": true,
+          "toast_remaining": 1.09503333333333,
+          "toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "pincer",
+          "label": "pincer-recovery",
+          "loot_active": true,
+          "loot_age": 0.174603703703704,
+          "loot_visible": true,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 7,
+          "screenshot": false,
+          "toast_remaining": 1.48153333333333,
+          "toast_text": "戰術追獵：雷爪獵將",
+          "toast_visible": false,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "artillery-warning",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "warning",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 8,
+          "screenshot": false,
+          "toast_remaining": 1.30863703703704,
+          "toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "artillery-active",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "active",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 9,
+          "screenshot": true,
+          "toast_remaining": 1.06283703703704,
+          "toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "artillery-recovery",
+          "loot_active": true,
+          "loot_age": 0.21440303030303,
+          "loot_visible": true,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 10,
+          "screenshot": true,
+          "toast_remaining": 1.4758,
+          "toast_text": "戰術追獵：霜環守望者",
+          "toast_visible": false,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "urgent-預警",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 11,
+          "screenshot": true,
+          "toast_remaining": 1.48333333333333,
+          "toast_text": "預警重要訊息",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "urgent-反噬",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 12,
+          "screenshot": false,
+          "toast_remaining": 1.476,
+          "toast_text": "反噬重要訊息",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "urgent-封隙",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 13,
+          "screenshot": false,
+          "toast_remaining": 1.48,
+          "toast_text": "封隙重要訊息",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "urgent-護衛",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            196,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            470,
+            102,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 14,
+          "screenshot": false,
+          "toast_remaining": 1.47916666666667,
+          "toast_text": "護衛重要訊息",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            844,
+            390
+          ]
+        }
+      ],
+      "start_state": {
+        "gate_visible": false,
+        "input_trace": [
+          {
+            "button": 1,
+            "device": 32,
+            "position": [
+              778.999938964844,
+              644.307678222656
+            ],
+            "pressed": true,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": false
+          },
+          {
+            "button": 1,
+            "device": 32,
+            "position": [
+              778.999938964844,
+              644.307678222656
+            ],
+            "pressed": false,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": true
+          }
+        ],
+        "manual_paused": false,
+        "pause_rect": [
+          788,
+          18,
+          54,
+          44
+        ],
+        "paused": false,
+        "summon_visible": false,
+        "system_paused": false
+      },
+      "status": "VERIFIED",
+      "version": "0.31.1-content-r2.1"
+    },
+    "errors": [],
+    "known_uid_warnings": [
+      "WARNING: 'res://scenes/enemies/Enemy.tscn': In external resource #0, invalid UID: 'uid://bdjiu1vdhnva8' - using text path instead: 'res://scripts/enemies/enemy.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/heroes/Hero.tscn': In external resource #0, invalid UID: 'uid://b03h8fce7yo4h' - using text path instead: 'res://scripts/heroes/hero.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/heroes/Hero.tscn': In external resource #1, invalid UID: 'uid://bvdrm3bnn22fp' - using text path instead: 'res://scripts/player/player_visual.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/LinearBulletWeapon.tscn': In external resource #0, invalid UID: 'uid://y0ifhp6aek4q' - using text path instead: 'res://scripts/weapons/linear_bullet_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/ChainLightningWeapon.tscn': In external resource #0, invalid UID: 'uid://r34rqjh5rhuc' - using text path instead: 'res://scripts/weapons/chain_lightning_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://resources/weapons/pulse_bloom.tres': In external resource #0, invalid UID: 'uid://cy7niv7tqxgjw' - using text path instead: 'res://scripts/resources/weapon_data.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/ExplosionWeapon.tscn': In external resource #0, invalid UID: 'uid://qpxsdg4ib4pw' - using text path instead: 'res://scripts/weapons/explosion_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/BoomerangWeapon.tscn': In external resource #0, invalid UID: 'uid://cu6wgjts36j1v' - using text path instead: 'res://scripts/weapons/boomerang_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/HomingMissileWeapon.tscn': In external resource #0, invalid UID: 'uid://cicio67l8hh7w' - using text path instead: 'res://scripts/weapons/homing_missile_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://resources/weapons/grenade_lob.tres': In external resource #0, invalid UID: 'uid://cy7niv7tqxgjw' - using text path instead: 'res://scripts/resources/weapon_data.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/GrenadeLobWeapon.tscn': In external resource #0, invalid UID: 'uid://8ehxjfp3cvax' - using text path instead: 'res://scripts/weapons/grenade_lob_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/RailLanceWeapon.tscn': In external resource #0, invalid UID: 'uid://3ufdb44lxu6w' - using text path instead: 'res://scripts/weapons/rail_lance_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/EchoHymnWeapon.tscn': In external resource #0, invalid UID: 'uid://dv3dpccemkdl' - using text path instead: 'res://scripts/weapons/echo_hymn_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/Projectile.tscn': In external resource #0, invalid UID: 'uid://dmnivqvnx3msr' - using text path instead: 'res://scripts/projectiles/projectile.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/OrbitProjectile.tscn': In external resource #0, invalid UID: 'uid://ce5p22o4lc8we' - using text path instead: 'res://scripts/projectiles/orbit_projectile.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/ExplosionArea.tscn': In external resource #0, invalid UID: 'uid://dts4g75qwsmht' - using text path instead: 'res://scripts/projectiles/explosion_area.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/HazardZone.tscn': In external resource #0, invalid UID: 'uid://dfyhbi0sl1bg3' - using text path instead: 'res://scripts/projectiles/hazard_zone.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/pickups/XPGem.tscn': In external resource #0, invalid UID: 'uid://bnxqgej0s7ij3' - using text path instead: 'res://scripts/pickups/pickup.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/pickups/CoinPickup.tscn': In external resource #0, invalid UID: 'uid://bnxqgej0s7ij3' - using text path instead: 'res://scripts/pickups/pickup.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/DamageNumber.tscn': In external resource #0, invalid UID: 'uid://bwncf505utn40' - using text path instead: 'res://scripts/vfx/damage_number.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/DeathBurst.tscn': In external resource #0, invalid UID: 'uid://d2e1nsvw32d27' - using text path instead: 'res://scripts/vfx/death_burst.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/LightningArc.tscn': In external resource #0, invalid UID: 'uid://cdynht625kx80' - using text path instead: 'res://scripts/vfx/lightning_arc.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #0, invalid UID: 'uid://cvp1iu71i6lo1' - using text path instead: 'res://scripts/arena/arena.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #1, invalid UID: 'uid://cjnsfivopi2bc' - using text path instead: 'res://scripts/arena/arena_background.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #2, invalid UID: 'uid://d0mybkg1o8106' - using text path instead: 'res://scripts/heroes/squad_manager.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #3, invalid UID: 'uid://dv3cdftopmui4' - using text path instead: 'res://scripts/enemies/enemy_spawner.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/HUD.tscn': In external resource #0, invalid UID: 'uid://ck6rhg5ngj0p6' - using text path instead: 'res://scripts/ui/hud.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/ContractScreen.tscn': In external resource #0, invalid UID: 'uid://c0gscje856pvl' - using text path instead: 'res://scripts/ui/contract_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/LevelUpScreen.tscn': In external resource #0, invalid UID: 'uid://n00fn16r4v8g' - using text path instead: 'res://scripts/ui/level_up_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/GameOverScreen.tscn': In external resource #0, invalid UID: 'uid://g1cw2dpki4sq' - using text path instead: 'res://scripts/ui/game_over_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/RiftShopScreen.tscn': In external resource #0, invalid UID: 'uid://p6x4x0tpoxwe' - using text path instead: 'res://scripts/ui/rift_shop_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/StageVictoryScreen.tscn': In external resource #0, invalid UID: 'uid://cnfhgtuxh3pi2' - using text path instead: 'res://scripts/ui/stage_victory_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)"
+    ],
+    "external_requests": [],
+    "start_input": {
+      "method": "Playwright centre mouse on Godot official audio_prompt_button",
+      "rect": [
+        344,
+        316,
+        156,
+        66
+      ],
+      "normal_pause_resume_verified": true,
+      "after_start": {
+        "gate_visible": false,
+        "input_trace": [
+          {
+            "button": 1,
+            "device": 32,
+            "position": [
+              778.999938964844,
+              644.307678222656
+            ],
+            "pressed": true,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": false
+          },
+          {
+            "button": 1,
+            "device": 32,
+            "position": [
+              778.999938964844,
+              644.307678222656
+            ],
+            "pressed": false,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": true
+          }
+        ],
+        "manual_paused": false,
+        "pause_rect": [
+          788,
+          18,
+          54,
+          44
+        ],
+        "paused": false,
+        "summon_visible": false,
+        "system_paused": false
+      }
+    },
+    "pack_sha256": "1a262b14e16b35afca3697e75e50afab923ab6b7e10c9cd22e3240771943c095",
+    "source_manifest_sha256": "be36ff160fd1c07b22dbb5ce9d3eae1cd2b9b4b38ad86a7808aeb4d5365c78b6",
+    "release_entry_restored": true
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "input": "mouse",
+    "gate_only": false,
+    "result": {
+      "checks": 33,
+      "failures": [],
+      "fixture": "real arena UI; deterministic debug checkpoints; combat physics disabled for UI isolation; no gameplay balance claims",
+      "gate_only": false,
+      "records": [
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "picker-open",
+          "loot_active": false,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": false,
+          "phase": "waiting",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": true,
+          "sample": 0,
+          "screenshot": true,
+          "toast_remaining": 1.05,
+          "toast_text": "點按「陣形」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收",
+          "toast_visible": false,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "picker-closed",
+          "loot_active": false,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "waiting",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 1,
+          "screenshot": true,
+          "toast_remaining": 1.03333333333333,
+          "toast_text": "點按「陣形」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "front-warning",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "warning",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 2,
+          "screenshot": false,
+          "toast_remaining": 1.32767777777778,
+          "toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "front-active",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "active",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 3,
+          "screenshot": true,
+          "toast_remaining": 1.13484644444444,
+          "toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "front-recovery",
+          "loot_active": true,
+          "loot_age": 0.174242857142857,
+          "loot_visible": true,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 4,
+          "screenshot": false,
+          "toast_remaining": -0.545553555555556,
+          "toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+          "toast_visible": false,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "pincer",
+          "label": "pincer-warning",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "warning",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 5,
+          "screenshot": false,
+          "toast_remaining": 1.31292380952381,
+          "toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "pincer",
+          "label": "pincer-active",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "active",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 6,
+          "screenshot": true,
+          "toast_remaining": 1.09297575757576,
+          "toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "pincer",
+          "label": "pincer-recovery",
+          "loot_active": true,
+          "loot_age": 0.199904761904762,
+          "loot_visible": true,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 7,
+          "screenshot": false,
+          "toast_remaining": 1.4763619047619,
+          "toast_text": "戰術追獵：雷爪獵將",
+          "toast_visible": false,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "artillery-warning",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "warning",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 8,
+          "screenshot": false,
+          "toast_remaining": 1.31476666666667,
+          "toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "artillery-active",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "active",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 9,
+          "screenshot": true,
+          "toast_remaining": 1.06176666666667,
+          "toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "artillery-recovery",
+          "loot_active": true,
+          "loot_age": 0.2342,
+          "loot_visible": true,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 10,
+          "screenshot": true,
+          "toast_remaining": 1.4714,
+          "toast_text": "戰術追獵：霜環守望者",
+          "toast_visible": false,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "urgent-預警",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 11,
+          "screenshot": true,
+          "toast_remaining": 1.4568,
+          "toast_text": "預警重要訊息",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "urgent-反噬",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 12,
+          "screenshot": false,
+          "toast_remaining": 1.48,
+          "toast_text": "反噬重要訊息",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "urgent-封隙",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 13,
+          "screenshot": false,
+          "toast_remaining": 1.47873333333333,
+          "toast_text": "封隙重要訊息",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "urgent-護衛",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            450.992156982422,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            16,
+            556,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 14,
+          "screenshot": false,
+          "toast_remaining": 1.47793333333333,
+          "toast_text": "護衛重要訊息",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            390,
+            844
+          ]
+        }
+      ],
+      "start_state": {
+        "gate_visible": false,
+        "input_trace": [
+          {
+            "button": 1,
+            "device": 32,
+            "position": [
+              640,
+              2651.8486328125
+            ],
+            "pressed": true,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": false
+          },
+          {
+            "button": 1,
+            "device": 32,
+            "position": [
+              640,
+              2651.8486328125
+            ],
+            "pressed": false,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": true
+          }
+        ],
+        "manual_paused": false,
+        "pause_rect": [
+          334,
+          34,
+          54,
+          44
+        ],
+        "paused": false,
+        "summon_visible": false,
+        "system_paused": false
+      },
+      "status": "VERIFIED",
+      "version": "0.31.1-content-r2.1"
+    },
+    "errors": [],
+    "known_uid_warnings": [
+      "WARNING: 'res://scenes/enemies/Enemy.tscn': In external resource #0, invalid UID: 'uid://bdjiu1vdhnva8' - using text path instead: 'res://scripts/enemies/enemy.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/heroes/Hero.tscn': In external resource #0, invalid UID: 'uid://b03h8fce7yo4h' - using text path instead: 'res://scripts/heroes/hero.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/heroes/Hero.tscn': In external resource #1, invalid UID: 'uid://bvdrm3bnn22fp' - using text path instead: 'res://scripts/player/player_visual.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/LinearBulletWeapon.tscn': In external resource #0, invalid UID: 'uid://y0ifhp6aek4q' - using text path instead: 'res://scripts/weapons/linear_bullet_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/ChainLightningWeapon.tscn': In external resource #0, invalid UID: 'uid://r34rqjh5rhuc' - using text path instead: 'res://scripts/weapons/chain_lightning_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://resources/weapons/pulse_bloom.tres': In external resource #0, invalid UID: 'uid://cy7niv7tqxgjw' - using text path instead: 'res://scripts/resources/weapon_data.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/ExplosionWeapon.tscn': In external resource #0, invalid UID: 'uid://qpxsdg4ib4pw' - using text path instead: 'res://scripts/weapons/explosion_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/BoomerangWeapon.tscn': In external resource #0, invalid UID: 'uid://cu6wgjts36j1v' - using text path instead: 'res://scripts/weapons/boomerang_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/HomingMissileWeapon.tscn': In external resource #0, invalid UID: 'uid://cicio67l8hh7w' - using text path instead: 'res://scripts/weapons/homing_missile_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://resources/weapons/grenade_lob.tres': In external resource #0, invalid UID: 'uid://cy7niv7tqxgjw' - using text path instead: 'res://scripts/resources/weapon_data.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/GrenadeLobWeapon.tscn': In external resource #0, invalid UID: 'uid://8ehxjfp3cvax' - using text path instead: 'res://scripts/weapons/grenade_lob_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/RailLanceWeapon.tscn': In external resource #0, invalid UID: 'uid://3ufdb44lxu6w' - using text path instead: 'res://scripts/weapons/rail_lance_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/EchoHymnWeapon.tscn': In external resource #0, invalid UID: 'uid://dv3dpccemkdl' - using text path instead: 'res://scripts/weapons/echo_hymn_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/Projectile.tscn': In external resource #0, invalid UID: 'uid://dmnivqvnx3msr' - using text path instead: 'res://scripts/projectiles/projectile.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/OrbitProjectile.tscn': In external resource #0, invalid UID: 'uid://ce5p22o4lc8we' - using text path instead: 'res://scripts/projectiles/orbit_projectile.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/ExplosionArea.tscn': In external resource #0, invalid UID: 'uid://dts4g75qwsmht' - using text path instead: 'res://scripts/projectiles/explosion_area.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/HazardZone.tscn': In external resource #0, invalid UID: 'uid://dfyhbi0sl1bg3' - using text path instead: 'res://scripts/projectiles/hazard_zone.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/pickups/XPGem.tscn': In external resource #0, invalid UID: 'uid://bnxqgej0s7ij3' - using text path instead: 'res://scripts/pickups/pickup.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/pickups/CoinPickup.tscn': In external resource #0, invalid UID: 'uid://bnxqgej0s7ij3' - using text path instead: 'res://scripts/pickups/pickup.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/DamageNumber.tscn': In external resource #0, invalid UID: 'uid://bwncf505utn40' - using text path instead: 'res://scripts/vfx/damage_number.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/DeathBurst.tscn': In external resource #0, invalid UID: 'uid://d2e1nsvw32d27' - using text path instead: 'res://scripts/vfx/death_burst.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/LightningArc.tscn': In external resource #0, invalid UID: 'uid://cdynht625kx80' - using text path instead: 'res://scripts/vfx/lightning_arc.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #0, invalid UID: 'uid://cvp1iu71i6lo1' - using text path instead: 'res://scripts/arena/arena.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #1, invalid UID: 'uid://cjnsfivopi2bc' - using text path instead: 'res://scripts/arena/arena_background.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #2, invalid UID: 'uid://d0mybkg1o8106' - using text path instead: 'res://scripts/heroes/squad_manager.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #3, invalid UID: 'uid://dv3cdftopmui4' - using text path instead: 'res://scripts/enemies/enemy_spawner.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/HUD.tscn': In external resource #0, invalid UID: 'uid://ck6rhg5ngj0p6' - using text path instead: 'res://scripts/ui/hud.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/ContractScreen.tscn': In external resource #0, invalid UID: 'uid://c0gscje856pvl' - using text path instead: 'res://scripts/ui/contract_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/LevelUpScreen.tscn': In external resource #0, invalid UID: 'uid://n00fn16r4v8g' - using text path instead: 'res://scripts/ui/level_up_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/GameOverScreen.tscn': In external resource #0, invalid UID: 'uid://g1cw2dpki4sq' - using text path instead: 'res://scripts/ui/game_over_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/RiftShopScreen.tscn': In external resource #0, invalid UID: 'uid://p6x4x0tpoxwe' - using text path instead: 'res://scripts/ui/rift_shop_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/StageVictoryScreen.tscn': In external resource #0, invalid UID: 'uid://cnfhgtuxh3pi2' - using text path instead: 'res://scripts/ui/stage_victory_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)"
+    ],
+    "external_requests": [],
+    "start_input": {
+      "method": "Playwright centre mouse on Godot official audio_prompt_button",
+      "rect": [
+        117,
+        770,
+        156,
+        76
+      ],
+      "normal_pause_resume_verified": true,
+      "after_start": {
+        "gate_visible": false,
+        "input_trace": [
+          {
+            "button": 1,
+            "device": 32,
+            "position": [
+              640,
+              2651.8486328125
+            ],
+            "pressed": true,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": false
+          },
+          {
+            "button": 1,
+            "device": 32,
+            "position": [
+              640,
+              2651.8486328125
+            ],
+            "pressed": false,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": true
+          }
+        ],
+        "manual_paused": false,
+        "pause_rect": [
+          334,
+          34,
+          54,
+          44
+        ],
+        "paused": false,
+        "summon_visible": false,
+        "system_paused": false
+      }
+    },
+    "pack_sha256": "1a262b14e16b35afca3697e75e50afab923ab6b7e10c9cd22e3240771943c095",
+    "source_manifest_sha256": "be36ff160fd1c07b22dbb5ce9d3eae1cd2b9b4b38ad86a7808aeb4d5365c78b6",
+    "release_entry_restored": true
+  },
+  {
+    "width": 1366,
+    "height": 600,
+    "input": "mouse",
+    "gate_only": false,
+    "result": {
+      "checks": 33,
+      "failures": [],
+      "fixture": "real arena UI; deterministic debug checkpoints; combat physics disabled for UI isolation; no gameplay balance claims",
+      "gate_only": false,
+      "records": [
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "picker-open",
+          "loot_active": false,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": false,
+          "phase": "waiting",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": true,
+          "sample": 0,
+          "screenshot": true,
+          "toast_remaining": 1.0436,
+          "toast_text": "點按「Q／陣形」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收",
+          "toast_visible": false,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "picker-closed",
+          "loot_active": false,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "waiting",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 1,
+          "screenshot": true,
+          "toast_remaining": 1.0356,
+          "toast_text": "點按「Q／陣形」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "front-warning",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "warning",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 2,
+          "screenshot": false,
+          "toast_remaining": 1.2745,
+          "toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "front-active",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "active",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 3,
+          "screenshot": true,
+          "toast_remaining": 0.991133333333334,
+          "toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "front",
+          "label": "front-recovery",
+          "loot_active": true,
+          "loot_age": 0.241877777777778,
+          "loot_visible": true,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 4,
+          "screenshot": false,
+          "toast_remaining": -0.845366666666667,
+          "toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+          "toast_visible": false,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "pincer",
+          "label": "pincer-warning",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "warning",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 5,
+          "screenshot": false,
+          "toast_remaining": 1.18975555555556,
+          "toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "pincer",
+          "label": "pincer-active",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "active",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 6,
+          "screenshot": true,
+          "toast_remaining": 0.855088888888889,
+          "toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "pincer",
+          "label": "pincer-recovery",
+          "loot_active": true,
+          "loot_age": 0.2428,
+          "loot_visible": true,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 7,
+          "screenshot": false,
+          "toast_remaining": 1.46666666666667,
+          "toast_text": "戰術追獵：雷爪獵將",
+          "toast_visible": false,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "artillery-warning",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "warning",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 8,
+          "screenshot": false,
+          "toast_remaining": 1.1939,
+          "toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "artillery-active",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "active",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 9,
+          "screenshot": true,
+          "toast_remaining": 0.813266666666667,
+          "toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "artillery-recovery",
+          "loot_active": true,
+          "loot_age": 0.263166666666667,
+          "loot_visible": true,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 10,
+          "screenshot": true,
+          "toast_remaining": 1.48333333333333,
+          "toast_text": "戰術追獵：霜環守望者",
+          "toast_visible": false,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "urgent-預警",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 11,
+          "screenshot": true,
+          "toast_remaining": 1.4677,
+          "toast_text": "預警重要訊息",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "urgent-反噬",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 12,
+          "screenshot": false,
+          "toast_remaining": 1.4764,
+          "toast_text": "反噬重要訊息",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "urgent-封隙",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 13,
+          "screenshot": false,
+          "toast_remaining": 1.47196666666667,
+          "toast_text": "封隙重要訊息",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        },
+        {
+          "audio_gate_visible": false,
+          "failures_so_far": [],
+          "kind": "artillery",
+          "label": "urgent-護衛",
+          "loot_active": true,
+          "loot_age": 0,
+          "loot_visible": false,
+          "marker_rect": [
+            12,
+            329.03662109375,
+            174,
+            30
+          ],
+          "marker_visible": true,
+          "phase": "recovery",
+          "picker_rect": [
+            992,
+            312,
+            362,
+            280
+          ],
+          "picker_visible": false,
+          "sample": 14,
+          "screenshot": false,
+          "toast_remaining": 1.4708,
+          "toast_text": "護衛重要訊息",
+          "toast_visible": true,
+          "version": "0.31.1-content-r2.1",
+          "viewport": [
+            1366,
+            600
+          ]
+        }
+      ],
+      "start_state": {
+        "gate_visible": false,
+        "input_trace": [
+          {
+            "button": 1,
+            "device": 32,
+            "position": [
+              819.499938964844,
+              660
+            ],
+            "pressed": true,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": false
+          },
+          {
+            "button": 1,
+            "device": 32,
+            "position": [
+              819.499938964844,
+              660
+            ],
+            "pressed": false,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": true
+          }
+        ],
+        "manual_paused": false,
+        "pause_rect": [
+          1310,
+          8,
+          54,
+          44
+        ],
+        "paused": false,
+        "summon_visible": false,
+        "system_paused": false
+      },
+      "status": "VERIFIED",
+      "version": "0.31.1-content-r2.1"
+    },
+    "errors": [],
+    "known_uid_warnings": [
+      "WARNING: 'res://scenes/enemies/Enemy.tscn': In external resource #0, invalid UID: 'uid://bdjiu1vdhnva8' - using text path instead: 'res://scripts/enemies/enemy.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/heroes/Hero.tscn': In external resource #0, invalid UID: 'uid://b03h8fce7yo4h' - using text path instead: 'res://scripts/heroes/hero.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/heroes/Hero.tscn': In external resource #1, invalid UID: 'uid://bvdrm3bnn22fp' - using text path instead: 'res://scripts/player/player_visual.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/LinearBulletWeapon.tscn': In external resource #0, invalid UID: 'uid://y0ifhp6aek4q' - using text path instead: 'res://scripts/weapons/linear_bullet_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/ChainLightningWeapon.tscn': In external resource #0, invalid UID: 'uid://r34rqjh5rhuc' - using text path instead: 'res://scripts/weapons/chain_lightning_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://resources/weapons/pulse_bloom.tres': In external resource #0, invalid UID: 'uid://cy7niv7tqxgjw' - using text path instead: 'res://scripts/resources/weapon_data.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/ExplosionWeapon.tscn': In external resource #0, invalid UID: 'uid://qpxsdg4ib4pw' - using text path instead: 'res://scripts/weapons/explosion_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/BoomerangWeapon.tscn': In external resource #0, invalid UID: 'uid://cu6wgjts36j1v' - using text path instead: 'res://scripts/weapons/boomerang_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/HomingMissileWeapon.tscn': In external resource #0, invalid UID: 'uid://cicio67l8hh7w' - using text path instead: 'res://scripts/weapons/homing_missile_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://resources/weapons/grenade_lob.tres': In external resource #0, invalid UID: 'uid://cy7niv7tqxgjw' - using text path instead: 'res://scripts/resources/weapon_data.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/GrenadeLobWeapon.tscn': In external resource #0, invalid UID: 'uid://8ehxjfp3cvax' - using text path instead: 'res://scripts/weapons/grenade_lob_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/RailLanceWeapon.tscn': In external resource #0, invalid UID: 'uid://3ufdb44lxu6w' - using text path instead: 'res://scripts/weapons/rail_lance_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/EchoHymnWeapon.tscn': In external resource #0, invalid UID: 'uid://dv3dpccemkdl' - using text path instead: 'res://scripts/weapons/echo_hymn_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/Projectile.tscn': In external resource #0, invalid UID: 'uid://dmnivqvnx3msr' - using text path instead: 'res://scripts/projectiles/projectile.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/OrbitProjectile.tscn': In external resource #0, invalid UID: 'uid://ce5p22o4lc8we' - using text path instead: 'res://scripts/projectiles/orbit_projectile.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/ExplosionArea.tscn': In external resource #0, invalid UID: 'uid://dts4g75qwsmht' - using text path instead: 'res://scripts/projectiles/explosion_area.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/HazardZone.tscn': In external resource #0, invalid UID: 'uid://dfyhbi0sl1bg3' - using text path instead: 'res://scripts/projectiles/hazard_zone.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/pickups/XPGem.tscn': In external resource #0, invalid UID: 'uid://bnxqgej0s7ij3' - using text path instead: 'res://scripts/pickups/pickup.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/pickups/CoinPickup.tscn': In external resource #0, invalid UID: 'uid://bnxqgej0s7ij3' - using text path instead: 'res://scripts/pickups/pickup.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/DamageNumber.tscn': In external resource #0, invalid UID: 'uid://bwncf505utn40' - using text path instead: 'res://scripts/vfx/damage_number.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/DeathBurst.tscn': In external resource #0, invalid UID: 'uid://d2e1nsvw32d27' - using text path instead: 'res://scripts/vfx/death_burst.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/LightningArc.tscn': In external resource #0, invalid UID: 'uid://cdynht625kx80' - using text path instead: 'res://scripts/vfx/lightning_arc.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #0, invalid UID: 'uid://cvp1iu71i6lo1' - using text path instead: 'res://scripts/arena/arena.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #1, invalid UID: 'uid://cjnsfivopi2bc' - using text path instead: 'res://scripts/arena/arena_background.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #2, invalid UID: 'uid://d0mybkg1o8106' - using text path instead: 'res://scripts/heroes/squad_manager.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #3, invalid UID: 'uid://dv3cdftopmui4' - using text path instead: 'res://scripts/enemies/enemy_spawner.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/HUD.tscn': In external resource #0, invalid UID: 'uid://ck6rhg5ngj0p6' - using text path instead: 'res://scripts/ui/hud.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/ContractScreen.tscn': In external resource #0, invalid UID: 'uid://c0gscje856pvl' - using text path instead: 'res://scripts/ui/contract_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/LevelUpScreen.tscn': In external resource #0, invalid UID: 'uid://n00fn16r4v8g' - using text path instead: 'res://scripts/ui/level_up_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/GameOverScreen.tscn': In external resource #0, invalid UID: 'uid://g1cw2dpki4sq' - using text path instead: 'res://scripts/ui/game_over_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/RiftShopScreen.tscn': In external resource #0, invalid UID: 'uid://p6x4x0tpoxwe' - using text path instead: 'res://scripts/ui/rift_shop_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/StageVictoryScreen.tscn': In external resource #0, invalid UID: 'uid://cnfhgtuxh3pi2' - using text path instead: 'res://scripts/ui/stage_victory_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)"
+    ],
+    "external_requests": [],
+    "start_input": {
+      "method": "Playwright centre mouse on Godot official audio_prompt_button",
+      "rect": [
+        605,
+        526,
+        156,
+        48
+      ],
+      "normal_pause_resume_verified": true,
+      "after_start": {
+        "gate_visible": false,
+        "input_trace": [
+          {
+            "button": 1,
+            "device": 32,
+            "position": [
+              819.499938964844,
+              660
+            ],
+            "pressed": true,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": false
+          },
+          {
+            "button": 1,
+            "device": 32,
+            "position": [
+              819.499938964844,
+              660
+            ],
+            "pressed": false,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": true
+          }
+        ],
+        "manual_paused": false,
+        "pause_rect": [
+          1310,
+          8,
+          54,
+          44
+        ],
+        "paused": false,
+        "summon_visible": false,
+        "system_paused": false
+      }
+    },
+    "pack_sha256": "1a262b14e16b35afca3697e75e50afab923ab6b7e10c9cd22e3240771943c095",
+    "source_manifest_sha256": "be36ff160fd1c07b22dbb5ce9d3eae1cd2b9b4b38ad86a7808aeb4d5365c78b6",
+    "release_entry_restored": true
+  },
+  {
+    "width": 844,
+    "height": 390,
+    "input": "touch",
+    "gate_only": true,
+    "result": {
+      "checks": 3,
+      "failures": [],
+      "fixture": "real arena UI; deterministic debug checkpoints; combat physics disabled for UI isolation; no gameplay balance claims",
+      "gate_only": true,
+      "records": [],
+      "start_state": {
+        "gate_visible": false,
+        "input_trace": [
+          {
+            "button": 1,
+            "device": -1,
+            "position": [
+              778.999938964844,
+              644.307678222656
+            ],
+            "pressed": true,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": false
+          },
+          {
+            "button": 0,
+            "device": 0,
+            "position": [
+              778.999938964844,
+              644.307678222656
+            ],
+            "pressed": true,
+            "type": "InputEventScreenTouch",
+            "unlocked_before_audio_handler": true
+          },
+          {
+            "button": 1,
+            "device": -1,
+            "position": [
+              778.999938964844,
+              644.307678222656
+            ],
+            "pressed": false,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": true
+          },
+          {
+            "button": 0,
+            "device": 0,
+            "position": [
+              778.999938964844,
+              644.307678222656
+            ],
+            "pressed": false,
+            "type": "InputEventScreenTouch",
+            "unlocked_before_audio_handler": true
+          }
+        ],
+        "manual_paused": false,
+        "pause_rect": [
+          788,
+          18,
+          54,
+          44
+        ],
+        "paused": false,
+        "summon_visible": false,
+        "system_paused": false
+      },
+      "status": "VERIFIED",
+      "version": "0.31.1-content-r2.1"
+    },
+    "errors": [],
+    "known_uid_warnings": [
+      "WARNING: 'res://scenes/enemies/Enemy.tscn': In external resource #0, invalid UID: 'uid://bdjiu1vdhnva8' - using text path instead: 'res://scripts/enemies/enemy.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/heroes/Hero.tscn': In external resource #0, invalid UID: 'uid://b03h8fce7yo4h' - using text path instead: 'res://scripts/heroes/hero.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/heroes/Hero.tscn': In external resource #1, invalid UID: 'uid://bvdrm3bnn22fp' - using text path instead: 'res://scripts/player/player_visual.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/LinearBulletWeapon.tscn': In external resource #0, invalid UID: 'uid://y0ifhp6aek4q' - using text path instead: 'res://scripts/weapons/linear_bullet_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/ChainLightningWeapon.tscn': In external resource #0, invalid UID: 'uid://r34rqjh5rhuc' - using text path instead: 'res://scripts/weapons/chain_lightning_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://resources/weapons/pulse_bloom.tres': In external resource #0, invalid UID: 'uid://cy7niv7tqxgjw' - using text path instead: 'res://scripts/resources/weapon_data.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/ExplosionWeapon.tscn': In external resource #0, invalid UID: 'uid://qpxsdg4ib4pw' - using text path instead: 'res://scripts/weapons/explosion_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/BoomerangWeapon.tscn': In external resource #0, invalid UID: 'uid://cu6wgjts36j1v' - using text path instead: 'res://scripts/weapons/boomerang_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/HomingMissileWeapon.tscn': In external resource #0, invalid UID: 'uid://cicio67l8hh7w' - using text path instead: 'res://scripts/weapons/homing_missile_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://resources/weapons/grenade_lob.tres': In external resource #0, invalid UID: 'uid://cy7niv7tqxgjw' - using text path instead: 'res://scripts/resources/weapon_data.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/GrenadeLobWeapon.tscn': In external resource #0, invalid UID: 'uid://8ehxjfp3cvax' - using text path instead: 'res://scripts/weapons/grenade_lob_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/RailLanceWeapon.tscn': In external resource #0, invalid UID: 'uid://3ufdb44lxu6w' - using text path instead: 'res://scripts/weapons/rail_lance_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/EchoHymnWeapon.tscn': In external resource #0, invalid UID: 'uid://dv3dpccemkdl' - using text path instead: 'res://scripts/weapons/echo_hymn_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/Projectile.tscn': In external resource #0, invalid UID: 'uid://dmnivqvnx3msr' - using text path instead: 'res://scripts/projectiles/projectile.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/OrbitProjectile.tscn': In external resource #0, invalid UID: 'uid://ce5p22o4lc8we' - using text path instead: 'res://scripts/projectiles/orbit_projectile.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/ExplosionArea.tscn': In external resource #0, invalid UID: 'uid://dts4g75qwsmht' - using text path instead: 'res://scripts/projectiles/explosion_area.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/HazardZone.tscn': In external resource #0, invalid UID: 'uid://dfyhbi0sl1bg3' - using text path instead: 'res://scripts/projectiles/hazard_zone.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/pickups/XPGem.tscn': In external resource #0, invalid UID: 'uid://bnxqgej0s7ij3' - using text path instead: 'res://scripts/pickups/pickup.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/pickups/CoinPickup.tscn': In external resource #0, invalid UID: 'uid://bnxqgej0s7ij3' - using text path instead: 'res://scripts/pickups/pickup.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/DamageNumber.tscn': In external resource #0, invalid UID: 'uid://bwncf505utn40' - using text path instead: 'res://scripts/vfx/damage_number.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/DeathBurst.tscn': In external resource #0, invalid UID: 'uid://d2e1nsvw32d27' - using text path instead: 'res://scripts/vfx/death_burst.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/LightningArc.tscn': In external resource #0, invalid UID: 'uid://cdynht625kx80' - using text path instead: 'res://scripts/vfx/lightning_arc.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #0, invalid UID: 'uid://cvp1iu71i6lo1' - using text path instead: 'res://scripts/arena/arena.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #1, invalid UID: 'uid://cjnsfivopi2bc' - using text path instead: 'res://scripts/arena/arena_background.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #2, invalid UID: 'uid://d0mybkg1o8106' - using text path instead: 'res://scripts/heroes/squad_manager.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #3, invalid UID: 'uid://dv3cdftopmui4' - using text path instead: 'res://scripts/enemies/enemy_spawner.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/HUD.tscn': In external resource #0, invalid UID: 'uid://ck6rhg5ngj0p6' - using text path instead: 'res://scripts/ui/hud.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/ContractScreen.tscn': In external resource #0, invalid UID: 'uid://c0gscje856pvl' - using text path instead: 'res://scripts/ui/contract_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/LevelUpScreen.tscn': In external resource #0, invalid UID: 'uid://n00fn16r4v8g' - using text path instead: 'res://scripts/ui/level_up_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/GameOverScreen.tscn': In external resource #0, invalid UID: 'uid://g1cw2dpki4sq' - using text path instead: 'res://scripts/ui/game_over_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/RiftShopScreen.tscn': In external resource #0, invalid UID: 'uid://p6x4x0tpoxwe' - using text path instead: 'res://scripts/ui/rift_shop_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/StageVictoryScreen.tscn': In external resource #0, invalid UID: 'uid://cnfhgtuxh3pi2' - using text path instead: 'res://scripts/ui/stage_victory_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)"
+    ],
+    "external_requests": [],
+    "start_input": {
+      "method": "Playwright centre touch on Godot official audio_prompt_button",
+      "rect": [
+        344,
+        316,
+        156,
+        66
+      ],
+      "normal_pause_resume_verified": true,
+      "after_start": {
+        "gate_visible": false,
+        "input_trace": [
+          {
+            "button": 1,
+            "device": -1,
+            "position": [
+              778.999938964844,
+              644.307678222656
+            ],
+            "pressed": true,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": false
+          },
+          {
+            "button": 0,
+            "device": 0,
+            "position": [
+              778.999938964844,
+              644.307678222656
+            ],
+            "pressed": true,
+            "type": "InputEventScreenTouch",
+            "unlocked_before_audio_handler": true
+          },
+          {
+            "button": 1,
+            "device": -1,
+            "position": [
+              778.999938964844,
+              644.307678222656
+            ],
+            "pressed": false,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": true
+          },
+          {
+            "button": 0,
+            "device": 0,
+            "position": [
+              778.999938964844,
+              644.307678222656
+            ],
+            "pressed": false,
+            "type": "InputEventScreenTouch",
+            "unlocked_before_audio_handler": true
+          }
+        ],
+        "manual_paused": false,
+        "pause_rect": [
+          788,
+          18,
+          54,
+          44
+        ],
+        "paused": false,
+        "summon_visible": false,
+        "system_paused": false
+      }
+    },
+    "pack_sha256": "1a262b14e16b35afca3697e75e50afab923ab6b7e10c9cd22e3240771943c095",
+    "source_manifest_sha256": "be36ff160fd1c07b22dbb5ce9d3eae1cd2b9b4b38ad86a7808aeb4d5365c78b6",
+    "release_entry_restored": true
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "input": "touch",
+    "gate_only": true,
+    "result": {
+      "checks": 3,
+      "failures": [],
+      "fixture": "real arena UI; deterministic debug checkpoints; combat physics disabled for UI isolation; no gameplay balance claims",
+      "gate_only": true,
+      "records": [],
+      "start_state": {
+        "gate_visible": false,
+        "input_trace": [
+          {
+            "button": 1,
+            "device": -1,
+            "position": [
+              640,
+              2651.8486328125
+            ],
+            "pressed": true,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": false
+          },
+          {
+            "button": 0,
+            "device": 0,
+            "position": [
+              640,
+              2651.8486328125
+            ],
+            "pressed": true,
+            "type": "InputEventScreenTouch",
+            "unlocked_before_audio_handler": true
+          },
+          {
+            "button": 1,
+            "device": -1,
+            "position": [
+              640,
+              2651.8486328125
+            ],
+            "pressed": false,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": true
+          },
+          {
+            "button": 0,
+            "device": 0,
+            "position": [
+              640,
+              2651.8486328125
+            ],
+            "pressed": false,
+            "type": "InputEventScreenTouch",
+            "unlocked_before_audio_handler": true
+          }
+        ],
+        "manual_paused": false,
+        "pause_rect": [
+          334,
+          34,
+          54,
+          44
+        ],
+        "paused": false,
+        "summon_visible": false,
+        "system_paused": false
+      },
+      "status": "VERIFIED",
+      "version": "0.31.1-content-r2.1"
+    },
+    "errors": [],
+    "known_uid_warnings": [
+      "WARNING: 'res://scenes/enemies/Enemy.tscn': In external resource #0, invalid UID: 'uid://bdjiu1vdhnva8' - using text path instead: 'res://scripts/enemies/enemy.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/heroes/Hero.tscn': In external resource #0, invalid UID: 'uid://b03h8fce7yo4h' - using text path instead: 'res://scripts/heroes/hero.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/heroes/Hero.tscn': In external resource #1, invalid UID: 'uid://bvdrm3bnn22fp' - using text path instead: 'res://scripts/player/player_visual.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/LinearBulletWeapon.tscn': In external resource #0, invalid UID: 'uid://y0ifhp6aek4q' - using text path instead: 'res://scripts/weapons/linear_bullet_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/ChainLightningWeapon.tscn': In external resource #0, invalid UID: 'uid://r34rqjh5rhuc' - using text path instead: 'res://scripts/weapons/chain_lightning_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://resources/weapons/pulse_bloom.tres': In external resource #0, invalid UID: 'uid://cy7niv7tqxgjw' - using text path instead: 'res://scripts/resources/weapon_data.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/ExplosionWeapon.tscn': In external resource #0, invalid UID: 'uid://qpxsdg4ib4pw' - using text path instead: 'res://scripts/weapons/explosion_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/BoomerangWeapon.tscn': In external resource #0, invalid UID: 'uid://cu6wgjts36j1v' - using text path instead: 'res://scripts/weapons/boomerang_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/HomingMissileWeapon.tscn': In external resource #0, invalid UID: 'uid://cicio67l8hh7w' - using text path instead: 'res://scripts/weapons/homing_missile_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://resources/weapons/grenade_lob.tres': In external resource #0, invalid UID: 'uid://cy7niv7tqxgjw' - using text path instead: 'res://scripts/resources/weapon_data.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/GrenadeLobWeapon.tscn': In external resource #0, invalid UID: 'uid://8ehxjfp3cvax' - using text path instead: 'res://scripts/weapons/grenade_lob_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/RailLanceWeapon.tscn': In external resource #0, invalid UID: 'uid://3ufdb44lxu6w' - using text path instead: 'res://scripts/weapons/rail_lance_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/weapons/EchoHymnWeapon.tscn': In external resource #0, invalid UID: 'uid://dv3dpccemkdl' - using text path instead: 'res://scripts/weapons/echo_hymn_weapon.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/Projectile.tscn': In external resource #0, invalid UID: 'uid://dmnivqvnx3msr' - using text path instead: 'res://scripts/projectiles/projectile.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/OrbitProjectile.tscn': In external resource #0, invalid UID: 'uid://ce5p22o4lc8we' - using text path instead: 'res://scripts/projectiles/orbit_projectile.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/ExplosionArea.tscn': In external resource #0, invalid UID: 'uid://dts4g75qwsmht' - using text path instead: 'res://scripts/projectiles/explosion_area.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/projectiles/HazardZone.tscn': In external resource #0, invalid UID: 'uid://dfyhbi0sl1bg3' - using text path instead: 'res://scripts/projectiles/hazard_zone.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/pickups/XPGem.tscn': In external resource #0, invalid UID: 'uid://bnxqgej0s7ij3' - using text path instead: 'res://scripts/pickups/pickup.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/pickups/CoinPickup.tscn': In external resource #0, invalid UID: 'uid://bnxqgej0s7ij3' - using text path instead: 'res://scripts/pickups/pickup.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/DamageNumber.tscn': In external resource #0, invalid UID: 'uid://bwncf505utn40' - using text path instead: 'res://scripts/vfx/damage_number.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/DeathBurst.tscn': In external resource #0, invalid UID: 'uid://d2e1nsvw32d27' - using text path instead: 'res://scripts/vfx/death_burst.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/vfx/LightningArc.tscn': In external resource #0, invalid UID: 'uid://cdynht625kx80' - using text path instead: 'res://scripts/vfx/lightning_arc.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #0, invalid UID: 'uid://cvp1iu71i6lo1' - using text path instead: 'res://scripts/arena/arena.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #1, invalid UID: 'uid://cjnsfivopi2bc' - using text path instead: 'res://scripts/arena/arena_background.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #2, invalid UID: 'uid://d0mybkg1o8106' - using text path instead: 'res://scripts/heroes/squad_manager.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #3, invalid UID: 'uid://dv3cdftopmui4' - using text path instead: 'res://scripts/enemies/enemy_spawner.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/HUD.tscn': In external resource #0, invalid UID: 'uid://ck6rhg5ngj0p6' - using text path instead: 'res://scripts/ui/hud.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/ContractScreen.tscn': In external resource #0, invalid UID: 'uid://c0gscje856pvl' - using text path instead: 'res://scripts/ui/contract_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/LevelUpScreen.tscn': In external resource #0, invalid UID: 'uid://n00fn16r4v8g' - using text path instead: 'res://scripts/ui/level_up_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/GameOverScreen.tscn': In external resource #0, invalid UID: 'uid://g1cw2dpki4sq' - using text path instead: 'res://scripts/ui/game_over_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/RiftShopScreen.tscn': In external resource #0, invalid UID: 'uid://p6x4x0tpoxwe' - using text path instead: 'res://scripts/ui/rift_shop_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)",
+      "WARNING: 'res://scenes/ui/StageVictoryScreen.tscn': In external resource #0, invalid UID: 'uid://cnfhgtuxh3pi2' - using text path instead: 'res://scripts/ui/stage_victory_screen.gd'.",
+      "   at: open (core/io/resource_format_binary.cpp:1028)"
+    ],
+    "external_requests": [],
+    "start_input": {
+      "method": "Playwright centre touch on Godot official audio_prompt_button",
+      "rect": [
+        117,
+        770,
+        156,
+        76
+      ],
+      "normal_pause_resume_verified": true,
+      "after_start": {
+        "gate_visible": false,
+        "input_trace": [
+          {
+            "button": 1,
+            "device": -1,
+            "position": [
+              640,
+              2651.8486328125
+            ],
+            "pressed": true,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": false
+          },
+          {
+            "button": 0,
+            "device": 0,
+            "position": [
+              640,
+              2651.8486328125
+            ],
+            "pressed": true,
+            "type": "InputEventScreenTouch",
+            "unlocked_before_audio_handler": true
+          },
+          {
+            "button": 1,
+            "device": -1,
+            "position": [
+              640,
+              2651.8486328125
+            ],
+            "pressed": false,
+            "type": "InputEventMouseButton",
+            "unlocked_before_audio_handler": true
+          },
+          {
+            "button": 0,
+            "device": 0,
+            "position": [
+              640,
+              2651.8486328125
+            ],
+            "pressed": false,
+            "type": "InputEventScreenTouch",
+            "unlocked_before_audio_handler": true
+          }
+        ],
+        "manual_paused": false,
+        "pause_rect": [
+          334,
+          34,
+          54,
+          44
+        ],
+        "paused": false,
+        "summon_visible": false,
+        "system_paused": false
+      }
+    },
+    "pack_sha256": "1a262b14e16b35afca3697e75e50afab923ab6b7e10c9cd22e3240771943c095",
+    "source_manifest_sha256": "be36ff160fd1c07b22dbb5ce9d3eae1cd2b9b4b38ad86a7808aeb4d5365c78b6",
+    "release_entry_restored": true
+  }
+]
