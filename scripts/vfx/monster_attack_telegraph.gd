@@ -41,7 +41,7 @@ func show_cue(next_kind: StringName, direction: Vector2, radius: float, is_featu
 	# arrows also stay in world space so vertical attacks never look compressed.
 	reach = damage_radius if damage_radius > 0.0 else clampf(radius * 2.1, 42.0, 92.0)
 	scale = Vector2.ONE
-	tint = color.lightened(0.20) if is_feature else Color("ff865d")
+	tint = Color("ff586f")
 	age = 0.0
 	redraw_clock = 0.0
 	_rebuild_direction_geometry()

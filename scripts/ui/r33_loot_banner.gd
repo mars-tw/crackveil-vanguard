@@ -1,6 +1,7 @@
 extends Control
 
 const MOBILE := preload("res://scripts/services/mobile_tuning.gd")
+const LAYOUT := preload("res://scripts/ui/battle_layout.gd")
 var age := 0.0
 var title: Label
 var benefit: Label
@@ -54,15 +55,17 @@ func _process(delta: float) -> void:
 	var portrait := view.y > view.x
 	# The generic touch-control pass can enlarge labels; restore this compact
 	# notification's measured typography after every viewport/layout update.
-	title.add_theme_font_size_override("font_size", 17)
+	title.add_theme_font_size_override("font_size", 14)
 	benefit.add_theme_font_size_override("font_size", 12)
 	title.clip_text = true
 	benefit.clip_text = true
-	size = Vector2(minf(318.0, view.x - 24), 60)
+	LAYOUT.place(self,LAYOUT.regions(view,phone).notice)
 	title.size.x = maxf(1.0, size.x - 57.0)
 	benefit.size.x = title.size.x
-	position = Vector2((view.x - size.x) * 0.5, view.y - (258.0 if phone and portrait else 122.0))
-	visible = not GameManager.is_system_pause_active() and not GameManager.manual_paused and GameManager.game_running
+	var bond_active: bool = is_instance_valid(GameManager.squad_manager) and GameManager.squad_manager.bond_reveal_timer > 0.0
+	var picker := get_parent().get_node_or_null("FormationPicker")
+	var choosing: bool = is_instance_valid(picker) and picker.visible
+	visible = not choosing and not bond_active and not GameManager.is_system_pause_active() and not GameManager.manual_paused and GameManager.game_running
 	modulate.a = minf(1.0, age / 0.08) * minf(1.0, (1.7 - age) / 0.24)
 	queue_redraw()
 

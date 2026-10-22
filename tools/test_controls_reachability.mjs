@@ -179,7 +179,7 @@ await fs.mkdir(evidenceDir, { recursive: true });
 const browser = await chromium.launch({
 	executablePath: chromePath,
 	headless: true,
-	args: ["--disable-dev-shm-usage", "--ignore-gpu-blocklist", "--enable-webgl"],
+	args: ["--mute-audio", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--disable-dev-shm-usage", "--ignore-gpu-blocklist", "--enable-webgl"],
 });
 const results = [];
 

@@ -9,7 +9,7 @@ if (!expectedVersion) throw new Error("Project release version is missing");
 const url = new URL(process.env.UI_CAPTURE_URL ?? "http://127.0.0.1:8072/");
 url.searchParams.set("cv_r22_test", "1");
 url.searchParams.set("cv_r32_test", "1");
-const browser = await chromium.launch({ executablePath: process.env.UI_CAPTURE_CHROME || chromium.executablePath(), headless: true });
+const browser = await chromium.launch({ executablePath: process.env.UI_CAPTURE_CHROME || chromium.executablePath(), headless: true, args: ["--mute-audio", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 const errors = [];
 page.on("pageerror", error => errors.push(error.message));

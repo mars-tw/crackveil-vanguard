@@ -5,6 +5,7 @@ const CATALOG_PATH := "res://scripts/vfx/newskill_fx_catalog.gd"
 const ATLAS_PATH := "res://assets/art/r35/r35_skill_fx_atlas.png"
 const DESKTOP_CAP := 32
 const MOBILE_CAP := 16
+const FRIENDLY_SHADER := preload("res://scripts/shaders/friendly_attack.gdshader")
 
 class Effect extends Node2D:
 	var sprite: AnimatedSprite2D
@@ -27,10 +28,13 @@ var channels: Dictionary = {}
 var emitted := 0
 var rejected := 0
 var peak := 0
+var friendly_material: ShaderMaterial
 
 func _ready() -> void:
 	add_to_group("combat_presentation")
 	z_index = 38
+	friendly_material = ShaderMaterial.new()
+	friendly_material.shader = FRIENDLY_SHADER
 	if ResourceLoader.exists(CATALOG_PATH):
 		catalog = load(CATALOG_PATH)
 	set_process(false)
@@ -74,6 +78,10 @@ func play_effect(kind: String, origin: Vector2, direction: Vector2, strength: fl
 	var size_scale := clampf(strength, 0.35, 4.4 if kind in ["slash_a", "slash_b", "cyclone"] else 2.5)
 	slot.scale = Vector2.ONE * size_scale
 	slot.modulate = Color.WHITE
+	if kind in ["slash_a", "slash_b", "cyclone"]:
+		slot.sprite.material = friendly_material
+	else:
+		slot.sprite.material = null
 	slot.sprite.sprite_frames = frames
 	slot.sprite.stop()
 	slot.sprite.set_frame_and_progress(0, 0.0)
@@ -116,13 +124,13 @@ func _process(delta: float) -> void:
 		if not slot.held:
 			if slot.release_age >= 0.0:
 				slot.release_age += delta
-				slot.modulate.a = maxf(0.0, 1.0 - slot.release_age / 0.10)
+				slot.modulate.a = maxf(0.0, 1.0 - slot.release_age / 0.10) * (0.68 if slot.kind in ["slash_a", "slash_b", "cyclone"] else 1.0)
 				if slot.release_age >= 0.10:
 					_release(slot)
 			elif slot.age >= slot.life:
 				_release(slot)
 			else:
-				slot.modulate.a = minf(1.0, (slot.life - slot.age) / 0.07)
+				slot.modulate.a = minf(1.0, (slot.life - slot.age) / 0.07) * (0.68 if slot.kind in ["slash_a", "slash_b", "cyclone"] else 1.0)
 	if active.is_empty():
 		set_process(false)
 

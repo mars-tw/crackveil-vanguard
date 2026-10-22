@@ -1289,6 +1289,8 @@ const DAMAGE_TAKEN_SOFT_CAP_MIN := 0.85
 
 func get_incoming_damage_multiplier(target: Node = null) -> float:
 	var reduction_multiplier := 1.0
+	if is_instance_valid(squad_manager) and squad_manager.has_method("get_spatial_cover_multiplier"):
+		reduction_multiplier *= squad_manager.get_spatial_cover_multiplier(target)
 	if is_instance_valid(loot_director):
 		reduction_multiplier *= loot_director.get_incoming_damage_multiplier()
 	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("has_active_bond"):

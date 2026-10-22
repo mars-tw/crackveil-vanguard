@@ -248,14 +248,15 @@ func _apply_sprite() -> void:
 		sprite.visible = false
 		return
 	sprite.visible = true
-	var target_size: float = 20.0 + clamp(float(value) * 0.8, 0.0, 8.0)
+	var target_size: float = 13.0 + clamp(float(value) * 0.4, 0.0, 4.0)
+	sprite.modulate = Color(0.76, 0.82, 0.88, 0.86)
 	SPRITE_LOADER.fit_sprite(sprite, texture, target_size, sprite_scale)
 	if shadow != null:
 		shadow.visible = true
 		shadow.position = Vector2(0.0, target_size * 0.34)
 		ART_RESOURCES.fit_sprite(shadow, ART_RESOURCES.get_ellipse_shadow(), target_size * 1.45)
 	if glow != null:
-		glow.visible = true
+		glow.visible = false
 		var glow_color := Color(0.34, 0.94, 1.0, 0.34)
 		if pickup_kind == "coin":
 			glow_color = Color(1.0, 0.64, 0.22, 0.34)

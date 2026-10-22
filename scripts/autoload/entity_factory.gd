@@ -920,7 +920,7 @@ func _tick_enemy_animation_clock(delta: float) -> void:
 		var client_index := bucket_index
 		while client_index < enemy_animation_clients.size():
 			var enemy := enemy_animation_clients[client_index]
-			if enemy != null and is_instance_valid(enemy):
+			if enemy != null and is_instance_valid(enemy) and enemy.is_inside_tree():
 				enemy.tick_shared_enemy_animation(elapsed, focus_position, focus_valid)
 			client_index += ENEMY_ANIMATION_BUCKET_COUNT
 

@@ -1,0 +1,41 @@
+[
+  {
+    "script": "tools/test_r44_reviewer.cjs",
+    "arguments": [],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "evidence": "reviewer/reviewer-path.json"
+  },
+  {
+    "script": "tools/content_r1_capture.cjs",
+    "arguments": [
+      "matrix"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED"
+  },
+  {
+    "script": "tools/content_r1_live.cjs",
+    "arguments": [],
+    "exit_code": 0,
+    "status": "VERIFIED"
+  },
+  {
+    "script": "tools/content_r1_samples.cjs",
+    "arguments": [],
+    "exit_code": 0,
+    "status": "VERIFIED"
+  },
+  {
+    "script": "tools/test_controls_reachability.mjs",
+    "arguments": [],
+    "exit_code": 0,
+    "status": "VERIFIED"
+  },
+  {
+    "script": "tools/test_r33_web_smoke.mjs",
+    "arguments": [],
+    "exit_code": 0,
+    "status": "VERIFIED"
+  }
+]

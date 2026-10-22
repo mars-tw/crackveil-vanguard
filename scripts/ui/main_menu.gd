@@ -654,7 +654,7 @@ func _build_guide_panel() -> void:
 	# R29 P1-4＋文案潤飾：整段長文改逐則列表、字級基準 15（手機縮放後約 29px），
 	# 數字改中文（九人／等級七）、ASCII 詞移離斷行孤兒位，消除「擊敗 Boss／後可繼續」式硬拆。
 	var guide_rows := [
-		["三陣封隙", "十個戰場各有三道陣記。帶隊走進楔形、圓陣、散兵陣記，讓兩名隊友就位一點二秒。每封一陣全隊回復八點生命，每關首次全封可得四枚殘響。"],
+		["三陣封隙", ("拖左下搖桿移動，按住「旋斬」攻擊、放開回能。點按陣形輪換，長按直選。" if MOBILE_TUNING.has_confirmed_touch() else "WASD 移動，按住空白鍵旋斬、放開回能。Q 換陣，P 暫停。") + "帶隊走進楔形、圓陣、散兵陣記，讓兩名隊友就位一點二秒。每封一陣全隊回復八點生命，每關首次全封可得四枚殘響。"],
 		["無盡", "擊敗 Boss 之後可續戰無盡敵潮，衝擊更高紀錄。"],
 		["契約", "從種子出擊進場可先選契約，改變本局風險與獎勵；一般出擊直接開始封隙。"],
 		["隊伍", "十三位英雄可招募，隊伍最多九人。新英雄包括貫槍突擊的星焰槍騎、緩速與回復的潮汐魔導，以及返場雙刀的影刃遊俠。隊長倒下，全隊撤退。"],
@@ -662,7 +662,7 @@ func _build_guide_panel() -> void:
 		["羈絆", "特定成員同隊會啟用羈絆，改變武器、治療或防禦。"],
 		["裝備", "彩色光柱是裝備。靠近即可拾取，較強的同槽裝備會自動換上，較弱的拆成金幣；菁英必掉稀有以上，Boss 必掉傳說。"],
 		["進化", "武器進化需要本局等級七、指定質變等級與武器傷害等級。"],
-		["召喚", "左下召喚或 B 可花金幣抽技能與隊友升級卡、抽永久寵物。技能卡的招募選項需有空位；重複寵物會升星。"],
+		["召喚", "點按「召喚」可花金幣抽技能與隊友升級卡、抽永久寵物。技能卡的招募選項需有空位；重複寵物會升星。"],
 	]
 	for row in guide_rows:
 		var row_label := Label.new()
@@ -964,7 +964,7 @@ func _apply_responsive_layout() -> void:
 	side_close_button.position = Vector2(panel_width - (126.0 if mobile else 92.0), 14.0)
 	side_close_button.size = Vector2(104.0 if mobile else 82.0, touch_height)
 	if side_scroll != null:
-		var scroll_y := 64.0 if mobile and not portrait else 76.0 if mobile else 70.0
+		var scroll_y := maxf(76.0, 14.0 + touch_height + 14.0)
 		# R29 P0-1：直向手機面板底部原保留 84px 空帶（無任何控件），縮到 24px 還給設定控制。
 		var scroll_bottom := 0.0 if mobile and not portrait else 24.0 if mobile else 92.0
 		side_scroll.position = Vector2(24.0 if mobile else 28.0, scroll_y)

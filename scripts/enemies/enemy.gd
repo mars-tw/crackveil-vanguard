@@ -161,6 +161,13 @@ func _ready() -> void:
 	_apply_shape()
 
 
+func _exit_tree() -> void:
+	# Shared animation is owned by an autoload and can outlive this arena.
+	if is_instance_valid(EntityFactory):
+		_release_death_animation_profile()
+		EntityFactory.unregister_enemy_animation_client(self)
+
+
 func pool_on_acquire() -> void:
 	is_active = true
 	visible = true
@@ -1042,10 +1049,10 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 	var severity := final_amount / maxf(1.0, max_hp)
 	var heavy_hit := severity >= 0.4
 	if last_hit_critical:
-		EntityFactory.spawn_damage_number("爆擊 %d" % roundi(final_amount), number_position, Color("ffe18c"), 28)
+		EntityFactory.spawn_damage_number("爆擊 %d" % roundi(final_amount), number_position, Color("d8d9ed"), 22)
 		GameManager.record_critical_hit(global_position, source_position, final_amount)
 	else:
-		EntityFactory.spawn_damage_number(final_amount, number_position, Color(1.0, 0.79, 0.38) if heavy_hit else Color(1.0, 0.96, 0.72), 23 if heavy_hit else 0)
+		EntityFactory.spawn_damage_number(final_amount, number_position, Color("ccd9e0") if heavy_hit else Color("a9c1cb"), 18 if heavy_hit else 15)
 	COMBAT_FEEDBACK.report_hit(global_position, source_position, severity, hp <= 0.0, is_elite or is_boss)
 	hp_bar_timer = 0.55
 	_trigger_hit_micro_feedback()
@@ -1127,7 +1134,7 @@ func _die(source_position: Vector2 = Vector2.ZERO) -> void:
 
 
 func _finalize_death() -> void:
-	if death_finalized:
+	if death_finalized or not is_inside_tree():
 		return
 	death_finalized = true
 	_release_death_animation_profile()

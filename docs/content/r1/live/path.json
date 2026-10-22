@@ -1,0 +1,157 @@
+{
+  "status": "VERIFIED",
+  "events": [
+    {
+      "step": 0,
+      "time": 0.841633333333334
+    },
+    {
+      "step": 1,
+      "time": 2.99307073015873
+    },
+    {
+      "step": 2,
+      "time": 5.95178607407407
+    }
+  ],
+  "shots": [
+    {
+      "name": "01-picker",
+      "state": {
+        "ability_text": "旋斬",
+        "auto_upgrade": true,
+        "bond_text": "",
+        "confirmed_touch": true,
+        "elapsed": 0.774966666666667,
+        "formation_cooldown": 0,
+        "formation_id": "wedge",
+        "formation_picker": true,
+        "formation_ready": true,
+        "mission_text": "楔形｜封隙 0/3\n下一步：走進楔形陣記",
+        "notice_text": "拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。",
+        "paused": false,
+        "relay": {
+          "anchor_x": 949.799987792969,
+          "anchor_y": 360,
+          "captain_x": 779,
+          "captain_y": 360,
+          "completed": false,
+          "distance": 140,
+          "hold": 0,
+          "saved": false,
+          "settled": 2,
+          "step": 0
+        },
+        "seal_saved": false,
+        "seed": 2893732598,
+        "touch_controls_visible": true,
+        "version": "0.30.0-content-r1"
+      },
+      "image": "review-set/01-formation-picker.png"
+    },
+    {
+      "name": "02-hold-a",
+      "state": {
+        "ability_text": "旋斬",
+        "auto_upgrade": true,
+        "bond_text": "",
+        "confirmed_touch": true,
+        "elapsed": 1.35902592592593,
+        "formation_cooldown": 0,
+        "formation_id": "wedge",
+        "formation_picker": false,
+        "formation_ready": true,
+        "mission_text": "楔形｜封隙 0/3\n下一步：停留 0.0/1.2 秒・隊友 2/2",
+        "notice_text": "拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。",
+        "paused": false,
+        "relay": {
+          "anchor_x": 864.056274414062,
+          "anchor_y": 360,
+          "captain_x": 817.289611816406,
+          "captain_y": 360,
+          "completed": false,
+          "distance": 38.3333358764648,
+          "hold": 0.0509259259259259,
+          "saved": false,
+          "settled": 2,
+          "step": 0
+        },
+        "seal_saved": false,
+        "seed": 2893732598,
+        "touch_controls_visible": true,
+        "version": "0.30.0-content-r1"
+      },
+      "image": "review-set/02-seal-hold-a.png"
+    },
+    {
+      "name": "03-hold-b",
+      "state": {
+        "ability_text": "旋斬",
+        "auto_upgrade": true,
+        "bond_text": "",
+        "confirmed_touch": true,
+        "elapsed": 2.0732763030303,
+        "formation_cooldown": 0,
+        "formation_id": "wedge",
+        "formation_picker": false,
+        "formation_ready": true,
+        "mission_text": "楔形｜封隙 0/3\n下一步：停留 0.7/1.2 秒・隊友 2/2",
+        "notice_text": "拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。",
+        "paused": false,
+        "relay": {
+          "anchor_x": 817.787658691406,
+          "anchor_y": 356.989990234375,
+          "captain_x": 780.781005859375,
+          "captain_y": 356.989990234375,
+          "completed": false,
+          "distance": 30.3333358764648,
+          "hold": 0.765176303030303,
+          "saved": false,
+          "settled": 2,
+          "step": 0
+        },
+        "seal_saved": false,
+        "seed": 2893732598,
+        "touch_controls_visible": true,
+        "version": "0.30.0-content-r1"
+      },
+      "image": "review-set/03-seal-hold-b.png"
+    },
+    {
+      "name": "04-sealed",
+      "state": {
+        "ability_text": "旋斬",
+        "auto_upgrade": true,
+        "bond_text": "",
+        "confirmed_touch": true,
+        "elapsed": 7.9863674074074,
+        "formation_cooldown": 0.415152,
+        "formation_id": "scatter",
+        "formation_picker": false,
+        "formation_ready": false,
+        "mission_text": "散兵｜封隙 2/3\n下一步：停留 1.2/1.2 秒・隊友 2/2",
+        "notice_text": "散兵游擊：拾取 +60%｜移動 +8%｜傷害 -5%",
+        "paused": false,
+        "relay": {
+          "anchor_x": 731.874572753906,
+          "anchor_y": 360.70703125,
+          "captain_x": 777.443237304688,
+          "captain_y": 361.723510742188,
+          "completed": true,
+          "distance": 37.3606872558594,
+          "hold": 0,
+          "saved": true,
+          "settled": 2,
+          "step": 3
+        },
+        "seal_saved": true,
+        "seed": 2893732598,
+        "touch_controls_visible": true,
+        "version": "0.30.0-content-r1"
+      },
+      "image": "review-set/14-seals-complete.png"
+    }
+  ],
+  "errors": [],
+  "input": "CDP long press/direct selection and supported movement keys; ordinary release"
+}

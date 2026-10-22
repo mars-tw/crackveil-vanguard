@@ -400,7 +400,11 @@ func _input(event: InputEvent) -> void:
 
 
 func _on_combat_pause_changed(_visible_manual_pause: bool) -> void:
-	if get_tree() != null and get_tree().paused:
+	# Scene replacement can emit pause_changed after this actor left the tree
+	# but before deferred freeing. get_tree() itself reports an error then.
+	if not is_inside_tree():
+		return
+	if get_tree().paused:
 		_end_draw_cut_step("pause")
 		active_ability_touch_held = false
 		active_ability_hold_timer = 0.0

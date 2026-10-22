@@ -10,6 +10,7 @@ const COMBAT_READOUT := preload("res://scripts/ui/combat_readout.gd")
 const EQUIPMENT_PANEL := preload("res://scripts/ui/equipment_panel.gd")
 const R33_LOOT_BANNER := preload("res://scripts/ui/r33_loot_banner.gd")
 const FORMATION_PICKER := preload("res://scripts/ui/formation_picker.gd")
+const BATTLE_LAYOUT := preload("res://scripts/ui/battle_layout.gd")
 
 var root: Control
 var hud_panel: Panel
@@ -63,6 +64,7 @@ var combo_break_label: Label
 var boss_intro_rect: ColorRect
 var boss_intro_label: Label
 var pause_overlay: Panel
+var pause_backdrop: ColorRect
 var pause_scroll: ScrollContainer
 var pause_content: VBoxContainer
 var pause_title_label: Label
@@ -102,6 +104,7 @@ var syncing_settings_controls: bool = false
 var toast_token: int = 0
 var toast_queue: Array[String] = []
 var toast_showing: bool = false
+var toast_current_text := ""
 var reset_meta_confirm_pending: bool = false
 var level_flash_tween: Tween = null
 var captain_hit_flash_tween: Tween = null
@@ -218,6 +221,11 @@ func _process(_delta: float) -> void:
 		formation_picker.refresh(GameManager.squad_manager)
 	_update_tactical_hint()
 	_refresh_active_ability_button()
+	var loot_notice := root.get_node_or_null("LootBanner")
+	var squad: Node = GameManager.squad_manager
+	var bond_active: bool = is_instance_valid(squad) and squad.bond_reveal_timer > 0.0
+	toast_label.text = squad.bond_reveal_text if bond_active else toast_current_text
+	toast_panel.visible = (toast_showing or bond_active) and not blocked and not formation_picker.visible and (bond_active or not (is_instance_valid(loot_notice) and loot_notice.visible))
 
 
 func _notification(what: int) -> void:
@@ -398,7 +406,7 @@ func _build_ui() -> void:
 
 	active_ability_button = Button.new()
 	active_ability_button.name = "ActiveAbilityButton"
-	active_ability_button.text = "斬"
+	active_ability_button.text = "旋斬"
 	active_ability_button.tooltip_text = "點按拔刀；按住持續旋斬"
 	active_ability_button.button_down.connect(_on_active_ability_button_down)
 	active_ability_button.button_up.connect(_on_active_ability_button_up)
@@ -491,9 +499,17 @@ func _build_ui() -> void:
 	tactical_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tactical_hint.add_theme_font_size_override("font_size", 14)
 	tactical_hint.add_theme_color_override("font_outline_color", Color("101b30"))
-	tactical_hint.add_theme_constant_override("outline_size", 4)
-	tactical_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	tactical_hint.clip_text = true
+	tactical_hint.add_theme_constant_override("outline_size", 1)
+	tactical_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	tactical_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	tactical_hint.clip_text = false
+	var mission_surface := StyleBoxFlat.new()
+	mission_surface.bg_color = Color(0.02,0.035,0.06,0.94)
+	mission_surface.border_color = Color("718399")
+	mission_surface.set_border_width_all(1)
+	mission_surface.set_corner_radius_all(6)
+	mission_surface.set_content_margin_all(4)
+	tactical_hint.add_theme_stylebox_override("normal",mission_surface)
 	root.add_child(tactical_hint)
 
 	toast_panel = Panel.new()
@@ -618,6 +634,13 @@ func _make_quick_icon_button(text_value: String, tooltip_value: String, toggle: 
 
 
 func _build_pause_overlay() -> void:
+	pause_backdrop = ColorRect.new()
+	pause_backdrop.name = "PauseBackdrop"
+	pause_backdrop.color = Color(0.005, 0.009, 0.02, 0.72)
+	pause_backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	pause_backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
+	pause_backdrop.visible = false
+	root.add_child(pause_backdrop)
 	pause_overlay = Panel.new()
 	pause_overlay.name = "PauseOverlay"
 	pause_overlay.visible = false
@@ -626,6 +649,14 @@ func _build_pause_overlay() -> void:
 	pause_overlay.anchor_right = 0.5
 	pause_overlay.anchor_top = 0.5
 	pause_overlay.anchor_bottom = 0.5
+	var surface := StyleBoxFlat.new()
+	surface.bg_color = Color("0b1424")
+	surface.border_color = Color("718399")
+	surface.set_border_width_all(1)
+	surface.set_corner_radius_all(12)
+	pause_overlay.add_theme_stylebox_override("panel", surface)
+	pause_overlay.z_index = 30
+	pause_backdrop.z_index = 29
 	root.add_child(pause_overlay)
 
 	pause_title_label = Label.new()
@@ -1328,6 +1359,7 @@ func _apply_responsive_layout() -> void:
 	_apply_accessibility_palette()
 	_apply_r33_battle_layout(viewport_size, mobile)
 	_apply_phone_battle_layout(viewport_size, mobile)
+	_apply_content_r1_layout(viewport_size, mobile)
 	ability_layout_signature.clear()
 	call_deferred("_publish_reachability_probe", viewport_size)
 
@@ -1396,7 +1428,41 @@ func _refresh_r33_labels() -> void:
 	if level_label != null:
 		level_label.text = "Lv.%d" % last_level_value
 	if score_label != null:
-		score_label.text = "%d 殺　金 %d" % [GameManager.kills, GameManager.gold]
+		score_label.text = "擊殺 %d\n金幣 %d" % [GameManager.kills, GameManager.gold]
+
+
+func _apply_content_r1_layout(view: Vector2, phone: bool) -> void:
+	var zones := BATTLE_LAYOUT.regions(view, phone)
+	BATTLE_LAYOUT.place(hud_panel, zones.stats)
+	BATTLE_LAYOUT.place(score_panel, zones.score)
+	BATTLE_LAYOUT.place(time_label, zones.time)
+	BATTLE_LAYOUT.place(pause_button, zones.pause)
+	pause_button.custom_minimum_size = Vector2(44, 44)
+	pause_button.add_theme_font_size_override("font_size", 13)
+	var stat: Rect2 = zones.stats
+	BATTLE_LAYOUT.place(hp_icon, Rect2(stat.position + Vector2(8, 9), Vector2(20, 20)))
+	BATTLE_LAYOUT.place(hp_label, Rect2(stat.position + Vector2(34, 7), Vector2(stat.size.x - 76, 28)))
+	hp_label.add_theme_font_size_override("font_size", (13 if view.x <= 360 else 15) if phone else 19)
+	hp_label.reset_size()
+	BATTLE_LAYOUT.place(level_label, Rect2(stat.position + Vector2(stat.size.x - 42, 10), Vector2(38, 24)))
+	level_label.add_theme_font_size_override("font_size", 12)
+	level_label.reset_size()
+	BATTLE_LAYOUT.place(xp_bar, Rect2(stat.position + Vector2(10, 42), Vector2(stat.size.x - 20, 5)))
+	BATTLE_LAYOUT.place(score_label, Rect2(zones.score.position + Vector2(4, 3), zones.score.size - Vector2(8, 6)))
+	score_label.add_theme_font_size_override("font_size", 12 if phone else 15)
+	score_label.size = zones.score.size - Vector2(8, 6)
+	time_label.add_theme_font_size_override("font_size", 20)
+	BATTLE_LAYOUT.place(tactical_hint, zones.mission)
+	tactical_hint.add_theme_font_size_override("font_size", 14 if phone else 15)
+	BATTLE_LAYOUT.place(toast_panel, zones.notice)
+	toast_label.add_theme_font_size_override("font_size", 13)
+	# Persistent pages own their header and footer; battle information cannot
+	# shine through them, even when the world keeps its own CanvasLayers.
+	pause_overlay.modulate = Color.WHITE
+	if is_instance_valid(pause_backdrop):
+		BATTLE_LAYOUT.place(pause_backdrop, Rect2(Vector2.ZERO, view))
+	for button in [pause_resume_button, pause_menu_button]:
+		button.add_theme_font_size_override("font_size", 18)
 
 
 func _apply_phone_battle_layout(view: Vector2, phone: bool) -> void:
@@ -1491,6 +1557,10 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"formation_scatter": formation_picker.buttons.get("scatter"),
 		"formation_cancel": formation_picker.cancel_button,
 		"tactical_hint": tactical_hint,
+		"toast": toast_panel,
+		"mission_text": tactical_hint,
+		"time": time_label,
+		"score": score_panel,
 		"pause_auto_battle": pause_auto_button
 	}, {
 		"paused": pause_overlay != null and pause_overlay.visible,
@@ -1499,6 +1569,12 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"formation_cooldown": GameManager.squad_manager.get_formation_cooldown_remaining() if is_instance_valid(GameManager.squad_manager) else 0.0,
 		"formation_ready": formation_button.is_visible_in_tree() and not formation_button.disabled,
 		"auto_upgrade": GameManager.auto_upgrade_enabled,
+		"version": str(ProjectSettings.get_setting("application/config/version")),
+		"seed": GameManager.current_run_seed,
+		"mission_text": tactical_hint.text,
+		"notice_text": toast_label.text,
+		"ability_text": active_ability_button.text,
+		"bond_text": GameManager.squad_manager.bond_reveal_text if is_instance_valid(GameManager.squad_manager) else "",
 		"relay": GameManager.tactical_director.relay.probe() if is_instance_valid(GameManager.tactical_director) and is_instance_valid(GameManager.tactical_director.relay) else {},
 		"elapsed": GameManager.elapsed_time,
 		"seal_saved": bool(MetaProgress.formation_seals.get(GameManager.selected_stage_id, false)),
@@ -1835,6 +1911,12 @@ func _on_pause_changed(is_paused: bool) -> void:
 		_reset_touch_input()
 	if pause_overlay != null:
 		pause_overlay.visible = is_paused
+	if is_instance_valid(pause_backdrop):
+		pause_backdrop.visible = is_paused
+	for control in [hud_panel, score_panel, hp_icon, hp_label, level_label, xp_bar, time_label, score_label]:
+		control.visible = not is_paused
+	if is_paused:
+		toast_panel.visible = false
 	if pause_button != null:
 		pause_button.text = "繼續" if is_paused else "暫停"
 		pause_button.visible = not is_paused
@@ -2042,7 +2124,7 @@ func _refresh_active_ability_button() -> void:
 	var ratio: float = clamp(remaining / duration, 0.0, 1.0)
 	var channel_available := not channel.is_empty()
 	active_ability_button.disabled = get_tree().paused or not GameManager.game_running or (remaining > 0.01 and not channel_available)
-	active_ability_button.text = "旋" if bool(channel.get("active", false)) else "斬"
+	active_ability_button.text = "旋斬"
 	if channel_available and (bool(channel.get("held", false)) or bool(channel.get("active", false))):
 		ratio = 1.0 - float(channel.get("energy_ratio", 1.0))
 	if active_ability_cooldown != null:
@@ -2098,7 +2180,8 @@ func _open_formation_picker() -> void:
 	var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
 	formation_picker.refresh(GameManager.squad_manager)
 	formation_picker.reset_size()
-	formation_picker.position = Vector2(maxf(8.0, view.x - formation_picker.size.x - 12.0), clampf(formation_button.position.y - formation_picker.size.y - 8.0, 62.0, maxf(62.0, view.y - formation_picker.size.y - 8.0)))
+	formation_picker.position = Vector2(maxf(8.0, view.x - formation_picker.size.x - 12.0), maxf(138.0 if view.y > view.x else 70.0, view.y - formation_picker.size.y - 8.0))
+	toast_panel.visible = false
 	formation_picker.show()
 	root.move_child(formation_picker, root.get_child_count() - 1)
 
@@ -2125,10 +2208,19 @@ func _update_tactical_hint() -> void:
 	if not tactical_hint.visible:
 		return
 	var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
-	tactical_hint.text = GameManager.tactical_director.current_hint()
-	tactical_hint.add_theme_font_size_override("font_size",14)
-	tactical_hint.position = Vector2(8.0, 104.0 if view.y > view.x else 112.0)
-	tactical_hint.size = Vector2(view.x - 16.0, 24.0)
+	var squad: Node = GameManager.squad_manager
+	var relay: Node = GameManager.tactical_director.relay
+	var formation: String = squad.get_formation_definition().short if is_instance_valid(squad) else "楔形"
+	if is_instance_valid(relay) and not relay.completed:
+		var next := "走進%s陣記" % relay.NAMES[relay.step]
+		if squad.get_formation_id() != relay.ORDER[relay.step]:
+			next = "換成%s，再走進陣記" % relay.NAMES[relay.step]
+		elif relay.hold > 0:
+			next = "停留 %.1f/1.2 秒・隊友 %d/2" % [relay.hold, mini(2, relay.settled)]
+		tactical_hint.text = "%s｜封隙 %d/3\n下一步：%s" % [formation, relay.step, next]
+	else:
+		tactical_hint.text = "%s｜封隙 3/3\n%s" % [formation, GameManager.tactical_director.current_hint()]
+	BATTLE_LAYOUT.place(tactical_hint, BATTLE_LAYOUT.regions(view, MOBILE_TUNING.use_mobile_ui(view)).mission)
 
 
 func _layout_formation_button(layout: Vector2, touch: bool, phone: bool, blocked: bool, row_y: float, button_height: float) -> void:
@@ -2305,7 +2397,10 @@ func _on_combo_break_requested(combo_count: int) -> void:
 	combo_break_label.add_theme_font_size_override("font_size", 20)
 	combo_break_label.visible = true
 	combo_break_label.modulate = Color(0.86, 0.92, 0.96, 0.88)
-	combo_break_label.position.y += 4.0
+	var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
+	var phone := MOBILE_TUNING.use_mobile_ui(view)
+	var rest_position := Vector2(24.0,view.y * (0.40 if phone and view.y > view.x else 0.32))
+	combo_break_label.position = rest_position + Vector2(0,4)
 	combo_break_tween = create_tween()
 	combo_break_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	combo_break_tween.set_parallel(true)
@@ -2314,7 +2409,8 @@ func _on_combo_break_requested(combo_count: int) -> void:
 	combo_break_tween.chain().tween_callback(func() -> void:
 		if combo_break_label != null:
 			combo_break_label.visible = false
-			_apply_responsive_layout()
+			# A cosmetic fade must not reset input or dismiss the formation menu.
+			combo_break_label.position = rest_position
 	)
 
 
@@ -2633,12 +2729,13 @@ func _play_toast_queue() -> void:
 	toast_showing = true
 	while not toast_queue.is_empty():
 		toast_token += 1
-		toast_label.text = toast_queue.pop_front()
+		toast_current_text = toast_queue.pop_front()
+		toast_label.text = toast_current_text
 		var mobile := MOBILE_TUNING.use_mobile_ui(MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size))
-		toast_label.add_theme_font_size_override("font_size", 14 if mobile else 16)
-		var toast_height := maxf(48.0, toast_label.get_minimum_size().y + 12.0)
-		toast_panel.offset_bottom = toast_panel.offset_top + toast_height
-		toast_panel.visible = true
+		toast_label.add_theme_font_size_override("font_size", 13)
+		var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
+		BATTLE_LAYOUT.place(toast_panel, BATTLE_LAYOUT.regions(view, mobile).notice)
+		toast_panel.visible = not get_tree().paused
 		await get_tree().create_timer(1.5, true).timeout
 	if toast_panel != null:
 		toast_panel.visible = false

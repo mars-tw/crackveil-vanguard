@@ -2,6 +2,7 @@ extends Control
 
 const WORLD := preload("res://scripts/services/loop_world_topology.gd")
 const MOBILE := preload("res://scripts/services/mobile_tuning.gd")
+const LAYOUT := preload("res://scripts/ui/battle_layout.gd")
 var clock := 0.0
 
 func _ready() -> void:
@@ -10,9 +11,8 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	var view := MOBILE.ui_layout_size(get_viewport().get_visible_rect().size)
 	var phone := MOBILE.layout_tier(view) == MOBILE.LayoutTier.PHONE
-	size = Vector2(68, 88) if phone else Vector2(146, 172)
-	position = Vector2(view.x - size.x - 12, 78)
-	visible = GameManager.game_running and is_instance_valid(GameManager.player)
+	LAYOUT.place(self, LAYOUT.regions(view, phone).minimap)
+	visible = GameManager.game_running and is_instance_valid(GameManager.player) and not GameManager.manual_paused
 	clock += delta
 	if clock >= 0.1:
 		clock = 0.0

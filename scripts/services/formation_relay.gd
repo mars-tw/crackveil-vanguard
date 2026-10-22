@@ -77,7 +77,7 @@ func advance(delta: float) -> void:
 func hint() -> String:
 	if completed:
 		return "三陣封隙完成"
-	return "三陣封隙 %d/3｜%s・%s" % [step + 1, NAMES[step], "隊友就位 %d/2" % mini(2, settled) if hold > 0 else "走位到陣記"]
+	return "三陣封隙 %d/3｜目標%s・%s" % [step, NAMES[step], "隊友就位 %d/2" % mini(2, settled) if hold > 0 else "走位到陣記"]
 
 func probe() -> Dictionary:
 	var screen := get_viewport().get_canvas_transform() * anchor
@@ -102,7 +102,9 @@ func _draw() -> void:
 				draw_circle(anchor + Vector2.from_angle(angle) * 20, 5, color)
 	var font := FONT
 	if font != null:
-		draw_string(font, anchor + Vector2(-65, -68), "%s封隙 %d/3" % [NAMES[step], step + 1], HORIZONTAL_ALIGNMENT_LEFT, -1, 19, color)
+		var text := "%s陣記 %d/3" % [NAMES[step], step + 1]
+		draw_string_outline(font,anchor + Vector2(-65,-68),text,HORIZONTAL_ALIGNMENT_LEFT,-1,19,4,Color("101823"))
+		draw_string(font, anchor + Vector2(-65, -68), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 19, color)
 	var captain: Node2D = GameManager.player
 	var direction := captain.global_position.direction_to(anchor)
 	if captain.global_position.distance_to(anchor) > CAPTAIN_RADIUS:

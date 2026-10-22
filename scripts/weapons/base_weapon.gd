@@ -88,6 +88,8 @@ func find_nearest_enemy(max_range: float) -> Node2D:
 	if owner_player == null or not is_instance_valid(owner_player):
 		return null
 
+	if is_instance_valid(GameManager.squad_manager) and GameManager.squad_manager.has_method("select_formation_target"):
+		return GameManager.squad_manager.select_formation_target(owner_player, max_range)
 	return EntityFactory.find_nearest_enemy(owner_player.global_position, max_range)
 
 

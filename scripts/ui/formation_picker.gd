@@ -12,6 +12,12 @@ var touch_id := ""
 func _ready() -> void:
 	name = "FormationPicker"
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	var surface := StyleBoxFlat.new()
+	surface.bg_color = Color("0c1525")
+	surface.border_color = Color("718399")
+	surface.set_border_width_all(1)
+	surface.set_corner_radius_all(10)
+	add_theme_stylebox_override("panel",surface)
 	var margin := MarginContainer.new()
 	for edge in ["left", "right", "top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + edge, 10)
@@ -48,13 +54,23 @@ func refresh(squad: Node) -> void:
 	cancel_button.custom_minimum_size = Vector2(260,44)
 	cancel_button.reset_size()
 	var cooldown: float = squad.get_formation_cooldown_remaining()
-	title.text = "選擇陣形" if cooldown <= 0.0 else "換陣冷卻 %.1f 秒" % cooldown
+	title.text = "選擇陣形｜目前：%s" % squad.get_formation_definition().short if cooldown <= 0.0 else "換陣冷卻 %.1f 秒" % cooldown
+	var view := MobileTuning.ui_layout_size(get_viewport_rect().size)
+	var small := view.x < 390
 	for id in buttons:
 		var definition: Dictionary = squad.get_formation_definition(id)
 		var current: bool = squad.get_formation_id() == id
-		buttons[id].text = ("[目前] " if current else "") + str(definition.short) + "｜" + str(definition.effect).replace(" ", "")
-		buttons[id].add_theme_font_size_override("font_size",14)
-		buttons[id].custom_minimum_size = Vector2(260,48)
+		buttons[id].text = str(definition.short) + "｜" + str(definition.effect).replace(" ", "") + "\n效果：" + str(definition.tactic)
+		buttons[id].add_theme_font_size_override("font_size",12 if small else 14)
+		buttons[id].custom_minimum_size = Vector2(300 if small else 340,58)
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color("111e30")
+		style.border_color = definition.color.darkened(0.3)
+		style.set_border_width_all(1)
+		style.set_corner_radius_all(6)
+		style.set_content_margin_all(5)
+		buttons[id].add_theme_stylebox_override("normal",style)
+		buttons[id].add_theme_stylebox_override("disabled",style)
 		buttons[id].reset_size()
 		buttons[id].disabled = current or cooldown > 0.0
 		buttons[id].add_theme_color_override("font_color", definition.color.lightened(0.3))

@@ -225,9 +225,9 @@ func _draw_slash(effect: Dictionary, anchor: Vector2, t: float) -> void:
 	var swept_end := center_angle + half_angle
 	var body_width := (16.0 if heavy else 7.0) * (1.0 - t * 0.7)
 	var blade := _blade_polygon(origin, reach, body_width, swept_start, swept_end, 28)
-	draw_colored_polygon(blade, Color(1.0, 0.76, 0.32, alpha * 0.83))
+	draw_colored_polygon(blade, Color(0.38, 0.81, 1.0, alpha * 0.62))
 	var core := _blade_polygon(origin, reach - 1.0, body_width * 0.45, swept_start + 0.04, swept_end - 0.04, 28)
-	draw_colored_polygon(core, Color(1.0, 0.98, 0.76, alpha))
+	draw_colored_polygon(core, Color(0.76, 0.94, 1.0, alpha * 0.85))
 	draw_arc(origin, reach, swept_start, swept_end, 32, Color(1.0, 1.0, 0.92, alpha), 1.8 if heavy else 1.2, true)
 	# Restore the shared canvas before the next independent hit/death mark.
 	draw_set_transform(Vector2.ZERO)

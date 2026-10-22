@@ -92,7 +92,8 @@ func current_hint() -> String:
 		return relay.hint()
 	if not claimed.has("maneuver"):
 		if distance_walked < 160.0:
-			return "拖左下移動・自動攻擊｜走位 %d/160" % mini(160, int(distance_walked))
+			var move := "拖搖桿移動" if MobileTuning.has_confirmed_touch() else "WASD 移動"
+			return "%s・自動攻擊｜走位 %d/160" % [move,mini(160, int(distance_walked))]
 		return "點按換陣／長按直選｜陣形 %d/3" % formations.size()
 	if not claimed.has("hunt"):
 		return "雙菁追獵 %d/2｜首取殘響 +5" % mini(2, GameManager.elites_killed)

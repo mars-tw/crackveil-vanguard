@@ -128,7 +128,7 @@ func _ready() -> void:
 	if hud != null and hud.has_method("attach_equipment_panel"):
 		hud.attach_equipment_panel(loot_director)
 	_attach_first_run_guide()
-	GameManager.show_toast("點按踏進拔刀；按住空白鍵或「斬」持續旋斬，放開即可回能。")
+	GameManager.show_toast("拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。" if MOBILE_TUNING.has_confirmed_touch() else "WASD 移動；按住空白鍵旋斬，放開回能。")
 
 
 func _apply_mobile_color_grade() -> void:

@@ -1,0 +1,15 @@
+{
+  "status": "VERIFIED",
+  "native_navigation_runs": 4,
+  "late_kills": 0,
+  "remaining_animation_clients": 0,
+  "before_fix": "shared enemy animation clock finalized an enemy after its arena left the SceneTree; native stack pointed to Enemy._finalize_death",
+  "fixes": [
+    "unregister animation and release death budget on exit_tree",
+    "skip detached shared-animation clients",
+    "reject detached death finalization",
+    "guard detached Hero pause callbacks"
+  ],
+  "evidence": "navigation.json",
+  "content_checks": 1403
+}

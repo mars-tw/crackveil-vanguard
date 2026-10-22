@@ -1,0 +1,16 @@
+{
+  "before_fix": {
+    "expected_failure": true,
+    "checks": 1208,
+    "failures": [
+      "combo fade reset layout and closed formation picker",
+      "loot notification shows partially behind formation picker"
+    ]
+  },
+  "after_fix": {
+    "status": "VERIFIED",
+    "checks": 1208,
+    "failures": []
+  },
+  "fix": "restore only combo label position; do not reset the full HUD and active input"
+}

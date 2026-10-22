@@ -1,0 +1,76 @@
+{
+  "status": "VERIFIED",
+  "reviewer_role": "execution-line self review; not independent scoring",
+  "reviewed_images": [
+    {
+      "file": "review-set/01-formation-picker.png",
+      "sha256": "ff0a98713eb7563ecefd0f2773fea2ef6c9b4d199b5fa94c7af314951069b37c"
+    },
+    {
+      "file": "review-set/02-seal-hold-a.png",
+      "sha256": "47e8c75718aedd6f579a93f252da83e26e4816ee79646c0eebad06dc33f5e294"
+    },
+    {
+      "file": "review-set/03-seal-hold-b.png",
+      "sha256": "11211e99594f8228441e6646843bb3be6c5817aa85544166bf0d54b788833ea6"
+    },
+    {
+      "file": "review-set/04-wedge.png",
+      "sha256": "2782f0397e927f6c100dd8d16f437918d0238967064af651cca30e5b1aad8be0"
+    },
+    {
+      "file": "review-set/05-ring.png",
+      "sha256": "57a69c67607702b4bcc15cd7208d05e8e44ed58c7fa575a362c2f7bd04495945"
+    },
+    {
+      "file": "review-set/06-scatter.png",
+      "sha256": "777666920e8125c07f2ba4006d5f8bd0ea78870374c66b3d48c4fa4a1f8e1587"
+    },
+    {
+      "file": "review-set/07-bond-a.png",
+      "sha256": "bd1420faff59a498c6ac89150459729d7a018e97c93ff4da73fdeac176d4c8b2"
+    },
+    {
+      "file": "review-set/08-bond-b.png",
+      "sha256": "4e71875cbdf24e9db90e4b4a68b4b0b1a31ebc1baa7edce73dbbe50a9e4f496a"
+    },
+    {
+      "file": "review-set/09-bond-c.png",
+      "sha256": "957a65a22c0abc70efe04a8818de9760ac00aba7dc69e99030e0d3429e2a96ac"
+    },
+    {
+      "file": "review-set/10-landscape-guide.png",
+      "sha256": "21a07e0c7cefd1e4e6d2dd4e65cced9ce3c077270116ca11232cc70af400ed2a"
+    },
+    {
+      "file": "review-set/11-portrait-390-battle.png",
+      "sha256": "080d275c9c4e796e29c6adc3ad9a090ba7028ee007577bceb1bf24de8460c1f8"
+    },
+    {
+      "file": "review-set/12-portrait-430-picker.png",
+      "sha256": "4115c8e0608ca9b0f779d81b6905c4c96dfa549e604ed41275912740ba5b659e"
+    },
+    {
+      "file": "review-set/13-desktop-pause.png",
+      "sha256": "15d8eff7851979713328ae969735a6906f6187d5dc1e52376e9bd685a79290bf"
+    },
+    {
+      "file": "review-set/14-seals-complete.png",
+      "sha256": "09be12b89992f4c27e9f5f6b742015cf17a77fe63a681b18780c56d22c564be7"
+    },
+    {
+      "file": "review-set/15-dense-combat.png",
+      "sha256": "e493761a8cd681e2323b793b8dfdaeb3422979fa7ec17830b476b5112cdde3b5"
+    }
+  ],
+  "independent_score": null,
+  "findings": [
+    "HUD/objective/combo/notice regions readable",
+    "fixed guide header and close button",
+    "portrait HP not covered",
+    "desktop pause surface and footer separated",
+    "formation shapes and squad positions differ",
+    "bond participants and effect text visible",
+    "high density captain/allies/nearest threat/marker distinguishable"
+  ]
+}

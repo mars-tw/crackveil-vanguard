@@ -51,6 +51,7 @@ const FORMATION_DEFINITIONS: Dictionary = {
 		"short": "楔形",
 		"summary": "隊友前壓到兩翼：全隊傷害 +15%，受到傷害 +8%",
 		"effect": "傷害 +15%｜受傷 +8%",
+		"tactic": "前方優先集火，集中突破",
 		"damage": 1.15,
 		"incoming": 1.08,
 		"pickup": 1.0,
@@ -62,6 +63,7 @@ const FORMATION_DEFINITIONS: Dictionary = {
 		"short": "圓陣",
 		"summary": "隊友圍住隊長：受到傷害 -10%，全隊傷害 -8%",
 		"effect": "受傷 -10%｜傷害 -8%",
+		"tactic": "護圈內再減傷 8%，靠攏就位",
 		"damage": 0.92,
 		"incoming": 0.90,
 		"pickup": 1.0,
@@ -73,6 +75,7 @@ const FORMATION_DEFINITIONS: Dictionary = {
 		"short": "散兵",
 		"summary": "隊友大範圍散開：拾取範圍 +60%、移動 +8%，全隊傷害 -5%",
 		"effect": "拾取 +60%｜移動 +8%｜傷害 -5%",
+		"tactic": "分散回收，腳下虛線為拾取範圍",
 		"damage": 0.95,
 		"incoming": 1.0,
 		"pickup": 1.6,
@@ -107,6 +110,10 @@ var formation_cooldown: float = 0.0
 var formation_switch_count: int = 0
 var formation_indicator_timer: float = 0.0
 var _resonance_regen_accumulator: float = 0.0
+var tactical_draw_clock := 0.0
+var bond_reveal_timer := 0.0
+var bond_reveal_text := ""
+var nearest_threat: Node2D
 
 const BOND_DEFINITIONS: Array[Dictionary] = [
 	{"id": "bond_ember_pulse", "name": "燼脈聯爆", "hero_ids": ["ember_grenadier", "pulse_artificer"]},
@@ -229,6 +236,9 @@ func clear_squad() -> void:
 	dead_ids.clear()
 	active_bonds.clear()
 	leader = null
+	bond_reveal_timer = 0.0
+	bond_reveal_text = ""
+	nearest_threat = null
 	formation_id = FORMATION_ORDER[0]
 	formation_cooldown = 0.0
 	formation_switch_count = 0
@@ -238,6 +248,13 @@ func clear_squad() -> void:
 
 
 func _process(delta: float) -> void:
+	tactical_draw_clock += delta
+	bond_reveal_timer = maxf(0.0, bond_reveal_timer - delta)
+	if tactical_draw_clock >= 0.05:
+		tactical_draw_clock = 0.0
+		if is_instance_valid(leader) and GameManager.game_running:
+			nearest_threat = EntityFactory.find_nearest_enemy(leader.global_position,420.0)
+		queue_redraw()
 	if formation_cooldown > 0.0:
 		formation_cooldown = maxf(0.0, formation_cooldown - delta)
 	if formation_indicator_timer > 0.0:
@@ -397,18 +414,75 @@ func get_formation_debug_state() -> Dictionary:
 
 
 func _draw() -> void:
-	if formation_indicator_timer <= 0.0 or leader == null or not is_instance_valid(leader):
+	if leader == null or not is_instance_valid(leader) or not GameManager.game_running:
 		return
-	var alpha := clampf(formation_indicator_timer / FORMATION_INDICATOR_DURATION, 0.0, 1.0)
 	var color: Color = get_formation_definition().get("color", Color.WHITE)
 	var origin := to_local(leader.global_position)
-	var line_color := Color(color.r, color.g, color.b, 0.55 * alpha)
-	for index in range(1, members.size()):
-		var target := to_local(get_formation_world_position(index))
-		draw_line(origin, target, line_color, 2.0, true)
-		draw_arc(target, 15.0, 0.0, TAU, 20, Color(color.r, color.g, color.b, 0.85 * alpha), 2.5, true)
-	var radius := 52.0 + (1.0 - alpha) * 40.0
-	draw_arc(origin, radius, 0.0, TAU, 40, Color(color.r, color.g, color.b, 0.7 * alpha), 3.0, true)
+	var forward: Vector2 = leader.get_locomotion_facing_direction()
+	if is_instance_valid(nearest_threat) and nearest_threat.is_active:
+		var point := to_local(nearest_threat.global_position)
+		draw_arc(point,22,0,TAU,28,Color("ff586f"),2.0,true)
+		draw_polyline(PackedVector2Array([point+Vector2(-9,-42),point+Vector2(0,-32),point+Vector2(9,-42)]),Color("ff8999"),3,true)
+	if formation_id == "ring":
+		# This boundary is the exact spatial cover test below.
+		draw_circle(origin, RING_INNER_RADIUS, Color(color, 0.055))
+		draw_arc(origin, RING_INNER_RADIUS, 0, TAU, 64, Color(color, 0.78), 2.2, true)
+		for angle in range(8):
+			var point := origin + Vector2.from_angle(angle * TAU / 8) * RING_INNER_RADIUS
+			draw_line(point - Vector2(4, 0), point + Vector2(4, 0), color, 2, true)
+	elif formation_id == "wedge":
+		var tip := origin + forward * 135
+		var side := forward.orthogonal() * 70
+		draw_polyline(PackedVector2Array([origin + side, tip, origin - side]), Color(color, 0.7), 2.0, true)
+	for member in get_members():
+		if not is_instance_valid(member) or not member.is_alive:
+			continue
+		var point := to_local(member.global_position)
+		# Captain uses a double diamond, companions a small formation ring.
+		if member == leader:
+			var diamond := PackedVector2Array([point + Vector2(0,-17),point + Vector2(23,0),point + Vector2(0,13),point + Vector2(-23,0),point + Vector2(0,-17)])
+			draw_polyline(diamond, Color("dcf9ff"), 2.2, true)
+		else:
+			draw_arc(point, 16, 0, TAU, 24, Color(color,0.85), 1.8, true)
+		if formation_id == "scatter":
+			var radius: float = member.get_pickup_radius()
+			for segment in range(12):
+				draw_arc(point, radius, segment * TAU / 12, (segment + 0.55) * TAU / 12, 4, Color(color,0.30),1.2,true)
+		elif formation_id == "wedge":
+			var tip := point + forward * 36
+			draw_polyline(PackedVector2Array([tip-forward.rotated(-0.65)*12,tip,tip-forward.rotated(0.65)*12]),Color(color,0.9),2,true)
+	if bond_reveal_timer > 0:
+		for definition in active_bonds.values():
+			var a: Node = get_member_by_id(definition.hero_ids[0])
+			var b: Node = get_member_by_id(definition.hero_ids[1])
+			if is_instance_valid(a) and is_instance_valid(b):
+				draw_line(to_local(a.global_position),to_local(b.global_position),Color("e4b7ff"),2,true)
+				for member in [a,b]:
+					draw_arc(to_local(member.global_position),23,0,TAU,28,Color("e4b7ff"),2.5,true)
+
+
+func select_formation_target(owner: Node2D, max_range: float) -> Node2D:
+	var nearest := EntityFactory.find_nearest_enemy(owner.global_position, max_range)
+	if formation_id != "wedge" or not is_instance_valid(leader):
+		return nearest
+	var forward: Vector2 = leader.get_locomotion_facing_direction()
+	var best: Node2D = null
+	var distance := INF
+	for enemy in EntityFactory.get_enemies_in_radius(owner.global_position,max_range):
+		var offset: Vector2 = enemy.global_position - leader.global_position
+		if offset.normalized().dot(forward) < 0.35:
+			continue
+		var candidate: float = owner.global_position.distance_squared_to(enemy.global_position)
+		if candidate < distance:
+			distance = candidate
+			best = enemy
+	return best if best != null else nearest
+
+
+func get_spatial_cover_multiplier(target: Node) -> float:
+	if formation_id != "ring" or not is_instance_valid(leader) or not is_instance_valid(target) or not target is Node2D:
+		return 1.0
+	return 0.92 if leader.global_position.distance_to(target.global_position) <= RING_INNER_RADIUS else 1.0
 
 
 func _spawn_member(hero_data: Resource, leader_flag: bool) -> Node:
@@ -764,6 +838,7 @@ func recompute_bonds() -> void:
 	# - excess constructs are reclaimed oldest-first (FIFO), shattering only
 	#   while their shepherd owner remains alive; owner death releases all with
 	#   trigger_shatter=false from Hero._die().
+	var previous := active_bonds.keys()
 	active_bonds.clear()
 	for definition in BOND_DEFINITIONS:
 		var enabled := true
@@ -775,6 +850,23 @@ func recompute_bonds() -> void:
 		if enabled:
 			active_bonds[str(definition.get("id", ""))] = definition
 	_sync_dynamic_bond_limits()
+	if active_bonds.is_empty():
+		bond_reveal_text = ""
+		bond_reveal_timer = 0.0
+	for id in active_bonds:
+		if not previous.has(id):
+			var definition: Dictionary = active_bonds[id]
+			var names := PackedStringArray()
+			for hero_id in definition.hero_ids:
+				var member := get_member_by_id(hero_id)
+				var data: Variant = member.get("hero_data")
+				names.append(str(data.get("display_name")) if data is Resource else str(hero_id))
+			var effect: String = {"bond_guard_echo":"全隊減傷 5%", "bond_ember_pulse":"爆裂範圍 +8%", "bond_void_rail":"緩速目標貫槍 +12%", "bond_captain_shepherd":"裂傀強化"}.get(id,"")
+			if id == "bond_guard_echo" and formation_id == "ring":
+				effect += "・圓陣回復 1.5 HP／秒"
+			bond_reveal_text = "%s｜%s\n%s" % [definition.name, "＋".join(names), effect]
+			bond_reveal_timer = 4.0
+			GameManager.show_toast(bond_reveal_text)
 	if OS.is_debug_build():
 		print("BONDS_ACTIVE=%s" % str(active_bonds.keys()))
 	GameManager.queue_stats_emit()

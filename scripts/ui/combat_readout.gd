@@ -1,6 +1,7 @@
 extends Control
 
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+const LAYOUT := preload("res://scripts/ui/battle_layout.gd")
 
 var panel: PanelContainer
 var headline: Label
@@ -63,14 +64,12 @@ func _refresh() -> void:
 	var viewport_size := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
 	var portrait := viewport_size.y > viewport_size.x
-	var width := minf(144.0 if mobile and not portrait else 230.0, viewport_size.x - 32.0)
-	panel.position = Vector2((viewport_size.x - width) * 0.5, MOBILE_TUNING.safe_top_padding(viewport_size) + (108.0 if mobile and portrait else 58.0))
-	panel.size = Vector2(width, 42.0)
-	headline.add_theme_font_size_override("font_size", 13 if mobile and not portrait else 15)
+	LAYOUT.place(panel, LAYOUT.regions(viewport_size, mobile).combo)
+	headline.add_theme_font_size_override("font_size", 14)
 	detail.add_theme_font_size_override("font_size", 11)
 	rows.add_theme_constant_override("separation", 2)
 	visible = GameManager.game_running and not GameManager.is_game_over and not GameManager.stage_victory_pending and not GameManager.manual_paused and (GameManager.combo_count >= 3 or GameManager.boss_active)
-	detail.visible = GameManager.combo_fire_rate_timer > 0.0 or GameManager.boss_active
+	detail.visible = true
 	if not visible:
 		return
 	var boss: Node = null
@@ -97,4 +96,4 @@ func _refresh() -> void:
 		var seconds := maxi(0, ceili(encounter_time - GameManager.elapsed_time))
 		headline.text = "無盡作戰" if GameManager.boss_killed else "%s來襲 %d 秒" % [encounter_name, seconds]
 		meter.value = clampf(GameManager.elapsed_time / maxf(1.0, encounter_time), 0.0, 1.0)
-		detail.text = "移動回收裝備與經驗" if mobile else "空白鍵：裂隙脈衝　P：暫停"
+		detail.text = "移動回收裝備與經驗" if MOBILE_TUNING.has_confirmed_touch() else "空白鍵：旋斬　P：暫停"

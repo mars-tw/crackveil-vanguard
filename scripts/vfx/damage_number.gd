@@ -119,6 +119,22 @@ func _process(delta: float) -> void:
 		EntityFactory.release_damage_number(self)
 	else:
 		_update_alpha()
+		# World numbers never enter the fixed HUD lanes, even near the top edge.
+		var screen: Vector2 = get_viewport().get_canvas_transform() * global_position
+		var css := MobileTuning.ui_layout_size(get_viewport_rect().size)
+		var ratio := css.x / maxf(1.0, get_viewport_rect().size.x)
+		var zones := BattleLayout.regions(css, MobileTuning.use_mobile_ui(css))
+		var extent := value_label.size * scale * ratio
+		var text_rect := Rect2(screen * ratio - extent * 0.5,extent)
+		var obscures := false
+		for key in ["stats","score","time","mission","combo","notice","minimap"]:
+			if text_rect.intersects(zones[key]):
+				obscures = true
+				break
+		var control_height := 184.0 if css.y > css.x else 140.0 if MobileTuning.has_confirmed_touch() else 84.0
+		if text_rect.intersects(Rect2(0,css.y-control_height,minf(250,css.x*0.55),control_height)) or text_rect.intersects(Rect2(css.x-124,css.y-220,124,220)):
+			obscures = true
+		value_label.visible = not obscures
 
 
 func _set_value(value: Variant) -> void:

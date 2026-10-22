@@ -47,7 +47,7 @@ func setup(loot_director: Node, equipment: Dictionary, angle: float = 0.0) -> vo
 	name_label.add_theme_font_size_override("font_size", 12)
 	name_label.add_theme_color_override("font_color", rarity_color.lightened(0.18))
 	name_label.add_theme_color_override("font_outline_color", Color(0.015, 0.02, 0.04))
-	name_label.add_theme_constant_override("outline_size", 4)
+	name_label.add_theme_constant_override("outline_size", 1)
 	add_child(name_label)
 	queue_redraw()
 
@@ -55,6 +55,16 @@ func setup(loot_director: Node, equipment: Dictionary, angle: float = 0.0) -> vo
 func _physics_process(delta: float) -> void:
 	if collected or item.is_empty():
 		return
+	# Only the nearest drop gets a name. The art/rarity icon remains visible
+	# for every drop; a pile cannot produce a stack of unreadable labels.
+	if is_instance_valid(GameManager.player):
+		var distance_to_captain: float = global_position.distance_squared_to(GameManager.player.global_position)
+		var nearest := distance_to_captain <= 220.0 * 220.0
+		for other in get_tree().get_nodes_in_group("equipment_drops"):
+			if other != self and other.global_position.distance_squared_to(GameManager.player.global_position) < distance_to_captain:
+				nearest = false
+				break
+		name_label.visible = nearest
 	age += delta
 	animation_timer += delta
 	if age < 0.32:

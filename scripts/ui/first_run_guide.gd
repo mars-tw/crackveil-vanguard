@@ -83,7 +83,7 @@ func _build_ui() -> void:
 	panel.add_child(title_label)
 
 	body_label = Label.new()
-	body_label.text = "移動：WASD / 方向鍵 / 左下搖桿\n隊長技：空白鍵 / 右下按鈕釋放裂隙脈衝\n武器會自動攻擊最近敵人\n收集藍色寶石升級，從三張卡選一張"
+	body_label.text = _controls_page_text()
 	body_label.anchor_left = 0.0
 	body_label.anchor_right = 1.0
 	body_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -175,8 +175,8 @@ func _refresh_page() -> void:
 
 func _controls_page_text() -> String:
 	if MOBILE_TUNING.has_confirmed_touch():
-		return "移動：左下搖桿\n隊長技：右下按鈕釋放裂隙脈衝\n武器會自動攻擊最近敵人\n收集藍色寶石升級，從三張卡選一張"
-	return "移動：WASD / 方向鍵\n隊長技：空白鍵釋放裂隙脈衝\n武器會自動攻擊最近敵人\n收集藍色寶石升級，從三張卡選一張"
+		return "拖左下搖桿移動\n按住右下「旋斬」，放開回能\n點按陣形輪換，長按直選\n走進地面陣記，等兩名隊友就位"
+	return "WASD／方向鍵移動\n按住空白鍵旋斬，放開回能\nQ 換陣；長按陣形按鈕直選\n走進地面陣記，等兩名隊友就位"
 
 
 func _is_disabled() -> bool:
