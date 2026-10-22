@@ -1,0 +1,56 @@
+[
+  {
+    "scene": "ContentR3Run",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors",
+      "res://scenes/debug/ContentR3Run.tscn",
+      "--",
+      "team=assault",
+      "seed=55210"
+    ],
+    "exit_code": 0,
+    "status": "BLOCKED",
+    "log_sha256": "ad2df97048ef913c8994850b7c7963ad1fc8f2c09aa2bf7eb8158a9a58c10f75",
+    "wall_seconds": 88.391,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_paired-assault",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\native-profiles\\paired-assault\\ContentR3Run\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\native-profiles\\paired-assault\\ContentR3Run\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors"
+  },
+  {
+    "scene": "ContentR3Run",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors",
+      "res://scenes/debug/ContentR3Run.tscn",
+      "--",
+      "team=escort",
+      "seed=55210"
+    ],
+    "exit_code": 0,
+    "status": "BLOCKED",
+    "log_sha256": "95a92c91d441e0989ab097a287eb5aaa538a34a4d58dd02b1485e36a1e02a7fb",
+    "wall_seconds": 134.969,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_paired-escort",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\native-profiles\\paired-escort\\ContentR3Run\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\native-profiles\\paired-escort\\ContentR3Run\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors"
+  }
+]

@@ -107,6 +107,7 @@ func _build_ui() -> void:
 
 func show_summary(summary: Dictionary) -> void:
 	displayed_summary = summary.duplicate(true)
+	restart_button.text="免費整備" if GameManager.active_starting_formal and MetaProgress.starting_vouchers>0 else "重試保存" if not GameManager.pending_starting_settlements.is_empty() else "再來一局"
 	_update_summary_count(0.0)
 	if summary_tween != null and summary_tween.is_valid():
 		summary_tween.kill()
@@ -137,6 +138,7 @@ func _update_summary_count(progress_ratio: float) -> void:
 		_echo_destination_text(summary, progress)
 	]
 	summary_label.text += "\n裝備拾取 %d 件　拆解 %d 件" % [int(displayed_summary.get("equipment_collected", 0)), int(displayed_summary.get("equipment_salvaged", 0))]
+	if str(displayed_summary.get("starting_build_text","")).strip_edges()!="": summary_label.text+="\n"+str(displayed_summary.starting_build_text)
 
 
 func _on_restart_pressed() -> void:
@@ -145,6 +147,7 @@ func _on_restart_pressed() -> void:
 
 
 func _on_main_menu_pressed() -> void:
+	if GameManager.active_starting_node!="" or GameManager.active_starting_team!="legacy": GameManager.open_preparation_on_menu=true
 	root.visible = false
 	main_menu_requested.emit()
 

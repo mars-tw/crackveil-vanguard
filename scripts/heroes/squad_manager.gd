@@ -274,7 +274,13 @@ func _tick_formation_resonance(delta: float) -> void:
 		var before := 0.0
 		for member in get_members():
 			before += member.current_hp
-		heal_members(regen)
+		for member in get_members():
+			if GameManager.active_starting_node=="bond_harmony" and member.global_position.distance_to(leader.global_position)>RING_INNER_RADIUS: continue
+			var previous: float=member.current_hp
+			member.heal(regen)
+			var restored: float=member.current_hp-previous
+			GameManager.record_support("echo_singer",restored,0)
+			if GameManager.active_starting_node=="bond_harmony": GameManager.starting_benefits.healing+=maxf(0,restored-maxf(0,regen-1.0))
 		var after := 0.0
 		for member in get_members():
 			after += member.current_hp
@@ -301,6 +307,7 @@ func get_formation_switch_cooldown_duration() -> float:
 	var duration := FORMATION_SWITCH_COOLDOWN
 	if has_living_passive("guard"):
 		duration *= FORMATION_GUARD_COOLDOWN_MULTIPLIER
+	if GameManager.active_starting_node=="spec_step": duration*=1.75
 	return duration
 
 
@@ -324,6 +331,7 @@ func set_formation(new_id: String, force: bool = false) -> bool:
 		return false
 	formation_id = new_id
 	formation_switch_count += 1
+	if GameManager.active_starting_node=="spec_step": GameManager.starting_step_timer=2.0
 	formation_cooldown = get_formation_switch_cooldown_duration()
 	formation_indicator_timer = FORMATION_INDICATOR_DURATION
 	if has_living_passive("guard"):
@@ -382,7 +390,7 @@ func get_formation_damage_multiplier() -> float:
 		multiplier *= float(BOND_FORMATION_RESONANCE[bond_id].get("damage", 1.0))
 	if formation_id == "wedge":
 		multiplier *= 1.0 + _living_passive_value("blast")
-	if is_instance_valid(GameManager.tactical_director) and GameManager.tactical_director.relay.counter_timer > 0:
+	if is_instance_valid(GameManager.tactical_director) and is_instance_valid(GameManager.tactical_director.relay) and GameManager.tactical_director.relay.counter_timer > 0:
 		multiplier *= 1.2
 	return multiplier
 
@@ -392,11 +400,15 @@ func get_formation_incoming_multiplier() -> float:
 
 
 func get_formation_pickup_multiplier() -> float:
-	return float(get_formation_definition().get("pickup", 1.0)) * (1.0 + _living_passive_value("support"))
+	return float(get_formation_definition().get("pickup", 1.0)) * (1.0 + _living_passive_value("support")) * (1.35 if GameManager.active_starting_node=="spec_collect" and formation_id=="scatter" else 1.0)
 
 
 func get_formation_speed_multiplier() -> float:
-	return float(get_formation_definition().get("speed", 1.0))
+	var multiplier := float(get_formation_definition().get("speed", 1.0))
+	if GameManager.active_starting_node=="crew_scout": multiplier*=1.12
+	if GameManager.active_starting_node=="spec_escort" and GameManager.run_mode=="campaign": multiplier*=0.88
+	if GameManager.active_starting_node=="spec_step" and GameManager.starting_step_timer>0: multiplier*=1.25
+	return multiplier
 
 
 func get_follower_speed_multiplier() -> float:
@@ -407,6 +419,7 @@ func get_formation_regen_per_second() -> float:
 	var regen := 0.0
 	for bond_id in get_active_resonance_ids():
 		regen += float(BOND_FORMATION_RESONANCE[bond_id].get("regen", 0.0))
+	if GameManager.active_starting_node=="bond_harmony" and has_active_bond("bond_guard_echo") and formation_id=="ring": regen+=1.0
 	return regen
 
 
@@ -539,6 +552,7 @@ func _append_recruit_options(pool: Array) -> void:
 		var hero_id: String = str(hero_data.get("id"))
 		if member_ids.has(hero_id) or recruited_once.has(hero_id) or dead_ids.has(hero_id):
 			continue
+		if not _starting_recruit_allowed(hero_id): continue
 		var recruit_description: String = str(hero_data.get("description"))
 		var hero_quote_value = hero_data.get("quote")
 		var hero_quote: String = str(hero_quote_value) if hero_quote_value != null else ""
@@ -806,6 +820,7 @@ func has_weapon_modifier(modifier_id: String) -> bool:
 
 
 func recruit_hero(hero_id: String) -> bool:
+	if not _starting_recruit_allowed(hero_id): return false
 	if squad_data == null or hero_id == "" or member_ids.has(hero_id) or recruited_once.has(hero_id) or dead_ids.has(hero_id):
 		return false
 	if get_member_count() >= int(squad_data.get("max_members")):
@@ -992,7 +1007,15 @@ func get_formation_local_offset(slot_index: int) -> Vector2:
 
 func _can_offer_recruit_for_slot(slot_count: int) -> bool:
 	var required_level := int(RECRUIT_LEVEL_GATES.get(slot_count, 8))
+	if GameManager.active_starting_node=="bond_reserve": required_level=maxi(1,required_level-1)
 	return int(GameManager.get("level")) >= required_level
+
+func _starting_recruit_allowed(id: String) -> bool:
+	if GameManager.active_starting_node!="bond_reserve": return true
+	var family: String=GameManager.STARTING_BUILD.family(id)
+	for member in get_members():
+		if GameManager.STARTING_BUILD.family(member.hero_id)==family: return false
+	return true
 
 
 func _recruit_option_weight(slot_count: int) -> float:

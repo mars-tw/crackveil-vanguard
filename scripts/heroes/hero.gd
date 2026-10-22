@@ -742,7 +742,7 @@ func _tick_channel(delta: float) -> void:
 			channel_active = true
 			auto_channel_actions += 1
 	if not channel_active and not channel_pending and not held:
-		channel_energy = minf(CHANNEL_MAX_ENERGY, channel_energy + delta * CHANNEL_ENERGY_REGEN)
+		channel_energy = minf(CHANNEL_MAX_ENERGY, channel_energy + delta * CHANNEL_ENERGY_REGEN * (0.75 if GameManager.active_starting_node=="crew_gunner" else 1.0))
 
 
 func _begin_channel_swing() -> void:
@@ -887,7 +887,7 @@ func _cast_rift_pulse_damage(forward: Vector2) -> int:
 func _damage_cleave(forward: Vector2, cleave_range: float, half_angle: float, base_damage: float, knockback: float, target_cap: int, heavy: bool = false) -> int:
 	var damaged_count := 0
 	var killed_count := 0
-	var pulse_damage := base_damage * GameManager.get_outgoing_damage_multiplier(self)
+	var pulse_damage := base_damage * GameManager.get_melee_damage_multiplier(self)
 	var forward_normalized := forward.normalized()
 	var cosine := cos(half_angle)
 	var cosine_squared := cosine * cosine
@@ -985,6 +985,7 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO, force_h
 
 	var final_incoming := amount * (GameManager.get_incoming_damage_multiplier(self) if GameManager.has_method("get_incoming_damage_multiplier") else 1.0)
 	var remaining_damage := final_incoming
+	var shield_before := temporary_shield_hp
 	if temporary_shield_hp > 0.0:
 		var absorbed: float = min(temporary_shield_hp, remaining_damage)
 		temporary_shield_hp -= absorbed
@@ -995,6 +996,9 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO, force_h
 		var multiplier: float = GameManager.get_incoming_damage_multiplier(self)
 		var unbonded: float = GameManager.get_incoming_damage_multiplier(self,false)
 		GameManager.bond_benefits.prevented += maxf(0,amount*(unbonded-multiplier))
+		var hp_without_guard := minf(current_hp,maxf(0,amount*unbonded-shield_before))
+		var hp_with_guard := minf(current_hp,maxf(0,final_incoming-shield_before))
+		GameManager.record_support("orbit_guard",0,maxf(0,hp_without_guard-hp_with_guard))
 		GameManager.bond_benefits.triggers += 1
 	current_hp = max(current_hp - remaining_damage, 0.0)
 	invulnerability_timer = invulnerability_time

@@ -56,6 +56,7 @@ var tactical_collection_button: Button
 var tactical_previous_button: Button
 var tactical_next_button: Button
 var tactical_detail_label: Label
+var preparation_entry_button: Button
 
 
 func _ready() -> void:
@@ -66,6 +67,9 @@ func _ready() -> void:
 	GameManager.system_pause_owners.clear()
 	_build_background()
 	_build_ui()
+	if GameManager.open_preparation_on_menu:
+		GameManager.open_preparation_on_menu=false
+		call_deferred("_open_build_preparation")
 	if not get_viewport().size_changed.is_connected(_on_viewport_size_changed):
 		get_viewport().size_changed.connect(_on_viewport_size_changed)
 	_install_web_viewport_hooks()
@@ -116,8 +120,12 @@ func _queue_browser_reflow() -> void:
 
 func _apply_browser_reflow() -> void:
 	# orientationchange 與 canvas resize 的事件順序依瀏覽器而異；等兩 frame 讓 CSS innerWidth/innerHeight 收斂。
-	await get_tree().process_frame
-	await get_tree().process_frame
+	for frame in range(2):
+		if not is_inside_tree(): return
+		var tree := get_tree()
+		if not is_instance_valid(tree): return
+		await tree.process_frame
+		if not is_inside_tree() or not is_instance_valid(tree): return
 	web_reflow_pending = false
 	_apply_responsive_layout()
 
@@ -200,6 +208,7 @@ func _build_ui() -> void:
 	navigation_row.add_child(guide_button)
 
 	meta_button = _make_menu_button("殘響升級")
+	meta_button.text="免費整備・殘響" if MetaProgress.starting_vouchers>0 else "編成・殘響"
 	meta_button.pressed.connect(_show_panel.bind("meta"))
 	menu_box.add_child(meta_button)
 
@@ -328,6 +337,10 @@ func _apply_menu_button_style(button: Button) -> void:
 
 
 func _show_panel(panel_id: String) -> void:
+	# A new section opens at its own heading; refreshing an existing section
+	# after a purchase preserves the player's reading position.
+	if panel_id!=active_panel_id: side_scroll.scroll_vertical=0
+	preparation_entry_button=null
 	tactical_collection_button = null
 	tactical_previous_button = null
 	tactical_next_button = null
@@ -372,6 +385,13 @@ func _show_panel(panel_id: String) -> void:
 
 
 func _build_meta_panel() -> void:
+	var preparation := Button.new()
+	preparation_entry_button=preparation
+	preparation.text="出擊整備"
+	preparation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	preparation.custom_minimum_size.y=44
+	preparation.pressed.connect(_open_build_preparation)
+	side_content.add_child(preparation)
 	var summary := MetaProgress.get_progress_summary() if MetaProgress.has_method("get_progress_summary") else {}
 	var summary_label := Label.new()
 	summary_label.text = "碎片 %d    累積 %d" % [int(summary.get("shards", 0)), int(summary.get("lifetime_shards", 0))]
@@ -694,12 +714,28 @@ func _on_seed_start_pressed() -> void:
 	_start_run(seed_input.text if seed_input != null else "")
 
 
-func _start_run(seed_text: String) -> void:
+func _start_run(seed_text: String, preparation_confirmed := false) -> void:
+	var before_vouchers: int=MetaProgress.starting_vouchers
+	GameManager.retry_starting_settlements()
+	if not preparation_confirmed and (MetaProgress.starting_vouchers>before_vouchers or (MetaProgress.starting_second_granted and MetaProgress.starting_vouchers>0)):
+		_open_build_preparation()
+		return
+	GameManager.prepare_starting_build()
 	GameManager.run_mode = "campaign"
 	var selected_seed := GameManager.seed_from_text(seed_text) if seed_text.strip_edges() != "" else 0
 	GameManager.forced_run_seed = selected_seed
 	get_tree().paused = false
 	get_tree().change_scene_to_file(ARENA_SCENE_PATH)
+
+func _open_build_preparation() -> void:
+	_close_side_panel()
+	var preparation := get_node_or_null("BuildPreparation")
+	if preparation==null:
+		preparation=preload("res://scripts/ui/build_preparation.gd").new()
+		preparation.name="BuildPreparation"
+		add_child(preparation)
+		preparation.launch_requested.connect(func():GameManager.tactical_launch=false;_start_run("",true))
+	preparation.open()
 
 
 func _on_close_panel_pressed() -> void:
@@ -736,6 +772,7 @@ func _on_meta_upgrade_pressed(track_id: String) -> void:
 
 
 func _refresh_active_panel() -> void:
+	if is_instance_valid(meta_button): meta_button.text="免費整備・殘響" if MetaProgress.starting_vouchers>0 else "編成・殘響"
 	if side_panel != null and side_panel.visible:
 		_show_panel(active_panel_id)
 
@@ -1057,10 +1094,13 @@ func _apply_responsive_layout() -> void:
 func _publish_settled_reachability_probe() -> void:
 	# Container/font minimums settle after deferred notifications. Publish the
 	# actual final rectangles rather than the previous orientation's width.
-	await get_tree().process_frame
-	await get_tree().process_frame
-	if is_inside_tree():
-		_publish_reachability_probe(MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size))
+	for frame in range(2):
+		if not is_inside_tree(): return
+		var tree := get_tree()
+		if not is_instance_valid(tree): return
+		await tree.process_frame
+		if not is_inside_tree() or not is_instance_valid(tree): return
+	_publish_reachability_probe(MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size))
 
 
 func _publish_reachability_probe(viewport_size: Vector2) -> void:
@@ -1069,8 +1109,10 @@ func _publish_reachability_probe(viewport_size: Vector2) -> void:
 		"world_map": world_button,
 		"guide": guide_button,
 		"meta": meta_button,
+		"build_preparation": preparation_entry_button,
 		"achievements": achievements_button,
 		"settings": settings_button,
+		"ui_scale": ui_scale_slider,
 		"seed_row": seed_row,
 		"seed_input": seed_input,
 		"seed_start": seed_start_button,
@@ -1085,6 +1127,8 @@ func _publish_reachability_probe(viewport_size: Vector2) -> void:
 		"tactical_page": tactical_page,
 		"seal_saved": bool(MetaProgress.formation_seals.get(GameManager.selected_stage_id, false)),
 		"shards": MetaProgress.shards,
+		"ui_scale_index": PlayerSettings.ui_scale_index,
+		"free_choice_entry": meta_button.text,
 		"confirmed_touch": MOBILE_TUNING.has_confirmed_touch()
 	})
 

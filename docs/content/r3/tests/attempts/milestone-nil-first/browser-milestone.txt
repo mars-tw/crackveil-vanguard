@@ -1,0 +1,10 @@
+GODOT_DIAGNOSTIC SCRIPT ERROR: Invalid access to property or key 'is_alive' on a base object of type 'Nil'.
+GODOT_DIAGNOSTIC    at: _milestone_fixture (res://scripts/debug/content_r3_review.gd:130)
+GODOT_DIAGNOSTIC    GDScript backtrace (most recent call first):
+GODOT_DIAGNOSTIC        [0] _milestone_fixture (res://scripts/debug/content_r3_review.gd:130)
+page.waitForFunction: Timeout 30000ms exceeded.
+    at milestone (C:\Users\digimkt\Desktop\遊戲\rift-survivors\tools\content_r3_capture.cjs:105:15)
+    at async C:\Users\digimkt\Desktop\遊戲\rift-survivors\tools\content_r3_capture.cjs:113:189 {
+  log: [],
+  name: 'TimeoutError'
+}

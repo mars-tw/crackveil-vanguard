@@ -1,0 +1,21 @@
+{
+  "path": "scripts/debug/content_r3_review.gd",
+  "before_sha256": "4551f02292b7b539896014e34f66d39f6890b411fc41b4dde43e50f8efb0ceca",
+  "after_sha256": "2ac1a1d4dc7bce05ca1109af8e3785a248e307aa2f91d41cec5436305359b8d5",
+  "before_copy": "tests/attempts/milestone-nil-first/content_r3_review.gd.txt",
+  "old_expression": "\"captain_dead\":not GameManager.player.is_alive",
+  "new_expression": "\"captain_dead\":bool(screen.displayed_summary.get(\"captain_dead\",false))",
+  "scope": "Web-only review subclass milestone branch reads genuine persisted terminal summary after actor recycling; no shared runtime or native run/parent/entry dependency changed",
+  "native_entry_dependencies": [
+    "scenes/debug/ContentR3Run.tscn",
+    "scripts/debug/content_r3_run.gd",
+    "scripts/debug/content_r2_run.gd"
+  ],
+  "authorization": "primary supervisor 2026-10-22: preserve native receipts; verify current shared runtime plus actual native driver/parent/entry; archive precise QA-only old/new SHA",
+  "before_source_manifest": "tests/attempts/milestone-nil-first/source-hashes.json",
+  "before_source_manifest_sha256": "24bbcb575b7f60a86814934e4d9c1c3c551a113ce94d05589d9df7c48dc11d3f",
+  "release_pack_identical": true,
+  "before_release_pack_sha256": "421cbe9ec5e7dc2ecc55b14368316bf1b5ba2d0df24b0e6de5e2f47e3d34d9a1",
+  "after_copy": "tests/attempts/footer-label-overflow/nil-fixed-review.gd.txt",
+  "superseded_scope": "Later genuine footer-label overflow required a shared UI text fix and max-scale footer probe. Final native/controls/both exports/captures are rerun on the final source; no old-source exception is used for final results."
+}

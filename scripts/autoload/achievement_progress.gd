@@ -63,6 +63,7 @@ var save_path: String = SAVE_PATH
 
 
 func _ready() -> void:
+	save_path=preload("res://scripts/services/qa_profile.gd").path(SAVE_PATH)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	load_progress()
 

@@ -1056,7 +1056,8 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 	if hp <= 0.0 or not is_active:
 		return 0.0
 
-	var final_amount := maxf(0.0, amount * _damage_taken_multiplier())
+	var starting_multiplier := GameManager.get_starting_target_multiplier(self)
+	var final_amount := maxf(0.0, amount * _damage_taken_multiplier() * starting_multiplier)
 	if special_shield_active:
 		final_amount *= 0.45
 	if final_amount <= 0.0:
@@ -1083,6 +1084,8 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 	if final_amount <= 0:
 		return 0.0
 	var applied_damage := minf(hp,final_amount)
+	if starting_multiplier>1 and GameManager.game_running:
+		GameManager.starting_benefits.shield_damage+=maxf(0,applied_damage-minf(hp,final_amount/starting_multiplier))
 	if GameManager.game_running:
 		unattributed_damage_pending+=applied_damage
 		GameManager.record_enemy_hp_damage(applied_damage)

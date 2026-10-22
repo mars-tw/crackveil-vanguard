@@ -1,0 +1,60 @@
+[
+  {
+    "scene": "ContentR3Run",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors",
+      "res://scenes/debug/ContentR3Run.tscn",
+      "--",
+      "team=assault",
+      "seed=55210"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "6d04c7b6610e3f9fee5d5c11418961481a7afbaf5e56fce196cd255c2b20537a",
+    "source_receipt": "tests/paired-assault/ContentR3Run-source.json",
+    "source_receipt_sha256": "500b9ca7796464915b57b3fcc705e6e0b0653073afc2c84eff4076b9fce834c8",
+    "wall_seconds": 80.687,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_paired-assault",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\native-profiles\\paired-assault\\ContentR3Run\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\native-profiles\\paired-assault\\ContentR3Run\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors"
+  },
+  {
+    "scene": "ContentR3Run",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors",
+      "res://scenes/debug/ContentR3Run.tscn",
+      "--",
+      "team=escort",
+      "seed=55210"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "29b7704ba62c28cc8dc41bb2c0144aa38f85045ac49038a53edfac322c3ad561",
+    "source_receipt": "tests/paired-escort/ContentR3Run-source.json",
+    "source_receipt_sha256": "500b9ca7796464915b57b3fcc705e6e0b0653073afc2c84eff4076b9fce834c8",
+    "wall_seconds": 151.281,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_paired-escort",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\native-profiles\\paired-escort\\ContentR3Run\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\native-profiles\\paired-escort\\ContentR3Run\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors"
+  }
+]

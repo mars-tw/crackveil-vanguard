@@ -28,6 +28,9 @@ var label_layer: CanvasLayer
 var marker_label: Label
 
 func required_formation() -> String:
+	if is_instance_valid(pressure):
+		if GameManager.active_starting_node=="spec_escort" and pressure.kind=="front": return "ring"
+		if GameManager.active_starting_node=="spec_collect" and pressure.kind=="pincer": return "scatter"
 	return str(pressure.COUNTERS[pressure.kind]) if is_instance_valid(pressure) else ORDER[mini(step,2)]
 
 func is_open() -> bool:
@@ -50,7 +53,7 @@ func _update_label() -> void:
 		return
 	var picker := marker_label.get_parent().get_node_or_null("FormationPicker")
 	var choosing: bool = is_instance_valid(picker) and picker.visible
-	marker_label.visible = GameManager.game_running and not completed and not get_tree().paused and not choosing
+	marker_label.visible = GameManager.game_running and GameManager.run_mode=="campaign" and not completed and not get_tree().paused and not choosing
 	if not marker_label.visible:
 		return
 	# Reassert the CSS font after the HUD's general accessibility pass.
@@ -118,15 +121,21 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_update_label()
 	visible = GameManager.run_mode == "campaign" and GameManager.game_running and not completed
-	if get_tree().paused or not GameManager.game_running or GameManager.run_mode != "campaign":
+	if get_tree().paused or not GameManager.game_running:
+		return
+	if GameManager.run_mode!="campaign":
+		_tick_feedback(delta)
 		return
 	advance(delta)
 	queue_redraw()
 
-func advance(delta: float) -> void:
+func _tick_feedback(delta: float) -> void:
 	wrong_timer = maxf(0,wrong_timer-delta)
 	counter_timer = maxf(0,counter_timer-delta)
 	feedback_timer = maxf(0,feedback_timer-delta)
+
+func advance(delta: float) -> void:
+	_tick_feedback(delta)
 	if completed:
 		if GameManager.boss_killed:
 			GameManager.try_complete_campaign_victory()
@@ -146,7 +155,7 @@ func advance(delta: float) -> void:
 		hold = 0
 		return
 	pressure.begin()
-	var correct: bool = squad.get_formation_id() == required_formation()
+	var correct: bool = GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,squad.get_formation_id())
 	if not correct and captain.global_position.distance_to(anchor) <= CAPTAIN_RADIUS and wrong_timer <= 0:
 		wrong_timer = 2.5
 		wrong_penalties += 1
@@ -169,17 +178,23 @@ func advance(delta: float) -> void:
 		if pressure.clock > pressure.WARNING + pressure.ACTIVE + 1.1:
 			hold = 0
 		return
-	hold += maxf(0.0, delta)
+	var gained: float=maxf(0.0, delta) * (0.85 if GameManager.active_starting_node=="spec_escort" and pressure.kind=="front" and squad.get_formation_id()=="ring" else 1.0)
+	hold += gained
+	if squad.get_formation_id()!=str(pressure.COUNTERS[pressure.kind]): GameManager.starting_benefits.alternative_hold+=gained
 	if hold < HOLD_SECONDS:
 		return
 	if step==2 and GameManager.elapsed_time<90.0:
 		return
-	history.append({"formation": required_formation(), "pressure":pressure.kind,"cycles":pressure.cycles,"time": GameManager.elapsed_time, "followers": settled})
+	history.append({"formation": squad.get_formation_id(), "pressure":pressure.kind,"cycles":pressure.cycles,"time": GameManager.elapsed_time, "followers": settled})
 	counter_timer = 5.0
+	if GameManager.active_starting_node=="spec_prepare": counter_timer=10.0
 	feedback_timer = 1.4
 	GameManager.request_combat_impact(5.0,0.035)
 	EntityFactory.spawn_death_burst(anchor,Color("ffdcac"),3.4,"gold_rain")
-	squad.heal_members(8.0)
+	if GameManager.active_starting_node=="spec_prepare":
+		for member in squad.get_members(): GameManager.starting_benefits.healing_forgone+=minf(8,member.max_hp-member.current_hp)
+	else:
+		squad.heal_members(8.0)
 	step += 1
 	hold = 0.0
 	if step == ORDER.size():
@@ -190,11 +205,11 @@ func advance(delta: float) -> void:
 		reward_saved = reward >= 0
 		retry_timer = 2.0
 		var record := "首次封隙殘響 +4。" if reward > 0 else "本關封隙已收藏。" if reward == 0 else "紀錄尚未存好，稍後重試。"
-		GameManager.show_toast("三陣封隙完成！全隊整補；" + record)
+		GameManager.show_toast(("三陣封隙完成！放棄治療・反擊 +20%，10 秒；" if GameManager.active_starting_node=="spec_prepare" else "三陣封隙完成！全隊整補；") + record)
 	else:
 		anchor += Vector2(0, -170) if step == 1 else Vector2(-210, 0)
 		pressure.configure(anchor,step)
-		GameManager.show_toast("封隙 %d/3｜對陣整補 +8・反擊傷害 +20%%，5 秒" % step)
+		GameManager.show_toast("封隙 %d/3｜放棄治療・反擊傷害 +20%%，10 秒" % step if GameManager.active_starting_node=="spec_prepare" else "封隙 %d/3｜對陣整補 +8・反擊傷害 +20%%，5 秒" % step)
 	if AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("level_up")
 

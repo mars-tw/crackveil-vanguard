@@ -89,6 +89,12 @@ func _ready() -> void:
 	EntityFactory.initialize_for_arena(self)
 	var leader: Node = null
 	if squad_manager != null and squad_manager.has_method("start_squad"):
+		if GameManager.pending_starting_formal:
+			squad_manager.squad_data=squad_manager.squad_data.duplicate(true)
+			squad_manager.squad_data.starting_heroes.clear()
+			for id in GameManager.STARTING_BUILD.roster(GameManager.pending_starting_team,GameManager.pending_starting_node):
+				squad_manager.squad_data.starting_heroes.append(load("res://resources/heroes/%s.tres" % id))
+			if GameManager.pending_starting_node=="bond_construct": squad_manager.squad_data.max_members=8
 		leader = squad_manager.start_squad()
 	if leader is Node2D:
 		leader.global_position = Vector2(0, 1000)
@@ -177,11 +183,18 @@ func _update_leader_light() -> void:
 
 
 func _on_restart_requested() -> void:
+	if not is_inside_tree(): return
+	if GameManager.active_starting_formal and (MetaProgress.starting_vouchers>0 or not GameManager.pending_starting_settlements.is_empty()):
+		GameManager.open_preparation_on_menu=true
+		_on_main_menu_requested()
+		return
+	if GameManager.active_starting_formal: GameManager.prepare_starting_build()
 	get_tree().paused = false
 	get_tree().reload_current_scene()
 
 
 func _on_seed_restart_requested(seed_text: String) -> void:
+	if GameManager.active_starting_formal: GameManager.prepare_starting_build()
 	GameManager.forced_run_seed = GameManager.seed_from_text(seed_text)
 	get_tree().paused = false
 	get_tree().reload_current_scene()

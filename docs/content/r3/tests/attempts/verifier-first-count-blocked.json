@@ -1,0 +1,15 @@
+{
+  "status": "BLOCKED",
+  "checks": 6928,
+  "failures": [
+    "mechanics regression r1-mechanics.json"
+  ],
+  "version": "0.32.0-content-r3",
+  "base": "ce94e02",
+  "scope": "48 existing CI + R3, affected UI followup, 8 true-input UI cases, 2 continuous same-seed formal runs, 15 current raw screenshots, transactional profile/migration boundaries",
+  "ci_source_limit": "The 49-gate run did not capture pre/post source hashes. Current SHA and mtime are recorded after the fact, not presented as an immutable pre-execution snapshot. Subsequent production changes are confined to preparation UI/menu lifecycle/visible voucher restart flow; R29/R43/ContentR3Test were rerun with real before/after hashes. Debug review-pilot corrections are covered by final same-seed runs and browser captures.",
+  "secret_scan_files": 954,
+  "secret_scan_hit_paths": [],
+  "overall_quality_score": "not established by technical gate; no >=9 claim",
+  "performance": "software-rendered screenshots; no device performance certification"
+}

@@ -1,0 +1,48 @@
+{
+  "before_snapshot_scope": "before first game-mechanics scene; after editor imports",
+  "before_metadata_scope": "existence/absence and SHA only; size/mtime were not recorded before, so no retrospective before-stat claim",
+  "after_captured_utc": "2026-10-22T11:09:42.642075+00:00",
+  "after_metadata": {
+    "veil_echo.cfg": {
+      "exists": true,
+      "bytes": 94,
+      "mtime_ns": 1784709340667823400,
+      "sha256": "e092e3257d92fef8157ae8fd605ae1ff11c0db7da31e6d491b856f10deb7f6fe"
+    },
+    "campaign.cfg": {
+      "exists": true,
+      "bytes": 70,
+      "mtime_ns": 1792653030051735900,
+      "sha256": "bbd2ed5a01aeb6c07face14b9cb34f81899e7542580608426993ae5f120c5080"
+    },
+    "campaign_pets.cfg": {
+      "exists": false,
+      "bytes": null,
+      "mtime_ns": null,
+      "sha256": null
+    },
+    "crackveil_settings.cfg": {
+      "exists": true,
+      "bytes": 162,
+      "mtime_ns": 1784709340665830200,
+      "sha256": "ddb94239f48b659e8784286b93d45979c13e7d979aa763d589991662c7b30391"
+    },
+    "crackveil_achievements.cfg": {
+      "exists": true,
+      "bytes": 314,
+      "mtime_ns": 1792651353428872800,
+      "sha256": "d06a94c93f305ddea665c3c2b801eea7e3855e21897b117d80e174225ecceb4b"
+    },
+    "crackveil_audio.cfg": {
+      "exists": true,
+      "bytes": 39,
+      "mtime_ns": 1792660310552289500,
+      "sha256": "85f7988476242e90770871d8ab18152a36707d6aca25f49e60413e6f31384b9c"
+    }
+  },
+  "default_hash_differences": [],
+  "native_outer_boundary": "per-child APPDATA/LOCALAPPDATA plus CV_QA_PROFILE selected in autoload ready before loads; no machine/shell global environment changed",
+  "web_boundary": "fresh Playwright browser context for every case; no existing browser profile",
+  "early_unit_files": "four explicitly named qa_content_r3_unit_* saves created by our early unit runs in real userdata, removed by scoped cleanup; original six default names preserved",
+  "game_transactions": "real reads, writes, migration, journals and retries remain enabled under QA isolation"
+}

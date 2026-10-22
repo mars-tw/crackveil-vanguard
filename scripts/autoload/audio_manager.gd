@@ -4,6 +4,7 @@ signal settings_changed
 signal audio_unlocked
 
 const SAVE_PATH := "user://crackveil_audio.cfg"
+var save_path:=SAVE_PATH
 const BUS_NAME := "Master"
 const PLAYER_POOL_SIZE := 12
 # R42：戰鬥背景音樂（本機 ACE-Step 原創生成，來源見 CREDITS.md）。
@@ -79,6 +80,7 @@ var music_target_db: float = -80.0
 
 
 func _ready() -> void:
+	save_path=preload("res://scripts/services/qa_profile.gd").path(SAVE_PATH)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_load_settings()
 	audio_runtime_enabled = not _is_headless_runtime()
@@ -416,7 +418,7 @@ func _apply_bus_settings() -> void:
 
 func _load_settings() -> void:
 	var config := ConfigFile.new()
-	if config.load(SAVE_PATH) != OK:
+	if config.load(save_path) != OK:
 		return
 	master_volume = clamp(float(config.get_value("audio", "master_volume", master_volume)), 0.0, 1.0)
 	muted = bool(config.get_value("audio", "muted", muted))
@@ -426,7 +428,7 @@ func _save_settings() -> void:
 	var config := ConfigFile.new()
 	config.set_value("audio", "master_volume", master_volume)
 	config.set_value("audio", "muted", muted)
-	var error := config.save(SAVE_PATH)
+	var error := config.save(save_path)
 	if error != OK:
 		printerr("AUDIO_SETTINGS_SAVE_FAIL: %s" % error)
 		if GameManager != null and GameManager.has_method("queue_toast"):

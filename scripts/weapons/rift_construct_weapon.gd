@@ -176,6 +176,7 @@ func _construct_stats() -> Dictionary:
 	var anchor_level := int(stats.get("construct_anchor_level", 0))
 	stats["damage"] = data_float("damage", 7.0) * GameManager.get_outgoing_damage_multiplier(owner_player) * (0.85 if anchor_level >= 2 else 1.0)
 	stats["effect_lifetime"] = data_float("effect_lifetime", 5.5) + (1.2 if anchor_level >= 1 else 0.0)
+	if GameManager.active_starting_node=="bond_construct" and squad_has_bond("bond_captain_shepherd"): stats["effect_lifetime"]*=1.4
 	stats["area_radius"] = data_float("area_radius", 54.0) + (8.0 if anchor_level >= 1 else 0.0)
 	stats["source_weapon_id"] = get_weapon_id()
 	return stats
@@ -188,6 +189,7 @@ func _owner_active_cap(stats: Dictionary) -> int:
 	var squad := GameManager.squad_manager
 	if squad != null and is_instance_valid(squad) and squad.has_method("has_active_bond") and squad.has_active_bond("bond_captain_shepherd"):
 		cap += 1
+	if GameManager.active_starting_node=="crew_shepherd": cap=mini(cap,2)
 	return mini(cap, int(stats.get("hard_cap_global", 6)))
 
 

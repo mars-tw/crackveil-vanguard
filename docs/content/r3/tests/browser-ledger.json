@@ -1,0 +1,417 @@
+[
+  {
+    "mode": "milestone",
+    "exit_code": 0,
+    "log_sha256": "8933b96c6ca4c7ff643ccbf1601b89859ff5698e80c76c9725a5f0d3a137e55e",
+    "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+    "builds": {
+      "release": {
+        "pack_sha256": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+        "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+        "root_headers_unchanged": true,
+        "release_entry_restored": true,
+        "isolated_header_entry": "official MainMenu",
+        "command": [
+          "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+          "--headless",
+          "--audio-driver",
+          "Dummy",
+          "--path",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\export-project",
+          "--export-release",
+          "Web",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\export\\content-r3\\release\\index.html"
+        ],
+        "files": {
+          "index-421cbe9ec5e7.pck": "421cbe9ec5e7dc2ecc55b14368316bf1b5ba2d0df24b0e6de5e2f47e3d34d9a1",
+          "index-7b3925f1be66.pck": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+          "index-bb577435be4d.pck": "bb577435be4de3ad79612e08b302eefbfaab453a4b5c814b6550a457ebf1660c",
+          "index.144x144.png": "f1db9012802727dd4746e5b6bbff92f87a6af63d9a5134d8793538fef80eb556",
+          "index.180x180.png": "93a372b2de01443185b2348f2f1eb95156c79c6a5332e2e153a676a356aec668",
+          "index.512x512.png": "b9328b3d54bbae85488812b9c98ed50b317112e7e6505d18db4b500c885c1e59",
+          "index.audio.position.worklet.js": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+          "index.audio.worklet.js": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+          "index.html": "7551871a7fe6a7297c5c4b8a2a89599a9ffdfbcf714e46e2005d86a7ec264918",
+          "index.js": "68586d6daafc93c6e697b3fb258976874aa7459b8931165ebb1dc3c9614cc42c",
+          "index.manifest.json": "1ce1d089c89c29cc294ff28d7e87a238654ef3010c25df31cde5746b49139044",
+          "index.offline.html": "dd6eaa279aae4b3a5aa7f9e092c6f1750c747979987ef6f7e7e10e4f37148482",
+          "index.pck": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+          "index.png": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+          "index.service.worker.js": "425163ba51019fc8d2bc4b06c3bec1d1933a1be2cd52d7e1c5b145a278fef018",
+          "index.wasm": "7eda98958eb09135a1acb54a4323a00b1a55af1997f15fa1cdc2b93e3df46656",
+          "r33-web-focal.png": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd"
+        }
+      },
+      "review": {
+        "pack_sha256": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+        "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+        "root_headers_unchanged": true,
+        "release_entry_restored": true,
+        "isolated_header_entry": "review fixture",
+        "command": [
+          "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+          "--headless",
+          "--audio-driver",
+          "Dummy",
+          "--path",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\export-project",
+          "--export-debug",
+          "Web",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\export\\content-r3\\review\\index.html"
+        ],
+        "files": {
+          "index-23991315a4d1.pck": "23991315a4d10148f37e13c033cfcd35448874d784ab4aeee9492caba4b41f70",
+          "index-2d4e9383fa4b.pck": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+          "index-b82001369404.pck": "b8200136940457c26b4daf4f1a85c0164fb6b601ef7fe944f7417844db2b2556",
+          "index-c2bb598d0e15.pck": "c2bb598d0e15095197d3598aa6ee43a442a9ad8614f078e9cd33c4fcf595cc68",
+          "index.144x144.png": "f1db9012802727dd4746e5b6bbff92f87a6af63d9a5134d8793538fef80eb556",
+          "index.180x180.png": "93a372b2de01443185b2348f2f1eb95156c79c6a5332e2e153a676a356aec668",
+          "index.512x512.png": "b9328b3d54bbae85488812b9c98ed50b317112e7e6505d18db4b500c885c1e59",
+          "index.audio.position.worklet.js": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+          "index.audio.worklet.js": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+          "index.html": "eeacc32cc6ce4f9d360087db9973441383107c49ef6bc92e3ab8158547815d86",
+          "index.js": "ffc3898b59fba6f5af0c02f76e5ee526cc061e65c7d2d6f4f98186876cea15c4",
+          "index.manifest.json": "1ce1d089c89c29cc294ff28d7e87a238654ef3010c25df31cde5746b49139044",
+          "index.offline.html": "dd6eaa279aae4b3a5aa7f9e092c6f1750c747979987ef6f7e7e10e4f37148482",
+          "index.pck": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+          "index.png": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+          "index.service.worker.js": "38536d4c32d85a0024536282fc3162eb634addc98fb15f0db8cf40588421e8da",
+          "index.wasm": "a7f772811c728a540ff559a91742ef025f9dc6de1947a09dd9f5cf8c93bf85c7",
+          "r33-web-focal.png": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd"
+        }
+      }
+    }
+  },
+  {
+    "mode": "controls",
+    "exit_code": 0,
+    "log_sha256": "20832b821e4ac85297184600ef533ecee89d17028249598b1bb5449220c36c70",
+    "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+    "builds": {
+      "release": {
+        "pack_sha256": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+        "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+        "root_headers_unchanged": true,
+        "release_entry_restored": true,
+        "isolated_header_entry": "official MainMenu",
+        "command": [
+          "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+          "--headless",
+          "--audio-driver",
+          "Dummy",
+          "--path",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\export-project",
+          "--export-release",
+          "Web",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\export\\content-r3\\release\\index.html"
+        ],
+        "files": {
+          "index-421cbe9ec5e7.pck": "421cbe9ec5e7dc2ecc55b14368316bf1b5ba2d0df24b0e6de5e2f47e3d34d9a1",
+          "index-7b3925f1be66.pck": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+          "index-bb577435be4d.pck": "bb577435be4de3ad79612e08b302eefbfaab453a4b5c814b6550a457ebf1660c",
+          "index.144x144.png": "f1db9012802727dd4746e5b6bbff92f87a6af63d9a5134d8793538fef80eb556",
+          "index.180x180.png": "93a372b2de01443185b2348f2f1eb95156c79c6a5332e2e153a676a356aec668",
+          "index.512x512.png": "b9328b3d54bbae85488812b9c98ed50b317112e7e6505d18db4b500c885c1e59",
+          "index.audio.position.worklet.js": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+          "index.audio.worklet.js": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+          "index.html": "7551871a7fe6a7297c5c4b8a2a89599a9ffdfbcf714e46e2005d86a7ec264918",
+          "index.js": "68586d6daafc93c6e697b3fb258976874aa7459b8931165ebb1dc3c9614cc42c",
+          "index.manifest.json": "1ce1d089c89c29cc294ff28d7e87a238654ef3010c25df31cde5746b49139044",
+          "index.offline.html": "dd6eaa279aae4b3a5aa7f9e092c6f1750c747979987ef6f7e7e10e4f37148482",
+          "index.pck": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+          "index.png": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+          "index.service.worker.js": "425163ba51019fc8d2bc4b06c3bec1d1933a1be2cd52d7e1c5b145a278fef018",
+          "index.wasm": "7eda98958eb09135a1acb54a4323a00b1a55af1997f15fa1cdc2b93e3df46656",
+          "r33-web-focal.png": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd"
+        }
+      },
+      "review": {
+        "pack_sha256": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+        "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+        "root_headers_unchanged": true,
+        "release_entry_restored": true,
+        "isolated_header_entry": "review fixture",
+        "command": [
+          "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+          "--headless",
+          "--audio-driver",
+          "Dummy",
+          "--path",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\export-project",
+          "--export-debug",
+          "Web",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\export\\content-r3\\review\\index.html"
+        ],
+        "files": {
+          "index-23991315a4d1.pck": "23991315a4d10148f37e13c033cfcd35448874d784ab4aeee9492caba4b41f70",
+          "index-2d4e9383fa4b.pck": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+          "index-b82001369404.pck": "b8200136940457c26b4daf4f1a85c0164fb6b601ef7fe944f7417844db2b2556",
+          "index-c2bb598d0e15.pck": "c2bb598d0e15095197d3598aa6ee43a442a9ad8614f078e9cd33c4fcf595cc68",
+          "index.144x144.png": "f1db9012802727dd4746e5b6bbff92f87a6af63d9a5134d8793538fef80eb556",
+          "index.180x180.png": "93a372b2de01443185b2348f2f1eb95156c79c6a5332e2e153a676a356aec668",
+          "index.512x512.png": "b9328b3d54bbae85488812b9c98ed50b317112e7e6505d18db4b500c885c1e59",
+          "index.audio.position.worklet.js": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+          "index.audio.worklet.js": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+          "index.html": "eeacc32cc6ce4f9d360087db9973441383107c49ef6bc92e3ab8158547815d86",
+          "index.js": "ffc3898b59fba6f5af0c02f76e5ee526cc061e65c7d2d6f4f98186876cea15c4",
+          "index.manifest.json": "1ce1d089c89c29cc294ff28d7e87a238654ef3010c25df31cde5746b49139044",
+          "index.offline.html": "dd6eaa279aae4b3a5aa7f9e092c6f1750c747979987ef6f7e7e10e4f37148482",
+          "index.pck": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+          "index.png": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+          "index.service.worker.js": "38536d4c32d85a0024536282fc3162eb634addc98fb15f0db8cf40588421e8da",
+          "index.wasm": "a7f772811c728a540ff559a91742ef025f9dc6de1947a09dd9f5cf8c93bf85c7",
+          "r33-web-focal.png": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd"
+        }
+      }
+    }
+  },
+  {
+    "mode": "preparation",
+    "exit_code": 0,
+    "log_sha256": "8a8d6d0bb1f4f68a8c6cff083ccc3906d7301e2727fe541dc28ca0ebe391452f",
+    "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+    "builds": {
+      "release": {
+        "pack_sha256": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+        "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+        "root_headers_unchanged": true,
+        "release_entry_restored": true,
+        "isolated_header_entry": "official MainMenu",
+        "command": [
+          "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+          "--headless",
+          "--audio-driver",
+          "Dummy",
+          "--path",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\export-project",
+          "--export-release",
+          "Web",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\export\\content-r3\\release\\index.html"
+        ],
+        "files": {
+          "index-421cbe9ec5e7.pck": "421cbe9ec5e7dc2ecc55b14368316bf1b5ba2d0df24b0e6de5e2f47e3d34d9a1",
+          "index-7b3925f1be66.pck": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+          "index-bb577435be4d.pck": "bb577435be4de3ad79612e08b302eefbfaab453a4b5c814b6550a457ebf1660c",
+          "index.144x144.png": "f1db9012802727dd4746e5b6bbff92f87a6af63d9a5134d8793538fef80eb556",
+          "index.180x180.png": "93a372b2de01443185b2348f2f1eb95156c79c6a5332e2e153a676a356aec668",
+          "index.512x512.png": "b9328b3d54bbae85488812b9c98ed50b317112e7e6505d18db4b500c885c1e59",
+          "index.audio.position.worklet.js": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+          "index.audio.worklet.js": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+          "index.html": "7551871a7fe6a7297c5c4b8a2a89599a9ffdfbcf714e46e2005d86a7ec264918",
+          "index.js": "68586d6daafc93c6e697b3fb258976874aa7459b8931165ebb1dc3c9614cc42c",
+          "index.manifest.json": "1ce1d089c89c29cc294ff28d7e87a238654ef3010c25df31cde5746b49139044",
+          "index.offline.html": "dd6eaa279aae4b3a5aa7f9e092c6f1750c747979987ef6f7e7e10e4f37148482",
+          "index.pck": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+          "index.png": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+          "index.service.worker.js": "425163ba51019fc8d2bc4b06c3bec1d1933a1be2cd52d7e1c5b145a278fef018",
+          "index.wasm": "7eda98958eb09135a1acb54a4323a00b1a55af1997f15fa1cdc2b93e3df46656",
+          "r33-web-focal.png": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd"
+        }
+      },
+      "review": {
+        "pack_sha256": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+        "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+        "root_headers_unchanged": true,
+        "release_entry_restored": true,
+        "isolated_header_entry": "review fixture",
+        "command": [
+          "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+          "--headless",
+          "--audio-driver",
+          "Dummy",
+          "--path",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\export-project",
+          "--export-debug",
+          "Web",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\export\\content-r3\\review\\index.html"
+        ],
+        "files": {
+          "index-23991315a4d1.pck": "23991315a4d10148f37e13c033cfcd35448874d784ab4aeee9492caba4b41f70",
+          "index-2d4e9383fa4b.pck": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+          "index-b82001369404.pck": "b8200136940457c26b4daf4f1a85c0164fb6b601ef7fe944f7417844db2b2556",
+          "index-c2bb598d0e15.pck": "c2bb598d0e15095197d3598aa6ee43a442a9ad8614f078e9cd33c4fcf595cc68",
+          "index.144x144.png": "f1db9012802727dd4746e5b6bbff92f87a6af63d9a5134d8793538fef80eb556",
+          "index.180x180.png": "93a372b2de01443185b2348f2f1eb95156c79c6a5332e2e153a676a356aec668",
+          "index.512x512.png": "b9328b3d54bbae85488812b9c98ed50b317112e7e6505d18db4b500c885c1e59",
+          "index.audio.position.worklet.js": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+          "index.audio.worklet.js": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+          "index.html": "eeacc32cc6ce4f9d360087db9973441383107c49ef6bc92e3ab8158547815d86",
+          "index.js": "ffc3898b59fba6f5af0c02f76e5ee526cc061e65c7d2d6f4f98186876cea15c4",
+          "index.manifest.json": "1ce1d089c89c29cc294ff28d7e87a238654ef3010c25df31cde5746b49139044",
+          "index.offline.html": "dd6eaa279aae4b3a5aa7f9e092c6f1750c747979987ef6f7e7e10e4f37148482",
+          "index.pck": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+          "index.png": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+          "index.service.worker.js": "38536d4c32d85a0024536282fc3162eb634addc98fb15f0db8cf40588421e8da",
+          "index.wasm": "a7f772811c728a540ff559a91742ef025f9dc6de1947a09dd9f5cf8c93bf85c7",
+          "r33-web-focal.png": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd"
+        }
+      }
+    }
+  },
+  {
+    "mode": "escort",
+    "exit_code": 0,
+    "log_sha256": "0bfe68f95d43f2d860efc2a2e074cda22530b26247e4f40715229296a04306a0",
+    "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+    "builds": {
+      "release": {
+        "pack_sha256": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+        "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+        "root_headers_unchanged": true,
+        "release_entry_restored": true,
+        "isolated_header_entry": "official MainMenu",
+        "command": [
+          "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+          "--headless",
+          "--audio-driver",
+          "Dummy",
+          "--path",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\export-project",
+          "--export-release",
+          "Web",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\export\\content-r3\\release\\index.html"
+        ],
+        "files": {
+          "index-421cbe9ec5e7.pck": "421cbe9ec5e7dc2ecc55b14368316bf1b5ba2d0df24b0e6de5e2f47e3d34d9a1",
+          "index-7b3925f1be66.pck": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+          "index-bb577435be4d.pck": "bb577435be4de3ad79612e08b302eefbfaab453a4b5c814b6550a457ebf1660c",
+          "index.144x144.png": "f1db9012802727dd4746e5b6bbff92f87a6af63d9a5134d8793538fef80eb556",
+          "index.180x180.png": "93a372b2de01443185b2348f2f1eb95156c79c6a5332e2e153a676a356aec668",
+          "index.512x512.png": "b9328b3d54bbae85488812b9c98ed50b317112e7e6505d18db4b500c885c1e59",
+          "index.audio.position.worklet.js": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+          "index.audio.worklet.js": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+          "index.html": "7551871a7fe6a7297c5c4b8a2a89599a9ffdfbcf714e46e2005d86a7ec264918",
+          "index.js": "68586d6daafc93c6e697b3fb258976874aa7459b8931165ebb1dc3c9614cc42c",
+          "index.manifest.json": "1ce1d089c89c29cc294ff28d7e87a238654ef3010c25df31cde5746b49139044",
+          "index.offline.html": "dd6eaa279aae4b3a5aa7f9e092c6f1750c747979987ef6f7e7e10e4f37148482",
+          "index.pck": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+          "index.png": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+          "index.service.worker.js": "425163ba51019fc8d2bc4b06c3bec1d1933a1be2cd52d7e1c5b145a278fef018",
+          "index.wasm": "7eda98958eb09135a1acb54a4323a00b1a55af1997f15fa1cdc2b93e3df46656",
+          "r33-web-focal.png": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd"
+        }
+      },
+      "review": {
+        "pack_sha256": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+        "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+        "root_headers_unchanged": true,
+        "release_entry_restored": true,
+        "isolated_header_entry": "review fixture",
+        "command": [
+          "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+          "--headless",
+          "--audio-driver",
+          "Dummy",
+          "--path",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\export-project",
+          "--export-debug",
+          "Web",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\export\\content-r3\\review\\index.html"
+        ],
+        "files": {
+          "index-23991315a4d1.pck": "23991315a4d10148f37e13c033cfcd35448874d784ab4aeee9492caba4b41f70",
+          "index-2d4e9383fa4b.pck": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+          "index-b82001369404.pck": "b8200136940457c26b4daf4f1a85c0164fb6b601ef7fe944f7417844db2b2556",
+          "index-c2bb598d0e15.pck": "c2bb598d0e15095197d3598aa6ee43a442a9ad8614f078e9cd33c4fcf595cc68",
+          "index.144x144.png": "f1db9012802727dd4746e5b6bbff92f87a6af63d9a5134d8793538fef80eb556",
+          "index.180x180.png": "93a372b2de01443185b2348f2f1eb95156c79c6a5332e2e153a676a356aec668",
+          "index.512x512.png": "b9328b3d54bbae85488812b9c98ed50b317112e7e6505d18db4b500c885c1e59",
+          "index.audio.position.worklet.js": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+          "index.audio.worklet.js": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+          "index.html": "eeacc32cc6ce4f9d360087db9973441383107c49ef6bc92e3ab8158547815d86",
+          "index.js": "ffc3898b59fba6f5af0c02f76e5ee526cc061e65c7d2d6f4f98186876cea15c4",
+          "index.manifest.json": "1ce1d089c89c29cc294ff28d7e87a238654ef3010c25df31cde5746b49139044",
+          "index.offline.html": "dd6eaa279aae4b3a5aa7f9e092c6f1750c747979987ef6f7e7e10e4f37148482",
+          "index.pck": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+          "index.png": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+          "index.service.worker.js": "38536d4c32d85a0024536282fc3162eb634addc98fb15f0db8cf40588421e8da",
+          "index.wasm": "a7f772811c728a540ff559a91742ef025f9dc6de1947a09dd9f5cf8c93bf85c7",
+          "r33-web-focal.png": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd"
+        }
+      }
+    }
+  },
+  {
+    "mode": "assault",
+    "exit_code": 0,
+    "log_sha256": "7fa392bab4b7b61a49ebb2b250c7c0a40d5248d596bc30bdd0c99a15e2b9ee10",
+    "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+    "builds": {
+      "release": {
+        "pack_sha256": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+        "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+        "root_headers_unchanged": true,
+        "release_entry_restored": true,
+        "isolated_header_entry": "official MainMenu",
+        "command": [
+          "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+          "--headless",
+          "--audio-driver",
+          "Dummy",
+          "--path",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\export-project",
+          "--export-release",
+          "Web",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\export\\content-r3\\release\\index.html"
+        ],
+        "files": {
+          "index-421cbe9ec5e7.pck": "421cbe9ec5e7dc2ecc55b14368316bf1b5ba2d0df24b0e6de5e2f47e3d34d9a1",
+          "index-7b3925f1be66.pck": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+          "index-bb577435be4d.pck": "bb577435be4de3ad79612e08b302eefbfaab453a4b5c814b6550a457ebf1660c",
+          "index.144x144.png": "f1db9012802727dd4746e5b6bbff92f87a6af63d9a5134d8793538fef80eb556",
+          "index.180x180.png": "93a372b2de01443185b2348f2f1eb95156c79c6a5332e2e153a676a356aec668",
+          "index.512x512.png": "b9328b3d54bbae85488812b9c98ed50b317112e7e6505d18db4b500c885c1e59",
+          "index.audio.position.worklet.js": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+          "index.audio.worklet.js": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+          "index.html": "7551871a7fe6a7297c5c4b8a2a89599a9ffdfbcf714e46e2005d86a7ec264918",
+          "index.js": "68586d6daafc93c6e697b3fb258976874aa7459b8931165ebb1dc3c9614cc42c",
+          "index.manifest.json": "1ce1d089c89c29cc294ff28d7e87a238654ef3010c25df31cde5746b49139044",
+          "index.offline.html": "dd6eaa279aae4b3a5aa7f9e092c6f1750c747979987ef6f7e7e10e4f37148482",
+          "index.pck": "7b3925f1be664da7c05af06b6366b2e7369fd6c3f6094d72c3d5736f0cf07ed5",
+          "index.png": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+          "index.service.worker.js": "425163ba51019fc8d2bc4b06c3bec1d1933a1be2cd52d7e1c5b145a278fef018",
+          "index.wasm": "7eda98958eb09135a1acb54a4323a00b1a55af1997f15fa1cdc2b93e3df46656",
+          "r33-web-focal.png": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd"
+        }
+      },
+      "review": {
+        "pack_sha256": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+        "source_manifest_sha256": "71815b15478526c9b264637bbeb50c6de2c2995d765b6211c840505e7289ba25",
+        "root_headers_unchanged": true,
+        "release_entry_restored": true,
+        "isolated_header_entry": "review fixture",
+        "command": [
+          "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+          "--headless",
+          "--audio-driver",
+          "Dummy",
+          "--path",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r3\\export-project",
+          "--export-debug",
+          "Web",
+          "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\export\\content-r3\\review\\index.html"
+        ],
+        "files": {
+          "index-23991315a4d1.pck": "23991315a4d10148f37e13c033cfcd35448874d784ab4aeee9492caba4b41f70",
+          "index-2d4e9383fa4b.pck": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+          "index-b82001369404.pck": "b8200136940457c26b4daf4f1a85c0164fb6b601ef7fe944f7417844db2b2556",
+          "index-c2bb598d0e15.pck": "c2bb598d0e15095197d3598aa6ee43a442a9ad8614f078e9cd33c4fcf595cc68",
+          "index.144x144.png": "f1db9012802727dd4746e5b6bbff92f87a6af63d9a5134d8793538fef80eb556",
+          "index.180x180.png": "93a372b2de01443185b2348f2f1eb95156c79c6a5332e2e153a676a356aec668",
+          "index.512x512.png": "b9328b3d54bbae85488812b9c98ed50b317112e7e6505d18db4b500c885c1e59",
+          "index.audio.position.worklet.js": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+          "index.audio.worklet.js": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+          "index.html": "eeacc32cc6ce4f9d360087db9973441383107c49ef6bc92e3ab8158547815d86",
+          "index.js": "ffc3898b59fba6f5af0c02f76e5ee526cc061e65c7d2d6f4f98186876cea15c4",
+          "index.manifest.json": "1ce1d089c89c29cc294ff28d7e87a238654ef3010c25df31cde5746b49139044",
+          "index.offline.html": "dd6eaa279aae4b3a5aa7f9e092c6f1750c747979987ef6f7e7e10e4f37148482",
+          "index.pck": "2d4e9383fa4be6357d4e0c15799256f3da756b27c8f76dc608fc333b22d32cb5",
+          "index.png": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+          "index.service.worker.js": "38536d4c32d85a0024536282fc3162eb634addc98fb15f0db8cf40588421e8da",
+          "index.wasm": "a7f772811c728a540ff559a91742ef025f9dc6de1947a09dd9f5cf8c93bf85c7",
+          "r33-web-focal.png": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd"
+        }
+      }
+    }
+  }
+]

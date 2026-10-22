@@ -15,7 +15,11 @@ func _process(delta: float) -> void:
 		detonation_position = target.global_position
 
 	var effect_stats := _effect_stats_for_fire()
-	EntityFactory.spawn_explosion(detonation_position, effect_stats, owner_player)
+	if GameManager.active_starting_node=="bond_relay" and squad_has_bond("bond_ember_pulse"):
+		GameManager.starting_benefits.relay_blasts+=1
+		EntityFactory.spawn_delayed_explosion(detonation_position,effect_stats,owner_player,0.45)
+	else:
+		EntityFactory.spawn_explosion(detonation_position, effect_stats, owner_player)
 	if int(effect_stats.get("pulse_embers_level", 0)) > 0 or int(effect_stats.get("evo_ember_well_level", 0)) > 0:
 		EntityFactory.spawn_hazard_zone(detonation_position, _make_ember_stats(effect_stats), owner_player)
 	if int(effect_stats.get("evo_ember_well_level", 0)) > 0:
@@ -36,6 +40,7 @@ func _effect_stats_for_fire() -> Dictionary:
 	stats["damage"] = float(stats.get("damage", data_float("damage", 18.0))) * GameManager.get_outgoing_damage_multiplier(owner_player)
 	if str(owner_player.get("hero_id")) == "pulse_artificer" and squad_has_bond("bond_ember_pulse"):
 		stats["area_radius"] = float(stats.get("area_radius", data_float("area_radius", 82.0))) * 1.08
+		if GameManager.active_starting_node=="bond_relay": stats["area_radius"]*=1.25
 	return stats
 
 

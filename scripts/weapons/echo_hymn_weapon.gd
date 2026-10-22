@@ -12,10 +12,11 @@ func _process(delta: float) -> void:
 		return
 
 	_cast_hymn()
-	cooldown_timer = scaled_cooldown(data_float("cooldown", 1.0))
+	cooldown_timer = scaled_cooldown(data_float("cooldown", 1.0)) * (0.75 if GameManager.active_starting_node=="crew_singer" else 1.0)
 
 
 func _cast_hymn() -> void:
+	if GameManager.active_starting_node=="crew_singer": GameManager.starting_benefits.hymn_casts+=1
 	var stats := data_effect_stats().duplicate(true)
 	var crescendo_level := int(stats.get("echo_crescendo_level", 0))
 	var evolved := int(stats.get("evo_resonant_chorus_level", 0)) > 0
@@ -28,7 +29,13 @@ func _cast_hymn() -> void:
 	var aura_duration: float = 2.2 + float(crescendo_level) * 0.45 + float(pulse_level) * 0.22 + (1.1 if evolved else 0.0)
 
 	if GameManager.squad_manager != null and is_instance_valid(GameManager.squad_manager) and GameManager.squad_manager.has_method("heal_members"):
-		GameManager.squad_manager.heal_members(heal_amount)
+		var restored := 0.0
+		for member in GameManager.squad_manager.get_members():
+			if GameManager.active_starting_node=="bond_harmony" and member.global_position.distance_to(GameManager.player.global_position)>96: continue
+			var before: float=member.current_hp
+			member.heal(heal_amount)
+			restored+=maxf(0,member.current_hp-before)
+		GameManager.record_support(str(owner_player.get("hero_id")),restored,0)
 	GameManager.temporary_squad_damage_timer = max(float(GameManager.get("temporary_squad_damage_timer")), aura_duration)
 
 	_damage_nearby_enemies(radius, stats, evolved)

@@ -101,6 +101,7 @@ func show_summary(summary: Dictionary) -> void:
 	summary_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	summary_tween.tween_method(_update_summary_count, 0.0, 1.0, 0.9)
 	root.visible = true
+	if GameManager.active_starting_node!="" or GameManager.active_starting_team!="legacy": main_menu_button.text="免費選擇・下局整備" if MetaProgress.starting_vouchers>0 else "下局整備"
 
 
 func _update_summary_count(progress_ratio: float) -> void:
@@ -109,6 +110,7 @@ func _update_summary_count(progress_ratio: float) -> void:
 	summary_label.text = "擊破%s｜%s｜擊殺 %d\n封隙 3/3・殘響 +%d\n%s" % [
 		str(summary.get("boss_name","守門者")),GameManager.format_time(float(summary.get("elapsed_time",0))),
 		int(summary.get("kills",0)),int(summary.get("echo_shards_earned",0)),str(summary.get("contribution_text",GameManager.contribution_text()))]
+	if str(summary.get("starting_build_text","")).strip_edges()!="": summary_label.text+="\n"+str(summary.starting_build_text)
 
 
 
@@ -119,6 +121,12 @@ func _on_continue_pressed() -> void:
 
 func _on_main_menu_pressed() -> void:
 	root.visible = false
+	if GameManager.active_starting_node!="" or GameManager.active_starting_team!="legacy":
+		GameManager.game_running=false
+		GameManager.open_preparation_on_menu=true
+		get_tree().paused=false
+		get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
+		return
 	main_menu_requested.emit()
 
 

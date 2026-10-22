@@ -204,6 +204,18 @@ var next_shop_time: float = SHOP_FIRST_TIME
 var shop_schedule_index: int = 0
 var shop_refresh_count: int = 0
 var forced_run_seed: int = 0
+const STARTING_BUILD := preload("res://scripts/services/starting_build_catalog.gd")
+var pending_starting_formal := false
+var pending_starting_team := "legacy"
+var pending_starting_node := ""
+var active_starting_formal := false
+var active_starting_team := "legacy"
+var active_starting_node := ""
+var starting_run_id := ""
+var starting_step_timer := 0.0
+var starting_benefits: Dictionary = {}
+var open_preparation_on_menu := false
+var pending_starting_settlements: Dictionary = {}
 var current_run_seed: int = 0
 var current_run_theme_id: String = ""
 var current_run_theme_name: String = ""
@@ -245,6 +257,7 @@ const META_PICKUP_APPLIED_KEY := "_cv_meta_pickup_bonus_applied"
 
 
 func _ready() -> void:
+	campaign_save_path=preload("res://scripts/services/qa_profile.gd").path(campaign_save_path)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	var campaign := ConfigFile.new()
 	if campaign.load(campaign_save_path) == OK:
@@ -265,6 +278,7 @@ func select_stage(stage_id: String) -> bool:
 
 
 func start_selected_stage(mode: String = "campaign") -> void:
+	prepare_starting_build()
 	run_mode = "endless" if mode == "endless" else "campaign"
 	tactical_launch = false
 	game_running = false
@@ -320,6 +334,14 @@ func return_to_world_map() -> void:
 
 
 func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null, reset_player: bool = true) -> void:
+	active_starting_formal = pending_starting_formal
+	active_starting_team = pending_starting_team if pending_starting_formal else "legacy"
+	active_starting_node = pending_starting_node if pending_starting_formal else ""
+	pending_starting_formal=false
+	pending_starting_node=""
+	starting_run_id="%d-%d-%d" % [int(Time.get_unix_time_from_system()*1000000),Time.get_ticks_usec(),run_token+1]
+	starting_step_timer=0
+	starting_benefits={"healing":0.0,"shield_damage":0.0,"moving_hits":0,"counter_hits":0,"healing_forgone":0.0,"alternative_hold":0.0,"hymn_casts":0,"relay_blasts":0,"step_seconds":0.0}
 	tactical_director = null
 	clear_time_scale_owners()
 	arena = new_arena
@@ -403,6 +425,8 @@ func _process(delta: float) -> void:
 		if wallet_timer >= 2.0 or not game_running:
 			_save_campaign()
 	if game_running and not get_tree().paused:
+		if active_starting_node=="spec_step" and starting_step_timer>0 and is_instance_valid(player) and player.velocity.length()>10: starting_benefits.step_seconds+=minf(delta,starting_step_timer)
+		starting_step_timer=maxf(0,starting_step_timer-delta)
 		elapsed_time += delta
 		critical_feedback_timer = maxf(0.0, critical_feedback_timer - delta)
 		if temporary_squad_damage_timer > 0.0:
@@ -1275,6 +1299,14 @@ func get_outgoing_damage_multiplier(source: Node = null) -> float:
 			multiplier *= float(contract_modifiers.get("leader_damage_multiplier", 1.0))
 		else:
 			multiplier *= float(contract_modifiers.get("member_damage_multiplier", 1.0))
+	if active_starting_node=="crew_singer": multiplier*=0.9
+	if active_starting_node=="bond_rail" and is_instance_valid(squad_manager) and squad_manager.has_active_bond("bond_void_rail"):
+		multiplier*=1.12 if is_instance_valid(player) and player.velocity.length()>10 else 0.85
+	return multiplier
+
+func get_melee_damage_multiplier(source: Node) -> float:
+	var multiplier := get_outgoing_damage_multiplier(source)
+	if active_starting_node=="spec_collect" and is_instance_valid(source) and source.get("hero_id")=="rift_captain": multiplier*=0.8
 	return multiplier
 
 
@@ -1309,6 +1341,10 @@ func get_incoming_damage_multiplier(target: Node = null, include_guard_bond: boo
 		var construct_count := mini(4, EntityFactory.get_rift_construct_count_for_owner(target))
 		reduction_multiplier *= 1.0 - float(construct_count) * 0.02
 	var all_sources_multiplier := float(contract_modifiers.get("incoming_damage_multiplier", 1.0)) * reduction_multiplier
+	if active_starting_node=="crew_scout": all_sources_multiplier*=1.1
+	if active_starting_node=="spec_shield" and run_mode=="campaign" and is_instance_valid(tactical_director) and is_instance_valid(tactical_director.relay):
+		var pressure: Node=tactical_director.relay.pressure
+		if is_instance_valid(pressure) and pressure.kind=="pincer" and pressure.enabled and pressure.started and pressure.phase in ["warning","active"]: all_sources_multiplier*=1.2
 	return apply_damage_taken_soft_cap(all_sources_multiplier)
 
 
@@ -1326,6 +1362,9 @@ func reset_combat_metrics(enabled: bool = true) -> void:
 
 
 func record_weapon_damage(source: Node, weapon_id: String, amount: float, component_id: String = "", target: Node = null) -> void:
+	if game_running and amount>0:
+		if active_starting_node=="bond_rail" and is_instance_valid(player) and player.velocity.length()>10: starting_benefits.moving_hits+=1
+		if active_starting_node=="spec_prepare" and is_instance_valid(tactical_director) and tactical_director.relay.counter_timer>5: starting_benefits.counter_hits+=1
 	if game_running and amount > 0 and is_instance_valid(source) and source.get("hero_id") != null:
 		var row := contribution_row(str(source.get("hero_id")))
 		var source_name: Variant=source.get("display_name")
@@ -1361,7 +1400,7 @@ func record_weapon_damage(source: Node, weapon_id: String, amount: float, compon
 
 func contribution_row(id: String) -> Dictionary:
 	if not contribution.has(id):
-		contribution[id] = {"damage":0.0,"taken":0.0,"kills":0,"name":id}
+		contribution[id] = {"damage":0.0,"taken":0.0,"kills":0,"healing":0.0,"prevented":0.0,"name":id}
 	return contribution[id]
 
 func record_enemy_hp_damage(amount: float) -> void:
@@ -1381,6 +1420,8 @@ func contribution_text() -> String:
 		var row: Dictionary=contribution[id]
 		if id=="unattributed" and row.kills==0 and row.damage<0.001:continue
 		lines.append("%s　%d／%d／%d" % [row.name,int(row.damage),int(row.kills),int(row.taken)])
+		if float(row.get("healing",0))>0 or float(row.get("prevented",0))>0:
+			lines[-1]+="　回復%d・減傷%d" % [int(row.get("healing",0)),int(row.get("prevented",0))]
 	return "\n".join(lines)
 
 func combo_status_text() -> String:
@@ -1692,6 +1733,9 @@ func _as_float(value: Variant, fallback: float = 0.0) -> float:
 
 func _summary_with_echo(summary: Dictionary) -> Dictionary:
 	var enriched := summary.duplicate(true)
+	if active_starting_formal:
+		enriched["campaign_clear"] = stage_victory_pending and is_instance_valid(tactical_director) and tactical_director.relay.completed
+		enriched["starting_progress_status"]=_record_starting_settlement(starting_run_id,enriched)
 	if is_instance_valid(loot_director):
 		enriched.merge(loot_director.get_stats(), true)
 	var total_eligible: int = 0
@@ -1708,9 +1752,65 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 		enriched["echo_progress"] = MetaProgress.get_progress_summary()
 	enriched["run_seed"] = current_run_seed
 	enriched["contribution_text"] = contribution_text()
+	enriched["starting_build_text"] = starting_build_text()
+	enriched["starting_build"] = {"team":active_starting_team,"node":active_starting_node,"benefits":starting_benefits.duplicate(true),"run_id":starting_run_id,"valid_settlements":MetaProgress.starting_settlements.size(),"vouchers":MetaProgress.starting_vouchers}
 	if AchievementProgress != null and AchievementProgress.has_method("get_run_unlocked_definitions"):
 		enriched["achievement_unlocks"] = AchievementProgress.get_run_unlocked_definitions()
 	return enriched
+
+func prepare_starting_build() -> void:
+	pending_starting_formal=true
+	pending_starting_team=MetaProgress.starting_team
+	pending_starting_node=MetaProgress.starting_equipped if MetaProgress.starting_owned.has(MetaProgress.starting_equipped) else ""
+
+func _record_starting_settlement(id: String, summary: Dictionary) -> String:
+	var state: String=MetaProgress.starting_settlement_status(id,summary,true)
+	if state=="eligible": state="recorded" if MetaProgress.record_starting_settlement(id,summary,true) else "save_failed"
+	if state=="save_failed": pending_starting_settlements[id]=summary.duplicate(true)
+	elif state=="recorded": pending_starting_settlements.erase(id)
+	return state
+
+func retry_starting_settlements() -> bool:
+	if not MetaProgress.starting_ready: MetaProgress.load_progress()
+	for id in pending_starting_settlements.keys():
+		_record_starting_settlement(str(id),pending_starting_settlements[id])
+	return pending_starting_settlements.is_empty()
+
+func record_support(id: String, healing: float, prevented: float) -> void:
+	if not game_running or not is_instance_valid(squad_manager): return
+	for member in squad_manager.get_members():
+		if member.hero_id==id and member.is_alive:
+			var row := contribution_row(id)
+			row["name"]=member.display_name
+			row.healing+=maxf(0,healing)
+			row.prevented+=maxf(0,prevented)
+			return
+
+func starting_build_text() -> String:
+	if not active_starting_formal: return ""
+	var row := STARTING_BUILD.node(active_starting_node)
+	var text := "%s｜%s" % [STARTING_BUILD.TEAMS.get(active_starting_team,STARTING_BUILD.TEAMS.legacy).name,row.get("name","未裝備節點")]
+	if MetaProgress.starting_vouchers>0: text+="\n免費選擇 %d 次，下局整備可換新打法" % MetaProgress.starting_vouchers
+	if not pending_starting_settlements.is_empty(): text+="\n選擇進度尚未保存，回出擊整備可重試"
+	if bool(row.get("campaign_only",false)) and run_mode=="endless": text+="\n無盡：封隙出擊專用，本模式不再觸發"
+	if not starting_benefits.is_empty():
+		match active_starting_node:
+			"crew_singer": text+="\n療唱施放 %d 次；歌者實際回復 %d" % [starting_benefits.hymn_casts,int(contribution_row("echo_singer").healing)]
+			"bond_harmony": text+="\n護圈額外回復 %d" % int(starting_benefits.healing)
+			"spec_shield": text+="\n實際破盾增傷 %d" % int(starting_benefits.shield_damage)
+			"spec_escort","spec_collect": text+="\n替代陣形實際封合 %.1f 秒" % float(starting_benefits.alternative_hold)
+			"spec_step": text+="\n借步實際移動 %.1f 秒" % float(starting_benefits.step_seconds)
+			"spec_prepare": text+="\n延長反擊命中 %d；放棄治療 %d" % [int(starting_benefits.counter_hits),int(starting_benefits.healing_forgone)]
+			"bond_rail": text+="\n機動命中 %d 次" % int(starting_benefits.moving_hits)
+			"bond_relay": text+="\n延後範圍爆炸 %d 次" % int(starting_benefits.relay_blasts)
+			_: text+="\n隊員實際收益見下列傷害／回復／減傷"
+	return text
+
+func get_starting_target_multiplier(target: Node) -> float:
+	if active_starting_node=="spec_shield" and run_mode=="campaign" and is_instance_valid(target) and bool(target.get_meta("seal_guard",false)) and is_instance_valid(squad_manager) and squad_manager.get_formation_id()=="wedge" and is_instance_valid(tactical_director) and is_instance_valid(tactical_director.relay):
+		var pressure: Node=tactical_director.relay.pressure
+		if is_instance_valid(pressure) and pressure.enabled and pressure.started and pressure.kind=="front": return 1.25
+	return 1.0
 
 
 func _summary_for_echo_delta(summary: Dictionary, desired_delta: int) -> Dictionary:
@@ -1762,6 +1862,7 @@ func player_died() -> void:
 		return
 
 	var dead_player := player
+	var captain_truly_dead: bool=is_instance_valid(dead_player) and dead_player.current_hp<=0 and not dead_player.is_alive
 	if run_mode == "endless":
 		var previous: Dictionary = endless_best.get(selected_stage_id, {})
 		endless_best[selected_stage_id] = {"wave": maxi(int(previous.get("wave", 0)), get_endless_wave()), "kills": maxi(int(previous.get("kills", 0)), maxi(0, kills - endless_start_kills)), "seconds": maxf(float(previous.get("seconds", 0.0)), maxf(0.0, elapsed_time - endless_start_time))}
@@ -1800,6 +1901,8 @@ func player_died() -> void:
 		"boss_killed": boss_killed,
 		"contract_name": active_contract_name
 	}
+	summary["settlement_reason"]="defeat"
+	summary["captain_dead"]=captain_truly_dead
 	game_over_requested.emit(_summary_with_echo(summary))
 
 
@@ -1913,6 +2016,7 @@ func try_complete_campaign_victory() -> void:
 		"boss_name": str(STAGE_CATALOG.get_stage(selected_stage_id).get("boss_name", "")),
 		"next_stage_id": STAGE_CATALOG.get_next_stage_id(selected_stage_id)
 	}
+	summary["settlement_reason"]="victory"
 	stage_victory_requested.emit(_summary_with_echo(summary))
 
 
@@ -1921,6 +2025,8 @@ func continue_after_stage_victory() -> void:
 		return
 	stage_victory_pending = false
 	run_mode = "endless"
+	if bool(STARTING_BUILD.node(active_starting_node).get("campaign_only",false)):
+		show_toast("封隙戰術：無盡不再觸發；護送移速代價解除，既有反擊照常到期")
 	endless_start_time = elapsed_time
 	endless_start_kills = kills
 	var spawner := arena.get_node_or_null("EnemySpawner") if is_instance_valid(arena) else null

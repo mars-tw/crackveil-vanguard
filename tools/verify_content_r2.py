@@ -12,6 +12,11 @@ def check(value,message):
 def read(p):return json.loads((OUT/p).read_text(encoding='utf-8'))
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 version=re.search(r'^config/version="([^"]+)"',(ROOT/'project.godot').read_text(encoding='utf-8'),re.M)[1]
+# R3_EXACT_ROUTE_START
+# Exact version only: separate current evidence; all archived assertions remain.
+if version=='0.32.0-content-r3':
+    raise SystemExit(subprocess.run([__import__('sys').executable,str(ROOT/'tools/verify_content_r3.py')],cwd=ROOT).returncode)
+# R3_EXACT_ROUTE_END
 # R2 remains frozen at f384969. The patch has separate source/build/screenshots
 # and a narrower, explicitly reported gate scope; never rewrite R2's receipts.
 if version=='0.31.1-content-r2.1':

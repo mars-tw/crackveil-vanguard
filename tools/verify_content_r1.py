@@ -19,6 +19,11 @@ def read(relative):return json.loads((round_root/relative).read_text(encoding='u
 def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 
 version=re.search(r'^config/version="([^"]+)"',(root/'project.godot').read_text(encoding='utf-8'),re.M).group(1)
+# R3_EXACT_ROUTE_START
+# Exact version only: separate current evidence; all archived assertions remain.
+if version=='0.32.0-content-r3':
+    raise SystemExit(subprocess.run([__import__('sys').executable,str(root/'tools/verify_content_r3.py')],cwd=root).returncode)
+# R3_EXACT_ROUTE_END
 # Keep every frozen R1 assertion below. R2 has new source/build/image hashes
 # and a different encounter contract; the established entry point dispatches
 # that exact version to its stricter current-round verifier rather than rewriting
