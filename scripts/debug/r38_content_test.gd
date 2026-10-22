@@ -215,6 +215,12 @@ func _test_ten_bosses_and_rewards() -> void:
 		if boss == null:
 			return
 		boss.global_position = Vector2.ZERO
+		# This test isolates the authored 12fps frame-2 pattern. R2 separately
+		# tests the added 0.85s encounter telegraph and two recovery cycles.
+		boss.tactical_min_cycles = 0
+		if is_instance_valid(GameManager.tactical_director):
+			GameManager.tactical_director.relay.completed = true
+			GameManager.tactical_director.relay.reward_saved = true
 		boss.set_physics_process(false)
 		hero.global_position = Vector2(240,0)
 		for frame in range(3):

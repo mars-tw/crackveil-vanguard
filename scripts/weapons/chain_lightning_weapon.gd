@@ -42,7 +42,7 @@ func _cast_chain(first_target: Node2D) -> void:
 		has_final_target = true
 		if target.has_method("take_damage"):
 			var applied_damage: float = float(target.take_damage(damage_value, owner_player.global_position))
-			GameManager.record_weapon_damage(owner_player, get_weapon_id(), applied_damage)
+			GameManager.record_weapon_damage(owner_player, get_weapon_id(), applied_damage,"",target)
 		damage_value *= data_float("chain_damage_falloff", 0.86)
 
 	var effect_stats := data_effect_stats()
@@ -108,7 +108,7 @@ func _cast_overload_nova(origin: Vector2, used_ids: Dictionary) -> void:
 			continue
 		if enemy.has_method("take_damage"):
 			var applied_damage: float = float(enemy.take_damage(damage_value, origin))
-			GameManager.record_weapon_damage(owner_player, get_weapon_id(), applied_damage)
+			GameManager.record_weapon_damage(owner_player, get_weapon_id(), applied_damage,"",enemy)
 			arc_points.append(enemy.global_position)
 			hits += 1
 	if arc_points.size() > 1:

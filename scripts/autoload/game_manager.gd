@@ -229,6 +229,8 @@ var combo_last_kill_time: float = -999.0
 var last_combo_pulse_count: int = 0
 var last_combo_milestone_count: int = 0
 var upgrade_entry_token: int = 0
+var contribution: Dictionary = {}
+var bond_benefits := {"healing":0.0,"prevented":0.0,"triggers":0}
 var combat_metrics_enabled: bool = false
 var combat_damage_by_weapon: Dictionary = {}
 var combat_damage_by_component: Dictionary = {}
@@ -366,6 +368,8 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	contract_modifiers.clear()
 	temporary_squad_damage_timer = 0.0
 	combo_fire_rate_timer = 0.0
+	contribution.clear()
+	bond_benefits = {"healing":0.0,"prevented":0.0,"triggers":0}
 	next_elite_bonus_xp = 0
 	echo_shards_awarded_this_run = 0
 	seen_affix_toasts.clear()
@@ -661,10 +665,13 @@ func _emit_pause_changed() -> void:
 	pause_changed.emit(_is_manual_pause_visible())
 
 
-func add_kill(amount: int = 1) -> void:
+func add_kill(amount: int = 1, credit_owner: String = "") -> void:
 	if not game_running:
 		return
 	kills += amount
+	var credit := contribution_row("unattributed" if credit_owner=="" else credit_owner)
+	credit.kills += amount
+	if credit_owner=="":credit["name"]="其他來源"
 	_record_combo_kill(amount)
 	if AchievementProgress != null and AchievementProgress.has_method("record_kills"):
 		AchievementProgress.record_kills(kills)
@@ -1287,14 +1294,14 @@ func get_kill_thump_pitch(base_pitch: float) -> float:
 const DAMAGE_TAKEN_SOFT_CAP_MIN := 0.85
 
 
-func get_incoming_damage_multiplier(target: Node = null) -> float:
+func get_incoming_damage_multiplier(target: Node = null, include_guard_bond: bool = true) -> float:
 	var reduction_multiplier := 1.0
 	if is_instance_valid(squad_manager) and squad_manager.has_method("get_spatial_cover_multiplier"):
 		reduction_multiplier *= squad_manager.get_spatial_cover_multiplier(target)
 	if is_instance_valid(loot_director):
 		reduction_multiplier *= loot_director.get_incoming_damage_multiplier()
 	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("has_active_bond"):
-		if squad_manager.has_active_bond("bond_guard_echo"):
+		if include_guard_bond and squad_manager.has_active_bond("bond_guard_echo"):
 			reduction_multiplier *= 0.95
 	if squad_manager != null and is_instance_valid(squad_manager) and squad_manager.has_method("get_formation_incoming_multiplier"):
 		reduction_multiplier *= float(squad_manager.get_formation_incoming_multiplier())
@@ -1318,7 +1325,25 @@ func reset_combat_metrics(enabled: bool = true) -> void:
 	combat_damage_total = 0.0
 
 
-func record_weapon_damage(source: Node, weapon_id: String, amount: float, component_id: String = "") -> void:
+func record_weapon_damage(source: Node, weapon_id: String, amount: float, component_id: String = "", target: Node = null) -> void:
+	if game_running and amount > 0 and is_instance_valid(source) and source.get("hero_id") != null:
+		var row := contribution_row(str(source.get("hero_id")))
+		var source_name: Variant=source.get("display_name")
+		if source_name==null and source.get("data") is Dictionary:
+			source_name=source.get("data").get("name",source.get("hero_id"))
+		row["name"] = str(source.get("hero_id")) if source_name==null else str(source_name)
+		row.damage += amount
+		if is_instance_valid(target) and target.get("unattributed_damage_pending") != null:
+			var transfer := minf(amount,float(target.unattributed_damage_pending))
+			target.unattributed_damage_pending -= transfer
+			contribution_row("unattributed").damage=maxf(0,contribution_row("unattributed").damage-transfer)
+		if is_instance_valid(target) and (target.get("is_dying")==true or target.get("kill_credit_finalized")==true) and str(target.get("kill_credit_owner"))=="":
+			target.kill_credit_owner=str(source.get("hero_id"))
+			if target.kill_credit_finalized:
+				# Rare immediate-death paths can finalize before the caller records
+				# damage. Transfer that one credit; never award an additional kill.
+				contribution_row("unattributed").kills -= 1
+				row.kills += 1
 	if not combat_metrics_enabled or amount <= 0.0:
 		return
 	var hero_id := "unknown"
@@ -1333,6 +1358,38 @@ func record_weapon_damage(source: Node, weapon_id: String, amount: float, compon
 		combat_damage_by_component[component_key] = float(combat_damage_by_component.get(component_key, 0.0)) + amount
 	combat_damage_total += amount
 
+
+func contribution_row(id: String) -> Dictionary:
+	if not contribution.has(id):
+		contribution[id] = {"damage":0.0,"taken":0.0,"kills":0,"name":id}
+	return contribution[id]
+
+func record_enemy_hp_damage(amount: float) -> void:
+	if not game_running or amount<=0:return
+	var row:=contribution_row("unattributed")
+	row.damage+=amount
+	row["name"]="其他來源"
+
+func contribution_text() -> String:
+	var lines: Array[String] = ["隊員貢獻｜傷害／擊殺／承傷"]
+	lines.append("羈絆收益｜回復 %d・減傷 %d・觸發 %d" % [int(bond_benefits.healing),int(bond_benefits.prevented),int(bond_benefits.triggers)])
+	if is_instance_valid(squad_manager):
+		for member in squad_manager.get_members():
+			var row := contribution_row(member.hero_id)
+			row["name"] = member.display_name
+	for id in contribution:
+		var row: Dictionary=contribution[id]
+		if id=="unattributed" and row.kills==0 and row.damage<0.001:continue
+		lines.append("%s　%d／%d／%d" % [row.name,int(row.damage),int(row.kills),int(row.taken)])
+	return "\n".join(lines)
+
+func combo_status_text() -> String:
+	if combo_fire_rate_timer > 0:
+		return "已啟動 +10%%・剩 %.1f 秒" % combo_fire_rate_timer
+	for milestone in COMBO_MILESTONES:
+		if last_combo_milestone_count < milestone:
+			return "下次 %d 連斬・還差 %d" % [milestone,maxi(0,milestone-combo_count)]
+	return "本段已用完・斷連後重啟"
 
 func get_combat_metrics() -> Dictionary:
 	return {
@@ -1650,6 +1707,7 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 	if MetaProgress.has_method("get_progress_summary"):
 		enriched["echo_progress"] = MetaProgress.get_progress_summary()
 	enriched["run_seed"] = current_run_seed
+	enriched["contribution_text"] = contribution_text()
 	if AchievementProgress != null and AchievementProgress.has_method("get_run_unlocked_definitions"):
 		enriched["achievement_unlocks"] = AchievementProgress.get_run_unlocked_definitions()
 	return enriched
@@ -1804,9 +1862,7 @@ func record_boss_kill() -> void:
 	clear_time_scale_owners()
 	boss_kill_time = elapsed_time
 	boss_kills_total += 1
-	if not campaign_clears.has(selected_stage_id):
-		campaign_clears.append(selected_stage_id)
-		_save_campaign()
+
 	if AchievementProgress != null and AchievementProgress.has_method("record_boss_kill"):
 		AchievementProgress.record_boss_kill()
 	if AchievementProgress != null and AchievementProgress.has_method("record_survival_time"):
@@ -1815,11 +1871,26 @@ func record_boss_kill() -> void:
 		show_toast("無盡守關者擊破！傳說裝備已回收，繼續迎戰下一波。")
 		emit_stats()
 		return
+	try_complete_campaign_victory()
+
+
+func try_complete_campaign_victory() -> void:
+	if not game_running or is_game_over or not boss_killed or stage_victory_pending or run_mode != "campaign":
+		return
+	if is_instance_valid(tactical_director):
+		if not tactical_director.relay.completed:
+			return
+		if not tactical_director.guards_resolved():
+			return
+		tactical_director.check_objectives()
 	waiting_for_upgrade = false
 	waiting_for_shop = false
 	waiting_for_contract = false
 	system_pause_owners.clear()
 	stage_victory_pending = true
+	if not campaign_clears.has(selected_stage_id):
+		campaign_clears.append(selected_stage_id)
+		_save_campaign()
 	if elapsed_time >= next_shop_time:
 		next_shop_time = elapsed_time + SHOP_POST_VICTORY_GRACE
 	_request_system_pause("stage_victory")

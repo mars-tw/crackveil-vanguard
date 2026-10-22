@@ -64,9 +64,9 @@ func refresh(squad: Node) -> void:
 		buttons[id].add_theme_font_size_override("font_size",12 if small else 14)
 		buttons[id].custom_minimum_size = Vector2(300 if small else 340,58)
 		var style := StyleBoxFlat.new()
-		style.bg_color = Color("111e30")
+		style.bg_color = Color("25445a") if current else Color("111e30")
 		style.border_color = definition.color.darkened(0.3)
-		style.set_border_width_all(1)
+		style.set_border_width_all(3 if current else 1)
 		style.set_corner_radius_all(6)
 		style.set_content_margin_all(5)
 		buttons[id].add_theme_stylebox_override("normal",style)
@@ -74,6 +74,7 @@ func refresh(squad: Node) -> void:
 		buttons[id].reset_size()
 		buttons[id].disabled = current or cooldown > 0.0
 		buttons[id].add_theme_color_override("font_color", definition.color.lightened(0.3))
+		buttons[id].add_theme_color_override("font_disabled_color",Color("ecf9ff") if current else Color("90a4b8"))
 
 func _input(event: InputEvent) -> void:
 	if not visible:

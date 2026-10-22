@@ -1258,7 +1258,7 @@ func _apply_explosion_damage(world_position: Vector2, stats: Dictionary, source:
 				var applied_damage: float = float(enemy.take_damage(damage_value, world_position))
 				if applied_damage > 0.0:
 					explosion_damage_hits += 1
-				GameManager.record_weapon_damage(source, weapon_id, applied_damage, component_id)
+				GameManager.record_weapon_damage(source, weapon_id, applied_damage, component_id,enemy)
 
 
 func _grant_xp_direct(amount: int) -> void:

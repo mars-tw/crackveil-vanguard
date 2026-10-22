@@ -12,6 +12,7 @@ var boss_guard_at := -1.0
 var boss_guard_spawned := false
 var tick_timer := 0.0
 var guard_history: Array[Dictionary] = []
+var guard_refs: Array[Dictionary] = []
 var relay: Node2D
 
 func _ready() -> void:
@@ -39,6 +40,7 @@ func _process(delta: float) -> void:
 		return
 	tick_timer = 0.15
 	check_objectives()
+	GameManager.try_complete_campaign_victory()
 	if GameManager.run_mode != "campaign":
 		return
 	if GameManager.elapsed_time >= 32.0 and not hunt_announced:
@@ -56,7 +58,7 @@ func check_objectives() -> void:
 		_claim("maneuver")
 	if GameManager.elites_killed >= 2:
 		_claim("hunt")
-	if GameManager.boss_killed:
+	if GameManager.boss_killed and relay.completed and guards_resolved():
 		_claim("clear")
 
 func _claim(id: String) -> void:
@@ -84,7 +86,34 @@ func _spawn_guard(reason: String) -> bool:
 	var enemy: Node = spawner.spawn_tactical_guard(CATALOG.guard_id(GameManager.selected_stage_id))
 	if enemy == null:
 		return false
+	# Escort enters the readable battlefield after its arrival warning, so
+	# neither protected attack cycle is spent beyond the camera boundary.
+	if is_instance_valid(GameManager.player):
+		var forward: Vector2=GameManager.player.get_locomotion_facing_direction()
+		enemy.global_position=GameManager.player.global_position+forward*190+forward.orthogonal()*45
+	guard_refs.append({"ref":weakref(enemy),"token":enemy.spawn_token})
 	guard_history.append({"reason":reason, "stage":GameManager.selected_stage_id, "time":GameManager.elapsed_time, "profile":CATALOG.guard_id(GameManager.selected_stage_id)})
+	return true
+
+func record_guard_cycle(enemy: Node) -> void:
+	for i in guard_refs.size():
+		var row: Dictionary=guard_refs[i]
+		if row.ref.get_ref()==enemy and row.token==enemy.spawn_token:
+			var history: Dictionary=guard_history[i]
+			history["recoveries"]=enemy.tactical_recoveries
+			history["impacts"]=enemy.attack_impact_count
+			if enemy.death_finalized:
+				row["resolved"]=true
+				history["death_finalized_at"]=GameManager.elapsed_time
+			else:history["last_recovery_at"]=GameManager.elapsed_time
+			return
+
+func guards_resolved() -> bool:
+	for ref in guard_refs:
+		if ref.get("resolved",false):continue
+		var enemy: Object = ref.ref.get_ref()
+		if is_instance_valid(enemy) and enemy.get("spawn_token") == ref.token and (enemy.get("is_active")==true or enemy.get("is_dying")==true):
+			return false
 	return true
 
 func current_hint() -> String:
@@ -94,7 +123,7 @@ func current_hint() -> String:
 		if distance_walked < 160.0:
 			var move := "拖搖桿移動" if MobileTuning.has_confirmed_touch() else "WASD 移動"
 			return "%s・自動攻擊｜走位 %d/160" % [move,mini(160, int(distance_walked))]
-		return "點按換陣／長按直選｜陣形 %d/3" % formations.size()
+		return "演練紀錄待保存" if formations.size()==3 else "演練：再試其他陣形"
 	if not claimed.has("hunt"):
 		return "雙菁追獵 %d/2｜首取殘響 +5" % mini(2, GameManager.elites_killed)
 	if not claimed.has("clear"):
@@ -103,4 +132,4 @@ func current_hint() -> String:
 
 func progress_text() -> String:
 	var seal: String = relay.hint() if is_instance_valid(relay) else "三陣封隙"
-	return seal + "\n三陣演練：走位 %d/160・陣形 %d/3\n雙菁追獵：%d/2　守關突破：%s\n徽記 %d/3（首取 +3／+5／+8 殘響）" % [mini(160,int(distance_walked)), formations.size(), mini(2,GameManager.elites_killed), "完成" if claimed.has("clear") else "未完成", MetaProgress.get_tactical_medal_count(GameManager.selected_stage_id)]
+	return seal + "\n三陣演練：走位 %d/160・%s\n雙菁追獵：%d/2　守關突破：%s\n徽記 %d/3（首取 +3／+5／+8 殘響）" % [mini(160,int(distance_walked)), "三陣皆用過" if formations.size()==3 else "尚待試用其他陣形", mini(2,GameManager.elites_killed), "完成" if claimed.has("clear") else "未完成", MetaProgress.get_tactical_medal_count(GameManager.selected_stage_id)]

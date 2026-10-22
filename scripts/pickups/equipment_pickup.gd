@@ -40,6 +40,7 @@ func setup(loot_director: Node, equipment: Dictionary, angle: float = 0.0) -> vo
 	ART_RESOURCES.fit_sprite(glow, glow.texture, 67.0)
 	add_child(glow)
 	name_label = Label.new()
+	name_label.visible = false
 	name_label.text = "%s · %s" % [str(item.get("rarity_name", "")), str(item.get("name", ""))]
 	name_label.position = Vector2(-110.0, 14.0)
 	name_label.size = Vector2(220.0, 28.0)
@@ -55,16 +56,8 @@ func setup(loot_director: Node, equipment: Dictionary, angle: float = 0.0) -> vo
 func _physics_process(delta: float) -> void:
 	if collected or item.is_empty():
 		return
-	# Only the nearest drop gets a name. The art/rarity icon remains visible
-	# for every drop; a pile cannot produce a stack of unreadable labels.
-	if is_instance_valid(GameManager.player):
-		var distance_to_captain: float = global_position.distance_squared_to(GameManager.player.global_position)
-		var nearest := distance_to_captain <= 220.0 * 220.0
-		for other in get_tree().get_nodes_in_group("equipment_drops"):
-			if other != self and other.global_position.distance_squared_to(GameManager.player.global_position) < distance_to_captain:
-				nearest = false
-				break
-		name_label.visible = nearest
+	# Details live in the equipment panel. No all-drop scan for hidden text.
+	name_label.visible = false
 	age += delta
 	animation_timer += delta
 	if age < 0.32:

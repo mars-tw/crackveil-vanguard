@@ -104,6 +104,10 @@ func _advance_to_victory() -> Dictionary:
 		return _failure("Boss 不可受傷")
 	var leader: Node2D = GameManager.get("player") as Node2D
 	var impact_origin := leader.global_position if leader != null and is_instance_valid(leader) else Vector2.ZERO
+	boss.tactical_recoveries = 2
+	boss.boss_phase_two_triggered = true
+	GameManager.tactical_director.relay.completed = true
+	GameManager.tactical_director.relay.reward_saved = true
 	var lethal_damage := float(boss.get("max_hp")) + 1.0
 	var applied_damage := float(boss.call("take_damage", lethal_damage, impact_origin))
 	if applied_damage <= 0.0:

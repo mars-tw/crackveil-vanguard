@@ -371,6 +371,7 @@ func spawn_tactical_guard(profile_id: String) -> Node:
 	var config := SPECIAL_ELITES.make_config(profile_id, max_enemies)
 	if config.is_empty():
 		return null
+	config["tactical_min_cycles"] = 2
 	var stage := STAGE_CATALOG.get_stage(GameManager.selected_stage_id)
 	config["max_hp"] = float(config.max_hp) * (1.0 + 0.06 * float(stage.get("difficulty", 1)))
 	var enemy := EntityFactory.spawn_enemy("tactical_%s" % profile_id, config, _get_spawn_position())
@@ -386,6 +387,8 @@ func _spawn_boss() -> void:
 			return
 	var stage := STAGE_CATALOG.get_stage(GameManager.selected_stage_id)
 	var config := STAGE_CATALOG.get_boss_config(GameManager.selected_stage_id)
+	if GameManager.run_mode == "campaign":
+		config["tactical_min_cycles"] = 2
 	config["death_spawn_cap"] = max_enemies
 	if GameManager.run_mode == "endless":
 		var wave := GameManager.get_endless_wave()

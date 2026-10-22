@@ -57,7 +57,7 @@ func _damage_nearby_enemies(radius: float, stats: Dictionary, evolved: bool) -> 
 			hit_ids[hit_key] = true
 			if enemy.has_method("take_damage"):
 				var applied_damage: float = float(enemy.take_damage(pulse_damage, center))
-				GameManager.record_weapon_damage(owner_player, get_weapon_id(), applied_damage)
+				GameManager.record_weapon_damage(owner_player, get_weapon_id(), applied_damage,"",enemy)
 				hits += 1
 			if evolved and enemy.has_method("apply_knockback"):
 				enemy.apply_knockback(center, 18.0)

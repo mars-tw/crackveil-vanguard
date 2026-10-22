@@ -126,7 +126,7 @@ func _apply_tick_damage() -> void:
 	for enemy in [nearest, second] if max_targets > 1 else [nearest]:
 		if enemy != null and enemy.has_method("take_damage"):
 			var applied_damage := float(enemy.take_damage(damage_value, global_position))
-			GameManager.record_weapon_damage(source, str(stats.get("source_weapon_id", "rift_constructs")), applied_damage, "construct_tick")
+			GameManager.record_weapon_damage(source, str(stats.get("source_weapon_id", "rift_constructs")), applied_damage, "construct_tick",enemy)
 			hit_count += 1
 	if hit_count > 0:
 		hit_flash_timer = 0.1

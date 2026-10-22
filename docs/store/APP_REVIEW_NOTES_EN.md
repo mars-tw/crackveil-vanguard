@@ -1,3 +1,5 @@
+> R2 local candidate: seals open at 12/46/84 seconds. Read enemy pressure, dodge telegraphs, and bank 6 seconds during recovery with two living followers in formation. Wrong formations reset progress and cause backlash. Completing all seals and defeating the boss are both required for a campaign clear. The earlier R44 steps below are archived and have not been submitted to a store.
+
 # App Review Notes — local draft
 
 PREPARED — 15 October 2026. Intended for a future binary containing game version 0.29.0-r44. **Do not attach these instructions to the existing native build 3 as if it already contains this update.** No submission or response was sent.

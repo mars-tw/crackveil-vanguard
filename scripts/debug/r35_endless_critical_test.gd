@@ -293,6 +293,12 @@ func _scheduled_boss(spawner: Node, time_value: float) -> Node:
 
 
 func _kill_boss(boss: Node, campaign: bool) -> bool:
+	# This fixture tests campaign/endless death paths after the encounter.
+	boss.tactical_recoveries = 2
+	boss.boss_phase_two_triggered = true
+	if campaign:
+		GameManager.tactical_director.relay.completed = true
+		GameManager.tactical_director.relay.reward_saved = true
 	var clears_before := GameManager.campaign_clears.size()
 	boss.call("take_damage", 1000000.0, GameManager.player.global_position)
 	if not _check(bool(boss.get("is_dying")) and str(boss.get("current_animation_name")) == "death" and GameManager.campaign_clears.size() == clears_before and not GameManager.boss_killed, "boss skipped true death animation or awarded clear before finalization"):

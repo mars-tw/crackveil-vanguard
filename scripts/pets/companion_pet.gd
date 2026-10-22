@@ -165,7 +165,7 @@ func _on_frame_changed() -> void:
 				points.append(cursor.global_position)
 				var actual := float(cursor.call("take_damage", damage * falloff, global_position))
 				damage_dealt += actual
-				GameManager.record_weapon_damage(self, "pet_thunder_bird", actual)
+				GameManager.record_weapon_damage(self, "pet_thunder_bird", actual,"",cursor)
 				falloff *= 0.85
 				cursor = _nearest_target(cursor.global_position, 190.0, used)
 			if points.size() > 1:
@@ -191,7 +191,7 @@ func _on_frame_changed() -> void:
 			if target != null:
 				var actual := float(target.call("take_damage", damage, global_position))
 				damage_dealt += actual
-				GameManager.record_weapon_damage(self, "pet_spirit_rabbit", actual)
+				GameManager.record_weapon_damage(self, "pet_spirit_rabbit", actual,"",target)
 				var ray_points: Array[Vector2] = [global_position, target.global_position]
 				EntityFactory.spawn_lightning_arc(ray_points, data.color, 0.15, "res://assets/sprites/proj_lightning.png", 15.0)
 

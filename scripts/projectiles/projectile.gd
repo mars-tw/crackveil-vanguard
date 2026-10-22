@@ -369,7 +369,7 @@ func _on_body_entered(body: Node) -> void:
 	if body.has_method("take_damage"):
 		var applied_damage: float = float(body.take_damage(_damage_for_current_hit(), global_position))
 		if target_group == "enemies":
-			GameManager.record_weapon_damage(source if is_instance_valid(source) else null, source_weapon_id, applied_damage)
+			GameManager.record_weapon_damage(source if is_instance_valid(source) else null, source_weapon_id, applied_damage,"",body)
 			_apply_enemy_hit_feedback(body)
 	_try_spawn_riftline_forks()
 

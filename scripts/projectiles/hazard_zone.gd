@@ -117,7 +117,7 @@ func _apply_tick_damage() -> void:
 				)
 			if enemy.has_method("take_damage"):
 				var applied_damage: float = float(enemy.take_damage(tick_damage, global_position))
-				GameManager.record_weapon_damage(source if is_instance_valid(source) else null, str(stats.get("source_weapon_id", "")), applied_damage)
+				GameManager.record_weapon_damage(source if is_instance_valid(source) else null, str(stats.get("source_weapon_id", "")), applied_damage,"",enemy)
 
 
 func _draw() -> void:

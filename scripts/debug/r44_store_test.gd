@@ -82,6 +82,12 @@ func _run() -> void:
 	check(relay.step == 0, "dead follower counted as occupied")
 	followers[0].is_alive = true
 	for phase in range(3):
+		# Occupancy unit fixture now starts in an opened recovery window.
+		# R2's integration gate separately plays the warning and active phases.
+		GameManager.elapsed_time = relay.OPEN_TIMES[phase] + relay.HOLD_SECONDS
+		relay.pressure.started = true
+		relay.pressure.phase = "recovery"
+		relay.pressure.clock = 4.0
 		squad.set_formation(relay.ORDER[phase], true)
 		captain.global_position = relay.anchor
 		for member in squad.get_members():
@@ -101,7 +107,7 @@ func _run() -> void:
 		relay.advance(2.0)
 		check(relay.step == phase, "wrong formation closed a seal")
 		squad.set_formation(relay.ORDER[phase], true)
-		relay.advance(1.21)
+		relay.advance(relay.HOLD_SECONDS + 0.01)
 		check(relay.step == phase + 1, "occupied formation did not close")
 	check(relay.completed and relay.history.size() == 3, "relay incomplete")
 	check(MetaProgress.shards == 4 and MetaProgress.formation_seals.get("moon", false), "first reward not saved")

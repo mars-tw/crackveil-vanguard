@@ -110,7 +110,7 @@ func _record_hit(enemy: Node, amount: float) -> void:
 	var actual := float(enemy.call("take_damage", amount, owner_player.global_position))
 	if actual > 0.0:
 		damage_hits += 1
-		GameManager.record_weapon_damage(owner_player, get_weapon_id(), actual)
+		GameManager.record_weapon_damage(owner_player, get_weapon_id(), actual,"",enemy)
 
 func get_firepower_debug_state() -> Dictionary:
 	var state := super.get_firepower_debug_state()

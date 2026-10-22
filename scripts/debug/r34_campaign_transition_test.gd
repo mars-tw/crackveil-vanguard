@@ -119,6 +119,12 @@ func _run() -> void:
 		_freeze_fixture_actors(arena)
 		var collected_before := int(loot.get("collected_count"))
 		phase = "lethal_hit_and_death_poses_" + id
+		# Death/transition fixture supplies completed encounter prerequisites;
+		# natural R2 encounters verify those prerequisites independently.
+		boss.tactical_recoveries = 2
+		boss.boss_phase_two_triggered = true
+		GameManager.tactical_director.relay.completed = true
+		GameManager.tactical_director.relay.reward_saved = true
 		boss.call("take_damage", 1000000.0, GameManager.player.global_position)
 		if not _check(boss.get("is_dying") == true and str(boss.get("current_animation_name")) == "death" and not GameManager.boss_killed and GameManager.campaign_clears.size() == index, "boss clear or rewards skipped the actual death poses: " + id):
 			return

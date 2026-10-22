@@ -55,7 +55,7 @@ func _physics_process(delta: float) -> void:
 				var actual := float(enemy.call("take_damage", damage, global_position))
 				if is_instance_valid(source_actor):
 					source_actor.call("report_fire_damage", actual)
-					GameManager.record_weapon_damage(source_actor, "pet_fire_fox", actual)
+					GameManager.record_weapon_damage(source_actor, "pet_fire_fox", actual,"",enemy)
 		var presentation := get_tree().get_first_node_in_group("combat_presentation")
 		if presentation != null:
 			presentation.call("play_effect", "monster_fire", global_position, Vector2.UP, 0.64)

@@ -122,6 +122,8 @@ func _test_picker(size: Vector2i) -> void:
 	evidence.layouts.append({"viewport":str(size),"choice_rects":str(rects),"long_press":true,"selection":"scatter","cancel":true,"pause":true})
 
 func _test_progression() -> void:
+	director.relay.completed = true # medal fixture; R2 owns seal timing integration
+	director.relay.reward_saved = true
 	_check("走位" in director.current_hint(),"first minute movement hint missing")
 	GameManager.set_touch_move_vector(Vector2.RIGHT)
 	for frame in range(75):
@@ -139,6 +141,8 @@ func _test_progression() -> void:
 		var enemy: Node = arena.get_node("EnemySpawner").spawn_tactical_guard("charge")
 		_check(enemy!=null,"real hunt spawn failed")
 		if enemy!=null:
+			enemy.tactical_recoveries = 2
+			if enemy.is_boss: enemy.boss_phase_two_triggered = true
 			enemy.take_damage(99999,GameManager.player.global_position)
 			for frame in range(50):
 				await get_tree().process_frame
@@ -147,6 +151,8 @@ func _test_progression() -> void:
 	arena.get_node("EnemySpawner")._spawn_boss()
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		if enemy.is_boss:
+			enemy.tactical_recoveries = 2
+			if enemy.is_boss: enemy.boss_phase_two_triggered = true
 			enemy.take_damage(99999,GameManager.player.global_position)
 	for frame in range(55):
 		await get_tree().process_frame

@@ -20,7 +20,7 @@ var page_index: int = 0
 const DECISION_PAGES: Array[Dictionary] = [
 	{
 		"title": "封隙與契約",
-		"body": "先帶隊走進地面陣記，依序以楔形、圓陣、散兵封合裂隙。隊長和兩名隊友就位一點二秒才會完成；換陣點按輪換，長按直選。種子出擊另可選契約，改變風險與獎勵。"
+		"body": "先看敵況：重盾用楔形突破，包抄用圓陣守住，遠射用散兵閃躲。避開預警，隊長與兩名隊友在反擊窗口就位，累積六秒封合；錯陣會反噬。三道陣記分段穩定，最後一道不早於九十秒完成。"
 	},
 	{
 		"title": "招募與隊長",
@@ -175,8 +175,8 @@ func _refresh_page() -> void:
 
 func _controls_page_text() -> String:
 	if MOBILE_TUNING.has_confirmed_touch():
-		return "拖左下搖桿移動\n按住右下「旋斬」，放開回能\n點按陣形輪換，長按直選\n走進地面陣記，等兩名隊友就位"
-	return "WASD／方向鍵移動\n按住空白鍵旋斬，放開回能\nQ 換陣；長按陣形按鈕直選\n走進地面陣記，等兩名隊友就位"
+		return "拖左下搖桿移動\n按住右下「旋斬」，放開回能\n點按陣形輪換，長按直選\n觀察敵況換陣，避開預警再封隙"
+	return "WASD／方向鍵移動\n按住空白鍵旋斬，放開回能\nQ 換陣；長按陣形按鈕直選\n觀察敵況換陣，避開預警再封隙"
 
 
 func _is_disabled() -> bool:

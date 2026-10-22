@@ -47,7 +47,9 @@ const diagnostics=[];
     for(const key of keys)if(!wanted.has(key)){await page.keyboard.up(key);keys.delete(key);}
     for(const key of wanted)if(!keys.has(key)){await page.keyboard.down(key);keys.add(key);}
    };
-   phase='relay';const deadline=Date.now()+100000; let lastStep=-1;
+   // R2 opens its third seal at 84s. Keep the game-time <180 assertion below;
+   // allow headless software rendering enough wall time to reach that encounter.
+   phase='relay';const deadline=Date.now()+240000; let lastStep=-1;
    while(Date.now()<deadline){
     p=await probe('hud'); const r=p.flags.relay;
     check(!p.flags.paused,'unexpected paused state during relay');

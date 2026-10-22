@@ -81,8 +81,8 @@ func register_hit(world_position: Vector2, source_position: Vector2, severity: f
 	if _is_visible_impact(world_position):
 		_queue_effect({
 			"kind": "hit", "position": world_position, "direction": direction,
-			"age": 0.0, "lifetime": 0.11 if lethal else 0.09,
-			"size": 5.8 if lethal else lerpf(3.5, 4.8, clampf(severity, 0.0, 1.0)),
+			"age": 0.0, "lifetime": 0.55 if lethal and feature_enemy else 0.11 if lethal else 0.09,
+			"size": 26.0 if lethal and feature_enemy else 5.8 if lethal else lerpf(3.5, 4.8, clampf(severity, 0.0, 1.0)),
 			"lethal": lethal, "feature": feature_enemy,
 		})
 	if lethal:

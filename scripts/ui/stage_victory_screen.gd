@@ -106,19 +106,10 @@ func show_summary(summary: Dictionary) -> void:
 func _update_summary_count(progress_ratio: float) -> void:
 	var summary := displayed_summary
 	var progress: Dictionary = summary.get("echo_progress", {})
-	summary_label.text = "擊破%s\n存活  %s\n擊殺  %d\n精英擊殺  %d\n金幣  %d\n契約  %s\n殘響  +%d（本局 %d / 持有 %d）\n新成就  %s" % [
-		str(summary.get("boss_name", "守門者·帷幕")),
-		GameManager.format_time(float(summary.get("elapsed_time", 0.0)) * progress_ratio),
-		int(round(float(summary.get("kills", 0)) * progress_ratio)),
-		int(round(float(summary.get("elites_killed", 0)) * progress_ratio)),
-		int(round(float(summary.get("gold", 0)) * progress_ratio)),
-		str(summary.get("contract_name", "無契約")),
-		int(round(float(summary.get("echo_shards_earned", 0)) * progress_ratio)),
-		int(round(float(summary.get("echo_shards_run_total", 0)) * progress_ratio)),
-		int(round(float(progress.get("shards", 0)) * progress_ratio)),
-		_new_achievement_text(summary)
-	]
-	summary_label.text += "\n裝備拾取 %d 件　拆解 %d 件\n守門者傳說裝備已回收" % [int(summary.get("equipment_collected", 0)), int(summary.get("equipment_salvaged", 0))]
+	summary_label.text = "擊破%s｜%s｜擊殺 %d\n封隙 3/3・殘響 +%d\n%s" % [
+		str(summary.get("boss_name","守門者")),GameManager.format_time(float(summary.get("elapsed_time",0))),
+		int(summary.get("kills",0)),int(summary.get("echo_shards_earned",0)),str(summary.get("contribution_text",GameManager.contribution_text()))]
+
 
 
 func _on_continue_pressed() -> void:
@@ -165,7 +156,7 @@ func _apply_responsive_layout() -> void:
 
 	if title_label != null:
 		title_label.offset_top = 14.0 if compact_landscape else 20.0
-		title_label.offset_bottom = title_label.offset_top + (56.0 if mobile else 38.0)
+		title_label.offset_bottom = title_label.offset_top + (36.0 if compact_landscape else 56.0 if mobile else 38.0)
 		title_label.add_theme_font_size_override("font_size", (24 if portrait else 22) if mobile else 30)
 
 	var button_width: float = 246.0 if compact_landscape else 260.0 if mobile else 196.0
@@ -212,6 +203,13 @@ func _apply_responsive_layout() -> void:
 		main_menu_button.offset_top = secondary_top if mobile and portrait else primary_top
 		main_menu_button.offset_bottom = main_menu_button.offset_top + button_height
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
+	# This is a compact data page in CSS units. Reassert readable fixed sizes
+	# after the generic touch pass, so nine contributions and bond gains fit.
+	title_label.add_theme_font_size_override("font_size",24 if portrait else 22)
+	summary_label.add_theme_font_size_override("font_size",14 if compact_landscape else 16)
+	summary_label.add_theme_constant_override("line_spacing",-2)
+	for button in [copy_seed_button,continue_button,main_menu_button]:
+		button.add_theme_font_size_override("font_size",17)
 
 
 func _new_achievement_text(summary: Dictionary) -> String:

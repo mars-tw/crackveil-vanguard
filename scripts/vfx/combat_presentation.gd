@@ -29,12 +29,15 @@ var emitted := 0
 var rejected := 0
 var peak := 0
 var friendly_material: ShaderMaterial
+var sector_material: ShaderMaterial
 
 func _ready() -> void:
 	add_to_group("combat_presentation")
 	z_index = 38
 	friendly_material = ShaderMaterial.new()
 	friendly_material.shader = FRIENDLY_SHADER
+	sector_material = friendly_material.duplicate()
+	sector_material.set_shader_parameter("attack_sector",true)
 	if ResourceLoader.exists(CATALOG_PATH):
 		catalog = load(CATALOG_PATH)
 	set_process(false)
@@ -79,7 +82,7 @@ func play_effect(kind: String, origin: Vector2, direction: Vector2, strength: fl
 	slot.scale = Vector2.ONE * size_scale
 	slot.modulate = Color.WHITE
 	if kind in ["slash_a", "slash_b", "cyclone"]:
-		slot.sprite.material = friendly_material
+		slot.sprite.material = sector_material if kind == "cyclone" else friendly_material
 	else:
 		slot.sprite.material = null
 	slot.sprite.sprite_frames = frames
@@ -116,6 +119,10 @@ func set_channel(owner: Object, enabled: bool, origin: Vector2, direction: Vecto
 func _process(delta: float) -> void:
 	for slot in active.duplicate():
 		slot.age += delta
+		if slot.kind == "cyclone":
+			# Rotating short arcs are attack marks; no stable filled blue disk.
+			slot.sprite.rotation = slot.age * 18.0
+			slot.sprite.modulate.a = 0.40 + 0.50 * absf(sin(slot.age*20.0))
 		if slot.held:
 			var actor: Object = slot.owner_ref.get_ref() if slot.owner_ref != null else null
 			if actor == null or not is_instance_valid(actor) or not GameManager.game_running or actor.get("is_alive") == false:
@@ -142,6 +149,8 @@ func _release(slot: Effect) -> void:
 	slot.sprite.stop()
 	slot.sprite.set_frame_and_progress(0, 0.0)
 	slot.sprite.sprite_frames = null
+	slot.sprite.rotation = 0.0
+	slot.sprite.modulate = Color.WHITE
 	slot.visible = false
 	slot.modulate = Color.WHITE
 	slot.scale = Vector2.ONE

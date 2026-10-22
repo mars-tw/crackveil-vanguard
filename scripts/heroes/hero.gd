@@ -920,7 +920,7 @@ func _damage_cleave(forward: Vector2, cleave_range: float, half_angle: float, ba
 			var actual_damage := float(enemy.take_damage(pulse_damage, global_position))
 			if actual_damage <= 0.0:
 				continue
-			GameManager.record_weapon_damage(self, "captain_blade", actual_damage, "draw_cut" if heavy else "auto_cut")
+			GameManager.record_weapon_damage(self, "captain_blade", actual_damage, "draw_cut" if heavy else "auto_cut",enemy)
 			damaged_count += 1
 			if enemy.get("is_dying") == true:
 				killed_count += 1
@@ -989,6 +989,13 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO, force_h
 		var absorbed: float = min(temporary_shield_hp, remaining_damage)
 		temporary_shield_hp -= absorbed
 		remaining_damage -= absorbed
+	GameManager.contribution_row(hero_id).taken += minf(current_hp,remaining_damage)
+	GameManager.contribution_row(hero_id)["name"] = display_name
+	if squad_manager != null and squad_manager.has_active_bond("bond_guard_echo"):
+		var multiplier: float = GameManager.get_incoming_damage_multiplier(self)
+		var unbonded: float = GameManager.get_incoming_damage_multiplier(self,false)
+		GameManager.bond_benefits.prevented += maxf(0,amount*(unbonded-multiplier))
+		GameManager.bond_benefits.triggers += 1
 	current_hp = max(current_hp - remaining_damage, 0.0)
 	invulnerability_timer = invulnerability_time
 

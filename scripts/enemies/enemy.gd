@@ -48,6 +48,13 @@ static var animation_runtime_mobile_lod_cache: int = -1
 @export var attack_cooldown: float = 0.75
 
 var hp: float = 18.0
+var tactical_min_cycles := 0
+var tactical_recoveries := 0
+var tactical_telegraph_timer := 0.0
+var tactical_phase_gate_until := -1.0
+var kill_credit_owner := ""
+var kill_credit_finalized := false
+var unattributed_damage_pending := 0.0
 var attack_timer: float = 0.0
 var is_active: bool = false
 var spawn_token: int = 0
@@ -193,6 +200,11 @@ func pool_on_release() -> void:
 	remove_from_group("enemies")
 	velocity = Vector2.ZERO
 	hp = 0.0
+	tactical_min_cycles = 0
+	tactical_recoveries = 0
+	tactical_telegraph_timer = 0
+	tactical_phase_gate_until = -1
+	queue_redraw()
 	attack_timer = 0.0
 	hp_bar_timer = 0.0
 	behavior_state = "chase"
@@ -288,7 +300,15 @@ func pool_reset(args: Dictionary) -> void:
 
 func setup(enemy_type: String, config: Dictionary) -> void:
 	type_id = enemy_type
+	kill_credit_owner=""
+	kill_credit_finalized=false
+	unattributed_damage_pending=0
 	max_hp = float(config.get("max_hp", max_hp))
+	tactical_min_cycles = int(config.get("tactical_min_cycles",0))
+	tactical_recoveries = 0
+	tactical_telegraph_timer = 0
+	tactical_phase_gate_until = -1
+	queue_redraw()
 	hp = max_hp
 	speed = float(config.get("speed", speed))
 	damage = float(config.get("damage", damage))
@@ -706,6 +726,7 @@ func _start_attack(target: Node2D, damage_multiplier: float, attack_kind: String
 	attack_hit_registry.clear()
 	attack_hitbox_active = false
 	attack_timer = attack_cooldown
+	tactical_telegraph_timer = 0.85 if tactical_min_cycles>0 else 0.0
 	_play_animation_state(&"attack", true)
 	_show_attack_cue(attack_kind, target)
 	return true
@@ -889,7 +910,9 @@ func _trigger_boss_phase_two() -> void:
 	elif _start_attack(_find_nearest_hero(), 0.82, &"ring"):
 		pending_ring_projectile_count = 14
 		boss_phase_volley_pending = false
-	_spawn_boss_dashers(4)
+	# Half HP can be crossed inside Area2D.body_entered, while physics queries
+	# are flushing. Acquire colliders only after that callback has returned.
+	call_deferred("_spawn_boss_dashers",4,spawn_token)
 	if GameManager.has_method("record_boss_phase_two"):
 		GameManager.record_boss_phase_two()
 
@@ -901,7 +924,9 @@ func _apply_boss_phase_visuals() -> void:
 		boss_core_glow.modulate = Color(BOSS_CORE_PHASE_TWO_COLOR.r, BOSS_CORE_PHASE_TWO_COLOR.g, BOSS_CORE_PHASE_TWO_COLOR.b, 0.84)
 
 
-func _spawn_boss_dashers(count: int) -> void:
+func _spawn_boss_dashers(count: int, expected_token: int = -1) -> void:
+	if not is_inside_tree() or not is_active or is_dying or (expected_token>=0 and expected_token!=spawn_token):
+		return
 	for index in range(count):
 		if EntityFactory.get_enemy_live_count() >= death_spawn_cap:
 			return
@@ -1042,7 +1067,28 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 		var result := CRITICAL.resolve(final_amount, GameManager.current_run_seed, spawn_token, damage_hit_index)
 		last_hit_critical = bool(result.critical)
 		final_amount = float(result.damage)
+	# A visible ward lasts through two complete anticipation/impact/recovery
+	# cycles. Damage still matters, but cannot skip the encounter's grammar.
+	if is_boss and tactical_min_cycles>0 and not boss_phase_two_triggered and hp-final_amount<=max_hp*0.5:
+		# Even a first overkill hit after two base cycles must enter half HP.
+		final_amount=minf(final_amount,maxf(0,hp-max_hp*0.48))
+		tactical_phase_gate_until=GameManager.elapsed_time+2.2
+	var escort_pending := false
+	if is_boss and tactical_min_cycles>0 and is_instance_valid(GameManager.tactical_director):
+		escort_pending=GameManager.tactical_director.boss_guard_at>=0 and not GameManager.tactical_director.boss_guard_spawned
+	if is_boss and tactical_min_cycles>0 and (escort_pending or GameManager.elapsed_time<tactical_phase_gate_until):
+		final_amount=minf(final_amount,maxf(0,hp-max_hp*0.12))
+	if tactical_recoveries < tactical_min_cycles:
+		final_amount = minf(final_amount,maxf(0,hp - max_hp*0.12))
+	if final_amount <= 0:
+		return 0.0
+	var applied_damage := minf(hp,final_amount)
+	if GameManager.game_running:
+		unattributed_damage_pending+=applied_damage
+		GameManager.record_enemy_hp_damage(applied_damage)
 	hp = max(hp - final_amount, 0.0)
+	if is_boss and tactical_min_cycles>0 and hp>0 and hp<=max_hp*0.5 and not boss_phase_two_triggered:
+		_trigger_boss_phase_two()
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("hit")
 	var number_position := global_position + Vector2(float((spawn_token * 13 + damage_hit_index * 7) % 17 - 8), -radius - 10.0)
@@ -1078,8 +1124,18 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 			_play_animation_state(&"hurt", true)
 			_cancel_windup_on_stagger()
 			stagger_guard_timer = 0.65 if is_boss else (0.38 if is_elite else 0.0)
-	return final_amount
+	return applied_damage
 
+
+func _draw() -> void:
+	if not is_active or is_dying or tactical_min_cycles<=0:
+		return
+	# Two etched shield notches announce the attack-cycle protection.
+	var y := -radius-24.0
+	for index in range(2):
+		var x := float(index*18-9)
+		var color := Color("ffcc93") if tactical_recoveries<=index else Color("536575")
+		draw_polyline(PackedVector2Array([Vector2(x-6,y-7),Vector2(x+6,y-7),Vector2(x+6,y+2),Vector2(x,y+8),Vector2(x-6,y+2),Vector2(x-6,y-7)]),color,2,true)
 
 func _can_stagger(severity: float) -> bool:
 	if not is_elite and not is_boss:
@@ -1138,7 +1194,11 @@ func _finalize_death() -> void:
 		return
 	death_finalized = true
 	_release_death_animation_profile()
-	GameManager.add_kill()
+	var kills_before: int=GameManager.kills
+	GameManager.add_kill(1,kill_credit_owner)
+	kill_credit_finalized=GameManager.kills>kills_before
+	if tactical_min_cycles>0 and is_instance_valid(GameManager.tactical_director):
+		GameManager.tactical_director.record_guard_cycle(self)
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
 		var thump_pitch := 0.68 if is_boss else (0.78 if is_elite else 0.92)
 		if GameManager.has_method("get_kill_thump_pitch"):
@@ -1601,6 +1661,9 @@ func _play_animation_state(next_state: StringName, restart: bool = false) -> voi
 
 
 func tick_shared_enemy_animation(delta: float, focus_position: Vector2, focus_valid: bool) -> void:
+	if current_animation_name==&"attack" and tactical_telegraph_timer>0:
+		tactical_telegraph_timer=maxf(0,tactical_telegraph_timer-delta)
+		return
 	if not animation_frames_ready or animated_sprite == null or not visible:
 		return
 	if is_active:
@@ -1725,6 +1788,10 @@ func _on_enemy_animation_frame_changed() -> void:
 func _on_enemy_animation_finished() -> void:
 	match current_animation_name:
 		&"attack":
+			tactical_recoveries += 1
+			queue_redraw()
+			if tactical_min_cycles>0 and is_instance_valid(GameManager.tactical_director):
+				GameManager.tactical_director.record_guard_cycle(self)
 			pending_attack_target = null
 			attack_hitbox_active = false
 			if is_active:

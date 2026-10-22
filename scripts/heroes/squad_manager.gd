@@ -271,7 +271,16 @@ func _tick_formation_resonance(delta: float) -> void:
 	_resonance_regen_accumulator += delta
 	if _resonance_regen_accumulator >= 1.0:
 		_resonance_regen_accumulator -= 1.0
+		var before := 0.0
+		for member in get_members():
+			before += member.current_hp
 		heal_members(regen)
+		var after := 0.0
+		for member in get_members():
+			after += member.current_hp
+		if after > before:
+			GameManager.bond_benefits.healing += after-before
+			GameManager.bond_benefits.triggers += 1
 
 
 # ---------------------------------------------------------------- 陣形戰術
@@ -373,6 +382,8 @@ func get_formation_damage_multiplier() -> float:
 		multiplier *= float(BOND_FORMATION_RESONANCE[bond_id].get("damage", 1.0))
 	if formation_id == "wedge":
 		multiplier *= 1.0 + _living_passive_value("blast")
+	if is_instance_valid(GameManager.tactical_director) and GameManager.tactical_director.relay.counter_timer > 0:
+		multiplier *= 1.2
 	return multiplier
 
 
@@ -447,7 +458,7 @@ func _draw() -> void:
 		if formation_id == "scatter":
 			var radius: float = member.get_pickup_radius()
 			for segment in range(12):
-				draw_arc(point, radius, segment * TAU / 12, (segment + 0.55) * TAU / 12, 4, Color(color,0.30),1.2,true)
+				draw_arc(point, radius, segment * TAU / 12, (segment + 0.55) * TAU / 12, 4, Color(color,0.70),2.4,true)
 		elif formation_id == "wedge":
 			var tip := point + forward * 36
 			draw_polyline(PackedVector2Array([tip-forward.rotated(-0.65)*12,tip,tip-forward.rotated(0.65)*12]),Color(color,0.9),2,true)

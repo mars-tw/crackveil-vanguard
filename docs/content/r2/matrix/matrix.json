@@ -1,0 +1,6251 @@
+[
+  {
+    "width": 844,
+    "height": 390,
+    "phase": "matrix",
+    "errors": [],
+    "captures": [
+      {
+        "name": "guide",
+        "state": {
+          "controls": {
+            "achievements": {
+              "center_x": 176,
+              "center_y": 274,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 320,
+              "x": 16,
+              "y": 246
+            },
+            "guide": {
+              "center_x": 258,
+              "center_y": 146,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 156,
+              "x": 180,
+              "y": 118
+            },
+            "meta": {
+              "center_x": 176,
+              "center_y": 210,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 320,
+              "x": 16,
+              "y": 182
+            },
+            "seed_input": {
+              "center_x": 478,
+              "center_y": 82,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 252,
+              "x": 352,
+              "y": 54
+            },
+            "seed_row": {
+              "center_x": 552,
+              "center_y": 82,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 400,
+              "x": 352,
+              "y": 54
+            },
+            "seed_start": {
+              "center_x": 686,
+              "center_y": 82,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 132,
+              "x": 620,
+              "y": 54
+            },
+            "settings": {
+              "center_x": 176,
+              "center_y": 338,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 320,
+              "x": 16,
+              "y": 310
+            },
+            "side_close": {
+              "center_x": 754,
+              "center_y": 96,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 104,
+              "x": 702,
+              "y": 68
+            },
+            "side_panel": {
+              "center_x": 590,
+              "center_y": 214,
+              "exists": true,
+              "height": 320,
+              "visible": true,
+              "width": 476,
+              "x": 352,
+              "y": 54
+            },
+            "start": {
+              "center_x": 176,
+              "center_y": 82,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 320,
+              "x": 16,
+              "y": 54
+            },
+            "tactical_collection": {
+              "exists": false,
+              "visible": false
+            },
+            "tactical_next": {
+              "exists": false,
+              "visible": false
+            },
+            "tactical_previous": {
+              "exists": false,
+              "visible": false
+            },
+            "world_map": {
+              "center_x": 94,
+              "center_y": 146,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 156,
+              "x": 16,
+              "y": 118
+            }
+          },
+          "flags": {
+            "confirmed_touch": true,
+            "panel_id": "guide",
+            "seal_saved": false,
+            "shards": 0,
+            "side_panel_visible": true,
+            "tactical_page": 0
+          },
+          "scope": "main_menu",
+          "timestamp_msec": 1385,
+          "viewport_height": 390,
+          "viewport_width": 844
+        }
+      },
+      {
+        "name": "battle",
+        "state": {
+          "controls": {
+            "active_ability": {
+              "center_x": 802,
+              "center_y": 336,
+              "exists": true,
+              "height": 60,
+              "visible": true,
+              "width": 60,
+              "x": 772,
+              "y": 306
+            },
+            "auto_battle": {
+              "center_x": 224,
+              "center_y": 216.880004882812,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 136,
+              "x": 156,
+              "y": 188.880004882812
+            },
+            "equipment_menu": {
+              "center_x": 223.119995117188,
+              "center_y": 344,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 44,
+              "x": 201.119995117188,
+              "y": 322
+            },
+            "formation": {
+              "center_x": 802,
+              "center_y": 274,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 64,
+              "x": 770,
+              "y": 252
+            },
+            "formation_cancel": {
+              "center_x": 44,
+              "center_y": 33,
+              "exists": true,
+              "height": 66,
+              "visible": false,
+              "width": 88,
+              "x": 0,
+              "y": 0
+            },
+            "formation_ring": {
+              "center_x": 130,
+              "center_y": 28,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 260,
+              "x": 0,
+              "y": 0
+            },
+            "formation_scatter": {
+              "center_x": 130,
+              "center_y": 28,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 260,
+              "x": 0,
+              "y": 0
+            },
+            "formation_wedge": {
+              "center_x": 130,
+              "center_y": 28,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 260,
+              "x": 0,
+              "y": 0
+            },
+            "hp_label": {
+              "center_x": 84,
+              "center_y": 36.5,
+              "exists": true,
+              "height": 23,
+              "visible": true,
+              "width": 80,
+              "x": 44,
+              "y": 25
+            },
+            "hud_panel": {
+              "center_x": 111,
+              "center_y": 44,
+              "exists": true,
+              "height": 52,
+              "visible": true,
+              "width": 202,
+              "x": 10,
+              "y": 18
+            },
+            "level_label": {
+              "center_x": 182,
+              "center_y": 38,
+              "exists": true,
+              "height": 20,
+              "visible": true,
+              "width": 24,
+              "x": 170,
+              "y": 28
+            },
+            "mission_text": {
+              "center_x": 491,
+              "center_y": 45.5,
+              "exists": true,
+              "height": 55,
+              "visible": true,
+              "width": 358,
+              "x": 312,
+              "y": 18
+            },
+            "pause": {
+              "center_x": 815,
+              "center_y": 40,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 54,
+              "x": 788,
+              "y": 18
+            },
+            "pause_achievements_tab": {
+              "center_x": 258.666656494141,
+              "center_y": 95,
+              "exists": true,
+              "height": 66,
+              "visible": false,
+              "width": 157.33332824707,
+              "x": 180,
+              "y": 62
+            },
+            "pause_auto_battle": {
+              "center_x": 194,
+              "center_y": 150,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 28,
+              "x": 180,
+              "y": 128
+            },
+            "pause_high_contrast": {
+              "center_x": 229.5,
+              "center_y": 150,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 99,
+              "x": 180,
+              "y": 128
+            },
+            "pause_overlay": {
+              "center_x": 422,
+              "center_y": 195,
+              "exists": true,
+              "height": 366,
+              "visible": false,
+              "width": 520,
+              "x": 162,
+              "y": 12
+            },
+            "pause_resume": {
+              "center_x": 298.5,
+              "center_y": 341,
+              "exists": true,
+              "height": 66,
+              "visible": false,
+              "width": 237,
+              "x": 180,
+              "y": 308
+            },
+            "pause_return": {
+              "center_x": 545.5,
+              "center_y": 341,
+              "exists": true,
+              "height": 66,
+              "visible": false,
+              "width": 237,
+              "x": 427,
+              "y": 308
+            },
+            "pause_run_tab": {
+              "center_x": 258.666656494141,
+              "center_y": 95,
+              "exists": true,
+              "height": 66,
+              "visible": false,
+              "width": 157.33332824707,
+              "x": 180,
+              "y": 62
+            },
+            "pause_settings_tab": {
+              "center_x": 258.666656494141,
+              "center_y": 95,
+              "exists": true,
+              "height": 66,
+              "visible": false,
+              "width": 157.33332824707,
+              "x": 180,
+              "y": 62
+            },
+            "pause_ui_scale": {
+              "center_x": 300,
+              "center_y": 150,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 240,
+              "x": 180,
+              "y": 128
+            },
+            "quick_controls": {
+              "center_x": 616,
+              "center_y": 174,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 180,
+              "x": 526,
+              "y": 146
+            },
+            "quick_joystick_size": {
+              "center_x": 678,
+              "center_y": 174,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 56,
+              "x": 650,
+              "y": 146
+            },
+            "quick_mute": {
+              "center_x": 554,
+              "center_y": 174,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 56,
+              "x": 526,
+              "y": 146
+            },
+            "quick_screen_shake": {
+              "center_x": 616,
+              "center_y": 174,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 56,
+              "x": 588,
+              "y": 146
+            },
+            "score": {
+              "center_x": 730,
+              "center_y": 40,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 100,
+              "x": 680,
+              "y": 18
+            },
+            "summon": {
+              "center_x": 161.119995117188,
+              "center_y": 344,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 64,
+              "x": 129.119995117188,
+              "y": 322
+            },
+            "tactical_hint": {
+              "center_x": 491,
+              "center_y": 45.5,
+              "exists": true,
+              "height": 55,
+              "visible": true,
+              "width": 358,
+              "x": 312,
+              "y": 18
+            },
+            "time": {
+              "center_x": 262,
+              "center_y": 38,
+              "exists": true,
+              "height": 36,
+              "visible": true,
+              "width": 80,
+              "x": 222,
+              "y": 20
+            },
+            "toast": {
+              "center_x": 452,
+              "center_y": 110,
+              "exists": true,
+              "height": 64,
+              "visible": false,
+              "width": 460,
+              "x": 222,
+              "y": 78
+            },
+            "virtual_joystick": {
+              "center_x": 66.5599975585938,
+              "center_y": 311.440002441406,
+              "exists": true,
+              "height": 109.120002746582,
+              "visible": true,
+              "width": 109.120002746582,
+              "x": 12,
+              "y": 256.880004882812
+            },
+            "xp_bar": {
+              "center_x": 111,
+              "center_y": 62.5,
+              "exists": true,
+              "height": 5,
+              "visible": true,
+              "width": 182,
+              "x": 20,
+              "y": 60
+            },
+            "xp_readout": {
+              "center_x": 170.160003662109,
+              "center_y": 102,
+              "exists": true,
+              "height": 24,
+              "visible": false,
+              "width": 236.320007324219,
+              "x": 52,
+              "y": 90
+            }
+          },
+          "flags": {
+            "ability_text": "旋斬",
+            "auto_upgrade": true,
+            "bond_text": "",
+            "confirmed_touch": true,
+            "elapsed": 1.31252222222222,
+            "formation_cooldown": 0,
+            "formation_id": "wedge",
+            "formation_picker": false,
+            "formation_ready": true,
+            "mission_text": "楔形｜封隙 0/3\n陣記穩定中・11 秒",
+            "notice_text": "拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。",
+            "paused": false,
+            "relay": {
+              "anchor_x": 952.504638671875,
+              "anchor_y": 358.683044433594,
+              "captain_x": 781.704650878906,
+              "captain_y": 358.683044433594,
+              "completed": false,
+              "cycles": 0,
+              "distance": 140,
+              "hold": 0,
+              "marker": "第 1 道・就位 0/2",
+              "open": false,
+              "phase": "waiting",
+              "pressure": "front",
+              "required": "wedge",
+              "saved": false,
+              "settled": 0,
+              "step": 0,
+              "wrong": 0
+            },
+            "seal_saved": false,
+            "seed": 3885047832,
+            "touch_controls_visible": true,
+            "version": "0.31.0-content-r2"
+          },
+          "scope": "hud",
+          "timestamp_msec": 4348,
+          "viewport_height": 390,
+          "viewport_width": 844
+        }
+      },
+      {
+        "name": "formation",
+        "state": {
+          "controls": {
+            "active_ability": {
+              "center_x": 802,
+              "center_y": 336,
+              "exists": true,
+              "height": 60,
+              "visible": true,
+              "width": 60,
+              "x": 772,
+              "y": 306
+            },
+            "auto_battle": {
+              "center_x": 224,
+              "center_y": 216.880004882812,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 136,
+              "x": 156,
+              "y": 188.880004882812
+            },
+            "equipment_menu": {
+              "center_x": 223.119995117188,
+              "center_y": 344,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 44,
+              "x": 201.119995117188,
+              "y": 322
+            },
+            "formation": {
+              "center_x": 802,
+              "center_y": 274,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 64,
+              "x": 770,
+              "y": 252
+            },
+            "formation_cancel": {
+              "center_x": 651,
+              "center_y": 357,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 340,
+              "x": 481,
+              "y": 335
+            },
+            "formation_ring": {
+              "center_x": 651,
+              "center_y": 232,
+              "exists": true,
+              "height": 58,
+              "visible": true,
+              "width": 340,
+              "x": 481,
+              "y": 203
+            },
+            "formation_scatter": {
+              "center_x": 651,
+              "center_y": 298,
+              "exists": true,
+              "height": 66,
+              "visible": true,
+              "width": 340,
+              "x": 481,
+              "y": 265
+            },
+            "formation_wedge": {
+              "center_x": 651,
+              "center_y": 170,
+              "exists": true,
+              "height": 58,
+              "visible": true,
+              "width": 340,
+              "x": 481,
+              "y": 141
+            },
+            "hp_label": {
+              "center_x": 84,
+              "center_y": 36.5,
+              "exists": true,
+              "height": 23,
+              "visible": true,
+              "width": 80,
+              "x": 44,
+              "y": 25
+            },
+            "hud_panel": {
+              "center_x": 111,
+              "center_y": 44,
+              "exists": true,
+              "height": 52,
+              "visible": true,
+              "width": 202,
+              "x": 10,
+              "y": 18
+            },
+            "level_label": {
+              "center_x": 182,
+              "center_y": 38,
+              "exists": true,
+              "height": 20,
+              "visible": true,
+              "width": 24,
+              "x": 170,
+              "y": 28
+            },
+            "mission_text": {
+              "center_x": 491,
+              "center_y": 45.5,
+              "exists": true,
+              "height": 55,
+              "visible": true,
+              "width": 358,
+              "x": 312,
+              "y": 18
+            },
+            "pause": {
+              "center_x": 815,
+              "center_y": 40,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 54,
+              "x": 788,
+              "y": 18
+            },
+            "pause_achievements_tab": {
+              "center_x": 258.666656494141,
+              "center_y": 95,
+              "exists": true,
+              "height": 66,
+              "visible": false,
+              "width": 157.33332824707,
+              "x": 180,
+              "y": 62
+            },
+            "pause_auto_battle": {
+              "center_x": 194,
+              "center_y": 150,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 28,
+              "x": 180,
+              "y": 128
+            },
+            "pause_high_contrast": {
+              "center_x": 229.5,
+              "center_y": 150,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 99,
+              "x": 180,
+              "y": 128
+            },
+            "pause_overlay": {
+              "center_x": 422,
+              "center_y": 195,
+              "exists": true,
+              "height": 366,
+              "visible": false,
+              "width": 520,
+              "x": 162,
+              "y": 12
+            },
+            "pause_resume": {
+              "center_x": 298.5,
+              "center_y": 341,
+              "exists": true,
+              "height": 66,
+              "visible": false,
+              "width": 237,
+              "x": 180,
+              "y": 308
+            },
+            "pause_return": {
+              "center_x": 545.5,
+              "center_y": 341,
+              "exists": true,
+              "height": 66,
+              "visible": false,
+              "width": 237,
+              "x": 427,
+              "y": 308
+            },
+            "pause_run_tab": {
+              "center_x": 258.666656494141,
+              "center_y": 95,
+              "exists": true,
+              "height": 66,
+              "visible": false,
+              "width": 157.33332824707,
+              "x": 180,
+              "y": 62
+            },
+            "pause_settings_tab": {
+              "center_x": 258.666656494141,
+              "center_y": 95,
+              "exists": true,
+              "height": 66,
+              "visible": false,
+              "width": 157.33332824707,
+              "x": 180,
+              "y": 62
+            },
+            "pause_ui_scale": {
+              "center_x": 300,
+              "center_y": 150,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 240,
+              "x": 180,
+              "y": 128
+            },
+            "quick_controls": {
+              "center_x": 616,
+              "center_y": 174,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 180,
+              "x": 526,
+              "y": 146
+            },
+            "quick_joystick_size": {
+              "center_x": 678,
+              "center_y": 174,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 56,
+              "x": 650,
+              "y": 146
+            },
+            "quick_mute": {
+              "center_x": 554,
+              "center_y": 174,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 56,
+              "x": 526,
+              "y": 146
+            },
+            "quick_screen_shake": {
+              "center_x": 616,
+              "center_y": 174,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 56,
+              "x": 588,
+              "y": 146
+            },
+            "score": {
+              "center_x": 730,
+              "center_y": 40,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 100,
+              "x": 680,
+              "y": 18
+            },
+            "summon": {
+              "center_x": 161.119995117188,
+              "center_y": 344,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 64,
+              "x": 129.119995117188,
+              "y": 322
+            },
+            "tactical_hint": {
+              "center_x": 491,
+              "center_y": 45.5,
+              "exists": true,
+              "height": 55,
+              "visible": true,
+              "width": 358,
+              "x": 312,
+              "y": 18
+            },
+            "time": {
+              "center_x": 262,
+              "center_y": 38,
+              "exists": true,
+              "height": 36,
+              "visible": true,
+              "width": 80,
+              "x": 222,
+              "y": 20
+            },
+            "toast": {
+              "center_x": 452,
+              "center_y": 110,
+              "exists": true,
+              "height": 64,
+              "visible": false,
+              "width": 460,
+              "x": 222,
+              "y": 78
+            },
+            "virtual_joystick": {
+              "center_x": 66.5599975585938,
+              "center_y": 311.440002441406,
+              "exists": true,
+              "height": 109.120002746582,
+              "visible": true,
+              "width": 109.120002746582,
+              "x": 12,
+              "y": 256.880004882812
+            },
+            "xp_bar": {
+              "center_x": 111,
+              "center_y": 62.5,
+              "exists": true,
+              "height": 5,
+              "visible": true,
+              "width": 182,
+              "x": 20,
+              "y": 60
+            },
+            "xp_readout": {
+              "center_x": 170.160003662109,
+              "center_y": 102,
+              "exists": true,
+              "height": 24,
+              "visible": false,
+              "width": 236.320007324219,
+              "x": 52,
+              "y": 90
+            }
+          },
+          "flags": {
+            "ability_text": "旋斬",
+            "auto_upgrade": true,
+            "bond_text": "",
+            "confirmed_touch": true,
+            "elapsed": 2.43023333333333,
+            "formation_cooldown": 0,
+            "formation_id": "wedge",
+            "formation_picker": true,
+            "formation_ready": true,
+            "mission_text": "楔形｜封隙 0/3\n陣記穩定中・10 秒",
+            "notice_text": "拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。",
+            "paused": false,
+            "relay": {
+              "anchor_x": 948.449401855469,
+              "anchor_y": 361.65087890625,
+              "captain_x": 777.6494140625,
+              "captain_y": 361.65087890625,
+              "completed": false,
+              "cycles": 0,
+              "distance": 140,
+              "hold": 0,
+              "marker": "第 1 道・就位 0/2",
+              "open": false,
+              "phase": "waiting",
+              "pressure": "front",
+              "required": "wedge",
+              "saved": false,
+              "settled": 0,
+              "step": 0,
+              "wrong": 0
+            },
+            "seal_saved": false,
+            "seed": 3885047832,
+            "touch_controls_visible": true,
+            "version": "0.31.0-content-r2"
+          },
+          "scope": "hud",
+          "timestamp_msec": 5973,
+          "viewport_height": 390,
+          "viewport_width": 844
+        }
+      },
+      {
+        "name": "pause",
+        "state": {
+          "controls": {
+            "active_ability": {
+              "center_x": 802,
+              "center_y": 336,
+              "exists": true,
+              "height": 60,
+              "visible": true,
+              "width": 60,
+              "x": 772,
+              "y": 306
+            },
+            "auto_battle": {
+              "center_x": 224,
+              "center_y": 216.880004882812,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 136,
+              "x": 156,
+              "y": 188.880004882812
+            },
+            "equipment_menu": {
+              "center_x": 223.119995117188,
+              "center_y": 344,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 44,
+              "x": 201.119995117188,
+              "y": 322
+            },
+            "formation": {
+              "center_x": 802,
+              "center_y": 274,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 64,
+              "x": 770,
+              "y": 252
+            },
+            "formation_cancel": {
+              "center_x": 651,
+              "center_y": 357,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 340,
+              "x": 481,
+              "y": 335
+            },
+            "formation_ring": {
+              "center_x": 651,
+              "center_y": 232,
+              "exists": true,
+              "height": 58,
+              "visible": false,
+              "width": 340,
+              "x": 481,
+              "y": 203
+            },
+            "formation_scatter": {
+              "center_x": 651,
+              "center_y": 298,
+              "exists": true,
+              "height": 66,
+              "visible": false,
+              "width": 340,
+              "x": 481,
+              "y": 265
+            },
+            "formation_wedge": {
+              "center_x": 651,
+              "center_y": 170,
+              "exists": true,
+              "height": 58,
+              "visible": false,
+              "width": 340,
+              "x": 481,
+              "y": 141
+            },
+            "hp_label": {
+              "center_x": 84,
+              "center_y": 36.5,
+              "exists": true,
+              "height": 23,
+              "visible": false,
+              "width": 80,
+              "x": 44,
+              "y": 25
+            },
+            "hud_panel": {
+              "center_x": 111,
+              "center_y": 44,
+              "exists": true,
+              "height": 52,
+              "visible": false,
+              "width": 202,
+              "x": 10,
+              "y": 18
+            },
+            "level_label": {
+              "center_x": 182,
+              "center_y": 38,
+              "exists": true,
+              "height": 20,
+              "visible": false,
+              "width": 24,
+              "x": 170,
+              "y": 28
+            },
+            "mission_text": {
+              "center_x": 491,
+              "center_y": 45.5,
+              "exists": true,
+              "height": 55,
+              "visible": true,
+              "width": 358,
+              "x": 312,
+              "y": 18
+            },
+            "pause": {
+              "center_x": 815,
+              "center_y": 40,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 54,
+              "x": 788,
+              "y": 18
+            },
+            "pause_achievements_tab": {
+              "center_x": 433,
+              "center_y": 88,
+              "exists": true,
+              "height": 52,
+              "visible": true,
+              "width": 158,
+              "x": 354,
+              "y": 62
+            },
+            "pause_auto_battle": {
+              "center_x": 236,
+              "center_y": 150,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 112,
+              "x": 180,
+              "y": 128
+            },
+            "pause_high_contrast": {
+              "center_x": 367,
+              "center_y": 210,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 114,
+              "x": 310,
+              "y": 188
+            },
+            "pause_overlay": {
+              "center_x": 422,
+              "center_y": 195,
+              "exists": true,
+              "height": 366,
+              "visible": true,
+              "width": 520,
+              "x": 162,
+              "y": 12
+            },
+            "pause_resume": {
+              "center_x": 298.5,
+              "center_y": 336,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 237,
+              "x": 180,
+              "y": 308
+            },
+            "pause_return": {
+              "center_x": 545.5,
+              "center_y": 336,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 237,
+              "x": 427,
+              "y": 308
+            },
+            "pause_run_tab": {
+              "center_x": 607,
+              "center_y": 88,
+              "exists": true,
+              "height": 52,
+              "visible": true,
+              "width": 158,
+              "x": 528,
+              "y": 62
+            },
+            "pause_settings_tab": {
+              "center_x": 259,
+              "center_y": 88,
+              "exists": true,
+              "height": 52,
+              "visible": true,
+              "width": 158,
+              "x": 180,
+              "y": 62
+            },
+            "pause_ui_scale": {
+              "center_x": 302,
+              "center_y": 284,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 244,
+              "x": 180,
+              "y": 262
+            },
+            "quick_controls": {
+              "center_x": 616,
+              "center_y": 174,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 180,
+              "x": 526,
+              "y": 146
+            },
+            "quick_joystick_size": {
+              "center_x": 678,
+              "center_y": 174,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 56,
+              "x": 650,
+              "y": 146
+            },
+            "quick_mute": {
+              "center_x": 554,
+              "center_y": 174,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 56,
+              "x": 526,
+              "y": 146
+            },
+            "quick_screen_shake": {
+              "center_x": 616,
+              "center_y": 174,
+              "exists": true,
+              "height": 56,
+              "visible": false,
+              "width": 56,
+              "x": 588,
+              "y": 146
+            },
+            "score": {
+              "center_x": 730,
+              "center_y": 40,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 100,
+              "x": 680,
+              "y": 18
+            },
+            "summon": {
+              "center_x": 161.119995117188,
+              "center_y": 344,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 64,
+              "x": 129.119995117188,
+              "y": 322
+            },
+            "tactical_hint": {
+              "center_x": 491,
+              "center_y": 45.5,
+              "exists": true,
+              "height": 55,
+              "visible": true,
+              "width": 358,
+              "x": 312,
+              "y": 18
+            },
+            "time": {
+              "center_x": 262,
+              "center_y": 38,
+              "exists": true,
+              "height": 36,
+              "visible": false,
+              "width": 80,
+              "x": 222,
+              "y": 20
+            },
+            "toast": {
+              "center_x": 452,
+              "center_y": 110,
+              "exists": true,
+              "height": 64,
+              "visible": false,
+              "width": 460,
+              "x": 222,
+              "y": 78
+            },
+            "virtual_joystick": {
+              "center_x": 66.5599975585938,
+              "center_y": 311.440002441406,
+              "exists": true,
+              "height": 109.120002746582,
+              "visible": true,
+              "width": 109.120002746582,
+              "x": 12,
+              "y": 256.880004882812
+            },
+            "xp_bar": {
+              "center_x": 111,
+              "center_y": 62.5,
+              "exists": true,
+              "height": 5,
+              "visible": false,
+              "width": 182,
+              "x": 20,
+              "y": 60
+            },
+            "xp_readout": {
+              "center_x": 170.160003662109,
+              "center_y": 102,
+              "exists": true,
+              "height": 24,
+              "visible": false,
+              "width": 236.320007324219,
+              "x": 52,
+              "y": 90
+            }
+          },
+          "flags": {
+            "ability_text": "旋斬",
+            "auto_upgrade": true,
+            "bond_text": "",
+            "confirmed_touch": true,
+            "elapsed": 2.97686666666667,
+            "formation_cooldown": 0,
+            "formation_id": "wedge",
+            "formation_picker": false,
+            "formation_ready": true,
+            "mission_text": "楔形｜封隙 0/3\n陣記穩定中・10 秒",
+            "notice_text": "拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。",
+            "paused": true,
+            "relay": {
+              "anchor_x": 947.316772460938,
+              "anchor_y": 361.401306152344,
+              "captain_x": 776.516784667969,
+              "captain_y": 361.401306152344,
+              "completed": false,
+              "cycles": 0,
+              "distance": 140,
+              "hold": 0,
+              "marker": "第 1 道・就位 0/2",
+              "open": false,
+              "phase": "waiting",
+              "pressure": "front",
+              "required": "wedge",
+              "saved": false,
+              "settled": 0,
+              "step": 0,
+              "wrong": 0
+            },
+            "seal_saved": false,
+            "seed": 3885047832,
+            "touch_controls_visible": true,
+            "version": "0.31.0-content-r2"
+          },
+          "scope": "hud",
+          "timestamp_msec": 6855,
+          "viewport_height": 390,
+          "viewport_width": 844
+        }
+      }
+    ],
+    "hud": {
+      "controls": {
+        "active_ability": {
+          "center_x": 802,
+          "center_y": 336,
+          "exists": true,
+          "height": 60,
+          "visible": true,
+          "width": 60,
+          "x": 772,
+          "y": 306
+        },
+        "auto_battle": {
+          "center_x": 224,
+          "center_y": 216.880004882812,
+          "exists": true,
+          "height": 56,
+          "visible": false,
+          "width": 136,
+          "x": 156,
+          "y": 188.880004882812
+        },
+        "equipment_menu": {
+          "center_x": 223.119995117188,
+          "center_y": 344,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 44,
+          "x": 201.119995117188,
+          "y": 322
+        },
+        "formation": {
+          "center_x": 802,
+          "center_y": 274,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 64,
+          "x": 770,
+          "y": 252
+        },
+        "formation_cancel": {
+          "center_x": 651,
+          "center_y": 357,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 340,
+          "x": 481,
+          "y": 335
+        },
+        "formation_ring": {
+          "center_x": 651,
+          "center_y": 232,
+          "exists": true,
+          "height": 58,
+          "visible": false,
+          "width": 340,
+          "x": 481,
+          "y": 203
+        },
+        "formation_scatter": {
+          "center_x": 651,
+          "center_y": 298,
+          "exists": true,
+          "height": 66,
+          "visible": false,
+          "width": 340,
+          "x": 481,
+          "y": 265
+        },
+        "formation_wedge": {
+          "center_x": 651,
+          "center_y": 170,
+          "exists": true,
+          "height": 58,
+          "visible": false,
+          "width": 340,
+          "x": 481,
+          "y": 141
+        },
+        "hp_label": {
+          "center_x": 84,
+          "center_y": 36.5,
+          "exists": true,
+          "height": 23,
+          "visible": false,
+          "width": 80,
+          "x": 44,
+          "y": 25
+        },
+        "hud_panel": {
+          "center_x": 111,
+          "center_y": 44,
+          "exists": true,
+          "height": 52,
+          "visible": false,
+          "width": 202,
+          "x": 10,
+          "y": 18
+        },
+        "level_label": {
+          "center_x": 182,
+          "center_y": 38,
+          "exists": true,
+          "height": 20,
+          "visible": false,
+          "width": 24,
+          "x": 170,
+          "y": 28
+        },
+        "mission_text": {
+          "center_x": 491,
+          "center_y": 45.5,
+          "exists": true,
+          "height": 55,
+          "visible": true,
+          "width": 358,
+          "x": 312,
+          "y": 18
+        },
+        "pause": {
+          "center_x": 815,
+          "center_y": 40,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 54,
+          "x": 788,
+          "y": 18
+        },
+        "pause_achievements_tab": {
+          "center_x": 433,
+          "center_y": 88,
+          "exists": true,
+          "height": 52,
+          "visible": true,
+          "width": 158,
+          "x": 354,
+          "y": 62
+        },
+        "pause_auto_battle": {
+          "center_x": 236,
+          "center_y": 150,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 112,
+          "x": 180,
+          "y": 128
+        },
+        "pause_high_contrast": {
+          "center_x": 367,
+          "center_y": 210,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 114,
+          "x": 310,
+          "y": 188
+        },
+        "pause_overlay": {
+          "center_x": 422,
+          "center_y": 195,
+          "exists": true,
+          "height": 366,
+          "visible": true,
+          "width": 520,
+          "x": 162,
+          "y": 12
+        },
+        "pause_resume": {
+          "center_x": 298.5,
+          "center_y": 336,
+          "exists": true,
+          "height": 56,
+          "visible": true,
+          "width": 237,
+          "x": 180,
+          "y": 308
+        },
+        "pause_return": {
+          "center_x": 545.5,
+          "center_y": 336,
+          "exists": true,
+          "height": 56,
+          "visible": true,
+          "width": 237,
+          "x": 427,
+          "y": 308
+        },
+        "pause_run_tab": {
+          "center_x": 607,
+          "center_y": 88,
+          "exists": true,
+          "height": 52,
+          "visible": true,
+          "width": 158,
+          "x": 528,
+          "y": 62
+        },
+        "pause_settings_tab": {
+          "center_x": 259,
+          "center_y": 88,
+          "exists": true,
+          "height": 52,
+          "visible": true,
+          "width": 158,
+          "x": 180,
+          "y": 62
+        },
+        "pause_ui_scale": {
+          "center_x": 302,
+          "center_y": 284,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 244,
+          "x": 180,
+          "y": 262
+        },
+        "quick_controls": {
+          "center_x": 616,
+          "center_y": 174,
+          "exists": true,
+          "height": 56,
+          "visible": false,
+          "width": 180,
+          "x": 526,
+          "y": 146
+        },
+        "quick_joystick_size": {
+          "center_x": 678,
+          "center_y": 174,
+          "exists": true,
+          "height": 56,
+          "visible": false,
+          "width": 56,
+          "x": 650,
+          "y": 146
+        },
+        "quick_mute": {
+          "center_x": 554,
+          "center_y": 174,
+          "exists": true,
+          "height": 56,
+          "visible": false,
+          "width": 56,
+          "x": 526,
+          "y": 146
+        },
+        "quick_screen_shake": {
+          "center_x": 616,
+          "center_y": 174,
+          "exists": true,
+          "height": 56,
+          "visible": false,
+          "width": 56,
+          "x": 588,
+          "y": 146
+        },
+        "score": {
+          "center_x": 730,
+          "center_y": 40,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 100,
+          "x": 680,
+          "y": 18
+        },
+        "summon": {
+          "center_x": 161.119995117188,
+          "center_y": 344,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 64,
+          "x": 129.119995117188,
+          "y": 322
+        },
+        "tactical_hint": {
+          "center_x": 491,
+          "center_y": 45.5,
+          "exists": true,
+          "height": 55,
+          "visible": true,
+          "width": 358,
+          "x": 312,
+          "y": 18
+        },
+        "time": {
+          "center_x": 262,
+          "center_y": 38,
+          "exists": true,
+          "height": 36,
+          "visible": false,
+          "width": 80,
+          "x": 222,
+          "y": 20
+        },
+        "toast": {
+          "center_x": 452,
+          "center_y": 110,
+          "exists": true,
+          "height": 64,
+          "visible": false,
+          "width": 460,
+          "x": 222,
+          "y": 78
+        },
+        "virtual_joystick": {
+          "center_x": 66.5599975585938,
+          "center_y": 311.440002441406,
+          "exists": true,
+          "height": 109.120002746582,
+          "visible": true,
+          "width": 109.120002746582,
+          "x": 12,
+          "y": 256.880004882812
+        },
+        "xp_bar": {
+          "center_x": 111,
+          "center_y": 62.5,
+          "exists": true,
+          "height": 5,
+          "visible": false,
+          "width": 182,
+          "x": 20,
+          "y": 60
+        },
+        "xp_readout": {
+          "center_x": 170.160003662109,
+          "center_y": 102,
+          "exists": true,
+          "height": 24,
+          "visible": false,
+          "width": 236.320007324219,
+          "x": 52,
+          "y": 90
+        }
+      },
+      "flags": {
+        "ability_text": "旋斬",
+        "auto_upgrade": true,
+        "bond_text": "",
+        "confirmed_touch": true,
+        "elapsed": 2.97686666666667,
+        "formation_cooldown": 0,
+        "formation_id": "wedge",
+        "formation_picker": false,
+        "formation_ready": true,
+        "mission_text": "楔形｜封隙 0/3\n陣記穩定中・10 秒",
+        "notice_text": "拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。",
+        "paused": true,
+        "relay": {
+          "anchor_x": 947.316772460938,
+          "anchor_y": 361.401306152344,
+          "captain_x": 776.516784667969,
+          "captain_y": 361.401306152344,
+          "completed": false,
+          "cycles": 0,
+          "distance": 140,
+          "hold": 0,
+          "marker": "第 1 道・就位 0/2",
+          "open": false,
+          "phase": "waiting",
+          "pressure": "front",
+          "required": "wedge",
+          "saved": false,
+          "settled": 0,
+          "step": 0,
+          "wrong": 0
+        },
+        "seal_saved": false,
+        "seed": 3885047832,
+        "touch_controls_visible": true,
+        "version": "0.31.0-content-r2"
+      },
+      "scope": "hud",
+      "timestamp_msec": 6855,
+      "viewport_height": 390,
+      "viewport_width": 844
+    },
+    "menu": {
+      "controls": {
+        "active_ability": {
+          "center_x": 802,
+          "center_y": 336,
+          "exists": true,
+          "height": 60,
+          "visible": true,
+          "width": 60,
+          "x": 772,
+          "y": 306
+        },
+        "auto_battle": {
+          "center_x": 224,
+          "center_y": 216.880004882812,
+          "exists": true,
+          "height": 56,
+          "visible": false,
+          "width": 136,
+          "x": 156,
+          "y": 188.880004882812
+        },
+        "equipment_menu": {
+          "center_x": 223.119995117188,
+          "center_y": 344,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 44,
+          "x": 201.119995117188,
+          "y": 322
+        },
+        "formation": {
+          "center_x": 802,
+          "center_y": 274,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 64,
+          "x": 770,
+          "y": 252
+        },
+        "formation_cancel": {
+          "center_x": 651,
+          "center_y": 357,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 340,
+          "x": 481,
+          "y": 335
+        },
+        "formation_ring": {
+          "center_x": 651,
+          "center_y": 232,
+          "exists": true,
+          "height": 58,
+          "visible": false,
+          "width": 340,
+          "x": 481,
+          "y": 203
+        },
+        "formation_scatter": {
+          "center_x": 651,
+          "center_y": 298,
+          "exists": true,
+          "height": 66,
+          "visible": false,
+          "width": 340,
+          "x": 481,
+          "y": 265
+        },
+        "formation_wedge": {
+          "center_x": 651,
+          "center_y": 170,
+          "exists": true,
+          "height": 58,
+          "visible": false,
+          "width": 340,
+          "x": 481,
+          "y": 141
+        },
+        "hp_label": {
+          "center_x": 84,
+          "center_y": 36.5,
+          "exists": true,
+          "height": 23,
+          "visible": false,
+          "width": 80,
+          "x": 44,
+          "y": 25
+        },
+        "hud_panel": {
+          "center_x": 111,
+          "center_y": 44,
+          "exists": true,
+          "height": 52,
+          "visible": false,
+          "width": 202,
+          "x": 10,
+          "y": 18
+        },
+        "level_label": {
+          "center_x": 182,
+          "center_y": 38,
+          "exists": true,
+          "height": 20,
+          "visible": false,
+          "width": 24,
+          "x": 170,
+          "y": 28
+        },
+        "mission_text": {
+          "center_x": 491,
+          "center_y": 45.5,
+          "exists": true,
+          "height": 55,
+          "visible": true,
+          "width": 358,
+          "x": 312,
+          "y": 18
+        },
+        "pause": {
+          "center_x": 815,
+          "center_y": 40,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 54,
+          "x": 788,
+          "y": 18
+        },
+        "pause_achievements_tab": {
+          "center_x": 433,
+          "center_y": 88,
+          "exists": true,
+          "height": 52,
+          "visible": true,
+          "width": 158,
+          "x": 354,
+          "y": 62
+        },
+        "pause_auto_battle": {
+          "center_x": 236,
+          "center_y": 150,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 112,
+          "x": 180,
+          "y": 128
+        },
+        "pause_high_contrast": {
+          "center_x": 367,
+          "center_y": 210,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 114,
+          "x": 310,
+          "y": 188
+        },
+        "pause_overlay": {
+          "center_x": 422,
+          "center_y": 195,
+          "exists": true,
+          "height": 366,
+          "visible": true,
+          "width": 520,
+          "x": 162,
+          "y": 12
+        },
+        "pause_resume": {
+          "center_x": 298.5,
+          "center_y": 336,
+          "exists": true,
+          "height": 56,
+          "visible": true,
+          "width": 237,
+          "x": 180,
+          "y": 308
+        },
+        "pause_return": {
+          "center_x": 545.5,
+          "center_y": 336,
+          "exists": true,
+          "height": 56,
+          "visible": true,
+          "width": 237,
+          "x": 427,
+          "y": 308
+        },
+        "pause_run_tab": {
+          "center_x": 607,
+          "center_y": 88,
+          "exists": true,
+          "height": 52,
+          "visible": true,
+          "width": 158,
+          "x": 528,
+          "y": 62
+        },
+        "pause_settings_tab": {
+          "center_x": 259,
+          "center_y": 88,
+          "exists": true,
+          "height": 52,
+          "visible": true,
+          "width": 158,
+          "x": 180,
+          "y": 62
+        },
+        "pause_ui_scale": {
+          "center_x": 302,
+          "center_y": 284,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 244,
+          "x": 180,
+          "y": 262
+        },
+        "quick_controls": {
+          "center_x": 616,
+          "center_y": 174,
+          "exists": true,
+          "height": 56,
+          "visible": false,
+          "width": 180,
+          "x": 526,
+          "y": 146
+        },
+        "quick_joystick_size": {
+          "center_x": 678,
+          "center_y": 174,
+          "exists": true,
+          "height": 56,
+          "visible": false,
+          "width": 56,
+          "x": 650,
+          "y": 146
+        },
+        "quick_mute": {
+          "center_x": 554,
+          "center_y": 174,
+          "exists": true,
+          "height": 56,
+          "visible": false,
+          "width": 56,
+          "x": 526,
+          "y": 146
+        },
+        "quick_screen_shake": {
+          "center_x": 616,
+          "center_y": 174,
+          "exists": true,
+          "height": 56,
+          "visible": false,
+          "width": 56,
+          "x": 588,
+          "y": 146
+        },
+        "score": {
+          "center_x": 730,
+          "center_y": 40,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 100,
+          "x": 680,
+          "y": 18
+        },
+        "summon": {
+          "center_x": 161.119995117188,
+          "center_y": 344,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 64,
+          "x": 129.119995117188,
+          "y": 322
+        },
+        "tactical_hint": {
+          "center_x": 491,
+          "center_y": 45.5,
+          "exists": true,
+          "height": 55,
+          "visible": true,
+          "width": 358,
+          "x": 312,
+          "y": 18
+        },
+        "time": {
+          "center_x": 262,
+          "center_y": 38,
+          "exists": true,
+          "height": 36,
+          "visible": false,
+          "width": 80,
+          "x": 222,
+          "y": 20
+        },
+        "toast": {
+          "center_x": 452,
+          "center_y": 110,
+          "exists": true,
+          "height": 64,
+          "visible": false,
+          "width": 460,
+          "x": 222,
+          "y": 78
+        },
+        "virtual_joystick": {
+          "center_x": 66.5599975585938,
+          "center_y": 311.440002441406,
+          "exists": true,
+          "height": 109.120002746582,
+          "visible": true,
+          "width": 109.120002746582,
+          "x": 12,
+          "y": 256.880004882812
+        },
+        "xp_bar": {
+          "center_x": 111,
+          "center_y": 62.5,
+          "exists": true,
+          "height": 5,
+          "visible": false,
+          "width": 182,
+          "x": 20,
+          "y": 60
+        },
+        "xp_readout": {
+          "center_x": 170.160003662109,
+          "center_y": 102,
+          "exists": true,
+          "height": 24,
+          "visible": false,
+          "width": 236.320007324219,
+          "x": 52,
+          "y": 90
+        }
+      },
+      "flags": {
+        "ability_text": "旋斬",
+        "auto_upgrade": true,
+        "bond_text": "",
+        "confirmed_touch": true,
+        "elapsed": 2.97686666666667,
+        "formation_cooldown": 0,
+        "formation_id": "wedge",
+        "formation_picker": false,
+        "formation_ready": true,
+        "mission_text": "楔形｜封隙 0/3\n陣記穩定中・10 秒",
+        "notice_text": "拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。",
+        "paused": true,
+        "relay": {
+          "anchor_x": 947.316772460938,
+          "anchor_y": 361.401306152344,
+          "captain_x": 776.516784667969,
+          "captain_y": 361.401306152344,
+          "completed": false,
+          "cycles": 0,
+          "distance": 140,
+          "hold": 0,
+          "marker": "第 1 道・就位 0/2",
+          "open": false,
+          "phase": "waiting",
+          "pressure": "front",
+          "required": "wedge",
+          "saved": false,
+          "settled": 0,
+          "step": 0,
+          "wrong": 0
+        },
+        "seal_saved": false,
+        "seed": 3885047832,
+        "touch_controls_visible": true,
+        "version": "0.31.0-content-r2"
+      },
+      "scope": "hud",
+      "timestamp_msec": 6855,
+      "viewport_height": 390,
+      "viewport_width": 844
+    }
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "phase": "matrix",
+    "errors": [],
+    "captures": [
+      {
+        "name": "guide",
+        "state": {
+          "controls": {
+            "achievements": {
+              "center_x": 195.5,
+              "center_y": 448,
+              "exists": true,
+              "height": 64,
+              "visible": true,
+              "width": 352,
+              "x": 19.5,
+              "y": 416
+            },
+            "guide": {
+              "center_x": 285.5,
+              "center_y": 304,
+              "exists": true,
+              "height": 64,
+              "visible": true,
+              "width": 172,
+              "x": 199.5,
+              "y": 272
+            },
+            "meta": {
+              "center_x": 195.5,
+              "center_y": 376,
+              "exists": true,
+              "height": 64,
+              "visible": true,
+              "width": 352,
+              "x": 19.5,
+              "y": 344
+            },
+            "seed_input": {
+              "center_x": 113,
+              "center_y": 606,
+              "exists": true,
+              "height": 76,
+              "visible": true,
+              "width": 187,
+              "x": 19.5,
+              "y": 568
+            },
+            "seed_row": {
+              "center_x": 195,
+              "center_y": 606,
+              "exists": true,
+              "height": 76,
+              "visible": true,
+              "width": 351,
+              "x": 19.5,
+              "y": 568
+            },
+            "seed_start": {
+              "center_x": 296.5,
+              "center_y": 606,
+              "exists": true,
+              "height": 76,
+              "visible": true,
+              "width": 148,
+              "x": 222.5,
+              "y": 568
+            },
+            "settings": {
+              "center_x": 195.5,
+              "center_y": 520,
+              "exists": true,
+              "height": 64,
+              "visible": true,
+              "width": 352,
+              "x": 19.5,
+              "y": 488
+            },
+            "side_close": {
+              "center_x": 298,
+              "center_y": 115.300003051758,
+              "exists": true,
+              "height": 76,
+              "visible": true,
+              "width": 104,
+              "x": 246,
+              "y": 77.3000030517578
+            },
+            "side_panel": {
+              "center_x": 195,
+              "center_y": 444.649993896484,
+              "exists": true,
+              "height": 762.700012207031,
+              "visible": true,
+              "width": 354,
+              "x": 18,
+              "y": 63.2999992370605
+            },
+            "start": {
+              "center_x": 195.5,
+              "center_y": 232,
+              "exists": true,
+              "height": 64,
+              "visible": true,
+              "width": 352,
+              "x": 19.5,
+              "y": 200
+            },
+            "tactical_collection": {
+              "exists": false,
+              "visible": false
+            },
+            "tactical_next": {
+              "exists": false,
+              "visible": false
+            },
+            "tactical_previous": {
+              "exists": false,
+              "visible": false
+            },
+            "world_map": {
+              "center_x": 105.5,
+              "center_y": 304,
+              "exists": true,
+              "height": 64,
+              "visible": true,
+              "width": 172,
+              "x": 19.5,
+              "y": 272
+            }
+          },
+          "flags": {
+            "confirmed_touch": true,
+            "panel_id": "guide",
+            "seal_saved": false,
+            "shards": 0,
+            "side_panel_visible": true,
+            "tactical_page": 0
+          },
+          "scope": "main_menu",
+          "timestamp_msec": 1314,
+          "viewport_height": 844,
+          "viewport_width": 390
+        }
+      },
+      {
+        "name": "battle",
+        "state": {
+          "controls": {
+            "active_ability": {
+              "center_x": 346,
+              "center_y": 778,
+              "exists": true,
+              "height": 64,
+              "visible": true,
+              "width": 64,
+              "x": 314,
+              "y": 746
+            },
+            "auto_battle": {
+              "center_x": 310,
+              "center_y": 552.960021972656,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 136,
+              "x": 242,
+              "y": 514.960021972656
+            },
+            "equipment_menu": {
+              "center_x": 233.040008544922,
+              "center_y": 788,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 44,
+              "x": 211.040008544922,
+              "y": 766
+            },
+            "formation": {
+              "center_x": 346,
+              "center_y": 714,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 64,
+              "x": 314,
+              "y": 692
+            },
+            "formation_cancel": {
+              "center_x": 45,
+              "center_y": 38,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 90,
+              "x": 0,
+              "y": 0
+            },
+            "formation_ring": {
+              "center_x": 130,
+              "center_y": 38,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 260,
+              "x": 0,
+              "y": 0
+            },
+            "formation_scatter": {
+              "center_x": 130,
+              "center_y": 38,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 260,
+              "x": 0,
+              "y": 0
+            },
+            "formation_wedge": {
+              "center_x": 130,
+              "center_y": 38,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 260,
+              "x": 0,
+              "y": 0
+            },
+            "hp_label": {
+              "center_x": 84,
+              "center_y": 52.5,
+              "exists": true,
+              "height": 23,
+              "visible": true,
+              "width": 80,
+              "x": 44,
+              "y": 41
+            },
+            "hud_panel": {
+              "center_x": 105,
+              "center_y": 60,
+              "exists": true,
+              "height": 52,
+              "visible": true,
+              "width": 190,
+              "x": 10,
+              "y": 34
+            },
+            "level_label": {
+              "center_x": 170,
+              "center_y": 54,
+              "exists": true,
+              "height": 20,
+              "visible": true,
+              "width": 24,
+              "x": 158,
+              "y": 44
+            },
+            "mission_text": {
+              "center_x": 240,
+              "center_y": 122,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 280,
+              "x": 100,
+              "y": 94
+            },
+            "pause": {
+              "center_x": 361,
+              "center_y": 56,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 54,
+              "x": 334,
+              "y": 34
+            },
+            "pause_achievements_tab": {
+              "center_x": 83,
+              "center_y": 170,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 106,
+              "x": 30,
+              "y": 132
+            },
+            "pause_auto_battle": {
+              "center_x": 44,
+              "center_y": 220,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 28,
+              "x": 30,
+              "y": 198
+            },
+            "pause_high_contrast": {
+              "center_x": 87,
+              "center_y": 225,
+              "exists": true,
+              "height": 54,
+              "visible": false,
+              "width": 114,
+              "x": 30,
+              "y": 198
+            },
+            "pause_overlay": {
+              "center_x": 195,
+              "center_y": 422,
+              "exists": true,
+              "height": 680,
+              "visible": false,
+              "width": 366,
+              "x": 12,
+              "y": 82
+            },
+            "pause_resume": {
+              "center_x": 110,
+              "center_y": 730,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 160,
+              "x": 30,
+              "y": 692
+            },
+            "pause_return": {
+              "center_x": 280,
+              "center_y": 730,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 160,
+              "x": 200,
+              "y": 692
+            },
+            "pause_run_tab": {
+              "center_x": 83,
+              "center_y": 170,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 106,
+              "x": 30,
+              "y": 132
+            },
+            "pause_settings_tab": {
+              "center_x": 83,
+              "center_y": 170,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 106,
+              "x": 30,
+              "y": 132
+            },
+            "pause_ui_scale": {
+              "center_x": 150,
+              "center_y": 221,
+              "exists": true,
+              "height": 46,
+              "visible": false,
+              "width": 240,
+              "x": 30,
+              "y": 198
+            },
+            "quick_controls": {
+              "center_x": 336,
+              "center_y": 336,
+              "exists": true,
+              "height": 240,
+              "visible": false,
+              "width": 76,
+              "x": 298,
+              "y": 216
+            },
+            "quick_joystick_size": {
+              "center_x": 336,
+              "center_y": 418,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 76,
+              "x": 298,
+              "y": 380
+            },
+            "quick_mute": {
+              "center_x": 336,
+              "center_y": 254,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 76,
+              "x": 298,
+              "y": 216
+            },
+            "quick_screen_shake": {
+              "center_x": 336,
+              "center_y": 336,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 76,
+              "x": 298,
+              "y": 298
+            },
+            "score": {
+              "center_x": 276,
+              "center_y": 56,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 100,
+              "x": 226,
+              "y": 34
+            },
+            "summon": {
+              "center_x": 171.040008544922,
+              "center_y": 788,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 64,
+              "x": 139.040008544922,
+              "y": 766
+            },
+            "tactical_hint": {
+              "center_x": 240,
+              "center_y": 122,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 280,
+              "x": 100,
+              "y": 94
+            },
+            "time": {
+              "center_x": 50,
+              "center_y": 114,
+              "exists": true,
+              "height": 36,
+              "visible": true,
+              "width": 80,
+              "x": 10,
+              "y": 96
+            },
+            "toast": {
+              "center_x": 155,
+              "center_y": 252,
+              "exists": true,
+              "height": 72,
+              "visible": true,
+              "width": 290,
+              "x": 10,
+              "y": 216
+            },
+            "virtual_joystick": {
+              "center_x": 71.5200042724609,
+              "center_y": 750.480041503906,
+              "exists": true,
+              "height": 119.040000915527,
+              "visible": true,
+              "width": 119.040008544922,
+              "x": 12,
+              "y": 690.960021972656
+            },
+            "xp_bar": {
+              "center_x": 105,
+              "center_y": 78.5,
+              "exists": true,
+              "height": 5,
+              "visible": true,
+              "width": 170,
+              "x": 20,
+              "y": 76
+            },
+            "xp_readout": {
+              "center_x": 110,
+              "center_y": 128.5,
+              "exists": true,
+              "height": 45,
+              "visible": false,
+              "width": 116,
+              "x": 52,
+              "y": 106
+            }
+          },
+          "flags": {
+            "ability_text": "旋斬",
+            "auto_upgrade": true,
+            "bond_text": "",
+            "confirmed_touch": true,
+            "elapsed": 1.25723474074074,
+            "formation_cooldown": 0,
+            "formation_id": "wedge",
+            "formation_picker": false,
+            "formation_ready": true,
+            "mission_text": "楔形｜封隙 0/3\n陣記穩定中・11 秒",
+            "notice_text": "拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。",
+            "paused": false,
+            "relay": {
+              "anchor_x": 945.593872070312,
+              "anchor_y": 1380.83544921875,
+              "captain_x": 637.593872070312,
+              "captain_y": 1380.83544921875,
+              "completed": false,
+              "cycles": 0,
+              "distance": 140,
+              "hold": 0,
+              "marker": "第 1 道・就位 0/2",
+              "open": false,
+              "phase": "waiting",
+              "pressure": "front",
+              "required": "wedge",
+              "saved": false,
+              "settled": 0,
+              "step": 0,
+              "wrong": 0
+            },
+            "seal_saved": false,
+            "seed": 2156723116,
+            "touch_controls_visible": true,
+            "version": "0.31.0-content-r2"
+          },
+          "scope": "hud",
+          "timestamp_msec": 4205,
+          "viewport_height": 844,
+          "viewport_width": 390
+        }
+      },
+      {
+        "name": "formation",
+        "state": {
+          "controls": {
+            "active_ability": {
+              "center_x": 346,
+              "center_y": 778,
+              "exists": true,
+              "height": 64,
+              "visible": true,
+              "width": 64,
+              "x": 314,
+              "y": 746
+            },
+            "auto_battle": {
+              "center_x": 310,
+              "center_y": 552.960021972656,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 136,
+              "x": 242,
+              "y": 514.960021972656
+            },
+            "equipment_menu": {
+              "center_x": 233.040008544922,
+              "center_y": 788,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 44,
+              "x": 211.040008544922,
+              "y": 766
+            },
+            "formation": {
+              "center_x": 346,
+              "center_y": 714,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 64,
+              "x": 314,
+              "y": 692
+            },
+            "formation_cancel": {
+              "center_x": 197,
+              "center_y": 811,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 340,
+              "x": 27,
+              "y": 789
+            },
+            "formation_ring": {
+              "center_x": 197,
+              "center_y": 690,
+              "exists": true,
+              "height": 66,
+              "visible": true,
+              "width": 340,
+              "x": 27,
+              "y": 657
+            },
+            "formation_scatter": {
+              "center_x": 197,
+              "center_y": 756,
+              "exists": true,
+              "height": 58,
+              "visible": true,
+              "width": 340,
+              "x": 27,
+              "y": 727
+            },
+            "formation_wedge": {
+              "center_x": 197,
+              "center_y": 624,
+              "exists": true,
+              "height": 58,
+              "visible": true,
+              "width": 340,
+              "x": 27,
+              "y": 595
+            },
+            "hp_label": {
+              "center_x": 84,
+              "center_y": 52.5,
+              "exists": true,
+              "height": 23,
+              "visible": true,
+              "width": 80,
+              "x": 44,
+              "y": 41
+            },
+            "hud_panel": {
+              "center_x": 105,
+              "center_y": 60,
+              "exists": true,
+              "height": 52,
+              "visible": true,
+              "width": 190,
+              "x": 10,
+              "y": 34
+            },
+            "level_label": {
+              "center_x": 170,
+              "center_y": 54,
+              "exists": true,
+              "height": 20,
+              "visible": true,
+              "width": 24,
+              "x": 158,
+              "y": 44
+            },
+            "mission_text": {
+              "center_x": 240,
+              "center_y": 122,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 280,
+              "x": 100,
+              "y": 94
+            },
+            "pause": {
+              "center_x": 361,
+              "center_y": 56,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 54,
+              "x": 334,
+              "y": 34
+            },
+            "pause_achievements_tab": {
+              "center_x": 83,
+              "center_y": 170,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 106,
+              "x": 30,
+              "y": 132
+            },
+            "pause_auto_battle": {
+              "center_x": 44,
+              "center_y": 220,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 28,
+              "x": 30,
+              "y": 198
+            },
+            "pause_high_contrast": {
+              "center_x": 87,
+              "center_y": 225,
+              "exists": true,
+              "height": 54,
+              "visible": false,
+              "width": 114,
+              "x": 30,
+              "y": 198
+            },
+            "pause_overlay": {
+              "center_x": 195,
+              "center_y": 422,
+              "exists": true,
+              "height": 680,
+              "visible": false,
+              "width": 366,
+              "x": 12,
+              "y": 82
+            },
+            "pause_resume": {
+              "center_x": 110,
+              "center_y": 730,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 160,
+              "x": 30,
+              "y": 692
+            },
+            "pause_return": {
+              "center_x": 280,
+              "center_y": 730,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 160,
+              "x": 200,
+              "y": 692
+            },
+            "pause_run_tab": {
+              "center_x": 83,
+              "center_y": 170,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 106,
+              "x": 30,
+              "y": 132
+            },
+            "pause_settings_tab": {
+              "center_x": 83,
+              "center_y": 170,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 106,
+              "x": 30,
+              "y": 132
+            },
+            "pause_ui_scale": {
+              "center_x": 150,
+              "center_y": 221,
+              "exists": true,
+              "height": 46,
+              "visible": false,
+              "width": 240,
+              "x": 30,
+              "y": 198
+            },
+            "quick_controls": {
+              "center_x": 336,
+              "center_y": 336,
+              "exists": true,
+              "height": 240,
+              "visible": false,
+              "width": 76,
+              "x": 298,
+              "y": 216
+            },
+            "quick_joystick_size": {
+              "center_x": 336,
+              "center_y": 418,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 76,
+              "x": 298,
+              "y": 380
+            },
+            "quick_mute": {
+              "center_x": 336,
+              "center_y": 254,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 76,
+              "x": 298,
+              "y": 216
+            },
+            "quick_screen_shake": {
+              "center_x": 336,
+              "center_y": 336,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 76,
+              "x": 298,
+              "y": 298
+            },
+            "score": {
+              "center_x": 276,
+              "center_y": 56,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 100,
+              "x": 226,
+              "y": 34
+            },
+            "summon": {
+              "center_x": 171.040008544922,
+              "center_y": 788,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 64,
+              "x": 139.040008544922,
+              "y": 766
+            },
+            "tactical_hint": {
+              "center_x": 240,
+              "center_y": 122,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 280,
+              "x": 100,
+              "y": 94
+            },
+            "time": {
+              "center_x": 50,
+              "center_y": 114,
+              "exists": true,
+              "height": 36,
+              "visible": true,
+              "width": 80,
+              "x": 10,
+              "y": 96
+            },
+            "toast": {
+              "center_x": 155,
+              "center_y": 252,
+              "exists": true,
+              "height": 72,
+              "visible": false,
+              "width": 290,
+              "x": 10,
+              "y": 216
+            },
+            "virtual_joystick": {
+              "center_x": 71.5200042724609,
+              "center_y": 750.480041503906,
+              "exists": true,
+              "height": 119.040000915527,
+              "visible": true,
+              "width": 119.040008544922,
+              "x": 12,
+              "y": 690.960021972656
+            },
+            "xp_bar": {
+              "center_x": 105,
+              "center_y": 78.5,
+              "exists": true,
+              "height": 5,
+              "visible": true,
+              "width": 170,
+              "x": 20,
+              "y": 76
+            },
+            "xp_readout": {
+              "center_x": 110,
+              "center_y": 128.5,
+              "exists": true,
+              "height": 45,
+              "visible": false,
+              "width": 116,
+              "x": 52,
+              "y": 106
+            }
+          },
+          "flags": {
+            "ability_text": "旋斬",
+            "auto_upgrade": true,
+            "bond_text": "",
+            "confirmed_touch": true,
+            "elapsed": 2.45788007407407,
+            "formation_cooldown": 0,
+            "formation_id": "wedge",
+            "formation_picker": true,
+            "formation_ready": true,
+            "mission_text": "楔形｜封隙 0/3\n陣記穩定中・10 秒",
+            "notice_text": "拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。",
+            "paused": false,
+            "relay": {
+              "anchor_x": 948.029724121094,
+              "anchor_y": 1385.00207519531,
+              "captain_x": 640.029724121094,
+              "captain_y": 1385.00207519531,
+              "completed": false,
+              "cycles": 0,
+              "distance": 140,
+              "hold": 0,
+              "marker": "第 1 道・就位 0/2",
+              "open": false,
+              "phase": "waiting",
+              "pressure": "front",
+              "required": "wedge",
+              "saved": false,
+              "settled": 0,
+              "step": 0,
+              "wrong": 0
+            },
+            "seal_saved": false,
+            "seed": 2156723116,
+            "touch_controls_visible": true,
+            "version": "0.31.0-content-r2"
+          },
+          "scope": "hud",
+          "timestamp_msec": 5940,
+          "viewport_height": 844,
+          "viewport_width": 390
+        }
+      },
+      {
+        "name": "pause",
+        "state": {
+          "controls": {
+            "active_ability": {
+              "center_x": 346,
+              "center_y": 778,
+              "exists": true,
+              "height": 64,
+              "visible": true,
+              "width": 64,
+              "x": 314,
+              "y": 746
+            },
+            "auto_battle": {
+              "center_x": 310,
+              "center_y": 552.960021972656,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 136,
+              "x": 242,
+              "y": 514.960021972656
+            },
+            "equipment_menu": {
+              "center_x": 233.040008544922,
+              "center_y": 788,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 44,
+              "x": 211.040008544922,
+              "y": 766
+            },
+            "formation": {
+              "center_x": 346,
+              "center_y": 714,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 64,
+              "x": 314,
+              "y": 692
+            },
+            "formation_cancel": {
+              "center_x": 197,
+              "center_y": 811,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 340,
+              "x": 27,
+              "y": 789
+            },
+            "formation_ring": {
+              "center_x": 197,
+              "center_y": 690,
+              "exists": true,
+              "height": 66,
+              "visible": false,
+              "width": 340,
+              "x": 27,
+              "y": 657
+            },
+            "formation_scatter": {
+              "center_x": 197,
+              "center_y": 756,
+              "exists": true,
+              "height": 58,
+              "visible": false,
+              "width": 340,
+              "x": 27,
+              "y": 727
+            },
+            "formation_wedge": {
+              "center_x": 197,
+              "center_y": 624,
+              "exists": true,
+              "height": 58,
+              "visible": false,
+              "width": 340,
+              "x": 27,
+              "y": 595
+            },
+            "hp_label": {
+              "center_x": 84,
+              "center_y": 52.5,
+              "exists": true,
+              "height": 23,
+              "visible": false,
+              "width": 80,
+              "x": 44,
+              "y": 41
+            },
+            "hud_panel": {
+              "center_x": 105,
+              "center_y": 60,
+              "exists": true,
+              "height": 52,
+              "visible": false,
+              "width": 190,
+              "x": 10,
+              "y": 34
+            },
+            "level_label": {
+              "center_x": 170,
+              "center_y": 54,
+              "exists": true,
+              "height": 20,
+              "visible": false,
+              "width": 24,
+              "x": 158,
+              "y": 44
+            },
+            "mission_text": {
+              "center_x": 240,
+              "center_y": 122,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 280,
+              "x": 100,
+              "y": 94
+            },
+            "pause": {
+              "center_x": 361,
+              "center_y": 56,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 54,
+              "x": 334,
+              "y": 34
+            },
+            "pause_achievements_tab": {
+              "center_x": 205,
+              "center_y": 158,
+              "exists": true,
+              "height": 52,
+              "visible": true,
+              "width": 106,
+              "x": 152,
+              "y": 132
+            },
+            "pause_auto_battle": {
+              "center_x": 86,
+              "center_y": 220,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 112,
+              "x": 30,
+              "y": 198
+            },
+            "pause_high_contrast": {
+              "center_x": 97,
+              "center_y": 485,
+              "exists": true,
+              "height": 54,
+              "visible": true,
+              "width": 134,
+              "x": 30,
+              "y": 458
+            },
+            "pause_overlay": {
+              "center_x": 195,
+              "center_y": 422,
+              "exists": true,
+              "height": 680,
+              "visible": true,
+              "width": 366,
+              "x": 12,
+              "y": 82
+            },
+            "pause_resume": {
+              "center_x": 110,
+              "center_y": 730,
+              "exists": true,
+              "height": 76,
+              "visible": true,
+              "width": 160,
+              "x": 30,
+              "y": 692
+            },
+            "pause_return": {
+              "center_x": 280,
+              "center_y": 730,
+              "exists": true,
+              "height": 76,
+              "visible": true,
+              "width": 160,
+              "x": 200,
+              "y": 692
+            },
+            "pause_run_tab": {
+              "center_x": 327,
+              "center_y": 158,
+              "exists": true,
+              "height": 52,
+              "visible": true,
+              "width": 106,
+              "x": 274,
+              "y": 132
+            },
+            "pause_settings_tab": {
+              "center_x": 83,
+              "center_y": 158,
+              "exists": true,
+              "height": 52,
+              "visible": true,
+              "width": 106,
+              "x": 30,
+              "y": 132
+            },
+            "pause_ui_scale": {
+              "center_x": 195,
+              "center_y": 582,
+              "exists": true,
+              "height": 46,
+              "visible": true,
+              "width": 330,
+              "x": 30,
+              "y": 559
+            },
+            "quick_controls": {
+              "center_x": 336,
+              "center_y": 336,
+              "exists": true,
+              "height": 240,
+              "visible": false,
+              "width": 76,
+              "x": 298,
+              "y": 216
+            },
+            "quick_joystick_size": {
+              "center_x": 336,
+              "center_y": 418,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 76,
+              "x": 298,
+              "y": 380
+            },
+            "quick_mute": {
+              "center_x": 336,
+              "center_y": 254,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 76,
+              "x": 298,
+              "y": 216
+            },
+            "quick_screen_shake": {
+              "center_x": 336,
+              "center_y": 336,
+              "exists": true,
+              "height": 76,
+              "visible": false,
+              "width": 76,
+              "x": 298,
+              "y": 298
+            },
+            "score": {
+              "center_x": 276,
+              "center_y": 56,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 100,
+              "x": 226,
+              "y": 34
+            },
+            "summon": {
+              "center_x": 171.040008544922,
+              "center_y": 788,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 64,
+              "x": 139.040008544922,
+              "y": 766
+            },
+            "tactical_hint": {
+              "center_x": 240,
+              "center_y": 122,
+              "exists": true,
+              "height": 56,
+              "visible": true,
+              "width": 280,
+              "x": 100,
+              "y": 94
+            },
+            "time": {
+              "center_x": 50,
+              "center_y": 114,
+              "exists": true,
+              "height": 36,
+              "visible": false,
+              "width": 80,
+              "x": 10,
+              "y": 96
+            },
+            "toast": {
+              "center_x": 155,
+              "center_y": 252,
+              "exists": true,
+              "height": 72,
+              "visible": false,
+              "width": 290,
+              "x": 10,
+              "y": 216
+            },
+            "virtual_joystick": {
+              "center_x": 71.5200042724609,
+              "center_y": 750.480041503906,
+              "exists": true,
+              "height": 119.040000915527,
+              "visible": true,
+              "width": 119.040008544922,
+              "x": 12,
+              "y": 690.960021972656
+            },
+            "xp_bar": {
+              "center_x": 105,
+              "center_y": 78.5,
+              "exists": true,
+              "height": 5,
+              "visible": false,
+              "width": 170,
+              "x": 20,
+              "y": 76
+            },
+            "xp_readout": {
+              "center_x": 110,
+              "center_y": 128.5,
+              "exists": true,
+              "height": 45,
+              "visible": false,
+              "width": 116,
+              "x": 52,
+              "y": 106
+            }
+          },
+          "flags": {
+            "ability_text": "旋斬",
+            "auto_upgrade": true,
+            "bond_text": "",
+            "confirmed_touch": true,
+            "elapsed": 2.91364674074074,
+            "formation_cooldown": 0,
+            "formation_id": "wedge",
+            "formation_picker": false,
+            "formation_ready": true,
+            "mission_text": "楔形｜封隙 0/3\n陣記穩定中・10 秒",
+            "notice_text": "拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。",
+            "paused": true,
+            "relay": {
+              "anchor_x": 948,
+              "anchor_y": 1384.99987792969,
+              "captain_x": 640,
+              "captain_y": 1384.99987792969,
+              "completed": false,
+              "cycles": 0,
+              "distance": 140,
+              "hold": 0,
+              "marker": "第 1 道・就位 0/2",
+              "open": false,
+              "phase": "waiting",
+              "pressure": "front",
+              "required": "wedge",
+              "saved": false,
+              "settled": 0,
+              "step": 0,
+              "wrong": 0
+            },
+            "seal_saved": false,
+            "seed": 2156723116,
+            "touch_controls_visible": true,
+            "version": "0.31.0-content-r2"
+          },
+          "scope": "hud",
+          "timestamp_msec": 6734,
+          "viewport_height": 844,
+          "viewport_width": 390
+        }
+      }
+    ],
+    "hud": {
+      "controls": {
+        "active_ability": {
+          "center_x": 346,
+          "center_y": 778,
+          "exists": true,
+          "height": 64,
+          "visible": true,
+          "width": 64,
+          "x": 314,
+          "y": 746
+        },
+        "auto_battle": {
+          "center_x": 310,
+          "center_y": 552.960021972656,
+          "exists": true,
+          "height": 76,
+          "visible": false,
+          "width": 136,
+          "x": 242,
+          "y": 514.960021972656
+        },
+        "equipment_menu": {
+          "center_x": 233.040008544922,
+          "center_y": 788,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 44,
+          "x": 211.040008544922,
+          "y": 766
+        },
+        "formation": {
+          "center_x": 346,
+          "center_y": 714,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 64,
+          "x": 314,
+          "y": 692
+        },
+        "formation_cancel": {
+          "center_x": 197,
+          "center_y": 811,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 340,
+          "x": 27,
+          "y": 789
+        },
+        "formation_ring": {
+          "center_x": 197,
+          "center_y": 690,
+          "exists": true,
+          "height": 66,
+          "visible": false,
+          "width": 340,
+          "x": 27,
+          "y": 657
+        },
+        "formation_scatter": {
+          "center_x": 197,
+          "center_y": 756,
+          "exists": true,
+          "height": 58,
+          "visible": false,
+          "width": 340,
+          "x": 27,
+          "y": 727
+        },
+        "formation_wedge": {
+          "center_x": 197,
+          "center_y": 624,
+          "exists": true,
+          "height": 58,
+          "visible": false,
+          "width": 340,
+          "x": 27,
+          "y": 595
+        },
+        "hp_label": {
+          "center_x": 84,
+          "center_y": 52.5,
+          "exists": true,
+          "height": 23,
+          "visible": false,
+          "width": 80,
+          "x": 44,
+          "y": 41
+        },
+        "hud_panel": {
+          "center_x": 105,
+          "center_y": 60,
+          "exists": true,
+          "height": 52,
+          "visible": false,
+          "width": 190,
+          "x": 10,
+          "y": 34
+        },
+        "level_label": {
+          "center_x": 170,
+          "center_y": 54,
+          "exists": true,
+          "height": 20,
+          "visible": false,
+          "width": 24,
+          "x": 158,
+          "y": 44
+        },
+        "mission_text": {
+          "center_x": 240,
+          "center_y": 122,
+          "exists": true,
+          "height": 56,
+          "visible": true,
+          "width": 280,
+          "x": 100,
+          "y": 94
+        },
+        "pause": {
+          "center_x": 361,
+          "center_y": 56,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 54,
+          "x": 334,
+          "y": 34
+        },
+        "pause_achievements_tab": {
+          "center_x": 205,
+          "center_y": 158,
+          "exists": true,
+          "height": 52,
+          "visible": true,
+          "width": 106,
+          "x": 152,
+          "y": 132
+        },
+        "pause_auto_battle": {
+          "center_x": 86,
+          "center_y": 220,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 112,
+          "x": 30,
+          "y": 198
+        },
+        "pause_high_contrast": {
+          "center_x": 97,
+          "center_y": 485,
+          "exists": true,
+          "height": 54,
+          "visible": true,
+          "width": 134,
+          "x": 30,
+          "y": 458
+        },
+        "pause_overlay": {
+          "center_x": 195,
+          "center_y": 422,
+          "exists": true,
+          "height": 680,
+          "visible": true,
+          "width": 366,
+          "x": 12,
+          "y": 82
+        },
+        "pause_resume": {
+          "center_x": 110,
+          "center_y": 730,
+          "exists": true,
+          "height": 76,
+          "visible": true,
+          "width": 160,
+          "x": 30,
+          "y": 692
+        },
+        "pause_return": {
+          "center_x": 280,
+          "center_y": 730,
+          "exists": true,
+          "height": 76,
+          "visible": true,
+          "width": 160,
+          "x": 200,
+          "y": 692
+        },
+        "pause_run_tab": {
+          "center_x": 327,
+          "center_y": 158,
+          "exists": true,
+          "height": 52,
+          "visible": true,
+          "width": 106,
+          "x": 274,
+          "y": 132
+        },
+        "pause_settings_tab": {
+          "center_x": 83,
+          "center_y": 158,
+          "exists": true,
+          "height": 52,
+          "visible": true,
+          "width": 106,
+          "x": 30,
+          "y": 132
+        },
+        "pause_ui_scale": {
+          "center_x": 195,
+          "center_y": 582,
+          "exists": true,
+          "height": 46,
+          "visible": true,
+          "width": 330,
+          "x": 30,
+          "y": 559
+        },
+        "quick_controls": {
+          "center_x": 336,
+          "center_y": 336,
+          "exists": true,
+          "height": 240,
+          "visible": false,
+          "width": 76,
+          "x": 298,
+          "y": 216
+        },
+        "quick_joystick_size": {
+          "center_x": 336,
+          "center_y": 418,
+          "exists": true,
+          "height": 76,
+          "visible": false,
+          "width": 76,
+          "x": 298,
+          "y": 380
+        },
+        "quick_mute": {
+          "center_x": 336,
+          "center_y": 254,
+          "exists": true,
+          "height": 76,
+          "visible": false,
+          "width": 76,
+          "x": 298,
+          "y": 216
+        },
+        "quick_screen_shake": {
+          "center_x": 336,
+          "center_y": 336,
+          "exists": true,
+          "height": 76,
+          "visible": false,
+          "width": 76,
+          "x": 298,
+          "y": 298
+        },
+        "score": {
+          "center_x": 276,
+          "center_y": 56,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 100,
+          "x": 226,
+          "y": 34
+        },
+        "summon": {
+          "center_x": 171.040008544922,
+          "center_y": 788,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 64,
+          "x": 139.040008544922,
+          "y": 766
+        },
+        "tactical_hint": {
+          "center_x": 240,
+          "center_y": 122,
+          "exists": true,
+          "height": 56,
+          "visible": true,
+          "width": 280,
+          "x": 100,
+          "y": 94
+        },
+        "time": {
+          "center_x": 50,
+          "center_y": 114,
+          "exists": true,
+          "height": 36,
+          "visible": false,
+          "width": 80,
+          "x": 10,
+          "y": 96
+        },
+        "toast": {
+          "center_x": 155,
+          "center_y": 252,
+          "exists": true,
+          "height": 72,
+          "visible": false,
+          "width": 290,
+          "x": 10,
+          "y": 216
+        },
+        "virtual_joystick": {
+          "center_x": 71.5200042724609,
+          "center_y": 750.480041503906,
+          "exists": true,
+          "height": 119.040000915527,
+          "visible": true,
+          "width": 119.040008544922,
+          "x": 12,
+          "y": 690.960021972656
+        },
+        "xp_bar": {
+          "center_x": 105,
+          "center_y": 78.5,
+          "exists": true,
+          "height": 5,
+          "visible": false,
+          "width": 170,
+          "x": 20,
+          "y": 76
+        },
+        "xp_readout": {
+          "center_x": 110,
+          "center_y": 128.5,
+          "exists": true,
+          "height": 45,
+          "visible": false,
+          "width": 116,
+          "x": 52,
+          "y": 106
+        }
+      },
+      "flags": {
+        "ability_text": "旋斬",
+        "auto_upgrade": true,
+        "bond_text": "",
+        "confirmed_touch": true,
+        "elapsed": 2.91364674074074,
+        "formation_cooldown": 0,
+        "formation_id": "wedge",
+        "formation_picker": false,
+        "formation_ready": true,
+        "mission_text": "楔形｜封隙 0/3\n陣記穩定中・10 秒",
+        "notice_text": "拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。",
+        "paused": true,
+        "relay": {
+          "anchor_x": 948,
+          "anchor_y": 1384.99987792969,
+          "captain_x": 640,
+          "captain_y": 1384.99987792969,
+          "completed": false,
+          "cycles": 0,
+          "distance": 140,
+          "hold": 0,
+          "marker": "第 1 道・就位 0/2",
+          "open": false,
+          "phase": "waiting",
+          "pressure": "front",
+          "required": "wedge",
+          "saved": false,
+          "settled": 0,
+          "step": 0,
+          "wrong": 0
+        },
+        "seal_saved": false,
+        "seed": 2156723116,
+        "touch_controls_visible": true,
+        "version": "0.31.0-content-r2"
+      },
+      "scope": "hud",
+      "timestamp_msec": 6734,
+      "viewport_height": 844,
+      "viewport_width": 390
+    },
+    "menu": {
+      "controls": {
+        "active_ability": {
+          "center_x": 346,
+          "center_y": 778,
+          "exists": true,
+          "height": 64,
+          "visible": true,
+          "width": 64,
+          "x": 314,
+          "y": 746
+        },
+        "auto_battle": {
+          "center_x": 310,
+          "center_y": 552.960021972656,
+          "exists": true,
+          "height": 76,
+          "visible": false,
+          "width": 136,
+          "x": 242,
+          "y": 514.960021972656
+        },
+        "equipment_menu": {
+          "center_x": 233.040008544922,
+          "center_y": 788,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 44,
+          "x": 211.040008544922,
+          "y": 766
+        },
+        "formation": {
+          "center_x": 346,
+          "center_y": 714,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 64,
+          "x": 314,
+          "y": 692
+        },
+        "formation_cancel": {
+          "center_x": 197,
+          "center_y": 811,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 340,
+          "x": 27,
+          "y": 789
+        },
+        "formation_ring": {
+          "center_x": 197,
+          "center_y": 690,
+          "exists": true,
+          "height": 66,
+          "visible": false,
+          "width": 340,
+          "x": 27,
+          "y": 657
+        },
+        "formation_scatter": {
+          "center_x": 197,
+          "center_y": 756,
+          "exists": true,
+          "height": 58,
+          "visible": false,
+          "width": 340,
+          "x": 27,
+          "y": 727
+        },
+        "formation_wedge": {
+          "center_x": 197,
+          "center_y": 624,
+          "exists": true,
+          "height": 58,
+          "visible": false,
+          "width": 340,
+          "x": 27,
+          "y": 595
+        },
+        "hp_label": {
+          "center_x": 84,
+          "center_y": 52.5,
+          "exists": true,
+          "height": 23,
+          "visible": false,
+          "width": 80,
+          "x": 44,
+          "y": 41
+        },
+        "hud_panel": {
+          "center_x": 105,
+          "center_y": 60,
+          "exists": true,
+          "height": 52,
+          "visible": false,
+          "width": 190,
+          "x": 10,
+          "y": 34
+        },
+        "level_label": {
+          "center_x": 170,
+          "center_y": 54,
+          "exists": true,
+          "height": 20,
+          "visible": false,
+          "width": 24,
+          "x": 158,
+          "y": 44
+        },
+        "mission_text": {
+          "center_x": 240,
+          "center_y": 122,
+          "exists": true,
+          "height": 56,
+          "visible": true,
+          "width": 280,
+          "x": 100,
+          "y": 94
+        },
+        "pause": {
+          "center_x": 361,
+          "center_y": 56,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 54,
+          "x": 334,
+          "y": 34
+        },
+        "pause_achievements_tab": {
+          "center_x": 205,
+          "center_y": 158,
+          "exists": true,
+          "height": 52,
+          "visible": true,
+          "width": 106,
+          "x": 152,
+          "y": 132
+        },
+        "pause_auto_battle": {
+          "center_x": 86,
+          "center_y": 220,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 112,
+          "x": 30,
+          "y": 198
+        },
+        "pause_high_contrast": {
+          "center_x": 97,
+          "center_y": 485,
+          "exists": true,
+          "height": 54,
+          "visible": true,
+          "width": 134,
+          "x": 30,
+          "y": 458
+        },
+        "pause_overlay": {
+          "center_x": 195,
+          "center_y": 422,
+          "exists": true,
+          "height": 680,
+          "visible": true,
+          "width": 366,
+          "x": 12,
+          "y": 82
+        },
+        "pause_resume": {
+          "center_x": 110,
+          "center_y": 730,
+          "exists": true,
+          "height": 76,
+          "visible": true,
+          "width": 160,
+          "x": 30,
+          "y": 692
+        },
+        "pause_return": {
+          "center_x": 280,
+          "center_y": 730,
+          "exists": true,
+          "height": 76,
+          "visible": true,
+          "width": 160,
+          "x": 200,
+          "y": 692
+        },
+        "pause_run_tab": {
+          "center_x": 327,
+          "center_y": 158,
+          "exists": true,
+          "height": 52,
+          "visible": true,
+          "width": 106,
+          "x": 274,
+          "y": 132
+        },
+        "pause_settings_tab": {
+          "center_x": 83,
+          "center_y": 158,
+          "exists": true,
+          "height": 52,
+          "visible": true,
+          "width": 106,
+          "x": 30,
+          "y": 132
+        },
+        "pause_ui_scale": {
+          "center_x": 195,
+          "center_y": 582,
+          "exists": true,
+          "height": 46,
+          "visible": true,
+          "width": 330,
+          "x": 30,
+          "y": 559
+        },
+        "quick_controls": {
+          "center_x": 336,
+          "center_y": 336,
+          "exists": true,
+          "height": 240,
+          "visible": false,
+          "width": 76,
+          "x": 298,
+          "y": 216
+        },
+        "quick_joystick_size": {
+          "center_x": 336,
+          "center_y": 418,
+          "exists": true,
+          "height": 76,
+          "visible": false,
+          "width": 76,
+          "x": 298,
+          "y": 380
+        },
+        "quick_mute": {
+          "center_x": 336,
+          "center_y": 254,
+          "exists": true,
+          "height": 76,
+          "visible": false,
+          "width": 76,
+          "x": 298,
+          "y": 216
+        },
+        "quick_screen_shake": {
+          "center_x": 336,
+          "center_y": 336,
+          "exists": true,
+          "height": 76,
+          "visible": false,
+          "width": 76,
+          "x": 298,
+          "y": 298
+        },
+        "score": {
+          "center_x": 276,
+          "center_y": 56,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 100,
+          "x": 226,
+          "y": 34
+        },
+        "summon": {
+          "center_x": 171.040008544922,
+          "center_y": 788,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 64,
+          "x": 139.040008544922,
+          "y": 766
+        },
+        "tactical_hint": {
+          "center_x": 240,
+          "center_y": 122,
+          "exists": true,
+          "height": 56,
+          "visible": true,
+          "width": 280,
+          "x": 100,
+          "y": 94
+        },
+        "time": {
+          "center_x": 50,
+          "center_y": 114,
+          "exists": true,
+          "height": 36,
+          "visible": false,
+          "width": 80,
+          "x": 10,
+          "y": 96
+        },
+        "toast": {
+          "center_x": 155,
+          "center_y": 252,
+          "exists": true,
+          "height": 72,
+          "visible": false,
+          "width": 290,
+          "x": 10,
+          "y": 216
+        },
+        "virtual_joystick": {
+          "center_x": 71.5200042724609,
+          "center_y": 750.480041503906,
+          "exists": true,
+          "height": 119.040000915527,
+          "visible": true,
+          "width": 119.040008544922,
+          "x": 12,
+          "y": 690.960021972656
+        },
+        "xp_bar": {
+          "center_x": 105,
+          "center_y": 78.5,
+          "exists": true,
+          "height": 5,
+          "visible": false,
+          "width": 170,
+          "x": 20,
+          "y": 76
+        },
+        "xp_readout": {
+          "center_x": 110,
+          "center_y": 128.5,
+          "exists": true,
+          "height": 45,
+          "visible": false,
+          "width": 116,
+          "x": 52,
+          "y": 106
+        }
+      },
+      "flags": {
+        "ability_text": "旋斬",
+        "auto_upgrade": true,
+        "bond_text": "",
+        "confirmed_touch": true,
+        "elapsed": 2.91364674074074,
+        "formation_cooldown": 0,
+        "formation_id": "wedge",
+        "formation_picker": false,
+        "formation_ready": true,
+        "mission_text": "楔形｜封隙 0/3\n陣記穩定中・10 秒",
+        "notice_text": "拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。",
+        "paused": true,
+        "relay": {
+          "anchor_x": 948,
+          "anchor_y": 1384.99987792969,
+          "captain_x": 640,
+          "captain_y": 1384.99987792969,
+          "completed": false,
+          "cycles": 0,
+          "distance": 140,
+          "hold": 0,
+          "marker": "第 1 道・就位 0/2",
+          "open": false,
+          "phase": "waiting",
+          "pressure": "front",
+          "required": "wedge",
+          "saved": false,
+          "settled": 0,
+          "step": 0,
+          "wrong": 0
+        },
+        "seal_saved": false,
+        "seed": 2156723116,
+        "touch_controls_visible": true,
+        "version": "0.31.0-content-r2"
+      },
+      "scope": "hud",
+      "timestamp_msec": 6734,
+      "viewport_height": 844,
+      "viewport_width": 390
+    }
+  },
+  {
+    "width": 1366,
+    "height": 600,
+    "phase": "matrix",
+    "errors": [],
+    "captures": [
+      {
+        "name": "guide",
+        "state": {
+          "controls": {
+            "achievements": {
+              "center_x": 163,
+              "center_y": 362,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 270,
+              "x": 28,
+              "y": 338
+            },
+            "guide": {
+              "center_x": 232.5,
+              "center_y": 246,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 131,
+              "x": 167,
+              "y": 222
+            },
+            "meta": {
+              "center_x": 163,
+              "center_y": 304,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 270,
+              "x": 28,
+              "y": 280
+            },
+            "seed_input": {
+              "center_x": 103,
+              "center_y": 484,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 150,
+              "x": 28,
+              "y": 460
+            },
+            "seed_row": {
+              "center_x": 163,
+              "center_y": 484,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 270,
+              "x": 28,
+              "y": 460
+            },
+            "seed_start": {
+              "center_x": 244,
+              "center_y": 484,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 108,
+              "x": 190,
+              "y": 460
+            },
+            "settings": {
+              "center_x": 163,
+              "center_y": 420,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 270,
+              "x": 28,
+              "y": 396
+            },
+            "side_close": {
+              "center_x": 1287,
+              "center_y": 134,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 82,
+              "x": 1246,
+              "y": 110
+            },
+            "side_panel": {
+              "center_x": 1078,
+              "center_y": 334,
+              "exists": true,
+              "height": 476,
+              "visible": true,
+              "width": 520,
+              "x": 818,
+              "y": 96
+            },
+            "start": {
+              "center_x": 163,
+              "center_y": 188,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 270,
+              "x": 28,
+              "y": 164
+            },
+            "tactical_collection": {
+              "exists": false,
+              "visible": false
+            },
+            "tactical_next": {
+              "exists": false,
+              "visible": false
+            },
+            "tactical_previous": {
+              "exists": false,
+              "visible": false
+            },
+            "world_map": {
+              "center_x": 93.5,
+              "center_y": 246,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 131,
+              "x": 28,
+              "y": 222
+            }
+          },
+          "flags": {
+            "confirmed_touch": false,
+            "panel_id": "guide",
+            "seal_saved": false,
+            "shards": 0,
+            "side_panel_visible": true,
+            "tactical_page": 0
+          },
+          "scope": "main_menu",
+          "timestamp_msec": 1398,
+          "viewport_height": 600,
+          "viewport_width": 1366
+        }
+      },
+      {
+        "name": "battle",
+        "state": {
+          "controls": {
+            "active_ability": {
+              "center_x": 1311,
+              "center_y": 541,
+              "exists": true,
+              "height": 62,
+              "visible": false,
+              "width": 62,
+              "x": 1280,
+              "y": 510
+            },
+            "auto_battle": {
+              "center_x": 224,
+              "center_y": 502,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 136,
+              "x": 156,
+              "y": 478
+            },
+            "equipment_menu": {
+              "center_x": 30,
+              "center_y": 24,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 60,
+              "x": 0,
+              "y": 0
+            },
+            "formation": {
+              "center_x": 132,
+              "center_y": 452,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 224,
+              "x": 20,
+              "y": 430
+            },
+            "formation_cancel": {
+              "center_x": 30,
+              "center_y": 24,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 60,
+              "x": 0,
+              "y": 0
+            },
+            "formation_ring": {
+              "center_x": 130,
+              "center_y": 24,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 260,
+              "x": 0,
+              "y": 0
+            },
+            "formation_scatter": {
+              "center_x": 130,
+              "center_y": 24,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 260,
+              "x": 0,
+              "y": 0
+            },
+            "formation_wedge": {
+              "center_x": 130,
+              "center_y": 24,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 260,
+              "x": 0,
+              "y": 0
+            },
+            "hp_label": {
+              "center_x": 94.5,
+              "center_y": 29.5,
+              "exists": true,
+              "height": 29,
+              "visible": true,
+              "width": 101,
+              "x": 44,
+              "y": 15
+            },
+            "hud_panel": {
+              "center_x": 135,
+              "center_y": 34,
+              "exists": true,
+              "height": 52,
+              "visible": true,
+              "width": 250,
+              "x": 10,
+              "y": 8
+            },
+            "level_label": {
+              "center_x": 230,
+              "center_y": 28,
+              "exists": true,
+              "height": 20,
+              "visible": true,
+              "width": 24,
+              "x": 218,
+              "y": 18
+            },
+            "mission_text": {
+              "center_x": 756,
+              "center_y": 36.5,
+              "exists": true,
+              "height": 57,
+              "visible": true,
+              "width": 792,
+              "x": 360,
+              "y": 8
+            },
+            "pause": {
+              "center_x": 1337,
+              "center_y": 30,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 54,
+              "x": 1310,
+              "y": 8
+            },
+            "pause_achievements_tab": {
+              "center_x": 513,
+              "center_y": 96,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 164,
+              "x": 431,
+              "y": 72
+            },
+            "pause_auto_battle": {
+              "center_x": 449,
+              "center_y": 150,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 28,
+              "x": 435,
+              "y": 126
+            },
+            "pause_high_contrast": {
+              "center_x": 482.5,
+              "center_y": 148,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 95,
+              "x": 435,
+              "y": 126
+            },
+            "pause_overlay": {
+              "center_x": 683,
+              "center_y": 300,
+              "exists": true,
+              "height": 556,
+              "visible": false,
+              "width": 540,
+              "x": 413,
+              "y": 22
+            },
+            "pause_resume": {
+              "center_x": 554.5,
+              "center_y": 538.5,
+              "exists": true,
+              "height": 49,
+              "visible": false,
+              "width": 247,
+              "x": 431,
+              "y": 514
+            },
+            "pause_return": {
+              "center_x": 811.5,
+              "center_y": 538.5,
+              "exists": true,
+              "height": 49,
+              "visible": false,
+              "width": 247,
+              "x": 688,
+              "y": 514
+            },
+            "pause_run_tab": {
+              "center_x": 513,
+              "center_y": 96,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 164,
+              "x": 431,
+              "y": 72
+            },
+            "pause_settings_tab": {
+              "center_x": 513,
+              "center_y": 96,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 164,
+              "x": 431,
+              "y": 72
+            },
+            "pause_ui_scale": {
+              "center_x": 555,
+              "center_y": 148,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 240,
+              "x": 435,
+              "y": 126
+            },
+            "quick_controls": {
+              "center_x": 1313,
+              "center_y": 76,
+              "exists": true,
+              "height": 36,
+              "visible": false,
+              "width": 78,
+              "x": 1274,
+              "y": 58
+            },
+            "quick_joystick_size": {
+              "center_x": 1293,
+              "center_y": 82,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 38,
+              "x": 1274,
+              "y": 58
+            },
+            "quick_mute": {
+              "center_x": 1293,
+              "center_y": 82,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 38,
+              "x": 1274,
+              "y": 58
+            },
+            "quick_screen_shake": {
+              "center_x": 1335,
+              "center_y": 82,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 38,
+              "x": 1316,
+              "y": 58
+            },
+            "score": {
+              "center_x": 1232,
+              "center_y": 34,
+              "exists": true,
+              "height": 52,
+              "visible": true,
+              "width": 140,
+              "x": 1162,
+              "y": 8
+            },
+            "summon": {
+              "center_x": 132,
+              "center_y": 502,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 224,
+              "x": 20,
+              "y": 478
+            },
+            "tactical_hint": {
+              "center_x": 756,
+              "center_y": 36.5,
+              "exists": true,
+              "height": 57,
+              "visible": true,
+              "width": 792,
+              "x": 360,
+              "y": 8
+            },
+            "time": {
+              "center_x": 310,
+              "center_y": 28,
+              "exists": true,
+              "height": 36,
+              "visible": true,
+              "width": 80,
+              "x": 270,
+              "y": 10
+            },
+            "toast": {
+              "center_x": 500,
+              "center_y": 100,
+              "exists": true,
+              "height": 64,
+              "visible": true,
+              "width": 460,
+              "x": 270,
+              "y": 68
+            },
+            "virtual_joystick": {
+              "center_x": 95.8399963378906,
+              "center_y": 504.160003662109,
+              "exists": true,
+              "height": 163.679992675781,
+              "visible": false,
+              "width": 163.679992675781,
+              "x": 14,
+              "y": 422.320007324219
+            },
+            "xp_bar": {
+              "center_x": 135,
+              "center_y": 52.5,
+              "exists": true,
+              "height": 5,
+              "visible": true,
+              "width": 230,
+              "x": 20,
+              "y": 50
+            },
+            "xp_readout": {
+              "center_x": 193,
+              "center_y": 92,
+              "exists": true,
+              "height": 24,
+              "visible": false,
+              "width": 286,
+              "x": 50,
+              "y": 80
+            }
+          },
+          "flags": {
+            "ability_text": "旋斬",
+            "auto_upgrade": false,
+            "bond_text": "",
+            "confirmed_touch": false,
+            "elapsed": 0.911033333333333,
+            "formation_cooldown": 0,
+            "formation_id": "wedge",
+            "formation_picker": false,
+            "formation_ready": true,
+            "mission_text": "楔形｜封隙 0/3\n陣記穩定中・12 秒",
+            "notice_text": "WASD 移動；按住空白鍵旋斬，放開回能。",
+            "paused": false,
+            "relay": {
+              "anchor_x": 959.601013183594,
+              "anchor_y": 360.096496582031,
+              "captain_x": 819.601013183594,
+              "captain_y": 360.096496582031,
+              "completed": false,
+              "cycles": 0,
+              "distance": 140,
+              "hold": 0,
+              "marker": "第 1 道・就位 0/2",
+              "open": false,
+              "phase": "waiting",
+              "pressure": "front",
+              "required": "wedge",
+              "saved": false,
+              "settled": 0,
+              "step": 0,
+              "wrong": 0
+            },
+            "seal_saved": false,
+            "seed": 4113152476,
+            "touch_controls_visible": false,
+            "version": "0.31.0-content-r2"
+          },
+          "scope": "hud",
+          "timestamp_msec": 4877,
+          "viewport_height": 600,
+          "viewport_width": 1366
+        }
+      },
+      {
+        "name": "formation",
+        "state": {
+          "controls": {
+            "active_ability": {
+              "center_x": 1311,
+              "center_y": 541,
+              "exists": true,
+              "height": 62,
+              "visible": false,
+              "width": 62,
+              "x": 1280,
+              "y": 510
+            },
+            "auto_battle": {
+              "center_x": 224,
+              "center_y": 502,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 136,
+              "x": 156,
+              "y": 478
+            },
+            "equipment_menu": {
+              "center_x": 30,
+              "center_y": 24,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 60,
+              "x": 0,
+              "y": 0
+            },
+            "formation": {
+              "center_x": 132,
+              "center_y": 452,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 224,
+              "x": 20,
+              "y": 430
+            },
+            "formation_cancel": {
+              "center_x": 1173,
+              "center_y": 559,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 340,
+              "x": 1003,
+              "y": 537
+            },
+            "formation_ring": {
+              "center_x": 1173,
+              "center_y": 442,
+              "exists": true,
+              "height": 58,
+              "visible": true,
+              "width": 340,
+              "x": 1003,
+              "y": 413
+            },
+            "formation_scatter": {
+              "center_x": 1173,
+              "center_y": 504,
+              "exists": true,
+              "height": 58,
+              "visible": true,
+              "width": 340,
+              "x": 1003,
+              "y": 475
+            },
+            "formation_wedge": {
+              "center_x": 1173,
+              "center_y": 380,
+              "exists": true,
+              "height": 58,
+              "visible": true,
+              "width": 340,
+              "x": 1003,
+              "y": 351
+            },
+            "hp_label": {
+              "center_x": 94.5,
+              "center_y": 29.5,
+              "exists": true,
+              "height": 29,
+              "visible": true,
+              "width": 101,
+              "x": 44,
+              "y": 15
+            },
+            "hud_panel": {
+              "center_x": 135,
+              "center_y": 34,
+              "exists": true,
+              "height": 52,
+              "visible": true,
+              "width": 250,
+              "x": 10,
+              "y": 8
+            },
+            "level_label": {
+              "center_x": 230,
+              "center_y": 28,
+              "exists": true,
+              "height": 20,
+              "visible": true,
+              "width": 24,
+              "x": 218,
+              "y": 18
+            },
+            "mission_text": {
+              "center_x": 756,
+              "center_y": 36.5,
+              "exists": true,
+              "height": 57,
+              "visible": true,
+              "width": 792,
+              "x": 360,
+              "y": 8
+            },
+            "pause": {
+              "center_x": 1337,
+              "center_y": 30,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 54,
+              "x": 1310,
+              "y": 8
+            },
+            "pause_achievements_tab": {
+              "center_x": 513,
+              "center_y": 96,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 164,
+              "x": 431,
+              "y": 72
+            },
+            "pause_auto_battle": {
+              "center_x": 449,
+              "center_y": 150,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 28,
+              "x": 435,
+              "y": 126
+            },
+            "pause_high_contrast": {
+              "center_x": 482.5,
+              "center_y": 148,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 95,
+              "x": 435,
+              "y": 126
+            },
+            "pause_overlay": {
+              "center_x": 683,
+              "center_y": 300,
+              "exists": true,
+              "height": 556,
+              "visible": false,
+              "width": 540,
+              "x": 413,
+              "y": 22
+            },
+            "pause_resume": {
+              "center_x": 554.5,
+              "center_y": 538.5,
+              "exists": true,
+              "height": 49,
+              "visible": false,
+              "width": 247,
+              "x": 431,
+              "y": 514
+            },
+            "pause_return": {
+              "center_x": 811.5,
+              "center_y": 538.5,
+              "exists": true,
+              "height": 49,
+              "visible": false,
+              "width": 247,
+              "x": 688,
+              "y": 514
+            },
+            "pause_run_tab": {
+              "center_x": 513,
+              "center_y": 96,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 164,
+              "x": 431,
+              "y": 72
+            },
+            "pause_settings_tab": {
+              "center_x": 513,
+              "center_y": 96,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 164,
+              "x": 431,
+              "y": 72
+            },
+            "pause_ui_scale": {
+              "center_x": 555,
+              "center_y": 148,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 240,
+              "x": 435,
+              "y": 126
+            },
+            "quick_controls": {
+              "center_x": 1313,
+              "center_y": 76,
+              "exists": true,
+              "height": 36,
+              "visible": false,
+              "width": 78,
+              "x": 1274,
+              "y": 58
+            },
+            "quick_joystick_size": {
+              "center_x": 1293,
+              "center_y": 82,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 38,
+              "x": 1274,
+              "y": 58
+            },
+            "quick_mute": {
+              "center_x": 1293,
+              "center_y": 82,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 38,
+              "x": 1274,
+              "y": 58
+            },
+            "quick_screen_shake": {
+              "center_x": 1335,
+              "center_y": 82,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 38,
+              "x": 1316,
+              "y": 58
+            },
+            "score": {
+              "center_x": 1232,
+              "center_y": 34,
+              "exists": true,
+              "height": 52,
+              "visible": true,
+              "width": 140,
+              "x": 1162,
+              "y": 8
+            },
+            "summon": {
+              "center_x": 132,
+              "center_y": 502,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 224,
+              "x": 20,
+              "y": 478
+            },
+            "tactical_hint": {
+              "center_x": 756,
+              "center_y": 36.5,
+              "exists": true,
+              "height": 57,
+              "visible": true,
+              "width": 792,
+              "x": 360,
+              "y": 8
+            },
+            "time": {
+              "center_x": 310,
+              "center_y": 28,
+              "exists": true,
+              "height": 36,
+              "visible": true,
+              "width": 80,
+              "x": 270,
+              "y": 10
+            },
+            "toast": {
+              "center_x": 500,
+              "center_y": 100,
+              "exists": true,
+              "height": 64,
+              "visible": false,
+              "width": 460,
+              "x": 270,
+              "y": 68
+            },
+            "virtual_joystick": {
+              "center_x": 95.8399963378906,
+              "center_y": 504.160003662109,
+              "exists": true,
+              "height": 163.679992675781,
+              "visible": false,
+              "width": 163.679992675781,
+              "x": 14,
+              "y": 422.320007324219
+            },
+            "xp_bar": {
+              "center_x": 135,
+              "center_y": 52.5,
+              "exists": true,
+              "height": 5,
+              "visible": true,
+              "width": 230,
+              "x": 20,
+              "y": 50
+            },
+            "xp_readout": {
+              "center_x": 193,
+              "center_y": 92,
+              "exists": true,
+              "height": 24,
+              "visible": false,
+              "width": 286,
+              "x": 50,
+              "y": 80
+            }
+          },
+          "flags": {
+            "ability_text": "旋斬",
+            "auto_upgrade": false,
+            "bond_text": "",
+            "confirmed_touch": false,
+            "elapsed": 2.58173333333333,
+            "formation_cooldown": 0,
+            "formation_id": "wedge",
+            "formation_picker": true,
+            "formation_ready": true,
+            "mission_text": "楔形｜封隙 0/3\n陣記穩定中・10 秒",
+            "notice_text": "WASD 移動；按住空白鍵旋斬，放開回能。",
+            "paused": false,
+            "relay": {
+              "anchor_x": 959.5,
+              "anchor_y": 360,
+              "captain_x": 819.5,
+              "captain_y": 360,
+              "completed": false,
+              "cycles": 0,
+              "distance": 140,
+              "hold": 0,
+              "marker": "第 1 道・就位 0/2",
+              "open": false,
+              "phase": "waiting",
+              "pressure": "front",
+              "required": "wedge",
+              "saved": false,
+              "settled": 0,
+              "step": 0,
+              "wrong": 0
+            },
+            "seal_saved": false,
+            "seed": 4113152476,
+            "touch_controls_visible": false,
+            "version": "0.31.0-content-r2"
+          },
+          "scope": "hud",
+          "timestamp_msec": 7197,
+          "viewport_height": 600,
+          "viewport_width": 1366
+        }
+      },
+      {
+        "name": "pause",
+        "state": {
+          "controls": {
+            "active_ability": {
+              "center_x": 1311,
+              "center_y": 541,
+              "exists": true,
+              "height": 62,
+              "visible": false,
+              "width": 62,
+              "x": 1280,
+              "y": 510
+            },
+            "auto_battle": {
+              "center_x": 224,
+              "center_y": 502,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 136,
+              "x": 156,
+              "y": 478
+            },
+            "equipment_menu": {
+              "center_x": 30,
+              "center_y": 24,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 60,
+              "x": 0,
+              "y": 0
+            },
+            "formation": {
+              "center_x": 132,
+              "center_y": 452,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 224,
+              "x": 20,
+              "y": 430
+            },
+            "formation_cancel": {
+              "center_x": 1173,
+              "center_y": 559,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 340,
+              "x": 1003,
+              "y": 537
+            },
+            "formation_ring": {
+              "center_x": 1173,
+              "center_y": 442,
+              "exists": true,
+              "height": 58,
+              "visible": false,
+              "width": 340,
+              "x": 1003,
+              "y": 413
+            },
+            "formation_scatter": {
+              "center_x": 1173,
+              "center_y": 504,
+              "exists": true,
+              "height": 58,
+              "visible": false,
+              "width": 340,
+              "x": 1003,
+              "y": 475
+            },
+            "formation_wedge": {
+              "center_x": 1173,
+              "center_y": 380,
+              "exists": true,
+              "height": 58,
+              "visible": false,
+              "width": 340,
+              "x": 1003,
+              "y": 351
+            },
+            "hp_label": {
+              "center_x": 94.5,
+              "center_y": 29.5,
+              "exists": true,
+              "height": 29,
+              "visible": false,
+              "width": 101,
+              "x": 44,
+              "y": 15
+            },
+            "hud_panel": {
+              "center_x": 135,
+              "center_y": 34,
+              "exists": true,
+              "height": 52,
+              "visible": false,
+              "width": 250,
+              "x": 10,
+              "y": 8
+            },
+            "level_label": {
+              "center_x": 230,
+              "center_y": 28,
+              "exists": true,
+              "height": 20,
+              "visible": false,
+              "width": 24,
+              "x": 218,
+              "y": 18
+            },
+            "mission_text": {
+              "center_x": 756,
+              "center_y": 36.5,
+              "exists": true,
+              "height": 57,
+              "visible": true,
+              "width": 792,
+              "x": 360,
+              "y": 8
+            },
+            "pause": {
+              "center_x": 1337,
+              "center_y": 30,
+              "exists": true,
+              "height": 44,
+              "visible": false,
+              "width": 54,
+              "x": 1310,
+              "y": 8
+            },
+            "pause_achievements_tab": {
+              "center_x": 689,
+              "center_y": 96,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 164,
+              "x": 607,
+              "y": 72
+            },
+            "pause_auto_battle": {
+              "center_x": 497,
+              "center_y": 150,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 124,
+              "x": 435,
+              "y": 126
+            },
+            "pause_high_contrast": {
+              "center_x": 612,
+              "center_y": 283,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 110,
+              "x": 557,
+              "y": 261
+            },
+            "pause_overlay": {
+              "center_x": 683,
+              "center_y": 300,
+              "exists": true,
+              "height": 556,
+              "visible": true,
+              "width": 540,
+              "x": 413,
+              "y": 22
+            },
+            "pause_resume": {
+              "center_x": 554.5,
+              "center_y": 538.5,
+              "exists": true,
+              "height": 49,
+              "visible": true,
+              "width": 247,
+              "x": 431,
+              "y": 514
+            },
+            "pause_return": {
+              "center_x": 811.5,
+              "center_y": 538.5,
+              "exists": true,
+              "height": 49,
+              "visible": true,
+              "width": 247,
+              "x": 688,
+              "y": 514
+            },
+            "pause_run_tab": {
+              "center_x": 865,
+              "center_y": 96,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 164,
+              "x": 783,
+              "y": 72
+            },
+            "pause_settings_tab": {
+              "center_x": 513,
+              "center_y": 96,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 164,
+              "x": 431,
+              "y": 72
+            },
+            "pause_ui_scale": {
+              "center_x": 555,
+              "center_y": 370,
+              "exists": true,
+              "height": 44,
+              "visible": true,
+              "width": 240,
+              "x": 435,
+              "y": 348
+            },
+            "quick_controls": {
+              "center_x": 1313,
+              "center_y": 76,
+              "exists": true,
+              "height": 36,
+              "visible": false,
+              "width": 78,
+              "x": 1274,
+              "y": 58
+            },
+            "quick_joystick_size": {
+              "center_x": 1293,
+              "center_y": 82,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 38,
+              "x": 1274,
+              "y": 58
+            },
+            "quick_mute": {
+              "center_x": 1293,
+              "center_y": 82,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 38,
+              "x": 1274,
+              "y": 58
+            },
+            "quick_screen_shake": {
+              "center_x": 1335,
+              "center_y": 82,
+              "exists": true,
+              "height": 48,
+              "visible": false,
+              "width": 38,
+              "x": 1316,
+              "y": 58
+            },
+            "score": {
+              "center_x": 1232,
+              "center_y": 34,
+              "exists": true,
+              "height": 52,
+              "visible": false,
+              "width": 140,
+              "x": 1162,
+              "y": 8
+            },
+            "summon": {
+              "center_x": 132,
+              "center_y": 502,
+              "exists": true,
+              "height": 48,
+              "visible": true,
+              "width": 224,
+              "x": 20,
+              "y": 478
+            },
+            "tactical_hint": {
+              "center_x": 756,
+              "center_y": 36.5,
+              "exists": true,
+              "height": 57,
+              "visible": true,
+              "width": 792,
+              "x": 360,
+              "y": 8
+            },
+            "time": {
+              "center_x": 310,
+              "center_y": 28,
+              "exists": true,
+              "height": 36,
+              "visible": false,
+              "width": 80,
+              "x": 270,
+              "y": 10
+            },
+            "toast": {
+              "center_x": 500,
+              "center_y": 100,
+              "exists": true,
+              "height": 64,
+              "visible": false,
+              "width": 460,
+              "x": 270,
+              "y": 68
+            },
+            "virtual_joystick": {
+              "center_x": 95.8399963378906,
+              "center_y": 504.160003662109,
+              "exists": true,
+              "height": 163.679992675781,
+              "visible": false,
+              "width": 163.679992675781,
+              "x": 14,
+              "y": 422.320007324219
+            },
+            "xp_bar": {
+              "center_x": 135,
+              "center_y": 52.5,
+              "exists": true,
+              "height": 5,
+              "visible": false,
+              "width": 230,
+              "x": 20,
+              "y": 50
+            },
+            "xp_readout": {
+              "center_x": 193,
+              "center_y": 92,
+              "exists": true,
+              "height": 24,
+              "visible": false,
+              "width": 286,
+              "x": 50,
+              "y": 80
+            }
+          },
+          "flags": {
+            "ability_text": "旋斬",
+            "auto_upgrade": false,
+            "bond_text": "",
+            "confirmed_touch": false,
+            "elapsed": 3.44398666666667,
+            "formation_cooldown": 0,
+            "formation_id": "wedge",
+            "formation_picker": false,
+            "formation_ready": true,
+            "mission_text": "楔形｜封隙 0/3\n陣記穩定中・9 秒",
+            "notice_text": "WASD 移動；按住空白鍵旋斬，放開回能。",
+            "paused": true,
+            "relay": {
+              "anchor_x": 959.5,
+              "anchor_y": 360,
+              "captain_x": 819.5,
+              "captain_y": 360,
+              "completed": false,
+              "cycles": 0,
+              "distance": 140,
+              "hold": 0,
+              "marker": "第 1 道・就位 0/2",
+              "open": false,
+              "phase": "waiting",
+              "pressure": "front",
+              "required": "wedge",
+              "saved": false,
+              "settled": 0,
+              "step": 0,
+              "wrong": 0
+            },
+            "seal_saved": false,
+            "seed": 4113152476,
+            "touch_controls_visible": false,
+            "version": "0.31.0-content-r2"
+          },
+          "scope": "hud",
+          "timestamp_msec": 8622,
+          "viewport_height": 600,
+          "viewport_width": 1366
+        }
+      }
+    ],
+    "hud": {
+      "controls": {
+        "active_ability": {
+          "center_x": 1311,
+          "center_y": 541,
+          "exists": true,
+          "height": 62,
+          "visible": false,
+          "width": 62,
+          "x": 1280,
+          "y": 510
+        },
+        "auto_battle": {
+          "center_x": 224,
+          "center_y": 502,
+          "exists": true,
+          "height": 48,
+          "visible": false,
+          "width": 136,
+          "x": 156,
+          "y": 478
+        },
+        "equipment_menu": {
+          "center_x": 30,
+          "center_y": 24,
+          "exists": true,
+          "height": 48,
+          "visible": false,
+          "width": 60,
+          "x": 0,
+          "y": 0
+        },
+        "formation": {
+          "center_x": 132,
+          "center_y": 452,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 224,
+          "x": 20,
+          "y": 430
+        },
+        "formation_cancel": {
+          "center_x": 1173,
+          "center_y": 559,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 340,
+          "x": 1003,
+          "y": 537
+        },
+        "formation_ring": {
+          "center_x": 1173,
+          "center_y": 442,
+          "exists": true,
+          "height": 58,
+          "visible": false,
+          "width": 340,
+          "x": 1003,
+          "y": 413
+        },
+        "formation_scatter": {
+          "center_x": 1173,
+          "center_y": 504,
+          "exists": true,
+          "height": 58,
+          "visible": false,
+          "width": 340,
+          "x": 1003,
+          "y": 475
+        },
+        "formation_wedge": {
+          "center_x": 1173,
+          "center_y": 380,
+          "exists": true,
+          "height": 58,
+          "visible": false,
+          "width": 340,
+          "x": 1003,
+          "y": 351
+        },
+        "hp_label": {
+          "center_x": 94.5,
+          "center_y": 29.5,
+          "exists": true,
+          "height": 29,
+          "visible": false,
+          "width": 101,
+          "x": 44,
+          "y": 15
+        },
+        "hud_panel": {
+          "center_x": 135,
+          "center_y": 34,
+          "exists": true,
+          "height": 52,
+          "visible": false,
+          "width": 250,
+          "x": 10,
+          "y": 8
+        },
+        "level_label": {
+          "center_x": 230,
+          "center_y": 28,
+          "exists": true,
+          "height": 20,
+          "visible": false,
+          "width": 24,
+          "x": 218,
+          "y": 18
+        },
+        "mission_text": {
+          "center_x": 756,
+          "center_y": 36.5,
+          "exists": true,
+          "height": 57,
+          "visible": true,
+          "width": 792,
+          "x": 360,
+          "y": 8
+        },
+        "pause": {
+          "center_x": 1337,
+          "center_y": 30,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 54,
+          "x": 1310,
+          "y": 8
+        },
+        "pause_achievements_tab": {
+          "center_x": 689,
+          "center_y": 96,
+          "exists": true,
+          "height": 48,
+          "visible": true,
+          "width": 164,
+          "x": 607,
+          "y": 72
+        },
+        "pause_auto_battle": {
+          "center_x": 497,
+          "center_y": 150,
+          "exists": true,
+          "height": 48,
+          "visible": false,
+          "width": 124,
+          "x": 435,
+          "y": 126
+        },
+        "pause_high_contrast": {
+          "center_x": 612,
+          "center_y": 283,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 110,
+          "x": 557,
+          "y": 261
+        },
+        "pause_overlay": {
+          "center_x": 683,
+          "center_y": 300,
+          "exists": true,
+          "height": 556,
+          "visible": true,
+          "width": 540,
+          "x": 413,
+          "y": 22
+        },
+        "pause_resume": {
+          "center_x": 554.5,
+          "center_y": 538.5,
+          "exists": true,
+          "height": 49,
+          "visible": true,
+          "width": 247,
+          "x": 431,
+          "y": 514
+        },
+        "pause_return": {
+          "center_x": 811.5,
+          "center_y": 538.5,
+          "exists": true,
+          "height": 49,
+          "visible": true,
+          "width": 247,
+          "x": 688,
+          "y": 514
+        },
+        "pause_run_tab": {
+          "center_x": 865,
+          "center_y": 96,
+          "exists": true,
+          "height": 48,
+          "visible": true,
+          "width": 164,
+          "x": 783,
+          "y": 72
+        },
+        "pause_settings_tab": {
+          "center_x": 513,
+          "center_y": 96,
+          "exists": true,
+          "height": 48,
+          "visible": true,
+          "width": 164,
+          "x": 431,
+          "y": 72
+        },
+        "pause_ui_scale": {
+          "center_x": 555,
+          "center_y": 370,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 240,
+          "x": 435,
+          "y": 348
+        },
+        "quick_controls": {
+          "center_x": 1313,
+          "center_y": 76,
+          "exists": true,
+          "height": 36,
+          "visible": false,
+          "width": 78,
+          "x": 1274,
+          "y": 58
+        },
+        "quick_joystick_size": {
+          "center_x": 1293,
+          "center_y": 82,
+          "exists": true,
+          "height": 48,
+          "visible": false,
+          "width": 38,
+          "x": 1274,
+          "y": 58
+        },
+        "quick_mute": {
+          "center_x": 1293,
+          "center_y": 82,
+          "exists": true,
+          "height": 48,
+          "visible": false,
+          "width": 38,
+          "x": 1274,
+          "y": 58
+        },
+        "quick_screen_shake": {
+          "center_x": 1335,
+          "center_y": 82,
+          "exists": true,
+          "height": 48,
+          "visible": false,
+          "width": 38,
+          "x": 1316,
+          "y": 58
+        },
+        "score": {
+          "center_x": 1232,
+          "center_y": 34,
+          "exists": true,
+          "height": 52,
+          "visible": false,
+          "width": 140,
+          "x": 1162,
+          "y": 8
+        },
+        "summon": {
+          "center_x": 132,
+          "center_y": 502,
+          "exists": true,
+          "height": 48,
+          "visible": true,
+          "width": 224,
+          "x": 20,
+          "y": 478
+        },
+        "tactical_hint": {
+          "center_x": 756,
+          "center_y": 36.5,
+          "exists": true,
+          "height": 57,
+          "visible": true,
+          "width": 792,
+          "x": 360,
+          "y": 8
+        },
+        "time": {
+          "center_x": 310,
+          "center_y": 28,
+          "exists": true,
+          "height": 36,
+          "visible": false,
+          "width": 80,
+          "x": 270,
+          "y": 10
+        },
+        "toast": {
+          "center_x": 500,
+          "center_y": 100,
+          "exists": true,
+          "height": 64,
+          "visible": false,
+          "width": 460,
+          "x": 270,
+          "y": 68
+        },
+        "virtual_joystick": {
+          "center_x": 95.8399963378906,
+          "center_y": 504.160003662109,
+          "exists": true,
+          "height": 163.679992675781,
+          "visible": false,
+          "width": 163.679992675781,
+          "x": 14,
+          "y": 422.320007324219
+        },
+        "xp_bar": {
+          "center_x": 135,
+          "center_y": 52.5,
+          "exists": true,
+          "height": 5,
+          "visible": false,
+          "width": 230,
+          "x": 20,
+          "y": 50
+        },
+        "xp_readout": {
+          "center_x": 193,
+          "center_y": 92,
+          "exists": true,
+          "height": 24,
+          "visible": false,
+          "width": 286,
+          "x": 50,
+          "y": 80
+        }
+      },
+      "flags": {
+        "ability_text": "旋斬",
+        "auto_upgrade": false,
+        "bond_text": "",
+        "confirmed_touch": false,
+        "elapsed": 3.44398666666667,
+        "formation_cooldown": 0,
+        "formation_id": "wedge",
+        "formation_picker": false,
+        "formation_ready": true,
+        "mission_text": "楔形｜封隙 0/3\n陣記穩定中・9 秒",
+        "notice_text": "WASD 移動；按住空白鍵旋斬，放開回能。",
+        "paused": true,
+        "relay": {
+          "anchor_x": 959.5,
+          "anchor_y": 360,
+          "captain_x": 819.5,
+          "captain_y": 360,
+          "completed": false,
+          "cycles": 0,
+          "distance": 140,
+          "hold": 0,
+          "marker": "第 1 道・就位 0/2",
+          "open": false,
+          "phase": "waiting",
+          "pressure": "front",
+          "required": "wedge",
+          "saved": false,
+          "settled": 0,
+          "step": 0,
+          "wrong": 0
+        },
+        "seal_saved": false,
+        "seed": 4113152476,
+        "touch_controls_visible": false,
+        "version": "0.31.0-content-r2"
+      },
+      "scope": "hud",
+      "timestamp_msec": 8622,
+      "viewport_height": 600,
+      "viewport_width": 1366
+    },
+    "menu": {
+      "controls": {
+        "active_ability": {
+          "center_x": 1311,
+          "center_y": 541,
+          "exists": true,
+          "height": 62,
+          "visible": false,
+          "width": 62,
+          "x": 1280,
+          "y": 510
+        },
+        "auto_battle": {
+          "center_x": 224,
+          "center_y": 502,
+          "exists": true,
+          "height": 48,
+          "visible": false,
+          "width": 136,
+          "x": 156,
+          "y": 478
+        },
+        "equipment_menu": {
+          "center_x": 30,
+          "center_y": 24,
+          "exists": true,
+          "height": 48,
+          "visible": false,
+          "width": 60,
+          "x": 0,
+          "y": 0
+        },
+        "formation": {
+          "center_x": 132,
+          "center_y": 452,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 224,
+          "x": 20,
+          "y": 430
+        },
+        "formation_cancel": {
+          "center_x": 1173,
+          "center_y": 559,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 340,
+          "x": 1003,
+          "y": 537
+        },
+        "formation_ring": {
+          "center_x": 1173,
+          "center_y": 442,
+          "exists": true,
+          "height": 58,
+          "visible": false,
+          "width": 340,
+          "x": 1003,
+          "y": 413
+        },
+        "formation_scatter": {
+          "center_x": 1173,
+          "center_y": 504,
+          "exists": true,
+          "height": 58,
+          "visible": false,
+          "width": 340,
+          "x": 1003,
+          "y": 475
+        },
+        "formation_wedge": {
+          "center_x": 1173,
+          "center_y": 380,
+          "exists": true,
+          "height": 58,
+          "visible": false,
+          "width": 340,
+          "x": 1003,
+          "y": 351
+        },
+        "hp_label": {
+          "center_x": 94.5,
+          "center_y": 29.5,
+          "exists": true,
+          "height": 29,
+          "visible": false,
+          "width": 101,
+          "x": 44,
+          "y": 15
+        },
+        "hud_panel": {
+          "center_x": 135,
+          "center_y": 34,
+          "exists": true,
+          "height": 52,
+          "visible": false,
+          "width": 250,
+          "x": 10,
+          "y": 8
+        },
+        "level_label": {
+          "center_x": 230,
+          "center_y": 28,
+          "exists": true,
+          "height": 20,
+          "visible": false,
+          "width": 24,
+          "x": 218,
+          "y": 18
+        },
+        "mission_text": {
+          "center_x": 756,
+          "center_y": 36.5,
+          "exists": true,
+          "height": 57,
+          "visible": true,
+          "width": 792,
+          "x": 360,
+          "y": 8
+        },
+        "pause": {
+          "center_x": 1337,
+          "center_y": 30,
+          "exists": true,
+          "height": 44,
+          "visible": false,
+          "width": 54,
+          "x": 1310,
+          "y": 8
+        },
+        "pause_achievements_tab": {
+          "center_x": 689,
+          "center_y": 96,
+          "exists": true,
+          "height": 48,
+          "visible": true,
+          "width": 164,
+          "x": 607,
+          "y": 72
+        },
+        "pause_auto_battle": {
+          "center_x": 497,
+          "center_y": 150,
+          "exists": true,
+          "height": 48,
+          "visible": false,
+          "width": 124,
+          "x": 435,
+          "y": 126
+        },
+        "pause_high_contrast": {
+          "center_x": 612,
+          "center_y": 283,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 110,
+          "x": 557,
+          "y": 261
+        },
+        "pause_overlay": {
+          "center_x": 683,
+          "center_y": 300,
+          "exists": true,
+          "height": 556,
+          "visible": true,
+          "width": 540,
+          "x": 413,
+          "y": 22
+        },
+        "pause_resume": {
+          "center_x": 554.5,
+          "center_y": 538.5,
+          "exists": true,
+          "height": 49,
+          "visible": true,
+          "width": 247,
+          "x": 431,
+          "y": 514
+        },
+        "pause_return": {
+          "center_x": 811.5,
+          "center_y": 538.5,
+          "exists": true,
+          "height": 49,
+          "visible": true,
+          "width": 247,
+          "x": 688,
+          "y": 514
+        },
+        "pause_run_tab": {
+          "center_x": 865,
+          "center_y": 96,
+          "exists": true,
+          "height": 48,
+          "visible": true,
+          "width": 164,
+          "x": 783,
+          "y": 72
+        },
+        "pause_settings_tab": {
+          "center_x": 513,
+          "center_y": 96,
+          "exists": true,
+          "height": 48,
+          "visible": true,
+          "width": 164,
+          "x": 431,
+          "y": 72
+        },
+        "pause_ui_scale": {
+          "center_x": 555,
+          "center_y": 370,
+          "exists": true,
+          "height": 44,
+          "visible": true,
+          "width": 240,
+          "x": 435,
+          "y": 348
+        },
+        "quick_controls": {
+          "center_x": 1313,
+          "center_y": 76,
+          "exists": true,
+          "height": 36,
+          "visible": false,
+          "width": 78,
+          "x": 1274,
+          "y": 58
+        },
+        "quick_joystick_size": {
+          "center_x": 1293,
+          "center_y": 82,
+          "exists": true,
+          "height": 48,
+          "visible": false,
+          "width": 38,
+          "x": 1274,
+          "y": 58
+        },
+        "quick_mute": {
+          "center_x": 1293,
+          "center_y": 82,
+          "exists": true,
+          "height": 48,
+          "visible": false,
+          "width": 38,
+          "x": 1274,
+          "y": 58
+        },
+        "quick_screen_shake": {
+          "center_x": 1335,
+          "center_y": 82,
+          "exists": true,
+          "height": 48,
+          "visible": false,
+          "width": 38,
+          "x": 1316,
+          "y": 58
+        },
+        "score": {
+          "center_x": 1232,
+          "center_y": 34,
+          "exists": true,
+          "height": 52,
+          "visible": false,
+          "width": 140,
+          "x": 1162,
+          "y": 8
+        },
+        "summon": {
+          "center_x": 132,
+          "center_y": 502,
+          "exists": true,
+          "height": 48,
+          "visible": true,
+          "width": 224,
+          "x": 20,
+          "y": 478
+        },
+        "tactical_hint": {
+          "center_x": 756,
+          "center_y": 36.5,
+          "exists": true,
+          "height": 57,
+          "visible": true,
+          "width": 792,
+          "x": 360,
+          "y": 8
+        },
+        "time": {
+          "center_x": 310,
+          "center_y": 28,
+          "exists": true,
+          "height": 36,
+          "visible": false,
+          "width": 80,
+          "x": 270,
+          "y": 10
+        },
+        "toast": {
+          "center_x": 500,
+          "center_y": 100,
+          "exists": true,
+          "height": 64,
+          "visible": false,
+          "width": 460,
+          "x": 270,
+          "y": 68
+        },
+        "virtual_joystick": {
+          "center_x": 95.8399963378906,
+          "center_y": 504.160003662109,
+          "exists": true,
+          "height": 163.679992675781,
+          "visible": false,
+          "width": 163.679992675781,
+          "x": 14,
+          "y": 422.320007324219
+        },
+        "xp_bar": {
+          "center_x": 135,
+          "center_y": 52.5,
+          "exists": true,
+          "height": 5,
+          "visible": false,
+          "width": 230,
+          "x": 20,
+          "y": 50
+        },
+        "xp_readout": {
+          "center_x": 193,
+          "center_y": 92,
+          "exists": true,
+          "height": 24,
+          "visible": false,
+          "width": 286,
+          "x": 50,
+          "y": 80
+        }
+      },
+      "flags": {
+        "ability_text": "旋斬",
+        "auto_upgrade": false,
+        "bond_text": "",
+        "confirmed_touch": false,
+        "elapsed": 3.44398666666667,
+        "formation_cooldown": 0,
+        "formation_id": "wedge",
+        "formation_picker": false,
+        "formation_ready": true,
+        "mission_text": "楔形｜封隙 0/3\n陣記穩定中・9 秒",
+        "notice_text": "WASD 移動；按住空白鍵旋斬，放開回能。",
+        "paused": true,
+        "relay": {
+          "anchor_x": 959.5,
+          "anchor_y": 360,
+          "captain_x": 819.5,
+          "captain_y": 360,
+          "completed": false,
+          "cycles": 0,
+          "distance": 140,
+          "hold": 0,
+          "marker": "第 1 道・就位 0/2",
+          "open": false,
+          "phase": "waiting",
+          "pressure": "front",
+          "required": "wedge",
+          "saved": false,
+          "settled": 0,
+          "step": 0,
+          "wrong": 0
+        },
+        "seal_saved": false,
+        "seed": 4113152476,
+        "touch_controls_visible": false,
+        "version": "0.31.0-content-r2"
+      },
+      "scope": "hud",
+      "timestamp_msec": 8622,
+      "viewport_height": 600,
+      "viewport_width": 1366
+    }
+  }
+]

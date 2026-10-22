@@ -347,6 +347,13 @@ func _build_ui() -> void:
 	xp_bar.max_value = 1.0
 	xp_bar.show_percentage = false
 	root.add_child(xp_bar)
+	var exp_caption := Label.new()
+	exp_caption.name = "ExpCaption"
+	exp_caption.text = "EXP"
+	exp_caption.add_theme_font_size_override("font_size",8)
+	exp_caption.position = Vector2(2,-9)
+	exp_caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	xp_bar.add_child(exp_caption)
 
 	theme_label = Label.new()
 	theme_label.name = "ThemeLabel"
@@ -1907,6 +1914,8 @@ func _refresh_primary_stat_labels(compact_landscape: bool) -> void:
 
 
 func _on_pause_changed(is_paused: bool) -> void:
+	if is_instance_valid(GameManager.tactical_director) and is_instance_valid(GameManager.tactical_director.relay.marker_label):
+		GameManager.tactical_director.relay.marker_label.visible = not is_paused and not GameManager.tactical_director.relay.completed
 	if get_tree().paused or is_paused:
 		_reset_touch_input()
 	if pause_overlay != null:
@@ -2212,12 +2221,7 @@ func _update_tactical_hint() -> void:
 	var relay: Node = GameManager.tactical_director.relay
 	var formation: String = squad.get_formation_definition().short if is_instance_valid(squad) else "楔形"
 	if is_instance_valid(relay) and not relay.completed:
-		var next := "走進%s陣記" % relay.NAMES[relay.step]
-		if squad.get_formation_id() != relay.ORDER[relay.step]:
-			next = "換成%s，再走進陣記" % relay.NAMES[relay.step]
-		elif relay.hold > 0:
-			next = "停留 %.1f/1.2 秒・隊友 %d/2" % [relay.hold, mini(2, relay.settled)]
-		tactical_hint.text = "%s｜封隙 %d/3\n下一步：%s" % [formation, relay.step, next]
+		tactical_hint.text = "%s｜封隙 %d/3\n%s" % [formation, relay.step, relay.next_action()]
 	else:
 		tactical_hint.text = "%s｜封隙 3/3\n%s" % [formation, GameManager.tactical_director.current_hint()]
 	BATTLE_LAYOUT.place(tactical_hint, BATTLE_LAYOUT.regions(view, MOBILE_TUNING.use_mobile_ui(view)).mission)
@@ -2717,6 +2721,13 @@ func _on_toast_requested(message: String) -> void:
 		return
 	if message == "":
 		return
+	var urgent := message.contains("預警") or message.contains("反噬") or message.contains("封隙") or message.contains("護衛")
+	if urgent:
+		toast_queue.clear()
+		if toast_showing:
+			toast_current_text = message
+			toast_label.text = message
+			return
 	toast_queue.append(message)
 	# Loot bursts should not leave old notices playing for half a minute.
 	if toast_queue.size() > 4:
