@@ -36,7 +36,10 @@ func _fits(label: Label,context: String) -> void:
 
 func _separate(labels: Array,context: String) -> void:
 	for i in range(labels.size()-1):
-		if labels[i].text!="" and labels[i+1].text!="":check(not labels[i].get_global_rect().intersects(labels[i+1].get_global_rect()),"text cards overlap "+context)
+		if labels[i].text!="" and labels[i+1].text!="":
+			var first_rect: Rect2=labels[i].get_global_rect()
+			var second_rect: Rect2=labels[i+1].get_global_rect()
+			check(not first_rect.intersects(second_rect),"text cards overlap "+context+" first="+str(first_rect)+" second="+str(second_rect))
 
 func _run() -> void:
 	AudioManager.set_muted(true)
@@ -80,6 +83,8 @@ func _run() -> void:
 			screen.title_label.text=stage.name+"・通關"
 			_fits(screen.title_label,"real stage title")
 		for label in [screen.summary_label,screen.gain_label,screen.progress_label,screen.page_label]:_fits(label,"result core")
+		check(not screen.summary_scroll.get_global_rect().intersects(screen.gain_label.get_global_rect()),"result summary viewport overlaps actual gain %s" % view_size)
+		check(not screen.gain_label.get_global_rect().intersects(screen.progress_label.get_global_rect()),"result gain overlaps progress %s" % view_size)
 		check(screen.summary_label.text.contains("存活 8/9") and screen.gain_label.text.contains("22"),"result core omitted outcome or actual benefit")
 		screen.rows=[{"id":"solar_lancer","damage":123,"healing":0,"prevented":0}]
 		for id in ["crew_guard","crew_scout","crew_gunner","crew_shepherd","bond_construct","bond_reserve","spec_collect"]:

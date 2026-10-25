@@ -172,12 +172,24 @@ func _act() -> void:
 	notice="已保存" if success else "無法保存或殘響不足，請確認後重試"
 	_refresh()
 
+func _progress_hint() -> String:
+	var free_text: String
+	if not MetaProgress.starting_second_granted:
+		free_text="第二次免費 %d/4" % mini(4,MetaProgress.starting_settlements.size())
+	elif MetaProgress.starting_vouchers>0:
+		free_text="免費選擇 %d 張可用" % MetaProgress.starting_vouchers
+	else:
+		free_text="第二次免費已使用"
+	var goal: Dictionary=MetaProgress.get_next_progress_goal()
+	if goal.get("kind","")=="complete":return free_text+"・局外強化已滿級"
+	return free_text+"・%s差%d 殘響" % [str(goal.get("name","下一強化")).replace(" ",""),goal.get("remaining",0)]
+
 func _refresh() -> void:
 	if not is_instance_valid(root):return
 	var row:=_current()
 	var equipped: Dictionary=CATALOG.node(MetaProgress.starting_equipped)
 	wallet.text="殘響%d 免費%d" % [MetaProgress.shards,MetaProgress.starting_vouchers]
-	progress_label.text=MetaProgress.starting_choice_progress_text()
+	progress_label.text=_progress_hint()
 	controls.clear.text="重試保存" if not GameManager.pending_starting_settlements.is_empty() else "卸下節點"
 	current_ids=CATALOG.roster(MetaProgress.starting_team,MetaProgress.starting_equipped)
 	candidate_ids=CATALOG.roster(row.id,MetaProgress.starting_equipped) if tab==0 else CATALOG.roster(MetaProgress.starting_team,row.id)

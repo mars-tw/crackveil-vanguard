@@ -32,6 +32,12 @@ func _draw() -> void:
 		var above:=at+Vector2(0,-48)
 		if member==GameManager.player:
 			captain_markers+=1
+			# Gold floor halo: the captain stays identifiable in a 64px thumbnail
+			# without covering face, weapon or the real attack body.
+			draw_set_transform(at+Vector2(0,16),0,Vector2(1,0.4))
+			draw_arc(Vector2.ZERO,32,0,TAU,40,INK,8,true)
+			draw_arc(Vector2.ZERO,32,0,TAU,40,GOLD,4,true)
+			draw_set_transform(Vector2.ZERO)
 			# A crown and four corner brackets remain distinct from all rings.
 			draw_circle(above,10,INK)
 			var crown:=PackedVector2Array([above+Vector2(-8,-3),above+Vector2(-5,5),above+Vector2(5,5),above+Vector2(8,-3),above+Vector2(2,0),above+Vector2(0,-7),above+Vector2(-2,0)])

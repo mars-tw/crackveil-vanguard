@@ -37,15 +37,24 @@ func is_open() -> bool:
 	return not completed and GameManager.elapsed_time >= OPEN_TIMES[mini(step,2)]
 
 func marker_text() -> String:
-	return "第 %d 道・%s" % [mini(step+1,3), "封合" if completed else "反噬" if wrong_timer > 0 else "就位 %d/2" % mini(2,settled)]
+	return "第 %d 道・%s" % [mini(step+1,3), "封合" if completed else "反噬" if wrong_timer > 0 else "到位 %d 人・需 2" % settled]
 
 func next_action() -> String:
 	if not is_open():
 		return "陣記穩定中・%d 秒" % ceili(OPEN_TIMES[mini(step,2)]-GameManager.elapsed_time)
 	if wrong_timer > 0:
-		return "錯陣反噬・進度歸零"
+		var needed_id:=str(pressure.COUNTERS[pressure.kind]) if is_instance_valid(pressure) else "wedge"
+		return "錯陣反噬・進度歸零・需%s" % NAMES[ORDER.find(needed_id)]
+	if is_instance_valid(pressure) and pressure.started and pressure.phase in ["warning","active"]:
+		var needed:=required_formation()
+		var selected: String=GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else "wedge"
+		var advice: String="陣形正確" if GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,selected) else "請換%s" % NAMES[ORDER.find(needed)]
+		return "%s・建議%s・%s" % [pressure.status_text(),NAMES[ORDER.find(needed)],advice]
 	if hold > 0:
-		return "就位 %d/2・封合 %d%%" % [mini(2,settled),int(hold/HOLD_SECONDS*100)]
+		return "到位 %d 人（需 2）・封合 %d%%" % [settled,int(hold/HOLD_SECONDS*100)]
+	if counter_timer>0:
+		var label: String="放棄治療・反擊增傷" if GameManager.active_starting_node=="spec_prepare" else "對陣反擊增傷"
+		return "%s +20%%・剩 %d 秒" % [label,ceili(counter_timer)]
 	return pressure.status_text()
 
 func _update_label() -> void:
@@ -67,7 +76,7 @@ func _update_label() -> void:
 	var scale_factor: float = get_viewport_rect().size.x/maxf(1,view.x)
 	point /= scale_factor
 	captain /= scale_factor
-	var width := 174.0
+	var width := 214.0
 	var y := clampf(point.y+65,150.0,view.y-158)
 	var x := clampf(point.x-width/2,12.0,view.x-width-90)
 	# Label is independent of world depth, outside notices and character bounds.
@@ -213,6 +222,32 @@ func advance(delta: float) -> void:
 	if AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("level_up")
 
+func result_text(result: Dictionary) -> String:
+	var name: String = NAMES[maxi(0,ORDER.find(str(result.formation)))]
+	var members: int = int(result.members)
+	var hit: int = int(result.hit)
+	if int(result.protected) > 0:
+		return "%s護住 %d 人・減傷 %d" % [name,int(result.protected),int(result.reduced)]
+	if hit == 0:
+		return "%s對陣・全員避開" % name if bool(result.correct) else "全員避開・%s無法封合" % name
+	return "%s對陣・%d/%d 人中招" % [name,hit,members] if bool(result.correct) else "錯陣・%d/%d 人中招" % [hit,members]
+
+func _draw_glyph(center: Vector2, id: String, color: Color, size: float) -> void:
+	var ink := Color("08121f",0.9)
+	match id:
+		"wedge":
+			var tri := PackedVector2Array([center+Vector2(size,0),center+Vector2(-size*0.7,-size*0.8),center+Vector2(-size*0.7,size*0.8),center+Vector2(size,0)])
+			draw_polyline(tri,ink,7,true)
+			draw_polyline(tri,color,3.5,true)
+		"ring":
+			draw_arc(center,size*0.8,0,TAU,28,ink,7,true)
+			draw_arc(center,size*0.8,0,TAU,28,color,3.5,true)
+			draw_circle(center,4,color)
+		_:
+			for offset in [Vector2(-size*0.75,-size*0.45),Vector2(size*0.75,-size*0.45),Vector2(0,size*0.6)]:
+				draw_circle(center+offset,6.5,ink)
+				draw_circle(center+offset,4.5,color)
+
 func hint() -> String:
 	return "封隙 3/3・完成" if completed else "封隙 %d/3｜第 %d 道・%s" % [step,step+1,next_action()]
 
@@ -236,9 +271,38 @@ func _draw() -> void:
 	if hold > 0:
 		draw_line(anchor+Vector2(-44,66),anchor+Vector2(44,66),Color("253446"),5,true)
 		draw_line(anchor+Vector2(-44,66),anchor+Vector2(-44+88*hold/HOLD_SECONDS,66),Color.WHITE,5,true)
+	var squad: Node = GameManager.squad_manager
+	var selected: String = squad.get_formation_id() if is_instance_valid(squad) else "wedge"
+	var needed := required_formation()
+	var matches: bool = is_instance_valid(pressure) and GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,selected)
+	# The anchor shows which real formation this seal accepts; the rim turns
+	# green or red from the same accepts() check that gates seal progress.
+	_draw_glyph(anchor,needed,COLORS[ORDER.find(needed)],19.0)
+	if is_open():
+		draw_arc(anchor,edge+9,0,TAU,48,Color("08121f",0.8),6,true)
+		draw_arc(anchor,edge+9,0,TAU,48,Color("8ff0a4") if matches else Color("ff7a8a"),3,true)
+		if is_instance_valid(squad) and matches and GameManager.player.global_position.distance_to(anchor) <= 160:
+			for member in squad.get_members():
+				if not is_instance_valid(member) or member == GameManager.player or not member.is_alive:
+					continue
+				var slot: Vector2 = squad.get_formation_world_position(member.formation_index)
+				var in_slot: bool = member.global_position.distance_to(slot) <= FOLLOWER_TOLERANCE
+				draw_arc(slot+Vector2(0,14),13,0,TAU,20,Color("08121f",0.75),5,true)
+				draw_arc(slot+Vector2(0,14),13,0,TAU,20,Color(COLORS[ORDER.find(selected)],1.0 if in_slot else 0.45),2.5,true)
+				if in_slot:
+					draw_circle(slot+Vector2(0,14),5,COLORS[ORDER.find(selected)])
 	if wrong_timer > 0:
 		draw_line(anchor-Vector2(23,23),anchor+Vector2(23,23),Color("ff637c"),5,true)
 		draw_line(anchor+Vector2(23,-23),anchor+Vector2(-23,23),Color("ff637c"),5,true)
+	if is_instance_valid(pressure) and pressure.result_age < 2.4 and not pressure.last_result.is_empty():
+		var verdict := result_text(pressure.last_result)
+		var good: bool = bool(pressure.last_result.correct) and (int(pressure.last_result.hit) == 0 or int(pressure.last_result.protected) > 0)
+		var fade := clampf((2.4 - pressure.result_age) / 0.5, 0.0, 1.0)
+		var at := anchor + Vector2(-140, -edge - 34 - 14.0 * minf(1.0, pressure.result_age / 0.4))
+		var text_width: float = FONT.get_string_size(verdict,HORIZONTAL_ALIGNMENT_LEFT,-1,20).x
+		draw_rect(Rect2(at+Vector2(140-text_width/2-10,-22),Vector2(text_width+20,30)),Color(0.03,0.05,0.09,0.72*fade),true)
+		draw_string_outline(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,7,Color(0.03,0.05,0.09,0.9*fade))
+		draw_string(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,Color(Color("bdf5a8") if good else Color("ffa0a8"),fade))
 	var captain: Node2D = GameManager.player
 	var direction := captain.global_position.direction_to(anchor)
 	if captain.global_position.distance_to(anchor) > CAPTAIN_RADIUS:

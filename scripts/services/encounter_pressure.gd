@@ -22,6 +22,11 @@ var hit_registry: Dictionary = {}
 var enemies: Array[WeakRef] = []
 var events: Array[Dictionary] = []
 var enabled := true
+# Presentation receipt of the last resolved impact; derived from the same
+# hit registry and damage branch above, never fed back into combat.
+var cycle_protected := 0
+var last_result: Dictionary = {}
+var result_age := 99.0
 
 func configure(point: Vector2, index: int) -> void:
 	anchor = point
@@ -65,6 +70,7 @@ func _spawn_threats() -> void:
 func _lock_warning() -> void:
 	phase = "warning"
 	hit_registry.clear()
+	cycle_protected = 0
 	targets.clear()
 	if kind == "artillery" and is_instance_valid(GameManager.squad_manager):
 		for member in GameManager.squad_manager.get_members():
@@ -83,6 +89,7 @@ func advance(delta: float) -> void:
 	if not started:
 		return
 	clock += maxf(0,delta)
+	result_age += maxf(0,delta)
 	if phase == "warning" and clock >= WARNING:
 		phase = "active"
 		impacts += 1
@@ -96,11 +103,20 @@ func advance(delta: float) -> void:
 				var protected: bool = kind == "pincer" and GameManager.squad_manager.get_formation_id() == "ring" and member.global_position.distance_to(GameManager.player.global_position) <= 96
 				if member.take_damage(4.0 if protected else 14.0,anchor):
 					hits += 1
+					if protected:
+						cycle_protected += 1
 		if clock >= WARNING + ACTIVE:
 			phase = "recovery"
 			cycles += 1
 			if not hit_registry.has(GameManager.player.get_instance_id()):
 				avoided += 1
+			var alive := 0
+			for member in GameManager.squad_manager.get_members():
+				if member.is_alive:
+					alive += 1
+			var formation: String = GameManager.squad_manager.get_formation_id()
+			last_result = {"kind":kind,"members":alive,"hit":hit_registry.size(),"protected":cycle_protected,"reduced":cycle_protected*10,"formation":formation,"correct":GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,kind,formation)}
+			result_age = 0.0
 			events.append({"phase":"recovery","kind":kind,"time":GameManager.elapsed_time,"cycle":cycles})
 	if clock >= WARNING + ACTIVE + RECOVERY:
 		clock = 0
@@ -126,13 +142,27 @@ func _draw() -> void:
 	if not enabled or not started or not GameManager.game_running or get_tree().paused or phase == "recovery":
 		return
 	var color := Color("ff637c") if phase == "active" else Color("edbc8d")
-	var alpha := 0.32 if phase == "active" else 0.10
+	var alpha := 0.20 if phase == "active" else 0.08
+	var edge_alpha:=0.74+0.18*sin(clock*8.0)
 	if kind in ["front","pincer"]:
 		var lanes: Array[Rect2] = []
 		lanes.assign([Rect2(anchor+Vector2(-40,-34),Vector2(285,68))] if kind == "front" else [Rect2(anchor+Vector2(-230,-85),Vector2(202,170)),Rect2(anchor+Vector2(28,-85),Vector2(202,170))])
 		for lane in lanes:
 			draw_rect(lane,Color(color,alpha),true)
-			draw_rect(lane,color,false,3,true)
+			# Etched, double-weight corners keep the threat in the game's material
+			# language without laying a flat debug-looking block over combat.
+			draw_rect(lane,Color("101b30",0.82),false,8,true)
+			draw_rect(lane,Color(color,edge_alpha),false,3,true)
+			var corner:=15.0
+			var nw:=lane.position
+			var ne:=lane.position+Vector2(lane.size.x,0)
+			var sw:=lane.position+Vector2(0,lane.size.y)
+			var se:=lane.position+lane.size
+			for point in [nw,ne,sw,se]:
+				var x_dir:float=1.0 if point.x==nw.x else -1.0
+				var y_dir:float=1.0 if point.y==nw.y else -1.0
+				draw_line(point+Vector2(x_dir*corner,0),point,Color(color,edge_alpha),4,true)
+				draw_line(point,point+Vector2(0,y_dir*corner),Color(color,edge_alpha),4,true)
 			for i in range(3):
 				var tip := lane.position+Vector2(28+i*55,lane.size.y/2)
 				var dir := -1.0 if kind == "front" or lane.get_center().x > anchor.x else 1.0

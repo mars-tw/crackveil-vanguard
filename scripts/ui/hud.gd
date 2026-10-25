@@ -79,6 +79,7 @@ var pause_achievements_page: VBoxContainer
 var pause_run_page: VBoxContainer
 var pause_volume_label: Label
 var pause_volume_slider: HSlider
+var pause_settings_toggle_grid: GridContainer
 var pause_mute_check: CheckBox
 var pause_damage_numbers_check: CheckBox
 var pause_screen_shake_check: CheckBox
@@ -773,37 +774,37 @@ func _build_pause_settings_page() -> void:
 	pause_volume_slider.value_changed.connect(_on_volume_slider_changed)
 	pause_settings_page.add_child(pause_volume_slider)
 
-	var toggle_grid := GridContainer.new()
-	toggle_grid.columns = 2
-	toggle_grid.add_theme_constant_override("h_separation", 12)
-	toggle_grid.add_theme_constant_override("v_separation", 8)
-	toggle_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	pause_settings_page.add_child(toggle_grid)
+	pause_settings_toggle_grid = GridContainer.new()
+	pause_settings_toggle_grid.columns = 2
+	pause_settings_toggle_grid.add_theme_constant_override("h_separation", 12)
+	pause_settings_toggle_grid.add_theme_constant_override("v_separation", 8)
+	pause_settings_toggle_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_settings_page.add_child(pause_settings_toggle_grid)
 
 	pause_mute_check = CheckBox.new()
 	pause_mute_check.text = "靜音"
 	pause_mute_check.toggled.connect(_on_mute_toggled)
-	toggle_grid.add_child(pause_mute_check)
+	pause_settings_toggle_grid.add_child(pause_mute_check)
 
 	pause_damage_numbers_check = CheckBox.new()
 	pause_damage_numbers_check.text = "傷害數字"
 	pause_damage_numbers_check.toggled.connect(_on_damage_numbers_toggled)
-	toggle_grid.add_child(pause_damage_numbers_check)
+	pause_settings_toggle_grid.add_child(pause_damage_numbers_check)
 
 	pause_screen_shake_check = CheckBox.new()
 	pause_screen_shake_check.text = "螢幕震動"
 	pause_screen_shake_check.toggled.connect(_on_screen_shake_toggled)
-	toggle_grid.add_child(pause_screen_shake_check)
+	pause_settings_toggle_grid.add_child(pause_screen_shake_check)
 
 	pause_force_joystick_check = CheckBox.new()
 	pause_force_joystick_check.text = "強制搖桿"
 	pause_force_joystick_check.toggled.connect(_on_force_joystick_toggled)
-	toggle_grid.add_child(pause_force_joystick_check)
+	pause_settings_toggle_grid.add_child(pause_force_joystick_check)
 
 	pause_high_contrast_check = CheckBox.new()
 	pause_high_contrast_check.text = "高對比"
 	pause_high_contrast_check.toggled.connect(_on_high_contrast_toggled)
-	toggle_grid.add_child(pause_high_contrast_check)
+	pause_settings_toggle_grid.add_child(pause_high_contrast_check)
 
 	pause_ui_scale_label = Label.new()
 	pause_ui_scale_label.text = "介面大小"
@@ -1203,7 +1204,8 @@ func _apply_responsive_layout() -> void:
 	pause_button.disabled = pause_overlay != null and pause_overlay.visible
 
 	if pause_overlay != null:
-		var overlay_width: float = min(viewport_size.x - (24.0 if mobile else 40.0), 520.0 if mobile else 540.0)
+		var side_inset: float = 32.0 if mobile else 48.0
+		var overlay_width: float = min(viewport_size.x - side_inset, 520.0 if mobile else 540.0)
 		var overlay_height: float = min(viewport_size.y - (24.0 if mobile else 44.0), 680.0 if mobile else 610.0)
 		pause_overlay.anchor_left = 0.5
 		pause_overlay.anchor_right = 0.5
@@ -1219,7 +1221,9 @@ func _apply_responsive_layout() -> void:
 			pause_title_label.size = Vector2(max(1.0, overlay_width - 36.0), 34.0)
 			pause_title_label.add_theme_font_size_override("font_size", 24 if not mobile else 22)
 		if pause_tab_bar != null:
-			pause_tab_bar.position = Vector2(18.0, 50.0)
+			# Keep a deliberate title-to-tabs gap at maximum UI scale. The glyph
+			# extends beyond its centered Label box in the CJK font.
+			pause_tab_bar.position = Vector2(18.0, 78.0)
 			pause_tab_bar.size = Vector2(max(1.0, overlay_width - 36.0), 50.0 if mobile else 48.0)
 			var tab_width: float = max(78.0, (overlay_width - 48.0) / 3.0)
 			for child in pause_tab_bar.get_children():
@@ -1237,16 +1241,26 @@ func _apply_responsive_layout() -> void:
 				pause_menu_button.size = Vector2(resume_width, resume_height)
 
 	if pause_scroll != null:
-		var overlay_size: Vector2 = pause_overlay.size if pause_overlay != null else Vector2(430.0, 610.0)
+		var side_inset: float = 32.0 if mobile else 48.0
+		var panel_max_width: float = 520.0 if mobile else 540.0
+		var panel_width: float = min(viewport_size.x - side_inset, panel_max_width)
+		var panel_max_height: float = 680.0 if mobile else 610.0
+		var panel_height: float = min(viewport_size.y - (24.0 if mobile else 44.0), panel_max_height)
 		var scroll_margin: float = 18.0 if mobile else 22.0
-		var scroll_top: float = 116.0 if mobile else 104.0
-		var scroll_bottom: float = 78.0 if mobile else 70.0
+		var scroll_top: float = 138.0 if mobile else 132.0
+		var scroll_bottom: float = 70.0 if mobile and not portrait else 78.0 if mobile else 70.0
 		pause_scroll.position = Vector2(scroll_margin, scroll_top)
-		pause_scroll.size = Vector2(max(1.0, overlay_size.x - scroll_margin * 2.0), max(1.0, overlay_size.y - scroll_top - scroll_bottom))
+		# The panel is centered from the requested layout width. Control.size can
+		# still report a wider anchored extent on small canvases, so derive this
+		# child from the same width used for the title, tabs, and footer buttons.
+		pause_scroll.size = Vector2(max(1.0, panel_width - scroll_margin * 2.0 - 8.0), max(1.0, panel_height - scroll_top - scroll_bottom))
 
 	if pause_content != null:
-		var content_width: float = max(260.0, (pause_scroll.size.x if pause_scroll != null else min(viewport_size.x - 60.0, 420.0)))
+		var minimum_content_width: float = 240.0 if mobile else 260.0
+		var content_width: float = max(minimum_content_width, (pause_scroll.size.x if pause_scroll != null else min(viewport_size.x - 60.0, 420.0)))
 		pause_content.custom_minimum_size = Vector2(content_width, 0.0)
+		if pause_settings_toggle_grid != null:
+			pause_settings_toggle_grid.columns = 1 if mobile and content_width < 300.0 else 2
 		_layout_pause_achievement_grid(content_width, mobile)
 
 	if audio_prompt_button != null:
@@ -1560,6 +1574,8 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"xp_bar": xp_bar,
 		"pause": pause_button,
 		"pause_overlay": pause_overlay,
+		"pause_title": pause_title_label,
+		"pause_scroll": pause_scroll,
 		"pause_settings_tab": pause_settings_tab_button,
 		"pause_achievements_tab": pause_achievements_tab_button,
 		"pause_run_tab": pause_run_tab_button,
@@ -1589,6 +1605,7 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"pause_auto_battle": pause_auto_button
 	}, {
 		"paused": pause_overlay != null and pause_overlay.visible,
+		"ui_scale_index": int(PlayerSettings.get("ui_scale_index")) if PlayerSettings != null else 1,
 		"formation_picker": formation_picker != null and formation_picker.visible,
 		"formation_id": GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else "",
 		"formation_cooldown": GameManager.squad_manager.get_formation_cooldown_remaining() if is_instance_valid(GameManager.squad_manager) else 0.0,

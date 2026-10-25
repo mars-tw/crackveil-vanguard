@@ -1,0 +1,1541 @@
+{
+	"checks": 120,
+	"failures": [],
+	"fixture": "real arena UI; deterministic debug checkpoints; combat physics disabled for UI isolation; no gameplay balance claims",
+	"gate_only": false,
+	"records": [
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "picker-open",
+			"loot_active": false,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": false,
+			"phase": "waiting",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": true,
+			"sample": 0,
+			"screenshot": true,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "點按「陣形」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收",
+			"toast_visible": false,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "picker-closed",
+			"loot_active": false,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "waiting",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 1,
+			"screenshot": true,
+			"toast_remaining": 1.46666666666667,
+			"toast_text": "點按「陣形」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "front-warning",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "warning",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 2,
+			"screenshot": false,
+			"toast_remaining": 1.35,
+			"toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "front-active",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "active",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 3,
+			"screenshot": true,
+			"toast_remaining": 1.21366666666667,
+			"toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "front-recovery",
+			"loot_active": true,
+			"loot_age": 0.15,
+			"loot_visible": true,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 4,
+			"screenshot": false,
+			"toast_remaining": -0.296333333333332,
+			"toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+			"toast_visible": false,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "pincer",
+			"label": "pincer-warning",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "warning",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 5,
+			"screenshot": false,
+			"toast_remaining": 1.35,
+			"toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "pincer",
+			"label": "pincer-active",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "active",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 6,
+			"screenshot": true,
+			"toast_remaining": 1.2,
+			"toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "pincer",
+			"label": "pincer-recovery",
+			"loot_active": true,
+			"loot_age": 0.15,
+			"loot_visible": true,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 7,
+			"screenshot": false,
+			"toast_remaining": -0.309999999999999,
+			"toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+			"toast_visible": false,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "artillery-warning",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "warning",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 8,
+			"screenshot": false,
+			"toast_remaining": 1.35,
+			"toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "artillery-active",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "active",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 9,
+			"screenshot": true,
+			"toast_remaining": 1.2,
+			"toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "artillery-recovery",
+			"loot_active": true,
+			"loot_age": 0.15,
+			"loot_visible": true,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 10,
+			"screenshot": true,
+			"toast_remaining": -0.309999999999999,
+			"toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+			"toast_visible": false,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "urgent-預警",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 11,
+			"screenshot": true,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "預警重要訊息",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "urgent-反噬",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 12,
+			"screenshot": false,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "反噬重要訊息",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "urgent-封隙",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 13,
+			"screenshot": false,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "封隙重要訊息",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "urgent-護衛",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				196.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				470.0,
+				102.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 14,
+			"screenshot": false,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "護衛重要訊息",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				844,
+				390
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "picker-open",
+			"loot_active": false,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				86.0,
+				487.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": false,
+			"phase": "waiting",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": true,
+			"sample": 15,
+			"screenshot": true,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "點按「陣形」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收",
+			"toast_visible": false,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "picker-closed",
+			"loot_active": false,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				86.0,
+				487.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "waiting",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 16,
+			"screenshot": true,
+			"toast_remaining": 1.46666666666667,
+			"toast_text": "點按「陣形」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "front-warning",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				86.0,
+				487.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "warning",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 17,
+			"screenshot": false,
+			"toast_remaining": 1.35,
+			"toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "front-active",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				86.0,
+				487.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "active",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 18,
+			"screenshot": true,
+			"toast_remaining": 1.21366666666667,
+			"toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "front-recovery",
+			"loot_active": true,
+			"loot_age": 0.15,
+			"loot_visible": true,
+			"marker_rect": [
+				86.0,
+				487.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 19,
+			"screenshot": false,
+			"toast_remaining": -0.296333333333332,
+			"toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+			"toast_visible": false,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "pincer",
+			"label": "pincer-warning",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				86.0,
+				487.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "warning",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 20,
+			"screenshot": false,
+			"toast_remaining": 1.35,
+			"toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "pincer",
+			"label": "pincer-active",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				86.0,
+				487.611328125,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "active",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 21,
+			"screenshot": true,
+			"toast_remaining": 1.2,
+			"toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "pincer",
+			"label": "pincer-recovery",
+			"loot_active": true,
+			"loot_age": 0.136333333333333,
+			"loot_visible": true,
+			"marker_rect": [
+				86.0,
+				491.500244140625,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 22,
+			"screenshot": false,
+			"toast_remaining": -0.309999999999999,
+			"toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+			"toast_visible": false,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "artillery-warning",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				86.0,
+				491.500244140625,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "warning",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 23,
+			"screenshot": false,
+			"toast_remaining": 1.35,
+			"toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "artillery-active",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				86.0,
+				491.500244140625,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "active",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 24,
+			"screenshot": true,
+			"toast_remaining": 1.2,
+			"toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "artillery-recovery",
+			"loot_active": true,
+			"loot_age": 0.15,
+			"loot_visible": true,
+			"marker_rect": [
+				86.0,
+				487.133178710938,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 25,
+			"screenshot": true,
+			"toast_remaining": -0.309999999999999,
+			"toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+			"toast_visible": false,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "urgent-預警",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				86.0,
+				487.133178710938,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 26,
+			"screenshot": true,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "預警重要訊息",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "urgent-反噬",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				86.0,
+				487.133178710938,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 27,
+			"screenshot": false,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "反噬重要訊息",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "urgent-封隙",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				86.0,
+				487.133178710938,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 28,
+			"screenshot": false,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "封隙重要訊息",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "urgent-護衛",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				86.0,
+				487.133178710938,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				16.0,
+				556.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 29,
+			"screenshot": false,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "護衛重要訊息",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				390,
+				844
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "picker-open",
+			"loot_active": false,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				329.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": false,
+			"phase": "waiting",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": true,
+			"sample": 30,
+			"screenshot": true,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "點按「Q／陣形」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收",
+			"toast_visible": false,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "picker-closed",
+			"loot_active": false,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				329.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "waiting",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 31,
+			"screenshot": true,
+			"toast_remaining": 1.46666666666667,
+			"toast_text": "點按「Q／陣形」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "front-warning",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				329.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "warning",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 32,
+			"screenshot": false,
+			"toast_remaining": 1.35,
+			"toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "front-active",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				329.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "active",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 33,
+			"screenshot": true,
+			"toast_remaining": 1.21366666666667,
+			"toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "front",
+			"label": "front-recovery",
+			"loot_active": true,
+			"loot_age": 0.15,
+			"loot_visible": true,
+			"marker_rect": [
+				12.0,
+				329.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 34,
+			"screenshot": false,
+			"toast_remaining": -0.296333333333332,
+			"toast_text": "重盾正面推進｜預警 2 秒，留意地面刻線",
+			"toast_visible": false,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "pincer",
+			"label": "pincer-warning",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				329.0,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "warning",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 35,
+			"screenshot": false,
+			"toast_remaining": 1.35,
+			"toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "pincer",
+			"label": "pincer-active",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				329.292358398438,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "active",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 36,
+			"screenshot": true,
+			"toast_remaining": 1.2,
+			"toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "pincer",
+			"label": "pincer-recovery",
+			"loot_active": true,
+			"loot_age": 0.136333333333333,
+			"loot_visible": true,
+			"marker_rect": [
+				12.0,
+				331.045593261719,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 37,
+			"screenshot": false,
+			"toast_remaining": -0.309999999999999,
+			"toast_text": "兩翼包抄｜預警 2 秒，留意地面刻線",
+			"toast_visible": false,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "artillery-warning",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				331.045593261719,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "warning",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 38,
+			"screenshot": false,
+			"toast_remaining": 1.35,
+			"toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "artillery-active",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				331.045593261719,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "active",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 39,
+			"screenshot": true,
+			"toast_remaining": 1.2,
+			"toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "artillery-recovery",
+			"loot_active": true,
+			"loot_age": 0.15,
+			"loot_visible": true,
+			"marker_rect": [
+				12.0,
+				331.045593261719,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 40,
+			"screenshot": true,
+			"toast_remaining": -0.309999999999999,
+			"toast_text": "遠射鎖定落點｜預警 2 秒，留意地面刻線",
+			"toast_visible": false,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "urgent-預警",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				331.045593261719,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 41,
+			"screenshot": true,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "預警重要訊息",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "urgent-反噬",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				331.045593261719,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 42,
+			"screenshot": false,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "反噬重要訊息",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "urgent-封隙",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				331.045593261719,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 43,
+			"screenshot": false,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "封隙重要訊息",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		},
+		{
+			"audio_gate_visible": false,
+			"failures_so_far": [],
+			"kind": "artillery",
+			"label": "urgent-護衛",
+			"loot_active": true,
+			"loot_age": 0.0,
+			"loot_visible": false,
+			"marker_rect": [
+				12.0,
+				331.045593261719,
+				214.0,
+				30.0
+			],
+			"marker_visible": true,
+			"phase": "recovery",
+			"picker_rect": [
+				992.0,
+				312.0,
+				362.0,
+				280.0
+			],
+			"picker_visible": false,
+			"sample": 44,
+			"screenshot": false,
+			"toast_remaining": 1.48333333333333,
+			"toast_text": "護衛重要訊息",
+			"toast_visible": true,
+			"version": "0.34.0-content-r5",
+			"viewport": [
+				1366,
+				600
+			]
+		}
+	],
+	"start_state": {},
+	"status": "VERIFIED",
+	"version": "0.34.0-content-r5"
+}

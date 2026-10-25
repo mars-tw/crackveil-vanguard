@@ -60,6 +60,20 @@ func _process(delta: float) -> void:
 	_refresh()
 
 
+func _current_tactical_guard() -> Node:
+	if not is_instance_valid(GameManager.tactical_director):return null
+	var refs: Array=GameManager.tactical_director.guard_refs
+	for index in range(refs.size()-1,-1,-1):
+		var entry: Dictionary=refs[index]
+		var ref: WeakRef=entry.get("ref")
+		var enemy: Object=ref.get_ref() if is_instance_valid(ref) else null
+		if not is_instance_valid(enemy):continue
+		if int(enemy.get("spawn_token"))!=int(entry.get("token",-1)):continue
+		if enemy.get("is_active")!=true or enemy.get("is_dying")==true or int(enemy.get("tactical_recoveries"))>=2:continue
+		return enemy as Node
+	return null
+
+
 func _refresh() -> void:
 	var viewport_size := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
@@ -68,10 +82,12 @@ func _refresh() -> void:
 	headline.add_theme_font_size_override("font_size", 14)
 	detail.add_theme_font_size_override("font_size", 11)
 	rows.add_theme_constant_override("separation", 2)
-	var guard: Node = null
+	var guard: Node = _current_tactical_guard()
 	var nearest := 500.0
+	if is_instance_valid(guard) and is_instance_valid(GameManager.player):nearest=guard.global_position.distance_to(GameManager.player.global_position)
 	if is_instance_valid(GameManager.player):
 		for candidate in get_tree().get_nodes_in_group("enemies"):
+			if is_instance_valid(guard):break
 			if candidate.get("is_active") == true and candidate.get("is_dying") != true and int(candidate.get("tactical_min_cycles")) > 0:
 				var distance: float = candidate.global_position.distance_to(GameManager.player.global_position)
 				if distance < nearest:
@@ -87,18 +103,24 @@ func _refresh() -> void:
 			if bool(enemy.get("is_boss")) and float(enemy.get("hp")) > 0.0:
 				boss = enemy
 				break
-	if boss != null:
-		headline.text = "裂隙守門者"
+	var guard_cycle_active: bool=guard!=null and int(guard.get("tactical_recoveries"))<2
+	if guard_cycle_active:
+		headline.text = "%s・攻防已完成 %d/2 輪" % [str(guard.get("special_elite_name")),mini(2,guard.tactical_recoveries)]
+		meter.value = float(guard.get("hp"))/maxf(1.0,float(guard.get("max_hp")))
+		detail.text = "護甲已破・反擊" if guard.tactical_recoveries>=2 else "預警出招・閃開刻線" if guard.current_animation_name==&"attack" else "躲避後・等待下一輪"
+	elif boss != null:
+		var stage: Dictionary=GameManager.STAGE_CATALOG.get_stage(GameManager.selected_stage_id)
+		headline.text = str(stage.get("boss_name","守關者"))
 		meter.value = clampf(float(boss.get("hp")) / maxf(1.0, float(boss.get("max_hp"))), 0.0, 1.0)
-		detail.text = "完成攻防 %d/2・%s" % [mini(2,boss.attack_impact_count), "半血增援" if boss.boss_phase_two_triggered else "躲預警再反擊"]
+		detail.text = "已完成攻防 %d/2 輪・%s" % [mini(2,boss.attack_impact_count), "半血增援" if boss.boss_phase_two_triggered else "躲預警再反擊"]
 		if is_instance_valid(GameManager.tactical_director):
 			var pending_at: float=GameManager.tactical_director.boss_guard_at
 			if pending_at>GameManager.elapsed_time:
 				detail.text="增援 %.1f 秒・護甲維持" % (pending_at-GameManager.elapsed_time)
 	elif guard != null:
-		headline.text = "%s・破甲 %d/2" % [guard.special_elite_name, mini(2,guard.tactical_recoveries)]
-		meter.value = guard.hp/guard.max_hp
-		detail.text = "護甲已破・反擊" if guard.tactical_recoveries>=2 else "預警出招・閃開刻線" if guard.current_animation_name==&"attack" else "已完成攻防 %d/2 輪" % mini(2,guard.tactical_recoveries)
+		headline.text = "%s・攻防已完成 %d/2 輪" % [str(guard.get("special_elite_name")),mini(2,guard.tactical_recoveries)]
+		meter.value = float(guard.get("hp"))/maxf(1.0,float(guard.get("max_hp")))
+		detail.text = "護甲已破・反擊" if guard.tactical_recoveries>=2 else "預警出招・閃開刻線" if guard.current_animation_name==&"attack" else "躲避後・等待下一輪"
 	elif GameManager.combo_count >= 3:
 		headline.text = "%d 連斬" % GameManager.combo_count
 		meter.value = clampf(1.0 - (GameManager.elapsed_time - GameManager.combo_last_kill_time) / GameManager.COMBO_WINDOW, 0.0, 1.0)

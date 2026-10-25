@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "status": "BASELINE_FROZEN_FROM_COMMITTED_R4",
+  "commit": "2489ab4c62ca48b4d59548415afe7ca5d962f148",
+  "version": "0.33.0-content-r4",
+  "sourceManifest": {
+    "path": "docs/content/r4/tests/source-hashes.json",
+    "sha256": "3be3075b1e3bc0f1c86f006e8afc74880b9d9b581abde3ffcb126bda0131ebdc",
+    "files": 640
+  },
+  "baselineSourcePacks": {
+    "release": {
+      "pack_sha256": "0cbe4475cecac56ff73c11ede34e9a3f6d892d4de336cf0ae4c424c9d42a6979",
+      "source_manifest_sha256": "3be3075b1e3bc0f1c86f006e8afc74880b9d9b581abde3ffcb126bda0131ebdc"
+    },
+    "review": {
+      "pack_sha256": "58393fb163a21c39a528833490c9acefaf01325a7949b9da6407834120ecb2f3",
+      "source_manifest_sha256": "3be3075b1e3bc0f1c86f006e8afc74880b9d9b581abde3ffcb126bda0131ebdc"
+    }
+  },
+  "completeCi": {
+    "passed": 50,
+    "sourceInputFiles": 897,
+    "sourceBeforeEqualsAfter": true,
+    "evidence": "_整理紀錄/20261022/r4-ci-independent-review.json"
+  },
+  "scope": "Read-only R5 pre-change reference; R4 history and outputs remain unchanged."
+}

@@ -1,0 +1,11 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+R32_LOOT_PITY seeds=500 regular_kills=150000 drops=10464 max_first=12 max_gap=28
+R32_EQUIPMENT_MONOTONIC slots=3 levels=20 rarities=4 stronger_items_never_reduce_any_stat=true
+R32_EQUIPMENT_DELTA hp=100+20+36 movement=200+20 duplicate_safe=true salvage_gold=true recruit_once=true reset_restores=true
+R32_LOOT_PHYSICAL visible_drop=1 magnetic_collection=1 boss_claimed=3 world_remaining=0
+R32_UPGRADE_PREVIEW readonly=true numeric_before_after=true evolution_requirements=true projectile_pierce=true
+R32_LOOT_UI viewport=(1280, 720) progress=[P: (190.0, 208.0), S: (900.0, 24.0)] scroll=[P: (206.0, 244.0), S: (868.0, 300.0)]
+R32_LOOT_UI viewport=(844, 390) progress=[P: (22.0, 72.0), S: (800.0, 24.0)] scroll=[P: (32.0, 104.0), S: (796.0, 254.0)]
+R32_LOOT_UI viewport=(390, 844) progress=[P: (22.0, 72.0), S: (346.0, 24.0)] scroll=[P: (32.0, 104.0), S: (334.0, 708.0)]
+R32_LOOT_PASS seeds=500 first_drop<=12 max_dry_gap<=28 rng=isolated slots=3 rare_pity=4 elite>=rare boss=legendary duplicate=safe delta=idempotent recruit=synced physical=magnet upgrade=live_readonly layouts=3

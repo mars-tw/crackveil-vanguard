@@ -10,6 +10,7 @@ signal progress_changed
 const SAVE_PATH := "user://veil_echo.cfg"
 const TACTICAL := preload("res://scripts/services/tactical_catalog.gd")
 const STARTING := preload("res://scripts/services/starting_build_catalog.gd")
+const ECHO_SHARDS := preload("res://scripts/services/echo_shard_breakdown.gd")
 
 const TRACKS: Array[Dictionary] = [
 	{
@@ -177,23 +178,11 @@ func award_run(summary: Dictionary) -> int:
 
 
 func calculate_run_shards(summary: Dictionary) -> int:
-	if summary.has("_fixed_echo_delta"):
-		return max(0, int(summary.get("_fixed_echo_delta", 0)))
-	var elapsed := float(summary.get("elapsed_time", 0.0))
-	var gold := int(summary.get("gold_earned", summary.get("gold", 0)))
-	var kills := int(summary.get("kills", 0))
-	var level := int(summary.get("level", 1))
-	var elites := int(summary.get("elites_killed", 0))
-	var boss_killed := bool(summary.get("boss_killed", false))
-	var amount := int(floor(float(gold) * 0.25))
-	amount += int(floor(float(kills) / 20.0))
-	amount += int(floor(float(level) / 3.0))
-	amount += elites * 2
-	if boss_killed:
-		amount += 8
-	if elapsed >= 30.0:
-		amount = max(1, amount)
-	return amount
+	return ECHO_SHARDS.total(summary)
+
+
+func calculate_run_shard_breakdown(summary: Dictionary) -> Dictionary:
+	return ECHO_SHARDS.calculate(summary)
 
 
 func buy_upgrade(track_id: String) -> bool:
@@ -335,8 +324,22 @@ func get_progress_summary() -> Dictionary:
 		"magnetism_level": get_upgrade_level("echo_magnetism"),
 		"focus_level": get_upgrade_level("echo_focus"),
 		"contract_slot_unlocked": has_unlock("contract_slot"),
-		"opening_choice_unlocked": has_unlock("opening_choice")
+		"opening_choice_unlocked": has_unlock("opening_choice"),
+		"next_goal": get_next_progress_goal()
 	}
+
+
+func get_next_progress_goal() -> Dictionary:
+	for unlock in UNLOCKS:
+		var required:=int(unlock.get("required_lifetime_shards",0))
+		if lifetime_shards<required:
+			return {"kind":"lifetime","name":str(unlock.get("name","下一解鎖")),"current":lifetime_shards,"target":required,"remaining":required-lifetime_shards}
+	for track in TRACKS:
+		var id:=str(track.get("id",""))
+		if get_upgrade_level(id)<int(track.get("max_level",1)):
+			var cost:=get_upgrade_cost(id)
+			return {"kind":"spendable","name":str(track.get("name","下一強化")),"current":shards,"target":cost,"remaining":maxi(0,cost-shards)}
+	return {"kind":"complete","name":"目前殘響強化已滿級","current":shards,"target":0,"remaining":0}
 
 
 func _reset_runtime_defaults() -> void:

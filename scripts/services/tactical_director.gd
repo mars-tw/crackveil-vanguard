@@ -127,7 +127,13 @@ func current_hint() -> String:
 	if not claimed.has("hunt"):
 		return "雙菁追獵 %d/2｜首取殘響 +5" % mini(2, GameManager.elites_killed)
 	if not claimed.has("clear"):
-		return "守關突破｜Boss %s｜首取 +8" % GameManager.format_time(float(CATALOG.STAGES.get_stage(GameManager.selected_stage_id).get("boss_time",90)))
+		var stage: Dictionary=CATALOG.STAGES.get_stage(GameManager.selected_stage_id)
+		var boss_name:=str(stage.get("boss_name","守關者"))
+		if GameManager.run_mode=="endless":return "Boss %s・無盡第 %d 波" % [boss_name,GameManager.get_endless_wave()]
+		if GameManager.boss_active:return "守關・Boss %s 已出現・首取 +8" % boss_name
+		var boss_time:=float(stage.get("boss_time",90))
+		if GameManager.elapsed_time<boss_time:return "Boss %s・%s 後登場・首取 +8" % [boss_name,GameManager.format_time(boss_time-GameManager.elapsed_time)]
+		return "Boss %s・正在入場・首取 +8" % boss_name
 	return "本關目標完成！回主選單查看收藏"
 
 func progress_text() -> String:

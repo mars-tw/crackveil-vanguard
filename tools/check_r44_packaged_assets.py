@@ -7,16 +7,21 @@ import subprocess
 parser=argparse.ArgumentParser()
 parser.add_argument('--godot',required=True)
 parser.add_argument('--pack',required=True)
+parser.add_argument('--out',default='docs/evidence/r44-store')
+parser.add_argument('--temp-dir',default='.audit-tmp/r44')
 args=parser.parse_args()
 root=Path(__file__).resolve().parents[1]
 report=root/'docs/evidence/r44-store/runtime-assets.json'
 assets=sorted({'res://'+r['asset'] for r in json.loads(report.read_text(encoding='utf-8'))['assets']})
-temporary=root/'.audit-tmp/r44'
+temporary=root/args.temp_dir
 temporary.mkdir(parents=True,exist_ok=True)
 script=temporary/'packaged_asset_probe.gd'
 script.write_text('''extends SceneTree
 func _initialize() -> void:
     var failures: Array[String] = []
+    for qa_path in ["res://scenes/debug/ContentR1Review.tscn", "res://scripts/debug/content_r1_review.gd"]:
+        if ResourceLoader.exists(qa_path):
+            failures.append(qa_path + ":QA_fixture_in_release")
     var assets: Array = %s
     for path in assets:
         if not ResourceLoader.exists(path):
@@ -33,7 +38,8 @@ isolation.mkdir(parents=True,exist_ok=True)
 command=[args.godot,'--headless','--path',str(isolation),'--main-pack',str(Path(args.pack).resolve()),'--script',str(script)]
 run=subprocess.run(command,cwd=isolation,capture_output=True,timeout=90,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
 log=(run.stdout+run.stderr).decode('utf-8',errors='replace').replace('\r\n','\n').replace('\r','').rstrip()+'\n'
-output=root/'docs/evidence/r44-store/packaged-assets.txt'
+output=root/args.out/'packaged-assets.txt'
+output.parent.mkdir(parents=True,exist_ok=True)
 output.write_text(log,encoding='utf-8',newline='\n')
 assert run.returncode==0 and 'ERROR:' not in log,log[-4000:]
 line=next(line for line in log.splitlines() if line.startswith('R44_PACKAGED_ASSETS='))

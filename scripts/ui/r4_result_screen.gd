@@ -6,6 +6,7 @@ signal main_menu_requested
 const FONT:=preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 const CATALOG:=preload("res://scripts/services/starting_build_catalog.gd")
 const PROBE:=preload("res://scripts/services/web_reachability_probe.gd")
+const SUPPORT_MODEL:=preload("res://scripts/services/support_report_model.gd")
 var victory:=false
 var root: Control
 var panel: Panel
@@ -31,6 +32,7 @@ var tab:=0
 var page:=0
 var rows: Array=[]
 var page_capacity:=2
+var support_rows: Array=[]
 
 func _ready() -> void:
 	process_mode=PROCESS_MODE_ALWAYS
@@ -53,7 +55,7 @@ func _ready() -> void:
 	title_label=_label(23)
 	summary_scroll=ScrollContainer.new()
 	summary_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-	summary_scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	summary_scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO
 	panel.add_child(summary_scroll)
 	body_scroll=summary_scroll
 	summary_label=Label.new()
@@ -121,6 +123,7 @@ func show_summary(summary: Dictionary) -> void:
 			var row: Dictionary=GameManager.contribution[id].duplicate(true)
 			row["id"]=id
 			rows.append(row)
+	support_rows=SUPPORT_MODEL.build(rows)
 	tab=0
 	page=0
 	title_label.text=(str(summary.get("stage_name","封隙出擊"))+"・通關") if victory else "任務失敗"
@@ -132,17 +135,31 @@ func show_summary(summary: Dictionary) -> void:
 	_apply_responsive_layout()
 
 func _page_count() -> int:
-	return maxi(1,ceili(float(_records().size() if tab==2 else rows.size())/_per_page()))
+	var count: int=_records().size() if tab==2 else support_rows.size() if tab==1 else rows.size()
+	return maxi(1,ceili(float(count)/_per_page()))
+
 
 func _per_page() -> int:
 	var view:=MobileTuning.ui_layout_size(get_viewport().get_visible_rect().size)
-	return 1 if view.y>view.x and view.y<640 else 2
+	if view.y>view.x and view.y<640:return 1
+	if view.x<=900 and view.y<=430 and int(PlayerSettings.get("ui_scale_index"))>=2:return 1
+	return 2
 
 func _records() -> Array[String]:
 	var data:=displayed_summary
+	var echo: Dictionary=data.get("echo_progress",MetaProgress.get_progress_summary())
+	var goal: Dictionary=echo.get("next_goal",MetaProgress.get_next_progress_goal())
+	var source_lines: Array[String]=[]
+	var sources: Dictionary=data.get("echo_shard_sources",{})
+	for source in ["金幣","擊殺","等級","菁英","Boss","出擊保底","驗證固定增量","其他已保存收益"]:
+		var amount:=int(sources.get(source,0))
+		if amount>0:source_lines.append("%s +%d" % [source,amount])
 	var result: Array[String]=[
-		"戰利與成長\n金幣 %d・等級 %d\n殘響 +%d・裝備 %d 件" % [data.get("gold",0),data.get("level",1),data.get("echo_shards_earned",0),data.get("equipment_collected",0)],
+		"戰利與成長\n金幣 %d・等級 %d\n殘響 +%d・裝備 %d 件\n來源：%s" % [data.get("gold",0),data.get("level",1),data.get("echo_shards_earned",0),data.get("equipment_collected",0),"／".join(source_lines) if not source_lines.is_empty() else "本局沒有已保存收入"],
 		"關卡紀錄\n擊殺 %d・菁英 %d\n守門者：%s" % [data.get("kills",0),data.get("elites_killed",0),"已擊破" if data.get("boss_killed",false) else "尚未擊破"]]
+	if goal.get("kind","")=="lifetime":result.append("局外目標\n%s：永久殘響 %d/%d\n還差 %d" % [goal.get("name","下一解鎖"),goal.get("current",0),goal.get("target",0),goal.get("remaining",0)])
+	elif goal.get("kind","")=="spendable":result.append("局外目標\n%s：可用殘響 %d/%d\n還差 %d" % [goal.get("name","下一強化"),goal.get("current",0),goal.get("target",0),goal.get("remaining",0)])
+	else:result.append("局外目標\n"+str(goal.get("name","目前強化已完成")))
 	for achievement in data.get("achievement_unlocks",[]):result.append("本局新解鎖\n"+str(achievement.get("name","")))
 	return result
 
@@ -153,7 +170,9 @@ func _refresh() -> void:
 	var node: Dictionary=CATALOG.node(str(build.get("node",GameManager.active_starting_node)))
 	var bond: Dictionary=displayed_summary.get("bond_benefits",GameManager.bond_benefits)
 	var outcome: String="擊破"+str(displayed_summary.get("boss_name",GameManager.STAGE_CATALOG.get_stage(GameManager.selected_stage_id).get("boss_name","守門者"))) if victory else "先鋒的殘響"
-	summary_label.text="%s｜%s\n%s %s\n擊殺 %d・存活 %d/%d 人\n羈絆收益 回復%d／減傷%d HP" % [CATALOG.TEAMS.get(team,CATALOG.TEAMS.legacy).name,node.get("name","未裝節點"),outcome,GameManager.format_time(float(displayed_summary.get("elapsed_time",0))),displayed_summary.get("kills",0),displayed_summary.get("squad_alive",0),displayed_summary.get("squad_total",rows.size()),bond.get("healing",0),bond.get("prevented",0)]
+	var echo: Dictionary=displayed_summary.get("echo_progress",MetaProgress.get_progress_summary())
+	var goal: Dictionary=echo.get("next_goal",MetaProgress.get_next_progress_goal())
+	summary_label.text="%s｜%s\n%s・%s\n擊殺 %d・存活 %d/%d\n羈絆收益（全隊加成）回%d／減%d HP\n殘響 +%d・現有 %d\n下一步 %s・%s" % [CATALOG.TEAMS.get(team,CATALOG.TEAMS.legacy).name,node.get("name","未裝節點"),outcome,GameManager.format_time(float(displayed_summary.get("elapsed_time",0))),displayed_summary.get("kills",0),displayed_summary.get("squad_alive",0),displayed_summary.get("squad_total",rows.size()),bond.get("healing",0),bond.get("prevented",0),displayed_summary.get("echo_shards_earned",0),echo.get("shards",MetaProgress.shards),goal.get("name","強化完成"),("還差 %d" % int(goal.get("remaining",0))) if int(goal.get("remaining",0))>0 else ("可在整備兌換" if goal.get("kind","")=="spendable" else "已達成")]
 	gain_label.text=_measured_gain(node,build.get("benefits",{}))
 	progress_label.text=MetaProgress.starting_choice_progress_text()
 	if not GameManager.pending_starting_settlements.is_empty():progress_label.text="進度未保存・整備可重試"
@@ -167,11 +186,15 @@ func _refresh() -> void:
 		if number>=page_capacity:continue
 		if tab==2:
 			if i<records.size():cards[number].text=records[i]
-		elif i<rows.size():
-			var row: Dictionary=rows[i]
+		else:
+			var displayed_rows: Array=support_rows if tab==1 else rows
+			if i>=displayed_rows.size():continue
+			var row: Dictionary=displayed_rows[i]
 			cards[number].text=str(row.get("name",row.get("id","隊員")))+"\n"
 			if tab==0:cards[number].text+="傷害 %d HP・擊殺 %d\n承傷 %d HP" % [row.get("damage",0),row.get("kills",0),row.get("taken",0)]
-			else:cards[number].text+="回復 %d HP・減傷 %d HP\n個人支援（含其羈絆貢獻）" % [row.get("healing",0),row.get("prevented",0)]
+			# One header line keeps the full zero-support roster inside its card.
+			elif str(row.get("id",""))=="support_zero_group":cards[number].text=str(row.get("name","未觸發隊員"))+"（回復／減傷皆 0 HP）\n"+"、".join(row.get("member_names",[]))
+			else:cards[number].text+="個人總計（含羈絆）・回復 %d HP・減傷 %d HP" % [row.get("healing",0),row.get("prevented",0)]
 	for number in range(3):tabs[number].modulate=Color("ffdc82") if tab==number else Color.WHITE
 	_apply_responsive_layout()
 
@@ -210,16 +233,32 @@ func _apply_responsive_layout() -> void:
 	var portrait:=view.y>view.x
 	var scale:=PlayerSettings.get_ui_scale_multiplier()
 	title_label.add_theme_font_size_override("font_size",roundi(23*scale))
-	for label in [summary_label,gain_label]:label.add_theme_font_size_override("font_size",roundi(14*scale))
+	summary_label.add_theme_font_size_override("font_size",roundi((12 if portrait and view.x<=360 else 14)*scale))
+	for label in [gain_label]:label.add_theme_font_size_override("font_size",roundi(14*scale))
 	for label in [progress_label,page_label]:label.add_theme_font_size_override("font_size",roundi(12*scale))
 	for id in controls:controls[id].add_theme_font_size_override("font_size",roundi(14*scale))
 	_place(title_label,12,8,w,30)
 	var left_w:=w if portrait else w*0.46-8
-	_place(summary_scroll,12,50,left_w,104 if portrait else 114)
 	summary_label.custom_minimum_size=Vector2(left_w,0)
-	_place(gain_label,12,158 if portrait else 168,left_w,48)
-	_place(progress_label,12,208 if portrait else 220,left_w,28 if portrait else 36)
-	var tab_y:=240.0 if portrait else 44.0
+	var tab_y:=44.0
+	if portrait:
+		# Stack the portrait summary from its real line count so the echo and
+		# next-goal lines are never hidden behind the measured-gain line.
+		var summary_h:=minf(size.y-300,_text_height(summary_label,left_w))
+		var gain_h:=_text_height(gain_label,left_w) if gain_label.text!="" else 0.0
+		_place(summary_scroll,12,50,left_w,summary_h)
+		_place(gain_label,12,52+summary_h,left_w,gain_h)
+		var progress_h:=_text_height(progress_label,left_w)
+		_place(progress_label,12,54+summary_h+gain_h,left_w,progress_h)
+		tab_y=minf(size.y-226,58+summary_h+gain_h+progress_h)
+	else:
+		# Same real-line stacking in landscape; maximum UI scale needs more
+		# than the old fixed 150 px for six summary lines.
+		var summary_h:=minf(size.y-210,maxf(150.0,_text_height(summary_label,left_w)))
+		var gain_y:=maxf(206.0,54+summary_h)
+		_place(summary_scroll,12,50,left_w,summary_h)
+		_place(gain_label,12,gain_y,left_w,48)
+		_place(progress_label,12,gain_y+50,left_w,36)
 	var right_x:=12.0 if portrait else 24+left_w
 	var right_w:=w if portrait else w-left_w-12
 	for number in range(3):_place(tabs[number],right_x+number*(right_w+4)/3,tab_y,(right_w-8)/3,44)
@@ -234,12 +273,32 @@ func _apply_responsive_layout() -> void:
 	for label in cards:label.add_theme_font_size_override("font_size",roundi(14*scale))
 	_publish()
 
+func _text_height(label: Label,width: float) -> float:
+	# Real wrapped line count x font line height (incl. theme line spacing),
+	# so maximum UI scale and CJK glyph height are measured, not estimated.
+	label.size=Vector2(width,label.size.y)
+	var font: Font=label.get_theme_font("font")
+	var font_size: int=label.get_theme_font_size("font_size")
+	var spacing: float=float(label.get_theme_constant("line_spacing"))
+	var lines:=maxi(label.get_line_count(),label.text.count("
+")+1)
+	return lines*(font.get_height(font_size)+spacing)+6.0
+
 func _place(control: Control,x: float,y: float,w: float,h: float) -> void:
 	control.position=Vector2(x,y)
 	control.size=Vector2(w,h)
 
 func _publish() -> void:
-	PROBE.publish("result",MobileTuning.ui_layout_size(get_viewport().get_visible_rect().size),controls,{"visible":root.visible,"victory":victory,"tab":tab,"page":page,"pages":_page_count(),"summary":summary_label.text,"gain":gain_label.text,"progress":progress_label.text,"rows":rows,"cards":[cards[0].text,cards[1].text]})
+	var visible_support_members: Array=[]
+	if tab==1:
+		for slot in range(page_capacity):
+			var index:=page*page_capacity+slot
+			if index>=support_rows.size():continue
+			var item: Dictionary=support_rows[index]
+			if str(item.get("id",""))=="support_zero_group":
+				for i in range(item.get("member_ids",[]).size()):visible_support_members.append({"id":item.member_ids[i],"name":item.member_names[i],"grouped":true})
+			else:visible_support_members.append({"id":item.get("id",""),"name":item.get("name",item.get("id","隊員")),"grouped":false})
+	PROBE.publish("result",MobileTuning.ui_layout_size(get_viewport().get_visible_rect().size),controls,{"visible":root.visible,"victory":victory,"tab":tab,"page":page,"pages":_page_count(),"summary":summary_label.text,"gain":gain_label.text,"progress":progress_label.text,"rows":rows,"support_rows":support_rows,"visible_support_members":visible_support_members,"cards":[cards[0].text,cards[1].text]})
 
 func _process(_delta: float) -> void:
 	if is_instance_valid(root) and root.visible:_publish()

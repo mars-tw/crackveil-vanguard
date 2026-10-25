@@ -228,6 +228,7 @@ var temporary_squad_damage_timer: float = 0.0
 var combo_fire_rate_timer: float = 0.0
 var next_elite_bonus_xp: int = 0
 var echo_shards_awarded_this_run: int = 0
+var echo_shard_eligible_totals: Dictionary={}
 var seen_affix_toasts: Dictionary = {}
 var pending_toasts: Array[String] = []
 var run_token: int = 0
@@ -395,6 +396,7 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	bond_benefits = {"healing":0.0,"prevented":0.0,"triggers":0}
 	next_elite_bonus_xp = 0
 	echo_shards_awarded_this_run = 0
+	echo_shard_eligible_totals.clear()
 	seen_affix_toasts.clear()
 	run_token += 1
 	camera_threat_zoom_timer = 0.0
@@ -1745,9 +1747,15 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 		total_eligible = int(MetaProgress.calculate_run_shards(enriched))
 	var delta: int = max(0, total_eligible - echo_shards_awarded_this_run)
 	var awarded: int = 0
+	var echo_breakdown: Dictionary={}
 	if delta > 0 and MetaProgress.has_method("award_run"):
 		awarded = int(MetaProgress.award_run(_summary_for_echo_delta(enriched, delta)))
+		if MetaProgress.has_method("calculate_run_shard_breakdown"):
+			echo_breakdown=_new_echo_source_awards(MetaProgress.calculate_run_shard_breakdown(enriched),awarded)
 		echo_shards_awarded_this_run += awarded
+	if delta==0 and MetaProgress.has_method("calculate_run_shard_breakdown"):
+		echo_shard_eligible_totals=MetaProgress.calculate_run_shard_breakdown(enriched).duplicate(true)
+	enriched["echo_shard_sources"]=echo_breakdown
 	enriched["echo_shards_earned"] = awarded
 	enriched["echo_shards_run_total"] = echo_shards_awarded_this_run
 	if MetaProgress.has_method("get_progress_summary"):
@@ -1780,6 +1788,22 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 	if AchievementProgress != null and AchievementProgress.has_method("get_run_unlocked_definitions"):
 		enriched["achievement_unlocks"] = AchievementProgress.get_run_unlocked_definitions()
 	return enriched
+
+
+func _new_echo_source_awards(current: Dictionary, awarded: int) -> Dictionary:
+	var remaining:=maxi(0,awarded)
+	var result: Dictionary={}
+	var order: Array[String]=["金幣","擊殺","等級","菁英","Boss","出擊保底","驗證固定增量"]
+	for key in order:
+		var eligible:=int(current.get(key,0))
+		var previous:=int(echo_shard_eligible_totals.get(key,0))
+		var new_eligible:=maxi(0,eligible-previous)
+		var earned:=mini(remaining,new_eligible)
+		if earned>0:result[key]=earned
+		remaining-=earned
+	if remaining>0:result["其他已保存收益"]=remaining
+	if awarded>0:echo_shard_eligible_totals=current.duplicate(true)
+	return result
 
 func prepare_starting_build() -> void:
 	pending_starting_formal=true

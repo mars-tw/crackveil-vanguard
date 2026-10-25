@@ -5,6 +5,10 @@ const CATALOG_PATH := "res://scripts/vfx/newskill_fx_catalog.gd"
 const ATLAS_PATH := "res://assets/art/r35/r35_skill_fx_atlas.png"
 const DESKTOP_CAP := 32
 const MOBILE_CAP := 16
+# Cosmetic visibility only: hidden slots retain their original animation/lifetime.
+const FRIENDLY_DESKTOP_CAP := 12
+const FRIENDLY_MOBILE_CAP := 6
+const FRIENDLY_SWEEP_ALPHA := 0.38
 const FRIENDLY_SHADER := preload("res://scripts/shaders/friendly_attack.gdshader")
 
 class Effect extends Node2D:
@@ -45,6 +49,25 @@ func _ready() -> void:
 func _cap() -> int:
 	return MOBILE_CAP if MOBILE.mobile_lod_enabled(get_viewport_rect().size) else DESKTOP_CAP
 
+func _friendly_cap() -> int:
+	return FRIENDLY_MOBILE_CAP if MOBILE.mobile_lod_enabled(get_viewport_rect().size) else FRIENDLY_DESKTOP_CAP
+
+func _is_friendly_sweep(slot: Effect) -> bool:
+	return slot.kind in ["slash_a", "slash_b", "cyclone"]
+
+func _refresh_friendly_visibility() -> void:
+	var remaining := _friendly_cap()
+	# Prefer the most recent detached attack marks. Held owner channels remain visible.
+	for index in range(active.size() - 1, -1, -1):
+		var slot: Effect = active[index]
+		if not _is_friendly_sweep(slot):
+			continue
+		if slot.held:
+			slot.visible = true
+			continue
+		slot.visible = remaining > 0
+		remaining -= 1
+
 func _effect_origin(kind: String, origin: Vector2, direction: Vector2) -> Vector2:
 	if kind in ["slash_a", "slash_b"]:
 		return origin + direction.normalized() * 70.0 + Vector2(0, 22)
@@ -80,7 +103,7 @@ func play_effect(kind: String, origin: Vector2, direction: Vector2, strength: fl
 	slot.rotation = direction.angle() if kind in ["slash_a", "slash_b", "monster_bite", "monster_fire", "monster_shadow"] else 0.0
 	var size_scale := clampf(strength, 0.35, 4.4 if kind in ["slash_a", "slash_b", "cyclone"] else 2.5)
 	slot.scale = Vector2.ONE * size_scale
-	slot.modulate = Color.WHITE
+	slot.modulate = Color(1.0, 1.0, 1.0, FRIENDLY_SWEEP_ALPHA if _is_friendly_sweep(slot) else 1.0)
 	if kind in ["slash_a", "slash_b", "cyclone"]:
 		slot.sprite.material = sector_material if kind == "cyclone" else friendly_material
 	else:
@@ -91,6 +114,7 @@ func play_effect(kind: String, origin: Vector2, direction: Vector2, strength: fl
 	slot.sprite.play("default")
 	slot.visible = true
 	active.append(slot)
+	_refresh_friendly_visibility()
 	emitted += 1
 	peak = maxi(peak, active.size())
 	set_process(true)
@@ -106,15 +130,18 @@ func set_channel(owner: Object, enabled: bool, origin: Vector2, direction: Vecto
 			slot.held = false
 			slot.release_age = 0.0
 		channels.erase(key)
+		_refresh_friendly_visibility()
 		return
 	if not is_instance_valid(slot):
 		slot = play_effect("cyclone", origin, direction, strength)
 		if slot == null:
 			return
 		slot.held = true
+		slot.modulate = Color.WHITE
 		slot.owner_ref = weakref(owner)
 		channels[key] = slot
 	slot.global_position = _effect_origin("cyclone", origin, direction)
+	_refresh_friendly_visibility()
 
 func _process(delta: float) -> void:
 	for slot in active.duplicate():
@@ -131,13 +158,14 @@ func _process(delta: float) -> void:
 		if not slot.held:
 			if slot.release_age >= 0.0:
 				slot.release_age += delta
-				slot.modulate.a = maxf(0.0, 1.0 - slot.release_age / 0.10) * (0.46 if slot.kind in ["slash_a", "slash_b", "cyclone"] else 1.0)
+				slot.modulate.a = maxf(0.0, 1.0 - slot.release_age / 0.10) * (FRIENDLY_SWEEP_ALPHA if _is_friendly_sweep(slot) else 1.0)
 				if slot.release_age >= 0.10:
 					_release(slot)
 			elif slot.age >= slot.life:
 				_release(slot)
 			else:
-				slot.modulate.a = minf(1.0, (slot.life - slot.age) / 0.07) * (0.46 if slot.kind in ["slash_a", "slash_b", "cyclone"] else 1.0)
+				slot.modulate.a = minf(1.0, (slot.life - slot.age) / 0.07) * (FRIENDLY_SWEEP_ALPHA if _is_friendly_sweep(slot) else 1.0)
+	_refresh_friendly_visibility()
 	if active.is_empty():
 		set_process(false)
 
@@ -164,4 +192,12 @@ func _release(slot: Effect) -> void:
 	free_slots.append(slot)
 
 func get_debug_state() -> Dictionary:
-	return {"active": active.size(), "free": free_slots.size(), "channels": channels.size(), "emitted": emitted, "rejected": rejected, "peak": peak, "cap": _cap(), "assets_ready": catalog != null and ResourceLoader.exists(ATLAS_PATH)}
+	var friendly_visible := 0
+	var friendly_hidden := 0
+	for slot in active:
+		if _is_friendly_sweep(slot) and not slot.held:
+			if slot.visible:
+				friendly_visible += 1
+			else:
+				friendly_hidden += 1
+	return {"friendly_visible": friendly_visible, "friendly_hidden": friendly_hidden, "friendly_cap": _friendly_cap(), "friendly_alpha": FRIENDLY_SWEEP_ALPHA, "active": active.size(), "free": free_slots.size(), "channels": channels.size(), "emitted": emitted, "rejected": rejected, "peak": peak, "cap": _cap(), "assets_ready": catalog != null and ResourceLoader.exists(ATLAS_PATH)}
