@@ -24,8 +24,8 @@ func _ready() -> void:
 	# 16px keeps the first character clear of the R9 vector frame corners.
 	style.content_margin_left = 16.0
 	style.content_margin_right = 16.0
-	style.content_margin_top = 5.0
-	style.content_margin_bottom = 5.0
+	style.content_margin_top = 12.0
+	style.content_margin_bottom = 9.0
 	panel.add_theme_stylebox_override("panel", style)
 	add_child(panel)
 	preload("res://scripts/ui/rift_frame_ornament.gd").attach(panel, false, Color("6fc4cf"), 12.0)
@@ -107,7 +107,7 @@ func _refresh() -> void:
 				break
 	var guard_cycle_active: bool=guard!=null and int(guard.get("tactical_recoveries"))<2
 	if guard_cycle_active:
-		headline.text = "%s・攻防已完成 %d/2 輪" % [_guard_name(guard),mini(2,guard.tactical_recoveries)]
+		headline.text = "%s・攻防 %d/2 輪" % [_guard_name(guard),mini(2,guard.tactical_recoveries)]
 		meter.value = float(guard.get("hp"))/maxf(1.0,float(guard.get("max_hp")))
 		detail.text = "護甲已破・反擊" if guard.tactical_recoveries>=2 else "預警出招・閃開刻線" if guard.current_animation_name==&"attack" else "躲避後・等待下一輪"
 	elif boss != null:
@@ -120,7 +120,7 @@ func _refresh() -> void:
 			if pending_at>GameManager.elapsed_time:
 				detail.text="增援 %.1f 秒・護甲維持" % (pending_at-GameManager.elapsed_time)
 	elif guard != null:
-		headline.text = "%s・攻防已完成 %d/2 輪" % [_guard_name(guard),mini(2,guard.tactical_recoveries)]
+		headline.text = "%s・攻防 %d/2 輪" % [_guard_name(guard),mini(2,guard.tactical_recoveries)]
 		meter.value = float(guard.get("hp"))/maxf(1.0,float(guard.get("max_hp")))
 		detail.text = "護甲已破・反擊" if guard.tactical_recoveries>=2 else "預警出招・閃開刻線" if guard.current_animation_name==&"attack" else "躲避後・等待下一輪"
 	elif GameManager.combo_count >= 3:
@@ -138,6 +138,19 @@ func _refresh() -> void:
 		headline.text = "無盡作戰" if GameManager.boss_killed else "%s來襲 %d 秒" % [encounter_name, seconds]
 		meter.value = clampf(GameManager.elapsed_time / maxf(1.0, encounter_time), 0.0, 1.0)
 		detail.text = "移動回收裝備與經驗" if MOBILE_TUNING.has_confirmed_touch() else "空白鍵：旋斬　P：暫停"
+	_fit_headline()
+
+
+# R10: long guard titles shrink instead of touching the frame ornament.
+func _fit_headline() -> void:
+	var room := panel.size.x - 64.0
+	var font := headline.get_theme_font("font")
+	if room <= 0.0 or font == null:
+		return
+	var font_size := 15
+	while font_size > 11 and font.get_string_size(headline.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > room:
+		font_size -= 1
+	headline.add_theme_font_size_override("font_size", font_size)
 
 
 # Some guards (e.g. gatekeeper reinforcements) carry no elite title; never

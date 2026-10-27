@@ -285,6 +285,20 @@ func _build_card_content(button: Button, title: String, description: String, opt
 	button.add_child(card_secondary)
 
 
+func card_icon_width_ratio(button: Button) -> float:
+	var icon := button.get_node_or_null("UpgradeIcon") as Control
+	if icon == null or button.size.x <= 0.0:
+		return 0.0
+	return icon.size.x / button.size.x
+func card_content_fill_ratio(button: Button) -> float:
+	if button.size.y <= 0.0:
+		return 0.0
+	var lowest := 0.0
+	for name in ["UpgradeIcon", "CategoryLabel", "CardTitle", "CardDescription", "CardSecondary"]:
+		var node := button.get_node_or_null(name) as Control
+		if node != null and node.visible:
+			lowest = maxf(lowest, node.position.y + node.size.y)
+	return clampf(lowest / button.size.y, 0.0, 1.0)
 func _upgrade_icon(option: Dictionary) -> Texture2D:
 	var key := UPGRADE_PREVIEW.icon_key(option)
 	if R9_ICONS.has(key):
@@ -321,7 +335,8 @@ func _layout_card_content(button: Button, portrait: bool, mobile: bool) -> void:
 	var secondary := button.get_node_or_null("CardSecondary") as Label
 	if icon == null or category == null or card_title == null or description == null:
 		return
-	var icon_size := 58.0 if mobile and portrait else 48.0
+	var card_width := maxf(button.size.x, button.custom_minimum_size.x)
+	var icon_size := clampf(card_width * 0.30, 48.0, 96.0) if card_width > 0.0 else (58.0 if mobile and portrait else 48.0)
 	var icon_top := 16.0 if mobile else 14.0
 	icon.anchor_left = 0.5
 	icon.anchor_right = 0.5
@@ -350,7 +365,7 @@ func _layout_card_content(button: Button, portrait: bool, mobile: bool) -> void:
 	description.offset_right = -16.0
 	description.offset_top = card_title.offset_bottom + 5.0
 	description.offset_bottom = -54.0
-	description.add_theme_font_size_override("font_size", 15 if mobile and portrait else 13 if mobile else 14)
+	description.add_theme_font_size_override("font_size", 17 if mobile and portrait else 15 if mobile else 16)
 	if secondary != null:
 		secondary.anchor_left = 0.0
 		secondary.anchor_right = 1.0
@@ -361,7 +376,16 @@ func _layout_card_content(button: Button, portrait: bool, mobile: bool) -> void:
 		# Room for two lines: an effect detail plus the bond link.
 		secondary.offset_top = -50.0
 		secondary.offset_bottom = -10.0
-		secondary.add_theme_font_size_override("font_size", 11)
+		secondary.add_theme_font_size_override("font_size", 12)
+		# Claude R10: grow upward to the real wrapped height (up to three lines)
+		# so a third line never runs past the card bottom.
+		var secondary_font: Font = secondary.get_theme_font("font")
+		var wrap_width := maxf(button.size.x, button.custom_minimum_size.x) - 32.0
+		if secondary_font != null and wrap_width > 0.0:
+			var needed: float = secondary_font.get_multiline_string_size(secondary.text, HORIZONTAL_ALIGNMENT_CENTER, wrap_width, 12).y
+			if needed > 38.0:
+				secondary.offset_top = -12.0 - needed
+				description.offset_bottom = secondary.offset_top - 4.0
 
 
 func _apply_card_style(button: Button, option: Dictionary) -> void:

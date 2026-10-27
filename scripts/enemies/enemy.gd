@@ -11,7 +11,7 @@ const COMBAT_FEEDBACK := preload("res://scripts/vfx/combat_feedback.gd")
 const R38_ENEMIES := preload("res://scripts/services/r38_enemy_catalog.gd")
 const THREAT_GLOW_DENSITY_START := 80
 const THREAT_GLOW_DENSITY_FULL := 150
-const HIT_FLASH_DURATION := 0.08
+const HIT_FLASH_DURATION := 0.16
 const ATTACK_IMPACT_FRAME := 2
 const KNOCKBACK_DECELERATION := 1050.0
 const ANIMATION_LOD_NEAR_DISTANCE := 180.0
@@ -111,6 +111,7 @@ var special_gold_drops := 0
 var special_projectiles_fired := 0
 var special_label: Label
 var elite_halo: Sprite2D = null
+var hit_flash_overlay: Sprite2D = null
 var elite_armor_broken := false
 var elite_break_announcements := 0
 var death_dissolve_age := 99.0
@@ -209,6 +210,8 @@ func pool_on_release() -> void:
 	tactical_recoveries = 0
 	tactical_telegraph_timer = 0
 	tactical_phase_gate_until = -1
+	if hit_flash_overlay != null:
+		hit_flash_overlay.visible = false
 	queue_redraw()
 	attack_timer = 0.0
 	hp_bar_timer = 0.0
@@ -419,13 +422,23 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 		special_label = Label.new()
 		special_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		special_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		special_label.add_theme_font_size_override("font_size", 14)
+		special_label.add_theme_font_size_override("font_size", 19)
+		var label_backing := StyleBoxFlat.new()
+		label_backing.bg_color = Color(0.02, 0.04, 0.08, 0.88)
+		label_backing.border_color = Color(1.0, 0.85, 0.45, 0.9)
+		label_backing.set_border_width_all(1)
+		label_backing.set_corner_radius_all(4)
+		label_backing.content_margin_left = 8
+		label_backing.content_margin_right = 8
+		label_backing.content_margin_top = 3
+		label_backing.content_margin_bottom = 3
+		special_label.add_theme_stylebox_override("normal", label_backing)
 		special_label.add_theme_color_override("font_outline_color", Color("11192a"))
-		special_label.add_theme_constant_override("outline_size", 3)
+		special_label.add_theme_constant_override("outline_size", 5)
 		add_child(special_label)
 	special_label.text = special_elite_name
-	special_label.size = Vector2(160, 22)
-	special_label.position = Vector2(-80, -64 * animated_sprite.scale.y - 25)
+	special_label.size = Vector2(200, 30)
+	special_label.position = Vector2(-100, -64 * animated_sprite.scale.y - 34)
 	special_label.visible = special_elite_name != ""
 	special_label.add_theme_color_override("font_color", body_color.lightened(0.45))
 	_update_hp_bar()
@@ -1077,6 +1090,41 @@ func elite_frame_visible() -> bool:
 	return is_elite or is_boss or special_elite_id != ""
 
 
+func _show_hit_flash_overlay() -> void:
+	if hit_flash_overlay == null:
+		return
+	if is_dying:
+		hit_flash_overlay.visible = false
+		return
+	var frame_texture: Texture2D = null
+	if animated_sprite != null and animated_sprite.sprite_frames != null and animation_frames_ready:
+		frame_texture = animated_sprite.sprite_frames.get_frame_texture(animated_sprite.animation, animated_sprite.frame)
+		hit_flash_overlay.scale = animated_sprite.scale
+		hit_flash_overlay.flip_h = animated_sprite.flip_h
+	elif sprite != null and sprite.visible:
+		frame_texture = sprite.texture
+		hit_flash_overlay.scale = sprite.scale
+		hit_flash_overlay.flip_h = sprite.flip_h
+	if frame_texture == null:
+		hit_flash_overlay.visible = false
+		return
+	hit_flash_overlay.texture = frame_texture
+	hit_flash_overlay.modulate = Color(1, 1, 1, hit_flash_strength() * HIT_FLASH_OVERLAY_MAX_ALPHA)
+	hit_flash_overlay.visible = hit_flash_timer > 0.0
+# One shared material: pooled enemies must not compile a shader each.
+static var _hit_flash_material: ShaderMaterial = null
+# Keeps some sprite detail under the flash so damage numbers stay readable.
+const HIT_FLASH_OVERLAY_MAX_ALPHA := 0.72
+static func _shared_hit_flash_material() -> ShaderMaterial:
+	if _hit_flash_material == null:
+		var flash_shader := Shader.new()
+		flash_shader.code = "shader_type canvas_item;\nvoid fragment() { COLOR = vec4(vec3(1.0), texture(TEXTURE, UV).a * COLOR.a); }"
+		_hit_flash_material = ShaderMaterial.new()
+		_hit_flash_material.shader = flash_shader
+	return _hit_flash_material
+func hit_flash_color() -> Color:
+	var ratio := clampf(hit_flash_timer / HIT_FLASH_DURATION, 0.0, 1.0)
+	return Color.WHITE.lerp(Color(2.2, 2.15, 2.0, 1.0), pow(ratio, 0.65))
 func hit_flash_strength() -> float:
 	return clampf(hit_flash_timer / HIT_FLASH_DURATION, 0.0, 1.0)
 
@@ -1142,7 +1190,7 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 	if elite_frame_visible() and not elite_armor_broken and hp > 0.0 and hp <= max_hp * 0.5:
 		elite_armor_broken = true
 		elite_break_announcements += 1
-		EntityFactory.spawn_damage_number("\u7834\u7532", global_position + Vector2(0, -radius - 34.0), Color("ffd57a"), 26, "", true)
+		EntityFactory.spawn_damage_number("\u7834\u7532", global_position + Vector2(0, -radius - 72.0), Color("ffd57a"), 36, "", true)
 	hp_bar_timer = 0.55
 	_trigger_hit_micro_feedback()
 	_update_hp_bar()
@@ -1205,6 +1253,11 @@ func _cancel_windup_on_stagger() -> void:
 func _trigger_hit_micro_feedback() -> void:
 	# Every damage route (projectile, orbit, chain, hazard, hymn) converges here.
 	hit_flash_timer = maxf(hit_flash_timer, HIT_FLASH_DURATION)
+	if sprite != null:
+		sprite.modulate = hit_flash_color()
+	if animated_sprite != null:
+		animated_sprite.modulate = hit_flash_color()
+	_show_hit_flash_overlay()
 
 
 func _die(source_position: Vector2 = Vector2.ZERO) -> void:
@@ -1214,7 +1267,7 @@ func _die(source_position: Vector2 = Vector2.ZERO) -> void:
 	is_active = false
 	death_dissolve_age = 0.0
 	if elite_frame_visible():
-		EntityFactory.spawn_damage_number("\u64ca\u7834", global_position + Vector2(0, -radius - 40.0), Color("ffd57a"), 28, "", true)
+		EntityFactory.spawn_damage_number("\u64ca\u7834", global_position + Vector2(0, -radius - 40.0), Color("ffd57a"), 38, "", true)
 	velocity = Vector2.ZERO
 	knockback_velocity = Vector2.ZERO
 	var death_direction := (global_position - source_position).normalized()
@@ -1400,6 +1453,15 @@ func _ensure_visual_nodes() -> void:
 		elite_halo.name = "EliteHalo"
 		elite_halo.visible = false
 		add_child(elite_halo)
+	hit_flash_overlay = get_node_or_null("HitFlashOverlay") as Sprite2D
+	if hit_flash_overlay == null:
+		hit_flash_overlay = Sprite2D.new()
+		hit_flash_overlay.name = "HitFlashOverlay"
+		hit_flash_overlay.visible = false
+		add_child(hit_flash_overlay)
+	hit_flash_overlay.material = _shared_hit_flash_material()
+	hit_flash_overlay.centered = true
+	hit_flash_overlay.z_index = 2
 	elite_halo.texture = preload("res://assets/ui/r9_vector/icon_elite_halo.svg")
 	elite_halo.centered = true
 	elite_halo.z_index = -1
@@ -1648,6 +1710,10 @@ func _tick_hit_flash(delta: float) -> void:
 		sprite.modulate = Color.WHITE
 		if animated_sprite != null:
 			animated_sprite.modulate = Color.WHITE
+		if hit_flash_overlay != null:
+			hit_flash_overlay.visible = false
+	else:
+		_show_hit_flash_overlay()
 
 
 func _update_visual_state() -> void:
@@ -1735,7 +1801,8 @@ func tick_shared_enemy_animation(delta: float, focus_position: Vector2, focus_va
 	else:
 		# Dying enemies fade toward a faint husk while the fall poses keep playing.
 		death_dissolve_age += delta
-		animated_sprite.modulate = Color(1.0, 1.0, 1.0, death_dissolve_alpha())
+		if hit_flash_timer <= 0.0:
+			animated_sprite.modulate = Color(1.0, 1.0, 1.0, death_dissolve_alpha())
 	if not is_active and is_dying and death_recoil_velocity.length_squared() > 0.01:
 		# The articulated fall poses still run in full; a small ballistic slide
 		# carries the attack direction after the disabled collider leaves combat.

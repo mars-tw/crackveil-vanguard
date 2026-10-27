@@ -13,6 +13,8 @@ const FOLLOWER_TOLERANCE := 66.0
 const FONT := preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 const BADGES := {"wedge": preload("res://assets/ui/r8_vector/badge_wedge.svg"), "ring": preload("res://assets/ui/r8_vector/badge_ring.svg"), "scatter": preload("res://assets/ui/r8_vector/badge_scatter.svg")}
 const SEAL_EMBLEM := preload("res://assets/ui/r8_vector/seal_emblem.svg")
+const SEAL_STAGE_MARK := preload("res://assets/ui/r10_vector/seal_stage_mark.svg")
+const GUIDE_ARROW := preload("res://assets/ui/r10_vector/guide_arrow.svg")
 var anchor := Vector2.ZERO
 var step := 0
 var hold := 0.0
@@ -58,18 +60,28 @@ func accepted_text() -> String:
 
 func seal_stage_tint(stage_index: int) -> Color:
 	match clampi(stage_index, 0, 2):
-		0: return Color("6fc4cf")
-		1: return Color("d9b46a")
-		_: return Color("ffae78")
+		0: return Color.from_hsv(185.0 / 360.0, 0.68, 0.88)
+		1: return Color.from_hsv(45.0 / 360.0, 0.72, 0.92)
+		_: return Color.from_hsv(280.0 / 360.0, 0.58, 0.90)
 
 func seal_stage_edge(stage_index: int) -> Color:
 	match clampi(stage_index, 0, 2):
-		0: return Color("91dafa")
-		1: return Color("f3d995")
-		_: return Color("ff8a99")
+		0: return Color.from_hsv(185.0 / 360.0, 0.55, 1.0)
+		1: return Color.from_hsv(45.0 / 360.0, 0.65, 1.0)
+		_: return Color.from_hsv(280.0 / 360.0, 0.52, 1.0)
 
+const SEAL_STAGE_HUES := [185.0, 45.0, 280.0]
+const SEAL_FLASH_MAX_ALPHA := 0.80
+var formation_link_timer := 0.0
+var _last_formation_id := ""
+static func seal_stage_hue(stage_index: int) -> float:
+	return SEAL_STAGE_HUES[clampi(stage_index, 0, 2)]
+static func seal_stage_mark_count(stage_index: int) -> int:
+	return clampi(stage_index, 0, 2) + 1
+func formation_link_alpha() -> float:
+	return 1.0 if formation_link_timer > 0.0 else 0.22 # timer is set to exactly 1.0s on switch
 func seal_ground_fill_alpha() -> float:
-	return 0.16
+	return 0.20
 
 func member_zone_state(member_position: Vector2) -> String:
 	var local := member_position - anchor
@@ -77,11 +89,14 @@ func member_zone_state(member_position: Vector2) -> String:
 
 # Beyond this range the off-screen pointer leads instead of a fan of lines.
 const GUIDE_LINE_RANGE := 360.0
+const GUIDE_ARROW_LENGTH := 24.0
+static func guide_arrow_length() -> float:
+	return GUIDE_ARROW_LENGTH
 
 func guide_line_points(member_position: Vector2) -> PackedVector2Array:
 	var direction := member_position.direction_to(anchor)
 	var start := member_position + Vector2(0, 14)
-	var tip := anchor - direction * (CAPTAIN_RADIUS + 8.0)
+	var tip := start + direction * GUIDE_ARROW_LENGTH
 	return PackedVector2Array([start, tip])
 
 func clear_wrong_if_correct() -> bool:
@@ -93,6 +108,16 @@ func clear_wrong_if_correct() -> bool:
 		wrong_timer = 0.0
 		return true
 	return false
+
+func clear_wrong_notice() -> void:
+	if is_instance_valid(GameManager.arena):
+		var hud: Node = GameManager.arena.get_node_or_null("HUD")
+		if hud != null and hud.has_method("clear_wrong_formation_notice"):
+			hud.clear_wrong_formation_notice()
+		elif hud != null:
+			var inner: Node = hud.get_node_or_null("HUD")
+			if inner != null and inner.has_method("clear_wrong_formation_notice"):
+				inner.clear_wrong_formation_notice()
 
 func switch_hint() -> String:
 	return "點陣形鈕" if MobileTuning.has_confirmed_touch() else "按 Q 切換"
@@ -235,11 +260,18 @@ func _tick_feedback(delta: float) -> void:
 	wrong_timer = maxf(0,wrong_timer-delta)
 	counter_timer = maxf(0,counter_timer-delta)
 	feedback_timer = maxf(0,feedback_timer-delta)
+	formation_link_timer = maxf(0.0, formation_link_timer - delta)
+	if is_instance_valid(GameManager.squad_manager):
+		var current_formation: String = GameManager.squad_manager.get_formation_id()
+		if _last_formation_id != "" and current_formation != _last_formation_id:
+			formation_link_timer = 1.0
+		_last_formation_id = current_formation
 	seal_flash_time += maxf(0,delta)
 
 func advance(delta: float) -> void:
 	_tick_feedback(delta)
-	clear_wrong_if_correct()
+	if clear_wrong_if_correct():
+		clear_wrong_notice()
 	if completed:
 		if GameManager.boss_killed:
 			GameManager.try_complete_campaign_victory()
@@ -325,6 +357,21 @@ func seal_text(count: int) -> String:
 		return "封合 %d/3・放棄治療・反擊 +20%% 10 秒" % count
 	return "封合 %d/3・整補 +8・反擊 +20%% 5 秒" % count
 
+# R10 (Claude): verdict lines sit between the top HUD band and the bottom
+# equipment/notice band, so a seal near the screen edge never hides them.
+const VERDICT_TOP_BAND := 112.0
+const VERDICT_BOTTOM_BAND := 104.0
+static func clamp_screen_point(screen: Vector2, view: Vector2, width: float) -> Vector2:
+	screen.x = clampf(screen.x, 8.0, maxf(8.0, view.x - width - 8.0))
+	screen.y = clampf(screen.y, VERDICT_TOP_BAND, maxf(VERDICT_TOP_BAND, view.y - VERDICT_BOTTOM_BAND))
+	return screen
+func _keep_on_screen(local_at: Vector2, width: float) -> Vector2:
+	if not is_inside_tree():
+		return local_at
+	var xf := get_viewport().get_canvas_transform() * get_global_transform()
+	var view := get_viewport().get_visible_rect().size
+	return xf.affine_inverse() * clamp_screen_point(xf * local_at, view, width)
+
 func result_text(result: Dictionary) -> String:
 	var name: String = NAMES[maxi(0,ORDER.find(str(result.formation)))]
 	var members: int = int(result.members)
@@ -397,7 +444,7 @@ func _draw_seal_flash() -> void:
 	if seal_flash_time >= SEAL_FLASH_SECONDS or seal_flash_text == "":
 		return
 	var gold := Color("ffd98a")
-	var fade := clampf((SEAL_FLASH_SECONDS - seal_flash_time) / 0.6, 0.0, 1.0)
+	var fade := minf(clampf((SEAL_FLASH_SECONDS - seal_flash_time) / 0.6, 0.0, 1.0), SEAL_FLASH_MAX_ALPHA)
 	var grow := 1.0 + 1.1 * smoothstep(0.0, 0.7, seal_flash_time)
 	var edge := CAPTAIN_RADIUS * grow
 	var ring := PackedVector2Array([seal_flash_at+Vector2(0,-edge),seal_flash_at+Vector2(edge,0),seal_flash_at+Vector2(0,edge),seal_flash_at+Vector2(-edge,0),seal_flash_at+Vector2(0,-edge)])
@@ -435,6 +482,10 @@ func _draw() -> void:
 	for i in range(4):
 		var point := anchor+Vector2.from_angle(i*PI/2)*edge
 		draw_circle(point,4,color)
+	for mark in range(seal_stage_mark_count(step)):
+		var mark_at := anchor + Vector2((float(mark) - float(seal_stage_mark_count(step) - 1) * 0.5) * 22.0, edge * 0.52)
+		draw_texture_rect(SEAL_STAGE_MARK, Rect2(mark_at - Vector2(9, 9), Vector2(18, 18)), false, Color(stage_edge, 0.95))
+		draw_polyline(PackedVector2Array([mark_at + Vector2(0, -7), mark_at + Vector2(7, 0), mark_at + Vector2(0, 7), mark_at + Vector2(-7, 0), mark_at + Vector2(0, -7)]), Color("08121f", 0.85), 1.5, true)
 	if hold > 0:
 		draw_line(anchor+Vector2(-44,66),anchor+Vector2(44,66),Color("253446"),5,true)
 		draw_line(anchor+Vector2(-44,66),anchor+Vector2(-44+88*hold/HOLD_SECONDS,66),Color.WHITE,5,true)
@@ -476,6 +527,9 @@ func _draw() -> void:
 					var guide_dir: Vector2 = guide[0].direction_to(guide[1])
 					draw_line(guide[1], guide[1] - guide_dir.rotated(0.6) * 11.0, Color(stage_edge, 0.95), 2.0, true)
 					draw_line(guide[1], guide[1] - guide_dir.rotated(-0.6) * 11.0, Color(stage_edge, 0.95), 2.0, true)
+					draw_set_transform(guide[1], guide_dir.angle(), Vector2(0.25, 0.25))
+					draw_texture_rect(GUIDE_ARROW, Rect2(-12, -12, 24, 24), false, Color(stage_edge, 0.95))
+					draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	if wrong_timer > 0:
 		draw_line(anchor-Vector2(23,23),anchor+Vector2(23,23),Color("ff637c"),5,true)
 		draw_line(anchor+Vector2(23,-23),anchor+Vector2(-23,23),Color("ff637c"),5,true)
@@ -485,6 +539,7 @@ func _draw() -> void:
 		var fade := clampf((2.4 - pressure.result_age) / 0.5, 0.0, 1.0)
 		var lift := 14.0 * minf(1.0, pressure.result_age / 0.4)
 		var at := anchor + (Vector2(-140, edge + 44 - lift) if _label_below(anchor) else Vector2(-140, -edge - 34 - lift))
+		at = _keep_on_screen(at, 280.0)
 		var text_width: float = FONT.get_string_size(verdict,HORIZONTAL_ALIGNMENT_LEFT,-1,20).x
 		draw_rect(Rect2(at+Vector2(140-text_width/2-10,-22),Vector2(text_width+20,30)),Color(0.03,0.05,0.09,0.72*fade),true)
 		draw_string_outline(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,7,Color(0.03,0.05,0.09,0.9*fade))

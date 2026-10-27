@@ -674,6 +674,9 @@ func _configure_projectile_vfx() -> void:
 		elif source_weapon_id == "boss_ring":
 			trail.width = clamp(radius * 1.15, 4.0, 10.0)
 			alpha = 0.76
+		if not enemy_projectile:
+			# R10: dense fights keep player trails from netting over the squad.
+			alpha *= preload("res://scripts/vfx/lightning_arc.gd").crowd_alpha_for_count(EntityFactory.get_enemy_active_count())
 		trail.default_color = Color(vfx_color.r, vfx_color.g, vfx_color.b, alpha)
 		var trail_time := 0.1 if source_weapon_id == "riftline_emitter" else (0.085 if source_weapon_id == "rift_seeker_missiles" else (0.072 if motion_mode == "boomerang" else 0.06))
 		var max_length := 72.0

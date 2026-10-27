@@ -80,3 +80,4 @@ CC0 素材依法不要求署名，但本專案保留作者、來源與修改紀�
 ## R9 向量 UI 圖
 
 - assets/ui/r9_vector/ 的 12 張 SVG 為 MUSE (Meta muse-wonder) 手寫純向量原創素材，逐檔用途與尺寸見該目錄 MANIFEST.json 與 README.md。
+- assets/ui/r10_vector/ 的 3 張 SVG 為 MUSE (Meta muse-wonder) 手寫純向量原創素材，逐檔用途與尺寸見該目錄 MANIFEST.json 與 README.md。

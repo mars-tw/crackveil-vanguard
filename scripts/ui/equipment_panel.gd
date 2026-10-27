@@ -184,6 +184,10 @@ func _position_details() -> void:
 	var screen_height := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size).y
 	var up := get_global_rect().position.y > screen_height * 0.5
 	details.position.y = -details.get_combined_minimum_size().y - 8.0 if up else size.y + 8.0
+	# R10: the card docks to the right screen edge so it never covers the squad
+	# and seal in the middle of the battlefield.
+	var screen_width := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size).x
+	details.position.x = screen_width - details.size.x - 12.0 - get_global_rect().position.x
 
 
 func _describe_slot(index: int) -> String:

@@ -114,6 +114,41 @@ var _resonance_regen_accumulator: float = 0.0
 var tactical_draw_clock := 0.0
 var bond_reveal_timer := 0.0
 var bond_reveal_text := ""
+var bond_flash_timer := 0.0
+var bond_flash_text := ""
+var bond_flash_bond_id := ""
+var bond_flash_line: Line2D = null
+func _ensure_bond_flash_line() -> Line2D:
+	if bond_flash_line == null or not is_instance_valid(bond_flash_line):
+		bond_flash_line = Line2D.new()
+		bond_flash_line.name = "BondFlashLine"
+		bond_flash_line.width = 5.0
+		bond_flash_line.default_color = Color(1.0, 0.92, 0.55, 1.0)
+		bond_flash_line.texture = preload("res://assets/ui/r10_vector/bond_flash.svg")
+		bond_flash_line.texture_mode = Line2D.LINE_TEXTURE_STRETCH
+		bond_flash_line.z_index = 6
+		bond_flash_line.visible = false
+		add_child(bond_flash_line)
+	return bond_flash_line
+func trigger_bond_flash(bond_id: String) -> void:
+	for definition in BOND_DEFINITIONS:
+		if str(definition.get("id", "")) == bond_id:
+			var effect_text: String = str(BOND_FORMATION_RESONANCE.get(bond_id, {}).get("text", ""))
+			bond_flash_timer = BOND_FLASH_SECONDS
+			bond_flash_bond_id = bond_id
+			bond_flash_text = "%s・%s" % [str(definition.get("name", bond_id)), effect_text if effect_text != "" else "羈絆成立"]
+			_ensure_bond_flash_line().visible = true
+			queue_redraw()
+			return
+func bond_flash_node() -> Line2D:
+	return _ensure_bond_flash_line()
+const BOND_FLASH_SECONDS := 0.9
+func bond_flash_active() -> bool:
+	return bond_flash_timer > 0.0
+func bond_flash_alpha() -> float:
+	return clampf(bond_flash_timer / BOND_FLASH_SECONDS, 0.0, 1.0)
+func formation_link_alpha() -> float:
+	return 1.0 if formation_indicator_timer > FORMATION_INDICATOR_DURATION - 1.0 else 0.22
 var nearest_threat: Node2D
 
 const BOND_DEFINITIONS: Array[Dictionary] = [
@@ -251,6 +286,19 @@ func clear_squad() -> void:
 func _process(delta: float) -> void:
 	tactical_draw_clock += delta
 	bond_reveal_timer = maxf(0.0, bond_reveal_timer - delta)
+	bond_flash_timer = maxf(0.0, bond_flash_timer - delta)
+	if bond_flash_line != null and is_instance_valid(bond_flash_line):
+		if bond_flash_timer > 0.0 and bond_flash_bond_id != "":
+			for definition in BOND_DEFINITIONS:
+				if str(definition.get("id", "")) == bond_flash_bond_id:
+					var fa: Node = get_member_by_id(str(definition.hero_ids[0]))
+					var fb: Node = get_member_by_id(str(definition.hero_ids[1]))
+					if fa is Node2D and fb is Node2D and is_instance_valid(fa) and is_instance_valid(fb):
+						bond_flash_line.points = PackedVector2Array([to_local(fa.global_position), to_local(fb.global_position)])
+						bond_flash_line.default_color = Color(1.0, 0.92, 0.55, bond_flash_alpha())
+						bond_flash_line.visible = true
+		else:
+			bond_flash_line.visible = false
 	if tactical_draw_clock >= 0.05:
 		tactical_draw_clock = 0.0
 		if is_instance_valid(leader) and GameManager.game_running:
@@ -341,6 +389,9 @@ func set_formation(new_id: String, force: bool = false) -> bool:
 	if GameManager.active_starting_node=="spec_step": GameManager.starting_step_timer=2.0
 	formation_cooldown = get_formation_switch_cooldown_duration()
 	formation_indicator_timer = FORMATION_INDICATOR_DURATION
+	var resonance_ids := get_active_resonance_ids()
+	if not resonance_ids.is_empty():
+		trigger_bond_flash(str(resonance_ids[0]))
 	if has_living_passive("guard"):
 		apply_temporary_shield(14.0, 2.5)
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
@@ -457,19 +508,20 @@ func _draw() -> void:
 	if formation_id == "ring":
 		# This boundary is the exact spatial cover test below.
 		draw_circle(origin, RING_INNER_RADIUS, Color(color, 0.055))
-		draw_arc(origin, RING_INNER_RADIUS, 0, TAU, 64, Color(color, 0.78), 2.2, true)
+		draw_arc(origin, RING_INNER_RADIUS, 0, TAU, 64, Color(color, formation_link_alpha()), 2.2, true)
 		for angle in range(8):
 			var point := origin + Vector2.from_angle(angle * TAU / 8) * RING_INNER_RADIUS
 			draw_line(point - Vector2(4, 0), point + Vector2(4, 0), color, 2, true)
 	elif formation_id == "wedge":
 		var tip := origin + forward * 135
 		var side := forward.orthogonal() * 70
-		draw_polyline(PackedVector2Array([origin + side, tip, origin - side]), Color(color, 0.7), 2.0, true)
+		draw_polyline(PackedVector2Array([origin + side, tip, origin - side]), Color(color, formation_link_alpha()), 2.0, true)
 	for member in get_members():
 		if not is_instance_valid(member) or not member.is_alive:
 			continue
 		var point := to_local(member.global_position)
 		var foot := point + Vector2(0, 14)
+		draw_arc(foot, 14.5, 0, TAU, 24, Color(0.01, 0.03, 0.06, 0.92), 3.5, true)
 		draw_circle(foot, 13.0, Color(color, 0.18))
 		draw_arc(foot, 13.0, 0, TAU, 24, Color(color, 0.75), 1.8, true)
 		# Captain uses a double diamond, companions a small formation ring.
@@ -493,7 +545,23 @@ func _draw() -> void:
 			var b: Node = get_member_by_id(definition.hero_ids[1])
 			if is_instance_valid(a) and is_instance_valid(b):
 				draw_line(to_local(a.global_position),to_local(b.global_position),Color("e4b7ff"),2,true)
-				for member in [a,b]:
+	if bond_flash_timer > 0.0 and bond_flash_bond_id != "":
+		for definition in BOND_DEFINITIONS:
+			if str(definition.get("id", "")) != bond_flash_bond_id:
+				continue
+			var fa: Node = get_member_by_id(str(definition.hero_ids[0]))
+			var fb: Node = get_member_by_id(str(definition.hero_ids[1]))
+			if fa is Node2D and fb is Node2D and is_instance_valid(fa) and is_instance_valid(fb):
+				var flash_a := bond_flash_alpha()
+				draw_line(to_local(fa.global_position), to_local(fb.global_position), Color(0.05, 0.02, 0.10, 0.85 * flash_a), 9, true)
+				draw_line(to_local(fa.global_position), to_local(fb.global_position), Color(1.0, 0.92, 0.55, flash_a), 4.5, true)
+				for member in [fa, fb]:
+					draw_arc(to_local(member.global_position), 30.0 + (1.0 - flash_a) * 14.0, 0, TAU, 28, Color(1.0, 0.92, 0.55, flash_a), 3.5, true)
+				if bond_flash_text != "":
+					var mid := (to_local(fa.global_position) + to_local(fb.global_position)) * 0.5 + Vector2(-160, -34)
+					draw_string_outline(SWITCH_FONT, mid, bond_flash_text, HORIZONTAL_ALIGNMENT_CENTER, 320, 19, 6, Color("08121f", 0.9 * flash_a))
+					draw_string(SWITCH_FONT, mid, bond_flash_text, HORIZONTAL_ALIGNMENT_CENTER, 320, 19, Color(1.0, 0.95, 0.70, flash_a))
+				for member in [fa, fb]:
 					draw_arc(to_local(member.global_position),23,0,TAU,28,Color("e4b7ff"),2.5,true)
 
 
@@ -944,6 +1012,10 @@ func recompute_bonds() -> void:
 				effect += "・圓陣回復 1.5 HP／秒"
 			bond_reveal_text = "%s｜%s\n%s" % [definition.name, "＋".join(names), effect]
 			bond_reveal_timer = 4.0
+			bond_flash_timer = BOND_FLASH_SECONDS
+			bond_flash_bond_id = id
+			bond_flash_text = "%s・%s" % [str(definition.name), effect]
+			_ensure_bond_flash_line().visible = true
 			GameManager.show_toast(bond_reveal_text,"bond")
 	if OS.is_debug_build():
 		print("BONDS_ACTIVE=%s" % str(active_bonds.keys()))

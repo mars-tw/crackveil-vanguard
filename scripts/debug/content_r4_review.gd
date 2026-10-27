@@ -126,6 +126,15 @@ func _milestone_fixture() -> void:
 		for frame in range(5): await get_tree().process_frame
 		arena=GameManager.arena
 		if number==0: await _official_gate()
+		# R10: the reviewed fourth defeat plays ~20 s of uninterrupted battle first,
+		# so the displayed time matches the damage and kills on the result screen.
+		if number==3:
+			while GameManager.elapsed_time<20.0 and not GameManager.is_game_over:await get_tree().process_frame
+		if GameManager.is_game_over:
+			for frame in range(90): await get_tree().process_frame
+			assert(MetaProgress.starting_settlements.size()==number+1)
+			milestone_progress.append({"settlements":MetaProgress.starting_settlements.size(),"text":arena.get_node("GameOverScreen").progress_label.text,"vouchers":MetaProgress.starting_vouchers})
+			continue
 		GameManager.player.invulnerability_timer=0
 		GameManager.player.take_damage(99999,GameManager.player.global_position+Vector2.RIGHT)
 		for frame in range(90): await get_tree().process_frame
@@ -134,7 +143,7 @@ func _milestone_fixture() -> void:
 	var screen: Node=arena.get_node("GameOverScreen")
 	screen._update_summary_count(1.0)
 	JavaScriptBridge.eval("window.__cvContentR4ProgressHistory="+JSON.stringify(milestone_progress),true)
-	JavaScriptBridge.eval("window.__cvContentR4Milestone="+JSON.stringify({"label":"fourth-defeat","version":ProjectSettings.get_setting("application/config/version"),"settlements":MetaProgress.starting_settlements.size(),"vouchers":MetaProgress.starting_vouchers,"elapsed":GameManager.elapsed_time,"kills":GameManager.kills,"captain_dead":bool(screen.displayed_summary.get("captain_dead",false)),"restart_text":screen.restart_button.text,"ui_scale_index":PlayerSettings.ui_scale_index,"footer_buttons":{"copy":_rect(screen.copy_seed_button.get_global_rect()),"restart":_rect(screen.restart_button.get_global_rect()),"menu":_rect(screen.main_menu_button.get_global_rect())},"menu_rect":_rect(screen.restart_button.get_global_rect()),"provenance":"controlled real Hero.take_damage lethal fixture; four formal early defeat callbacks; normal restart UI signals; not a natural battle result; QA max UI setting via real PlayerSettings setter"}),true)
+	JavaScriptBridge.eval("window.__cvContentR4Milestone="+JSON.stringify({"label":"fourth-defeat","version":ProjectSettings.get_setting("application/config/version"),"settlements":MetaProgress.starting_settlements.size(),"vouchers":MetaProgress.starting_vouchers,"elapsed":GameManager.elapsed_time,"kills":GameManager.kills,"captain_dead":bool(screen.displayed_summary.get("captain_dead",false)),"restart_text":screen.restart_button.text,"ui_scale_index":PlayerSettings.ui_scale_index,"footer_buttons":{"copy":_rect(screen.copy_seed_button.get_global_rect()),"restart":_rect(screen.restart_button.get_global_rect()),"menu":_rect(screen.main_menu_button.get_global_rect())},"menu_rect":_rect(screen.restart_button.get_global_rect()),"provenance":"controlled real Hero.take_damage lethal fixture (fourth run after ~20 s of uninterrupted battle); four formal defeat callbacks; normal restart UI signals; not a natural battle result; QA max UI setting via real PlayerSettings setter"}),true)
 	while not bool(JavaScriptBridge.eval("window.__cvR19Controls?.build_preparation?.flags.visible===true",true)):await get_tree().process_frame
 
 func _rect(value: Rect2) -> Array:

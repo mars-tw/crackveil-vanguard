@@ -231,12 +231,12 @@ func _refresh() -> void:
 	else:
 		var owned: bool=MetaProgress.starting_owned.has(row.id)
 		var active: bool=MetaProgress.starting_equipped==row.id
-		title.text="%s・成本 %d" % [row.name,row.cost]
+		title.text=("%s・首次免費・之後 %d 殘響" % [row.name,row.cost]) if not MetaProgress.starting_owned.has(row.id) and MetaProgress.starting_vouchers>0 else ("%s・已解鎖" % row.name) if MetaProgress.starting_owned.has(row.id) else "%s・成本 %d 殘響" % [row.name,row.cost]
 		var cost: String=str(row.cost_text).replace("和聲回復僅限護圈 96 內","只回復淡藍護圈內隊友").replace("改 390 範圍槍","改用中距離直線貫槍")
 		detail.text="收益：%s\n代價：%s" % ["護盾＋星焰直線貫槍" if row.id=="crew_guard" else row.benefit,"少電弧連鎖，換中距離貫槍" if row.id=="crew_guard" else cost]
 		controls.action.text="已裝備" if active else "裝備此節點" if owned else "免費解鎖" if MetaProgress.starting_vouchers>0 else "解鎖 %d 殘響" % row.cost
 		controls.action.disabled=active or (not owned and MetaProgress.starting_vouchers<=0 and MetaProgress.shards<int(row.cost))
-		state_label.text=notice if notice!="" else "已裝備・本局生效" if active else "已解鎖・尚未裝備" if owned else "未解鎖・可免費選擇" if MetaProgress.starting_vouchers>0 else "未解鎖・殘響不足" if MetaProgress.shards<int(row.cost) else "未解鎖・可購買"
+		state_label.text=notice if notice!="" else "已裝備・本局生效" if active else "已解鎖・尚未裝備" if owned else "未解鎖・首次免費（之後 %d 殘響）" % row.cost if MetaProgress.starting_vouchers>0 else "未解鎖・殘響不足" if MetaProgress.shards<int(row.cost) else "未解鎖・可購買"
 		if bool(row.get("campaign_only",false)):state_label.text+="・封隙專用（無盡停用）"
 	for number in range(5):
 		var button:=overview_buttons[number]
@@ -270,10 +270,12 @@ func _layout() -> void:
 	detail.add_theme_font_size_override("font_size",roundi(13*scale))
 	title.add_theme_font_size_override("font_size",roundi(17*scale))
 	for id in controls:controls[id].add_theme_font_size_override("font_size",roundi((12 if str(id).begins_with("node_") else 14)*scale))
-	_place(heading,42,8,100,26)
+	var heading_w: float=FONT.get_string_size(heading.text,HORIZONTAL_ALIGNMENT_LEFT,-1,heading.get_theme_font_size("font_size")).x+4.0
+	_place(heading,54,8,heading_w,26)
+	var wallet_x: float=maxf(124.0 if portrait else 240.0,54.0+heading_w+8.0)
 	_place(controls.close,size.x-68,8,56,44)
 	_place(rule_label,12,35,w-68 if portrait else 220,18)
-	_place(wallet,124 if portrait else 240,12,w-184 if portrait else w-300,18)
+	_place(wallet,wallet_x,12,w-60-wallet_x if portrait else w-60-wallet_x,18)
 	_place(progress_label,12 if portrait else 240,58 if portrait else 32,w if portrait else w-300,18)
 	var tabs_y:=80.0 if portrait else 52.0
 	for number in range(4):_place(tabs[number],12+number*(w+4)/4,tabs_y,(w-12)/4,44)
@@ -291,6 +293,10 @@ func _layout() -> void:
 	var col: float=(roster_w-8)*0.5
 	var roster_y:=body_y+32 if portrait else body_y
 	_place(title,12 if portrait else 24+roster_w,body_y,w if portrait else w-roster_w-12,28)
+	var title_size: int = roundi(17*scale)
+	while title_size > 10 and FONT.get_string_size(title.text,HORIZONTAL_ALIGNMENT_LEFT,-1,title_size).x > title.size.x - 4:
+		title_size -= 1
+	title.add_theme_font_size_override("font_size",title_size)
 	_place(final_label,12,roster_y,col,17)
 	_place(preview_label,20+col,roster_y,col,17)
 	var row_h:=minf(72,maxf(22,(bottom-137-roster_y)/3))
@@ -324,6 +330,10 @@ func _layout() -> void:
 	_place(lineup,12 if portrait else 24+roster_w,lineup_y,detail_w,minf(lineup_h,220))
 	lineup.queue_redraw()
 	_place(state_label,12 if portrait else 24+roster_w,bottom-118,w if portrait else w-roster_w-12,20)
+	var state_size: int = roundi(12*scale)
+	while state_size > 9 and FONT.get_string_size(state_label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,state_size).x > state_label.size.x - 4:
+		state_size -= 1
+	state_label.add_theme_font_size_override("font_size",state_size)
 	_publish()
 
 func _draw_lineup() -> void:

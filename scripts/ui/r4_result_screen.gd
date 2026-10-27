@@ -76,7 +76,10 @@ func _ready() -> void:
 		var button:=_button("tab_"+str(number),["輸出","支援","紀錄"][number])
 		button.pressed.connect(func():tab=number;page=0;_refresh())
 		tabs.append(button)
-	for number in range(2):cards.append(_label(14))
+	for number in range(2):
+		var card_label := _label(14)
+		card_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		cards.append(card_label)
 	for number in range(2):
 		var art:=Control.new()
 		art.name="CardArt%d" % number
@@ -177,6 +180,61 @@ func _records() -> Array[String]:
 	for achievement in data.get("achievement_unlocks",[]):result.append("本局新解鎖\n"+str(achievement.get("name","")))
 	return result
 
+func _hero_display_name(hero_id: String) -> String:
+	var path := "res://resources/heroes/%s.tres" % hero_id
+	if hero_id != "" and ResourceLoader.exists(path):
+		return str(load(path).get("display_name"))
+	return hero_id
+func bond_condition_for(present_ids: Array) -> String:
+	var tables: GDScript = load("res://scripts/heroes/squad_manager.gd")
+	var present := {}
+	for id in present_ids:
+		present[str(id)] = true
+	var best_missing: Array = []
+	var best_name := ""
+	for definition in tables.BOND_DEFINITIONS:
+		var missing: Array = []
+		for hero_id in definition.get("hero_ids", []):
+			if not present.has(str(hero_id)):
+				missing.append(str(hero_id))
+		if missing.is_empty():
+			return "羈絆「%s」已成立" % str(definition.get("name", ""))
+		if best_missing.is_empty() or missing.size() < best_missing.size():
+			best_missing = missing
+			best_name = str(definition.get("name", ""))
+	if best_missing.is_empty():
+		return "尚未成立羈絆"
+	var names := PackedStringArray()
+	for hero_id in best_missing:
+		names.append(_hero_display_name(hero_id))
+	return "再招募 %s 可成立「%s」" % ["、".join(names), best_name]
+func _roster_ids() -> Array:
+	var present: Array = []
+	for row in rows:
+		if str(row.get("id", "")) == "support_zero_group":
+			present.append_array(row.get("member_ids", []))
+		else:
+			present.append(str(row.get("id", "")))
+	return present
+func bond_zero_reason_text() -> String:
+	var condition := bond_condition_for(_roster_ids())
+	# A bond that formed but never fired must not read as "not formed".
+	if condition.ends_with("已成立"):
+		return "%s・本局未觸發加成" % condition
+	return "羈絆未成立：%s" % condition
+# One summary line, as short as the 0/0 line it replaces, so portrait
+# result cards keep their height; the support tab holds the full condition.
+func summary_bond_line() -> String:
+	var condition := bond_condition_for(_roster_ids())
+	if condition.ends_with("已成立"):
+		return "羈絆收益 0・已成立未觸發"
+	if condition.begins_with("再招募 "):
+		return "羈絆收益 0・再招募%s可成立" % condition.trim_prefix("再招募 ").get_slice(" ", 0).get_slice("、", 0)
+	return "羈絆收益 0・尚未成立"
+static func name_line_fits(name: String, font: Font, font_size: int, width: float) -> bool:
+	if font == null:
+		return true
+	return font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x <= width
 func _refresh() -> void:
 	page_capacity=_per_page()
 	var build: Dictionary=displayed_summary.get("starting_build",{})
@@ -187,6 +245,8 @@ func _refresh() -> void:
 	var echo: Dictionary=displayed_summary.get("echo_progress",MetaProgress.get_progress_summary())
 	var goal: Dictionary=echo.get("next_goal",MetaProgress.get_next_progress_goal())
 	summary_label.text="%s｜%s\n%s・%s\n擊殺 %d・存活 %d/%d\n羈絆收益（全隊加成）回%d／減%d HP\n殘響 +%d・現有 %d\n下一步 %s・%s" % [CATALOG.TEAMS.get(team,CATALOG.TEAMS.legacy).name,node.get("name","未裝節點"),outcome,GameManager.format_time(float(displayed_summary.get("elapsed_time",0))),displayed_summary.get("kills",0),displayed_summary.get("squad_alive",0),displayed_summary.get("squad_total",rows.size()),bond.get("healing",0),bond.get("prevented",0),displayed_summary.get("echo_shards_earned",0),echo.get("shards",MetaProgress.shards),goal.get("name","強化完成"),("還差 %d" % int(goal.get("remaining",0))) if int(goal.get("remaining",0))>0 else ("可在整備兌換" if goal.get("kind","")=="spendable" else "已達成")]
+	if int(bond.get("healing",0)) == 0 and int(bond.get("prevented",0)) == 0:
+		summary_label.text = summary_label.text.replace("羈絆收益（全隊加成）回0／減0 HP", summary_bond_line())
 	if not victory:
 		var advice:=_defeat_advice(displayed_summary.get("seal_state",{}))
 		if advice!="":summary_label.text+="\n"+advice
@@ -212,7 +272,7 @@ func _refresh() -> void:
 			cards[number].text=str(row.get("name",row.get("id","隊員")))+"\n"
 			if tab==0:cards[number].text+="傷害 %d HP・擊殺 %d\n承傷 %d HP" % [row.get("damage",0),row.get("kills",0),row.get("taken",0)]
 			# One header line keeps the full zero-support roster inside its card.
-			elif str(row.get("id",""))=="support_zero_group":cards[number].text=str(row.get("name","未觸發隊員"))+"（回復／減傷皆 0 HP）\n"+"、".join(row.get("member_names",[]))
+			elif str(row.get("id",""))=="support_zero_group":cards[number].text=str(row.get("name","未觸發隊員"))+"\n"+bond_condition_for(_roster_ids())+"\n"+"、".join(row.get("member_names",[]))
 			else:cards[number].text+="個人總計（含羈絆）\n回復 %d HP・減傷 %d HP" % [row.get("healing",0),row.get("prevented",0)]
 	for number in range(3):tabs[number].modulate=Color("ffdc82") if tab==number else Color.WHITE
 	_apply_responsive_layout()
@@ -338,7 +398,7 @@ func _apply_responsive_layout() -> void:
 	for label in [gain_label]:label.add_theme_font_size_override("font_size",roundi(14*scale))
 	for label in [progress_label,page_label]:label.add_theme_font_size_override("font_size",roundi(12*scale))
 	for id in controls:controls[id].add_theme_font_size_override("font_size",roundi(14*scale))
-	_place(title_label,46,8,w-34,30)
+	_place(title_label,54,8,w-42,30)
 	var left_w:=w if portrait else w*0.46-8
 	summary_label.custom_minimum_size=Vector2(left_w,0)
 	var tab_y:=44.0
@@ -357,9 +417,9 @@ func _apply_responsive_layout() -> void:
 		# than the old fixed 150 px for six summary lines.
 		var summary_h:=minf(size.y-210,maxf(150.0,_text_height(summary_label,left_w)))
 		var gain_y:=maxf(206.0,54+summary_h)
-		_place(summary_scroll,12,50,left_w,summary_h)
-		_place(gain_label,12,gain_y,left_w,48)
-		_place(progress_label,12,gain_y+50,left_w,36)
+		_place(summary_scroll,20,50,left_w-8,summary_h)
+		_place(gain_label,20,gain_y,left_w-8,48)
+		_place(progress_label,20,gain_y+50,left_w-8,36)
 	var right_x:=12.0 if portrait else 24+left_w
 	var right_w:=w if portrait else w-left_w-12
 	for number in range(3):_place(tabs[number],right_x+number*(right_w+4)/3,tab_y,(right_w-8)/3,44)
@@ -377,13 +437,19 @@ func _apply_responsive_layout() -> void:
 		# Bars only where the real wrapped text still fits above them.
 		if bars_h>0 and _text_height(cards[number],card_rect.size.x-indent-4)+bars_h>card_rect.size.y-2:bars_h=0.0
 		card_data[number]["show_bars"]=bars_h>0
+		var name_line: String = cards[number].text.split("\n")[0] if cards[number].text != "" else ""
+		var card_font: Font = cards[number].get_theme_font("font")
+		var fitted_size: int = roundi(14*scale)
+		while fitted_size > 10 and not name_line_fits(name_line, card_font, fitted_size, card_rect.size.x-indent-8):
+			fitted_size -= 1
+		cards[number].add_theme_font_size_override("font_size", fitted_size)
 		_place(cards[number],card_rect.position.x+indent,card_rect.position.y+2,card_rect.size.x-indent-4,card_rect.size.y-bars_h-2)
 		card_art[number].queue_redraw()
 	_place(controls.previous,right_x,pager_y,right_w*0.34,44)
 	_place(page_label,right_x+right_w*0.34+4,pager_y+12,right_w*0.32-8,22)
 	_place(controls.next,right_x+right_w*0.66,pager_y,right_w*0.34,44)
 	for number in range(3):_place([copy_seed_button,main_menu_button,controls.primary][number],12+number*(w+4)/3,size.y-56,(w-8)/3,44)
-	for label in cards:label.add_theme_font_size_override("font_size",roundi(14*scale))
+	# Card font sizes are fitted per-card above so names never wrap.
 	_publish()
 
 func _text_height(label: Label,width: float) -> float:

@@ -92,7 +92,7 @@ func _sync_segments() -> void:
 func _draw() -> void:
 	if not is_active or points.size() < 2:
 		return
-	var alpha := pow(1.0 - clampf(age / lifetime, 0.0, 1.0), 1.8)
+	var alpha := pow(1.0 - clampf(age / lifetime, 0.0, 1.0), 1.8) * crowd_alpha_factor()
 	var tint := arc_color.lerp(Color.WHITE, 0.84)
 	tint.a = alpha * 0.86
 	for index in range(1, points.size()):
@@ -106,6 +106,15 @@ func _draw() -> void:
 		draw_circle(contact, 1.5, Color(1.0, 0.97, 0.82, alpha * 0.8))
 
 
+static func crowd_alpha_for_count(enemy_count: int) -> float:
+	return 0.45 if enemy_count >= 24 else 0.7 if enemy_count >= 12 else 1.0
+func crowd_alpha_factor() -> float:
+	var count := 0
+	if EntityFactory != null and EntityFactory.has_method("get_enemy_live_count"):
+		count = EntityFactory.get_enemy_live_count()
+	elif EntityFactory != null and EntityFactory.has_method("get_enemy_active_count"):
+		count = EntityFactory.get_enemy_active_count()
+	return crowd_alpha_for_count(count)
 func get_debug_state() -> Dictionary:
 	var visible_segments := 0
 	for segment in segments:

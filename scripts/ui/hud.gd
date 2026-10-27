@@ -105,6 +105,7 @@ var force_touch_controls_visible: bool = false
 var syncing_audio_controls: bool = false
 var syncing_settings_controls: bool = false
 var toast_token: int = 0
+var _fitted_toast_text := ""
 var toast_queue: Array[String] = []
 var toast_showing: bool = false
 var toast_current_text := ""
@@ -220,6 +221,7 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	_sync_exp_caption()
 	var blocked := get_tree().paused or not GameManager.game_running
 	if blocked and not touch_input_blocked:
 		_reset_touch_input()
@@ -249,6 +251,9 @@ func _process(_delta: float) -> void:
 			captain_hurt_marker.modulate.a = clampf(captain_hurt_timer / 1.2, 0.0, 1.0)
 	var duplicate_notice := toast_showing and is_instance_valid(tactical_hint) and tactical_hint.visible and notices_duplicate(tactical_hint.text, toast_current_text)
 	toast_panel.visible = (toast_showing or bond_active) and not blocked and not duplicate_notice and not formation_picker.visible and (urgent or bond_active or not (is_instance_valid(loot_notice) and loot_notice.visible))
+	if toast_panel.visible and toast_label.text != _fitted_toast_text:
+		_fitted_toast_text = toast_label.text
+		_fit_toast_panel()
 	# Hidden routine notices keep their readable time instead of expiring behind
 	# loot, bond reveals or a modal. Urgent battle messages own the notice lane.
 	if toast_showing and toast_panel.visible and (urgent or not bond_active):
@@ -381,8 +386,12 @@ func _build_ui() -> void:
 	var exp_caption := Label.new()
 	exp_caption.name = "ExpCaption"
 	exp_caption.text = "EXP"
-	exp_caption.add_theme_font_size_override("font_size",8)
-	exp_caption.position = Vector2(2,-9)
+	exp_caption.add_theme_font_size_override("font_size",9)
+	exp_caption.add_theme_color_override("font_color", Color(0.85, 0.97, 1.0, 1.0))
+	exp_caption.add_theme_color_override("font_outline_color", Color(0.02, 0.05, 0.09, 1.0))
+	exp_caption.add_theme_constant_override("outline_size", 3)
+	exp_caption.position = Vector2(6, 1)
+	exp_caption.size = Vector2(40, 14)
 	exp_caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	xp_bar.add_child(exp_caption)
 
@@ -600,15 +609,16 @@ func _build_ui() -> void:
 
 	captain_hurt_marker = Polygon2D.new()
 	captain_hurt_marker.name = "CaptainHurtMarker"
-	captain_hurt_marker.polygon = PackedVector2Array([Vector2(0, -16), Vector2(11, 10), Vector2(0, 4), Vector2(-11, 10)])
-	captain_hurt_marker.color = Color(1.0, 0.30, 0.30, 0.92)
+	captain_hurt_marker.polygon = PackedVector2Array([Vector2(0, -30), Vector2(20, 18), Vector2(0, 7), Vector2(-20, 18)])
+	captain_hurt_marker.name = "CaptainHurtMarker"
+	captain_hurt_marker.color = Color(1.0, 0.12, 0.16, 1.0)
 	captain_hurt_marker.visible = false
 	captain_hurt_marker.z_index = 40
 	root.add_child(captain_hurt_marker)
 	for edge_spec in ["top", "bottom", "left", "right"]:
 		var edge := ColorRect.new()
 		edge.name = "LowHpEdge" + edge_spec.capitalize()
-		edge.color = Color(1.0, 0.16, 0.20, 0.42)
+		edge.color = Color(1.0, 0.10, 0.14, 0.78)
 		edge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		edge.visible = false
 		root.add_child(edge)
@@ -1522,7 +1532,12 @@ func _apply_content_r1_layout(view: Vector2, phone: bool) -> void:
 	BATTLE_LAYOUT.place(level_label, Rect2(stat.position + Vector2(stat.size.x - 42, 10), Vector2(38, 24)))
 	level_label.add_theme_font_size_override("font_size", 12)
 	level_label.reset_size()
-	BATTLE_LAYOUT.place(xp_bar, Rect2(stat.position + Vector2(10, 42), Vector2(stat.size.x - 20, 5)))
+	BATTLE_LAYOUT.place(xp_bar, Rect2(stat.position + Vector2(10, 38), Vector2(stat.size.x - 20, 16)))
+	var exp_caption_fix := xp_bar.get_node_or_null("ExpCaption") as Label
+	if exp_caption_fix != null:
+		exp_caption_fix.clip_text = true
+		exp_caption_fix.position = Vector2(6, 1)
+		exp_caption_fix.size = Vector2(40, 14)
 	BATTLE_LAYOUT.place(score_label, Rect2(zones.score.position + Vector2(4, 3), zones.score.size - Vector2(8, 6)))
 	score_label.add_theme_font_size_override("font_size", 12 if phone else 15)
 	score_label.size = zones.score.size - Vector2(8, 6)
@@ -1535,8 +1550,9 @@ func _apply_content_r1_layout(view: Vector2, phone: bool) -> void:
 		mission_style.content_margin_left = 17.0 if phone else 20.0
 		mission_style.content_margin_right = 17.0 if phone else 20.0
 	BATTLE_LAYOUT.place(toast_panel, zones.notice)
+	_fit_toast_panel()
 	_layout_low_hp_edges(view)
-	toast_label.add_theme_font_size_override("font_size", 13)
+	toast_label.add_theme_font_size_override("font_size", 18)
 	# Persistent pages own their header and footer; battle information cannot
 	# shine through them, even when the world keeps its own CanvasLayers.
 	pause_overlay.modulate = Color.WHITE
@@ -1549,7 +1565,7 @@ func _apply_content_r1_layout(view: Vector2, phone: bool) -> void:
 func _layout_low_hp_edges(view: Vector2) -> void:
 	if low_hp_edges.size() < 4:
 		return
-	var thickness := 6.0
+	var thickness := 16.0
 	low_hp_edges[0].position = Vector2.ZERO
 	low_hp_edges[0].size = Vector2(view.x, thickness)
 	low_hp_edges[1].position = Vector2(0, view.y - thickness)
@@ -2469,7 +2485,7 @@ func _on_boss_intro_requested(boss_name: String) -> void:
 
 
 func _on_boss_phase_transition_requested() -> void:
-	_play_boss_banner("裂隙過熱  |  BOSS PHASE II", true)
+	_play_boss_banner("裂隙過熱・首領第二階段（PHASE II）", true)
 
 
 func _play_boss_banner(message: String, phase_two: bool) -> void:
@@ -2764,6 +2780,67 @@ func _dangerous_battle() -> bool:
 	var director: Node=GameManager.tactical_director
 	return is_instance_valid(director) and is_instance_valid(director.relay) and is_instance_valid(director.relay.pressure) and director.relay.pressure.enabled and director.relay.pressure.phase in ["warning","active"]
 
+const LOW_HP_EDGE_THICKNESS := 16.0
+const LOW_HP_EDGE_ALPHA := 0.78
+const HURT_MARKER_LENGTH := 48.0
+static func toast_size_for_text(text: String, view_width: float, font: Font, font_size: int) -> Vector2:
+	var widest := 0.0
+	var line_count := 0
+	for line in text.split("\n"):
+		line_count += 1
+		if font != null:
+			widest = maxf(widest, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
+	var max_width := minf(560.0, maxf(220.0, view_width - 32.0))
+	var width := clampf(widest + 56.0, 220.0, max_width)
+	var rows := 0
+	var line_height := font.get_height(font_size) if font != null else 26.0
+	for line in text.split("\n"):
+		var line_width := font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x if font != null else 0.0
+		rows += maxi(1, int(ceilf(line_width / maxf(1.0, width - 40.0))))
+	return Vector2(width, clampf(float(rows) * line_height + 24.0, 52.0, 140.0))
+func _fit_toast_panel() -> void:
+	if toast_panel == null or toast_label == null:
+		return
+	var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size) if is_inside_tree() else Vector2(1280, 720)
+	var font: Font = toast_label.get_theme_font("font")
+	var font_size: int = toast_label.get_theme_font_size("font_size")
+	var fitted := toast_size_for_text(toast_label.text, view.x, font, font_size)
+	var center_x := toast_panel.position.x + toast_panel.size.x * 0.5 if toast_panel.size.x > 0.0 else view.x * 0.5
+	toast_panel.size = fitted
+	toast_panel.position.x = clampf(center_x - fitted.x * 0.5, 8.0, maxf(8.0, view.x - fitted.x - 8.0))
+func clear_wrong_formation_notice() -> void:
+	var cleared := false
+	if toast_showing and (toast_current_text.contains("錯陣") or toast_current_text.contains("反噬")):
+		toast_current_text = ""
+		toast_showing = false
+		toast_remaining = 0.0
+		cleared = true
+	toast_queue = toast_queue.filter(func(m: String) -> bool: return not (m.contains("錯陣") or m.contains("反噬")))
+	if is_instance_valid(toast_panel) and cleared:
+		toast_panel.visible = false
+	if is_instance_valid(tactical_hint) and (tactical_hint.text.contains("錯陣") or tactical_hint.text.contains("反噬")):
+		_update_tactical_hint()
+var _exp_caption_bar_size := Vector2(-1, -1)
+func _sync_exp_caption() -> void:
+	if xp_bar == null or xp_bar.size == _exp_caption_bar_size:
+		return
+	_exp_caption_bar_size = xp_bar.size
+	var caption := xp_bar.get_node_or_null("ExpCaption") as Label
+	if caption == null:
+		return
+	var room := xp_bar.size.y - 2.0
+	caption.clip_text = true
+	caption.position = Vector2(6, 1)
+	caption.size = Vector2(minf(40.0, maxf(1.0, xp_bar.size.x - 8.0)), maxf(1.0, room))
+	# Max UI scale overflows even a 14px bar; Lv beside the bar names it.
+	caption.visible = false
+func exp_caption_rect_in_bar() -> bool:
+	if xp_bar == null:
+		return false
+	var caption := xp_bar.get_node_or_null("ExpCaption") as Control
+	if caption == null:
+		return false
+	return Rect2(Vector2.ZERO, xp_bar.size).encloses(Rect2(caption.position, caption.size))
 static func low_hp_warning_active(ratio: float) -> bool:
 	return ratio < 0.30
 
@@ -2861,7 +2938,7 @@ func _play_toast_queue() -> void:
 	toast_remaining = 1.5
 	toast_label.text = toast_current_text
 	var mobile := MOBILE_TUNING.use_mobile_ui(MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size))
-	toast_label.add_theme_font_size_override("font_size", 13)
+	toast_label.add_theme_font_size_override("font_size", 18)
 	var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
 	BATTLE_LAYOUT.place(toast_panel, BATTLE_LAYOUT.regions(view, mobile).notice)
 	toast_panel.visible = not get_tree().paused and not formation_picker.visible
