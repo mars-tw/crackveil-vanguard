@@ -1,0 +1,199 @@
+{
+  "audit": "Crackveil Vanguard (rift-survivors) Apple Guideline 4.3 binary similarity — read-only",
+  "date": "2026-10-27",
+  "scope_note": "in_ios_release 依 export_presets.cfg preset.3 (iOS Xcode unsigned) 的 include/exclude 推斷，並以既有 export/native/ios-export.log (2026-10-15, sourceVersion 0.27.0-r42) 交叉驗證；該 log 早於目前原始碼 (0.35.0-content-r6)，凡僅有舊 log 支持者已在 evidence 註明。本次未執行遊戲、未匯出、未修改任何既有檔案。",
+  "findings": [
+    {
+      "category": "release-content",
+      "path": "rift-survivors/export_presets.cfg",
+      "line": 148,
+      "in_ios_release": true,
+      "evidence": "preset.3 iOS: export_filter=all_resources (L146), include_filter=assets/audio/*.wav (L147), exclude_filter 含 scripts/debug/**,scenes/debug/**,tools/**,docs/**,android/**,assets/rodin/**,assets/art/r24/**,assets/art/r25/** 等 (L148), script_export_mode=2 (L152), encrypt_pck=false (L150)。即除明列排除外，全專案資源皆進 PCK。",
+      "recommendation": "維持 all_resources 時，新增排除必須逐項列入四個 preset 或至少 iOS/Android/Web 三者一致；每次改 exclude 後以乾淨匯出的 savepack 清單驗證，不要只改單一 preset。"
+    },
+    {
+      "category": "release-content",
+      "path": "rift-survivors/scripts/debug",
+      "line": null,
+      "in_ios_release": false,
+      "evidence": "目錄共 89 個 .gd (+.uid)；scenes/debug 共 88 個 .tscn。iOS exclude 明列 scripts/debug/** 與 scenes/debug/** (export_presets.cfg:148)。既有 ios-export.log 中 savepack 對 scripts/debug 與 scenes/debug 命中數皆為 0，排除在舊版匯出生效。此結論僅及『目錄被排除』，不保證正式版程式未 preload 或引用 debug 內容（本次搜尋非 debug 程式未發現 preload scripts/debug，僅 scripts/debug/r31_endgame_gate.gd:12 自行 preload 同目錄 hook）。",
+      "recommendation": "保留此排除；新增測試一律放 scripts/debug 或 scenes/debug，不要放 services/arena/ui 等出貨目錄（對照下方 arena probe 與 services probe 的反例）。"
+    },
+    {
+      "category": "test-code-in-release",
+      "path": "rift-survivors/scripts/services/web_reachability_probe.gd",
+      "line": 33,
+      "in_ios_release": true,
+      "evidence": "全檔僅 34 行，class_name WebReachabilityProbe。publish() 在 L6 以 OS.has_feature(\"web\") 早退，iOS 不執行 JavaScriptBridge.eval；但檔案位於未被排除的 scripts/services，字串 cv_r19_test/cv_r22_test 與 window.__cvR19Controls/__cvR22Controls (L33) 會隨編譯後腳本進 PCK。既有 ios-export.log:183,535 證實 web_reachability_probe.gdc/.remap 已打包。呼叫端共 9 處 UI：contract_screen.gd:4,544、first_run_guide.gd:4,269、hud.gd:4,1569、level_up_screen.gd:9,152、main_menu.gd:6,1107、r4_battle_journal.gd:4,148、r4_build_preparation.gd:7,357、r4_result_screen.gd:8,393。",
+      "recommendation": "刪除 web_reachability_probe.gd 及其 9 處 preload/publish 呼叫，改由 Web 測試在瀏覽器端以 DOM/截圖量測，或把量測移到 tools/ 的外部 Playwright 腳本讀取 canvas 幾何；不要保留以 URL 參數開啟的體內探針。若短期無法刪，至少將檔案移入 scripts/debug 並同步排除，且 publish 呼叫以 OS.has_feature(\"web\") 外層條件包裹——但最終仍應移除，因其功能純為 QA 觀測。"
+    },
+    {
+      "category": "test-code-in-release",
+      "path": "rift-survivors/scripts/ui/hud.gd",
+      "line": 1888,
+      "in_ios_release": true,
+      "evidence": "_publish_runtime_probe (L1883-1941) 由 _on_stats_changed (L1836) 每次統計變化呼叫；L1884 以 has_feature(\"web\") 早退，L1888 讀取 URL 參數 cv_r32_test，啟用後把 FPS、效能監控、玩家座標、各系統 get_debug_state 組成 payload 寫入 window.__cvR32Runtime (L1941)。iOS 正式版只會執行到 L1884 早退，不外洩資料；但整段探針與參數名稱在正式版二進位內。",
+      "recommendation": "刪除 _publish_runtime_probe、runtime_probe_checked/enabled (L124-125) 與 L1836 呼叫；效能觀測改用 Godot 正式版的 Performance 監控在開發建置量測，或在 tools/ 以外部工具讀取。get_debug_state 本身見下一項。"
+    },
+    {
+      "category": "test-code-in-release",
+      "path": "rift-survivors/scripts/ui/world_map.gd",
+      "line": 75,
+      "in_ios_release": true,
+      "evidence": "L74-75 僅 web 時以 JavaScriptBridge 讀 cv_r22_test 設 probe_enabled；_publish_probe (L503-505) 同樣 web+probe_enabled 才寫 window.__cvR34WorldMap。iOS 不執行 eval 路徑，但 get_debug_state (L489) 與參數字串在正式版內。",
+      "recommendation": "刪除 probe_enabled、L74-75 與 _publish_probe；世界地圖版面驗證改由外部截圖/無頭測試在 Web 建置進行。get_debug_state 若僅供測試，應改名為正式用途的狀態快照 API 並只回傳 UI 需要欄位，或隨測試移到 debug 目錄的包裝器。"
+    },
+    {
+      "category": "test-code-in-release",
+      "path": "rift-survivors/scripts/services/qa_profile.gd",
+      "line": 6,
+      "in_ios_release": true,
+      "evidence": "path() (L5-10) 無條件讀 OS.get_environment(\"CV_QA_PROFILE\")，合法字元時把存檔改寫為 user://qa_<profile>_...。呼叫端皆為 autoload 正式路徑：achievement_progress.gd:66、audio_manager.gd:83、game_manager.gd:262、meta_progress.gd:75、player_settings.gd:17，皆在 _ready/存檔時執行。iOS 上環境變數通常為空而回傳原路徑，故行為不變，但 QA 分流邏輯在正式版每次存檔都會執行，且字串 CV_QA_PROFILE 在二進位內。此檔不在 exclude 內。",
+      "recommendation": "正式版移除 qa_profile 依賴：autoload 直接使用原 SAVE_PATH 常數；QA 隔離改由測試在啟動前以 Godot 的 user:// 路徑覆寫或測試專用建置參數達成。若必須保留，改為僅在 OS.is_debug_build() 時才讀環境變數，其餘直接回傳 original——但更乾淨的做法是刪除此檔並讓測試 harness 自行備份/還原存檔。"
+    },
+    {
+      "category": "test-code-in-release",
+      "path": "rift-survivors/scripts/autoload/meta_progress.gd",
+      "line": 486,
+      "in_ios_release": true,
+      "evidence": "debug_save_fault/debug_save_fault_remaining (L70-71) 為正式 autoload 欄位；L486 與 L497 的故障注入皆受 OS.is_debug_build() 且 CV_QA_PROFILE 非空雙重守衛，正式版 fault 恆為空字串，不改變存檔行為。設定端僅 scripts/debug/content_r3_test.gd:334-528（已被排除）。屬『程式在、行為不在』。",
+      "recommendation": "將故障注入欄位與 L486/L497 分支移出正式 autoload：測試改以包裝 ConfigFile 寫入層或在 debug 建置以子類別/測試替身注入；正式版只保留正常交易寫入路徑。"
+    },
+    {
+      "category": "test-code-in-release",
+      "path": "rift-survivors/scripts/arena/r33_art_probe.gd",
+      "line": 10,
+      "in_ios_release": true,
+      "evidence": "與 r34_art_probe.gd、r34_composition_probe.gd、r34_final_storm_probe.gd 同位於未排除的 scripts/arena；其場景 scenes/debug/R33ArtProbe.tscn 等已被排除，非 debug 程式未發現引用這四支 probe。_ready 即 call_deferred(\"_run\") 並寫 res://docs/evidence/... (各檔 OUT 常數，如 r33 L4、r34_composition L5)。既有 ios-export.log:457-462,626-630 證實四支 .gdc/.remap 皆打包。iOS 正式版因場景被排除而不被實例化、不執行，但美術 QA 探針程式留在出貨二進位。",
+      "recommendation": "把四支 *_probe.gd 移入 scripts/debug（場景已在該處），或直接刪除並改以 tools/ 的無頭截圖腳本重現；同時確認 scenes/debug 的 ext_resource 路徑一併更新。不要只靠場景排除讓同目錄腳本留在 services/arena。"
+    },
+    {
+      "category": "test-code-in-release",
+      "path": "rift-survivors/scripts/services/mobile_tuning.gd",
+      "line": 61,
+      "in_ios_release": true,
+      "evidence": "set_device_hints_override_for_tests (L61-63) 與 set_force_mobile_lod_for_tests (L291-292, 設定鍵 crackveil/debug/force_mobile_lod L17) 為公開靜態函式；_runtime_device_hints (L492-493) 先檢查 override。正式版呼叫端搜尋結果：僅 scripts/debug 多支測試與 scripts/arena/r34_final_storm_probe.gd:24（probe 本身亦應移出），正式 UI/玩法未呼叫。iOS 不會被啟用，但測試後門留在正式版且可由任何正式程式誤用。",
+      "recommendation": "刪除兩個 *_for_tests 函式與 _device_hints_override 分支，測試改以傳入 device_hints 參數（layout_tier 等函式已有參數注入點，如 L66）或在 debug 測試場景自行 stub；force_mobile_lod 改為測試建置的 ProjectSettings 覆寫，不要留在正式服務。"
+    },
+    {
+      "category": "test-code-in-release",
+      "path": "rift-survivors/scripts/ui/hud.gd",
+      "line": 213,
+      "in_ios_release": true,
+      "evidence": "screenshot beauty mode：L213 需 is_debug_build 且 cmdline 有 --screenshot-beauty；F12 切換 L307 同受 is_debug_build 守衛；set_screenshot_beauty_mode (L2499-2510) 在 L2500 對非 debug 直接 return。entity_factory.gd:568 與 squad_manager.gd:896 的 print 亦受 is_debug_build 守衛。iOS 正式版不執行，僅程式與字串 SCREENSHOT_BEAUTY 在內。",
+      "recommendation": "可接受保留守衛，但建議把 beauty mode 的切換入口與 print 移到 debug 建置專用腳本；正式版只保留 GameManager.screenshot_beauty_mode 的唯讀預設 false，避免審查或自動掃描誤讀為隱藏模式。"
+    },
+    {
+      "category": "test-code-in-release",
+      "path": "rift-survivors/scripts/arena/arena.gd",
+      "line": 256,
+      "in_ios_release": true,
+      "evidence": "_apply_run_seed (L254-268) 在正式版無 debug 守衛地遍歷 OS.get_cmdline_args() 解析 --run-seed=，並讀寫 GameManager.forced_run_seed (game_manager.gd:207)。此為玩家種子輸入功能的正式路徑（main_menu.gd:726 由 _start_run 設定、arena.gd:202-206 種子重開），非純測試後門；iOS 一般無 cmdline 參數而走隨機種子。屬會在正式版執行的參數解析，應與 QA 參數區分看待。",
+      "recommendation": "保留種子玩法，但文件與審查回覆中明示此為玩家可見的種子出擊功能；若商店版不需要種子分享，移除 --run-seed cmdline 解析、僅保留 UI 輸入，避免正式版存在未公開的啟動參數面。"
+    },
+    {
+      "category": "test-code-in-release",
+      "path": "rift-survivors/scripts/services/web_reachability_probe.gd (cv_r5_pause_layout)",
+      "line": null,
+      "in_ios_release": false,
+      "evidence": "以 cv_r5、pause_layout、cv_r19_test、cv_r22_test、cv_r32_test 全文搜尋 scripts 與 scenes：cv_r19/cv_r22 見 web_reachability_probe.gd:33，cv_r32 見 hud.gd:1888，cv_r22 另見 world_map.gd:75；cv_r5_pause_layout 命中數為 0。無法確認該參數曾存在於目前原始碼，可能屬其他版本、其他專案或已移除。",
+      "recommendation": "不要為不存在的參數做修改；若送審 build 來自其他 commit，請提供該 build 的 commit/PCK 再稽核。本項結論為無法確認，不得寫成已移除或不存在於歷史。"
+    },
+    {
+      "category": "release-content",
+      "path": "rift-survivors/release/ios/source-verification.json",
+      "line": null,
+      "in_ios_release": true,
+      "evidence": "iOS exclude 未含 release/**、native/**、output/**、.playwright-cli/**。既有 ios-export.log:422-424 證實 res://native/build-config.json、res://release/android/verification.json、res://release/ios/source-verification.json 被 savepack 打包；log 中 res://docs/ 與 res://tools/ 打包數為 0，顯示 exclude 對已列目錄有效、未列目錄即漏。release 資料夾另含 AAB/APK/ZIP 等大型產物，未被 Godot 匯入者是否打包無法確認（無 .import 者通常不打包，此為推斷，未驗證）。",
+      "recommendation": "在 iOS（及 Android/Web）exclude_filter 補上 release/**,native/**,output/**,.playwright-cli/**,.github/**；build-config 若需隨附改放 tools/ 或在匯出後由 CI 注入，不要放在 res:// 根目錄下被 all_resources 掃入。"
+    },
+    {
+      "category": "release-content",
+      "path": "rift-survivors/web/icons/icon_512x512.png",
+      "line": null,
+      "in_ios_release": true,
+      "evidence": "web/ 未被排除；ios-export.log:98-111,666 顯示僅 web/icons 四張圖示（含 .import）打包，web/offline.html、mobile_startup.js、loading_recovery.mjs、webgl_state_cache.js 未見於 savepack（是否因非 Godot 資源而不打包，無法確認，僅就 log 事實陳述）。project.godot:14 以 icon_512 為專案圖示，圖示進 PCK 屬預期。",
+      "recommendation": "明示排除 web/*.html,web/*.js,web/*.mjs 只保留 web/icons/**，避免未來新增 Web 專用檔被掃入原生 PCK；PWA offline 頁應只存在 Web 匯出。"
+    },
+    {
+      "category": "shared-third-party",
+      "path": "rift-survivors/assets/fonts/OFL.txt",
+      "line": null,
+      "in_ios_release": true,
+      "evidence": "SHA-256 與 rift-forge-3d/Assets/_Project/Resources/Fonts/OFL.txt 完全相同（4301 bytes）。RS 實際字型為子集化 NotoSansCJKtc-Regular-UI-Subset.otf (1,536,772 bytes)，RF 為 NotoSansTC-Regular.otf (5,683,368 bytes)，位元組不同；僅授權文本相同。CREDITS.md:9 已記載 Noto 來源與 OFL。",
+      "recommendation": "可接受：保留 OFL 與 CREDITS 記載即可，不需更換字型。回覆 Apple 時列為標準第三方元件並附授權，不要聲稱為自有原創。"
+    },
+    {
+      "category": "shared-third-party",
+      "path": "rift-survivors/LICENSE",
+      "line": null,
+      "in_ios_release": false,
+      "evidence": "SHA-256 與 game-store-publisher/native-kit/apps/storm-apocalypse/web/LICENSE 完全相同（1064 bytes，MIT 範本）。根目錄 LICENSE 未證明進 PCK（Godot 打包以資源為主，此點無法確認），屬 repo 層相同而非已證實的二進位相同。",
+      "recommendation": "可接受：MIT 範本相同不構成模板換皮證據；確保每款 App 的 LICENSE/CREDITS 只列實際使用的素材，勿整包複製他作的 CREDITS。"
+    },
+    {
+      "category": "shared-third-party",
+      "path": "rift-survivors/tools/asset_sources/particle",
+      "line": null,
+      "in_ios_release": false,
+      "evidence": "SHA-256 命中 6 檔與 native-kit/apps/tower-defense-skill/web/assets/particles/ 的 Kenney 粒子圖完全相同（如 circle_02.png=kenney-ice-ring.png、fire_01.png=kenney-fire.png 等，皆 CC0 Kenney Particle Pack）。命中位置在 RS 的 tools/asset_sources，已被 iOS exclude 的 tools/** 排除；RS 出貨衍生圖位於 assets/vfx/kenney_particle（經裁切調色，CREDITS.md:12），與 NK 原圖雜湊不同。",
+      "recommendation": "可接受但需可追溯：保留 Kenney CC0 來源與加工紀錄（CREDITS.md:12、tools/process_m3_assets.py）；審查回覆中說明相同的是 CC0 原始素材庫而非任一款 App 的出貨圖，不要把原始素材庫放進會出貨的目錄。"
+    },
+    {
+      "category": "shared-self-authored",
+      "path": "rift-survivors/scripts (vs rift-forge-3d/Assets/_Project/Scripts/Runtime)",
+      "line": null,
+      "in_ios_release": "unknown",
+      "evidence": "跨 RS（排除 .git/.godot/.audit-tmp/export/output/release/android/.playwright-cli）與 RF（排除 Library/build 等）共 12,927/450 檔 SHA-256 比對：RS 自有遊戲程式與 RF 的 C# 程式零完全相同（引擎與語言不同：GDScript vs C#）。RS 非 debug .gd 共 115 檔、函式約 1,794 個，get_debug_state 在正式程式出現 13 處定義；RF 執行期檔案為 GameBootstrap.cs、PlayerController.cs、RiftGame*.cs 等，命名與結構獨立。此為檔案層證據，未做編譯後二進位或 IL/bytecode 的相似度分析，故二進位層結論為無法確認。",
+      "recommendation": "不需改名或混淆。向 Apple 的差異證據應放在玩法與內容：RS 的活隊員三陣封隙/羈絆（formation_relay、squad_manager）對 RF 的單人閃避反擊/鍛造委託，並附實際遊玩錄影與關卡清單，而非程式命名。"
+    },
+    {
+      "category": "shared-self-authored",
+      "path": "game-store-publisher/native-kit/unity-prepared/rift-forge-3d",
+      "line": null,
+      "in_ios_release": false,
+      "evidence": "NK 內含 RF 的隔離副本 unity-prepared/rift-forge-3d，與 RF 本體大量 SHA-256 相同，含 Unity 標準 TutorialInfo/URP 設定與自有 GameBootstrap.cs、CameraRigTests.cs 等。此為同一款 RF 的準備副本，非 Crackveil 內容，不進 Crackveil 的 Godot PCK；但顯示 NK 以整包複製方式準備各款，上架時若把 prepared 副本誤當另一款送審會構成直接重複。",
+      "recommendation": "在 NK 文件中明標 unity-prepared 僅為 RF 本體的隔離工作副本、禁止作為獨立 App 送審；每款 App 的來源目錄應唯一且在送審前以雜湊清單確認未含他作整包副本。"
+    },
+    {
+      "category": "ios-packaging",
+      "path": "game-store-publisher/native-kit/ci_godot_ios_export.sh",
+      "line": 15,
+      "in_ios_release": true,
+      "evidence": "L14-17 白名單僅 crackveil-vanguard (tw.mars.crackveilvanguard/CrackveilVanguard) 與 seven-district-reckoning (tw.mars.sevendistrictreckoning/SevenDistrict) 兩款 Godot App 共用同一匯出/簽署腳本；腳本本身不進 App，但產生的 Xcode 工程結構、ExportOptions (method app-store-connect、uploadSymbols False，L245)、模擬器/簽署流程兩款一致。seven-district 原始碼不在本次範圍，其 PCK 與 Crackveil 的實際相似度無法確認。",
+      "recommendation": "共用 CI 本身可接受，重點是兩款的 PCK 內容必須各自獨立：在送審前對兩款乾淨匯出的 PCK 做檔案清單與雜湊差異表，確認除 Godot 引擎/字型等第三方外無自有檔案相同，並把此表附於審查回覆。"
+    },
+    {
+      "category": "ios-packaging",
+      "path": "game-store-publisher/native-kit/ci_verify_godot_ios.py",
+      "line": 105,
+      "in_ios_release": true,
+      "evidence": "驗證器對兩款 Godot App 強制相同不變量：sourceFiles 恰 47 (L107,111)、PrivacyInfo 三類 required-reason 與代碼 DDA9.1/C617.1、35F9.1、E174.1/85F4.1 (L23-27,91-99)、PCK 須 GDPC 開頭 (L128)、版本須 1.0.0/build 1 (L105,132-133)。Crackveil 既有 export/native/ios/CrackveilVanguard/PrivacyInfo.xcprivacy 與此完全一致，此為 Godot 模板層相同，非玩法相同。另注意版本不一致：RS native/build-config.json 記 nativeBuild 3、export_presets.cfg:158 version=3，而驗證器與 release/ios/source-verification.json 記 build 1，ci_godot 流程若以 build 1 驗證目前來源將不一致（是否實際失敗無法確認，未執行 CI）。",
+      "recommendation": "先統一版本真源：export_presets、native/build-config.json、source-verification 三處 build 號一致後再送審，避免以舊 build 1 的已驗證來源夾帶新版 PCK。PrivacyInfo/引擎層相同在回覆中歸類為 Godot 官方模板，不要更動 required-reason 規避比對。"
+    },
+    {
+      "category": "ios-packaging",
+      "path": "rift-survivors/export/native/ios/CrackveilVanguard/CrackveilVanguard-Info.plist",
+      "line": null,
+      "in_ios_release": true,
+      "evidence": "此為舊匯出產物（2026-10-15）。欄位多為 Godot iOS 模板預設：CFBundleIdentifier/版本為建置變數、ITSAppUsesNonExemptEncryption=false、UIRequiresFullScreen=true、僅橫向 Landscape、空 NSCamera/NSPhotoLibrary/NSMicrophone 描述、UILaunchStoryboardName=Launch Screen。Launch Screen.storyboard 背景色 (0.015,0.027,0.059) 對應 project.godot:17 的 boot_splash 顏色，屬本作設定；storyboard 結構本身為模板。圖示由單一來源產生多尺寸（Icon-1024 等 15 檔，source-verification.json 有逐檔 SHA），splash@2x 與 @3x 位元組相同。dummy.cpp/dummy.h/dummy.swift、MoltenVK.xcframework、libgodot.a 皆 Godot 4.7.2 模板/引擎，任何同版 Godot iOS App 皆相同或高度相似。",
+      "recommendation": "模板層相同屬可接受，但應確保本作專屬欄位正確且不留空用途字串：NSCamera 等未使用權限應由 Godot 匯出設定移除而非留空字串；啟動畫面改用本作 key art 而非純色加預設 splash 圖，避免與其他 Godot App 的第一印象相同。不要更動引擎二進位本身。"
+    },
+    {
+      "category": "ios-packaging",
+      "path": "game-store-publisher/native-kit/configure_app.mjs",
+      "line": null,
+      "in_ios_release": false,
+      "evidence": "Capacitor 路徑（configure_app.mjs、configure_ios.mjs、install_icons.mjs、host-entry.mjs）服務 NK/apps 下 9 款 Web App（ashes-convoy 等），apps 內無 crackveil-vanguard 目錄；Crackveil 走 Godot 原生匯出（rift-survivors/tools/export_mobile.py 與 NK 的 ci_godot_*）。故 MarsGameNative host、#ffffff 白底 splash、統一 icon-1024 產生方式等 Capacitor 共用層不進 Crackveil 的 iOS App。此結論基於目錄與腳本參照，未比對已上架 IPA，商店端實際封裝無法確認。",
+      "recommendation": "在審查回覆中明確區分：Crackveil 為 Godot 原生 App，與同帳號 Capacitor Web 包裝的 9 款不共用包裝層；同時避免未來把 Crackveil 改走 Capacitor 共用殼，否則會新增整層相同二進位。"
+    },
+    {
+      "category": "concept-similarity",
+      "path": "rift-survivors/docs/store/DIFFERENTIATION.md",
+      "line": null,
+      "in_ios_release": "unknown",
+      "evidence": "專案自評文件已記載：本作與同帳號暴風啟示錄、灰燼護航、夜行列車在『敵潮/生存』受眾重疊，Rift Forge 3D 同為動作類；文件自評 4.3/4.2.6 風險為『高』，並指出敵潮+升級+Boss+局外成長為既有熱門類型。玩法差異主張為活隊員到位三陣封隙（formation_relay.gd、squad_manager.gd）對 RF 的單人完美閃避反擊與鍛造委託（rift-forge-3d/README.md）。美術產線文件 _共用文件/HYBRID_ART_PIPELINE.md、VISUAL_REFRESH_PLAN.md 為多款共用治理與 prompt 模板，屬流程共用而非已證實的出貨素材相同。",
+      "recommendation": "送審前以實機遊玩證據證明差異已出貨（非僅文件）：主選單第一分鐘、三陣封隙判定、隊員獨立生命/武器、十個戰場與 Boss 的實際錄影與截圖；若同帳號另有敵潮生存款，考慮合併為一款的多模式或下架較弱一款，而非再送一款同類型。此為產品決策，稽核不代替決定。"
+    }
+  ]
+}

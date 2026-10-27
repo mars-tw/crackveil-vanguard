@@ -71,8 +71,7 @@ func _ready() -> void:
 	_apply_layout()
 	_update_selection()
 	get_viewport().size_changed.connect(_apply_layout)
-	if OS.has_feature("web"):
-		probe_enabled = bool(JavaScriptBridge.eval("new URLSearchParams(location.search).get('cv_r22_test') === '1'", true))
+	probe_enabled = preload("res://scripts/services/qa_bridge.gd").world_map_enabled()
 	call_deferred("_publish_probe")
 
 
@@ -501,5 +500,5 @@ func get_debug_state() -> Dictionary:
 
 
 func _publish_probe() -> void:
-	if OS.has_feature("web") and probe_enabled and root != null:
-		JavaScriptBridge.eval("window.__cvR34WorldMap = %s" % JSON.stringify(get_debug_state()), true)
+	if probe_enabled and root != null:
+		preload("res://scripts/services/qa_bridge.gd").world_map_publish(get_debug_state())

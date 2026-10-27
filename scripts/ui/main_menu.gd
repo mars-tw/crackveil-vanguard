@@ -3,7 +3,7 @@ extends Node
 const ARENA_SCENE_PATH := "res://scenes/arena/Arena.tscn"
 const BACKGROUND_SCRIPT := preload("res://scripts/arena/arena_background.gd")
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
-const WEB_REACHABILITY_PROBE := preload("res://scripts/services/web_reachability_probe.gd")
+const WEB_REACHABILITY_PROBE := preload("res://scripts/services/qa_bridge.gd")
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 
 var background: Node2D
@@ -303,6 +303,7 @@ func _make_menu_button(text_value: String) -> Button:
 	button.custom_minimum_size = Vector2(220.0, 48.0)
 	button.add_theme_font_size_override("font_size", 20)
 	_apply_menu_button_style(button)
+	preload("res://scripts/ui/rift_frame_ornament.gd").attach(button, false, Color("6fc4cf"), 12.0)
 	return button
 
 

@@ -80,7 +80,7 @@ var music_target_db: float = -80.0
 
 
 func _ready() -> void:
-	save_path=preload("res://scripts/services/qa_profile.gd").path(SAVE_PATH)
+	save_path=preload("res://scripts/services/qa_bridge.gd").save_path(SAVE_PATH)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_load_settings()
 	audio_runtime_enabled = not _is_headless_runtime()

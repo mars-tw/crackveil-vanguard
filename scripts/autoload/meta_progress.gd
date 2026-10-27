@@ -72,7 +72,7 @@ var debug_save_fault_remaining := -1
 
 
 func _ready() -> void:
-	save_path=preload("res://scripts/services/qa_profile.gd").path(SAVE_PATH)
+	save_path=preload("res://scripts/services/qa_bridge.gd").save_path(SAVE_PATH)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	load_progress()
 
@@ -483,7 +483,7 @@ func _recover_transaction() -> bool:
 		return true # Interrupted first save; the free choice remains unspent.
 	if FileAccess.file_exists(backup_path):
 		var bytes:=FileAccess.get_file_as_bytes(backup_path)
-		if OS.is_debug_build() and not OS.get_environment("CV_QA_PROFILE").is_empty() and debug_save_fault=="recovery_failure":return false
+		if OS.is_debug_build() and preload("res://scripts/services/qa_bridge.gd").qa_active() and debug_save_fault=="recovery_failure":return false
 		if _digest(bytes)==str(record.get("old","")) and _write_verified(save_path,bytes):
 			_clear_transaction()
 			return true
@@ -494,7 +494,7 @@ func _save_verified_transaction(config: ConfigFile) -> bool:
 	var temporary:=save_path+".r3-temp-%d" % Time.get_ticks_usec()
 	var backup:=save_path+".r3-backup"
 	var journal:=save_path+".r3-journal"
-	var fault:=debug_save_fault if OS.is_debug_build() and not OS.get_environment("CV_QA_PROFILE").is_empty() else ""
+	var fault:=debug_save_fault if OS.is_debug_build() and preload("res://scripts/services/qa_bridge.gd").qa_active() else ""
 	if debug_save_fault_remaining>0:
 		debug_save_fault_remaining-=1
 		if debug_save_fault_remaining==0: debug_save_fault=""

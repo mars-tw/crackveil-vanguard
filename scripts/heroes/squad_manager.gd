@@ -45,6 +45,7 @@ const FORMATION_ORDER: Array[String] = ["wedge", "ring", "scatter"]
 const FORMATION_SWITCH_COOLDOWN := 4.0
 const FORMATION_GUARD_COOLDOWN_MULTIPLIER := 0.6
 const FORMATION_INDICATOR_DURATION := 1.4
+const SWITCH_FONT := preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 const FORMATION_DEFINITIONS: Dictionary = {
 	"wedge": {
 		"name": "楔形突擊",
@@ -475,6 +476,8 @@ func _draw() -> void:
 		elif formation_id == "wedge":
 			var tip := point + forward * 36
 			draw_polyline(PackedVector2Array([tip-forward.rotated(-0.65)*12,tip,tip-forward.rotated(0.65)*12]),Color(color,0.9),2,true)
+	if formation_indicator_timer > 0.0:
+		_draw_formation_switch(origin, forward, color)
 	if bond_reveal_timer > 0:
 		for definition in active_bonds.values():
 			var a: Node = get_member_by_id(definition.hero_ids[0])
@@ -483,6 +486,46 @@ func _draw() -> void:
 				draw_line(to_local(a.global_position),to_local(b.global_position),Color("e4b7ff"),2,true)
 				for member in [a,b]:
 					draw_arc(to_local(member.global_position),23,0,TAU,28,Color("e4b7ff"),2.5,true)
+
+
+# Switch moment: the ground motif of the new formation spreads from the
+# captain, each living companion gets a tether to its real new slot and the
+# formation name rises once. Presentation only; slots and stats are unchanged.
+func _draw_formation_switch(origin: Vector2, forward: Vector2, color: Color) -> void:
+	var t := clampf(1.0 - formation_indicator_timer / FORMATION_INDICATOR_DURATION, 0.0, 1.0)
+	var fade := 1.0 - smoothstep(0.55, 1.0, t)
+	var reach := lerpf(40.0, 150.0, smoothstep(0.0, 0.6, t))
+	var ink := Color("08121f", 0.75 * fade)
+	match formation_id:
+		"wedge":
+			for i in range(3):
+				var tip := origin + forward * (reach - i * 34.0)
+				var side := forward.orthogonal() * (26.0 + i * 8.0)
+				var chevron := PackedVector2Array([tip - forward * 22 + side, tip, tip - forward * 22 - side])
+				draw_polyline(chevron, ink, 7, true)
+				draw_polyline(chevron, Color(color, 0.95 * fade), 3.5, true)
+		"ring":
+			for i in range(2):
+				var radius := reach * (0.72 + i * 0.28)
+				draw_arc(origin, radius, 0, TAU, 48, ink, 7, true)
+				draw_arc(origin, radius, 0, TAU, 48, Color(color, 0.9 * fade), 3, true)
+		_:
+			for i in range(10):
+				var point := origin + Vector2.from_angle(i * TAU / 10.0 + t) * reach
+				draw_circle(point, 7, ink)
+				draw_circle(point, 4.5, Color(color, 0.95 * fade))
+	for member in get_members():
+		if not is_instance_valid(member) or member == leader or not member.is_alive:
+			continue
+		var from := to_local(member.global_position)
+		var slot := to_local(get_formation_world_position(member.formation_index))
+		if from.distance_to(slot) > 12.0:
+			draw_dashed_line(from, slot, Color(color, 0.8 * fade), 2.0, 8.0, true)
+			draw_circle(slot, 5, Color(color, 0.9 * fade))
+	var label := get_formation_name()
+	var at := origin + Vector2(-120, -96 - 18.0 * smoothstep(0.0, 0.4, t))
+	draw_string_outline(SWITCH_FONT, at, label, HORIZONTAL_ALIGNMENT_CENTER, 240, 26, 8, Color("08121f", 0.9 * fade))
+	draw_string(SWITCH_FONT, at, label, HORIZONTAL_ALIGNMENT_CENTER, 240, 26, Color(color.lightened(0.25), fade))
 
 
 func select_formation_target(owner: Node2D, max_range: float) -> Node2D:

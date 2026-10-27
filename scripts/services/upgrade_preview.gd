@@ -70,8 +70,34 @@ static func synergy_text(option: Dictionary) -> String:
 		for other in ids:
 			if str(other) != hero_id:
 				partner = str(other)
-		return "連動：配%s成立「%s」" % [_hero_name(partner), bond_name]
+		# Only name a partner this run can still bring in; otherwise stay quiet.
+		if not _partner_obtainable(squad, partner):
+			return ""
+		return "連動：招募%s可成立「%s」" % [_hero_name(partner), bond_name]
 	return ""
+
+
+static func _partner_obtainable(squad: Node, partner: String) -> bool:
+	if partner == "":
+		return false
+	var dead = squad.get("dead_ids")
+	if typeof(dead) == TYPE_DICTIONARY and (dead as Dictionary).has(partner):
+		return false
+	var once = squad.get("recruited_once")
+	if typeof(once) == TYPE_DICTIONARY and (once as Dictionary).has(partner):
+		return false
+	var data = squad.get("squad_data")
+	if data == null or not (data is Resource):
+		return false
+	if squad.has_method("get_member_count") and squad.get_member_count() >= int(data.get("max_members")):
+		return false
+	var found := false
+	for hero_data in data.get("available_heroes"):
+		if hero_data != null and str(hero_data.get("id")) == partner:
+			found = true
+	if found and squad.has_method("_starting_recruit_allowed"):
+		found = squad._starting_recruit_allowed(partner)
+	return found
 
 
 static func _hero_name(hero_id: String) -> String:

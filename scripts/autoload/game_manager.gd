@@ -259,7 +259,7 @@ const META_PICKUP_APPLIED_KEY := "_cv_meta_pickup_bonus_applied"
 
 
 func _ready() -> void:
-	campaign_save_path=preload("res://scripts/services/qa_profile.gd").path(campaign_save_path)
+	campaign_save_path=preload("res://scripts/services/qa_bridge.gd").save_path(campaign_save_path)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	var campaign := ConfigFile.new()
 	if campaign.load(campaign_save_path) == OK:
@@ -1783,6 +1783,11 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 		enriched.squad_total=squad_manager.recruited_once.size()
 		for member in squad_manager.get_members():
 			if member.is_alive:enriched.squad_alive+=1
+	# Real seal state at the end of the run, for the defeat advice line.
+	var director: Node = tactical_director if is_instance_valid(tactical_director) else null
+	var relay_node: Node = director.relay if director != null and is_instance_valid(director.relay) else null
+	if relay_node != null:
+		enriched["seal_state"] = {"step": int(relay_node.step), "completed": bool(relay_node.completed), "wrong": int(relay_node.wrong_penalties), "required": str(relay_node.required_formation()), "formation": squad_manager.get_formation_id() if is_instance_valid(squad_manager) else ""}
 	enriched["starting_build_text"] = starting_build_text()
 	enriched["starting_build"] = {"team":active_starting_team,"node":active_starting_node,"benefits":starting_benefits.duplicate(true),"run_id":starting_run_id,"valid_settlements":MetaProgress.starting_settlements.size(),"vouchers":MetaProgress.starting_vouchers}
 	if AchievementProgress != null and AchievementProgress.has_method("get_run_unlocked_definitions"):

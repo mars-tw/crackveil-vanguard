@@ -8,3 +8,6 @@ static func path(original: String) -> String:
 	for character in profile:
 		if not (character in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"): return original
 	return "user://qa_%s_%s" % [profile,original.trim_prefix("user://")]
+
+static func active() -> bool:
+	return not OS.get_environment("CV_QA_PROFILE").is_empty()

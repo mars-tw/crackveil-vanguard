@@ -105,7 +105,7 @@ func _refresh() -> void:
 				break
 	var guard_cycle_active: bool=guard!=null and int(guard.get("tactical_recoveries"))<2
 	if guard_cycle_active:
-		headline.text = "%s・攻防已完成 %d/2 輪" % [str(guard.get("special_elite_name")),mini(2,guard.tactical_recoveries)]
+		headline.text = "%s・攻防已完成 %d/2 輪" % [_guard_name(guard),mini(2,guard.tactical_recoveries)]
 		meter.value = float(guard.get("hp"))/maxf(1.0,float(guard.get("max_hp")))
 		detail.text = "護甲已破・反擊" if guard.tactical_recoveries>=2 else "預警出招・閃開刻線" if guard.current_animation_name==&"attack" else "躲避後・等待下一輪"
 	elif boss != null:
@@ -118,7 +118,7 @@ func _refresh() -> void:
 			if pending_at>GameManager.elapsed_time:
 				detail.text="增援 %.1f 秒・護甲維持" % (pending_at-GameManager.elapsed_time)
 	elif guard != null:
-		headline.text = "%s・攻防已完成 %d/2 輪" % [str(guard.get("special_elite_name")),mini(2,guard.tactical_recoveries)]
+		headline.text = "%s・攻防已完成 %d/2 輪" % [_guard_name(guard),mini(2,guard.tactical_recoveries)]
 		meter.value = float(guard.get("hp"))/maxf(1.0,float(guard.get("max_hp")))
 		detail.text = "護甲已破・反擊" if guard.tactical_recoveries>=2 else "預警出招・閃開刻線" if guard.current_animation_name==&"attack" else "躲避後・等待下一輪"
 	elif GameManager.combo_count >= 3:
@@ -136,3 +136,12 @@ func _refresh() -> void:
 		headline.text = "無盡作戰" if GameManager.boss_killed else "%s來襲 %d 秒" % [encounter_name, seconds]
 		meter.value = clampf(GameManager.elapsed_time / maxf(1.0, encounter_time), 0.0, 1.0)
 		detail.text = "移動回收裝備與經驗" if MOBILE_TUNING.has_confirmed_touch() else "空白鍵：旋斬　P：暫停"
+
+
+# Some guards (e.g. gatekeeper reinforcements) carry no elite title; never
+# leave the objective headline without a subject.
+func _guard_name(guard: Node) -> String:
+	var name_value := str(guard.get("special_elite_name"))
+	if name_value.strip_edges() != "":
+		return name_value
+	return "守門護衛" if GameManager.boss_active else "戰術護衛"

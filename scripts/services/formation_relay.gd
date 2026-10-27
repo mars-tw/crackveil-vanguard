@@ -218,7 +218,7 @@ func advance(delta: float) -> void:
 		wrong_timer = 2.5
 		wrong_penalties += 1
 		captain.take_damage(8.0,anchor+Vector2(1,0))
-		GameManager.show_toast("錯陣反噬：封合中斷，觀察敵軍攻勢再換陣", "battle", true)
+		GameManager.show_toast("錯陣反噬：進度歸零・%s・%s" % [accepted_text(), switch_hint()], "battle", true)
 	if correct:
 		for member in squad.get_members():
 			if not is_instance_valid(member) or member == captain or not member.is_alive:
@@ -319,6 +319,32 @@ func _label_below(point: Vector2) -> bool:
 	var screen: Vector2 = get_viewport().get_canvas_transform() * (point - Vector2(0, CAPTAIN_RADIUS + 64))
 	return screen.y < get_viewport_rect().size.y * 0.27
 
+# When the seal is outside the view, an edge pointer shows where it is and
+# which formation it needs; it disappears once the seal is on screen.
+func _draw_offscreen_pointer() -> void:
+	var inverse := get_viewport().get_canvas_transform().affine_inverse()
+	var size := get_viewport_rect().size
+	var top_left: Vector2 = inverse * Vector2.ZERO
+	var bottom_right: Vector2 = inverse * size
+	var view := Rect2(top_left, bottom_right - top_left)
+	# Keep the pointer clear of the HUD bands: top panels, bottom controls, sides.
+	var unit: float = view.size.x / maxf(1.0, size.x)
+	var inner := Rect2(view.position + Vector2(300, 150) * unit, view.size - Vector2(600, 300) * unit)
+	if inner.size.x <= 0 or inner.size.y <= 0 or view.grow(-30.0).has_point(anchor):
+		return
+	var center := view.get_center()
+	var direction := center.direction_to(anchor)
+	var point := Vector2(clampf(anchor.x, inner.position.x, inner.end.x), clampf(anchor.y, inner.position.y, inner.end.y))
+	var color: Color = COLORS[ORDER.find(required_formation())]
+	var tip := point + direction * 22
+	draw_circle(point, 24, Color("08121f", 0.82))
+	draw_arc(point, 24, 0, TAU, 32, Color("ffdcac"), 2.5, true)
+	_draw_glyph(point, required_formation(), color, 11.0)
+	draw_colored_polygon(PackedVector2Array([tip + direction * 14, tip + direction.orthogonal() * 9, tip - direction.orthogonal() * 9]), Color("ffdcac"))
+	var label := "第 %d 道" % mini(step + 1, 3)
+	draw_string_outline(FONT, point + Vector2(-50, 44), label, HORIZONTAL_ALIGNMENT_CENTER, 100, 15, 6, Color("08121f", 0.9))
+	draw_string(FONT, point + Vector2(-50, 44), label, HORIZONTAL_ALIGNMENT_CENTER, 100, 15, Color("ffdcac"))
+
 func _draw_seal_flash() -> void:
 	if seal_flash_time >= SEAL_FLASH_SECONDS or seal_flash_text == "":
 		return
@@ -404,5 +430,6 @@ func _draw() -> void:
 		draw_line(tip - direction * 18, tip, color, 3, true)
 		draw_line(tip, tip - direction.rotated(0.65) * 12, color, 3, true)
 		draw_line(tip, tip - direction.rotated(-0.65) * 12, color, 3, true)
+	_draw_offscreen_pointer()
 	# Drawn last so the next seal's marker never covers the success line.
 	_draw_seal_flash()

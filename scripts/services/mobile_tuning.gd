@@ -274,7 +274,7 @@ static func has_confirmed_touch(device_hints: Dictionary = {}) -> bool:
 
 
 static func mobile_lod_enabled(viewport_size: Vector2, force_mobile: bool = false, device_hints: Dictionary = {}) -> bool:
-	if bool(ProjectSettings.get_setting(FORCE_MOBILE_LOD_SETTING, false)):
+	if OS.is_debug_build() and bool(ProjectSettings.get_setting(FORCE_MOBILE_LOD_SETTING, false)):
 		return true
 	if force_mobile:
 		return true
@@ -489,7 +489,8 @@ static func _safe_viewport_size(viewport_size: Vector2) -> Vector2:
 
 
 static func _runtime_device_hints() -> Dictionary:
-	if not _device_hints_override.is_empty():
+	# Test-only device hints never apply in a release build.
+	if OS.is_debug_build() and not _device_hints_override.is_empty():
 		return _device_hints_override
 	if OS.has_feature("web") and Time.get_ticks_msec() - _cached_web_hints_msec < 250:
 		return _cached_web_hints

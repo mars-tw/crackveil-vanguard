@@ -6,7 +6,7 @@ const ICON_XP := preload("res://assets/art/icon_xp.png")
 const ICON_HEALTH := preload("res://assets/art/icon_health.png")
 const ICON_GOLD := preload("res://assets/art/icon_gold.png")
 const UPGRADE_PREVIEW := preload("res://scripts/services/upgrade_preview.gd")
-const PROBE := preload("res://scripts/services/web_reachability_probe.gd")
+const PROBE := preload("res://scripts/services/qa_bridge.gd")
 const R33_ANIMATION := preload("res://scripts/animation/true_animation_library.gd")
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 
@@ -47,6 +47,7 @@ func _build_ui() -> void:
 	panel = Panel.new()
 	panel.name = "Panel"
 	root.add_child(panel)
+	preload("res://scripts/ui/rift_frame_ornament.gd").attach(panel, true, Color("6fc4cf"), 24.0)
 
 	title_label = Label.new()
 	title_label.text = "選擇升級"
@@ -224,6 +225,7 @@ func _is_evolution_option(option: Dictionary) -> bool:
 
 func _build_card_content(button: Button, title: String, description: String, option: Dictionary) -> void:
 	button.clip_contents = true
+	preload("res://scripts/ui/rift_frame_ornament.gd").attach(button, false, _upgrade_accent(option), 14.0)
 	var icon := TextureRect.new()
 	icon.name = "UpgradeIcon"
 	icon.texture = _upgrade_icon(option)

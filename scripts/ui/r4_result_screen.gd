@@ -5,7 +5,7 @@ signal continue_requested
 signal main_menu_requested
 const FONT:=preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 const CATALOG:=preload("res://scripts/services/starting_build_catalog.gd")
-const PROBE:=preload("res://scripts/services/web_reachability_probe.gd")
+const PROBE:=preload("res://scripts/services/qa_bridge.gd")
 const SUPPORT_MODEL:=preload("res://scripts/services/support_report_model.gd")
 const ANIMATION:=preload("res://scripts/animation/true_animation_library.gd")
 var victory:=false
@@ -57,6 +57,7 @@ func _ready() -> void:
 	style.set_corner_radius_all(8)
 	panel.add_theme_stylebox_override("panel",style)
 	root.add_child(panel)
+	preload("res://scripts/ui/rift_frame_ornament.gd").attach(panel,true,Color("6fc4cf") if victory else Color("f8a3a1"),22.0)
 	title_label=_label(23)
 	summary_scroll=ScrollContainer.new()
 	summary_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
@@ -186,6 +187,9 @@ func _refresh() -> void:
 	var echo: Dictionary=displayed_summary.get("echo_progress",MetaProgress.get_progress_summary())
 	var goal: Dictionary=echo.get("next_goal",MetaProgress.get_next_progress_goal())
 	summary_label.text="%s｜%s\n%s・%s\n擊殺 %d・存活 %d/%d\n羈絆收益（全隊加成）回%d／減%d HP\n殘響 +%d・現有 %d\n下一步 %s・%s" % [CATALOG.TEAMS.get(team,CATALOG.TEAMS.legacy).name,node.get("name","未裝節點"),outcome,GameManager.format_time(float(displayed_summary.get("elapsed_time",0))),displayed_summary.get("kills",0),displayed_summary.get("squad_alive",0),displayed_summary.get("squad_total",rows.size()),bond.get("healing",0),bond.get("prevented",0),displayed_summary.get("echo_shards_earned",0),echo.get("shards",MetaProgress.shards),goal.get("name","強化完成"),("還差 %d" % int(goal.get("remaining",0))) if int(goal.get("remaining",0))>0 else ("可在整備兌換" if goal.get("kind","")=="spendable" else "已達成")]
+	if not victory:
+		var advice:=_defeat_advice(displayed_summary.get("seal_state",{}))
+		if advice!="":summary_label.text+="\n"+advice
 	gain_label.text=_measured_gain(node,build.get("benefits",{}))
 	progress_label.text=MetaProgress.starting_choice_progress_text()
 	if not GameManager.pending_starting_settlements.is_empty():progress_label.text="進度未保存・整備可重試"
@@ -277,6 +281,17 @@ func _draw_card_art(number: int) -> void:
 		art.draw_string(FONT,Vector2(size+12,y+8),str(bars[i][2]),HORIZONTAL_ALIGNMENT_LEFT,34,11,Color(bars[i][1],0.95))
 		art.draw_rect(Rect2(bar_x,y,bar_w,5),Color("1d3244"),true)
 		art.draw_rect(Rect2(bar_x,y,maxf(0,bar_w*clampf(float(bars[i][0]),0,1)),5),bars[i][1],true)
+
+# One concrete next-run hint from the real seal state; nothing is invented.
+func _defeat_advice(seal: Dictionary) -> String:
+	if seal.is_empty():return ""
+	var names:={"wedge":"楔形","ring":"圓陣","scatter":"散兵"}
+	var step:=int(seal.get("step",0))
+	if bool(seal.get("completed",false)):return "下次：三道已封，趁封合後的反擊增傷集火守門者"
+	var need:=str(names.get(str(seal.get("required","")),""))
+	var held:=str(names.get(str(seal.get("formation","")),""))
+	if int(seal.get("wrong",0))>0:return "下次：倒在第 %d 道（需%s，當時%s），錯陣反噬 %d 次；先看危險區上的陣形圖示" % [mini(step+1,3),need,held,int(seal.get("wrong",0))]
+	return "下次：倒在第 %d 道（封隙 %d/3），攻勢間隙帶兩名隊友站進封隙" % [mini(step+1,3),step]
 
 func _measured_gain(node: Dictionary,measured: Dictionary) -> String:
 	if node.is_empty():return "未裝起始節點・本局無節點增益"

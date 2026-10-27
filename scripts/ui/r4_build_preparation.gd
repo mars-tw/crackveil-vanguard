@@ -4,7 +4,7 @@ signal launch_requested
 const CATALOG:=preload("res://scripts/services/starting_build_catalog.gd")
 const ANIMATION:=preload("res://scripts/animation/true_animation_library.gd")
 const FONT:=preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
-const PROBE:=preload("res://scripts/services/web_reachability_probe.gd")
+const PROBE:=preload("res://scripts/services/qa_bridge.gd")
 var root: Control
 var panel: Panel
 var heading: Label
@@ -49,6 +49,7 @@ func _ready() -> void:
 	panel=Panel.new()
 	panel.add_theme_stylebox_override("panel",_style(Color("101e30"),Color("77cdda"),2))
 	root.add_child(panel)
+	preload("res://scripts/ui/rift_frame_ornament.gd").attach(panel,true,Color("6fc4cf"),22.0)
 	heading=_label("出擊整備",20)
 	rule_label=_label("三線共用一個起始節點",12)
 	wallet=_label("",12)

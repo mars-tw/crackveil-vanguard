@@ -27,6 +27,10 @@ var enabled := true
 var cycle_protected := 0
 var last_result: Dictionary = {}
 var result_age := 99.0
+const FONT := preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
+const FORMATION_ORDER := ["wedge", "ring", "scatter"]
+const FORMATION_NAMES := {"wedge": "楔形", "ring": "圓陣", "scatter": "散兵"}
+const FORMATION_COLORS := {"wedge": Color("ffae78"), "ring": Color("91dafa"), "scatter": Color("b2ec9b")}
 
 func configure(point: Vector2, index: int) -> void:
 	anchor = point
@@ -158,6 +162,38 @@ func _draw_rune(at: Vector2, color: Color, size: float) -> void:
 	draw_colored_polygon(PackedVector2Array([at+Vector2(0,-size),at+Vector2(size*0.7,0),at+Vector2(0,size),at+Vector2(-size*0.7,0)]),Color("101b30",0.85))
 	draw_polyline(PackedVector2Array([at+Vector2(0,-size),at+Vector2(size*0.7,0),at+Vector2(0,size),at+Vector2(-size*0.7,0),at+Vector2(0,-size)]),color,1.6,true)
 
+# The danger zone itself names the formation that answers it, from the same
+# accepts() table that gates the seal; it blinks red while the squad is wrong.
+func _draw_answer(center: Vector2) -> void:
+	var accepted: Array[String] = []
+	for id in FORMATION_ORDER:
+		if GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node, kind, id):
+			accepted.append(id)
+	if accepted.is_empty():
+		return
+	var current: String = GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else ""
+	var wrong := not accepted.has(current)
+	var blink := wrong and int(clock * 4.0) % 2 == 0
+	draw_circle(center, 25, Color("08121f", 0.82))
+	draw_arc(center, 25, 0, TAU, 32, Color("ff637c") if blink else Color(FORMATION_COLORS[accepted[0]], 0.95), 2.5, true)
+	var id: String = accepted[0]
+	var color: Color = FORMATION_COLORS[id]
+	match id:
+		"wedge":
+			var tri := PackedVector2Array([center + Vector2(12, 0), center + Vector2(-8, -10), center + Vector2(-8, 10), center + Vector2(12, 0)])
+			draw_polyline(tri, color, 3, true)
+		"ring":
+			draw_arc(center, 10, 0, TAU, 24, color, 3, true)
+		_:
+			for offset in [Vector2(-8, -5), Vector2(8, -5), Vector2(0, 8)]:
+				draw_circle(center + offset, 3.5, color)
+	var names := PackedStringArray()
+	for each in accepted:
+		names.append(FORMATION_NAMES[each])
+	var text := ("需" if accepted.size() == 1 else "可用") + "／".join(names)
+	draw_string_outline(FONT, center + Vector2(-60, 44), text, HORIZONTAL_ALIGNMENT_CENTER, 120, 16, 6, Color("08121f", 0.9))
+	draw_string(FONT, center + Vector2(-60, 44), text, HORIZONTAL_ALIGNMENT_CENTER, 120, 16, Color("ff8a99") if wrong else color)
+
 func _draw() -> void:
 	if not enabled or not started or not GameManager.game_running or get_tree().paused or phase == "recovery":
 		return
@@ -189,6 +225,8 @@ func _draw() -> void:
 				var dir := -1.0 if kind == "front" or lane.get_center().x > anchor.x else 1.0
 				draw_polyline(PackedVector2Array([tip+Vector2(-dir*11,-12),tip,tip+Vector2(-dir*11,12)]),Color("101b30",0.8),6,true)
 				draw_polyline(PackedVector2Array([tip+Vector2(-dir*11,-12),tip,tip+Vector2(-dir*11,12)]),color,3,true)
+			# Answer badge sits past the chevrons, on top of the lane art.
+			_draw_answer(lane.position + Vector2(lane.size.x - 48, lane.size.y / 2))
 	else:
 		for target in targets:
 			draw_circle(target,47,Color(color,alpha))
@@ -202,3 +240,5 @@ func _draw() -> void:
 				_draw_rune(target + Vector2.from_angle(i*PI/2+PI/4) * 47.0,Color(color,edge_alpha),7.0)
 			draw_line(target-Vector2(13,0),target+Vector2(13,0),color,2,true)
 			draw_line(target-Vector2(0,13),target+Vector2(0,13),color,2,true)
+		if not targets.is_empty():
+			_draw_answer(targets[0] + Vector2(0, -78))

@@ -1,7 +1,7 @@
 extends CanvasLayer
 
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
-const WEB_REACHABILITY_PROBE := preload("res://scripts/services/web_reachability_probe.gd")
+const WEB_REACHABILITY_PROBE := preload("res://scripts/services/qa_bridge.gd")
 
 signal contract_selected(contract: Dictionary)
 signal seed_restart_requested(seed_text: String)

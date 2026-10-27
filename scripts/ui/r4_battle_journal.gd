@@ -1,7 +1,7 @@
 extends Control
 
 const FONT:=preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
-const PROBE:=preload("res://scripts/services/web_reachability_probe.gd")
+const PROBE:=preload("res://scripts/services/qa_bridge.gd")
 var entries: Array[Dictionary]=[]
 var total:=0
 var page:=0
