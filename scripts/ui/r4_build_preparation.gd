@@ -20,6 +20,10 @@ var swap_label: Label
 var portraits: Array[TextureRect]=[]
 var portrait_names: Array[Label]=[]
 var preview_portraits: Array[TextureRect]=[]
+# Lineup diagram fills the detail column with the real candidate starters.
+var lineup: Control
+var lineup_textures: Array[Texture2D]=[]
+var lineup_names: PackedStringArray=[]
 var preview_names: Array[Label]=[]
 var controls: Dictionary={}
 var tabs: Array[Button]=[]
@@ -83,6 +87,11 @@ func _ready() -> void:
 		portrait_names.append(_label("",12))
 		preview_portraits.append(_portrait())
 		preview_names.append(_label("",12))
+	lineup=Control.new()
+	lineup.name="LineupDiagram"
+	lineup.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	lineup.draw.connect(_draw_lineup)
+	panel.add_child(lineup)
 	MetaProgress.progress_changed.connect(_refresh)
 	PlayerSettings.settings_changed.connect(_layout)
 	get_viewport().size_changed.connect(_layout)
@@ -195,6 +204,13 @@ func _refresh() -> void:
 	candidate_ids=CATALOG.roster(row.id,MetaProgress.starting_equipped) if tab==0 else CATALOG.roster(MetaProgress.starting_team,row.id)
 	_fill_roster(current_ids,portraits,portrait_names,false)
 	_fill_roster(candidate_ids,preview_portraits,preview_names,true)
+	lineup_textures.clear()
+	lineup_names.clear()
+	for id in candidate_ids:
+		var hero: Resource=load("res://resources/heroes/%s.tres" % id)
+		var frames:=ANIMATION.get_sprite_frames(str(hero.get("sprite_path")))
+		lineup_textures.append(frames.get_frame_texture(&"idle",0) if frames!=null else null)
+		lineup_names.append(str(hero.get("display_name")))
 	final_label.text="現役・"+str(CATALOG.TEAMS[MetaProgress.starting_team].name)
 	preview_label.text="選後・"+str(row.name)
 	replaced_ids=[]
@@ -276,10 +292,19 @@ func _layout() -> void:
 	_place(title,12 if portrait else 24+roster_w,body_y,w if portrait else w-roster_w-12,28)
 	_place(final_label,12,roster_y,col,17)
 	_place(preview_label,20+col,roster_y,col,17)
-	var row_h:=26.0 if portrait else minf(42,maxf(22,(bottom-137-roster_y)/3))
+	var row_h:=minf(72,maxf(22,(bottom-137-roster_y)/3))
+	if portrait:
+		# Larger portraits only use space the full benefit/cost text does not need.
+		var text_need:=FONT.get_multiline_string_size(detail.text,HORIZONTAL_ALIGNMENT_LEFT,w-4,roundi(13*scale)).y+8
+		row_h=clampf((bottom-120-text_need-(roster_y+19)-25)/3.0,26.0,40.0)
+	# Portraits grow only into width the longest roster name does not need.
+	var name_need:=0.0
+	for label in portrait_names+preview_names:
+		name_need=maxf(name_need,FONT.get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,roundi(12*scale)).x)
+	var image_cap:=clampf(col-name_need-9,18.0,64.0)
 	for number in range(3):
 		var y:=roster_y+19+number*row_h
-		var image_size:=minf(34,row_h-2)
+		var image_size:=minf(minf(64,row_h-2),image_cap)
 		_place(portraits[number],12,y,image_size,image_size)
 		_place(portrait_names[number],16+image_size,y,col-image_size-5,image_size)
 		_place(preview_portraits[number],20+col,y,image_size,image_size)
@@ -288,9 +313,38 @@ func _layout() -> void:
 	var swap_y:=roster_y+19+3*row_h
 	_place(swap_label,12,swap_y,w if portrait else roster_w,22)
 	var detail_y:=swap_y+25 if portrait else body_y+32
-	_place(detail,12 if portrait else 24+roster_w,detail_y,w if portrait else w-roster_w-12,maxf(28,bottom-120-detail_y))
+	var detail_w:=w if portrait else w-roster_w-12
+	var detail_room:=maxf(28,bottom-120-detail_y)
+	var detail_h:=minf(detail_room,FONT.get_multiline_string_size(detail.text,HORIZONTAL_ALIGNMENT_LEFT,detail_w-4,roundi(13*scale)).y+8)
+	_place(detail,12 if portrait else 24+roster_w,detail_y,detail_w,detail_room if detail_room-detail_h<110 else detail_h)
+	var lineup_y:=detail_y+detail_h+6
+	var lineup_h:=bottom-124-lineup_y
+	lineup.visible=lineup_h>=110
+	_place(lineup,12 if portrait else 24+roster_w,lineup_y,detail_w,minf(lineup_h,220))
+	lineup.queue_redraw()
 	_place(state_label,12 if portrait else 24+roster_w,bottom-118,w if portrait else w-roster_w-12,20)
 	_publish()
+
+func _draw_lineup() -> void:
+	var box:=Rect2(Vector2.ZERO,lineup.size)
+	lineup.draw_rect(box,Color("0b1626"),true)
+	lineup.draw_rect(box,Color("355a6e"),false,1.0)
+	var scale:=PlayerSettings.get_ui_scale_multiplier()
+	var font_size:=roundi(12*scale)
+	lineup.draw_string(FONT,Vector2(10,8+font_size),"選後站位（隊長在前，下一場實際先發）",HORIZONTAL_ALIGNMENT_LEFT,box.size.x-20,font_size,Color("9fc6d4"))
+	var top:=16.0+font_size
+	var cell:=minf((box.size.y-top-8-font_size)*0.62,box.size.x*0.24)
+	var centers:=[Vector2(box.size.x*0.5,top+cell*0.5),Vector2(box.size.x*0.5-cell*1.15,top+cell*0.95),Vector2(box.size.x*0.5+cell*1.15,top+cell*0.95)]
+	for number in range(mini(3,lineup_textures.size())):
+		var center: Vector2=centers[number]
+		var incoming:=not current_ids.has(candidate_ids[number])
+		var frame:=Rect2(center-Vector2(cell,cell)*0.5,Vector2(cell,cell))
+		lineup.draw_rect(frame,Color("14283b"),true)
+		lineup.draw_rect(frame,Color("ffdc82") if incoming else Color("77cdda"),false,2.0 if incoming else 1.0)
+		if lineup_textures[number]!=null:
+			lineup.draw_texture_rect(lineup_textures[number],frame.grow(-3),false)
+		var tag:=("先發 " if incoming else "")+lineup_names[number]
+		lineup.draw_string(FONT,Vector2(frame.position.x-20,frame.end.y+font_size+2),tag,HORIZONTAL_ALIGNMENT_CENTER,cell+40,font_size,Color("ffdc82") if incoming else Color("eaf2f3"))
 
 func _place(control: Control,x: float,y: float,w: float,h: float) -> void:
 	control.position=Vector2(x,y)

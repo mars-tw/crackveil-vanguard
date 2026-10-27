@@ -995,9 +995,12 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO, force_h
 	if squad_manager != null and squad_manager.has_active_bond("bond_guard_echo"):
 		var multiplier: float = GameManager.get_incoming_damage_multiplier(self)
 		var unbonded: float = GameManager.get_incoming_damage_multiplier(self,false)
-		GameManager.bond_benefits.prevented += maxf(0,amount*(unbonded-multiplier))
 		var hp_without_guard := minf(current_hp,maxf(0,amount*unbonded-shield_before))
 		var hp_with_guard := minf(current_hp,maxf(0,final_incoming-shield_before))
+		# Count reduction only inside the HP + shield that could really be lost,
+		# so overkill hits never inflate the bond ledger.
+		var pool := current_hp + shield_before
+		GameManager.bond_benefits.prevented += maxf(0,minf(pool,amount*unbonded)-minf(pool,final_incoming))
 		GameManager.record_support("orbit_guard",0,maxf(0,hp_without_guard-hp_with_guard))
 		GameManager.bond_benefits.triggers += 1
 	current_hp = max(current_hp - remaining_damage, 0.0)
@@ -1006,7 +1009,7 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO, force_h
 	var number_position := global_position + Vector2(0.0, -30.0)
 	if source_position != Vector2.ZERO:
 		number_position += (global_position - source_position).normalized() * 8.0
-	EntityFactory.spawn_damage_number(final_incoming, number_position, Color(1.0, 0.28, 0.22))
+	EntityFactory.spawn_damage_number(final_incoming, number_position, Color(1.0, 0.28, 0.22), 0, "", true)
 	if visual != null and visual.has_method("play_hurt"):
 		var heavy_reaction := remaining_damage >= max_hp * 0.12 or (force_heavy_reaction and remaining_damage > 0.0)
 		visual.call("play_hurt", source_position, heavy_reaction)

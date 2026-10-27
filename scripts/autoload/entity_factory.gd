@@ -76,6 +76,7 @@ var enemy_simplified_death_animation_total: int = 0
 var next_enemy_spawn_token: int = 1
 var enemy_group_scan_count: int = 0
 var active_damage_numbers: Array[Node] = []
+var readable_number_skips: int = 0
 var active_enemy_projectiles: Array[Node] = []
 var active_fork_projectiles: Array[Node] = []
 var active_hazard_zones: Array[Node] = []
@@ -148,6 +149,7 @@ func initialize_for_arena(arena: Node) -> void:
 	enemy_group_scan_count = 0
 	enemy_projectile_reclaims = 0
 	fork_projectile_cap_skips = 0
+	readable_number_skips = 0
 	hazard_zone_reclaims = 0
 	rift_construct_reclaims = 0
 	explosion_spawn_requests = 0
@@ -495,17 +497,23 @@ func magnetize_xp_near(world_position: Vector2, radius: float) -> int:
 	return magnetized_count
 
 
-func spawn_damage_number(value: Variant, world_position: Vector2, number_color: Color = Color.WHITE, font_size_override: int = 0) -> Node:
+# priority numbers (damage the squad takes) bypass the readability budget;
+# minor numbers merge into a same-kind neighbour or are skipped once the
+# screen already carries the readable maximum. Display only, never damage.
+func spawn_damage_number(value: Variant, world_position: Vector2, number_color: Color = Color.WHITE, font_size_override: int = 0, prefix: String = "", priority: bool = false) -> Node:
 	if PlayerSettings != null and not bool(PlayerSettings.get("damage_numbers_enabled")):
 		return null
 	_compact_active_damage_numbers()
 	var viewport_size := _viewport_size_for_lod()
 	var effective_cap := MOBILE_TUNING.damage_number_cap(viewport_size, DAMAGE_NUMBER_CAP)
-	var merged := _try_merge_damage_number(value, world_position, number_color, viewport_size, effective_cap)
+	var merged := _try_merge_damage_number(value, world_position, number_color, viewport_size, effective_cap, prefix)
 	if merged != null:
 		return merged
 	if active_damage_numbers.size() >= effective_cap:
 		return null
+	if not priority and active_damage_numbers.size() >= MOBILE_TUNING.readable_damage_number_cap(viewport_size):
+		readable_number_skips += 1
+		return _try_merge_damage_number(value, world_position, number_color, viewport_size, effective_cap, prefix, 2.6)
 	var number := _acquire("damage_number")
 	if number == null:
 		return null
@@ -515,7 +523,8 @@ func spawn_damage_number(value: Variant, world_position: Vector2, number_color: 
 		"value": value,
 		"position": world_position,
 		"color": number_color,
-		"font_size": effective_font_size
+		"font_size": effective_font_size,
+		"prefix": prefix
 	})
 	return number
 
@@ -829,6 +838,8 @@ func get_pool_stats() -> Dictionary:
 	stats["enemy_group_scans"] = enemy_group_scan_count
 	stats["enemy_projectile_reclaims"] = enemy_projectile_reclaims
 	stats["fork_projectile_cap_skips"] = fork_projectile_cap_skips
+	stats["readable_number_skips"] = readable_number_skips
+	stats["active_damage_numbers"] = active_damage_numbers.size()
 	stats["hazard_zone_reclaims"] = hazard_zone_reclaims
 	stats["rift_construct_reclaims"] = rift_construct_reclaims
 	stats["rift_construct_live"] = active_rift_constructs.size()
@@ -956,15 +967,17 @@ func reclaim_regular_enemy_for_elite(reference_position: Vector2) -> bool:
 	return true
 
 
-func _try_merge_damage_number(value: Variant, world_position: Vector2, number_color: Color, viewport_size: Vector2, effective_cap: int) -> Node:
+func _try_merge_damage_number(value: Variant, world_position: Vector2, number_color: Color, viewport_size: Vector2, effective_cap: int, prefix: String = "", radius_scale: float = 1.0) -> Node:
 	if not (typeof(value) == TYPE_FLOAT or typeof(value) == TYPE_INT):
 		return null
-	var merge_radius := MOBILE_TUNING.damage_number_merge_radius(viewport_size, DAMAGE_NUMBER_MERGE_RADIUS, active_damage_numbers.size(), effective_cap)
+	var merge_radius := MOBILE_TUNING.damage_number_merge_radius(viewport_size, DAMAGE_NUMBER_MERGE_RADIUS, active_damage_numbers.size(), effective_cap) * radius_scale
 	var merge_age := MOBILE_TUNING.damage_number_merge_age(viewport_size, DAMAGE_NUMBER_MERGE_AGE)
 	var merge_target: Node = null
 	var best_distance_squared := INF
 	for number in active_damage_numbers:
 		if number == null or not is_instance_valid(number):
+			continue
+		if str(number.get("prefix")) != prefix:
 			continue
 		if number.has_method("can_merge") and number.can_merge(world_position, merge_radius, merge_age):
 			var number_position := (number as Node2D).global_position if number is Node2D else world_position

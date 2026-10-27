@@ -6,6 +6,7 @@ const ICON_XP := preload("res://assets/art/icon_xp.png")
 const ICON_HEALTH := preload("res://assets/art/icon_health.png")
 const ICON_GOLD := preload("res://assets/art/icon_gold.png")
 const UPGRADE_PREVIEW := preload("res://scripts/services/upgrade_preview.gd")
+const PROBE := preload("res://scripts/services/web_reachability_probe.gd")
 const R33_ANIMATION := preload("res://scripts/animation/true_animation_library.gd")
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 
@@ -115,11 +116,13 @@ func show_options(options: Array) -> void:
 	_apply_responsive_layout()
 	root.visible = true
 	call_deferred("_animate_cards_in")
+	call_deferred("_publish_probe")
 
 
 func _on_upgrade_pressed(upgrade: Dictionary) -> void:
 	_reset_pending_mobile_confirm()
 	root.visible = false
+	_publish_probe()
 	upgrade_selected.emit(upgrade)
 
 
@@ -132,9 +135,27 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+# Read-only QA reachability receipt for the card rects and shown card text.
+func _publish_probe() -> void:
+	if root == null or not is_inside_tree():
+		return
+	var controls := {}
+	var texts: Array[String] = []
+	for index in range(option_buttons.size()):
+		var button := option_buttons[index]
+		if button == null or not is_instance_valid(button):
+			continue
+		controls["card_%d" % index] = button
+		var description := button.get_node_or_null("CardDescription") as Label
+		var card_title := button.get_node_or_null("CardTitle") as Label
+		texts.append((card_title.text if card_title != null else "") + "|" + (description.text if description != null else ""))
+	PROBE.publish("level_up", MobileTuning.ui_layout_size(get_viewport().get_visible_rect().size), controls, {"visible": root.visible, "cards": texts})
+
+
 func hide_screen() -> void:
 	if root != null:
 		root.visible = false
+		_publish_probe()
 	_reset_pending_mobile_confirm()
 
 
@@ -371,7 +392,7 @@ func _apply_responsive_layout() -> void:
 	var mobile := MOBILE_TUNING.use_mobile_ui(viewport_size)
 	var outer_margin := 12.0 if mobile else 28.0
 	var panel_width: float = min(viewport_size.x - outer_margin * 2.0, 920.0 if not portrait else 620.0)
-	var panel_height: float = min(viewport_size.y - (outer_margin * 2.0 if mobile else 54.0), 420.0 if not portrait else 790.0)
+	var panel_height: float = min(viewport_size.y - (outer_margin * 2.0 if mobile else 54.0), 476.0 if not portrait else 790.0)
 	if mobile:
 		panel_height = viewport_size.y - outer_margin * 2.0
 
@@ -407,7 +428,7 @@ func _apply_responsive_layout() -> void:
 	var card_width: float = panel_width - side_padding if portrait else max(190.0, (panel_width - side_padding - 36.0) / 3.0)
 	var card_scroll_top := card_scroll.offset_top if card_scroll != null else title_label.offset_bottom + 14.0
 	var available_card_height := panel_height - card_scroll_top - (20.0 if mobile else 26.0)
-	var card_height: float = 270.0 if mobile and portrait else 244.0 if portrait else clamp(available_card_height, 224.0 if not mobile else 224.0, 284.0 if not mobile else 280.0)
+	var card_height: float = 270.0 if mobile and portrait else 244.0 if portrait else clamp(available_card_height, 224.0 if not mobile else 224.0, 340.0 if not mobile else 280.0)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)

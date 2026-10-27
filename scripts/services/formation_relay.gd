@@ -24,14 +24,48 @@ var wrong_timer := 0.0
 var wrong_penalties := 0
 var counter_timer := 0.0
 var feedback_timer := 0.0
+# Seal-success presentation at the closed anchor; never feeds combat.
+var seal_flash_time := 99.0
+var seal_flash_at := Vector2.ZERO
+var seal_flash_text := ""
+const SEAL_FLASH_SECONDS := 2.6
 var label_layer: CanvasLayer
 var marker_label: Label
+var equipment_details: Control
 
 func required_formation() -> String:
 	if is_instance_valid(pressure):
 		if GameManager.active_starting_node=="spec_escort" and pressure.kind=="front": return "ring"
 		if GameManager.active_starting_node=="spec_collect" and pressure.kind=="pincer": return "scatter"
 	return str(pressure.COUNTERS[pressure.kind]) if is_instance_valid(pressure) else ORDER[mini(step,2)]
+
+func accepted_formations() -> Array[String]:
+	var accepted: Array[String] = []
+	if not is_instance_valid(pressure):
+		return accepted
+	for id in ORDER:
+		if GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,id):
+			accepted.append(id)
+	return accepted
+
+func accepted_text() -> String:
+	var names := PackedStringArray()
+	for id in accepted_formations():
+		names.append(NAMES[ORDER.find(id)])
+	return "可用：%s" % "／".join(names) if names.size() > 1 else "需%s" % (names[0] if names.size() == 1 else NAMES[ORDER.find(required_formation())])
+
+func switch_hint() -> String:
+	return "點陣形鈕" if MobileTuning.has_confirmed_touch() else "按 Q 切換"
+
+func consequence_text(result: Dictionary) -> String:
+	if bool(result.get("correct",false)):
+		return "陣形正確・站進封隙累積封合"
+	# The wave was lost to the wrong formation, but the squad may already have
+	# switched; never tell the player to switch to what they already hold.
+	var current: String = GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else ""
+	if current != "" and accepted_formations().has(current):
+		return "已換%s・站進封隙重新封合" % NAMES[ORDER.find(current)]
+	return "%s才能封合・%s" % [accepted_text(),switch_hint()]
 
 func is_open() -> bool:
 	return not completed and GameManager.elapsed_time >= OPEN_TIMES[mini(step,2)]
@@ -44,17 +78,24 @@ func next_action() -> String:
 		return "陣記穩定中・%d 秒" % ceili(OPEN_TIMES[mini(step,2)]-GameManager.elapsed_time)
 	if wrong_timer > 0:
 		var needed_id:=str(pressure.COUNTERS[pressure.kind]) if is_instance_valid(pressure) else "wedge"
-		return "錯陣反噬・進度歸零・需%s" % NAMES[ORDER.find(needed_id)]
+		var current: String=GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else ""
+		if is_instance_valid(pressure) and GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,current):
+			return "錯陣反噬・進度歸零・已換%s，重新封合" % NAMES[maxi(0,ORDER.find(current))]
+		return "錯陣反噬・進度歸零・需%s・%s" % [NAMES[ORDER.find(needed_id)],switch_hint()]
 	if is_instance_valid(pressure) and pressure.started and pressure.phase in ["warning","active"]:
 		var needed:=required_formation()
 		var selected: String=GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else "wedge"
-		var advice: String="陣形正確" if GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,selected) else "請換%s" % NAMES[ORDER.find(needed)]
-		return "%s・建議%s・%s" % [pressure.status_text(),NAMES[ORDER.find(needed)],advice]
+		if GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,selected):
+			var label: String = accepted_text() if accepted_formations().size() > 1 else "建議%s" % NAMES[ORDER.find(needed)]
+			return "%s・%s・陣形正確" % [pressure.status_text(),label]
+		return "%s・%s・%s" % [pressure.status_text(),accepted_text(),switch_hint()]
 	if hold > 0:
 		return "到位 %d 人（需 2）・封合 %d%%" % [settled,int(hold/HOLD_SECONDS*100)]
 	if counter_timer>0:
 		var label: String="放棄治療・反擊增傷" if GameManager.active_starting_node=="spec_prepare" else "對陣反擊增傷"
 		return "%s +20%%・剩 %d 秒" % [label,ceili(counter_timer)]
+	if is_instance_valid(pressure) and pressure.started and is_instance_valid(GameManager.squad_manager) and not GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,GameManager.squad_manager.get_formation_id()):
+		return "%s・%s・%s" % [pressure.status_text(),accepted_text(),switch_hint()]
 	return pressure.status_text()
 
 func _update_label() -> void:
@@ -62,7 +103,14 @@ func _update_label() -> void:
 		return
 	var picker := marker_label.get_parent().get_node_or_null("FormationPicker")
 	var choosing: bool = is_instance_valid(picker) and picker.visible
-	marker_label.visible = GameManager.game_running and GameManager.run_mode=="campaign" and not completed and not get_tree().paused and not choosing
+	# The world verdict and seal-success lines take the marker's place while shown.
+	var readout: bool = seal_flash_time < SEAL_FLASH_SECONDS or (is_instance_valid(pressure) and pressure.result_age < 2.4 and not pressure.last_result.is_empty())
+	# An open equipment detail panel owns that screen area; the marker yields.
+	if not is_instance_valid(equipment_details):
+		equipment_details = marker_label.get_parent().find_child("EquipmentDetails", true, false) as Control
+	if is_instance_valid(equipment_details) and equipment_details.is_visible_in_tree():
+		readout = true
+	marker_label.visible = GameManager.game_running and GameManager.run_mode=="campaign" and not completed and not get_tree().paused and not choosing and not readout
 	if not marker_label.visible:
 		return
 	# Reassert the CSS font after the HUD's general accessibility pass.
@@ -129,7 +177,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_update_label()
-	visible = GameManager.run_mode == "campaign" and GameManager.game_running and not completed
+	visible = GameManager.run_mode == "campaign" and GameManager.game_running and (not completed or seal_flash_time < SEAL_FLASH_SECONDS)
 	if get_tree().paused or not GameManager.game_running:
 		return
 	if GameManager.run_mode!="campaign":
@@ -142,6 +190,7 @@ func _tick_feedback(delta: float) -> void:
 	wrong_timer = maxf(0,wrong_timer-delta)
 	counter_timer = maxf(0,counter_timer-delta)
 	feedback_timer = maxf(0,feedback_timer-delta)
+	seal_flash_time += maxf(0,delta)
 
 func advance(delta: float) -> void:
 	_tick_feedback(delta)
@@ -198,6 +247,9 @@ func advance(delta: float) -> void:
 	counter_timer = 5.0
 	if GameManager.active_starting_node=="spec_prepare": counter_timer=10.0
 	feedback_timer = 1.4
+	seal_flash_time = 0.0
+	seal_flash_at = anchor
+	seal_flash_text = seal_text(step+1)
 	GameManager.request_combat_impact(5.0,0.035)
 	EntityFactory.spawn_death_burst(anchor,Color("ffdcac"),3.4,"gold_rain")
 	if GameManager.active_starting_node=="spec_prepare":
@@ -221,6 +273,11 @@ func advance(delta: float) -> void:
 		GameManager.show_toast("封隙 %d/3｜放棄治療・反擊傷害 +20%%，10 秒" % step if GameManager.active_starting_node=="spec_prepare" else "封隙 %d/3｜對陣整補 +8・反擊傷害 +20%%，5 秒" % step, "battle", true)
 	if AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("level_up")
+
+func seal_text(count: int) -> String:
+	if GameManager.active_starting_node=="spec_prepare":
+		return "封合 %d/3・放棄治療・反擊 +20%% 10 秒" % count
+	return "封合 %d/3・整補 +8・反擊 +20%% 5 秒" % count
 
 func result_text(result: Dictionary) -> String:
 	var name: String = NAMES[maxi(0,ORDER.find(str(result.formation)))]
@@ -256,8 +313,37 @@ func probe() -> Dictionary:
 	var captain_screen: Vector2 = get_viewport().get_canvas_transform() * GameManager.player.global_position if is_instance_valid(GameManager.player) else Vector2.ZERO
 	return {"step": step,"pressure":pressure.kind,"phase":pressure.phase,"cycles":pressure.cycles,"wrong":wrong_penalties,"required":required_formation(),"marker":marker_text(),"open":is_open(), "completed": completed, "hold": hold, "settled": settled, "distance": GameManager.player.global_position.distance_to(anchor) if is_instance_valid(GameManager.player) else -1.0, "anchor_x": screen.x, "anchor_y": screen.y, "captain_x":captain_screen.x, "captain_y":captain_screen.y, "saved": reward_saved}
 
+# Flip world-space readouts below the seal when the seal sits under the top HUD.
+func _label_below(point: Vector2) -> bool:
+	# Top of the two-line readout above the seal, against the top HUD band.
+	var screen: Vector2 = get_viewport().get_canvas_transform() * (point - Vector2(0, CAPTAIN_RADIUS + 64))
+	return screen.y < get_viewport_rect().size.y * 0.27
+
+func _draw_seal_flash() -> void:
+	if seal_flash_time >= SEAL_FLASH_SECONDS or seal_flash_text == "":
+		return
+	var gold := Color("ffd98a")
+	var fade := clampf((SEAL_FLASH_SECONDS - seal_flash_time) / 0.6, 0.0, 1.0)
+	var grow := 1.0 + 1.1 * smoothstep(0.0, 0.7, seal_flash_time)
+	var edge := CAPTAIN_RADIUS * grow
+	var ring := PackedVector2Array([seal_flash_at+Vector2(0,-edge),seal_flash_at+Vector2(edge,0),seal_flash_at+Vector2(0,edge),seal_flash_at+Vector2(-edge,0),seal_flash_at+Vector2(0,-edge)])
+	draw_polyline(ring,Color("08121f",0.8*fade),9,true)
+	draw_polyline(ring,Color(gold,fade),4,true)
+	var inner := CAPTAIN_RADIUS * 0.62
+	draw_colored_polygon(PackedVector2Array([seal_flash_at+Vector2(0,-inner),seal_flash_at+Vector2(inner,0),seal_flash_at+Vector2(0,inner),seal_flash_at+Vector2(-inner,0)]),Color(gold,0.42*fade))
+	var rise := 10.0 * minf(1.0, seal_flash_time / 0.4)
+	var at := seal_flash_at + (Vector2(-230, CAPTAIN_RADIUS + 70 - rise) if _label_below(seal_flash_at) else Vector2(-230, -CAPTAIN_RADIUS - 52 - rise))
+	var width: float = FONT.get_string_size(seal_flash_text,HORIZONTAL_ALIGNMENT_LEFT,-1,22).x
+	draw_rect(Rect2(at+Vector2(230-width/2-12,-25),Vector2(width+24,34)),Color(0.05,0.04,0.02,0.82*fade),true)
+	draw_rect(Rect2(at+Vector2(230-width/2-12,-25),Vector2(width+24,34)),Color(gold,0.9*fade),false,2,true)
+	draw_string_outline(FONT,at,seal_flash_text,HORIZONTAL_ALIGNMENT_CENTER,460,22,7,Color(0.03,0.03,0.02,0.9*fade))
+	draw_string(FONT,at,seal_flash_text,HORIZONTAL_ALIGNMENT_CENTER,460,22,Color(gold,fade))
+
 func _draw() -> void:
-	if completed or not is_instance_valid(GameManager.player):
+	if not is_instance_valid(GameManager.player):
+		return
+	if completed:
+		_draw_seal_flash()
 		return
 	var color: Color = COLORS[step]
 	# Four etched corners: task marker, never a defensive circle.
@@ -294,15 +380,23 @@ func _draw() -> void:
 	if wrong_timer > 0:
 		draw_line(anchor-Vector2(23,23),anchor+Vector2(23,23),Color("ff637c"),5,true)
 		draw_line(anchor+Vector2(23,-23),anchor+Vector2(-23,23),Color("ff637c"),5,true)
-	if is_instance_valid(pressure) and pressure.result_age < 2.4 and not pressure.last_result.is_empty():
+	if is_instance_valid(pressure) and pressure.result_age < 2.4 and not pressure.last_result.is_empty() and seal_flash_time >= SEAL_FLASH_SECONDS:
 		var verdict := result_text(pressure.last_result)
 		var good: bool = bool(pressure.last_result.correct) and (int(pressure.last_result.hit) == 0 or int(pressure.last_result.protected) > 0)
 		var fade := clampf((2.4 - pressure.result_age) / 0.5, 0.0, 1.0)
-		var at := anchor + Vector2(-140, -edge - 34 - 14.0 * minf(1.0, pressure.result_age / 0.4))
+		var lift := 14.0 * minf(1.0, pressure.result_age / 0.4)
+		var at := anchor + (Vector2(-140, edge + 44 - lift) if _label_below(anchor) else Vector2(-140, -edge - 34 - lift))
 		var text_width: float = FONT.get_string_size(verdict,HORIZONTAL_ALIGNMENT_LEFT,-1,20).x
 		draw_rect(Rect2(at+Vector2(140-text_width/2-10,-22),Vector2(text_width+20,30)),Color(0.03,0.05,0.09,0.72*fade),true)
 		draw_string_outline(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,7,Color(0.03,0.05,0.09,0.9*fade))
 		draw_string(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,Color(Color("bdf5a8") if good else Color("ffa0a8"),fade))
+		# Second line: what this verdict means for the seal under the same rule.
+		var consequence := consequence_text(pressure.last_result)
+		var sub_at := at + Vector2(0, 26)
+		var sub_width: float = FONT.get_string_size(consequence,HORIZONTAL_ALIGNMENT_LEFT,-1,16).x
+		draw_rect(Rect2(sub_at+Vector2(140-sub_width/2-8,-17),Vector2(sub_width+16,23)),Color(0.03,0.05,0.09,0.66*fade),true)
+		draw_string_outline(FONT,sub_at,consequence,HORIZONTAL_ALIGNMENT_CENTER,280,16,6,Color(0.03,0.05,0.09,0.9*fade))
+		draw_string(FONT,sub_at,consequence,HORIZONTAL_ALIGNMENT_CENTER,280,16,Color(Color("e8f7d8") if bool(pressure.last_result.correct) else Color("ffd0a0"),fade))
 	var captain: Node2D = GameManager.player
 	var direction := captain.global_position.direction_to(anchor)
 	if captain.global_position.distance_to(anchor) > CAPTAIN_RADIUS:
@@ -310,3 +404,5 @@ func _draw() -> void:
 		draw_line(tip - direction * 18, tip, color, 3, true)
 		draw_line(tip, tip - direction.rotated(0.65) * 12, color, 3, true)
 		draw_line(tip, tip - direction.rotated(-0.65) * 12, color, 3, true)
+	# Drawn last so the next seal's marker never covers the success line.
+	_draw_seal_flash()

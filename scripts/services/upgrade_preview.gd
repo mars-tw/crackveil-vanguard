@@ -16,13 +16,70 @@ static func describe(option: Dictionary) -> String:
 	var benefit := benefit_text(option)
 	var progress := progress_text(option)
 	var lines := PackedStringArray()
+	var target := target_text(option)
+	if target != "":
+		lines.append(target)
 	if benefit != "":
 		lines.append(benefit)
 	if description != "" and description != benefit and str(option.get("upgrade_kind", "")) not in ["weapon_damage", "weapon_cooldown", "weapon_projectiles"]:
 		lines.append(description)
 	if progress != "":
 		lines.append(progress)
+	var link := synergy_text(option)
+	if link != "":
+		lines.append(link)
 	return "\n".join(lines)
+
+
+const FORMATION_NAMES := {"wedge": "楔形", "ring": "圓陣", "scatter": "散兵"}
+
+# Who the card applies to, read from the live roster.
+static func target_text(option: Dictionary) -> String:
+	var id := str(option.get("id", ""))
+	if id in ["move_speed", "max_hp", "pickup_radius"]:
+		return "適用：隊長"
+	if id == "upgrade_hero_weapon":
+		return "適用：%s" % _hero_name(str(option.get("hero_id", "")))
+	return ""
+
+
+# Links to the real bond and bond × formation resonance tables; read only.
+static func synergy_text(option: Dictionary) -> String:
+	if str(option.get("id", "")) != "upgrade_hero_weapon":
+		return ""
+	var squad: Node = GameManager.squad_manager
+	if squad == null or not is_instance_valid(squad):
+		return ""
+	var hero_id := str(option.get("hero_id", ""))
+	# Tables come from the squad script itself, so stand-in squads stay safe.
+	var tables: GDScript = load("res://scripts/heroes/squad_manager.gd")
+	for definition in tables.BOND_DEFINITIONS:
+		var ids: Array = definition.get("hero_ids", [])
+		if not ids.has(hero_id):
+			continue
+		var bond_id := str(definition.get("id", ""))
+		var bond_name := str(definition.get("name", ""))
+		var resonance: Dictionary = tables.BOND_FORMATION_RESONANCE.get(bond_id, {})
+		var formation := str(resonance.get("formation", ""))
+		if squad.has_method("has_active_bond") and squad.has_active_bond(bond_id):
+			if formation == "":
+				return "連動：羈絆「%s」已成立" % bond_name
+			var current: String = squad.get_formation_id() if squad.has_method("get_formation_id") else ""
+			return "連動：「%s」已成立・%s時%s%s" % [bond_name, FORMATION_NAMES.get(formation, formation), str(resonance.get("short", "")).get_slice(" ", 1), "（目前）" if current == formation else ""]
+		var partner := ""
+		for other in ids:
+			if str(other) != hero_id:
+				partner = str(other)
+		return "連動：配%s成立「%s」" % [_hero_name(partner), bond_name]
+	return ""
+
+
+static func _hero_name(hero_id: String) -> String:
+	var path := "res://resources/heroes/%s.tres" % hero_id
+	if hero_id != "" and ResourceLoader.exists(path):
+		var data: Resource = load(path)
+		return str(data.get("display_name"))
+	return hero_id
 
 
 static func benefit_text(option: Dictionary) -> String:

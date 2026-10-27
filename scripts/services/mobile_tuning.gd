@@ -21,6 +21,9 @@ const MOBILE_BACKGROUND_DECOR_MULTIPLIER := 0.72
 const MOBILE_DAMAGE_NUMBER_MERGE_RADIUS := 104.0
 const MOBILE_DAMAGE_NUMBER_MERGE_AGE := 0.40
 const MOBILE_DAMAGE_NUMBER_CAP := 30
+# Readability budget: how many minor world numbers may be on screen together.
+const READABLE_DAMAGE_NUMBERS := 8
+const MOBILE_READABLE_DAMAGE_NUMBERS := 6
 const MOBILE_HAZARD_VISUAL_REDRAW_MULTIPLIER := 1.55
 const MOBILE_CORPSE_GHOST_CAP := 12
 const MOBILE_DEATH_BURST_CAP := 8
@@ -318,6 +321,10 @@ static func damage_number_merge_radius(viewport_size: Vector2, base_radius: floa
 
 static func damage_number_merge_age(viewport_size: Vector2, base_age: float, force_mobile: bool = false) -> float:
 	return max(base_age, MOBILE_DAMAGE_NUMBER_MERGE_AGE) if mobile_lod_enabled(viewport_size, force_mobile) else base_age
+
+
+static func readable_damage_number_cap(viewport_size: Vector2, force_mobile: bool = false) -> int:
+	return MOBILE_READABLE_DAMAGE_NUMBERS if mobile_lod_enabled(viewport_size, force_mobile) else READABLE_DAMAGE_NUMBERS
 
 
 static func damage_number_cap(viewport_size: Vector2, base_cap: int, force_mobile: bool = false) -> int:

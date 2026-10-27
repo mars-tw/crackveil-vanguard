@@ -1098,10 +1098,10 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 	var severity := final_amount / maxf(1.0, max_hp)
 	var heavy_hit := severity >= 0.4
 	if last_hit_critical:
-		EntityFactory.spawn_damage_number("爆擊 %d" % roundi(final_amount), number_position, Color("d8d9ed"), 22)
+		EntityFactory.spawn_damage_number(final_amount, number_position, Color("ffd57a"), 22, "爆擊 ")
 		GameManager.record_critical_hit(global_position, source_position, final_amount)
 	else:
-		EntityFactory.spawn_damage_number(final_amount, number_position, Color("ccd9e0") if heavy_hit else Color("a9c1cb"), 18 if heavy_hit else 15)
+		EntityFactory.spawn_damage_number(final_amount, number_position, Color("ccd9e0") if heavy_hit else Color("8ea4b0"), 17 if heavy_hit else 13)
 	COMBAT_FEEDBACK.report_hit(global_position, source_position, severity, hp <= 0.0, is_elite or is_boss)
 	hp_bar_timer = 0.55
 	_trigger_hit_micro_feedback()

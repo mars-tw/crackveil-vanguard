@@ -7,6 +7,7 @@ const FONT:=preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 const CATALOG:=preload("res://scripts/services/starting_build_catalog.gd")
 const PROBE:=preload("res://scripts/services/web_reachability_probe.gd")
 const SUPPORT_MODEL:=preload("res://scripts/services/support_report_model.gd")
+const ANIMATION:=preload("res://scripts/animation/true_animation_library.gd")
 var victory:=false
 var root: Control
 var panel: Panel
@@ -28,6 +29,10 @@ var displayed_summary: Dictionary={}
 var controls: Dictionary={}
 var tabs: Array[Button]=[]
 var cards: Array[Label]=[]
+# Portrait + measured bars behind each card; values come from the same rows.
+var card_art: Array[Control]=[]
+var card_data: Array[Dictionary]=[{},{}]
+var portrait_cache: Dictionary={}
 var tab:=0
 var page:=0
 var rows: Array=[]
@@ -71,6 +76,14 @@ func _ready() -> void:
 		button.pressed.connect(func():tab=number;page=0;_refresh())
 		tabs.append(button)
 	for number in range(2):cards.append(_label(14))
+	for number in range(2):
+		var art:=Control.new()
+		art.name="CardArt%d" % number
+		art.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		art.draw.connect(_draw_card_art.bind(number))
+		panel.add_child(art)
+		panel.move_child(art,cards[number].get_index())
+		card_art.append(art)
 	_button("previous","上一頁").pressed.connect(func():page=posmod(page-1,_page_count());_refresh())
 	_button("next","下一頁").pressed.connect(func():page=posmod(page+1,_page_count());_refresh())
 	copy_seed_button=_button("copy","下一關" if victory else "複製種子")
@@ -182,6 +195,7 @@ func _refresh() -> void:
 	for number in range(2):
 		var i:=page*page_capacity+number
 		cards[number].text=""
+		card_data[number]={}
 		cards[number].visible=number<page_capacity
 		if number>=page_capacity:continue
 		if tab==2:
@@ -190,13 +204,79 @@ func _refresh() -> void:
 			var displayed_rows: Array=support_rows if tab==1 else rows
 			if i>=displayed_rows.size():continue
 			var row: Dictionary=displayed_rows[i]
+			card_data[number]=_card_visual(row,displayed_rows)
 			cards[number].text=str(row.get("name",row.get("id","隊員")))+"\n"
 			if tab==0:cards[number].text+="傷害 %d HP・擊殺 %d\n承傷 %d HP" % [row.get("damage",0),row.get("kills",0),row.get("taken",0)]
 			# One header line keeps the full zero-support roster inside its card.
 			elif str(row.get("id",""))=="support_zero_group":cards[number].text=str(row.get("name","未觸發隊員"))+"（回復／減傷皆 0 HP）\n"+"、".join(row.get("member_names",[]))
-			else:cards[number].text+="個人總計（含羈絆）・回復 %d HP・減傷 %d HP" % [row.get("healing",0),row.get("prevented",0)]
+			else:cards[number].text+="個人總計（含羈絆）\n回復 %d HP・減傷 %d HP" % [row.get("healing",0),row.get("prevented",0)]
 	for number in range(3):tabs[number].modulate=Color("ffdc82") if tab==number else Color.WHITE
 	_apply_responsive_layout()
+
+func _portrait_size(card_h: float) -> float:
+	return clampf(card_h-14.0,30.0,64.0)
+
+func _portrait(hero_id: String) -> Texture2D:
+	if portrait_cache.has(hero_id):return portrait_cache[hero_id]
+	var path:="res://resources/heroes/%s.tres" % hero_id
+	var texture: Texture2D=null
+	if hero_id!="" and ResourceLoader.exists(path):
+		var hero: Resource=load(path)
+		var frames:=ANIMATION.get_sprite_frames(str(hero.get("sprite_path")))
+		texture=frames.get_frame_texture(&"idle",0) if frames!=null else null
+	portrait_cache[hero_id]=texture
+	return texture
+
+func _card_visual(row: Dictionary,displayed_rows: Array) -> Dictionary:
+	var ids: Array=row.get("member_ids",[]) if str(row.get("id",""))=="support_zero_group" else [str(row.get("id",""))]
+	var bars: Array=[]
+	if tab==0:
+		var top_damage:=1.0
+		var top_taken:=1.0
+		for other in displayed_rows:
+			top_damage=maxf(top_damage,float(other.get("damage",0)))
+			top_taken=maxf(top_taken,float(other.get("taken",0)))
+		bars=[[float(row.get("damage",0))/top_damage,Color("ffb36b"),"傷害"],[float(row.get("taken",0))/top_taken,Color("ff7a8a"),"承傷"]]
+	elif str(row.get("id",""))!="support_zero_group":
+		var top:=1.0
+		for other in displayed_rows:top=maxf(top,float(other.get("healing",0))+float(other.get("prevented",0)))
+		bars=[[float(row.get("healing",0))/top,Color("8ff0a4"),"回復"],[float(row.get("prevented",0))/top,Color("91dafa"),"減傷"]]
+	return {"ids":ids,"bars":bars,"group":str(row.get("id",""))=="support_zero_group"}
+
+func _draw_card_art(number: int) -> void:
+	var art:=card_art[number]
+	var data: Dictionary=card_data[number]
+	if data.is_empty():return
+	var box:=Rect2(Vector2.ZERO,art.size)
+	art.draw_rect(box,Color("0d1a2a"),true)
+	art.draw_rect(box,Color("2f5568"),false,1.0)
+	var size:=_portrait_size(box.size.y)
+	var ids: Array=data.get("ids",[])
+	if bool(data.get("group",false)):
+		# The grouped roster is already listed by name; keep the card text-only.
+		return
+	if ids.size()==1:
+		var frame:=Rect2(6,(box.size.y-size)*0.5,size,size)
+		art.draw_rect(frame,Color("14283b"),true)
+		art.draw_rect(frame,Color("77cdda"),false,1.0)
+		var texture:=_portrait(str(ids[0]))
+		if texture!=null:art.draw_texture_rect(texture,frame.grow(-2),false)
+	else:
+		var small:=minf(size*0.55,(box.size.x*0.3)/maxf(1,ids.size()))
+		for i in range(ids.size()):
+			var texture:=_portrait(str(ids[i]))
+			var frame:=Rect2(6+i*(small+3),(box.size.y-small)*0.5,small,small)
+			art.draw_rect(frame,Color("14283b"),true)
+			if texture!=null:art.draw_texture_rect(texture,frame.grow(-1),false,Color(1,1,1,0.55))
+	var bars: Array=data.get("bars",[]) if bool(data.get("show_bars",false)) else []
+	# Short legend before each bar; the scale is the top value on this screen.
+	var bar_x:=size+48.0
+	var bar_w:=box.size.x-bar_x-10
+	for i in range(bars.size()):
+		var y:=box.size.y-6-(bars.size()-i)*13.0
+		art.draw_string(FONT,Vector2(size+12,y+8),str(bars[i][2]),HORIZONTAL_ALIGNMENT_LEFT,34,11,Color(bars[i][1],0.95))
+		art.draw_rect(Rect2(bar_x,y,bar_w,5),Color("1d3244"),true)
+		art.draw_rect(Rect2(bar_x,y,maxf(0,bar_w*clampf(float(bars[i][0]),0,1)),5),bars[i][1],true)
 
 func _measured_gain(node: Dictionary,measured: Dictionary) -> String:
 	if node.is_empty():return "未裝起始節點・本局無節點增益"
@@ -265,7 +345,19 @@ func _apply_responsive_layout() -> void:
 	var pager_y:=size.y-108
 	var card_y:=tab_y+50
 	var card_h: float=(pager_y-card_y-4)/page_capacity
-	for number in range(2):_place(cards[number],right_x,card_y+number*card_h,right_w,card_h-2)
+	for number in range(2):
+		var card_rect:=Rect2(right_x,card_y+number*card_h,right_w,card_h-2)
+		_place(card_art[number],card_rect.position.x,card_rect.position.y,card_rect.size.x,card_rect.size.y)
+		card_art[number].visible=cards[number].visible and not card_data[number].is_empty()
+		var group: bool=bool(card_data[number].get("group",false))
+		var indent:=_portrait_size(card_rect.size.y)+12.0 if card_art[number].visible and not group else 0.0
+		# Bars need a wide card; narrow portrait cards keep the full text instead.
+		var bars_h:=float(card_data[number].get("bars",[]).size())*13.0+4.0 if card_art[number].visible else 0.0
+		# Bars only where the real wrapped text still fits above them.
+		if bars_h>0 and _text_height(cards[number],card_rect.size.x-indent-4)+bars_h>card_rect.size.y-2:bars_h=0.0
+		card_data[number]["show_bars"]=bars_h>0
+		_place(cards[number],card_rect.position.x+indent,card_rect.position.y+2,card_rect.size.x-indent-4,card_rect.size.y-bars_h-2)
+		card_art[number].queue_redraw()
 	_place(controls.previous,right_x,pager_y,right_w*0.34,44)
 	_place(page_label,right_x+right_w*0.34+4,pager_y+12,right_w*0.32-8,22)
 	_place(controls.next,right_x+right_w*0.66,pager_y,right_w*0.34,44)

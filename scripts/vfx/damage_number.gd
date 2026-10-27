@@ -20,6 +20,8 @@ var applied_font_size: int = -1
 var applied_label_size := Vector2.ZERO
 var applied_alpha: float = 1.0
 var pop_finished := false
+# Optional label prefix (e.g. critical hits) kept through numeric merges.
+var prefix: String = ""
 
 var shadow_label: Label = null
 var value_label: Label = null
@@ -43,6 +45,7 @@ func pool_on_release() -> void:
 	set_process(false)
 	age = 0.0
 	text_value = "0"
+	prefix = ""
 	numeric_total = 0.0
 	has_numeric_value = true
 	font_size = 18
@@ -77,6 +80,7 @@ func setup(value: Variant, world_position: Vector2, color_value: Color) -> void:
 func pool_reset(args: Dictionary) -> void:
 	var override_size := int(args.get("font_size", 0))
 	font_size = override_size if override_size > 0 else 18
+	prefix = str(args.get("prefix", ""))
 	setup(args.get("value", 0), args.get("position", Vector2.ZERO), args.get("color", Color.WHITE))
 	_apply_label_font_size()
 
@@ -89,7 +93,7 @@ func merge_value(value: Variant, world_position: Vector2, color_value: Color) ->
 	if not has_numeric_value:
 		return
 	numeric_total += float(value)
-	text_value = str(int(round(numeric_total)))
+	text_value = prefix + str(int(round(numeric_total)))
 	number_color = color_value
 	global_position = global_position.lerp(world_position, 0.35)
 	age = min(age, 0.08)
@@ -141,7 +145,7 @@ func _set_value(value: Variant) -> void:
 	if typeof(value) == TYPE_FLOAT or typeof(value) == TYPE_INT:
 		has_numeric_value = true
 		numeric_total = float(value)
-		text_value = str(int(round(numeric_total)))
+		text_value = prefix + str(int(round(numeric_total)))
 	else:
 		has_numeric_value = false
 		numeric_total = 0.0

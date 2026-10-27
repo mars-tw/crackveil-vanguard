@@ -38,6 +38,9 @@ func configure(point: Vector2, index: int) -> void:
 	phase = "waiting"
 	targets.clear()
 	hit_registry.clear()
+	# A new seal starts without the previous seal's verdict.
+	last_result = {}
+	result_age = 99.0
 	for ref in enemies:
 		var enemy: Object = ref.get_ref()
 		if is_instance_valid(enemy):
@@ -136,41 +139,66 @@ func contains_danger(point: Vector2) -> bool:
 func status_text() -> String:
 	if not started:
 		return str(NAMES[kind])
-	return "%s・%s" % [NAMES[kind],"預警 %.1f 秒" % maxf(0,WARNING-clock) if phase == "warning" else "攻勢生效" if phase == "active" else "反擊窗口"]
+	return "%s・%s" % [NAMES[kind],"預警 %.1f 秒" % maxf(0,WARNING-clock) if phase == "warning" else "攻勢生效" if phase == "active" else "攻勢間隙"]
+
+# Cracked stone edge: deterministic zig-zag so the frame reads as a rift
+# fissure, not a debug rectangle. Geometry matches contains_danger exactly.
+func _crack_points(from: Vector2, to: Vector2, salt: int) -> PackedVector2Array:
+	var points := PackedVector2Array([from])
+	var length := from.distance_to(to)
+	var steps := maxi(2, int(length / 17.0))
+	var normal := (to - from).normalized().orthogonal()
+	for i in range(1, steps):
+		var jitter := float(((i * 37 + salt * 11) % 7) - 3) * 1.15
+		points.append(from.lerp(to, float(i) / steps) + normal * jitter)
+	points.append(to)
+	return points
+
+func _draw_rune(at: Vector2, color: Color, size: float) -> void:
+	draw_colored_polygon(PackedVector2Array([at+Vector2(0,-size),at+Vector2(size*0.7,0),at+Vector2(0,size),at+Vector2(-size*0.7,0)]),Color("101b30",0.85))
+	draw_polyline(PackedVector2Array([at+Vector2(0,-size),at+Vector2(size*0.7,0),at+Vector2(0,size),at+Vector2(-size*0.7,0),at+Vector2(0,-size)]),color,1.6,true)
 
 func _draw() -> void:
 	if not enabled or not started or not GameManager.game_running or get_tree().paused or phase == "recovery":
 		return
 	var color := Color("ff637c") if phase == "active" else Color("edbc8d")
-	var alpha := 0.20 if phase == "active" else 0.08
+	var alpha := 0.14 if phase == "active" else 0.05
 	var edge_alpha:=0.74+0.18*sin(clock*8.0)
 	if kind in ["front","pincer"]:
 		var lanes: Array[Rect2] = []
 		lanes.assign([Rect2(anchor+Vector2(-40,-34),Vector2(285,68))] if kind == "front" else [Rect2(anchor+Vector2(-230,-85),Vector2(202,170)),Rect2(anchor+Vector2(28,-85),Vector2(202,170))])
+		var salt := 0
 		for lane in lanes:
 			draw_rect(lane,Color(color,alpha),true)
-			# Etched, double-weight corners keep the threat in the game's material
-			# language without laying a flat debug-looking block over combat.
-			draw_rect(lane,Color("101b30",0.82),false,8,true)
-			draw_rect(lane,Color(color,edge_alpha),false,3,true)
-			var corner:=15.0
 			var nw:=lane.position
 			var ne:=lane.position+Vector2(lane.size.x,0)
 			var sw:=lane.position+Vector2(0,lane.size.y)
 			var se:=lane.position+lane.size
+			for side in [[nw,ne],[ne,se],[se,sw],[sw,nw]]:
+				salt += 1
+				var crack := _crack_points(side[0],side[1],salt)
+				draw_polyline(crack,Color("101b30",0.85),7,true)
+				draw_polyline(crack,Color(color,edge_alpha),2.6,true)
 			for point in [nw,ne,sw,se]:
-				var x_dir:float=1.0 if point.x==nw.x else -1.0
-				var y_dir:float=1.0 if point.y==nw.y else -1.0
-				draw_line(point+Vector2(x_dir*corner,0),point,Color(color,edge_alpha),4,true)
-				draw_line(point,point+Vector2(0,y_dir*corner),Color(color,edge_alpha),4,true)
+				_draw_rune(point,Color(color,edge_alpha),9.0)
+			for i in range(1,3):
+				_draw_rune(nw.lerp(ne,i/3.0),Color(color,edge_alpha*0.8),5.0)
+				_draw_rune(sw.lerp(se,i/3.0),Color(color,edge_alpha*0.8),5.0)
 			for i in range(3):
 				var tip := lane.position+Vector2(28+i*55,lane.size.y/2)
 				var dir := -1.0 if kind == "front" or lane.get_center().x > anchor.x else 1.0
+				draw_polyline(PackedVector2Array([tip+Vector2(-dir*11,-12),tip,tip+Vector2(-dir*11,12)]),Color("101b30",0.8),6,true)
 				draw_polyline(PackedVector2Array([tip+Vector2(-dir*11,-12),tip,tip+Vector2(-dir*11,12)]),color,3,true)
 	else:
 		for target in targets:
 			draw_circle(target,47,Color(color,alpha))
+			var ring := PackedVector2Array()
+			for i in range(25):
+				var angle := i * TAU / 24.0
+				ring.append(target + Vector2.from_angle(angle) * (47.0 + (1.6 if i % 2 == 0 else -1.6)))
+			draw_polyline(ring,Color("101b30",0.85),7,true)
+			draw_polyline(ring,Color(color,edge_alpha),2.6,true)
 			for i in range(4):
-				draw_arc(target,47,i*PI/2,i*PI/2+0.95,10,color,3,true)
+				_draw_rune(target + Vector2.from_angle(i*PI/2+PI/4) * 47.0,Color(color,edge_alpha),7.0)
 			draw_line(target-Vector2(13,0),target+Vector2(13,0),color,2,true)
 			draw_line(target-Vector2(0,13),target+Vector2(0,13),color,2,true)

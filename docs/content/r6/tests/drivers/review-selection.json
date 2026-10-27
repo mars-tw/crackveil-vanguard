@@ -1,0 +1,80 @@
+{
+ "official": [
+  {
+   "file": "01-crew-overview-max-portrait.png",
+   "note": "320×568 最大字級整備；頭像放大後收益與代價兩行完整可見"
+  },
+  {
+   "file": "03-specialization-short-desktop.png",
+   "note": "1366×600 專精頁；右側空白改為選後站位圖，三位先發頭像放大"
+  },
+  {
+   "file": "04-assault-front-active.png",
+   "note": "突擊正面攻勢生效；裂紋符文危險框，任務列建議楔形・陣形正確"
+  },
+  {
+   "file": "05-escort-front-active.png",
+   "note": "護送正面；任務列寫可用：楔形／圓陣"
+  },
+  {
+   "file": "08-assault-artillery-active.png",
+   "note": "遠射落點；圓形危險區改鋸齒邊＋符文"
+  },
+  {
+   "file": "12-assault-victory.png",
+   "note": "突擊通關支援頁：本隊無補師，九人皆零貢獻，合併成一張名單卡"
+  },
+  {
+   "file": "13-escort-victory.png",
+   "note": "直式護送通關；支援卡頭像，數字獨立一行不斷字"
+  },
+  {
+   "file": "14-fourth-real-defeat-fixture.png",
+   "note": "第四次早敗受控結算；羈絆收益只算實際保住的 HP（減0），輸出卡頭像＋「傷害／承傷」標示長條"
+  }
+ ],
+ "bot": [
+  {
+   "src": "shots/b/16-verdict-e49.png",
+   "name": "16-pincer-wrong-verdict-backlash.png",
+   "provenance": "規則機器人第 2 道刻意保留楔形站上封隙：既有錯陣反噬紅叉，同時浮出本波結果「錯陣・5/7 人中招」＋「需圓陣才能封合・按 Q 切換」，任務列「需圓陣・按 Q 切換」，三處一致；正式 release PCK、只送鍵盤／滑鼠",
+   "note": "錯陣浮字兩行＋反噬紅叉，與任務列一致"
+  },
+  {
+   "src": "shots/b/17-wrong-backlash-e49.png",
+   "name": "17-pincer-wrong-backlash-hud.png",
+   "provenance": "同一局反噬期間：任務列「錯陣反噬・進度歸零・需圓陣・按 Q 切換」、通知「錯陣反噬：封合中斷」；仍為楔形，提示與實際陣形一致；正式 release PCK",
+   "note": "反噬期間任務列與通知"
+  },
+  {
+   "src": "shots/a/29-verdict-e94.png",
+   "name": "18-pincer-ring-protect-correct.png",
+   "provenance": "另一局換圓陣後：「圓陣護住 2 人・減傷 20」＋「陣形正確・站進封隙累積封合」，外圈綠、隊友站位圈；正式 release PCK、只送鍵盤／滑鼠",
+   "note": "對陣減傷浮字，與 16 結果不同"
+  },
+  {
+   "src": "shots/a/31-seal-2-e103.png",
+   "name": "19-seal-success.png",
+   "provenance": "同一局第 2 道封合瞬間：金色封印＋「封合 2/3・整補 +8・反擊 +20% 5 秒」；任務列立即換成下一道「遠射鎖定落點・需散兵・按 Q 切換」，下一道外圈紅；正式 release PCK",
+   "note": "封合成功、獎勵與下一道需求"
+  },
+  {
+   "src": "shots/a/02-levelup-1.png",
+   "name": "20-levelup-target-link-a.png",
+   "provenance": "自然對局 Lv.2 升級三選一（真實選項，未注入）：適用＋數值＋羈絆連動；正式 release PCK、鍵盤選擇",
+   "note": "升級卡：適用、數值、連動"
+  },
+  {
+   "src": "shots/a/21-verdict-e64.png",
+   "name": "21-levelup-target-link-b.png",
+   "provenance": "同一局 Lv.14 升級三選一：兩張質變卡含適用、數值、進化進度與連動，無捲軸；正式 release PCK",
+   "note": "高等級升級卡完整不需捲動"
+  },
+  {
+   "src": "shots/a/13-equipment-e24.png",
+   "name": "22-equipment-detail.png",
+   "provenance": "同一局點底部裝備槽：實際效果（全隊傷害／攻速）、本局拾取與拆解數；地上標籤讓位不遮擋；正式 release PCK、只送滑鼠",
+   "note": "裝備實際效果，無遮擋"
+  }
+ ]
+}
