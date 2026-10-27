@@ -11,6 +11,8 @@ const OPEN_TIMES := [12.0, 46.0, 84.0]
 const CAPTAIN_RADIUS := 54.0
 const FOLLOWER_TOLERANCE := 66.0
 const FONT := preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
+const BADGES := {"wedge": preload("res://assets/ui/r8_vector/badge_wedge.svg"), "ring": preload("res://assets/ui/r8_vector/badge_ring.svg"), "scatter": preload("res://assets/ui/r8_vector/badge_scatter.svg")}
+const SEAL_EMBLEM := preload("res://assets/ui/r8_vector/seal_emblem.svg")
 var anchor := Vector2.ZERO
 var step := 0
 var hold := 0.0
@@ -289,6 +291,11 @@ func result_text(result: Dictionary) -> String:
 		return "%s對陣・全員避開" % name if bool(result.correct) else "全員避開・%s無法封合" % name
 	return "%s對陣・%d/%d 人中招" % [name,hit,members] if bool(result.correct) else "錯陣・%d/%d 人中招" % [hit,members]
 
+# Vector badge of a formation (assets/ui/r8_vector); size is the badge radius.
+func _draw_badge(center: Vector2, id: String, radius: float) -> void:
+	var texture: Texture2D = BADGES.get(id, BADGES.wedge)
+	draw_texture_rect(texture, Rect2(center - Vector2.ONE * radius, Vector2.ONE * radius * 2.0), false)
+
 func _draw_glyph(center: Vector2, id: String, color: Color, size: float) -> void:
 	var ink := Color("08121f",0.9)
 	match id:
@@ -335,15 +342,12 @@ func _draw_offscreen_pointer() -> void:
 	var center := view.get_center()
 	var direction := center.direction_to(anchor)
 	var point := Vector2(clampf(anchor.x, inner.position.x, inner.end.x), clampf(anchor.y, inner.position.y, inner.end.y))
-	var color: Color = COLORS[ORDER.find(required_formation())]
-	var tip := point + direction * 22
-	draw_circle(point, 24, Color("08121f", 0.82))
-	draw_arc(point, 24, 0, TAU, 32, Color("ffdcac"), 2.5, true)
-	_draw_glyph(point, required_formation(), color, 11.0)
+	var tip := point + direction * 30
+	_draw_badge(point, required_formation(), 28.0)
 	draw_colored_polygon(PackedVector2Array([tip + direction * 14, tip + direction.orthogonal() * 9, tip - direction.orthogonal() * 9]), Color("ffdcac"))
 	var label := "第 %d 道" % mini(step + 1, 3)
-	draw_string_outline(FONT, point + Vector2(-50, 44), label, HORIZONTAL_ALIGNMENT_CENTER, 100, 15, 6, Color("08121f", 0.9))
-	draw_string(FONT, point + Vector2(-50, 44), label, HORIZONTAL_ALIGNMENT_CENTER, 100, 15, Color("ffdcac"))
+	draw_string_outline(FONT, point + Vector2(-50, 50), label, HORIZONTAL_ALIGNMENT_CENTER, 100, 15, 6, Color("08121f", 0.9))
+	draw_string(FONT, point + Vector2(-50, 50), label, HORIZONTAL_ALIGNMENT_CENTER, 100, 15, Color("ffdcac"))
 
 func _draw_seal_flash() -> void:
 	if seal_flash_time >= SEAL_FLASH_SECONDS or seal_flash_text == "":
@@ -355,8 +359,8 @@ func _draw_seal_flash() -> void:
 	var ring := PackedVector2Array([seal_flash_at+Vector2(0,-edge),seal_flash_at+Vector2(edge,0),seal_flash_at+Vector2(0,edge),seal_flash_at+Vector2(-edge,0),seal_flash_at+Vector2(0,-edge)])
 	draw_polyline(ring,Color("08121f",0.8*fade),9,true)
 	draw_polyline(ring,Color(gold,fade),4,true)
-	var inner := CAPTAIN_RADIUS * 0.62
-	draw_colored_polygon(PackedVector2Array([seal_flash_at+Vector2(0,-inner),seal_flash_at+Vector2(inner,0),seal_flash_at+Vector2(0,inner),seal_flash_at+Vector2(-inner,0)]),Color(gold,0.42*fade))
+	var emblem := CAPTAIN_RADIUS * (0.9 + 0.25 * smoothstep(0.0, 0.5, seal_flash_time))
+	draw_texture_rect(SEAL_EMBLEM, Rect2(seal_flash_at - Vector2.ONE * emblem, Vector2.ONE * emblem * 2.0), false, Color(1, 1, 1, fade))
 	var rise := 10.0 * minf(1.0, seal_flash_time / 0.4)
 	var at := seal_flash_at + (Vector2(-230, CAPTAIN_RADIUS + 70 - rise) if _label_below(seal_flash_at) else Vector2(-230, -CAPTAIN_RADIUS - 52 - rise))
 	var width: float = FONT.get_string_size(seal_flash_text,HORIZONTAL_ALIGNMENT_LEFT,-1,22).x
@@ -389,7 +393,7 @@ func _draw() -> void:
 	var matches: bool = is_instance_valid(pressure) and GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,selected)
 	# The anchor shows which real formation this seal accepts; the rim turns
 	# green or red from the same accepts() check that gates seal progress.
-	_draw_glyph(anchor,needed,COLORS[ORDER.find(needed)],19.0)
+	_draw_badge(anchor,needed,30.0)
 	if is_open():
 		draw_arc(anchor,edge+9,0,TAU,48,Color("08121f",0.8),6,true)
 		draw_arc(anchor,edge+9,0,TAU,48,Color("8ff0a4") if matches else Color("ff7a8a"),3,true)

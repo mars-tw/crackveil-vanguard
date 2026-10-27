@@ -1,0 +1,188 @@
+{
+	"checks": 244,
+	"failures": [],
+	"scenarios": [
+		{
+			"events": [
+				{
+					"cycle": 1,
+					"kind": "front",
+					"phase": "warning",
+					"time": 12.0
+				},
+				{
+					"cycle": 1,
+					"kind": "front",
+					"phase": "active",
+					"time": 12.0
+				},
+				{
+					"cycle": 1,
+					"kind": "front",
+					"phase": "recovery",
+					"time": 12.0
+				},
+				{
+					"cycle": 2,
+					"kind": "front",
+					"phase": "warning",
+					"time": 12.0
+				},
+				{
+					"cycle": 2,
+					"kind": "front",
+					"phase": "active",
+					"time": 12.0
+				},
+				{
+					"cycle": 2,
+					"kind": "front",
+					"phase": "recovery",
+					"time": 12.0
+				}
+			],
+			"history": [
+				{
+					"cycles": 2,
+					"followers": 2,
+					"formation": "wedge",
+					"pressure": "front",
+					"time": 12.0
+				},
+				{
+					"cycles": 0,
+					"followers": 2,
+					"formation": "scatter",
+					"pressure": "artillery",
+					"time": 90.0
+				}
+			],
+			"kind": "artillery",
+			"stage": "moon",
+			"wrong": 1
+		},
+		{
+			"guard_impacts": 2,
+			"guard_recoveries": 2
+		},
+		{
+			"events": [
+				{
+					"cycle": 1,
+					"kind": "pincer",
+					"phase": "warning",
+					"time": 12.0
+				},
+				{
+					"cycle": 1,
+					"kind": "pincer",
+					"phase": "active",
+					"time": 12.0
+				},
+				{
+					"cycle": 1,
+					"kind": "pincer",
+					"phase": "recovery",
+					"time": 12.0
+				},
+				{
+					"cycle": 2,
+					"kind": "pincer",
+					"phase": "warning",
+					"time": 12.0
+				},
+				{
+					"cycle": 2,
+					"kind": "pincer",
+					"phase": "active",
+					"time": 12.0
+				},
+				{
+					"cycle": 2,
+					"kind": "pincer",
+					"phase": "recovery",
+					"time": 12.0
+				}
+			],
+			"history": [
+				{
+					"cycles": 2,
+					"followers": 2,
+					"formation": "ring",
+					"pressure": "pincer",
+					"time": 12.0
+				},
+				{
+					"cycles": 0,
+					"followers": 2,
+					"formation": "wedge",
+					"pressure": "front",
+					"time": 90.0
+				}
+			],
+			"kind": "front",
+			"stage": "garden",
+			"wrong": 1
+		},
+		{
+			"events": [
+				{
+					"cycle": 1,
+					"kind": "artillery",
+					"phase": "warning",
+					"time": 12.0
+				},
+				{
+					"cycle": 1,
+					"kind": "artillery",
+					"phase": "active",
+					"time": 12.0
+				},
+				{
+					"cycle": 1,
+					"kind": "artillery",
+					"phase": "recovery",
+					"time": 12.0
+				},
+				{
+					"cycle": 2,
+					"kind": "artillery",
+					"phase": "warning",
+					"time": 12.0
+				},
+				{
+					"cycle": 2,
+					"kind": "artillery",
+					"phase": "active",
+					"time": 12.0
+				},
+				{
+					"cycle": 2,
+					"kind": "artillery",
+					"phase": "recovery",
+					"time": 12.0
+				}
+			],
+			"history": [
+				{
+					"cycles": 2,
+					"followers": 2,
+					"formation": "scatter",
+					"pressure": "artillery",
+					"time": 12.0
+				},
+				{
+					"cycles": 0,
+					"followers": 2,
+					"formation": "ring",
+					"pressure": "pincer",
+					"time": 90.0
+				}
+			],
+			"kind": "pincer",
+			"stage": "ember",
+			"wrong": 1
+		}
+	],
+	"status": "VERIFIED"
+}
