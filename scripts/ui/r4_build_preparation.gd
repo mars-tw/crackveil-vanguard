@@ -270,10 +270,10 @@ func _layout() -> void:
 	detail.add_theme_font_size_override("font_size",roundi(13*scale))
 	title.add_theme_font_size_override("font_size",roundi(17*scale))
 	for id in controls:controls[id].add_theme_font_size_override("font_size",roundi((12 if str(id).begins_with("node_") else 14)*scale))
-	_place(heading,12,8,100,26)
+	_place(heading,42,8,100,26)
 	_place(controls.close,size.x-68,8,56,44)
 	_place(rule_label,12,35,w-68 if portrait else 220,18)
-	_place(wallet,112 if portrait else 240,12,w-172 if portrait else w-300,18)
+	_place(wallet,124 if portrait else 240,12,w-184 if portrait else w-300,18)
 	_place(progress_label,12 if portrait else 240,58 if portrait else 32,w if portrait else w-300,18)
 	var tabs_y:=80.0 if portrait else 52.0
 	for number in range(4):_place(tabs[number],12+number*(w+4)/4,tabs_y,(w-12)/4,44)

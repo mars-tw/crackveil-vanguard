@@ -24,6 +24,7 @@ var dropped_hit_effects: int = 0
 var peak_effects: int = 0
 var slashes_recorded: int = 0
 var redraw_requests: int = 0
+var last_feedback_kind := "hit"
 
 
 func _ready() -> void:
@@ -38,10 +39,19 @@ func _exit_tree() -> void:
 		active_instance = null
 
 
-static func report_hit(world_position: Vector2, source_position: Vector2, severity: float, lethal: bool, feature_enemy: bool) -> void:
+static func report_hit(world_position: Vector2, source_position: Vector2, severity: float, lethal: bool, feature_enemy: bool, critical: bool = false) -> void:
 	var host: Node = active_instance.get_ref() if active_instance != null else null
 	if host != null and is_instance_valid(host):
-		host.register_hit(world_position, source_position, severity, lethal, feature_enemy)
+		host.register_hit(world_position, source_position, severity, lethal, feature_enemy, critical)
+
+static func feedback_kind(lethal: bool, critical: bool, feature_enemy: bool) -> String:
+	if lethal and feature_enemy:
+		return "elite_kill"
+	if lethal:
+		return "kill"
+	if critical:
+		return "critical"
+	return "hit"
 
 
 static func report_slash(world_position: Vector2, direction: Vector2, radius: float, half_angle: float, empowered: bool) -> void:
@@ -63,8 +73,9 @@ func register_slash(world_position: Vector2, direction: Vector2, radius: float, 
 	_request_redraw()
 
 
-func register_hit(world_position: Vector2, source_position: Vector2, severity: float, lethal: bool, feature_enemy: bool) -> void:
+func register_hit(world_position: Vector2, source_position: Vector2, severity: float, lethal: bool, feature_enemy: bool, critical: bool = false) -> void:
 	hits_recorded += 1
+	last_feedback_kind = feedback_kind(lethal, critical, feature_enemy)
 	if lethal:
 		kills_recorded += 1
 	if not feedback_enabled:
@@ -83,7 +94,7 @@ func register_hit(world_position: Vector2, source_position: Vector2, severity: f
 			"kind": "hit", "position": world_position, "direction": direction,
 			"age": 0.0, "lifetime": 0.55 if lethal and feature_enemy else 0.11 if lethal else 0.09,
 			"size": 26.0 if lethal and feature_enemy else 5.8 if lethal else lerpf(3.5, 4.8, clampf(severity, 0.0, 1.0)),
-			"lethal": lethal, "feature": feature_enemy,
+			"lethal": lethal, "feature": feature_enemy, "critical": critical,
 		})
 	if lethal:
 		_try_announce_harvest()

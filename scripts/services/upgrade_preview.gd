@@ -199,3 +199,114 @@ static func _weapon_data(option: Dictionary) -> Resource:
 
 static func _number(value: float) -> String:
 	return str(int(roundf(value))) if absf(value - roundf(value)) < 0.05 else "%.1f" % value
+
+const QUALITATIVE_ICON_WORDS := [
+	["projectiles", ["分叉", "分裂"]],
+	["pickup", ["回收"]],
+	["damage", ["雷鏈", "過載", "脈衝", "校準"]],
+	["cooldown", ["共鳴", "共振", "和聲"]],
+]
+
+static func icon_key(option: Dictionary) -> String:
+	if str(option.get("id", "")) == "recruit_hero":
+		return "recruit"
+	if str(option.get("upgrade_category", "")) == "evolution":
+		return "evolution"
+	if str(option.get("upgrade_category", "")) == "qualitative":
+		# Each qualitative change gets the icon of what it actually does, so two
+		# qualitative cards on one screen no longer share the same star.
+		var qualitative_name := str(option.get("name", ""))
+		for rule in QUALITATIVE_ICON_WORDS:
+			for word in rule[1]:
+				if qualitative_name.contains(word):
+					return rule[0]
+		return "qualitative"
+	match str(option.get("upgrade_kind", "")):
+		"weapon_damage":
+			return "damage"
+		"weapon_cooldown":
+			return "cooldown"
+		"weapon_projectiles":
+			return "projectiles"
+	match str(option.get("id", "")):
+		"move_speed":
+			return "speed"
+		"max_hp":
+			return "hp"
+		"pickup_radius":
+			return "pickup"
+		"recruit_hero":
+			return "recruit"
+	if str(option.get("upgrade_category", "")) == "fallback":
+		return "supply"
+	var option_id := str(option.get("id", ""))
+	if "heal" in option_id or "health" in option_id or "hp" in option_id or "armor" in option_id:
+		return "hp"
+	if "gold" in option_id:
+		return "supply"
+	return "supply"
+
+
+static func fix_orphan_punctuation(text: String) -> String:
+	const CLOSERS := "」』）】〕〉》、。！？；："
+	var lines := text.split("\n")
+	var fixed: Array[String] = []
+	for raw in lines:
+		var line := raw
+		while line.length() > 0 and CLOSERS.contains(line.substr(0, 1)) and not fixed.is_empty():
+			fixed[fixed.size() - 1] += line.substr(0, 1)
+			line = line.substr(1)
+		if line != "" or fixed.is_empty():
+			fixed.append(line)
+	return "\n".join(fixed)
+
+
+static func card_main_text(option: Dictionary) -> String:
+	var parts := PackedStringArray()
+	var target := target_text(option)
+	if target != "":
+		parts.append(target)
+	var benefit := benefit_text(option).replace("\n", " ")
+	if benefit != "":
+		parts.append(benefit)
+	elif str(option.get("id", "")) == "recruit_hero":
+		pass
+	if str(option.get("id", "")) == "recruit_hero":
+		var description := str(option.get("description", ""))
+		# Recruitment role text stays in the main card; the quote is secondary.
+		var hero_id := str(option.get("hero_id", ""))
+		var hero_path := "res://resources/heroes/%s.tres" % hero_id
+		if ResourceLoader.exists(hero_path):
+			description = str(load(hero_path).get("description"))
+		elif description.contains("\n"):
+			description = description.substr(description.find("\n") + 1)
+		if description != "" and description != benefit:
+			parts.append(description)
+	var progress := progress_text(option).replace("\n", " ")
+	if progress != "" and parts.size() < 3:
+		parts.append(progress)
+	while parts.size() > 3:
+		parts.remove_at(parts.size() - 1)
+	return fix_orphan_punctuation("\n".join(parts))
+
+
+static func card_secondary_text(option: Dictionary) -> String:
+	var parts := PackedStringArray()
+	if str(option.get("id", "")) == "upgrade_hero_weapon":
+		var description := str(option.get("description", ""))
+		var benefit := benefit_text(option)
+		if description != "" and description != benefit and str(option.get("upgrade_kind", "")) not in ["weapon_damage", "weapon_cooldown", "weapon_projectiles"]:
+			parts.append(description)
+		var progress := progress_text(option).replace("\n", " ")
+		var main := card_main_text(option)
+		if progress != "" and not main.contains(progress):
+			parts.append(progress)
+	var link := synergy_text(option)
+	if link != "":
+		parts.append(link)
+	if str(option.get("id", "")) == "recruit_hero":
+		var description := str(option.get("description", ""))
+		if description.begins_with("「") and description.contains("\n"):
+			parts.append(description.substr(0, description.find("\n") + 1).strip_edges())
+	return fix_orphan_punctuation(" ".join(parts))
+

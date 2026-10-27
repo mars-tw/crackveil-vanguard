@@ -292,6 +292,12 @@ func _tick_formation_resonance(delta: float) -> void:
 
 # ---------------------------------------------------------------- 陣形戰術
 
+const FOOT_GLOW_RADIUS := 13.0
+const FOOT_GLOW_ALPHA := 0.18
+
+func foot_glow_radius() -> float:
+	return FOOT_GLOW_RADIUS
+
 func get_formation_id() -> String:
 	return formation_id
 
@@ -463,6 +469,9 @@ func _draw() -> void:
 		if not is_instance_valid(member) or not member.is_alive:
 			continue
 		var point := to_local(member.global_position)
+		var foot := point + Vector2(0, 14)
+		draw_circle(foot, 13.0, Color(color, 0.18))
+		draw_arc(foot, 13.0, 0, TAU, 24, Color(color, 0.75), 1.8, true)
 		# Captain uses a double diamond, companions a small formation ring.
 		if member == leader:
 			var diamond := PackedVector2Array([point + Vector2(0,-17),point + Vector2(23,0),point + Vector2(0,13),point + Vector2(-23,0),point + Vector2(0,-17)])

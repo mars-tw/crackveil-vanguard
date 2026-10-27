@@ -8,6 +8,18 @@ const ICON_GOLD := preload("res://assets/art/icon_gold.png")
 const UPGRADE_PREVIEW := preload("res://scripts/services/upgrade_preview.gd")
 const PROBE := preload("res://scripts/services/qa_bridge.gd")
 const R33_ANIMATION := preload("res://scripts/animation/true_animation_library.gd")
+const R9_ICONS := {
+	"damage": preload("res://assets/ui/r9_vector/icon_damage.svg"),
+	"cooldown": preload("res://assets/ui/r9_vector/icon_cooldown.svg"),
+	"projectiles": preload("res://assets/ui/r9_vector/icon_projectiles.svg"),
+	"qualitative": preload("res://assets/ui/r9_vector/icon_qualitative.svg"),
+	"evolution": preload("res://assets/ui/r9_vector/icon_evolution.svg"),
+	"recruit": preload("res://assets/ui/r9_vector/icon_recruit.svg"),
+	"speed": preload("res://assets/ui/r9_vector/icon_speed.svg"),
+	"hp": preload("res://assets/ui/r9_vector/icon_hp.svg"),
+	"pickup": preload("res://assets/ui/r9_vector/icon_pickup.svg"),
+	"supply": preload("res://assets/ui/r9_vector/icon_supply.svg"),
+}
 const SPRITE_LOADER := preload("res://scripts/services/sprite_loader.gd")
 
 signal upgrade_selected(upgrade: Dictionary)
@@ -104,7 +116,7 @@ func show_options(options: Array) -> void:
 		button.tooltip_text = str(option.get("description", ""))
 		button.set_meta("option_key", _option_key(option))
 		button.set_meta("upgrade_option", option)
-		_build_card_content(button, title, UPGRADE_PREVIEW.describe(option), option)
+		_build_card_content(button, title, UPGRADE_PREVIEW.card_main_text(option), option)
 		_apply_card_style(button, option)
 		button.pressed.connect(_on_upgrade_pressed.bind(option))
 		button.mouse_entered.connect(_on_card_focus.bind(button, true))
@@ -262,24 +274,22 @@ func _build_card_content(button: Button, title: String, description: String, opt
 	card_description.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card_description.add_theme_color_override("font_color", Color(0.78, 0.88, 0.94))
 	button.add_child(card_description)
+	var card_secondary := Label.new()
+	card_secondary.name = "CardSecondary"
+	card_secondary.text = UPGRADE_PREVIEW.card_secondary_text(option)
+	card_secondary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	card_secondary.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	card_secondary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	card_secondary.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card_secondary.add_theme_color_override("font_color", Color(0.55, 0.68, 0.76))
+	button.add_child(card_secondary)
 
 
 func _upgrade_icon(option: Dictionary) -> Texture2D:
-	var option_id := str(option.get("id", ""))
-	if option_id == "recruit_hero":
-		var hero_path := "res://resources/heroes/%s.tres" % str(option.get("hero_id", ""))
-		if ResourceLoader.exists(hero_path):
-			var hero_data: Resource = load(hero_path)
-			var hero_frames := R33_ANIMATION.get_sprite_frames(str(hero_data.get("sprite_path")))
-			var portrait: Texture2D = hero_frames.get_frame_texture(&"idle", 0) if hero_frames != null else null
-			if portrait != null:
-				return portrait
-	if "gold" in option_id:
-		return ICON_GOLD
-	if "heal" in option_id or "health" in option_id or "armor" in option_id or "hp" in option_id:
-		return ICON_HEALTH
+	var key := UPGRADE_PREVIEW.icon_key(option)
+	if R9_ICONS.has(key):
+		return R9_ICONS[key]
 	return ICON_XP
-
 
 func _upgrade_category_text(option: Dictionary) -> String:
 	if str(option.get("id", "")) == "recruit_hero":
@@ -308,6 +318,7 @@ func _layout_card_content(button: Button, portrait: bool, mobile: bool) -> void:
 	var category := button.get_node_or_null("CategoryLabel") as Label
 	var card_title := button.get_node_or_null("CardTitle") as Label
 	var description := button.get_node_or_null("CardDescription") as Label
+	var secondary := button.get_node_or_null("CardSecondary") as Label
 	if icon == null or category == null or card_title == null or description == null:
 		return
 	var icon_size := 58.0 if mobile and portrait else 48.0
@@ -338,8 +349,19 @@ func _layout_card_content(button: Button, portrait: bool, mobile: bool) -> void:
 	description.offset_left = 16.0
 	description.offset_right = -16.0
 	description.offset_top = card_title.offset_bottom + 5.0
-	description.offset_bottom = -14.0
+	description.offset_bottom = -54.0
 	description.add_theme_font_size_override("font_size", 15 if mobile and portrait else 13 if mobile else 14)
+	if secondary != null:
+		secondary.anchor_left = 0.0
+		secondary.anchor_right = 1.0
+		secondary.anchor_top = 1.0
+		secondary.anchor_bottom = 1.0
+		secondary.offset_left = 16.0
+		secondary.offset_right = -16.0
+		# Room for two lines: an effect detail plus the bond link.
+		secondary.offset_top = -50.0
+		secondary.offset_bottom = -10.0
+		secondary.add_theme_font_size_override("font_size", 11)
 
 
 func _apply_card_style(button: Button, option: Dictionary) -> void:

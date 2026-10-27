@@ -21,12 +21,14 @@ func _ready() -> void:
 	style.border_color = Color(0.32, 0.74, 0.88, 0.45)
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(7)
-	style.content_margin_left = 10.0
-	style.content_margin_right = 10.0
+	# 16px keeps the first character clear of the R9 vector frame corners.
+	style.content_margin_left = 16.0
+	style.content_margin_right = 16.0
 	style.content_margin_top = 5.0
 	style.content_margin_bottom = 5.0
 	panel.add_theme_stylebox_override("panel", style)
 	add_child(panel)
+	preload("res://scripts/ui/rift_frame_ornament.gd").attach(panel, false, Color("6fc4cf"), 12.0)
 	rows = VBoxContainer.new()
 	rows.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	rows.add_theme_constant_override("separation", 2)

@@ -56,6 +56,44 @@ func accepted_text() -> String:
 		names.append(NAMES[ORDER.find(id)])
 	return "可用：%s" % "／".join(names) if names.size() > 1 else "需%s" % (names[0] if names.size() == 1 else NAMES[ORDER.find(required_formation())])
 
+func seal_stage_tint(stage_index: int) -> Color:
+	match clampi(stage_index, 0, 2):
+		0: return Color("6fc4cf")
+		1: return Color("d9b46a")
+		_: return Color("ffae78")
+
+func seal_stage_edge(stage_index: int) -> Color:
+	match clampi(stage_index, 0, 2):
+		0: return Color("91dafa")
+		1: return Color("f3d995")
+		_: return Color("ff8a99")
+
+func seal_ground_fill_alpha() -> float:
+	return 0.16
+
+func member_zone_state(member_position: Vector2) -> String:
+	var local := member_position - anchor
+	return "inside" if absf(local.x) + absf(local.y) <= CAPTAIN_RADIUS else "outside"
+
+# Beyond this range the off-screen pointer leads instead of a fan of lines.
+const GUIDE_LINE_RANGE := 360.0
+
+func guide_line_points(member_position: Vector2) -> PackedVector2Array:
+	var direction := member_position.direction_to(anchor)
+	var start := member_position + Vector2(0, 14)
+	var tip := anchor - direction * (CAPTAIN_RADIUS + 8.0)
+	return PackedVector2Array([start, tip])
+
+func clear_wrong_if_correct() -> bool:
+	if wrong_timer <= 0.0:
+		return false
+	if not is_instance_valid(pressure) or not is_instance_valid(GameManager.squad_manager):
+		return false
+	if GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node, pressure.kind, GameManager.squad_manager.get_formation_id()):
+		wrong_timer = 0.0
+		return true
+	return false
+
 func switch_hint() -> String:
 	return "點陣形鈕" if MobileTuning.has_confirmed_touch() else "按 Q 切換"
 
@@ -135,6 +173,10 @@ func _update_label() -> void:
 	for key in ["notice","combo","minimap"]:
 		if rect.intersects(reserved[key]):
 			y = maxf(y,reserved[key].end.y+5)
+	var formation_button_rect := Rect2()
+	var formation_button := marker_label.get_parent().get_node_or_null("FormationButton") as Control
+	if is_instance_valid(formation_button) and formation_button.is_visible_in_tree():
+		formation_button_rect = formation_button.get_global_rect().grow(8.0)
 	var candidates: Array[Vector2] = [Vector2(x,y)]
 	for row in range(4):
 		for column in range(4):
@@ -144,6 +186,7 @@ func _update_label() -> void:
 		var clear := Rect2(8,136,view.x-96,view.y-284).encloses(candidate_rect) if view.x>view.y else Rect2(8,268,view.x-24,view.y-440).encloses(candidate_rect)
 		for region in reserved.values():
 			if candidate_rect.intersects(region):clear=false
+		if formation_button_rect.size.x > 0.0 and candidate_rect.intersects(formation_button_rect):clear=false
 		for member in GameManager.squad_manager.get_members():
 			var member_screen: Vector2=canvas*member.global_position/scale_factor
 			if candidate_rect.intersects(Rect2(member_screen-Vector2(26,55),Vector2(52,76))):clear=false
@@ -196,6 +239,7 @@ func _tick_feedback(delta: float) -> void:
 
 func advance(delta: float) -> void:
 	_tick_feedback(delta)
+	clear_wrong_if_correct()
 	if completed:
 		if GameManager.boss_killed:
 			GameManager.try_complete_campaign_victory()
@@ -379,8 +423,15 @@ func _draw() -> void:
 	# Four etched corners: task marker, never a defensive circle.
 	var edge := CAPTAIN_RADIUS
 	var diamond := PackedVector2Array([anchor+Vector2(0,-edge),anchor+Vector2(edge,0),anchor+Vector2(0,edge),anchor+Vector2(-edge,0),anchor+Vector2(0,-edge)])
-	draw_colored_polygon(PackedVector2Array([anchor+Vector2(0,-edge),anchor+Vector2(edge,0),anchor+Vector2(0,edge),anchor+Vector2(-edge,0)]),Color(0.025,0.04,0.06,0.65))
-	draw_polyline(diamond,Color("ffdcac") if is_open() else Color("758495"),3,true)
+	var stage_tint := seal_stage_tint(step)
+	var stage_edge := seal_stage_edge(step)
+	draw_colored_polygon(PackedVector2Array([anchor+Vector2(0,-edge),anchor+Vector2(edge,0),anchor+Vector2(0,edge),anchor+Vector2(-edge,0)]),Color(stage_tint, seal_ground_fill_alpha() if is_open() else 0.08))
+	draw_polyline(diamond,Color("08121f",0.55),6,true)
+	draw_polyline(diamond,stage_edge if is_open() else Color("758495"),2.4,true)
+	for ring_index in range(clampi(step,0,2)):
+		var inset := float(ring_index + 1) * 13.0
+		var inner := PackedVector2Array([anchor+Vector2(0,-edge+inset),anchor+Vector2(edge-inset,0),anchor+Vector2(0,edge-inset),anchor+Vector2(-edge+inset,0),anchor+Vector2(0,-edge+inset)])
+		draw_polyline(inner,Color(stage_edge,0.55),1.6,true)
 	for i in range(4):
 		var point := anchor+Vector2.from_angle(i*PI/2)*edge
 		draw_circle(point,4,color)
@@ -407,6 +458,24 @@ func _draw() -> void:
 				draw_arc(slot+Vector2(0,14),13,0,TAU,20,Color(COLORS[ORDER.find(selected)],1.0 if in_slot else 0.45),2.5,true)
 				if in_slot:
 					draw_circle(slot+Vector2(0,14),5,COLORS[ORDER.find(selected)])
+	# Foot rings always; guide lines only while the seal can be held, so a closed
+	# seal never fans lines across the fight.
+	if is_instance_valid(squad):
+		for member in squad.get_members():
+			if not is_instance_valid(member) or not member.is_alive:
+				continue
+			var foot: Vector2 = member.global_position + Vector2(0, 14)
+			if member_zone_state(member.global_position) == "inside":
+				draw_circle(foot, 13.0, Color(stage_edge, 0.20))
+				draw_arc(foot, 13.0, 0, TAU, 24, Color(stage_edge, 0.9), 2.0, true)
+			elif is_open() and member.global_position.distance_to(anchor) <= GUIDE_LINE_RANGE:
+				var guide: PackedVector2Array = guide_line_points(member.global_position)
+				if guide.size() == 2:
+					draw_line(guide[0], guide[1], Color("08121f", 0.65), 4.0, true)
+					draw_line(guide[0], guide[1], Color(stage_edge, 0.55), 1.5, true)
+					var guide_dir: Vector2 = guide[0].direction_to(guide[1])
+					draw_line(guide[1], guide[1] - guide_dir.rotated(0.6) * 11.0, Color(stage_edge, 0.95), 2.0, true)
+					draw_line(guide[1], guide[1] - guide_dir.rotated(-0.6) * 11.0, Color(stage_edge, 0.95), 2.0, true)
 	if wrong_timer > 0:
 		draw_line(anchor-Vector2(23,23),anchor+Vector2(23,23),Color("ff637c"),5,true)
 		draw_line(anchor+Vector2(23,-23),anchor+Vector2(-23,23),Color("ff637c"),5,true)

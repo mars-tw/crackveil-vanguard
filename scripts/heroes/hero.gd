@@ -1016,6 +1016,9 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO, force_h
 	if AudioManager != null and AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("hurt", false, -10.0, 0.92 if is_leader else 1.08)
 
+	if is_leader and GameManager.has_method("notify_captain_hurt"):
+		var hurt_from := (source_position - global_position).normalized() if source_position != Vector2.ZERO else Vector2.RIGHT
+		GameManager.notify_captain_hurt(hurt_from, current_hp / maxf(1.0, max_hp))
 	GameManager.emit_stats()
 	if current_hp <= 0.0:
 		_die()

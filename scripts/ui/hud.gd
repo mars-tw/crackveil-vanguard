@@ -117,6 +117,11 @@ var milestone_tween: Tween = null
 var combo_break_tween: Tween = null
 var boss_intro_tween: Tween = null
 var screenshot_beauty_active: bool = false
+var captain_hurt_direction := Vector2.RIGHT
+var captain_hurt_timer := 0.0
+var captain_hurt_marker: Polygon2D
+var low_hp_edges: Array[ColorRect] = []
+var low_hp_ratio := 1.0
 var last_level_value: int = 1
 var last_xp_value: int = 0
 var last_xp_required_value: int = 1
@@ -180,6 +185,8 @@ func _ready() -> void:
 	if not GameManager.pause_changed.is_connected(_on_pause_changed):
 		GameManager.pause_changed.connect(_on_pause_changed)
 	GameManager.battle_notice_requested.connect(_on_battle_notice)
+	if GameManager.has_signal("captain_hurt_requested") and not GameManager.captain_hurt_requested.is_connected(show_captain_hurt):
+		GameManager.captain_hurt_requested.connect(show_captain_hurt)
 	if GameManager.has_signal("level_flash_requested") and not GameManager.level_flash_requested.is_connected(_on_level_flash_requested):
 		GameManager.level_flash_requested.connect(_on_level_flash_requested)
 	if GameManager.has_signal("captain_ability_hit_flash_requested") and not GameManager.captain_ability_hit_flash_requested.is_connected(_on_captain_ability_hit_flash_requested):
@@ -235,7 +242,13 @@ func _process(_delta: float) -> void:
 	toast_label.text = squad.bond_reveal_text if bond_active and not urgent else toast_current_text
 	if urgent and is_instance_valid(loot_notice):
 		loot_notice.hide()
-	toast_panel.visible = (toast_showing or bond_active) and not blocked and not formation_picker.visible and (urgent or bond_active or not (is_instance_valid(loot_notice) and loot_notice.visible))
+	if captain_hurt_timer > 0.0:
+		captain_hurt_timer = maxf(0.0, captain_hurt_timer - _delta)
+		if is_instance_valid(captain_hurt_marker):
+			captain_hurt_marker.visible = captain_hurt_timer > 0.0
+			captain_hurt_marker.modulate.a = clampf(captain_hurt_timer / 1.2, 0.0, 1.0)
+	var duplicate_notice := toast_showing and is_instance_valid(tactical_hint) and tactical_hint.visible and notices_duplicate(tactical_hint.text, toast_current_text)
+	toast_panel.visible = (toast_showing or bond_active) and not blocked and not duplicate_notice and not formation_picker.visible and (urgent or bond_active or not (is_instance_valid(loot_notice) and loot_notice.visible))
 	# Hidden routine notices keep their readable time instead of expiring behind
 	# loot, bond reveals or a modal. Urgent battle messages own the notice lane.
 	if toast_showing and toast_panel.visible and (urgent or not bond_active):
@@ -322,11 +335,13 @@ func _build_ui() -> void:
 	hud_panel.name = "HUDPanel"
 	hud_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(hud_panel)
+	preload("res://scripts/ui/rift_frame_ornament.gd").attach(hud_panel, false, Color("6fc4cf"), 12.0)
 
 	score_panel = Panel.new()
 	score_panel.name = "ScorePanel"
 	score_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(score_panel)
+	preload("res://scripts/ui/rift_frame_ornament.gd").attach(score_panel, false, Color("6fc4cf"), 12.0)
 
 	hp_icon = _make_hud_icon("HealthIcon", ART_RESOURCES.get_health_icon())
 	root.add_child(hp_icon)
@@ -435,6 +450,7 @@ func _build_ui() -> void:
 	active_ability_button.button_up.connect(_on_active_ability_button_up)
 	_apply_active_ability_glass_style()
 	root.add_child(active_ability_button)
+	preload("res://scripts/ui/rift_frame_ornament.gd").attach(active_ability_button, false, Color("6fc4cf"), 12.0)
 
 	active_ability_cooldown_ring = COOLDOWN_RING_SCRIPT.new()
 	active_ability_cooldown_ring.name = "ActiveAbilityCooldownRing"
@@ -494,6 +510,7 @@ func _build_ui() -> void:
 	summon_button.text = "技能／寵物召喚"
 	summon_button.pressed.connect(_open_summon_shop)
 	root.add_child(summon_button)
+	preload("res://scripts/ui/rift_frame_ornament.gd").attach(summon_button, false, Color("6fc4cf"), 12.0)
 	auto_button = Button.new()
 	auto_button.name = "AutoBattleButton"
 	auto_button.pressed.connect(_toggle_auto_battle)
@@ -514,6 +531,7 @@ func _build_ui() -> void:
 	formation_button.button_up.connect(func() -> void: formation_press_active = false)
 	formation_button.mouse_exited.connect(func() -> void: formation_press_active = false)
 	root.add_child(formation_button)
+	preload("res://scripts/ui/rift_frame_ornament.gd").attach(formation_button, false, Color("6fc4cf"), 12.0)
 	formation_picker = FORMATION_PICKER.new()
 	root.add_child(formation_picker)
 	formation_picker.selected.connect(_select_formation)
@@ -533,8 +551,12 @@ func _build_ui() -> void:
 	mission_surface.set_border_width_all(1)
 	mission_surface.set_corner_radius_all(6)
 	mission_surface.set_content_margin_all(4)
+	# Leave the R9 vector frame corners clear of each line's first character.
+	mission_surface.content_margin_left = 18.0
+	mission_surface.content_margin_right = 18.0
 	tactical_hint.add_theme_stylebox_override("normal",mission_surface)
 	root.add_child(tactical_hint)
+	preload("res://scripts/ui/rift_frame_ornament.gd").attach(tactical_hint, false, Color("6fc4cf"), 12.0)
 
 	toast_panel = Panel.new()
 	toast_panel.name = "ToastPanel"
@@ -576,6 +598,21 @@ func _build_ui() -> void:
 	captain_hit_flash_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(captain_hit_flash_rect)
 
+	captain_hurt_marker = Polygon2D.new()
+	captain_hurt_marker.name = "CaptainHurtMarker"
+	captain_hurt_marker.polygon = PackedVector2Array([Vector2(0, -16), Vector2(11, 10), Vector2(0, 4), Vector2(-11, 10)])
+	captain_hurt_marker.color = Color(1.0, 0.30, 0.30, 0.92)
+	captain_hurt_marker.visible = false
+	captain_hurt_marker.z_index = 40
+	root.add_child(captain_hurt_marker)
+	for edge_spec in ["top", "bottom", "left", "right"]:
+		var edge := ColorRect.new()
+		edge.name = "LowHpEdge" + edge_spec.capitalize()
+		edge.color = Color(1.0, 0.16, 0.20, 0.42)
+		edge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		edge.visible = false
+		root.add_child(edge)
+		low_hp_edges.append(edge)
 	combo_pulse_rect = TextureRect.new()
 	combo_pulse_rect.name = "ComboPulse"
 	combo_pulse_rect.texture = ART_RESOURCES.get_radial_glow()
@@ -1491,8 +1528,14 @@ func _apply_content_r1_layout(view: Vector2, phone: bool) -> void:
 	score_label.size = zones.score.size - Vector2(8, 6)
 	time_label.add_theme_font_size_override("font_size", 20)
 	BATTLE_LAYOUT.place(tactical_hint, zones.mission)
-	tactical_hint.add_theme_font_size_override("font_size", 14 if phone else 15)
+	tactical_hint.add_theme_font_size_override("font_size", 13 if phone else 15)
+	# Phones keep a narrower inset so the longest mission line still fits.
+	var mission_style := tactical_hint.get_theme_stylebox("normal") as StyleBoxFlat
+	if mission_style != null:
+		mission_style.content_margin_left = 17.0 if phone else 20.0
+		mission_style.content_margin_right = 17.0 if phone else 20.0
 	BATTLE_LAYOUT.place(toast_panel, zones.notice)
+	_layout_low_hp_edges(view)
 	toast_label.add_theme_font_size_override("font_size", 13)
 	# Persistent pages own their header and footer; battle information cannot
 	# shine through them, even when the world keeps its own CanvasLayers.
@@ -1501,6 +1544,21 @@ func _apply_content_r1_layout(view: Vector2, phone: bool) -> void:
 		BATTLE_LAYOUT.place(pause_backdrop, Rect2(Vector2.ZERO, view))
 	for button in [pause_resume_button, pause_menu_button]:
 		button.add_theme_font_size_override("font_size", 18)
+
+
+func _layout_low_hp_edges(view: Vector2) -> void:
+	if low_hp_edges.size() < 4:
+		return
+	var thickness := 6.0
+	low_hp_edges[0].position = Vector2.ZERO
+	low_hp_edges[0].size = Vector2(view.x, thickness)
+	low_hp_edges[1].position = Vector2(0, view.y - thickness)
+	low_hp_edges[1].size = Vector2(view.x, thickness)
+	low_hp_edges[2].position = Vector2.ZERO
+	low_hp_edges[2].size = Vector2(thickness, view.y)
+	low_hp_edges[3].position = Vector2(view.x - thickness, 0)
+	low_hp_edges[3].size = Vector2(thickness, view.y)
+	_refresh_low_hp_warning()
 
 
 func _apply_phone_battle_layout(view: Vector2, phone: bool) -> void:
@@ -1842,6 +1900,8 @@ func _on_stats_changed(stats: Dictionary) -> void:
 	var xp_required: int = max(1, int(stats.get("xp_required", 1)))
 
 	hp_label.text = "HP %d/%d" % [hp, max_hp]
+	low_hp_ratio = clampf(float(hp) / maxf(1.0, float(max_hp)), 0.0, 1.0) if max_hp > 0 else 1.0
+	_refresh_low_hp_warning()
 	last_level_value = current_level
 	last_xp_value = xp
 	last_xp_required_value = xp_required
@@ -2252,12 +2312,13 @@ func _refresh_formation_button(phone: bool) -> void:
 	else:
 		formation_button.text = ("陣形：%s（Q）" % short_name) if remaining <= 0.05 else "陣形：%s　%.1f 秒" % [short_name, remaining]
 	formation_button.disabled = remaining > 0.05 or get_tree().paused or not GameManager.game_running
+	formation_button.tooltip_text = "點按切換小隊陣形；長按直選" if MOBILE_TUNING.has_confirmed_touch() else "切換小隊陣形（Q）：楔形突擊 / 圓陣護衛 / 散兵游擊"
 	var color: Color = definition.get("color", Color.WHITE)
 	formation_button.add_theme_color_override("font_color", color.lightened(0.25))
 	formation_button.add_theme_color_override("font_disabled_color", Color(color.r, color.g, color.b, 0.55))
 	if not formation_hint_shown and GameManager.game_running and float(GameManager.elapsed_time) >= 6.0 and int(squad.get("formation_switch_count")) == 0:
 		formation_hint_shown = true
-		_on_toast_requested("點按「%s」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收" % ("陣形" if phone else "Q／陣形"))
+		_on_toast_requested("點按「%s」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收" % ("陣形" if MOBILE_TUNING.has_confirmed_touch() else "Q／陣形"))
 
 
 func _open_phone_equipment() -> void:
@@ -2702,6 +2763,55 @@ func _drain_pending_toasts() -> void:
 func _dangerous_battle() -> bool:
 	var director: Node=GameManager.tactical_director
 	return is_instance_valid(director) and is_instance_valid(director.relay) and is_instance_valid(director.relay.pressure) and director.relay.pressure.enabled and director.relay.pressure.phase in ["warning","active"]
+
+static func low_hp_warning_active(ratio: float) -> bool:
+	return ratio < 0.30
+
+
+static func _notice_key(text: String) -> String:
+	var key := text.strip_edges()
+	for mark in ["：", "・", "，", ":", " ", "　"]:
+		key = key.replace(mark, "")
+	return key
+
+
+static func notices_duplicate(mission_text: String, notice_text: String) -> bool:
+	var mission := mission_text.strip_edges()
+	var notice := notice_text.strip_edges()
+	if _notice_key(notice) != "" and _notice_key(mission).contains(_notice_key(notice)):
+		return true
+	if mission == "" or notice == "":
+		return false
+	if mission == notice:
+		return true
+	for line in mission.split("\n"):
+		if line.strip_edges() == notice:
+			return true
+	return notice.length() >= 4 and mission.contains(notice)
+
+
+func is_low_hp_warning_shown() -> bool:
+	return low_hp_warning_active(low_hp_ratio)
+
+
+func show_captain_hurt(from_direction: Vector2, hp_ratio: float) -> void:
+	captain_hurt_direction = from_direction.normalized() if from_direction.length_squared() > 0.001 else Vector2.RIGHT
+	low_hp_ratio = clampf(hp_ratio, 0.0, 1.0)
+	captain_hurt_timer = 1.2
+	_refresh_low_hp_warning()
+	if is_instance_valid(captain_hurt_marker):
+		var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size) if is_inside_tree() else Vector2(1280, 720)
+		captain_hurt_marker.position = view * 0.5 + captain_hurt_direction * 92.0
+		captain_hurt_marker.rotation = captain_hurt_direction.angle() + PI * 0.5
+		captain_hurt_marker.visible = true
+
+
+func _refresh_low_hp_warning() -> void:
+	var active := is_low_hp_warning_shown() and GameManager.game_running and not (get_tree().paused if is_inside_tree() and get_tree() != null else false)
+	for edge in low_hp_edges:
+		if is_instance_valid(edge):
+			edge.visible = active
+
 
 func _on_battle_notice(message: String,kind: String,urgent: bool) -> void:
 	battle_journal.record(message,kind,urgent)

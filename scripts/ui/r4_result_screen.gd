@@ -231,6 +231,9 @@ func _portrait(hero_id: String) -> Texture2D:
 	portrait_cache[hero_id]=texture
 	return texture
 
+static func bar_fraction(value: float, top: float) -> float:
+	return clampf(value / maxf(1.0, top), 0.0, 1.0)
+
 func _card_visual(row: Dictionary,displayed_rows: Array) -> Dictionary:
 	var ids: Array=row.get("member_ids",[]) if str(row.get("id",""))=="support_zero_group" else [str(row.get("id",""))]
 	var bars: Array=[]
@@ -240,11 +243,14 @@ func _card_visual(row: Dictionary,displayed_rows: Array) -> Dictionary:
 		for other in displayed_rows:
 			top_damage=maxf(top_damage,float(other.get("damage",0)))
 			top_taken=maxf(top_taken,float(other.get("taken",0)))
-		bars=[[float(row.get("damage",0))/top_damage,Color("ffb36b"),"傷害"],[float(row.get("taken",0))/top_taken,Color("ff7a8a"),"承傷"]]
+		# One shared scale: damage and damage taken stay comparable even on a
+		# single-row page, where per-stat scales made every bar full length.
+		var top_output:=maxf(top_damage,top_taken)
+		bars=[[bar_fraction(float(row.get("damage",0)),top_output),Color("ffb36b"),"傷害"],[bar_fraction(float(row.get("taken",0)),top_output),Color("ff7a8a"),"承傷"]]
 	elif str(row.get("id",""))!="support_zero_group":
 		var top:=1.0
 		for other in displayed_rows:top=maxf(top,float(other.get("healing",0))+float(other.get("prevented",0)))
-		bars=[[float(row.get("healing",0))/top,Color("8ff0a4"),"回復"],[float(row.get("prevented",0))/top,Color("91dafa"),"減傷"]]
+		bars=[[bar_fraction(float(row.get("healing",0)),top),Color("8ff0a4"),"回復"],[bar_fraction(float(row.get("prevented",0)),top),Color("91dafa"),"減傷"]]
 	return {"ids":ids,"bars":bars,"group":str(row.get("id",""))=="support_zero_group"}
 
 func _draw_card_art(number: int) -> void:
@@ -332,7 +338,7 @@ func _apply_responsive_layout() -> void:
 	for label in [gain_label]:label.add_theme_font_size_override("font_size",roundi(14*scale))
 	for label in [progress_label,page_label]:label.add_theme_font_size_override("font_size",roundi(12*scale))
 	for id in controls:controls[id].add_theme_font_size_override("font_size",roundi(14*scale))
-	_place(title_label,12,8,w,30)
+	_place(title_label,46,8,w-34,30)
 	var left_w:=w if portrait else w*0.46-8
 	summary_label.custom_minimum_size=Vector2(left_w,0)
 	var tab_y:=44.0

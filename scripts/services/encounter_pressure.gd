@@ -27,6 +27,9 @@ var enabled := true
 var cycle_protected := 0
 var last_result: Dictionary = {}
 var result_age := 99.0
+const ZONE_FILL_WARNING := 0.03
+const ZONE_FILL_ACTIVE := 0.07
+const ZONE_EDGE_WIDTH := 2.2
 const FONT := preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 const FORMATION_ORDER := ["wedge", "ring", "scatter"]
 const FORMATION_NAMES := {"wedge": "楔形", "ring": "圓陣", "scatter": "散兵"}
@@ -168,6 +171,14 @@ const BADGES := {"wedge": preload("res://assets/ui/r8_vector/badge_wedge.svg"), 
 const WRONG_RING := preload("res://assets/ui/r8_vector/badge_wrong_ring.svg")
 const BADGE_SIZE := 64.0
 
+func answer_label(accepted: Array) -> String:
+	var names := PackedStringArray()
+	for each in accepted:
+		names.append(FORMATION_NAMES[each])
+	if names.is_empty():
+		return ""
+	return ("\u9700\uff1a" + "\uff0f".join(names)) if names.size() == 1 else ("\u53ef\u7528\uff1a" + "\uff0f".join(names))
+
 func _draw_answer(center: Vector2) -> void:
 	var accepted: Array[String] = []
 	for id in FORMATION_ORDER:
@@ -187,11 +198,12 @@ func _draw_answer(center: Vector2) -> void:
 		if wrong:
 			var pulse := 0.6 + 0.4 * absf(sin(clock * 6.0))
 			draw_texture_rect(WRONG_RING, rect.grow(6.0), false, Color(1, 1, 1, pulse))
-	var names := PackedStringArray()
-	for each in accepted:
-		names.append(FORMATION_NAMES[each])
-	var text := ("需" if count == 1 else "可用") + "／".join(names)
+	var text := answer_label(accepted)
 	var at := center + Vector2(-90, BADGE_SIZE * 0.5 + 24)
+	var badge_text_width: float = FONT.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+	var badge_backing := Rect2(at + Vector2(90 - badge_text_width * 0.5 - 8, -19), Vector2(badge_text_width + 16, 26))
+	draw_rect(badge_backing, Color("08121f", 0.88), true)
+	draw_rect(badge_backing, Color("ff8a99" if wrong else FORMATION_COLORS[accepted[0]], 0.85), false, 1.5, true)
 	draw_string_outline(FONT, at, text, HORIZONTAL_ALIGNMENT_CENTER, 180, 20, 7, Color("08121f", 0.92))
 	draw_string(FONT, at, text, HORIZONTAL_ALIGNMENT_CENTER, 180, 20, Color("ff8a99") if wrong else FORMATION_COLORS[accepted[0]])
 
@@ -199,7 +211,7 @@ func _draw() -> void:
 	if not enabled or not started or not GameManager.game_running or get_tree().paused or phase == "recovery":
 		return
 	var color := Color("ff637c") if phase == "active" else Color("edbc8d")
-	var alpha := 0.14 if phase == "active" else 0.05
+	var alpha := ZONE_FILL_ACTIVE if phase == "active" else ZONE_FILL_WARNING
 	var edge_alpha:=0.74+0.18*sin(clock*8.0)
 	if kind in ["front","pincer"]:
 		var lanes: Array[Rect2] = []

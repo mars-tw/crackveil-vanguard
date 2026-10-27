@@ -3,6 +3,7 @@ extends NinePatchRect
 # Crackveil's own frame: original vector nine-slices (assets/ui/r8_vector,
 # made with MUSE) drawn over the parent's existing StyleBox. The centre of each
 # frame is transparent; the overlay ignores input and never changes layout.
+const TITLE_SAFE_LEFT := 46.0
 const FRAMES := {
 	"panel": {"texture": preload("res://assets/ui/r8_vector/panel_frame.svg"), "margin": 48},
 	"card": {"texture": preload("res://assets/ui/r8_vector/card_frame.svg"), "margin": 24},
@@ -23,6 +24,9 @@ static func attach(parent: Control, with_seal: bool = true, accent_color: Color 
 		ornament.self_modulate = Color.WHITE.lerp(accent_color, 0.25)
 	parent.add_child(ornament)
 	return ornament
+
+static func title_safe_left() -> float:
+	return TITLE_SAFE_LEFT
 
 static func frame_kind_for(with_seal: bool, corner_size: float) -> String:
 	return "panel" if with_seal else "card" if is_equal_approx(corner_size, 14.0) else "button"

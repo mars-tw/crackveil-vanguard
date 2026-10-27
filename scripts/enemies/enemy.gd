@@ -110,6 +110,11 @@ var special_shield_active := false
 var special_gold_drops := 0
 var special_projectiles_fired := 0
 var special_label: Label
+var elite_halo: Sprite2D = null
+var elite_armor_broken := false
+var elite_break_announcements := 0
+var death_dissolve_age := 99.0
+var last_hit_was_critical := false
 var biome_skill := ""
 var biome_cooldown := 3.5
 var biome_timer := 1.4
@@ -246,6 +251,8 @@ func pool_on_release() -> void:
 		shadow.visible = false
 	if threat_glow != null:
 		threat_glow.visible = false
+	if elite_halo != null:
+		elite_halo.visible = false
 	if boss_inner_glow != null:
 		boss_inner_glow.visible = false
 	if boss_core_glow != null:
@@ -381,6 +388,10 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	boss_phase_volley_pending = false
 	rotation = 0.0
 	hit_flash_timer = 0.0
+	elite_armor_broken = false
+	elite_break_announcements = 0
+	death_dissolve_age = 99.0
+	last_hit_was_critical = false
 	is_dying = false
 	death_finalized = false
 	death_animation_profile = &"none"
@@ -1052,6 +1063,30 @@ func _effective_speed() -> float:
 	return speed * clamp(multiplier, 0.35, 1.6)
 
 
+func elite_display_scale() -> float:
+	if special_elite_id != "":
+		return 1.25
+	if is_boss:
+		return 1.08
+	if is_elite:
+		return 1.15
+	return 1.0
+
+
+func elite_frame_visible() -> bool:
+	return is_elite or is_boss or special_elite_id != ""
+
+
+func hit_flash_strength() -> float:
+	return clampf(hit_flash_timer / HIT_FLASH_DURATION, 0.0, 1.0)
+
+
+func death_dissolve_alpha() -> float:
+	if not is_dying:
+		return 1.0
+	return clampf(1.0 - death_dissolve_age / 0.5, 0.15, 1.0)
+
+
 func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> float:
 	if hp <= 0.0 or not is_active:
 		return 0.0
@@ -1102,7 +1137,12 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 		GameManager.record_critical_hit(global_position, source_position, final_amount)
 	else:
 		EntityFactory.spawn_damage_number(final_amount, number_position, Color("ccd9e0") if heavy_hit else Color("8ea4b0"), 17 if heavy_hit else 13)
-	COMBAT_FEEDBACK.report_hit(global_position, source_position, severity, hp <= 0.0, is_elite or is_boss)
+	last_hit_was_critical = last_hit_critical
+	COMBAT_FEEDBACK.report_hit(global_position, source_position, severity, hp <= 0.0, is_elite or is_boss, last_hit_critical)
+	if elite_frame_visible() and not elite_armor_broken and hp > 0.0 and hp <= max_hp * 0.5:
+		elite_armor_broken = true
+		elite_break_announcements += 1
+		EntityFactory.spawn_damage_number("\u7834\u7532", global_position + Vector2(0, -radius - 34.0), Color("ffd57a"), 26, "", true)
 	hp_bar_timer = 0.55
 	_trigger_hit_micro_feedback()
 	_update_hp_bar()
@@ -1172,6 +1212,9 @@ func _die(source_position: Vector2 = Vector2.ZERO) -> void:
 		return
 	is_dying = true
 	is_active = false
+	death_dissolve_age = 0.0
+	if elite_frame_visible():
+		EntityFactory.spawn_damage_number("\u64ca\u7834", global_position + Vector2(0, -radius - 40.0), Color("ffd57a"), 28, "", true)
 	velocity = Vector2.ZERO
 	knockback_velocity = Vector2.ZERO
 	var death_direction := (global_position - source_position).normalized()
@@ -1351,6 +1394,16 @@ func _ensure_visual_nodes() -> void:
 	threat_glow.material = ART_RESOURCES.get_additive_material()
 	threat_glow.z_index = -3
 
+	elite_halo = get_node_or_null("EliteHalo") as Sprite2D
+	if elite_halo == null:
+		elite_halo = Sprite2D.new()
+		elite_halo.name = "EliteHalo"
+		elite_halo.visible = false
+		add_child(elite_halo)
+	elite_halo.texture = preload("res://assets/ui/r9_vector/icon_elite_halo.svg")
+	elite_halo.centered = true
+	elite_halo.z_index = -1
+
 	sprite = get_node_or_null("Sprite2D") as Sprite2D
 	if sprite == null:
 		sprite = Sprite2D.new()
@@ -1474,7 +1527,7 @@ func _apply_sprite() -> void:
 		var texture: Texture2D = SPRITE_LOADER.get_texture(sprite_path)
 		sprite.visible = texture != null
 		if texture != null:
-			SPRITE_LOADER.fit_sprite(sprite, texture, radius * 3.0, sprite_scale)
+			SPRITE_LOADER.fit_sprite(sprite, texture, radius * 3.0, sprite_scale * elite_display_scale())
 		push_error("Missing articulated enemy animation frames for %s" % sprite_path)
 	_apply_shadow_and_glow()
 
@@ -1489,6 +1542,11 @@ func _set_sprite_modulate(color: Color) -> void:
 func _apply_shadow_and_glow() -> void:
 	if is_boss:
 		_ensure_boss_volume_nodes()
+	if elite_halo != null:
+		# Elites and bosses wear a rift halo so the body reads without the banner.
+		elite_halo.visible = elite_frame_visible()
+		if elite_halo.visible:
+			ART_RESOURCES.fit_sprite(elite_halo, elite_halo.texture, radius * 5.2 * elite_display_scale())
 	if shadow != null:
 		shadow.visible = true
 		shadow.position = Vector2(0.0, 54.0 * animated_sprite.scale.y) if animation_frames_ready else Vector2(0.0, radius * 0.86)
@@ -1581,7 +1639,8 @@ func _tick_hit_flash(delta: float) -> void:
 	hit_flash_timer = max(hit_flash_timer - delta, 0.0)
 	var ratio := hit_flash_timer / HIT_FLASH_DURATION
 	var flash_weight := pow(ratio, 0.65)
-	var flash_color := body_color.lerp(Color(1.0, 0.98, 0.9, 1.0), flash_weight)
+	# Overbright white so the hit reads on every sprite palette, easing back to normal.
+	var flash_color := Color.WHITE.lerp(Color(2.2, 2.15, 2.0, 1.0), flash_weight)
 	sprite.modulate = flash_color
 	if animated_sprite != null:
 		animated_sprite.modulate = flash_color
@@ -1624,7 +1683,7 @@ func _setup_animation_frames(target_diameter: float, scale_multiplier: float) ->
 		return
 	animated_sprite.sprite_frames = frames
 	animated_sprite.modulate = Color.WHITE
-	var readability_scale := 1.2 if is_boss else 1.45 if is_elite else 1.8
+	var readability_scale := (1.2 if is_boss else 1.45 if is_elite else 1.8) * elite_display_scale()
 	animated_sprite.scale = Vector2.ONE * (target_diameter / float(TRUE_ANIMATION_LIBRARY.CELL_SIZE)) * scale_multiplier * readability_scale
 	animation_frames_ready = true
 	animated_sprite.visible = true
@@ -1673,7 +1732,11 @@ func tick_shared_enemy_animation(delta: float, focus_position: Vector2, focus_va
 		_update_visual_state()
 	elif not is_dying:
 		return
-	elif death_recoil_velocity.length_squared() > 0.01:
+	else:
+		# Dying enemies fade toward a faint husk while the fall poses keep playing.
+		death_dissolve_age += delta
+		animated_sprite.modulate = Color(1.0, 1.0, 1.0, death_dissolve_alpha())
+	if not is_active and is_dying and death_recoil_velocity.length_squared() > 0.01:
 		# The articulated fall poses still run in full; a small ballistic slide
 		# carries the attack direction after the disabled collider leaves combat.
 		global_position += death_recoil_velocity * delta

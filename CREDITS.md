@@ -76,3 +76,7 @@ CC0 素材依法不要求署名，但本專案保留作者、來源與修改紀�
 ## R42 戰鬥配樂
 
 - `assets/audio/r42_battle_loop.ogg`：本機 ACE-Step v1.5 turbo（ComfyUI，經本機 AI 派工器 `music` 能力）以文字提示生成的原創器樂，再以 ffmpeg 裁去尾段靜音、做 2 秒交叉淡化成 24 秒循環並調整響度。提示詞、原始 FLAC、派工任務編號與 SHA-256 見 `docs/evidence/r42/audio/provenance.json`。ASR 檢查未偵測到人聲歌詞。
+
+## R9 向量 UI 圖
+
+- assets/ui/r9_vector/ 的 12 張 SVG 為 MUSE (Meta muse-wonder) 手寫純向量原創素材，逐檔用途與尺寸見該目錄 MANIFEST.json 與 README.md。

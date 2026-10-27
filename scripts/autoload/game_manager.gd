@@ -17,6 +17,7 @@ signal combo_break_requested(combo_count: int)
 signal boss_intro_requested(boss_name: String)
 signal boss_phase_transition_requested
 signal captain_ability_hit_flash_requested
+signal captain_hurt_requested(from_direction: Vector2, hp_ratio: float)
 
 const SHOP_FIRST_TIME := 75.0
 const SHOP_SECOND_TIME := 150.0
@@ -465,6 +466,9 @@ func show_toast(message: String, kind: String = "general", urgent: bool = false)
 
 func request_captain_ability_hit_flash() -> void:
 	captain_ability_hit_flash_requested.emit()
+
+func notify_captain_hurt(from_direction: Vector2, hp_ratio: float) -> void:
+	captain_hurt_requested.emit(from_direction, clampf(hp_ratio, 0.0, 1.0))
 
 
 func acquire_time_scale(owner: String, scale: float) -> int:
