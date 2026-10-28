@@ -276,6 +276,9 @@ func _layout() -> void:
 	_place(controls.close,size.x-68,8,56,44)
 	_place(rule_label,12,35,w-68 if portrait else 220,18)
 	_place(wallet,wallet_x,12,w-60-wallet_x if portrait else w-60-wallet_x,18)
+	# Text metrics differ slightly between platforms (the Linux CI measures this
+	# line wider than Windows); shrink the wallet line until it fits its slot.
+	_fit_font(wallet,roundi(12*scale),8)
 	_place(progress_label,12 if portrait else 240,58 if portrait else 32,w if portrait else w-300,18)
 	var tabs_y:=80.0 if portrait else 52.0
 	for number in range(4):_place(tabs[number],12+number*(w+4)/4,tabs_y,(w-12)/4,44)
@@ -356,6 +359,12 @@ func _draw_lineup() -> void:
 			lineup.draw_texture_rect(lineup_textures[number],frame.grow(-3),false)
 		var tag:=("先發 " if incoming else "")+lineup_names[number]
 		lineup.draw_string(FONT,Vector2(frame.position.x-20,frame.end.y+font_size+2),tag,HORIZONTAL_ALIGNMENT_CENTER,cell+40,font_size,Color("ffdc82") if incoming else Color("eaf2f3"))
+
+func _fit_font(label: Label,start: int,minimum: int) -> void:
+	var font_size:=start
+	while font_size>minimum and FONT.get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x>label.size.x:
+		font_size-=1
+	label.add_theme_font_size_override("font_size",font_size)
 
 func _place(control: Control,x: float,y: float,w: float,h: float) -> void:
 	control.position=Vector2(x,y)
