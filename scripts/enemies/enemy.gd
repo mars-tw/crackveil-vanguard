@@ -110,6 +110,99 @@ var special_shield_active := false
 var special_gold_drops := 0
 var special_projectiles_fired := 0
 var special_label: Label
+var special_label_wanted := false
+# R11: world name plates stay out of the top HUD band (bars, notice, timer)
+# and never stack on another elite's plate.
+const ELITE_LABEL_TOP_BAND := 175.0
+const ELITE_LABEL_BOTTOM_BAND := 110.0
+const ELITE_LABEL_SIZE := Vector2(200, 30)
+const ELITE_LABEL_Z := 40
+const ELITE_LABEL_RIGHT_BAND := 190.0
+const ELITE_LABEL_LEFT_BLOCK := Vector2(300, 250)
+static var _elite_label_frame := -1
+static var _elite_label_rects: Array[Rect2] = []
+# Screen areas of rule text (verdict lines, answer badges, seal marker), keyed by
+# the node that drew them. A canvas item keeps its last drawing until its next
+# _draw (for example while paused), so a reservation lives exactly as long as
+# that drawing: the owner clears it at the start of each _draw, and hidden or
+# freed owners are ignored.
+static var _reserved_by_owner: Dictionary = {}
+
+static func clear_label_areas(owner: Object) -> void:
+	_reserved_by_owner.erase(owner.get_instance_id())
+
+static func reserve_label_area(rect: Rect2, owner: Object = null) -> void:
+	var key := owner.get_instance_id() if owner != null else 0
+	if not _reserved_by_owner.has(key):
+		_reserved_by_owner[key] = {"owner": weakref(owner) if owner != null else null, "rects": []}
+	_reserved_by_owner[key].rects.append(rect)
+
+static func active_label_areas() -> Array[Rect2]:
+	var result: Array[Rect2] = []
+	for key in _reserved_by_owner.keys():
+		var entry: Dictionary = _reserved_by_owner[key]
+		if entry.owner != null:
+			var node = entry.owner.get_ref()
+			if node == null:
+				_reserved_by_owner.erase(key)
+				continue
+			if node is CanvasItem and node.is_inside_tree() and not node.is_visible_in_tree():
+				continue
+		for rect in entry.rects:
+			result.append(rect)
+	return result
+
+# R11: head markers (captain crown, ally icons) skip their draw when they
+# would sit on a verdict line, answer badge or seal marker.
+static func label_area_reserved(screen_point: Vector2, margin: float) -> bool:
+	for rect in active_label_areas():
+		if rect.grow(margin).has_point(screen_point):
+			return true
+	return false
+
+static func elite_label_hud_zones(view: Vector2) -> Array[Rect2]:
+	return [Rect2(view.x - ELITE_LABEL_RIGHT_BAND, 0, ELITE_LABEL_RIGHT_BAND, view.y), Rect2(0, view.y - ELITE_LABEL_LEFT_BLOCK.y, ELITE_LABEL_LEFT_BLOCK.x, ELITE_LABEL_LEFT_BLOCK.y)]
+
+static func elite_label_slot(above: Rect2, below: Rect2, view: Vector2, taken: Array[Rect2]) -> Rect2:
+	var zones := elite_label_hud_zones(view)
+	for candidate in [above, below, below.grow_individual(0, -34, 0, 34)]:
+		var rect: Rect2 = candidate
+		if rect.position.y < ELITE_LABEL_TOP_BAND or rect.end.y > view.y - ELITE_LABEL_BOTTOM_BAND:
+			continue
+		if zones[0].intersects(rect) or zones[1].intersects(rect):
+			continue
+		var free := true
+		for other in taken:
+			if other.intersects(rect):
+				free = false
+				break
+		if free:
+			return rect
+	return Rect2()
+
+func _place_special_label() -> void:
+	if special_label == null or not special_label_wanted or not is_inside_tree():
+		return
+	var frame := Engine.get_physics_frames()
+	if frame != _elite_label_frame:
+		_elite_label_frame = frame
+		_elite_label_rects.clear()
+	var xf := get_viewport().get_canvas_transform() * get_global_transform()
+	var view := get_viewport().get_visible_rect().size
+	var scale_y := absf(xf.get_scale().y)
+	var above_local := Vector2(-100, -64 * animated_sprite.scale.y - 34)
+	var below_local := Vector2(-100, 30 * animated_sprite.scale.y + 6)
+	var above := Rect2(xf * above_local, ELITE_LABEL_SIZE * scale_y)
+	var below := Rect2(xf * below_local, ELITE_LABEL_SIZE * scale_y)
+	var taken: Array[Rect2] = []
+	for rect in _elite_label_rects:
+		taken.append(rect.grow(4.0))
+	taken.append_array(active_label_areas())
+	var slot := elite_label_slot(above, below, view, taken)
+	special_label.visible = slot.size != Vector2.ZERO
+	if special_label.visible:
+		_elite_label_rects.append(slot)
+		special_label.position = xf.affine_inverse() * slot.position
 var elite_halo: Sprite2D = null
 var hit_flash_overlay: Sprite2D = null
 var elite_armor_broken := false
@@ -212,6 +305,9 @@ func pool_on_release() -> void:
 	tactical_phase_gate_until = -1
 	if hit_flash_overlay != null:
 		hit_flash_overlay.visible = false
+	special_label_wanted = false
+	if special_label != null:
+		special_label.visible = false
 	queue_redraw()
 	attack_timer = 0.0
 	hp_bar_timer = 0.0
@@ -435,11 +531,14 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 		special_label.add_theme_stylebox_override("normal", label_backing)
 		special_label.add_theme_color_override("font_outline_color", Color("11192a"))
 		special_label.add_theme_constant_override("outline_size", 5)
+		special_label.z_as_relative = false
+		special_label.z_index = ELITE_LABEL_Z
 		add_child(special_label)
 	special_label.text = special_elite_name
 	special_label.size = Vector2(200, 30)
 	special_label.position = Vector2(-100, -64 * animated_sprite.scale.y - 34)
 	special_label.visible = special_elite_name != ""
+	special_label_wanted = special_label.visible
 	special_label.add_theme_color_override("font_color", body_color.lightened(0.45))
 	_update_hp_bar()
 	_set_hp_bar_visible(false)
@@ -454,6 +553,7 @@ func _physics_process(delta: float) -> void:
 	if not is_active:
 		return
 	_tick_hit_flash(delta)
+	_place_special_label()
 	stagger_guard_timer = maxf(0.0, stagger_guard_timer - delta)
 
 	_tick_status_effects(delta)
@@ -1265,6 +1365,9 @@ func _die(source_position: Vector2 = Vector2.ZERO) -> void:
 		return
 	is_dying = true
 	is_active = false
+	special_label_wanted = false
+	if special_label != null:
+		special_label.visible = false
 	death_dissolve_age = 0.0
 	if elite_frame_visible():
 		EntityFactory.spawn_damage_number("\u64ca\u7834", global_position + Vector2(0, -radius - 40.0), Color("ffd57a"), 38, "", true)

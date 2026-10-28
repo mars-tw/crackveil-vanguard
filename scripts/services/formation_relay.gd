@@ -35,6 +35,8 @@ var seal_flash_text := ""
 const SEAL_FLASH_SECONDS := 2.6
 var label_layer: CanvasLayer
 var marker_label: Label
+var text_layer: Node2D
+const TEXT_LAYER_Z := 30
 var equipment_details: Control
 
 func required_formation() -> String:
@@ -122,8 +124,19 @@ func clear_wrong_notice() -> void:
 func switch_hint() -> String:
 	return "點陣形鈕" if MobileTuning.has_confirmed_touch() else "按 Q 切換"
 
+# R11: a correct formation that still took hits is amber, not the red of the
+# wrong-formation verdict, so "散兵對陣・9/9 人中招" never reads as a mistake.
+static func verdict_color(result: Dictionary) -> Color:
+	if not bool(result.get("correct",false)):
+		return Color("ffa0a8")
+	if int(result.get("hit",0)) == 0 or int(result.get("protected",0)) > 0:
+		return Color("bdf5a8")
+	return Color("ffd98a")
+
 func consequence_text(result: Dictionary) -> String:
 	if bool(result.get("correct",false)):
+		if int(result.get("hit",0)) > 0 and int(result.get("protected",0)) == 0:
+			return "陣形正確・封合照算・走位躲開落點"
 		return "陣形正確・站進封隙累積封合"
 	# The wave was lost to the wrong formation, but the squad may already have
 	# switched; never tell the player to switch to what they already hold.
@@ -222,6 +235,8 @@ func _update_label() -> void:
 	marker_label.position = Vector2(x,y)
 	marker_label.size = Vector2(width,30)
 	marker_label.text = marker_text()
+	Enemy.clear_label_areas(marker_label)
+	Enemy.reserve_label_area(marker_label.get_global_rect(), marker_label)
 
 
 func _ready() -> void:
@@ -230,6 +245,13 @@ func _ready() -> void:
 	pressure = preload("res://scripts/services/encounter_pressure.gd").new()
 	add_child(pressure)
 	pressure.configure(anchor,step)
+	# R11: verdict lines and the seal reward banner draw on a layer above the
+	# seal frames, elite halos and squad markers instead of underneath them.
+	text_layer = Node2D.new()
+	text_layer.name = "RuleTextLayer"
+	text_layer.z_index = TEXT_LAYER_Z
+	add_child(text_layer)
+	text_layer.draw.connect(_draw_text_layer)
 	marker_label = Label.new()
 	marker_label.add_theme_font_size_override("font_size",14)
 	marker_label.add_theme_color_override("font_color",Color("ffdcac"))
@@ -255,6 +277,8 @@ func _process(delta: float) -> void:
 		return
 	advance(delta)
 	queue_redraw()
+	if is_instance_valid(text_layer):
+		text_layer.queue_redraw()
 
 func _tick_feedback(delta: float) -> void:
 	wrong_timer = maxf(0,wrong_timer-delta)
@@ -348,9 +372,15 @@ func advance(delta: float) -> void:
 	else:
 		anchor += Vector2(0, -170) if step == 1 else Vector2(-210, 0)
 		pressure.configure(anchor,step)
-		GameManager.show_toast("封隙 %d/3｜放棄治療・反擊傷害 +20%%，10 秒" % step if GameManager.active_starting_node=="spec_prepare" else "封隙 %d/3｜對陣整補 +8・反擊傷害 +20%%，5 秒" % step, "battle", true)
+		# R11: the reward is already on the world banner (seal_text); the toast
+		# points at the next seal instead of repeating it.
+		GameManager.show_toast(seal_toast_text(step), "battle", true)
 	if AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("level_up")
+
+func seal_toast_text(step: int) -> String:
+	var seconds := 10 if GameManager.active_starting_node=="spec_prepare" else 5
+	return "封隙 %d/3｜第 %d 道已開啟・加成 %d 秒" % [step, step + 1, seconds]
 
 func seal_text(count: int) -> String:
 	if GameManager.active_starting_node=="spec_prepare":
@@ -365,6 +395,11 @@ static func clamp_screen_point(screen: Vector2, view: Vector2, width: float) -> 
 	screen.x = clampf(screen.x, 8.0, maxf(8.0, view.x - width - 8.0))
 	screen.y = clampf(screen.y, VERDICT_TOP_BAND, maxf(VERDICT_TOP_BAND, view.y - VERDICT_BOTTOM_BAND))
 	return screen
+# R11: elite name plates step aside from verdict lines and the seal marker.
+func _reserve_for_plates(local_rect: Rect2) -> void:
+	if is_inside_tree():
+		Enemy.reserve_label_area((get_viewport().get_canvas_transform() * get_global_transform()) * local_rect, text_layer if is_instance_valid(text_layer) else self)
+
 func _keep_on_screen(local_at: Vector2, width: float) -> Vector2:
 	if not is_inside_tree():
 		return local_at
@@ -440,6 +475,37 @@ func _draw_offscreen_pointer() -> void:
 	draw_string_outline(FONT, point + Vector2(-50, 50), label, HORIZONTAL_ALIGNMENT_CENTER, 100, 15, 6, Color("08121f", 0.9))
 	draw_string(FONT, point + Vector2(-50, 50), label, HORIZONTAL_ALIGNMENT_CENTER, 100, 15, Color("ffdcac"))
 
+# Runs on text_layer's draw signal: drawn after the seal and pressure children.
+func _draw_text_layer() -> void:
+	Enemy.clear_label_areas(text_layer)
+	if not is_instance_valid(GameManager.player):
+		return
+	if not completed:
+		_draw_verdict()
+	# Drawn last so the next seal's marker never covers the success line.
+	_draw_seal_flash()
+
+func _draw_verdict() -> void:
+	var edge := CAPTAIN_RADIUS
+	if is_instance_valid(pressure) and pressure.result_age < 2.4 and not pressure.last_result.is_empty() and seal_flash_time >= SEAL_FLASH_SECONDS:
+		var verdict := result_text(pressure.last_result)
+		var fade := clampf((2.4 - pressure.result_age) / 0.5, 0.0, 1.0)
+		var lift := 14.0 * minf(1.0, pressure.result_age / 0.4)
+		var at := anchor + (Vector2(-140, edge + 44 - lift) if _label_below(anchor) else Vector2(-140, -edge - 34 - lift))
+		at = _keep_on_screen(at, 280.0)
+		var text_width: float = FONT.get_string_size(verdict,HORIZONTAL_ALIGNMENT_LEFT,-1,20).x
+		_reserve_for_plates(Rect2(at + Vector2(0, -24), Vector2(280, 58)))
+		text_layer.draw_rect(Rect2(at+Vector2(140-text_width/2-10,-22),Vector2(text_width+20,30)),Color(0.03,0.05,0.09,0.72*fade),true)
+		text_layer.draw_string_outline(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,7,Color(0.03,0.05,0.09,0.9*fade))
+		text_layer.draw_string(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,Color(verdict_color(pressure.last_result),fade))
+		# Second line: what this verdict means for the seal under the same rule.
+		var consequence := consequence_text(pressure.last_result)
+		var sub_at := at + Vector2(0, 26)
+		var sub_width: float = FONT.get_string_size(consequence,HORIZONTAL_ALIGNMENT_LEFT,-1,16).x
+		text_layer.draw_rect(Rect2(sub_at+Vector2(140-sub_width/2-8,-17),Vector2(sub_width+16,23)),Color(0.03,0.05,0.09,0.66*fade),true)
+		text_layer.draw_string_outline(FONT,sub_at,consequence,HORIZONTAL_ALIGNMENT_CENTER,280,16,6,Color(0.03,0.05,0.09,0.9*fade))
+		text_layer.draw_string(FONT,sub_at,consequence,HORIZONTAL_ALIGNMENT_CENTER,280,16,Color(Color("e8f7d8") if bool(pressure.last_result.correct) else Color("ffd0a0"),fade))
+
 func _draw_seal_flash() -> void:
 	if seal_flash_time >= SEAL_FLASH_SECONDS or seal_flash_text == "":
 		return
@@ -448,23 +514,24 @@ func _draw_seal_flash() -> void:
 	var grow := 1.0 + 1.1 * smoothstep(0.0, 0.7, seal_flash_time)
 	var edge := CAPTAIN_RADIUS * grow
 	var ring := PackedVector2Array([seal_flash_at+Vector2(0,-edge),seal_flash_at+Vector2(edge,0),seal_flash_at+Vector2(0,edge),seal_flash_at+Vector2(-edge,0),seal_flash_at+Vector2(0,-edge)])
-	draw_polyline(ring,Color("08121f",0.8*fade),9,true)
-	draw_polyline(ring,Color(gold,fade),4,true)
+	text_layer.draw_polyline(ring,Color("08121f",0.8*fade),9,true)
+	text_layer.draw_polyline(ring,Color(gold,fade),4,true)
 	var emblem := CAPTAIN_RADIUS * (0.9 + 0.25 * smoothstep(0.0, 0.5, seal_flash_time))
-	draw_texture_rect(SEAL_EMBLEM, Rect2(seal_flash_at - Vector2.ONE * emblem, Vector2.ONE * emblem * 2.0), false, Color(1, 1, 1, fade))
+	text_layer.draw_texture_rect(SEAL_EMBLEM, Rect2(seal_flash_at - Vector2.ONE * emblem, Vector2.ONE * emblem * 2.0), false, Color(1, 1, 1, fade))
 	var rise := 10.0 * minf(1.0, seal_flash_time / 0.4)
 	var at := seal_flash_at + (Vector2(-230, CAPTAIN_RADIUS + 70 - rise) if _label_below(seal_flash_at) else Vector2(-230, -CAPTAIN_RADIUS - 52 - rise))
 	var width: float = FONT.get_string_size(seal_flash_text,HORIZONTAL_ALIGNMENT_LEFT,-1,22).x
-	draw_rect(Rect2(at+Vector2(230-width/2-12,-25),Vector2(width+24,34)),Color(0.05,0.04,0.02,0.82*fade),true)
-	draw_rect(Rect2(at+Vector2(230-width/2-12,-25),Vector2(width+24,34)),Color(gold,0.9*fade),false,2,true)
-	draw_string_outline(FONT,at,seal_flash_text,HORIZONTAL_ALIGNMENT_CENTER,460,22,7,Color(0.03,0.03,0.02,0.9*fade))
-	draw_string(FONT,at,seal_flash_text,HORIZONTAL_ALIGNMENT_CENTER,460,22,Color(gold,fade))
+	_reserve_for_plates(Rect2(at+Vector2(230-width/2-12,-25),Vector2(width+24,34)))
+	text_layer.draw_rect(Rect2(at+Vector2(230-width/2-12,-25),Vector2(width+24,34)),Color(0.05,0.04,0.02,0.82*fade),true)
+	text_layer.draw_rect(Rect2(at+Vector2(230-width/2-12,-25),Vector2(width+24,34)),Color(gold,0.9*fade),false,2,true)
+	text_layer.draw_string_outline(FONT,at,seal_flash_text,HORIZONTAL_ALIGNMENT_CENTER,460,22,7,Color(0.03,0.03,0.02,0.9*fade))
+	text_layer.draw_string(FONT,at,seal_flash_text,HORIZONTAL_ALIGNMENT_CENTER,460,22,Color(gold,fade))
 
 func _draw() -> void:
+	Enemy.clear_label_areas(self)
 	if not is_instance_valid(GameManager.player):
 		return
 	if completed:
-		_draw_seal_flash()
 		return
 	var color: Color = COLORS[step]
 	# Four etched corners: task marker, never a defensive circle.
@@ -533,24 +600,6 @@ func _draw() -> void:
 	if wrong_timer > 0:
 		draw_line(anchor-Vector2(23,23),anchor+Vector2(23,23),Color("ff637c"),5,true)
 		draw_line(anchor+Vector2(23,-23),anchor+Vector2(-23,23),Color("ff637c"),5,true)
-	if is_instance_valid(pressure) and pressure.result_age < 2.4 and not pressure.last_result.is_empty() and seal_flash_time >= SEAL_FLASH_SECONDS:
-		var verdict := result_text(pressure.last_result)
-		var good: bool = bool(pressure.last_result.correct) and (int(pressure.last_result.hit) == 0 or int(pressure.last_result.protected) > 0)
-		var fade := clampf((2.4 - pressure.result_age) / 0.5, 0.0, 1.0)
-		var lift := 14.0 * minf(1.0, pressure.result_age / 0.4)
-		var at := anchor + (Vector2(-140, edge + 44 - lift) if _label_below(anchor) else Vector2(-140, -edge - 34 - lift))
-		at = _keep_on_screen(at, 280.0)
-		var text_width: float = FONT.get_string_size(verdict,HORIZONTAL_ALIGNMENT_LEFT,-1,20).x
-		draw_rect(Rect2(at+Vector2(140-text_width/2-10,-22),Vector2(text_width+20,30)),Color(0.03,0.05,0.09,0.72*fade),true)
-		draw_string_outline(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,7,Color(0.03,0.05,0.09,0.9*fade))
-		draw_string(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,Color(Color("bdf5a8") if good else Color("ffa0a8"),fade))
-		# Second line: what this verdict means for the seal under the same rule.
-		var consequence := consequence_text(pressure.last_result)
-		var sub_at := at + Vector2(0, 26)
-		var sub_width: float = FONT.get_string_size(consequence,HORIZONTAL_ALIGNMENT_LEFT,-1,16).x
-		draw_rect(Rect2(sub_at+Vector2(140-sub_width/2-8,-17),Vector2(sub_width+16,23)),Color(0.03,0.05,0.09,0.66*fade),true)
-		draw_string_outline(FONT,sub_at,consequence,HORIZONTAL_ALIGNMENT_CENTER,280,16,6,Color(0.03,0.05,0.09,0.9*fade))
-		draw_string(FONT,sub_at,consequence,HORIZONTAL_ALIGNMENT_CENTER,280,16,Color(Color("e8f7d8") if bool(pressure.last_result.correct) else Color("ffd0a0"),fade))
 	var captain: Node2D = GameManager.player
 	var direction := captain.global_position.direction_to(anchor)
 	if captain.global_position.distance_to(anchor) > CAPTAIN_RADIUS:
@@ -559,5 +608,3 @@ func _draw() -> void:
 		draw_line(tip, tip - direction.rotated(0.65) * 12, color, 3, true)
 		draw_line(tip, tip - direction.rotated(-0.65) * 12, color, 3, true)
 	_draw_offscreen_pointer()
-	# Drawn last so the next seal's marker never covers the success line.
-	_draw_seal_flash()

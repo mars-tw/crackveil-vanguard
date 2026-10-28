@@ -149,6 +149,8 @@ func bond_flash_alpha() -> float:
 	return clampf(bond_flash_timer / BOND_FLASH_SECONDS, 0.0, 1.0)
 func formation_link_alpha() -> float:
 	return 1.0 if formation_indicator_timer > FORMATION_INDICATOR_DURATION - 1.0 else 0.22
+func scatter_ring_alpha() -> float:
+	return 0.7 if formation_indicator_timer > FORMATION_INDICATOR_DURATION - 1.0 else 0.3
 var nearest_threat: Node2D
 
 const BOND_DEFINITIONS: Array[Dictionary] = [
@@ -530,10 +532,12 @@ func _draw() -> void:
 			draw_polyline(diamond, Color("dcf9ff"), 2.2, true)
 		else:
 			draw_arc(point, 16, 0, TAU, 24, Color(color,0.85), 1.8, true)
-		if formation_id == "scatter":
+		if formation_id == "scatter" and member == leader:
+			# R11: only the captain shows the pickup radius; eight overlapping dashed
+			# rings filled the artillery stage with green strokes.
 			var radius: float = member.get_pickup_radius()
 			for segment in range(12):
-				draw_arc(point, radius, segment * TAU / 12, (segment + 0.55) * TAU / 12, 4, Color(color,0.70),2.4,true)
+				draw_arc(point, radius, segment * TAU / 12, (segment + 0.55) * TAU / 12, 4, Color(color, scatter_ring_alpha()), 1.8, true)
 		elif formation_id == "wedge":
 			var tip := point + forward * 36
 			draw_polyline(PackedVector2Array([tip-forward.rotated(-0.65)*12,tip,tip-forward.rotated(0.65)*12]),Color(color,0.9),2,true)

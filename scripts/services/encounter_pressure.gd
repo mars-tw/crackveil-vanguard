@@ -161,6 +161,10 @@ func _crack_points(from: Vector2, to: Vector2, salt: int) -> PackedVector2Array:
 	points.append(to)
 	return points
 
+func seal_banner_showing() -> bool:
+	var relay := get_parent()
+	return relay != null and relay.get("seal_flash_time") != null and float(relay.get("seal_flash_time")) < float(relay.get("SEAL_FLASH_SECONDS"))
+
 func _draw_rune(at: Vector2, color: Color, size: float) -> void:
 	draw_colored_polygon(PackedVector2Array([at+Vector2(0,-size),at+Vector2(size*0.7,0),at+Vector2(0,size),at+Vector2(-size*0.7,0)]),Color("101b30",0.85))
 	draw_polyline(PackedVector2Array([at+Vector2(0,-size),at+Vector2(size*0.7,0),at+Vector2(0,size),at+Vector2(-size*0.7,0),at+Vector2(0,-size)]),color,1.6,true)
@@ -180,6 +184,10 @@ func answer_label(accepted: Array) -> String:
 	return ("\u9700\uff1a" + "\uff0f".join(names)) if names.size() == 1 else ("\u53ef\u7528\uff1a" + "\uff0f".join(names))
 
 func _draw_answer(center: Vector2) -> void:
+	# R11: the next seal's answer badge waits until the seal banner fades, so it
+	# never covers the banner's reward line.
+	if seal_banner_showing():
+		return
 	var accepted: Array[String] = []
 	for id in FORMATION_ORDER:
 		if GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node, kind, id):
@@ -202,12 +210,18 @@ func _draw_answer(center: Vector2) -> void:
 	var at := center + Vector2(-90, BADGE_SIZE * 0.5 + 24)
 	var badge_text_width: float = FONT.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
 	var badge_backing := Rect2(at + Vector2(90 - badge_text_width * 0.5 - 8, -19), Vector2(badge_text_width + 16, 26))
+	# R11: elite name plates step aside from this badge instead of stacking on it.
+	if is_inside_tree():
+		var xf := get_viewport().get_canvas_transform() * get_global_transform()
+		var icons := Rect2(center - Vector2(count * (BADGE_SIZE + 6.0) * 0.5, BADGE_SIZE * 0.5), Vector2(count * (BADGE_SIZE + 6.0), BADGE_SIZE))
+		Enemy.reserve_label_area(xf * icons.merge(badge_backing), self)
 	draw_rect(badge_backing, Color("08121f", 0.88), true)
 	draw_rect(badge_backing, Color("ff8a99" if wrong else FORMATION_COLORS[accepted[0]], 0.85), false, 1.5, true)
 	draw_string_outline(FONT, at, text, HORIZONTAL_ALIGNMENT_CENTER, 180, 20, 7, Color("08121f", 0.92))
 	draw_string(FONT, at, text, HORIZONTAL_ALIGNMENT_CENTER, 180, 20, Color("ff8a99") if wrong else FORMATION_COLORS[accepted[0]])
 
 func _draw() -> void:
+	Enemy.clear_label_areas(self)
 	if not enabled or not started or not GameManager.game_running or get_tree().paused or phase == "recovery":
 		return
 	var color := Color("ff637c") if phase == "active" else Color("edbc8d")

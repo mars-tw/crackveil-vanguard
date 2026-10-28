@@ -17,6 +17,9 @@ func _process(_delta: float) -> void:
 	visible=GameManager.game_running and not GameManager.is_game_over and not GameManager.stage_victory_pending
 	queue_redraw()
 
+func _screen_xf() -> Transform2D:
+	return get_viewport().get_canvas_transform()*get_global_transform() if is_inside_tree() else Transform2D.IDENTITY
+
 func _line(a: Vector2,b: Vector2,color: Color,width: float=2.0) -> void:
 	draw_line(a,b,INK,width+3,true)
 	draw_line(a,b,color,width,true)
@@ -30,6 +33,7 @@ func _draw() -> void:
 		if not member.is_alive:continue
 		var at: Vector2=to_local(member.global_position)
 		var above:=at+Vector2(0,-48)
+		var head_clear:=not Enemy.label_area_reserved(_screen_xf()*above,12.0)
 		if member==GameManager.player:
 			captain_markers+=1
 			# Gold floor halo: the captain stays identifiable in a 64px thumbnail
@@ -39,14 +43,17 @@ func _draw() -> void:
 			draw_arc(Vector2.ZERO,32,0,TAU,40,GOLD,4,true)
 			draw_set_transform(Vector2.ZERO)
 			# A crown and four corner brackets remain distinct from all rings.
-			draw_circle(above,10,INK)
-			var crown:=PackedVector2Array([above+Vector2(-8,-3),above+Vector2(-5,5),above+Vector2(5,5),above+Vector2(8,-3),above+Vector2(2,0),above+Vector2(0,-7),above+Vector2(-2,0)])
-			draw_colored_polygon(crown,GOLD)
+			# The crown yields to rule text; the gold floor halo stays.
+			if head_clear:
+				draw_circle(above,10,INK)
+				var crown:=PackedVector2Array([above+Vector2(-8,-3),above+Vector2(-5,5),above+Vector2(5,5),above+Vector2(8,-3),above+Vector2(2,0),above+Vector2(0,-7),above+Vector2(-2,0)])
+				draw_colored_polygon(crown,GOLD)
 			for side in [-1,1]:
 				_line(at+Vector2(side*19,9),at+Vector2(side*26,9),GOLD)
 				_line(at+Vector2(side*26,9),at+Vector2(side*26,2),GOLD)
 		else:
 			ally_markers+=1
+			if not head_clear:continue
 			draw_circle(above,7,INK)
 			var id: String=member.hero_id
 			if id in ["echo_singer","line_mender","tide_oracle"]:
