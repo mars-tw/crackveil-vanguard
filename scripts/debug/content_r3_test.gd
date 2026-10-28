@@ -53,6 +53,28 @@ func _run() -> void:
 	print("CONTENT_R3_%s checks=%d failures=%d" % [result.status,checks,failures.size()])
 	get_tree().quit(0 if failures.is_empty() else 1)
 
+# The read-only fixture must really refuse the save on every CI platform.
+# Windows: the file's read-only attribute blocks Godot's replace-by-rename.
+# Linux/macOS: a read-only file can still be replaced by rename, so the
+# containing directory is made non-writable as well, and a probe write must
+# actually fail before the fixture counts as created (never assumed).
+func _set_save_read_only(path: String, on: bool) -> bool:
+	if OS.get_name() == "Windows":
+		return FileAccess.set_read_only_attribute(path, on) == OK
+	var file := ProjectSettings.globalize_path(path)
+	var dir := file.get_base_dir()
+	if on:
+		if FileAccess.set_unix_permissions(file, 292) != OK or FileAccess.set_unix_permissions(dir, 365) != OK: # 0444 / 0555
+			return false
+		var probe := FileAccess.open(dir.path_join("r3_read_only_probe.tmp"), FileAccess.WRITE)
+		if probe != null:
+			probe.close()
+			DirAccess.remove_absolute(dir.path_join("r3_read_only_probe.tmp"))
+			return false
+		return true
+	var restored := FileAccess.set_unix_permissions(dir, 493) == OK # 0755
+	return FileAccess.set_unix_permissions(file, 420) == OK and restored # 0644
+
 func _transaction_test() -> void:
 	var config:=ConfigFile.new()
 	config.set_value("echo","shards",187)
@@ -62,11 +84,11 @@ func _transaction_test() -> void:
 	config.set_value("formation_seals","moon",true)
 	config.set_value("future_owner_setting","keep_me","unaltered")
 	config.save(meta_path)
-	check(FileAccess.set_read_only_attribute(meta_path,true)==OK,"cannot create real read-only migration fixture")
+	check(_set_save_read_only(meta_path,true),"cannot create real read-only migration fixture")
 	MetaProgress.load_progress()
 	check(not MetaProgress.starting_ready and MetaProgress.shards==187,"failed migration did not preserve economy/block unavailable choices")
 	check(not MetaProgress.purchase_starting_node("crew_guard"),"failed migration allowed unpersisted voucher spending")
-	FileAccess.set_read_only_attribute(meta_path,false)
+	_set_save_read_only(meta_path,false)
 	MetaProgress.load_progress()
 	check(MetaProgress.shards==187 and MetaProgress.lifetime_shards==240 and MetaProgress.get_upgrade_level("echo_vitality")==2,"migration lost nonzero economy/upgrades")
 	check(MetaProgress.tactical_medals.moon==3 and MetaProgress.formation_seals.moon,"migration lost collections")
