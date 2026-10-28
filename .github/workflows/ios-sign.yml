@@ -1,0 +1,174 @@
+name: Sign Crackveil iOS build (manual, no store upload)
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_id:
+        description: Explicit approved Godot project
+        required: true
+        type: choice
+        options: [crackveil-vanguard]
+      release_tag:
+        description: Same-repository DRAFT release containing verified Godot sources and helpers
+        required: true
+        type: string
+      sums_sha256:
+        description: Approved SHA256 of that release's SHA256SUMS file
+        required: true
+        type: string
+
+permissions:
+  contents: read
+concurrency:
+  group: godot-ios-${{ inputs.project_id }}
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    if: github.ref == 'refs/heads/main' && github.repository == 'mars-tw/crackveil-vanguard'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - name: Download only the approved same-repository draft assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PROJECT_ID: ${{ inputs.project_id }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          SUMS_SHA256: ${{ inputs.sums_sha256 }}
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,re,subprocess
+          projects={'crackveil-vanguard':'CrackveilVanguard','seven-district-reckoning':'SevenDistrict'}
+          project=os.environ['PROJECT_ID'];tag=os.environ['RELEASE_TAG'];pin=os.environ['SUMS_SHA256'].lower()
+          if project not in projects or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,119}',tag) or not re.fullmatch(r'[0-9a-f]{64}',pin):raise SystemExit('Invalid approved project/tag/checksum pin')
+          repo=os.environ['GITHUB_REPOSITORY']
+          if repo!='mars-tw/crackveil-vanguard':raise SystemExit('Source release must belong to the calling trusted repository')
+          try:
+              # The tag lookup is for published releases and returns 404 for
+              # this real DRAFT even with push access. List drafts, then bind
+              # exactly one release to the approved tag before downloading.
+              result=subprocess.run(['gh','api','--paginate','--slurp','repos/'+repo+'/releases?per_page=100'],capture_output=True,text=True,timeout=60,check=True)
+              pages=json.loads(result.stdout)
+              matches=[item for page in pages for item in page if item.get('tag_name')==tag and item.get('draft') is True]
+              if len(matches)!=1:raise ValueError('Need exactly one approved DRAFT tag')
+              release=matches[0]
+          except Exception:raise SystemExit('Cannot verify the same-repository draft release') from None
+          if release.get('draft') is not True or release.get('tag_name')!=tag:raise SystemExit('Expected an actual DRAFT release')
+          base=pathlib.Path(os.environ['RUNNER_TEMP'])/'godot-ios-input';base.mkdir(mode=0o700)
+          name=projects[project]+'-1.0.0-unsigned-source.zip'
+          metadata=project+'-source-verification.json'
+          files=['SHA256SUMS',name,metadata,'ci_godot_ios_export.sh','ci_verify_godot_ios.py']
+          assets={a.get('name') for a in release.get('assets',[])}
+          if not set(files).issubset(assets):raise SystemExit('Selected source/47-hash metadata/helpers are missing')
+          for file in files:
+              process=subprocess.run(['gh','release','download',tag,'--repo',repo,'--pattern',file,'--dir',str(base)],capture_output=True,timeout=300)
+              if process.returncode:raise SystemExit('Approved release asset download failed; private output withheld')
+          sums=base/'SHA256SUMS'
+          if hashlib.sha256(sums.read_bytes()).hexdigest()!=pin:raise SystemExit('SHA256SUMS differs from the user-approved pin')
+          entries={}
+          for line in sums.read_text().splitlines():
+              if not line.strip():continue
+              match=re.fullmatch(r'([0-9a-fA-F]{64})\s+\*?([A-Za-z0-9._-]+)',line)
+              if not match or match[2] in entries:raise SystemExit('Invalid or duplicate checksum entry')
+              entries[match[2]]=match[1].lower()
+          for file in files[1:]:
+              if entries.get(file)!=hashlib.sha256((base/file).read_bytes()).hexdigest():raise SystemExit('Source/metadata/helper digest mismatch')
+          provenance={'projectId':project,'repository':repo,'releaseTag':tag,'releaseId':release['id'],'releaseDraft':True,'checksumManifestSha256':pin,'approvedSourceZipSha256':entries[name],'helpersVerified':True,'macBuildPerformed':False,'signatureVerified':False,'simulatorExecuted':False,'storeUploadPerformed':False}
+          (base/'input-provenance.json').write_text(json.dumps(provenance,indent=2))
+          print('Pinned draft assets downloaded and hashed only; no game/helper/Apple tool executed.')
+          PY
+      - name: Relay pinned draft inputs to this run's read-only Mac job
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: godot-source-${{ inputs.project_id }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/godot-ios-input
+          if-no-files-found: error
+          retention-days: 1
+  export:
+    needs: fetch
+    runs-on: macos-15-intel
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      actions: read
+    environment: apple-release
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    steps:
+      - name: Read this run's pinned input artifact without repository write access
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: godot-source-${{ inputs.project_id }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/godot-ios-input
+      - name: Recheck the approved checksum pin before executing any helper
+        env:
+          PROJECT_ID: ${{ inputs.project_id }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          SUMS_SHA256: ${{ inputs.sums_sha256 }}
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,re,subprocess
+          names={'crackveil-vanguard':'CrackveilVanguard','seven-district-reckoning':'SevenDistrict'}
+          project=os.environ['PROJECT_ID'];base=pathlib.Path(os.environ['RUNNER_TEMP'])/'godot-ios-input';pin=os.environ['SUMS_SHA256'].lower()
+          if project not in names or not re.fullmatch('[0-9a-f]{64}',pin):raise SystemExit('Invalid approved pin/project')
+          sums=base/'SHA256SUMS'
+          if hashlib.sha256(sums.read_bytes()).hexdigest()!=pin:raise SystemExit('Relay checksum manifest mismatch')
+          entries={}
+          for line in sums.read_text().splitlines():
+              if not line.strip():continue
+              match=re.fullmatch(r'([0-9a-fA-F]{64})\s+\*?([A-Za-z0-9._-]+)',line)
+              if not match or match[2] in entries:raise SystemExit('Invalid checksum entry')
+              entries[match[2]]=match[1].lower()
+          name=names[project]+'-1.0.0-unsigned-source.zip';metadata=project+'-source-verification.json'
+          for file in [name,metadata,'ci_godot_ios_export.sh','ci_verify_godot_ios.py']:
+              if entries.get(file)!=hashlib.sha256((base/file).read_bytes()).hexdigest():raise SystemExit('Relay asset/hash mismatch')
+          provenance=json.loads((base/'input-provenance.json').read_text())
+          if provenance.get('repository')!='mars-tw/crackveil-vanguard' or provenance.get('projectId')!=project or provenance.get('releaseTag')!=os.environ['RELEASE_TAG'] or provenance.get('checksumManifestSha256')!=pin or provenance.get('approvedSourceZipSha256')!=entries[name]:raise SystemExit('Input provenance mismatch')
+          source=pathlib.Path(os.environ['RUNNER_TEMP'])/'godot-ios-source';public=pathlib.Path(os.environ['GITHUB_WORKSPACE'])/'output/godot-ios';public.mkdir(parents=True)
+          subprocess.run(['python3',str(base/'ci_verify_godot_ios.py'),'source','--zip',str(base/name),'--metadata',str(base/metadata),'--project',project,'--root',str(source),'--output',str(public/'source-verification.json')],check=True,timeout=300)
+          (public/'input-provenance.json').write_text(json.dumps(provenance,indent=2))
+          with open(os.environ['GITHUB_ENV'],'a') as env:
+              for key,value in {'GODOT_CI_TOOLS':str(base),'GODOT_CI_SOURCE':str(source),'GODOT_CI_METADATA':str(base/metadata),'GODOT_CI_PROJECT':project,'GODOT_CI_OUTPUT':str(public)}.items():env.write(key+'='+value+'\n')
+          PY
+      - name: Verify the pinned Xcode and Godot source
+        run: bash "$GODOT_CI_TOOLS/ci_godot_ios_export.sh" prepare "$GODOT_CI_SOURCE" "$GODOT_CI_PROJECT" "$GODOT_CI_OUTPUT" "$GODOT_CI_METADATA"
+      - name: Build and capture actual simulators for the other approved project
+        run: bash "$GODOT_CI_TOOLS/ci_godot_ios_export.sh" sim "$GODOT_CI_SOURCE" "$GODOT_CI_PROJECT" "$GODOT_CI_OUTPUT" "$GODOT_CI_METADATA"
+      - name: Create and verify the per-App signed device IPA
+        env:
+          APPLE_DISTRIBUTION_P12_BASE64: ${{ secrets.APPLE_DISTRIBUTION_P12_BASE64 }}
+          APPLE_DISTRIBUTION_P12_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_P12_PASSWORD }}
+          APPLE_APPSTORE_PROFILE_BASE64: ${{ secrets.APPLE_APPSTORE_PROFILE_BASE64 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: bash "$GODOT_CI_TOOLS/ci_godot_ios_export.sh" sign "$GODOT_CI_SOURCE" "$GODOT_CI_PROJECT" "$GODOT_CI_OUTPUT" "$GODOT_CI_METADATA"
+      - name: Remove only this job's extracted input/source temporary directories
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import os,pathlib,shutil
+          parent=pathlib.Path(os.environ['RUNNER_TEMP']).resolve()
+          for name in ['godot-ios-input','godot-ios-source','godot-ios-capture-waits']:
+              target=(parent/name).resolve()
+              if target!=parent and target.is_relative_to(parent):shutil.rmtree(target,ignore_errors=True)
+          PY
+      - name: Preserve only IPA, public verification records and real PNG captures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: godot-ios-${{ inputs.project_id }}-1.0.0-${{ github.run_id }}
+          path: |
+            output/godot-ios/signed.ipa
+            output/godot-ios/input-provenance.json
+            output/godot-ios/source-verification.json
+            output/godot-ios/sim-build-failure.json
+            output/godot-ios/simulator-architecture.json
+            output/godot-ios/simulator-verification.json
+            output/godot-ios/simulator-launch.json
+            output/godot-ios/capture-wait-policy.json
+            output/godot-ios/verification.json
+            output/godot-ios/screenshots/*.png
+          if-no-files-found: error
+          retention-days: 14
+
