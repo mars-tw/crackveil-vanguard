@@ -1,0 +1,163 @@
+name: Capacitor iOS signed artifact (manual, no ASC upload)
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Same-repository draft release containing approved source inputs
+        required: true
+        type: string
+      sha256sums_sha256:
+        description: Locally approved SHA-256 of SHA256SUMS
+        required: true
+        type: string
+      project_id:
+        description: Explicit Capacitor project
+        required: true
+        type: choice
+        options:
+          - web-card-game-skill
+          - island-flight-school
+          - pixel-idle-farm-skill
+          - storm-apocalypse
+          - tower-defense-skill
+          - taiwan-train-school
+          - taiwan-train-math
+
+permissions:
+  contents: read
+
+concurrency:
+  group: capacitor-ios-${{ inputs.project_id }}
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    if: github.repository == 'mars-tw/crackveil-vanguard' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Download and verify fixed draft release inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PROJECT_ID: ${{ inputs.project_id }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          EXPECTED_SUMS_SHA256: ${{ inputs.sha256sums_sha256 }}
+        run: |
+          set -euo pipefail
+          base="$RUNNER_TEMP/capacitor-input"
+          mkdir -m 700 "$base"
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json databaseId,isDraft,tagName > "$base/release.json"
+          for name in SHA256SUMS ci_verify_ios.py ci_ios_export.sh "$PROJECT_ID-ios-source.zip"; do
+            gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern "$name" --dir "$base"
+          done
+          python3 - "$base" <<'PY'
+          import hashlib,json,os,pathlib,re,sys
+          base=pathlib.Path(sys.argv[1]);project=os.environ['PROJECT_ID'];tag=os.environ['RELEASE_TAG'];pin=os.environ['EXPECTED_SUMS_SHA256'].lower()
+          if not re.fullmatch(r'[0-9a-f]{64}',pin):raise SystemExit('Invalid checksum-manifest pin')
+          release=json.loads((base/'release.json').read_text())
+          if release.get('tagName')!=tag or release.get('isDraft') is not True or type(release.get('databaseId')) is not int:raise SystemExit('Source release must be the named same-repository draft')
+          sums=base/'SHA256SUMS'
+          if hashlib.sha256(sums.read_bytes()).hexdigest()!=pin:raise SystemExit('SHA256SUMS differs from approved pin')
+          entries={}
+          for line in sums.read_text().splitlines():
+              match=re.fullmatch(r'([0-9a-f]{64})  ([A-Za-z0-9][A-Za-z0-9._-]{0,150})',line)
+              if not match or match[2] in entries:raise SystemExit('Invalid checksum record')
+              entries[match[2]]=match[1]
+          required=['ci_verify_ios.py','ci_ios_export.sh',project+'-ios-source.zip']
+          if any(name not in entries or not (base/name).is_file() or (base/name).is_symlink() or hashlib.sha256((base/name).read_bytes()).hexdigest()!=entries[name] for name in required):raise SystemExit('Source/helper bytes differ from SHA256SUMS')
+          provenance={'repository':os.environ['GITHUB_REPOSITORY'],'releaseTag':tag,'releaseId':release['databaseId'],'projectId':project,'checksumManifestSha256':pin,'sourceZipSha256':entries[required[2]],'verifierSha256':entries[required[0]],'exporterSha256':entries[required[1]],'helpersExecuted':False,'appleSecretsUsed':False,'storeUploadPerformed':False}
+          (base/'input-provenance.json').write_text(json.dumps(provenance,indent=2)+'\n')
+          (base/'release.json').unlink()
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: capacitor-source-${{ inputs.project_id }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/capacitor-input
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 1
+
+  sign:
+    needs: fetch
+    if: github.repository == 'mars-tw/crackveil-vanguard' && github.ref == 'refs/heads/main'
+    runs-on: macos-15
+    timeout-minutes: 70
+    environment: apple-release
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+      PROJECT_ID: ${{ inputs.project_id }}
+      RELEASE_TAG: ${{ inputs.release_tag }}
+      EXPECTED_SUMS_SHA256: ${{ inputs.sha256sums_sha256 }}
+      PUBLIC_OUTPUT: ${{ github.workspace }}/output/capacitor-ios/${{ inputs.project_id }}
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: capacitor-source-${{ inputs.project_id }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/capacitor-input
+      - name: Reverify same-run provenance and extract source
+        run: |
+          set -euo pipefail
+          base="$RUNNER_TEMP/capacitor-input"
+          python3 - "$base" <<'PY'
+          import hashlib,json,os,pathlib,re,sys
+          base=pathlib.Path(sys.argv[1]);project=os.environ['PROJECT_ID'];pin=os.environ['EXPECTED_SUMS_SHA256'].lower();tag=os.environ['RELEASE_TAG']
+          names={'SHA256SUMS','ci_verify_ios.py','ci_ios_export.sh',project+'-ios-source.zip','input-provenance.json'}
+          if {p.name for p in base.iterdir()}!=names:raise SystemExit('Relayed input file set differs')
+          sums={}
+          if hashlib.sha256((base/'SHA256SUMS').read_bytes()).hexdigest()!=pin:raise SystemExit('Relayed SHA256SUMS differs')
+          for line in (base/'SHA256SUMS').read_text().splitlines():
+              match=re.fullmatch(r'([0-9a-f]{64})  ([A-Za-z0-9][A-Za-z0-9._-]{0,150})',line)
+              if not match:raise SystemExit('Invalid relayed checksum record')
+              sums[match[2]]=match[1]
+          source=project+'-ios-source.zip';provenance=json.loads((base/'input-provenance.json').read_text())
+          if provenance.get('repository')!='mars-tw/crackveil-vanguard' or provenance.get('releaseTag')!=tag or provenance.get('projectId')!=project or provenance.get('checksumManifestSha256')!=pin or provenance.get('sourceZipSha256')!=sums.get(source):raise SystemExit('Relayed provenance mismatch')
+          for name in ['ci_verify_ios.py','ci_ios_export.sh',source]:
+              if hashlib.sha256((base/name).read_bytes()).hexdigest()!=sums.get(name):raise SystemExit('Relayed helper/source digest mismatch')
+          with open(os.environ['GITHUB_ENV'],'a') as env:
+              env.write('CI_TOOLS='+str(base)+'\n')
+              env.write('APP_SOURCE='+str(pathlib.Path(os.environ['RUNNER_TEMP'],'capacitor-source'))+'\n')
+          PY
+          python3 "$base/ci_verify_ios.py" extract --zip "$base/$PROJECT_ID-ios-source.zip" --destination "$RUNNER_TEMP/capacitor-source"
+          mkdir -p "$PUBLIC_OUTPUT"
+          cp "$base/input-provenance.json" "$PUBLIC_OUTPUT/input-provenance.json"
+          python3 "$base/ci_verify_ios.py" source --root "$RUNNER_TEMP/capacitor-source" --project "$PROJECT_ID" --output "$PUBLIC_OUTPUT/source-verification.json"
+      - name: Install pinned dependencies and synchronize iOS without signing secrets
+        run: bash "$CI_TOOLS/ci_ios_export.sh" prepare "$APP_SOURCE" "$PROJECT_ID" "$PUBLIC_OUTPUT"
+      - name: Sign and verify the selected App without ASC upload
+        env:
+          APPLE_DISTRIBUTION_P12_BASE64: ${{ secrets.APPLE_DISTRIBUTION_P12_BASE64 }}
+          APPLE_DISTRIBUTION_P12_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_P12_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          PROFILE_WEB_CARD_GAME_SKILL: ${{ secrets.APPLE_PROFILE_WEB_CARD_GAME_SKILL_BASE64 }}
+          PROFILE_ISLAND_FLIGHT_SCHOOL: ${{ secrets.APPLE_PROFILE_ISLAND_FLIGHT_SCHOOL_BASE64 }}
+          PROFILE_PIXEL_IDLE_FARM_SKILL: ${{ secrets.APPLE_PROFILE_PIXEL_IDLE_FARM_SKILL_BASE64 }}
+          PROFILE_STORM_APOCALYPSE: ${{ secrets.APPLE_PROFILE_STORM_APOCALYPSE_BASE64 }}
+          PROFILE_TOWER_DEFENSE_SKILL: ${{ secrets.APPLE_PROFILE_TOWER_DEFENSE_SKILL_BASE64 }}
+          PROFILE_TAIWAN_TRAIN_SCHOOL: ${{ secrets.APPLE_PROFILE_TAIWAN_TRAIN_SCHOOL_BASE64 }}
+          PROFILE_TAIWAN_TRAIN_MATH: ${{ secrets.APPLE_PROFILE_TAIWAN_TRAIN_MATH_BASE64 }}
+        run: |
+          set -euo pipefail
+          case "$PROJECT_ID" in
+            web-card-game-skill) export APPLE_APPSTORE_PROFILE_BASE64="$PROFILE_WEB_CARD_GAME_SKILL" ;;
+            island-flight-school) export APPLE_APPSTORE_PROFILE_BASE64="$PROFILE_ISLAND_FLIGHT_SCHOOL" ;;
+            pixel-idle-farm-skill) export APPLE_APPSTORE_PROFILE_BASE64="$PROFILE_PIXEL_IDLE_FARM_SKILL" ;;
+            storm-apocalypse) export APPLE_APPSTORE_PROFILE_BASE64="$PROFILE_STORM_APOCALYPSE" ;;
+            tower-defense-skill) export APPLE_APPSTORE_PROFILE_BASE64="$PROFILE_TOWER_DEFENSE_SKILL" ;;
+            taiwan-train-school) export APPLE_APPSTORE_PROFILE_BASE64="$PROFILE_TAIWAN_TRAIN_SCHOOL" ;;
+            taiwan-train-math) export APPLE_APPSTORE_PROFILE_BASE64="$PROFILE_TAIWAN_TRAIN_MATH" ;;
+            *) exit 2 ;;
+          esac
+          test -n "$APPLE_APPSTORE_PROFILE_BASE64"
+          bash "$CI_TOOLS/ci_ios_export.sh" sign "$APP_SOURCE" "$PROJECT_ID" "$PUBLIC_OUTPUT"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: capacitor-ios-${{ inputs.project_id }}-${{ github.run_id }}
+          path: |
+            output/capacitor-ios/${{ inputs.project_id }}/signed.ipa
+            output/capacitor-ios/${{ inputs.project_id }}/verification.json
+            output/capacitor-ios/${{ inputs.project_id }}/source-verification.json
+            output/capacitor-ios/${{ inputs.project_id }}/input-provenance.json
+          if-no-files-found: warn
+          retention-days: 14
