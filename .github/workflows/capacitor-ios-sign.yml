@@ -126,6 +126,8 @@ jobs:
           python3 "$base/ci_verify_ios.py" source --root "$RUNNER_TEMP/capacitor-source" --project "$PROJECT_ID" --output "$PUBLIC_OUTPUT/source-verification.json"
       - name: Install pinned dependencies and synchronize iOS without signing secrets
         run: bash "$CI_TOOLS/ci_ios_export.sh" prepare "$APP_SOURCE" "$PROJECT_ID" "$PUBLIC_OUTPUT"
+      - name: Build and capture fresh iPhone and iPad simulator launches
+        run: bash "$CI_TOOLS/ci_ios_export.sh" sim "$APP_SOURCE" "$PROJECT_ID" "$PUBLIC_OUTPUT"
       - name: Sign and verify the selected App without ASC upload
         env:
           APPLE_DISTRIBUTION_P12_BASE64: ${{ secrets.APPLE_DISTRIBUTION_P12_BASE64 }}
@@ -161,5 +163,8 @@ jobs:
             output/capacitor-ios/${{ inputs.project_id }}/verification.json
             output/capacitor-ios/${{ inputs.project_id }}/source-verification.json
             output/capacitor-ios/${{ inputs.project_id }}/input-provenance.json
+            output/capacitor-ios/${{ inputs.project_id }}/simulator-verification.json
+            output/capacitor-ios/${{ inputs.project_id }}/simulator-launch.json
+            output/capacitor-ios/${{ inputs.project_id }}/screenshots/*.png
           if-no-files-found: warn
           retention-days: 14
