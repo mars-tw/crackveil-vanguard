@@ -36,6 +36,8 @@ jobs:
     if: github.repository == 'mars-tw/crackveil-vanguard' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    permissions:
+      contents: write
     steps:
       - name: Download and verify fixed draft release inputs
         env:
