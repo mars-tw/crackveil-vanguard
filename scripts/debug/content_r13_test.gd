@@ -125,4 +125,4 @@ func _test_formation_read() -> void:
 	_check(gm_src.contains("\"matched_seconds\": float(relay_node.matched_seconds)"), "the run summary carries the timers to the result screen")
 
 func _test_version() -> void:
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.42.0-content-r13", "project version is 0.42.0-content-r13")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.43.0-content-r14", "project version is 0.43.0-content-r14")

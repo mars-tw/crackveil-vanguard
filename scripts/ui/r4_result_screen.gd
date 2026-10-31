@@ -330,7 +330,8 @@ func _refresh() -> void:
 				for start in range(0, member_names.size(), 5):
 					lines.append("、".join(member_names.slice(start, start + 5)))
 				cards[number].text=heading+"\n"+"\n".join(lines)
-			else:cards[number].text+="個人總計（含羈絆）\n回復 %d HP・減傷 %d HP" % [row.get("healing",0),row.get("prevented",0)]
+			# R14: two lines, so narrow portrait cards never trim the numbers.
+			else:cards[number].text+="回復 %d・減傷 %d HP（含羈絆）" % [row.get("healing",0),row.get("prevented",0)]
 	for number in range(3):tabs[number].modulate=Color("ffdc82") if tab==number else Color.WHITE
 	_apply_responsive_layout()
 
@@ -420,7 +421,8 @@ func _defeat_advice(seal: Dictionary) -> String:
 # share of attack-wave time spent in an accepted formation, and backlashes.
 static func formation_read_line(seal: Dictionary) -> String:
 	var total := float(seal.get("pressure_seconds", 0.0))
-	if total < 1.0:
+	# R14: a run that met under ten seconds of attack waves has no read to report.
+	if total < 10.0:
 		return ""
 	var share := roundi(100.0 * clampf(float(seal.get("matched_seconds", 0.0)) / total, 0.0, 1.0))
 	return "攻勢中對陣 %d%%・錯陣反噬 %d 次" % [share, int(seal.get("wrong", 0))]

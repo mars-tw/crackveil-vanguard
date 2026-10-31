@@ -315,6 +315,9 @@ func _tick_feedback(delta: float) -> void:
 				# shows a head count and a per-hit damage figure side by side.
 				if not bool(pressure.last_result.get("correct", true)):
 					pressure.result_age = maxf(pressure.result_age, 2.4)
+				# R14: the backlash toast can outlive the 2.5 s penalty; a correct
+				# switch always clears it so it never contradicts the switch card.
+				clear_wrong_notice()
 		_last_formation_id = current_formation
 	seal_flash_time += maxf(0,delta)
 	switch_card_time += maxf(0,delta)
@@ -327,9 +330,9 @@ var switch_card_text := ""
 var switch_card_time := 99.0
 static func switch_card_for(kind: String, formation: String) -> String:
 	var pressure_name: String = {"front":"重盾正推","pincer":"兩翼包抄","artillery":"遠射落點"}.get(kind, "")
-	var effect: String = {"wedge":"輸出 +15%・可封合","ring":"貼近隊長者每擊傷害 14→4・可封合","scatter":"移速 +8%・散開躲落點・可封合"}.get(formation, "可封合")
+	var effect: String = {"wedge":"輸出 +15%・可封合","ring":"隊長身邊隊員每擊傷害 14→4・可封合","scatter":"移速 +8%・散開躲落點・可封合"}.get(formation, "可封合")
 	if kind == "front" and formation == "ring":
-		effect = "受傷 -10%・可封合"
+		effect = "全隊受傷 -10%・可封合"
 	if kind == "pincer" and formation == "scatter":
 		effect = "移速 +8%・可封合"
 	return "%s → %s：%s" % [NAMES[maxi(0, ORDER.find(formation))], pressure_name, effect]

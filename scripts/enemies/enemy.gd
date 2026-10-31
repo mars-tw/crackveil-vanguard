@@ -129,6 +129,8 @@ const ELITE_LABEL_EDGE := 24.0
 const ELITE_MARK_SIZE := Vector2(60, 36)
 # Two CJK characters the bundled font is guaranteed to have (◆ rendered as tofu).
 const ELITE_MARK_TEXT := "菁英"
+const ELITE_LABEL_MAX_DRIFT := 170.0
+const BOSS_PLATE_BG := Color(0.42, 0.05, 0.07, 0.94)
 const ELITE_LABEL_RIGHT_BAND := 190.0
 const ELITE_LABEL_LEFT_BLOCK := Vector2(300, 250)
 static var _elite_label_frame := -1
@@ -272,6 +274,12 @@ func _place_special_label() -> void:
 		slot = elite_label_slot(mark_above, mark_below, view, taken)
 		if slot.size == Vector2.ZERO:
 			slot = elite_label_slot(clamp_label_to_screen(Rect2(xf * Vector2(side_x, -18), mark_size), view), clamp_label_to_screen(Rect2(xf * Vector2(-side_x - ELITE_MARK_SIZE.x, -18), mark_size), view), view, taken)
+		compact = slot.size != Vector2.ZERO
+	# R14: a plate that ended up far from its body no longer reads as that
+	# elite's; use the compact mark beside the body instead, or nothing.
+	if slot.size != Vector2.ZERO and not compact and slot.get_center().distance_to(xf * Vector2.ZERO) > ELITE_LABEL_MAX_DRIFT * scale_y:
+		var mark_size2 := ELITE_MARK_SIZE * scale_y
+		slot = elite_label_slot(clamp_label_to_screen(Rect2(xf * Vector2(side_x, -18), mark_size2), view), clamp_label_to_screen(Rect2(xf * Vector2(-side_x - ELITE_MARK_SIZE.x, -18), mark_size2), view), view, taken)
 		compact = slot.size != Vector2.ZERO
 	special_label.visible = slot.size != Vector2.ZERO
 	special_label.text = ELITE_MARK_TEXT if compact else special_elite_name
@@ -606,6 +614,7 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 		label_backing.content_margin_top = 3
 		label_backing.content_margin_bottom = 3
 		special_label.add_theme_stylebox_override("normal", label_backing)
+		special_label.set_meta("backing", label_backing)
 		special_label.add_theme_color_override("font_outline_color", Color("11192a"))
 		special_label.add_theme_constant_override("outline_size", 5)
 		special_label.z_as_relative = false
@@ -617,6 +626,15 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	special_label.visible = special_elite_name != ""
 	special_label_wanted = special_label.visible
 	special_label.add_theme_color_override("font_color", body_color.lightened(0.45))
+	# R14: the gatekeeper's plate is crimson with a thick gold rim, unlike the
+	# dark elite plates, so the boss is told apart without reading the name.
+	var backing: StyleBoxFlat = special_label.get_meta("backing", null)
+	if backing != null:
+		backing.bg_color = BOSS_PLATE_BG if is_boss else Color(0.02, 0.04, 0.08, 0.88)
+		backing.set_border_width_all(3 if is_boss else 1)
+		backing.border_color = Color(1.0, 0.85, 0.45, 1.0 if is_boss else 0.9)
+	if is_boss:
+		special_label.add_theme_color_override("font_color", Color("fff1c8"))
 	_update_hp_bar()
 	_set_hp_bar_visible(false)
 	_request_camera_pressure_on_spawn()
@@ -1823,7 +1841,7 @@ func _apply_sprite() -> void:
 
 # R13: regular enemies carry a light tint of the stage colour, so each of the
 # ten stages reads differently; elites and bosses keep their own art colours.
-const STAGE_TINT_WEIGHT := 0.22
+const STAGE_TINT_WEIGHT := 0.30
 var rest_color := Color.WHITE
 static func stage_rest_color(stage_color: Color) -> Color:
 	var tint := Color.WHITE.lerp(stage_color, STAGE_TINT_WEIGHT)

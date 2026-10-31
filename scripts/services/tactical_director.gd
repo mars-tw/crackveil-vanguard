@@ -129,11 +129,11 @@ func current_hint() -> String:
 	if not claimed.has("clear"):
 		var stage: Dictionary=CATALOG.STAGES.get_stage(GameManager.selected_stage_id)
 		var boss_name:=str(stage.get("boss_name","守關者"))
-		if GameManager.run_mode=="endless":return "Boss %s・無盡第 %d 波" % [boss_name,GameManager.get_endless_wave()]
-		if GameManager.boss_active:return "守關・Boss %s 已出現・首取 +8" % boss_name
+		if GameManager.run_mode=="endless":return "首領 %s・無盡第 %d 波" % [boss_name,GameManager.get_endless_wave()]
+		if GameManager.boss_active:return "守關・首領 %s 已出現・首取 +8" % boss_name
 		var boss_time:=float(stage.get("boss_time",90))
-		if GameManager.elapsed_time<boss_time:return "Boss %s・%s 後登場・首取 +8" % [boss_name,GameManager.format_time(boss_time-GameManager.elapsed_time)]
-		return "Boss %s・正在入場・首取 +8" % boss_name
+		if GameManager.elapsed_time<boss_time:return "首領 %s・%s 後登場・首取 +8" % [boss_name,GameManager.format_time(boss_time-GameManager.elapsed_time)]
+		return "首領 %s・正在入場・首取 +8" % boss_name
 	return "本關目標完成！回主選單查看收藏"
 
 func progress_text() -> String:
