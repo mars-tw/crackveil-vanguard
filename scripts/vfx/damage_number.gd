@@ -3,6 +3,10 @@ extends Node2D
 static var visual_rng: RandomNumberGenerator = _create_visual_rng()
 static var label_layout_updates: int = 0
 static var process_updates: int = 0
+# R12: HUD controls drawn over the battlefield (the equipment bar) in the same
+# CSS layout space as BattleLayout; a number that would be cut by one is hidden.
+static var hud_blockers: Array[Rect2] = []
+const PLATE_YIELD_FONT_SIZE := 30
 static var alpha_updates: int = 0
 static var scale_updates: int = 0
 
@@ -75,6 +79,7 @@ func setup(value: Variant, world_position: Vector2, color_value: Color) -> void:
 		lifetime = 0.86
 		velocity = Vector2(0.0, -34.0)
 	_update_labels()
+	_update_hud_visibility()
 
 
 func pool_reset(args: Dictionary) -> void:
@@ -123,22 +128,71 @@ func _process(delta: float) -> void:
 		EntityFactory.release_damage_number(self)
 	else:
 		_update_alpha()
-		# World numbers never enter the fixed HUD lanes, even near the top edge.
-		var screen: Vector2 = get_viewport().get_canvas_transform() * global_position
-		var css := MobileTuning.ui_layout_size(get_viewport_rect().size)
-		var ratio := css.x / maxf(1.0, get_viewport_rect().size.x)
-		var zones := BattleLayout.regions(css, MobileTuning.use_mobile_ui(css))
-		var extent := value_label.size * scale * ratio
-		var text_rect := Rect2(screen * ratio - extent * 0.5,extent)
-		var obscures := false
-		for key in ["stats","score","time","mission","combo","notice","minimap"]:
-			if text_rect.intersects(zones[key]):
-				obscures = true
-				break
-		var control_height := 184.0 if css.y > css.x else 140.0 if MobileTuning.has_confirmed_touch() else 84.0
-		if text_rect.intersects(Rect2(0,css.y-control_height,minf(250,css.x*0.55),control_height)) or text_rect.intersects(Rect2(css.x-124,css.y-220,124,220)):
+		_update_hud_visibility()
+
+
+# R12: run on spawn as well as every frame, so a number created on the frame
+# the game pauses (screenshots, level-up) is never left over a HUD control.
+func _update_hud_visibility() -> void:
+	if not is_inside_tree():
+		return
+	# World numbers never enter the fixed HUD lanes, even near the top edge.
+	var canvas := get_viewport().get_canvas_transform()
+	var screen: Vector2 = canvas * global_position
+	# R12: pull a number that pokes past the screen edge back inside, instead of
+	# showing half of it (crits near the top and bottom edges).
+	var inside := clamp_to_screen(screen, value_label.size * scale * 0.5 + Vector2(6, 6), get_viewport_rect().size)
+	if inside != screen:
+		global_position = canvas.affine_inverse() * inside
+		screen = inside
+	var css := MobileTuning.ui_layout_size(get_viewport_rect().size)
+	var ratio := css.x / maxf(1.0, get_viewport_rect().size.x)
+	var zones := BattleLayout.regions(css, MobileTuning.use_mobile_ui(css))
+	var extent := value_label.size * scale * ratio
+	var text_rect := Rect2(screen * ratio - extent * 0.5,extent)
+	var obscures := false
+	for key in ["stats","score","time","mission","combo","notice","minimap"]:
+		if text_rect.intersects(zones[key]):
 			obscures = true
-		value_label.visible = not obscures
+			break
+	var control_height := 184.0 if css.y > css.x else 140.0 if MobileTuning.has_confirmed_touch() else 84.0
+	if text_rect.intersects(Rect2(0,css.y-control_height,minf(250,css.x*0.55),control_height)) or text_rect.intersects(Rect2(css.x-124,css.y-220,124,220)):
+		obscures = true
+	if blocked_by_hud(text_rect):
+		obscures = true
+	# R12: rule text (verdict lines, seal banner, answer badges) is reserved in
+	# viewport pixels; a number or "擊破" over it would make both unreadable.
+	# Grown by the 4 px text outline so a number is never left half showing.
+	var screen_rect := Rect2(screen - value_label.size * scale * 0.5, value_label.size * scale).grow(4.0)
+	Enemy.clear_label_areas(self)
+	if not obscures and covers_rule_text(screen_rect, Enemy.active_label_areas()):
+		obscures = true
+	# Small numbers yield to elite name plates; large event words push plates instead.
+	if not obscures and font_size < PLATE_YIELD_FONT_SIZE and covers_rule_text(screen_rect, Enemy.elite_plate_rects()):
+		obscures = true
+	value_label.visible = not obscures
+	# R12: large event words (擊破, 破甲) reserve their area so elite plates move
+	# aside instead of being written over; small numbers do not, so plates stay put.
+	if value_label.visible and font_size >= PLATE_YIELD_FONT_SIZE:
+		Enemy.reserve_label_area(screen_rect, self)
+
+
+static func clamp_to_screen(center: Vector2, half_extent: Vector2, view: Vector2) -> Vector2:
+	return Vector2(clampf(center.x, half_extent.x, maxf(half_extent.x, view.x - half_extent.x)), clampf(center.y, half_extent.y, maxf(half_extent.y, view.y - half_extent.y)))
+
+
+static func covers_rule_text(screen_rect: Rect2, areas: Array[Rect2]) -> bool:
+	for area in areas:
+		if screen_rect.intersects(area):
+			return true
+	return false
+
+
+static func blocked_by_hud(text_rect: Rect2) -> bool:
+	for blocker in hud_blockers:
+		if text_rect.intersects(blocker.grow(4.0)):
+			return true
+	return false
 
 
 func _set_value(value: Variant) -> void:

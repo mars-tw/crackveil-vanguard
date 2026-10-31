@@ -12,6 +12,7 @@ const R33_LOOT_BANNER := preload("res://scripts/ui/r33_loot_banner.gd")
 const FORMATION_PICKER := preload("res://scripts/ui/formation_picker.gd")
 const BATTLE_LAYOUT := preload("res://scripts/ui/battle_layout.gd")
 const BATTLE_JOURNAL := preload("res://scripts/ui/r4_battle_journal.gd")
+const DAMAGE_NUMBER := preload("res://scripts/vfx/damage_number.gd")
 var battle_journal: Control
 
 var root: Control
@@ -164,6 +165,10 @@ func _layout_equipment_panel() -> void:
 		y = virtual_joystick.position.y - height - 12.0
 	equipment_panel.position = Vector2((viewport_size.x - width) * 0.5, y)
 	equipment_panel.size = Vector2(width, height)
+	var blockers: Array[Rect2] = []
+	if not mobile:
+		blockers.append(Rect2(equipment_panel.position, equipment_panel.size))
+	DAMAGE_NUMBER.hud_blockers = blockers
 	for button in equipment_panel.buttons:
 		button.custom_minimum_size = Vector2(0.0, height)
 		button.add_theme_font_size_override("font_size", 12 if mobile else 14)

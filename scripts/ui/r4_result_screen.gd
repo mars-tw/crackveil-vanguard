@@ -208,6 +208,37 @@ func bond_condition_for(present_ids: Array) -> String:
 	for hero_id in best_missing:
 		names.append(_hero_display_name(hero_id))
 	return "再招募 %s 可成立「%s」" % ["、".join(names), best_name]
+# R12: the first bond the roster forms, or "" when none forms.
+func formed_bond_id(present_ids: Array) -> String:
+	var tables: GDScript = load("res://scripts/heroes/squad_manager.gd")
+	var present := {}
+	for id in present_ids:
+		present[str(id)] = true
+	for definition in tables.BOND_DEFINITIONS:
+		var formed := true
+		for hero_id in definition.get("hero_ids", []):
+			if not present.has(str(hero_id)):
+				formed = false
+		if formed:
+			return str(definition.get("id", ""))
+	return ""
+func _bond_name(bond_id: String) -> String:
+	var tables: GDScript = load("res://scripts/heroes/squad_manager.gd")
+	for definition in tables.BOND_DEFINITIONS:
+		if str(definition.get("id", "")) == bond_id:
+			return str(definition.get("name", ""))
+	return ""
+# R12: bonds other than 星盾和聲 apply their effect as soon as they form, so a
+# zero healing/prevention total does not mean they did nothing this run.
+func formed_bond_note(bond_id: String) -> String:
+	var tables: GDScript = load("res://scripts/heroes/squad_manager.gd")
+	var effect := str(tables.BOND_BASE_EFFECT.get(bond_id, ""))
+	var resonance: Dictionary = tables.BOND_FORMATION_RESONANCE.get(bond_id, {})
+	var formation := str({"wedge":"楔形","ring":"圓陣","scatter":"散兵"}.get(str(resonance.get("formation","")), ""))
+	if bond_id == "bond_guard_echo":
+		return "%s・隊員受傷時才計入" % effect
+	# A fact, not an instruction: the run may already have used that formation.
+	return "%s・成立起生效；%s時另加傷害 +8%%" % [effect, formation]
 func _roster_ids() -> Array:
 	var present: Array = []
 	for row in rows:
@@ -220,6 +251,9 @@ func bond_zero_reason_text() -> String:
 	var condition := bond_condition_for(_roster_ids())
 	# A bond that formed but never fired must not read as "not formed".
 	if condition.ends_with("已成立"):
+		var bond_id := formed_bond_id(_roster_ids())
+		if bond_id != "" and bond_id != "bond_guard_echo":
+			return "%s・%s" % [condition, formed_bond_note(bond_id)]
 		return "%s・本局未觸發加成" % condition
 	return "羈絆未成立：%s" % condition
 # One summary line, as short as the 0/0 line it replaces, so portrait
@@ -227,7 +261,12 @@ func bond_zero_reason_text() -> String:
 func summary_bond_line() -> String:
 	var condition := bond_condition_for(_roster_ids())
 	if condition.ends_with("已成立"):
-		return "羈絆收益 0・已成立未觸發"
+		# R12: say what the formed bond did instead of a bare "0"; only 星盾和聲
+		# waits for incoming damage before it can show a gain.
+		var bond_id := formed_bond_id(_roster_ids())
+		if bond_id != "" and bond_id != "bond_guard_echo":
+			return "羈絆收益・%s已生效" % _bond_name(bond_id)
+		return "羈絆收益・已成立待觸發"
 	if condition.begins_with("再招募 "):
 		return "羈絆收益 0・再招募%s可成立" % condition.trim_prefix("再招募 ").get_slice(" ", 0).get_slice("、", 0)
 	return "羈絆收益 0・尚未成立"
@@ -272,7 +311,23 @@ func _refresh() -> void:
 			cards[number].text=str(row.get("name",row.get("id","隊員")))+"\n"
 			if tab==0:cards[number].text+="傷害 %d HP・擊殺 %d\n承傷 %d HP" % [row.get("damage",0),row.get("kills",0),row.get("taken",0)]
 			# One header line keeps the full zero-support roster inside its card.
-			elif str(row.get("id",""))=="support_zero_group":cards[number].text=str(row.get("name","未觸發隊員"))+"\n"+bond_condition_for(_roster_ids())+"\n"+"、".join(row.get("member_names",[]))
+			elif str(row.get("id",""))=="support_zero_group":
+				# R12: this card lists members with no support total; it must not
+				# also claim a bond effect, so a formed bond adds nothing here.
+				# A formed bond is already stated in the summary column, so the card
+				# keeps only a head count and the names, at a readable size.
+				# R12: this page counts healing and damage prevention only; say so, so
+				# members of a damage bond are not read as "bond not triggered".
+				var member_names: Array = row.get("member_names",[])
+				var formed := formed_bond_id(_roster_ids())
+				var note := ("・%s計入輸出" % _bond_name(formed)) if formed != "" and formed != "bond_guard_echo" else ""
+				var heading := "無回復／減傷 %d 人%s" % [member_names.size(), note]
+				# The bond condition is already in the summary column; the card keeps
+				# to three lines so it never shrinks or trims a name.
+				var lines := PackedStringArray()
+				for start in range(0, member_names.size(), 5):
+					lines.append("、".join(member_names.slice(start, start + 5)))
+				cards[number].text=heading+"\n"+"\n".join(lines)
 			else:cards[number].text+="個人總計（含羈絆）\n回復 %d HP・減傷 %d HP" % [row.get("healing",0),row.get("prevented",0)]
 	for number in range(3):tabs[number].modulate=Color("ffdc82") if tab==number else Color.WHITE
 	_apply_responsive_layout()
@@ -442,7 +497,12 @@ func _apply_responsive_layout() -> void:
 		var fitted_size: int = roundi(14*scale)
 		while fitted_size > 10 and not name_line_fits(name_line, card_font, fitted_size, card_rect.size.x-indent-8):
 			fitted_size -= 1
+		# R12: the grouped untriggered-member card shrinks until its whole wrapped
+		# roster fits, instead of the last line being trimmed with "…".
 		cards[number].add_theme_font_size_override("font_size", fitted_size)
+		while group and fitted_size > 10 and _text_height(cards[number], card_rect.size.x-indent-4) > card_rect.size.y-bars_h-4:
+			fitted_size -= 1
+			cards[number].add_theme_font_size_override("font_size", fitted_size)
 		_place(cards[number],card_rect.position.x+indent,card_rect.position.y+2,card_rect.size.x-indent-4,card_rect.size.y-bars_h-2)
 		card_art[number].queue_redraw()
 	_place(controls.previous,right_x,pager_y,right_w*0.34,44)

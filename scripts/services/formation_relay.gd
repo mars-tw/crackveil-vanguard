@@ -126,12 +126,15 @@ func switch_hint() -> String:
 
 # R11: a correct formation that still took hits is amber, not the red of the
 # wrong-formation verdict, so "散兵對陣・9/9 人中招" never reads as a mistake.
+const VERDICT_AMBER := Color("ffbb33")
+const SEAL_BADGE_CLEAR := 56.0
 static func verdict_color(result: Dictionary) -> Color:
 	if not bool(result.get("correct",false)):
 		return Color("ffa0a8")
 	if int(result.get("hit",0)) == 0 or int(result.get("protected",0)) > 0:
 		return Color("bdf5a8")
-	return Color("ffd98a")
+	# R12: a saturated amber that still reads at thumbnail size (was ffd98a).
+	return VERDICT_AMBER
 
 func consequence_text(result: Dictionary) -> String:
 	if bool(result.get("correct",false)):
@@ -176,6 +179,12 @@ func next_action() -> String:
 		return "%s・%s・%s" % [pressure.status_text(),accepted_text(),switch_hint()]
 	return pressure.status_text()
 
+static func marker_hits_text(pixel_rect: Rect2, text_areas: Array[Rect2]) -> bool:
+	for area in text_areas:
+		if pixel_rect.intersects(area.grow(4.0)):
+			return true
+	return false
+
 func _update_label() -> void:
 	if not is_instance_valid(marker_label) or not is_instance_valid(GameManager.player):
 		return
@@ -215,6 +224,10 @@ func _update_label() -> void:
 	var formation_button := marker_label.get_parent().get_node_or_null("FormationButton") as Control
 	if is_instance_valid(formation_button) and formation_button.is_visible_in_tree():
 		formation_button_rect = formation_button.get_global_rect().grow(8.0)
+	# R12: the marker also keeps clear of rule text other nodes reserved this
+	# frame (the seal's "需：X" badge, verdict lines), in the same pixel space.
+	Enemy.clear_label_areas(marker_label)
+	var text_areas := Enemy.active_label_areas()
 	var candidates: Array[Vector2] = [Vector2(x,y)]
 	for row in range(4):
 		for column in range(4):
@@ -225,6 +238,7 @@ func _update_label() -> void:
 		for region in reserved.values():
 			if candidate_rect.intersects(region):clear=false
 		if formation_button_rect.size.x > 0.0 and candidate_rect.intersects(formation_button_rect):clear=false
+		if marker_hits_text(Rect2(candidate_rect.position*scale_factor,candidate_rect.size*scale_factor),text_areas):clear=false
 		for member in GameManager.squad_manager.get_members():
 			var member_screen: Vector2=canvas*member.global_position/scale_factor
 			if candidate_rect.intersects(Rect2(member_screen-Vector2(26,55),Vector2(52,76))):clear=false
@@ -235,7 +249,6 @@ func _update_label() -> void:
 	marker_label.position = Vector2(x,y)
 	marker_label.size = Vector2(width,30)
 	marker_label.text = marker_text()
-	Enemy.clear_label_areas(marker_label)
 	Enemy.reserve_label_area(marker_label.get_global_rect(), marker_label)
 
 
@@ -462,7 +475,8 @@ func _draw_offscreen_pointer() -> void:
 	var view := Rect2(top_left, bottom_right - top_left)
 	# Keep the pointer clear of the HUD bands: top panels, bottom controls, sides.
 	var unit: float = view.size.x / maxf(1.0, size.x)
-	var inner := Rect2(view.position + Vector2(300, 150) * unit, view.size - Vector2(600, 300) * unit)
+	# R12: top margin 190 keeps the pointer below the kill/gold panel.
+	var inner := Rect2(view.position + Vector2(300, 190) * unit, view.size - Vector2(600, 340) * unit)
 	if inner.size.x <= 0 or inner.size.y <= 0 or view.grow(-30.0).has_point(anchor):
 		return
 	var center := view.get_center()
@@ -472,6 +486,10 @@ func _draw_offscreen_pointer() -> void:
 	_draw_badge(point, required_formation(), 28.0)
 	draw_colored_polygon(PackedVector2Array([tip + direction * 14, tip + direction.orthogonal() * 9, tip - direction.orthogonal() * 9]), Color("ffdcac"))
 	var label := "第 %d 道" % mini(step + 1, 3)
+	# R12: the off-screen pointer (badge, arrow, ordinal) keeps elite plates off
+	# it; owned by this node, whose _draw clears its areas first.
+	if is_inside_tree():
+		Enemy.reserve_label_area((get_viewport().get_canvas_transform() * get_global_transform()) * Rect2(point + Vector2(-50, -40), Vector2(100, 96)), self)
 	draw_string_outline(FONT, point + Vector2(-50, 50), label, HORIZONTAL_ALIGNMENT_CENTER, 100, 15, 6, Color("08121f", 0.9))
 	draw_string(FONT, point + Vector2(-50, 50), label, HORIZONTAL_ALIGNMENT_CENTER, 100, 15, Color("ffdcac"))
 
@@ -495,7 +513,7 @@ func _draw_verdict() -> void:
 		at = _keep_on_screen(at, 280.0)
 		var text_width: float = FONT.get_string_size(verdict,HORIZONTAL_ALIGNMENT_LEFT,-1,20).x
 		_reserve_for_plates(Rect2(at + Vector2(0, -24), Vector2(280, 58)))
-		text_layer.draw_rect(Rect2(at+Vector2(140-text_width/2-10,-22),Vector2(text_width+20,30)),Color(0.03,0.05,0.09,0.72*fade),true)
+		text_layer.draw_rect(Rect2(at+Vector2(140-text_width/2-10,-22),Vector2(text_width+20,30)),Color(0.03,0.05,0.09,0.84*fade),true)
 		text_layer.draw_string_outline(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,7,Color(0.03,0.05,0.09,0.9*fade))
 		text_layer.draw_string(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,Color(verdict_color(pressure.last_result),fade))
 		# Second line: what this verdict means for the seal under the same rule.
@@ -563,6 +581,9 @@ func _draw() -> void:
 	# The anchor shows which real formation this seal accepts; the rim turns
 	# green or red from the same accepts() check that gates seal progress.
 	_draw_badge(anchor,needed,30.0)
+	# R12: the seal's own badge and rim stay readable; plates move off them.
+	if is_inside_tree():
+		Enemy.reserve_plate_area((get_viewport().get_canvas_transform() * get_global_transform()) * Rect2(anchor - Vector2(SEAL_BADGE_CLEAR, SEAL_BADGE_CLEAR), Vector2(SEAL_BADGE_CLEAR, SEAL_BADGE_CLEAR) * 2.0), self)
 	if is_open():
 		draw_arc(anchor,edge+9,0,TAU,48,Color("08121f",0.8),6,true)
 		draw_arc(anchor,edge+9,0,TAU,48,Color("8ff0a4") if matches else Color("ff7a8a"),3,true)

@@ -153,6 +153,9 @@ func scatter_ring_alpha() -> float:
 	return 0.7 if formation_indicator_timer > FORMATION_INDICATOR_DURATION - 1.0 else 0.3
 var nearest_threat: Node2D
 
+# What each bond does from the moment it forms (the formation resonance above
+# is extra). Only 星盾和聲 needs incoming damage before it shows any gain.
+const BOND_BASE_EFFECT: Dictionary = {"bond_guard_echo":"全隊減傷 5%", "bond_ember_pulse":"爆裂範圍 +8%", "bond_void_rail":"緩速目標貫槍 +12%", "bond_captain_shepherd":"裂傀強化"}
 const BOND_DEFINITIONS: Array[Dictionary] = [
 	{"id": "bond_ember_pulse", "name": "燼脈聯爆", "hero_ids": ["ember_grenadier", "pulse_artificer"]},
 	{"id": "bond_void_rail", "name": "縫獵協議", "hero_ids": ["void_weaver", "rift_sniper"]},
@@ -1011,7 +1014,7 @@ func recompute_bonds() -> void:
 				var member := get_member_by_id(hero_id)
 				var data: Variant = member.get("hero_data")
 				names.append(str(data.get("display_name")) if data is Resource else str(hero_id))
-			var effect: String = {"bond_guard_echo":"全隊減傷 5%", "bond_ember_pulse":"爆裂範圍 +8%", "bond_void_rail":"緩速目標貫槍 +12%", "bond_captain_shepherd":"裂傀強化"}.get(id,"")
+			var effect: String = str(BOND_BASE_EFFECT.get(id,""))
 			if id == "bond_guard_echo" and formation_id == "ring":
 				effect += "・圓陣回復 1.5 HP／秒"
 			bond_reveal_text = "%s｜%s\n%s" % [definition.name, "＋".join(names), effect]

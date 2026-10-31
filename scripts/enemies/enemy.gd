@@ -115,8 +115,20 @@ var special_label_wanted := false
 # and never stack on another elite's plate.
 const ELITE_LABEL_TOP_BAND := 175.0
 const ELITE_LABEL_BOTTOM_BAND := 110.0
-const ELITE_LABEL_SIZE := Vector2(200, 30)
-const ELITE_LABEL_Z := 40
+# R12: 36 px matches the drawn plate (19 px font plus padding), so the reserved
+# slot covers the whole frame, not just the text line.
+const ELITE_LABEL_SIZE := Vector2(200, 36)
+# R12: plates draw above the captain's floor ring and crown layer (z 95), so
+# the ring no longer runs through a plate's text.
+const ELITE_LABEL_Z := 96
+# R12: plates keep an 8 px gap from other plates and rule text, and stay fully
+# inside the screen edges. The edge margin is 24 px because plates are placed in
+# the physics step while the smoothed camera moves after it, one frame later.
+const ELITE_LABEL_GAP := 8.0
+const ELITE_LABEL_EDGE := 24.0
+const ELITE_MARK_SIZE := Vector2(60, 36)
+# Two CJK characters the bundled font is guaranteed to have (◆ rendered as tofu).
+const ELITE_MARK_TEXT := "菁英"
 const ELITE_LABEL_RIGHT_BAND := 190.0
 const ELITE_LABEL_LEFT_BLOCK := Vector2(300, 250)
 static var _elite_label_frame := -1
@@ -132,10 +144,34 @@ static func clear_label_areas(owner: Object) -> void:
 	_reserved_by_owner.erase(owner.get_instance_id())
 
 static func reserve_label_area(rect: Rect2, owner: Object = null) -> void:
+	# R12: a HUD Control reports get_global_rect() in its CanvasLayer's space,
+	# which the web/mobile build scales to CSS size; plates work in viewport
+	# pixels, so convert through the layer transform before storing.
+	if owner is Control and owner.is_inside_tree():
+		rect = owner.get_canvas_transform() * rect
 	var key := owner.get_instance_id() if owner != null else 0
 	if not _reserved_by_owner.has(key):
-		_reserved_by_owner[key] = {"owner": weakref(owner) if owner != null else null, "rects": []}
+		_reserved_by_owner[key] = {"owner": weakref(owner) if owner != null else null, "rects": [], "plate_rects": []}
 	_reserved_by_owner[key].rects.append(rect)
+
+# R12: areas only name plates must avoid (a seal's own badge and rim), not head
+# markers or damage numbers, so the captain's crown still shows on the seal.
+static func reserve_plate_area(rect: Rect2, owner: Object) -> void:
+	var key := owner.get_instance_id()
+	if not _reserved_by_owner.has(key):
+		_reserved_by_owner[key] = {"owner": weakref(owner), "rects": [], "plate_rects": []}
+	_reserved_by_owner[key].plate_rects.append(rect)
+
+static func active_plate_only_areas() -> Array[Rect2]:
+	var result: Array[Rect2] = []
+	for key in _reserved_by_owner.keys():
+		var entry: Dictionary = _reserved_by_owner[key]
+		var node = entry.owner.get_ref() if entry.owner != null else null
+		if entry.owner != null and (node == null or (node is CanvasItem and node.is_inside_tree() and not node.is_visible_in_tree())):
+			continue
+		for rect in entry.get("plate_rects", []):
+			result.append(rect)
+	return result
 
 static func active_label_areas() -> Array[Rect2]:
 	var result: Array[Rect2] = []
@@ -162,6 +198,26 @@ static func label_area_reserved(screen_point: Vector2, margin: float) -> bool:
 
 static func elite_label_hud_zones(view: Vector2) -> Array[Rect2]:
 	return [Rect2(view.x - ELITE_LABEL_RIGHT_BAND, 0, ELITE_LABEL_RIGHT_BAND, view.y), Rect2(0, view.y - ELITE_LABEL_LEFT_BLOCK.y, ELITE_LABEL_LEFT_BLOCK.x, ELITE_LABEL_LEFT_BLOCK.y)]
+
+# R12: the HUD panels (status, boss bar, mission, notice, minimap) in viewport
+# pixels; BattleLayout gives them in the CSS layout space the HUD layer uses.
+static func hud_panel_rects(view: Vector2) -> Array[Rect2]:
+	var css := MobileTuning.ui_layout_size(view)
+	var to_px := view.x / maxf(1.0, css.x)
+	var result: Array[Rect2] = []
+	var regions: Dictionary = BattleLayout.regions(css, MobileTuning.use_mobile_ui(css))
+	for key in regions:
+		var region: Rect2 = regions[key]
+		result.append(Rect2(region.position * to_px, region.size * to_px))
+	return result
+
+# R12: plates placed this physics frame, so small damage numbers can stay off them.
+static func elite_plate_rects() -> Array[Rect2]:
+	return _elite_label_rects.duplicate()
+
+static func clamp_label_to_screen(rect: Rect2, view: Vector2) -> Rect2:
+	var x := clampf(rect.position.x, ELITE_LABEL_EDGE, maxf(ELITE_LABEL_EDGE, view.x - ELITE_LABEL_EDGE - rect.size.x))
+	return Rect2(Vector2(x, rect.position.y), rect.size)
 
 static func elite_label_slot(above: Rect2, below: Rect2, view: Vector2, taken: Array[Rect2]) -> Rect2:
 	var zones := elite_label_hud_zones(view)
@@ -192,14 +248,34 @@ func _place_special_label() -> void:
 	var scale_y := absf(xf.get_scale().y)
 	var above_local := Vector2(-100, -64 * animated_sprite.scale.y - 34)
 	var below_local := Vector2(-100, 30 * animated_sprite.scale.y + 6)
-	var above := Rect2(xf * above_local, ELITE_LABEL_SIZE * scale_y)
-	var below := Rect2(xf * below_local, ELITE_LABEL_SIZE * scale_y)
+	var above := clamp_label_to_screen(Rect2(xf * above_local, ELITE_LABEL_SIZE * scale_y), view)
+	var below := clamp_label_to_screen(Rect2(xf * below_local, ELITE_LABEL_SIZE * scale_y), view)
 	var taken: Array[Rect2] = []
-	for rect in _elite_label_rects:
-		taken.append(rect.grow(4.0))
+	taken.append_array(_elite_label_rects)
 	taken.append_array(active_label_areas())
+	taken.append_array(active_plate_only_areas())
+	taken.append_array(hud_panel_rects(view))
+	for i in taken.size():
+		taken[i] = taken[i].grow(ELITE_LABEL_GAP)
 	var slot := elite_label_slot(above, below, view, taken)
+	var side_x := 46.0 * animated_sprite.scale.x + 8.0
+	if slot.size == Vector2.ZERO:
+		# R12: then beside the body, left and right, at mid height.
+		slot = elite_label_slot(clamp_label_to_screen(Rect2(xf * Vector2(side_x, -18), ELITE_LABEL_SIZE * scale_y), view), clamp_label_to_screen(Rect2(xf * Vector2(-side_x - ELITE_LABEL_SIZE.x, -18), ELITE_LABEL_SIZE * scale_y), view), view, taken)
+	var compact := false
+	if slot.size == Vector2.ZERO:
+		# R12: no room for the name; keep a small elite mark over the head so the
+		# elite is still identifiable (its full name stays in the boss bar).
+		var mark_size := ELITE_MARK_SIZE * scale_y
+		var mark_above := clamp_label_to_screen(Rect2(xf * Vector2(-ELITE_MARK_SIZE.x * 0.5, -64 * animated_sprite.scale.y - ELITE_MARK_SIZE.y - 4), mark_size), view)
+		var mark_below := clamp_label_to_screen(Rect2(xf * Vector2(-ELITE_MARK_SIZE.x * 0.5, 30 * animated_sprite.scale.y + 6), mark_size), view)
+		slot = elite_label_slot(mark_above, mark_below, view, taken)
+		if slot.size == Vector2.ZERO:
+			slot = elite_label_slot(clamp_label_to_screen(Rect2(xf * Vector2(side_x, -18), mark_size), view), clamp_label_to_screen(Rect2(xf * Vector2(-side_x - ELITE_MARK_SIZE.x, -18), mark_size), view), view, taken)
+		compact = slot.size != Vector2.ZERO
 	special_label.visible = slot.size != Vector2.ZERO
+	special_label.text = ELITE_MARK_TEXT if compact else special_elite_name
+	special_label.size = (ELITE_MARK_SIZE if compact else ELITE_LABEL_SIZE)
 	if special_label.visible:
 		_elite_label_rects.append(slot)
 		special_label.position = xf.affine_inverse() * slot.position
