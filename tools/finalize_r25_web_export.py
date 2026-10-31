@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "0.41.0-content-r12"
+RELEASE = "0.42.0-content-r13"
 FOCAL_SOURCE = ROOT / "assets" / "art" / "r33" / "r33_keyart.png"
 FOCAL_HASH = "04c40aa0"
 FOCAL_REF = f"r33-web-focal.png?v={FOCAL_HASH}"

@@ -1791,7 +1791,7 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 	var director: Node = tactical_director if is_instance_valid(tactical_director) else null
 	var relay_node: Node = director.relay if director != null and is_instance_valid(director.relay) else null
 	if relay_node != null:
-		enriched["seal_state"] = {"step": int(relay_node.step), "completed": bool(relay_node.completed), "wrong": int(relay_node.wrong_penalties), "required": str(relay_node.required_formation()), "formation": squad_manager.get_formation_id() if is_instance_valid(squad_manager) else ""}
+		enriched["seal_state"] = {"step": int(relay_node.step), "completed": bool(relay_node.completed), "wrong": int(relay_node.wrong_penalties), "pressure_seconds": float(relay_node.pressure_seconds), "matched_seconds": float(relay_node.matched_seconds), "required": str(relay_node.required_formation()), "formation": squad_manager.get_formation_id() if is_instance_valid(squad_manager) else ""}
 	enriched["starting_build_text"] = starting_build_text()
 	enriched["starting_build"] = {"team":active_starting_team,"node":active_starting_node,"benefits":starting_benefits.duplicate(true),"run_id":starting_run_id,"valid_settlements":MetaProgress.starting_settlements.size(),"vouchers":MetaProgress.starting_vouchers}
 	if AchievementProgress != null and AchievementProgress.has_method("get_run_unlocked_definitions"):

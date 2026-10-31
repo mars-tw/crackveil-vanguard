@@ -26,6 +26,10 @@ var history: Array[Dictionary] = []
 var pressure: Node2D
 var wrong_timer := 0.0
 var wrong_penalties := 0
+# R13: real time the squad faced an attack wave, and how much of it in an
+# accepted formation; the result screen reports this as the formation read.
+var pressure_seconds := 0.0
+var matched_seconds := 0.0
 var counter_timer := 0.0
 var feedback_timer := 0.0
 # Seal-success presentation at the closed anchor; never feeds combat.
@@ -167,7 +171,7 @@ func next_action() -> String:
 		var needed:=required_formation()
 		var selected: String=GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else "wedge"
 		if GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,selected):
-			var label: String = accepted_text() if accepted_formations().size() > 1 else "建議%s" % NAMES[ORDER.find(needed)]
+			var label: String = accepted_text() if accepted_formations().size() > 1 else "需%s" % NAMES[ORDER.find(needed)]
 			return "%s・%s・陣形正確" % [pressure.status_text(),label]
 		return "%s・%s・%s" % [pressure.status_text(),accepted_text(),switch_hint()]
 	if hold > 0:
@@ -302,8 +306,33 @@ func _tick_feedback(delta: float) -> void:
 		var current_formation: String = GameManager.squad_manager.get_formation_id()
 		if _last_formation_id != "" and current_formation != _last_formation_id:
 			formation_link_timer = 1.0
+			# R13: switching INTO an accepted formation while a pressure is up
+			# shows the cause and effect over the captain.
+			if not completed and is_instance_valid(pressure) and pressure.started and GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node, pressure.kind, current_formation):
+				switch_card_text = switch_card_for(pressure.kind, current_formation)
+				switch_card_time = 0.0
+				# The switch card replaces the old verdict, so the screen never
+				# shows a head count and a per-hit damage figure side by side.
+				if not bool(pressure.last_result.get("correct", true)):
+					pressure.result_age = maxf(pressure.result_age, 2.4)
 		_last_formation_id = current_formation
 	seal_flash_time += maxf(0,delta)
+	switch_card_time += maxf(0,delta)
+
+# R13: the switch card states what the formation does against this pressure,
+# using the real rule values (encounter_pressure.gd hit 14/4, squad formation
+# multipliers); it never claims an effect the rules do not apply.
+const SWITCH_CARD_SECONDS := 1.4
+var switch_card_text := ""
+var switch_card_time := 99.0
+static func switch_card_for(kind: String, formation: String) -> String:
+	var pressure_name: String = {"front":"重盾正推","pincer":"兩翼包抄","artillery":"遠射落點"}.get(kind, "")
+	var effect: String = {"wedge":"輸出 +15%・可封合","ring":"貼近隊長者每擊傷害 14→4・可封合","scatter":"移速 +8%・散開躲落點・可封合"}.get(formation, "可封合")
+	if kind == "front" and formation == "ring":
+		effect = "受傷 -10%・可封合"
+	if kind == "pincer" and formation == "scatter":
+		effect = "移速 +8%・可封合"
+	return "%s → %s：%s" % [NAMES[maxi(0, ORDER.find(formation))], pressure_name, effect]
 
 func advance(delta: float) -> void:
 	_tick_feedback(delta)
@@ -329,6 +358,10 @@ func advance(delta: float) -> void:
 		return
 	pressure.begin()
 	var correct: bool = GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,squad.get_formation_id())
+	if pressure.started and pressure.phase in ["warning","active"]:
+		pressure_seconds += maxf(0.0, delta)
+		if correct:
+			matched_seconds += maxf(0.0, delta)
 	if not correct and captain.global_position.distance_to(anchor) <= CAPTAIN_RADIUS and wrong_timer <= 0:
 		wrong_timer = 2.5
 		wrong_penalties += 1
@@ -500,8 +533,26 @@ func _draw_text_layer() -> void:
 		return
 	if not completed:
 		_draw_verdict()
+		_draw_switch_card()
 	# Drawn last so the next seal's marker never covers the success line.
 	_draw_seal_flash()
+
+func _draw_switch_card() -> void:
+	if switch_card_time >= SWITCH_CARD_SECONDS or switch_card_text == "" or not is_instance_valid(GameManager.player):
+		return
+	var fade := clampf((SWITCH_CARD_SECONDS - switch_card_time) / 0.4, 0.0, 1.0)
+	var lift := 12.0 * minf(1.0, switch_card_time / 0.3)
+	var head := to_local(GameManager.player.global_position)
+	# The draw width follows the text, so the card is never cut short.
+	var width: float = FONT.get_string_size(switch_card_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
+	var span := width + 16.0
+	var at := _keep_on_screen(head + Vector2(-span / 2, -104 - lift), span)
+	var box := Rect2(at + Vector2(span / 2 - width / 2 - 12, -22), Vector2(width + 24, 30))
+	_reserve_for_plates(box)
+	text_layer.draw_rect(box, Color(0.02, 0.07, 0.05, 0.86 * fade), true)
+	text_layer.draw_rect(box, Color(0.56, 0.94, 0.64, 0.9 * fade), false, 2, true)
+	text_layer.draw_string_outline(FONT, at, switch_card_text, HORIZONTAL_ALIGNMENT_CENTER, span, 18, 6, Color(0.02, 0.04, 0.03, 0.9 * fade))
+	text_layer.draw_string(FONT, at, switch_card_text, HORIZONTAL_ALIGNMENT_CENTER, span, 18, Color(0.82, 1.0, 0.84, fade))
 
 func _draw_verdict() -> void:
 	var edge := CAPTAIN_RADIUS

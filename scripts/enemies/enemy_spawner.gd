@@ -390,6 +390,9 @@ func _spawn_boss() -> void:
 	if GameManager.run_mode == "campaign":
 		config["tactical_min_cycles"] = 2
 	config["death_spawn_cap"] = max_enemies
+	# R13: the gatekeeper wears a world name plate like elites, so the boss is
+	# identifiable on the field, not only in the top-left boss bar.
+	config["special_elite_name"] = str(stage.get("boss_name", ""))
 	if GameManager.run_mode == "endless":
 		var wave := GameManager.get_endless_wave()
 		config["max_hp"] = float(config["max_hp"]) * (1.0 + 0.12 * float(wave - 1))

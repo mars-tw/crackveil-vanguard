@@ -290,6 +290,8 @@ func _refresh() -> void:
 		var advice:=_defeat_advice(displayed_summary.get("seal_state",{}))
 		if advice!="":summary_label.text+="\n"+advice
 	gain_label.text=_measured_gain(node,build.get("benefits",{}))
+	var read_line := formation_read_line(displayed_summary.get("seal_state",{}))
+	if read_line != "":gain_label.text += "\n" + read_line
 	progress_label.text=MetaProgress.starting_choice_progress_text()
 	if not GameManager.pending_starting_settlements.is_empty():progress_label.text="進度未保存・整備可重試"
 	page=clampi(page,0,_page_count()-1)
@@ -413,6 +415,15 @@ func _defeat_advice(seal: Dictionary) -> String:
 	var held:=str(names.get(str(seal.get("formation","")),""))
 	if int(seal.get("wrong",0))>0:return "下次：倒在第 %d 道（需%s，當時%s），錯陣反噬 %d 次；先看危險區上的陣形圖示" % [mini(step+1,3),need,held,int(seal.get("wrong",0))]
 	return "下次：倒在第 %d 道（封隙 %d/3），攻勢間隙帶兩名隊友站進封隙" % [mini(step+1,3),step]
+
+# R13: how well the squad read the attack waves this run, from real timers:
+# share of attack-wave time spent in an accepted formation, and backlashes.
+static func formation_read_line(seal: Dictionary) -> String:
+	var total := float(seal.get("pressure_seconds", 0.0))
+	if total < 1.0:
+		return ""
+	var share := roundi(100.0 * clampf(float(seal.get("matched_seconds", 0.0)) / total, 0.0, 1.0))
+	return "攻勢中對陣 %d%%・錯陣反噬 %d 次" % [share, int(seal.get("wrong", 0))]
 
 func _measured_gain(node: Dictionary,measured: Dictionary) -> String:
 	if node.is_empty():return "未裝起始節點・本局無節點增益"

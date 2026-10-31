@@ -543,7 +543,7 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	damage_hit_index = 0
 	last_hit_critical = false
 	special_elite_id = str(config.get("special_elite_id", ""))
-	special_elite_name = str(config.get("special_elite_name", ""))
+	special_elite_name = numbered_elite_name(str(config.get("special_elite_name", "")), get_instance_id())
 	special_skill = str(config.get("special_skill", ""))
 	special_cooldown = float(config.get("special_cooldown", 3.0))
 	special_timer = 1.4
@@ -566,6 +566,7 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	elite_armor_broken = false
 	elite_break_announcements = 0
 	death_dissolve_age = 99.0
+	elite_break_ring = false
 	last_hit_was_critical = false
 	is_dying = false
 	death_finalized = false
@@ -1290,7 +1291,9 @@ func _show_hit_flash_overlay() -> void:
 # One shared material: pooled enemies must not compile a shader each.
 static var _hit_flash_material: ShaderMaterial = null
 # Keeps some sprite detail under the flash so damage numbers stay readable.
-const HIT_FLASH_OVERLAY_MAX_ALPHA := 0.72
+# R13: 0.40 (was 0.72) so the body's outline and colour show through the flash
+# instead of a flat white silhouette in still frames.
+const HIT_FLASH_OVERLAY_MAX_ALPHA := 0.40
 static func _shared_hit_flash_material() -> ShaderMaterial:
 	if _hit_flash_material == null:
 		var flash_shader := Shader.new()
@@ -1394,7 +1397,47 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 	return applied_damage
 
 
+# R13: two live elites with the same name are told apart: the second one
+# carries 「・2」 on its plate, in the boss bar and in its break card.
+static var _live_elite_names: Dictionary = {}
+static func numbered_elite_name(base: String, owner_id: int) -> String:
+	for key in _live_elite_names.keys():
+		if _live_elite_names[key].has(owner_id):
+			_live_elite_names[key].erase(owner_id)
+	if base == "":
+		return ""
+	var holders: Dictionary = _live_elite_names.get(base, {})
+	var used := {}
+	for id in holders.keys():
+		var node := instance_from_id(id)
+		if node == null or not is_instance_valid(node) or not bool(node.get("is_active")):
+			holders.erase(id)
+			continue
+		used[int(holders[id])] = true
+	var ordinal := 1
+	while used.has(ordinal):
+		ordinal += 1
+	holders[owner_id] = ordinal
+	_live_elite_names[base] = holders
+	return base if ordinal == 1 else "%s・%d" % [base, ordinal]
+
+# R13: an elite's defeat gets its own beat: a gold shock ring on the ground and
+# the elite's name in the 擊破 card, so it is not just another death puff.
+const ELITE_BREAK_RING_SECONDS := 0.6
+var elite_break_ring := false
+func elite_break_ring_radius() -> float:
+	return lerpf(radius * 1.2, radius * 4.2, clampf(death_dissolve_age / ELITE_BREAK_RING_SECONDS, 0.0, 1.0))
+func elite_break_text() -> String:
+	return "擊破・%s" % special_elite_name if special_elite_name != "" else "擊破"
+
 func _draw() -> void:
+	if elite_break_ring and is_dying and death_dissolve_age < ELITE_BREAK_RING_SECONDS:
+		var fade := 1.0 - death_dissolve_age / ELITE_BREAK_RING_SECONDS
+		draw_set_transform(Vector2(0, radius * 0.6), 0.0, Vector2(1.0, 0.45))
+		draw_arc(Vector2.ZERO, elite_break_ring_radius(), 0.0, TAU, 48, Color(0.03, 0.05, 0.09, 0.7 * fade), 9.0, true)
+		draw_arc(Vector2.ZERO, elite_break_ring_radius(), 0.0, TAU, 48, Color(1.0, 0.85, 0.45, fade), 5.0, true)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		return
 	if not is_active or is_dying or tactical_min_cycles<=0:
 		return
 	# Two etched shield notches announce the attack-cycle protection.
@@ -1445,8 +1488,9 @@ func _die(source_position: Vector2 = Vector2.ZERO) -> void:
 	if special_label != null:
 		special_label.visible = false
 	death_dissolve_age = 0.0
+	elite_break_ring = elite_frame_visible() and not is_boss
 	if elite_frame_visible():
-		EntityFactory.spawn_damage_number("\u64ca\u7834", global_position + Vector2(0, -radius - 40.0), Color("ffd57a"), 38, "", true)
+		EntityFactory.spawn_damage_number(elite_break_text() if not is_boss else "\u64ca\u7834", global_position + Vector2(0, -radius - 40.0), Color("ffd57a"), 38, "", true)
 	velocity = Vector2.ZERO
 	knockback_velocity = Vector2.ZERO
 	var death_direction := (global_position - source_position).normalized()
@@ -1764,6 +1808,10 @@ func _apply_sprite() -> void:
 	sprite.position = Vector2.ZERO
 	sprite.flip_h = false
 	_setup_animation_frames(radius * 3.0, sprite_scale)
+	rest_color = _current_stage_rest_color()
+	sprite.modulate = rest_color
+	if animated_sprite != null:
+		animated_sprite.modulate = rest_color
 	if not animation_frames_ready:
 		var texture: Texture2D = SPRITE_LOADER.get_texture(sprite_path)
 		sprite.visible = texture != null
@@ -1773,7 +1821,24 @@ func _apply_sprite() -> void:
 	_apply_shadow_and_glow()
 
 
+# R13: regular enemies carry a light tint of the stage colour, so each of the
+# ten stages reads differently; elites and bosses keep their own art colours.
+const STAGE_TINT_WEIGHT := 0.22
+var rest_color := Color.WHITE
+static func stage_rest_color(stage_color: Color) -> Color:
+	var tint := Color.WHITE.lerp(stage_color, STAGE_TINT_WEIGHT)
+	tint.a = 1.0
+	return tint
+func _current_stage_rest_color() -> Color:
+	if is_elite or is_boss or not is_instance_valid(GameManager):
+		return Color.WHITE
+	var stage: Dictionary = GameManager.STAGE_CATALOG.get_stage(GameManager.selected_stage_id)
+	return stage_rest_color(stage.get("color", Color.WHITE))
+
 func _set_sprite_modulate(color: Color) -> void:
+	# Callers pass WHITE to mean "back to normal"; normal is the stage tint.
+	if color == Color.WHITE:
+		color = rest_color
 	if sprite != null and hit_flash_timer <= 0.0:
 		sprite.modulate = color
 	if animated_sprite != null and hit_flash_timer <= 0.0:
@@ -1886,9 +1951,9 @@ func _tick_hit_flash(delta: float) -> void:
 	if animated_sprite != null:
 		animated_sprite.modulate = flash_color
 	if hit_flash_timer <= 0.0:
-		sprite.modulate = Color.WHITE
+		sprite.modulate = rest_color
 		if animated_sprite != null:
-			animated_sprite.modulate = Color.WHITE
+			animated_sprite.modulate = rest_color
 		if hit_flash_overlay != null:
 			hit_flash_overlay.visible = false
 	else:
@@ -1980,8 +2045,10 @@ func tick_shared_enemy_animation(delta: float, focus_position: Vector2, focus_va
 	else:
 		# Dying enemies fade toward a faint husk while the fall poses keep playing.
 		death_dissolve_age += delta
+		if elite_break_ring and death_dissolve_age < ELITE_BREAK_RING_SECONDS + 0.1:
+			queue_redraw()
 		if hit_flash_timer <= 0.0:
-			animated_sprite.modulate = Color(1.0, 1.0, 1.0, death_dissolve_alpha())
+			animated_sprite.modulate = Color(rest_color.r, rest_color.g, rest_color.b, death_dissolve_alpha())
 	if not is_active and is_dying and death_recoil_velocity.length_squared() > 0.01:
 		# The articulated fall poses still run in full; a small ballistic slide
 		# carries the attack direction after the disabled collider leaves combat.
