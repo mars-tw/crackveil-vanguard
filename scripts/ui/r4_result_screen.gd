@@ -443,6 +443,9 @@ static func formation_read_line(seal: Dictionary) -> String:
 		line += "\n封合：快封 %d・慢封 %d" % [fast, slow]
 		# R20: how long the members fought with the formation synergy bonus.
 		line += "・隊員協同 %d 秒" % roundi(float(seal.get("matched_seconds", 0.0)))
+		# R21: and how much damage the synergy actually added.
+		if float(seal.get("synergy_damage", 0.0)) >= 1.0:
+			line += "（多打 %d HP）" % roundi(float(seal.get("synergy_damage", 0.0)))
 	return line
 
 func _measured_gain(node: Dictionary,measured: Dictionary) -> String:

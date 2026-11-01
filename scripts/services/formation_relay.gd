@@ -34,6 +34,12 @@ var matched_seconds := 0.0
 # formation, members (not the captain) deal FORMATION_SYNERGY_MEMBER damage.
 const FORMATION_SYNERGY_MEMBER := 1.8
 var synergy_active := false
+# R21: damage the synergy added, measured when member hits are recorded.
+var synergy_damage := 0.0
+# R21: seconds since the synergy last switched on (drives its pulse).
+const SYNERGY_PULSE_SECONDS := 0.8
+var synergy_pulse_time := 99.0
+var synergy_active_last := false
 var counter_timer := 0.0
 var feedback_timer := 0.0
 # Seal-success presentation at the closed anchor; never feeds combat.
@@ -186,7 +192,9 @@ func next_action() -> String:
 			if accepted_formations().size() > 1:
 				return "%s・陣形正確・隊員增傷 +80%%" % pressure.status_text()
 			return "%s・%s・陣形正確・%s・隊員 +80%%" % [pressure.status_text(),label,pace]
-		return "%s・%s・%s" % [pressure.status_text(),accepted_text(),switch_hint()]
+		# R21: right after a seal the banner celebrates the old wave; name this one
+		# as the next, so "可用" for a new formation does not read as a contradiction.
+		return "%s%s・%s・%s" % ["下一道 " if seal_flash_time < SEAL_FLASH_SECONDS else "", pressure.status_text(),accepted_text(),switch_hint()]
 	if hold > 0:
 		# R16: the fast/slow tag stays visible while the seal fills.
 		var held: String = GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else ""
@@ -359,6 +367,7 @@ func _tick_feedback(delta: float) -> void:
 				clear_wrong_notice()
 		_last_formation_id = current_formation
 	seal_flash_time += maxf(0,delta)
+	synergy_pulse_time += maxf(0,delta)
 	switch_card_time += maxf(0,delta)
 
 # R13: the switch card states what the formation does against this pressure,
@@ -407,7 +416,11 @@ func advance(delta: float) -> void:
 		return
 	pressure.begin()
 	var correct: bool = GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,squad.get_formation_id())
+	var was_synergy := synergy_active_last
 	synergy_active = correct and pressure.started and pressure.phase in ["warning","active"]
+	if synergy_active and not was_synergy:
+		synergy_pulse_time = 0.0
+	synergy_active_last = synergy_active
 	if pressure.started and pressure.phase in ["warning","active"]:
 		pressure_seconds += maxf(0.0, delta)
 		if correct:
@@ -633,6 +646,24 @@ func _draw_verdict() -> void:
 		text_layer.draw_string_outline(FONT,sub_at,consequence,HORIZONTAL_ALIGNMENT_CENTER,280,16,6,Color(0.03,0.05,0.09,0.9*fade))
 		text_layer.draw_string(FONT,sub_at,consequence,HORIZONTAL_ALIGNMENT_CENTER,280,16,Color(Color("e8f7d8") if bool(pressure.last_result.correct) else Color("ffd0a0"),fade))
 
+# R21: formation synergy reads on the squad itself. When it switches on, gold
+# links run from the captain to each member and their foot rings flare for
+# SYNERGY_PULSE_SECONDS; while it lasts the foot rings stay on at low light.
+func _draw_synergy() -> void:
+	if not synergy_active or not is_instance_valid(GameManager.squad_manager) or not is_instance_valid(GameManager.player):
+		return
+	var pulse := clampf(1.0 - synergy_pulse_time / SYNERGY_PULSE_SECONDS, 0.0, 1.0)
+	var gold := Color("ffd98a")
+	var captain_at := to_local(GameManager.player.global_position)
+	for member in GameManager.squad_manager.get_members():
+		if not is_instance_valid(member) or member == GameManager.player or not member.is_alive:
+			continue
+		var at := to_local(member.global_position)
+		if pulse > 0.0:
+			draw_line(captain_at, at, Color("101b30", 0.6 * pulse), 7.0, true)
+			draw_line(captain_at, at, Color(gold, 0.9 * pulse), 3.0, true)
+		draw_arc(at + Vector2(0, 10), 20.0 + 10.0 * pulse, 0.0, TAU, 28, Color(gold, 0.35 + 0.6 * pulse), 2.0 + 3.0 * pulse, true)
+
 static func seal_flash_color(slow: bool) -> Color:
 	return Color("7fe3ff") if slow else Color("ffd98a")
 
@@ -667,6 +698,7 @@ func _draw() -> void:
 		return
 	if completed:
 		return
+	_draw_synergy()
 	var color: Color = COLORS[step]
 	# Four etched corners: task marker, never a defensive circle.
 	var edge := CAPTAIN_RADIUS
