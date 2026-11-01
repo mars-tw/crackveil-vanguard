@@ -9,14 +9,14 @@ func _initialize() -> void:
 	_check(catalog.seal_seconds("", "front", "wedge") == 6 and catalog.seal_seconds("", "front", "ring") == 9, "seal times are the real 6 s hold over the seal rate (fast 6 s, slow 9 s)")
 	_check(catalog.seal_seconds("spec_escort", "front", "ring") == 7, "the escort ring seal shows the real 7 s (6 / 0.85, rounded)")
 	var pressure_script: GDScript = load("res://scripts/services/encounter_pressure.gd")
-	_check(pressure_script.choice_text("front", "") == "楔形快封6秒整補8／圓陣慢封9秒整補16・反擊10秒", "the warning compares both seal times")
+	_check(load("res://scripts/services/formation_relay.gd").compare_text("front") == "楔形快6秒整補8／圓陣慢9秒整補16", "both seal times are compared (top bar since R19)")
 	var pressure_src := FileAccess.get_file_as_string("res://scripts/services/encounter_pressure.gd")
 	_check(pressure_src.contains("tag_layer.draw_rect(tag, Color(\"08121f\", 0.92), true)") and pressure_src.contains("const PACE_TAG_Z := 97") and pressure_src.contains("tag_layer.z_as_relative = false"), "fast/slow ground tags have a solid backing and distinct colours")
 	var relay_src := FileAccess.get_file_as_string("res://scripts/services/formation_relay.gd")
 	_check(relay_src.contains("alternative_hold+=maxf(0.0, delta)"), "the escort result counts real seconds, matching the top bar's 7 s, not seal progress")
 	var hud_src := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
 	_check(hud_src.contains("minf(560.0 if view_width < 1200.0 else 680.0,"), "wide screens fit the seal choice notice on one line")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.47.0-content-r18", "project version is 0.47.0-content-r18")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.48.0-content-r19", "project version is 0.48.0-content-r19")
 	if failures.is_empty():
 		print("R17_REGRESSION status=PASS checks=%d" % checks)
 	else:

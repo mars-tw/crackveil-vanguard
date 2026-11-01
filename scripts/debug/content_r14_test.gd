@@ -26,7 +26,7 @@ func _check(condition: bool, label: String) -> void:
 func _test_card_wording() -> void:
 	var relay_script: GDScript = load("res://scripts/services/formation_relay.gd")
 	var pincer: String = relay_script.switch_card_for("pincer", "ring")
-	_check(pincer.contains("隊長身邊隊員每擊傷害 14→4"), "the ring card says it is the allies near the captain who take 14→4")
+	_check(pincer.contains("隊長身邊隊員每擊受傷 14→4"), "the ring card says it is the allies near the captain who take 14→4")
 	_check(relay_script.switch_card_for("front", "ring").contains("全隊受傷 -10%"), "the escort ring card names who takes less damage")
 
 func _test_short_run_read() -> void:
@@ -60,4 +60,4 @@ func _test_r14_review_fixes() -> void:
 	_check(result_src.contains("\"回復 %d・減傷 %d HP（含羈絆）\"") and not result_src.contains("個人總計（含羈絆）\n"), "support cards use two lines so narrow cards keep their numbers")
 
 func _test_version() -> void:
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.47.0-content-r18", "project version is 0.47.0-content-r18")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.48.0-content-r19", "project version is 0.48.0-content-r19")

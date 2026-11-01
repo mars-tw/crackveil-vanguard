@@ -280,7 +280,7 @@ func _refresh() -> void:
 	var team: String=str(build.get("team",GameManager.active_starting_team))
 	var node: Dictionary=CATALOG.node(str(build.get("node",GameManager.active_starting_node)))
 	var bond: Dictionary=displayed_summary.get("bond_benefits",GameManager.bond_benefits)
-	var outcome: String="擊破"+str(displayed_summary.get("boss_name",GameManager.STAGE_CATALOG.get_stage(GameManager.selected_stage_id).get("boss_name","守門者"))) if victory else "先鋒的殘響"
+	var outcome: String="擊破"+str(displayed_summary.get("boss_name",GameManager.STAGE_CATALOG.get_stage(GameManager.selected_stage_id).get("boss_name","守門者"))) if victory else defeat_cause(displayed_summary)
 	var echo: Dictionary=displayed_summary.get("echo_progress",MetaProgress.get_progress_summary())
 	var goal: Dictionary=echo.get("next_goal",MetaProgress.get_next_progress_goal())
 	summary_label.text="%s｜%s\n%s・%s\n擊殺 %d・存活 %d/%d\n羈絆收益（全隊加成）回%d／減%d HP\n殘響 +%d・現有 %d\n下一步 %s・%s" % [CATALOG.TEAMS.get(team,CATALOG.TEAMS.legacy).name,node.get("name","未裝節點"),outcome,GameManager.format_time(float(displayed_summary.get("elapsed_time",0))),displayed_summary.get("kills",0),displayed_summary.get("squad_alive",0),displayed_summary.get("squad_total",rows.size()),bond.get("healing",0),bond.get("prevented",0),displayed_summary.get("echo_shards_earned",0),echo.get("shards",MetaProgress.shards),goal.get("name","強化完成"),("還差 %d" % int(goal.get("remaining",0))) if int(goal.get("remaining",0))>0 else ("可在整備兌換" if goal.get("kind","")=="spendable" else "已達成")]
@@ -407,6 +407,16 @@ func _draw_card_art(number: int) -> void:
 		art.draw_rect(Rect2(bar_x,y,maxf(0,bar_w*clampf(float(bars[i][0]),0,1)),5),bars[i][1],true)
 
 # One concrete next-run hint from the real seal state; nothing is invented.
+# R19: the first line of a defeat says what ended the run and where.
+static func defeat_cause(summary: Dictionary) -> String:
+	var cause := "失敗原因：隊長倒下" if bool(summary.get("captain_dead", false)) else "失敗原因：先鋒的殘響耗盡"
+	var seal: Dictionary = summary.get("seal_state", {})
+	if bool(summary.get("boss_active", false)):
+		return cause + "・首領戰"
+	if not seal.is_empty():
+		return cause + ("・三道已封" if bool(seal.get("completed", false)) else "・第 %d 道" % mini(int(seal.get("step", 0)) + 1, 3))
+	return cause
+
 func _defeat_advice(seal: Dictionary) -> String:
 	if seal.is_empty():return ""
 	var names:={"wedge":"楔形","ring":"圓陣","scatter":"散兵"}

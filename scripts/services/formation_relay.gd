@@ -208,10 +208,9 @@ static func marker_hits_text(pixel_rect: Rect2, text_areas: Array[Rect2]) -> boo
 func compare_line() -> String:
 	if completed or not is_instance_valid(pressure) or not pressure.started or not is_instance_valid(GameManager.squad_manager):
 		return ""
-	var selected: String = GameManager.squad_manager.get_formation_id()
-	# Same branch as next_action's "陣形正確" line: open seal, no backlash, a
-	# warned or active wave, and a formation that answers it.
-	if not is_open() or wrong_timer > 0 or not pressure.phase in ["warning", "active"] or accepted_formations().size() < 2 or not GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node, pressure.kind, selected):
+	# Open seal and a warned or active wave (or a backlash just landed). R19:
+	# shown for a wrong formation too, so the fix and its trade are on one line.
+	if not is_open() or not (pressure.phase in ["warning", "active"] or wrong_timer > 0) or accepted_formations().size() < 2:
 		return ""
 	return compare_text(pressure.kind)
 
@@ -366,7 +365,7 @@ var switch_card_text := ""
 var switch_card_time := 99.0
 static func switch_card_for(kind: String, formation: String) -> String:
 	var pressure_name: String = {"front":"重盾正推","pincer":"兩翼包抄","artillery":"遠射落點"}.get(kind, "")
-	var effect: String = {"wedge":"輸出 +15%・可封合","ring":"隊長身邊隊員每擊傷害 14→4・可封合","scatter":"移速 +8%・散開躲落點・可封合"}.get(formation, "可封合")
+	var effect: String = {"wedge":"輸出 +15%・可封合","ring":"隊長身邊隊員每擊受傷 14→4・可封合","scatter":"移速 +8%・散開躲落點・可封合"}.get(formation, "可封合")
 	if kind == "front" and formation == "ring":
 		effect = "全隊受傷 -10%・可封合"
 	if kind == "pincer" and formation == "scatter":
@@ -446,8 +445,9 @@ func advance(delta: float) -> void:
 	seal_flash_at = anchor
 	last_seal_heal = int(GameManager.STARTING_BUILD.seal_heal(pressure.kind, squad.get_formation_id()))
 	seal_flash_text = seal_text(step+1, last_seal_counter, last_seal_heal)
+	seal_flash_slow = GameManager.STARTING_BUILD.is_secondary(pressure.kind, squad.get_formation_id())
 	GameManager.request_combat_impact(5.0,0.035)
-	EntityFactory.spawn_death_burst(anchor,Color("ffdcac"),3.4,"gold_rain")
+	EntityFactory.spawn_death_burst(anchor,Color("bdf0ff") if seal_flash_slow else Color("ffdcac"),3.4,"gold_rain")
 	if GameManager.active_starting_node=="spec_prepare":
 		for member in squad.get_members(): GameManager.starting_benefits.healing_forgone+=minf(last_seal_heal,member.max_hp-member.current_hp)
 	else:
@@ -478,6 +478,8 @@ func seal_toast_text(step: int, counter: int = -1) -> String:
 	return "封隙 %d/3｜第 %d 道已開啟・加成 %d 秒" % [step, step + 1, seconds]
 
 var last_seal_heal := 8
+# R19: the seal flash takes the fast (gold) or slow (cyan) colour of its answer.
+var seal_flash_slow := false
 func seal_text(count: int, counter: int = -1, heal: int = 8) -> String:
 	if GameManager.active_starting_node=="spec_prepare":
 		return "封合 %d/3・放棄治療・反擊 +20%% %d 秒" % [count, counter if counter > 0 else 10]
@@ -625,11 +627,18 @@ func _draw_verdict() -> void:
 		text_layer.draw_string_outline(FONT,sub_at,consequence,HORIZONTAL_ALIGNMENT_CENTER,280,16,6,Color(0.03,0.05,0.09,0.9*fade))
 		text_layer.draw_string(FONT,sub_at,consequence,HORIZONTAL_ALIGNMENT_CENTER,280,16,Color(Color("e8f7d8") if bool(pressure.last_result.correct) else Color("ffd0a0"),fade))
 
+static func seal_flash_color(slow: bool) -> Color:
+	return Color("7fe3ff") if slow else Color("ffd98a")
+
 func _draw_seal_flash() -> void:
 	if seal_flash_time >= SEAL_FLASH_SECONDS or seal_flash_text == "":
 		return
-	var gold := Color("ffd98a")
+	var gold := seal_flash_color(seal_flash_slow)
 	var fade := minf(clampf((SEAL_FLASH_SECONDS - seal_flash_time) / 0.6, 0.0, 1.0), SEAL_FLASH_MAX_ALPHA)
+	# R19: a wave that runs out from the seal over the first 0.6 s.
+	if seal_flash_time < 0.6:
+		var wave := smoothstep(0.0, 0.6, seal_flash_time)
+		text_layer.draw_arc(seal_flash_at, CAPTAIN_RADIUS * (1.0 + 2.2 * wave), 0.0, TAU, 48, Color(gold, 0.85 * (1.0 - wave)), 6.0 * (1.0 - wave) + 2.0, true)
 	var grow := 1.0 + 1.1 * smoothstep(0.0, 0.7, seal_flash_time)
 	var edge := CAPTAIN_RADIUS * grow
 	var ring := PackedVector2Array([seal_flash_at+Vector2(0,-edge),seal_flash_at+Vector2(edge,0),seal_flash_at+Vector2(0,edge),seal_flash_at+Vector2(-edge,0),seal_flash_at+Vector2(0,-edge)])

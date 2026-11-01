@@ -106,8 +106,9 @@ static func choice_text(pressure_kind: String, node_id: String) -> String:
 	var secondary := str(catalog.SECONDARY.get(pressure_kind, ""))
 	# Short enough for one toast line: the slow answer's extra reward only.
 	# R17: both seal times, so the trade can be compared at a glance.
-	# R17: both sides' seal time and heal, so the whole trade is comparable.
-	return "%s快封%d秒整補%d／%s慢封%d秒整補%d・反擊%d秒" % [names.get(primary, ""), catalog.seal_seconds(node_id, pressure_kind, primary), int(catalog.PRIMARY_SEAL_HEAL), names.get(secondary, ""), catalog.seal_seconds(node_id, pressure_kind, secondary), int(catalog.SECONDARY_SEAL_HEAL), int(catalog.counter_seconds(node_id, pressure_kind, secondary))]
+	# R19: the top bar now carries both seal times and heals for the whole wave,
+	# so the toast names the two answers and the slow one's longer counter only.
+	return "快封%s／慢封%s・慢封反擊%d秒" % [names.get(primary, ""), names.get(secondary, ""), int(catalog.counter_seconds(node_id, pressure_kind, secondary))]
 
 func _process(delta: float) -> void:
 	if not enabled or not started or get_tree().paused or not GameManager.game_running:
@@ -234,7 +235,7 @@ func _draw_pace_tags() -> void:
 		var tint := Color("ffd27a") if fast else Color("7fe3ff")
 		tag_layer.draw_rect(tag, Color("08121f", 0.92), true)
 		tag_layer.draw_rect(tag, tint, false, 2.0, true)
-		tag_layer.draw_string(FONT, tag.position + Vector2(0, 21), row[1], HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 22, tint)
+		tag_layer.draw_string(FONT, tag.position + Vector2(0, 21), str(row[2]) + str(row[1]), HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 22, tint)
 
 func _draw_answer(center: Vector2) -> void:
 	# R11: the next seal's answer badge waits until the seal banner fades, so it
@@ -270,9 +271,11 @@ func _draw_answer(center: Vector2) -> void:
 		if count > 1:
 			var pace := "快" if i == 0 and accepted[i] == primary else "慢"
 			# R17: a solid tag (gold fast, cyan slow) that reads over links and crowds.
-			var tag := Rect2(rect.position + Vector2(rect.size.x * 0.5 - 15, -32), Vector2(30, 28))
+			# R19: the tag names the formation too (楔快／圓慢), so the badge reads
+			# without knowing the icon.
+			var tag := Rect2(rect.position + Vector2(rect.size.x * 0.5 - 26, -32), Vector2(52, 28))
 			# R17: drawn on a layer above effects, name plates and the crown.
-			pace_tags.append([tag, pace])
+			pace_tags.append([tag, pace, str(FORMATION_NAMES[accepted[i]]).substr(0, 1)])
 		if wrong:
 			var pulse := 0.6 + 0.4 * absf(sin(clock * 6.0))
 			draw_texture_rect(WRONG_RING, rect.grow(6.0), false, Color(1, 1, 1, pulse))

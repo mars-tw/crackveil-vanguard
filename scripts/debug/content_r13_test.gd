@@ -69,7 +69,7 @@ func _test_elite_break() -> void:
 func _test_switch_card() -> void:
 	var relay_script: GDScript = load("res://scripts/services/formation_relay.gd")
 	var pincer: String = relay_script.switch_card_for("pincer", "ring")
-	_check(pincer.contains("圓陣") and pincer.contains("兩翼包抄") and pincer.contains("每擊傷害 14→4"), "ring vs pincer card says the 14→4 is damage per hit, not a head count")
+	_check(pincer.contains("圓陣") and pincer.contains("兩翼包抄") and pincer.contains("每擊受傷 14→4"), "ring vs pincer card says the 14→4 is damage per hit, not a head count")
 	var relay_src0 := FileAccess.get_file_as_string("res://scripts/services/formation_relay.gd")
 	_check(relay_src0.contains("pressure.result_age = maxf(pressure.result_age, 2.4)"), "switching into the right formation clears the old wrong-formation verdict")
 	var front: String = relay_script.switch_card_for("front", "wedge")
@@ -125,4 +125,4 @@ func _test_formation_read() -> void:
 	_check(gm_src.contains("\"matched_seconds\": float(relay_node.matched_seconds)"), "the run summary carries the timers to the result screen")
 
 func _test_version() -> void:
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.47.0-content-r18", "project version is 0.47.0-content-r18")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.48.0-content-r19", "project version is 0.48.0-content-r19")

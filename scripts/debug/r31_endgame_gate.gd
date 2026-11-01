@@ -230,7 +230,7 @@ func _test_defeat_buttons(arena: Node) -> bool:
 	if root == null or title == null or summary == null or restart_button == null or main_menu_button == null:
 		_fail("defeat UI control missing")
 		return false
-	if title.text != "任務失敗" or not summary.text.contains("先鋒的殘響"):
+	if title.text != "任務失敗" or not summary.text.contains("失敗原因："):
 		_fail("defeat UI copy missing")
 		return false
 	for button in [restart_button, main_menu_button]:

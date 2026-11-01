@@ -82,8 +82,8 @@ func _test_r15_review_fixes() -> void:
 
 func _test_choice_and_result() -> void:
 	var pressure_script: GDScript = load("res://scripts/services/encounter_pressure.gd")
-	_check(pressure_script.choice_text("pincer", "").begins_with("圓陣快封6秒整補8／散兵慢封9秒整補16・反擊10秒"), "the wave warning names both answers and their counter windows")
-	_check(pressure_script.choice_text("front", "spec_prepare").contains("反擊15秒"), "the warning reflects the prepare node's real +5 s")
+	_check(pressure_script.choice_text("pincer", "") == "快封圓陣／慢封散兵・慢封反擊10秒", "the wave warning names both answers and their counter windows")
+	_check(pressure_script.choice_text("front", "spec_prepare").contains("慢封反擊15秒"), "the warning reflects the prepare node's real +5 s")
 	var result_script: GDScript = load("res://scripts/ui/r4_result_screen.gd")
 	var line: String = result_script.formation_read_line({"pressure_seconds": 40.0, "matched_seconds": 30.0, "wrong": 1, "fast_seals": 2, "slow_seals": 1})
 	_check(line.contains("快封 2") and line.contains("慢封 1"), "the result lists how many seals used each answer")
@@ -109,4 +109,4 @@ func _test_choice_and_result() -> void:
 	_check(gm.contains("\"fast_seals\": relay_node.history.filter(") and gm.contains("\"slow_seals\": relay_node.history.filter("), "the counts come from the real seal history")
 
 func _test_version() -> void:
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.47.0-content-r18", "project version is 0.47.0-content-r18")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.48.0-content-r19", "project version is 0.48.0-content-r19")
