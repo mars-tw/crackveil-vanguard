@@ -102,7 +102,9 @@ func _run() -> void:
 		for member in squad.get_members():
 			if member != captain:
 				member.global_position = squad.get_formation_world_position(member.formation_index)
-		var wrong := "ring" if phase == 0 else "wedge"
+		# R15 rule update: only the formation that is neither primary nor
+		# secondary for this pressure is wrong (front/pincer/artillery).
+		var wrong: String = ["scatter", "wedge", "ring"][phase]
 		squad.set_formation(wrong, true)
 		relay.advance(2.0)
 		check(relay.step == phase, "wrong formation closed a seal")

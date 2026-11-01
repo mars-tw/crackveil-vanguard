@@ -53,8 +53,12 @@ func accepted_formations() -> Array[String]:
 	var accepted: Array[String] = []
 	if not is_instance_valid(pressure):
 		return accepted
+	# R15: the primary (fast-seal) answer is always listed first.
+	var primary := str(GameManager.STARTING_BUILD.PRIMARY.get(pressure.kind, ""))
+	if GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,primary):
+		accepted.append(primary)
 	for id in ORDER:
-		if GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,id):
+		if id != primary and GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,id):
 			accepted.append(id)
 	return accepted
 
@@ -162,11 +166,10 @@ func next_action() -> String:
 	if not is_open():
 		return "陣記穩定中・%d 秒" % ceili(OPEN_TIMES[mini(step,2)]-GameManager.elapsed_time)
 	if wrong_timer > 0:
-		var needed_id:=str(pressure.COUNTERS[pressure.kind]) if is_instance_valid(pressure) else "wedge"
 		var current: String=GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else ""
 		if is_instance_valid(pressure) and GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,current):
 			return "錯陣反噬・進度歸零・已換%s，重新封合" % NAMES[maxi(0,ORDER.find(current))]
-		return "錯陣反噬・進度歸零・需%s・%s" % [NAMES[ORDER.find(needed_id)],switch_hint()]
+		return "錯陣反噬・進度歸零・%s・%s" % [accepted_text(),switch_hint()]
 	if is_instance_valid(pressure) and pressure.started and pressure.phase in ["warning","active"]:
 		var needed:=required_formation()
 		var selected: String=GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else "wedge"
@@ -335,6 +338,12 @@ static func switch_card_for(kind: String, formation: String) -> String:
 		effect = "全隊受傷 -10%・可封合"
 	if kind == "pincer" and formation == "scatter":
 		effect = "移速 +8%・可封合"
+	# R15: the secondary answer states its trade: slower seal, longer counter.
+	var catalog: GDScript = load("res://scripts/services/starting_build_catalog.gd")
+	if catalog.is_secondary(kind, formation):
+		effect = effect.replace("可封合", "慢封・反擊 %d 秒" % int(catalog.SECONDARY_COUNTER_SECONDS))
+	elif catalog.PRIMARY.get(kind, "") == formation:
+		effect = effect.replace("可封合", "快封")
 	return "%s → %s：%s" % [NAMES[maxi(0, ORDER.find(formation))], pressure_name, effect]
 
 func advance(delta: float) -> void:
@@ -387,20 +396,22 @@ func advance(delta: float) -> void:
 		if pressure.clock > pressure.WARNING + pressure.ACTIVE + 1.1:
 			hold = 0
 		return
-	var gained: float=maxf(0.0, delta) * (0.85 if GameManager.active_starting_node=="spec_escort" and pressure.kind=="front" and squad.get_formation_id()=="ring" else 1.0)
+	var gained: float=maxf(0.0, delta) * GameManager.STARTING_BUILD.seal_rate(GameManager.active_starting_node, pressure.kind, squad.get_formation_id())
 	hold += gained
-	if squad.get_formation_id()!=str(pressure.COUNTERS[pressure.kind]): GameManager.starting_benefits.alternative_hold+=gained
+	# The escort/collect node measures only its own alternative, not the R15
+	# secondary answer every build now has.
+	if (GameManager.active_starting_node=="spec_escort" and pressure.kind=="front" and squad.get_formation_id()=="ring") or (GameManager.active_starting_node=="spec_collect" and pressure.kind=="pincer" and squad.get_formation_id()=="scatter"): GameManager.starting_benefits.alternative_hold+=gained
 	if hold < HOLD_SECONDS:
 		return
 	if step==2 and GameManager.elapsed_time<90.0:
 		return
 	history.append({"formation": squad.get_formation_id(), "pressure":pressure.kind,"cycles":pressure.cycles,"time": GameManager.elapsed_time, "followers": settled})
-	counter_timer = 5.0
-	if GameManager.active_starting_node=="spec_prepare": counter_timer=10.0
+	counter_timer = GameManager.STARTING_BUILD.counter_seconds(GameManager.active_starting_node, pressure.kind, squad.get_formation_id())
+	last_seal_counter = int(round(counter_timer))
 	feedback_timer = 1.4
 	seal_flash_time = 0.0
 	seal_flash_at = anchor
-	seal_flash_text = seal_text(step+1)
+	seal_flash_text = seal_text(step+1, last_seal_counter)
 	GameManager.request_combat_impact(5.0,0.035)
 	EntityFactory.spawn_death_burst(anchor,Color("ffdcac"),3.4,"gold_rain")
 	if GameManager.active_starting_node=="spec_prepare":
@@ -423,18 +434,19 @@ func advance(delta: float) -> void:
 		pressure.configure(anchor,step)
 		# R11: the reward is already on the world banner (seal_text); the toast
 		# points at the next seal instead of repeating it.
-		GameManager.show_toast(seal_toast_text(step), "battle", true)
+		GameManager.show_toast(seal_toast_text(step, last_seal_counter), "battle", true)
 	if AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("level_up")
 
-func seal_toast_text(step: int) -> String:
-	var seconds := 10 if GameManager.active_starting_node=="spec_prepare" else 5
+var last_seal_counter := 5
+func seal_toast_text(step: int, counter: int = -1) -> String:
+	var seconds := counter if counter > 0 else (10 if GameManager.active_starting_node=="spec_prepare" else 5)
 	return "封隙 %d/3｜第 %d 道已開啟・加成 %d 秒" % [step, step + 1, seconds]
 
-func seal_text(count: int) -> String:
+func seal_text(count: int, counter: int = -1) -> String:
 	if GameManager.active_starting_node=="spec_prepare":
-		return "封合 %d/3・放棄治療・反擊 +20%% 10 秒" % count
-	return "封合 %d/3・整補 +8・反擊 +20%% 5 秒" % count
+		return "封合 %d/3・放棄治療・反擊 +20%% %d 秒" % [count, counter if counter > 0 else 10]
+	return "封合 %d/3・整補 +8・反擊 +20%% %d 秒" % [count, counter if counter > 0 else 5]
 
 # R10 (Claude): verdict lines sit between the top HUD band and the bottom
 # equipment/notice band, so a seal near the screen edge never hides them.

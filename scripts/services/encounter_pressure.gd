@@ -87,7 +87,17 @@ func _lock_warning() -> void:
 			if member.is_alive and targets.size() < 3:
 				targets.append(member.global_position)
 	events.append({"phase":"warning","kind":kind,"time":GameManager.elapsed_time,"cycle":cycles + 1})
-	GameManager.show_toast("%s｜預警 2 秒，留意地面刻線" % NAMES[kind], "battle", true)
+	# No fixed seconds here: the top bar counts the warning down live.
+	GameManager.show_toast("%s｜預警・%s" % [NAMES[kind], choice_text(kind, GameManager.active_starting_node)], "battle", true)
+
+# R15: before the wave lands, name both answers and what each costs, so the
+# player can choose without trial and error.
+static func choice_text(pressure_kind: String, node_id: String) -> String:
+	var catalog: GDScript = load("res://scripts/services/starting_build_catalog.gd")
+	var names := {"wedge":"楔形","ring":"圓陣","scatter":"散兵"}
+	var primary := str(catalog.PRIMARY.get(pressure_kind, ""))
+	var secondary := str(catalog.SECONDARY.get(pressure_kind, ""))
+	return "%s快封反擊 %d 秒／%s慢封反擊 %d 秒" % [names.get(primary, ""), int(catalog.counter_seconds(node_id, pressure_kind, primary)), names.get(secondary, ""), int(catalog.counter_seconds(node_id, pressure_kind, secondary))]
 
 func _process(delta: float) -> void:
 	if not enabled or not started or get_tree().paused or not GameManager.game_running:
@@ -188,9 +198,13 @@ func _draw_answer(center: Vector2) -> void:
 	# never covers the banner's reward line.
 	if seal_banner_showing():
 		return
+	# R15: the fast-seal (primary) answer first, matching the top bar.
 	var accepted: Array[String] = []
+	var primary := str(GameManager.STARTING_BUILD.PRIMARY.get(kind, ""))
+	if GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node, kind, primary):
+		accepted.append(primary)
 	for id in FORMATION_ORDER:
-		if GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node, kind, id):
+		if id != primary and GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node, kind, id):
 			accepted.append(id)
 	if accepted.is_empty():
 		return

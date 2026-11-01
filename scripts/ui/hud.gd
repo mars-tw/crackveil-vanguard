@@ -2812,7 +2812,13 @@ func _fit_toast_panel() -> void:
 	var fitted := toast_size_for_text(toast_label.text, view.x, font, font_size)
 	var center_x := toast_panel.position.x + toast_panel.size.x * 0.5 if toast_panel.size.x > 0.0 else view.x * 0.5
 	toast_panel.size = fitted
-	toast_panel.position.x = clampf(center_x - fitted.x * 0.5, 8.0, maxf(8.0, view.x - fitted.x - 8.0))
+	# R15: a widened toast grows to the right of the status/boss column, not
+	# under it, so the start of a long warning is never covered.
+	var left_limit := 8.0
+	var notice_left: float = BATTLE_LAYOUT.regions(view, MOBILE_TUNING.use_mobile_ui(view)).notice.position.x
+	if fitted.x <= view.x - notice_left - 8.0:
+		left_limit = notice_left
+	toast_panel.position.x = clampf(center_x - fitted.x * 0.5, left_limit, maxf(left_limit, view.x - fitted.x - 8.0))
 func clear_wrong_formation_notice() -> void:
 	var cleared := false
 	if toast_showing and (toast_current_text.contains("錯陣") or toast_current_text.contains("反噬")):

@@ -51,9 +51,10 @@ func _test_formation_wording() -> void:
 	_check(escort.accepted_text()=="可用：楔形／圓陣","escort front shows both usable formations")
 	_free(escort)
 	var assault:=_relay("pincer","")
-	_check(assault.accepted_text()=="需圓陣","single accepted formation names the requirement")
+	# R15 rule update: every pressure accepts a primary and a secondary answer.
+	_check(assault.accepted_text()=="可用：圓陣／散兵","pincer names both usable formations")
 	var wrong: String=assault.consequence_text({"correct":false})
-	_check(wrong.contains("需圓陣") and wrong.contains("才能封合"),"wrong verdict names the needed formation")
+	_check(wrong.contains("可用：圓陣／散兵") and wrong.contains("才能封合"),"wrong verdict names the usable formations")
 	_check(wrong.contains("按 Q") or wrong.contains("點陣形鈕"),"wrong verdict names the switch input")
 	_check(assault.consequence_text({"correct":true}).contains("封合"),"correct verdict states the seal consequence")
 	_free(assault)

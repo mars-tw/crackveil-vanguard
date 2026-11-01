@@ -425,7 +425,13 @@ static func formation_read_line(seal: Dictionary) -> String:
 	if total < 10.0:
 		return ""
 	var share := roundi(100.0 * clampf(float(seal.get("matched_seconds", 0.0)) / total, 0.0, 1.0))
-	return "攻勢中對陣 %d%%・錯陣反噬 %d 次" % [share, int(seal.get("wrong", 0))]
+	var line := "攻勢中對陣 %d%%・錯陣反噬 %d 次" % [share, int(seal.get("wrong", 0))]
+	# R15: which answer each seal used, fast (primary) or slow (secondary).
+	var fast := int(seal.get("fast_seals", 0))
+	var slow := int(seal.get("slow_seals", 0))
+	if fast + slow > 0:
+		line += "\n封合：快封 %d・慢封 %d" % [fast, slow]
+	return line
 
 func _measured_gain(node: Dictionary,measured: Dictionary) -> String:
 	if node.is_empty():return "未裝起始節點・本局無節點增益"
@@ -486,8 +492,11 @@ func _apply_responsive_layout() -> void:
 		var summary_h:=minf(size.y-210,maxf(150.0,_text_height(summary_label,left_w)))
 		var gain_y:=maxf(206.0,54+summary_h)
 		_place(summary_scroll,20,50,left_w-8,summary_h)
-		_place(gain_label,20,gain_y,left_w-8,48)
-		_place(progress_label,20,gain_y+50,left_w-8,36)
+		# R15: the gain block grows with its real lines (formation read and
+		# fast/slow seals) so the progress line is never written over.
+		var gain_h:=maxf(48.0,_text_height(gain_label,left_w-8))
+		_place(gain_label,20,gain_y,left_w-8,gain_h)
+		_place(progress_label,20,gain_y+gain_h+2,left_w-8,36)
 	var right_x:=12.0 if portrait else 24+left_w
 	var right_w:=w if portrait else w-left_w-12
 	for number in range(3):_place(tabs[number],right_x+number*(right_w+4)/3,tab_y,(right_w-8)/3,44)

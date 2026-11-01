@@ -38,7 +38,35 @@ static func roster(team: String, id: String) -> Array:
 static func family(id: String) -> String:
 	return str(FAMILIES.get(id,id))
 
-static func accepts(id: String, kind: String, formation: String) -> bool:
-	if id=="spec_escort" and kind=="front" and formation=="ring": return true
-	if id=="spec_collect" and kind=="pincer" and formation=="scatter": return true
-	return formation==str({"front":"wedge","pincer":"ring","artillery":"scatter"}.get(kind,"wedge"))
+# R15: every pressure has a primary answer and a secondary one. The primary
+# seals at full speed; the secondary seals slower but earns a longer counter
+# window, so the player trades seal speed against the counter-attack. Only
+# the third formation is wrong.
+const PRIMARY := {"front":"wedge","pincer":"ring","artillery":"scatter"}
+const SECONDARY := {"front":"ring","pincer":"scatter","artillery":"wedge"}
+const SECONDARY_SEAL_RATE := 0.7
+const PRIMARY_COUNTER_SECONDS := 5.0
+const SECONDARY_COUNTER_SECONDS := 10.0
+
+static func accepts(_id: String, kind: String, formation: String) -> bool:
+	return formation == str(PRIMARY.get(kind, "wedge")) or formation == str(SECONDARY.get(kind, ""))
+
+static func is_secondary(kind: String, formation: String) -> bool:
+	return formation == str(SECONDARY.get(kind, ""))
+
+# Seal progress per second. The escort and collect builds keep their edge:
+# escort ring vs front 0.85, collect scatter vs pincer at full speed.
+static func seal_rate(id: String, kind: String, formation: String) -> float:
+	if not accepts(id, kind, formation):
+		return 0.0
+	if not is_secondary(kind, formation):
+		return 1.0
+	if id == "spec_escort" and kind == "front": return 0.85
+	if id == "spec_collect" and kind == "pincer": return 1.0
+	return SECONDARY_SEAL_RATE
+
+static func counter_seconds(id: String, kind: String, formation: String) -> float:
+	var seconds := SECONDARY_COUNTER_SECONDS if is_secondary(kind, formation) else PRIMARY_COUNTER_SECONDS
+	# The prepare node does what its card says: +5 s on every seal.
+	if id == "spec_prepare": seconds += 5.0
+	return seconds

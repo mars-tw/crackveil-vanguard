@@ -61,7 +61,9 @@ func _run() -> void:
 			var enemy: Node = ref.get_ref()
 			enemy.set_physics_process(false)
 			check(enemy.tactical_min_cycles==2,"guard can skip attack cycles")
-		var wrong: String = "ring" if relay.required_formation()!="ring" else "wedge"
+		# R15 rule update: each pressure accepts a primary and a secondary
+		# formation; only the third one is wrong.
+		var wrong: String = {"front":"scatter","pincer":"wedge","artillery":"ring"}[pressure.kind]
 		relay.wrong_timer = 0
 		relay.wrong_penalties = 0
 		relay.hold = 3.0 # Wrong choice must destroy already earned progress.
