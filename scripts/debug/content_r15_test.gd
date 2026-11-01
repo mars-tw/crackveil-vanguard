@@ -57,9 +57,9 @@ func _test_counter_window() -> void:
 func _test_cards_and_text() -> void:
 	var relay_script: GDScript = load("res://scripts/services/formation_relay.gd")
 	var secondary: String = relay_script.switch_card_for("front", "ring")
-	_check(secondary.contains("慢封") and secondary.contains("反擊 10 秒"), "the secondary switch card states its trade")
+	_check(secondary.contains("慢封 9 秒") and secondary.contains("反擊 10 秒"), "the secondary switch card states its trade")
 	var primary: String = relay_script.switch_card_for("front", "wedge")
-	_check(primary.contains("快封") and not primary.contains("慢封"), "the primary switch card says it seals fast")
+	_check(primary.contains("快封 6 秒") and not primary.contains("慢封"), "the primary switch card says it seals fast")
 	var relay: Node2D = relay_script.new()
 	_check(relay.seal_text(1, 10).contains("反擊 +20% 10 秒"), "a secondary seal banner shows 10 s")
 	_check(relay.seal_text(1).contains("5 秒"), "the default banner still shows 5 s (R11 contract)")
@@ -82,8 +82,8 @@ func _test_r15_review_fixes() -> void:
 
 func _test_choice_and_result() -> void:
 	var pressure_script: GDScript = load("res://scripts/services/encounter_pressure.gd")
-	_check(pressure_script.choice_text("pincer", "").begins_with("圓陣快封／散兵慢封・反擊 10 秒"), "the wave warning names both answers and their counter windows")
-	_check(pressure_script.choice_text("front", "spec_prepare").contains("反擊 15 秒"), "the warning reflects the prepare node's real +5 s")
+	_check(pressure_script.choice_text("pincer", "").begins_with("圓陣快封6秒回8／散兵慢封9秒回16・反擊10秒"), "the wave warning names both answers and their counter windows")
+	_check(pressure_script.choice_text("front", "spec_prepare").contains("反擊15秒"), "the warning reflects the prepare node's real +5 s")
 	var result_script: GDScript = load("res://scripts/ui/r4_result_screen.gd")
 	var line: String = result_script.formation_read_line({"pressure_seconds": 40.0, "matched_seconds": 30.0, "wrong": 1, "fast_seals": 2, "slow_seals": 1})
 	_check(line.contains("快封 2") and line.contains("慢封 1"), "the result lists how many seals used each answer")
@@ -109,4 +109,4 @@ func _test_choice_and_result() -> void:
 	_check(gm.contains("\"fast_seals\": relay_node.history.filter(") and gm.contains("\"slow_seals\": relay_node.history.filter("), "the counts come from the real seal history")
 
 func _test_version() -> void:
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.45.0-content-r16", "project version is 0.45.0-content-r16")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.46.0-content-r17", "project version is 0.46.0-content-r17")

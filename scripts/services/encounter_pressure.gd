@@ -54,6 +54,13 @@ func configure(point: Vector2, index: int) -> void:
 			enemy.set_meta("seal_guard",false)
 	enemies.clear()
 	z_index = 2
+	if not is_instance_valid(tag_layer):
+		tag_layer = Node2D.new()
+		tag_layer.name = "PaceTagLayer"
+		tag_layer.z_as_relative = false
+		tag_layer.z_index = PACE_TAG_Z
+		tag_layer.draw.connect(_draw_pace_tags)
+		add_child(tag_layer)
 	queue_redraw()
 
 func begin() -> void:
@@ -98,7 +105,9 @@ static func choice_text(pressure_kind: String, node_id: String) -> String:
 	var primary := str(catalog.PRIMARY.get(pressure_kind, ""))
 	var secondary := str(catalog.SECONDARY.get(pressure_kind, ""))
 	# Short enough for one toast line: the slow answer's extra reward only.
-	return "%s快封／%s慢封・反擊 %d 秒・整補 %d" % [names.get(primary, ""), names.get(secondary, ""), int(catalog.counter_seconds(node_id, pressure_kind, secondary)), int(catalog.SECONDARY_SEAL_HEAL)]
+	# R17: both seal times, so the trade can be compared at a glance.
+	# R17: both sides' seal time and heal, so the whole trade is comparable.
+	return "%s快封%d秒回%d／%s慢封%d秒回%d・反擊%d秒" % [names.get(primary, ""), catalog.seal_seconds(node_id, pressure_kind, primary), int(catalog.PRIMARY_SEAL_HEAL), names.get(secondary, ""), catalog.seal_seconds(node_id, pressure_kind, secondary), int(catalog.SECONDARY_SEAL_HEAL), int(catalog.counter_seconds(node_id, pressure_kind, secondary))]
 
 func _process(delta: float) -> void:
 	if not enabled or not started or get_tree().paused or not GameManager.game_running:
@@ -204,6 +213,18 @@ func _answer_under_hud(center: Vector2) -> bool:
 			return true
 	return false
 
+const PACE_TAG_Z := 97
+var tag_layer: Node2D = null
+var pace_tags: Array = []
+func _draw_pace_tags() -> void:
+	for row in pace_tags:
+		var tag: Rect2 = row[0]
+		var fast: bool = row[1] == "快"
+		var tint := Color("ffd27a") if fast else Color("7fe3ff")
+		tag_layer.draw_rect(tag, Color("08121f", 0.92), true)
+		tag_layer.draw_rect(tag, tint, false, 2.0, true)
+		tag_layer.draw_string(FONT, tag.position + Vector2(0, 21), row[1], HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 22, tint)
+
 func _draw_answer(center: Vector2) -> void:
 	# R11: the next seal's answer badge waits until the seal banner fades, so it
 	# never covers the banner's reward line.
@@ -235,8 +256,10 @@ func _draw_answer(center: Vector2) -> void:
 		# R16: each badge says whether it is the fast or the slow answer.
 		if count > 1:
 			var pace := "快" if i == 0 and accepted[i] == primary else "慢"
-			draw_string_outline(FONT, rect.position + Vector2(0, -6), pace, HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, 18, 6, Color("08121f", 0.95))
-			draw_string(FONT, rect.position + Vector2(0, -6), pace, HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, 18, Color("8ff0a4") if pace == "快" else Color("ffd27a"))
+			# R17: a solid tag (gold fast, cyan slow) that reads over links and crowds.
+			var tag := Rect2(rect.position + Vector2(rect.size.x * 0.5 - 15, -32), Vector2(30, 28))
+			# R17: drawn on a layer above effects, name plates and the crown.
+			pace_tags.append([tag, pace])
 		if wrong:
 			var pulse := 0.6 + 0.4 * absf(sin(clock * 6.0))
 			draw_texture_rect(WRONG_RING, rect.grow(6.0), false, Color(1, 1, 1, pulse))
@@ -256,6 +279,9 @@ func _draw_answer(center: Vector2) -> void:
 
 func _draw() -> void:
 	Enemy.clear_label_areas(self)
+	pace_tags.clear()
+	if is_instance_valid(tag_layer):
+		tag_layer.queue_redraw()
 	if not enabled or not started or not GameManager.game_running or get_tree().paused or phase == "recovery":
 		return
 	var color := Color("ff637c") if phase == "active" else Color("edbc8d")

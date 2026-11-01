@@ -2816,7 +2816,8 @@ static func toast_size_for_text(text: String, view_width: float, font: Font, fon
 		line_count += 1
 		if font != null:
 			widest = maxf(widest, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
-	var max_width := minf(560.0, maxf(220.0, view_width - 32.0))
+	# R17: wide screens allow a longer single-line notice (the seal choice line).
+	var max_width := minf(560.0 if view_width < 1200.0 else 680.0, maxf(220.0, view_width - 32.0))
 	var width := clampf(widest + 56.0, 220.0, max_width)
 	var rows := 0
 	var line_height := font.get_height(font_size) if font != null else 26.0

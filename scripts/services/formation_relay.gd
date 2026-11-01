@@ -176,7 +176,7 @@ func next_action() -> String:
 		if GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,selected):
 			var label: String = accepted_text() if accepted_formations().size() > 1 else "需%s" % NAMES[ORDER.find(needed)]
 			# R16: always say which answer the squad holds: fast or slow seal.
-			var pace := "慢封・反擊 %d 秒" % int(GameManager.STARTING_BUILD.counter_seconds(GameManager.active_starting_node, pressure.kind, selected)) if GameManager.STARTING_BUILD.is_secondary(pressure.kind, selected) else "快封"
+			var pace := ("慢封 %d 秒・反擊 %d 秒" % [GameManager.STARTING_BUILD.seal_seconds(GameManager.active_starting_node, pressure.kind, selected), int(GameManager.STARTING_BUILD.counter_seconds(GameManager.active_starting_node, pressure.kind, selected))]) if GameManager.STARTING_BUILD.is_secondary(pressure.kind, selected) else ("快封 %d 秒" % GameManager.STARTING_BUILD.seal_seconds(GameManager.active_starting_node, pressure.kind, selected))
 			return "%s・%s・陣形正確・%s" % [pressure.status_text(),label,pace]
 		return "%s・%s・%s" % [pressure.status_text(),accepted_text(),switch_hint()]
 	if hold > 0:
@@ -346,9 +346,9 @@ static func switch_card_for(kind: String, formation: String) -> String:
 	# R15: the secondary answer states its trade: slower seal, longer counter.
 	var catalog: GDScript = load("res://scripts/services/starting_build_catalog.gd")
 	if catalog.is_secondary(kind, formation):
-		effect = effect.replace("可封合", "慢封・反擊 %d 秒" % int(catalog.SECONDARY_COUNTER_SECONDS))
+		effect = effect.replace("可封合", "慢封 %d 秒・反擊 %d 秒" % [catalog.seal_seconds("", kind, formation), int(catalog.SECONDARY_COUNTER_SECONDS)])
 	elif catalog.PRIMARY.get(kind, "") == formation:
-		effect = effect.replace("可封合", "快封")
+		effect = effect.replace("可封合", "快封 %d 秒" % catalog.seal_seconds("", kind, formation))
 	return "%s → %s：%s" % [NAMES[maxi(0, ORDER.find(formation))], pressure_name, effect]
 
 func advance(delta: float) -> void:
@@ -405,7 +405,7 @@ func advance(delta: float) -> void:
 	hold += gained
 	# The escort/collect node measures only its own alternative, not the R15
 	# secondary answer every build now has.
-	if (GameManager.active_starting_node=="spec_escort" and pressure.kind=="front" and squad.get_formation_id()=="ring") or (GameManager.active_starting_node=="spec_collect" and pressure.kind=="pincer" and squad.get_formation_id()=="scatter"): GameManager.starting_benefits.alternative_hold+=gained
+	if (GameManager.active_starting_node=="spec_escort" and pressure.kind=="front" and squad.get_formation_id()=="ring") or (GameManager.active_starting_node=="spec_collect" and pressure.kind=="pincer" and squad.get_formation_id()=="scatter"): GameManager.starting_benefits.alternative_hold+=maxf(0.0, delta) # R17: real seconds, matching the 7 s shown on the top bar
 	if hold < HOLD_SECONDS:
 		return
 	if step==2 and GameManager.elapsed_time<90.0:

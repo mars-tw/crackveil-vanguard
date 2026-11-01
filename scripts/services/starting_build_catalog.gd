@@ -52,6 +52,11 @@ const SECONDARY_COUNTER_SECONDS := 10.0
 const PRIMARY_SEAL_HEAL := 8.0
 const SECONDARY_SEAL_HEAL := 16.0
 
+# R17: real seconds to fill a seal (6 s hold divided by the seal rate).
+static func seal_seconds(id: String, kind: String, formation: String) -> int:
+	var rate := seal_rate(id, kind, formation)
+	return roundi(6.0 / rate) if rate > 0.0 else 0
+
 static func seal_heal(kind: String, formation: String) -> float:
 	return SECONDARY_SEAL_HEAL if is_secondary(kind, formation) else PRIMARY_SEAL_HEAL
 
