@@ -97,7 +97,8 @@ static func choice_text(pressure_kind: String, node_id: String) -> String:
 	var names := {"wedge":"楔形","ring":"圓陣","scatter":"散兵"}
 	var primary := str(catalog.PRIMARY.get(pressure_kind, ""))
 	var secondary := str(catalog.SECONDARY.get(pressure_kind, ""))
-	return "%s快封反擊 %d 秒／%s慢封反擊 %d 秒" % [names.get(primary, ""), int(catalog.counter_seconds(node_id, pressure_kind, primary)), names.get(secondary, ""), int(catalog.counter_seconds(node_id, pressure_kind, secondary))]
+	# Short enough for one toast line: the slow answer's extra reward only.
+	return "%s快封／%s慢封・反擊 %d 秒・整補 %d" % [names.get(primary, ""), names.get(secondary, ""), int(catalog.counter_seconds(node_id, pressure_kind, secondary)), int(catalog.SECONDARY_SEAL_HEAL)]
 
 func _process(delta: float) -> void:
 	if not enabled or not started or get_tree().paused or not GameManager.game_running:
@@ -193,6 +194,16 @@ func answer_label(accepted: Array) -> String:
 		return ""
 	return ("\u9700\uff1a" + "\uff0f".join(names)) if names.size() == 1 else ("\u53ef\u7528\uff1a" + "\uff0f".join(names))
 
+func _answer_under_hud(center: Vector2) -> bool:
+	if not is_inside_tree():
+		return false
+	var xf := get_viewport().get_canvas_transform() * get_global_transform()
+	var area: Rect2 = xf * Rect2(center + Vector2(-100, -BADGE_SIZE * 0.5 - 26), Vector2(200, BADGE_SIZE + 60))
+	for panel in Enemy.hud_panel_rects(get_viewport().get_visible_rect().size):
+		if area.intersects(panel):
+			return true
+	return false
+
 func _draw_answer(center: Vector2) -> void:
 	# R11: the next seal's answer badge waits until the seal banner fades, so it
 	# never covers the banner's reward line.
@@ -208,6 +219,10 @@ func _draw_answer(center: Vector2) -> void:
 			accepted.append(id)
 	if accepted.is_empty():
 		return
+	# R16: a badge that would sit under the HUD panels (HP, timer, top bar,
+	# boss bar) is left to the seal marker and top bar instead of being cut.
+	if _answer_under_hud(center):
+		return
 	var current: String = GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else ""
 	var wrong := not accepted.has(current)
 	# Original vector badge of the answering formation (two side by side when
@@ -217,6 +232,11 @@ func _draw_answer(center: Vector2) -> void:
 		var offset := Vector2((i - (count - 1) * 0.5) * (BADGE_SIZE + 6.0), 0)
 		var rect := Rect2(center + offset - Vector2.ONE * BADGE_SIZE * 0.5, Vector2.ONE * BADGE_SIZE)
 		draw_texture_rect(BADGES[accepted[i]], rect, false)
+		# R16: each badge says whether it is the fast or the slow answer.
+		if count > 1:
+			var pace := "快" if i == 0 and accepted[i] == primary else "慢"
+			draw_string_outline(FONT, rect.position + Vector2(0, -6), pace, HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, 18, 6, Color("08121f", 0.95))
+			draw_string(FONT, rect.position + Vector2(0, -6), pace, HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, 18, Color("8ff0a4") if pace == "快" else Color("ffd27a"))
 		if wrong:
 			var pulse := 0.6 + 0.4 * absf(sin(clock * 6.0))
 			draw_texture_rect(WRONG_RING, rect.grow(6.0), false, Color(1, 1, 1, pulse))

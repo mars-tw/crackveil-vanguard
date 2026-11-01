@@ -47,6 +47,13 @@ const SECONDARY := {"front":"ring","pincer":"scatter","artillery":"wedge"}
 const SECONDARY_SEAL_RATE := 0.7
 const PRIMARY_COUNTER_SECONDS := 5.0
 const SECONDARY_COUNTER_SECONDS := 10.0
+# R16: the slow seal also restores twice the squad HP, so it is the safer
+# pick when the squad is hurt.
+const PRIMARY_SEAL_HEAL := 8.0
+const SECONDARY_SEAL_HEAL := 16.0
+
+static func seal_heal(kind: String, formation: String) -> float:
+	return SECONDARY_SEAL_HEAL if is_secondary(kind, formation) else PRIMARY_SEAL_HEAL
 
 static func accepts(_id: String, kind: String, formation: String) -> bool:
 	return formation == str(PRIMARY.get(kind, "wedge")) or formation == str(SECONDARY.get(kind, ""))

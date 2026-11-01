@@ -175,10 +175,15 @@ func next_action() -> String:
 		var selected: String=GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else "wedge"
 		if GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,selected):
 			var label: String = accepted_text() if accepted_formations().size() > 1 else "需%s" % NAMES[ORDER.find(needed)]
-			return "%s・%s・陣形正確" % [pressure.status_text(),label]
+			# R16: always say which answer the squad holds: fast or slow seal.
+			var pace := "慢封・反擊 %d 秒" % int(GameManager.STARTING_BUILD.counter_seconds(GameManager.active_starting_node, pressure.kind, selected)) if GameManager.STARTING_BUILD.is_secondary(pressure.kind, selected) else "快封"
+			return "%s・%s・陣形正確・%s" % [pressure.status_text(),label,pace]
 		return "%s・%s・%s" % [pressure.status_text(),accepted_text(),switch_hint()]
 	if hold > 0:
-		return "到位 %d 人（需 2）・封合 %d%%" % [settled,int(hold/HOLD_SECONDS*100)]
+		# R16: the fast/slow tag stays visible while the seal fills.
+		var held: String = GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else ""
+		var tag := ("・慢封" if is_instance_valid(pressure) and GameManager.STARTING_BUILD.is_secondary(pressure.kind, held) else "・快封")
+		return "到位 %d 人（需 2）・封合 %d%%%s" % [settled,int(hold/HOLD_SECONDS*100),tag]
 	if counter_timer>0:
 		var label: String="放棄治療・反擊增傷" if GameManager.active_starting_node=="spec_prepare" else "對陣反擊增傷"
 		return "%s +20%%・剩 %d 秒" % [label,ceili(counter_timer)]
@@ -411,13 +416,14 @@ func advance(delta: float) -> void:
 	feedback_timer = 1.4
 	seal_flash_time = 0.0
 	seal_flash_at = anchor
-	seal_flash_text = seal_text(step+1, last_seal_counter)
+	last_seal_heal = int(GameManager.STARTING_BUILD.seal_heal(pressure.kind, squad.get_formation_id()))
+	seal_flash_text = seal_text(step+1, last_seal_counter, last_seal_heal)
 	GameManager.request_combat_impact(5.0,0.035)
 	EntityFactory.spawn_death_burst(anchor,Color("ffdcac"),3.4,"gold_rain")
 	if GameManager.active_starting_node=="spec_prepare":
-		for member in squad.get_members(): GameManager.starting_benefits.healing_forgone+=minf(8,member.max_hp-member.current_hp)
+		for member in squad.get_members(): GameManager.starting_benefits.healing_forgone+=minf(last_seal_heal,member.max_hp-member.current_hp)
 	else:
-		squad.heal_members(8.0)
+		squad.heal_members(float(last_seal_heal))
 	step += 1
 	hold = 0.0
 	if step == ORDER.size():
@@ -443,10 +449,11 @@ func seal_toast_text(step: int, counter: int = -1) -> String:
 	var seconds := counter if counter > 0 else (10 if GameManager.active_starting_node=="spec_prepare" else 5)
 	return "封隙 %d/3｜第 %d 道已開啟・加成 %d 秒" % [step, step + 1, seconds]
 
-func seal_text(count: int, counter: int = -1) -> String:
+var last_seal_heal := 8
+func seal_text(count: int, counter: int = -1, heal: int = 8) -> String:
 	if GameManager.active_starting_node=="spec_prepare":
 		return "封合 %d/3・放棄治療・反擊 +20%% %d 秒" % [count, counter if counter > 0 else 10]
-	return "封合 %d/3・整補 +8・反擊 +20%% %d 秒" % [count, counter if counter > 0 else 5]
+	return "封合 %d/3・整補 +%d・反擊 +20%% %d 秒" % [count, heal, counter if counter > 0 else 5]
 
 # R10 (Claude): verdict lines sit between the top HUD band and the bottom
 # equipment/notice band, so a seal near the screen edge never hides them.

@@ -2290,7 +2290,28 @@ func _update_tactical_hint() -> void:
 		tactical_hint.text = "%s｜封隙 %d/3\n%s" % [formation, relay.step, relay.next_action()]
 	else:
 		tactical_hint.text = "%s｜封隙 3/3\n%s" % [formation, GameManager.tactical_director.current_hint()]
-	BATTLE_LAYOUT.place(tactical_hint, BATTLE_LAYOUT.regions(view, MOBILE_TUNING.use_mobile_ui(view)).mission)
+	var mission_rect: Rect2 = BATTLE_LAYOUT.regions(view, MOBILE_TUNING.use_mobile_ui(view)).mission
+	BATTLE_LAYOUT.place(tactical_hint, mission_rect)
+	# R16: long seal lines shrink to the mission box instead of running under
+	# the kill/gold panel beside it.
+	var phone_ui := MOBILE_TUNING.use_mobile_ui(view)
+	tactical_hint.add_theme_font_size_override("font_size", fitted_hint_size(tactical_hint.text, tactical_hint.get_theme_font("font"), mission_rect.size.x - (34.0 if phone_ui else 40.0), 13 if phone_ui else 15))
+
+
+static func fitted_hint_size(text: String, font: Font, width: float, base_size: int) -> int:
+	var size := base_size
+	if font == null:
+		return size
+	while size > 10:
+		var fits := true
+		for line in text.split("\n"):
+			if font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x > width:
+				fits = false
+				break
+		if fits:
+			break
+		size -= 1
+	return size
 
 
 func _layout_formation_button(layout: Vector2, touch: bool, phone: bool, blocked: bool, row_y: float, button_height: float) -> void:

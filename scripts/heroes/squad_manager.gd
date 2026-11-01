@@ -564,8 +564,11 @@ func _draw() -> void:
 				draw_line(to_local(fa.global_position), to_local(fb.global_position), Color(1.0, 0.92, 0.55, flash_a), 4.5, true)
 				for member in [fa, fb]:
 					draw_arc(to_local(member.global_position), 30.0 + (1.0 - flash_a) * 14.0, 0, TAU, 28, Color(1.0, 0.92, 0.55, flash_a), 3.5, true)
-				if bond_flash_text != "":
-					var mid := (to_local(fa.global_position) + to_local(fb.global_position)) * 0.5 + Vector2(-160, -34)
+				var mid := (to_local(fa.global_position) + to_local(fb.global_position)) * 0.5 + Vector2(-160, -34)
+				# R16: the bond line yields to the switch card and seal badges that
+				# fire on the same formation switch; the gold link still shows.
+				var text_screen := get_viewport().get_canvas_transform() * get_global_transform() * (mid + Vector2(160, -8))
+				if bond_flash_text != "" and not Enemy.label_area_reserved(text_screen, 40.0):
 					draw_string_outline(SWITCH_FONT, mid, bond_flash_text, HORIZONTAL_ALIGNMENT_CENTER, 320, 19, 6, Color("08121f", 0.9 * flash_a))
 					draw_string(SWITCH_FONT, mid, bond_flash_text, HORIZONTAL_ALIGNMENT_CENTER, 320, 19, Color(1.0, 0.95, 0.70, flash_a))
 				for member in [fa, fb]:

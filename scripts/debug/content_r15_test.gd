@@ -52,7 +52,7 @@ func _test_counter_window() -> void:
 	_check(catalog.counter_seconds("", "pincer", "scatter") > catalog.counter_seconds("", "pincer", "ring"), "the secondary seal earns a longer counter window")
 	_check(catalog.counter_seconds("spec_prepare", "pincer", "ring") == 10.0 and catalog.counter_seconds("spec_prepare", "pincer", "scatter") == 15.0, "the prepare node adds 5 s to every seal (10 s primary as in R3, 15 s secondary)")
 	var relay_src := FileAccess.get_file_as_string("res://scripts/services/formation_relay.gd")
-	_check(relay_src.contains("counter_timer = GameManager.STARTING_BUILD.counter_seconds(") and relay_src.contains("seal_text(step+1, last_seal_counter)"), "the seal banner states the real counter length")
+	_check(relay_src.contains("counter_timer = GameManager.STARTING_BUILD.counter_seconds(") and relay_src.contains("seal_text(step+1, last_seal_counter"), "the seal banner states the real counter length")
 
 func _test_cards_and_text() -> void:
 	var relay_script: GDScript = load("res://scripts/services/formation_relay.gd")
@@ -82,8 +82,8 @@ func _test_r15_review_fixes() -> void:
 
 func _test_choice_and_result() -> void:
 	var pressure_script: GDScript = load("res://scripts/services/encounter_pressure.gd")
-	_check(pressure_script.choice_text("pincer", "") == "圓陣快封反擊 5 秒／散兵慢封反擊 10 秒", "the wave warning names both answers and their counter windows")
-	_check(pressure_script.choice_text("front", "spec_prepare").contains("反擊 10 秒") and pressure_script.choice_text("front", "spec_prepare").contains("反擊 15 秒"), "the warning reflects the prepare node's real +5 s")
+	_check(pressure_script.choice_text("pincer", "").begins_with("圓陣快封／散兵慢封・反擊 10 秒"), "the wave warning names both answers and their counter windows")
+	_check(pressure_script.choice_text("front", "spec_prepare").contains("反擊 15 秒"), "the warning reflects the prepare node's real +5 s")
 	var result_script: GDScript = load("res://scripts/ui/r4_result_screen.gd")
 	var line: String = result_script.formation_read_line({"pressure_seconds": 40.0, "matched_seconds": 30.0, "wrong": 1, "fast_seals": 2, "slow_seals": 1})
 	_check(line.contains("快封 2") and line.contains("慢封 1"), "the result lists how many seals used each answer")
@@ -109,4 +109,4 @@ func _test_choice_and_result() -> void:
 	_check(gm.contains("\"fast_seals\": relay_node.history.filter(") and gm.contains("\"slow_seals\": relay_node.history.filter("), "the counts come from the real seal history")
 
 func _test_version() -> void:
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.44.0-content-r15", "project version is 0.44.0-content-r15")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.45.0-content-r16", "project version is 0.45.0-content-r16")
