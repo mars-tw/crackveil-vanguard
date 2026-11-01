@@ -30,6 +30,10 @@ var wrong_penalties := 0
 # accepted formation; the result screen reports this as the formation read.
 var pressure_seconds := 0.0
 var matched_seconds := 0.0
+# R20: squad synergy. While a warned or active wave is answered by the held
+# formation, members (not the captain) deal FORMATION_SYNERGY_MEMBER damage.
+const FORMATION_SYNERGY_MEMBER := 1.8
+var synergy_active := false
 var counter_timer := 0.0
 var feedback_timer := 0.0
 # Seal-success presentation at the closed anchor; never feeds combat.
@@ -180,8 +184,8 @@ func next_action() -> String:
 			# R18: with two answers the comparison sits on the top bar's first line
 			# (see compare_line); this line keeps only the wave status.
 			if accepted_formations().size() > 1:
-				return "%s・陣形正確" % pressure.status_text()
-			return "%s・%s・陣形正確・%s" % [pressure.status_text(),label,pace]
+				return "%s・陣形正確・隊員增傷 +80%%" % pressure.status_text()
+			return "%s・%s・陣形正確・%s・隊員 +80%%" % [pressure.status_text(),label,pace]
 		return "%s・%s・%s" % [pressure.status_text(),accepted_text(),switch_hint()]
 	if hold > 0:
 		# R16: the fast/slow tag stays visible while the seal fills.
@@ -397,11 +401,13 @@ func advance(delta: float) -> void:
 		hold = 0.0
 		return
 	settled = 0
+	synergy_active = false
 	if not is_open():
 		hold = 0
 		return
 	pressure.begin()
 	var correct: bool = GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node,pressure.kind,squad.get_formation_id())
+	synergy_active = correct and pressure.started and pressure.phase in ["warning","active"]
 	if pressure.started and pressure.phase in ["warning","active"]:
 		pressure_seconds += maxf(0.0, delta)
 		if correct:

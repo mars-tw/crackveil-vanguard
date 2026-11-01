@@ -279,6 +279,14 @@ func _draw_answer(center: Vector2) -> void:
 		if wrong:
 			var pulse := 0.6 + 0.4 * absf(sin(clock * 6.0))
 			draw_texture_rect(WRONG_RING, rect.grow(6.0), false, Color(1, 1, 1, pulse))
+	# R20: with two answers the 楔快／圓慢 tags already name both formations and
+	# the top bar compares them, so the "可用：…" caption is not repeated here
+	# (it stays for a single required answer and for a wrong formation).
+	if count > 1 and not wrong:
+		if is_inside_tree():
+			var xf_tags := get_viewport().get_canvas_transform() * get_global_transform()
+			Enemy.reserve_label_area(xf_tags * Rect2(center - Vector2(count * (BADGE_SIZE + 6.0) * 0.5, BADGE_SIZE * 0.5 + 32), Vector2(count * (BADGE_SIZE + 6.0), BADGE_SIZE + 32)), self)
+		return
 	var text := answer_label(accepted)
 	var at := center + Vector2(-90, BADGE_SIZE * 0.5 + 24)
 	var badge_text_width: float = FONT.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
@@ -342,8 +350,16 @@ func _draw() -> void:
 			for i in range(25):
 				var angle := i * TAU / 24.0
 				ring.append(target + Vector2.from_angle(angle) * (47.0 + (1.6 if i % 2 == 0 else -1.6)))
-			draw_polyline(ring,Color("101b30",0.85),7,true)
-			draw_polyline(ring,Color(color,edge_alpha),2.6,true)
+			# R20: landing rings read first: a heavier solid edge, and while the
+			# wave is warned a countdown arc that closes as the strike nears.
+			draw_polyline(ring,Color("101b30",0.9),9,true)
+			draw_polyline(ring,Color(color,maxf(edge_alpha,0.9)),4.0,true)
+			if phase == "warning":
+				var left := clampf(1.0 - clock / WARNING, 0.0, 1.0)
+				draw_arc(target, 58.0, -PI * 0.5, -PI * 0.5 + TAU * left, 40, Color("101b30",0.9), 8.0, true)
+				draw_arc(target, 58.0, -PI * 0.5, -PI * 0.5 + TAU * left, 40, Color("ffe6a6"), 4.0, true)
+			if is_inside_tree():
+				Enemy.reserve_plate_area(get_viewport().get_canvas_transform() * get_global_transform() * Rect2(target - Vector2.ONE * 62.0, Vector2.ONE * 124.0), self)
 			for i in range(4):
 				_draw_rune(target + Vector2.from_angle(i*PI/2+PI/4) * 47.0,Color(color,edge_alpha),7.0)
 			draw_line(target-Vector2(13,0),target+Vector2(13,0),color,2,true)

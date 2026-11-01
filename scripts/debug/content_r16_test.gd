@@ -36,7 +36,7 @@ func _test_slow_seal_heal() -> void:
 
 func _test_visible_pace() -> void:
 	var src := FileAccess.get_file_as_string("res://scripts/services/formation_relay.gd")
-	_check(src.contains("\"%s・%s・陣形正確・%s\" % [pressure.status_text(),label,pace]") and src.contains("\"慢封 %d 秒・反擊 %d 秒\""), "the top bar always says fast or slow seal for the held formation")
+	_check(src.contains("\"%s・%s・陣形正確・%s・隊員 +80%%\" % [pressure.status_text(),label,pace]") and src.contains("\"慢封 %d 秒・反擊 %d 秒\""), "the top bar always says fast or slow seal for the held formation")
 	var pressure_src := FileAccess.get_file_as_string("res://scripts/services/encounter_pressure.gd")
 	_check(src.contains("var tag := (\"・慢封\" if is_instance_valid(pressure)"), "the fast/slow tag stays on the top bar while the seal fills")
 	_check(pressure_src.contains("var pace := \"快\" if i == 0 and accepted[i] == primary else \"慢\""), "each ground badge is tagged fast or slow")
@@ -55,4 +55,4 @@ func _test_no_new_cover() -> void:
 	_check(pressure_src.contains("if _answer_under_hud(center):") and pressure_src.contains("Enemy.hud_panel_rects("), "ground badges under the HUD panels are not drawn half-cut")
 
 func _test_version() -> void:
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.48.0-content-r19", "project version is 0.48.0-content-r19")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.49.0-content-r20", "project version is 0.49.0-content-r20")

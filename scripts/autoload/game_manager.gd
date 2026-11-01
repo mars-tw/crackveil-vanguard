@@ -1307,6 +1307,10 @@ func get_outgoing_damage_multiplier(source: Node = null) -> float:
 			multiplier *= float(contract_modifiers.get("leader_damage_multiplier", 1.0))
 		else:
 			multiplier *= float(contract_modifiers.get("member_damage_multiplier", 1.0))
+	# R20: formation synergy. Members, not the captain, hit harder while the
+	# held formation answers the current wave (see formation_relay.gd).
+	if source != null and is_instance_valid(source) and source.get("hero_id") != null and source.get("is_leader") == false and is_instance_valid(tactical_director) and is_instance_valid(tactical_director.relay) and bool(tactical_director.relay.synergy_active):
+		multiplier *= float(tactical_director.relay.FORMATION_SYNERGY_MEMBER)
 	if active_starting_node=="crew_singer": multiplier*=0.9
 	if active_starting_node=="bond_rail" and is_instance_valid(squad_manager) and squad_manager.has_active_bond("bond_void_rail"):
 		multiplier*=1.12 if is_instance_valid(player) and player.velocity.length()>10 else 0.85
