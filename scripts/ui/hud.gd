@@ -2287,7 +2287,8 @@ func _update_tactical_hint() -> void:
 	var relay: Node = GameManager.tactical_director.relay
 	var formation: String = squad.get_formation_definition().short if is_instance_valid(squad) else "楔形"
 	if is_instance_valid(relay) and not relay.completed:
-		tactical_hint.text = "%s｜封隙 %d/3\n%s" % [formation, relay.step, relay.next_action()]
+		var compare: String = relay.compare_line()
+		tactical_hint.text = "%s｜封隙 %d/3%s\n%s" % [formation, relay.step, ("｜" + compare) if compare != "" else "", relay.next_action()]
 	else:
 		tactical_hint.text = "%s｜封隙 3/3\n%s" % [formation, GameManager.tactical_director.current_hint()]
 	var mission_rect: Rect2 = BATTLE_LAYOUT.regions(view, MOBILE_TUNING.use_mobile_ui(view)).mission

@@ -32,7 +32,7 @@ func _test_slow_seal_heal() -> void:
 	var src := FileAccess.get_file_as_string("res://scripts/services/formation_relay.gd")
 	_check(src.contains("squad.heal_members(float(last_seal_heal))") and src.contains("healing_forgone+=minf(last_seal_heal,"), "the real heal and the prepare node's forgone heal use the same amount")
 	var pressure_script: GDScript = load("res://scripts/services/encounter_pressure.gd")
-	_check(pressure_script.choice_text("front", "").contains("慢封9秒回16"), "the warning names the slow seal's larger heal")
+	_check(pressure_script.choice_text("front", "").contains("慢封9秒整補16"), "the warning names the slow seal's larger heal")
 
 func _test_visible_pace() -> void:
 	var src := FileAccess.get_file_as_string("res://scripts/services/formation_relay.gd")
@@ -55,4 +55,4 @@ func _test_no_new_cover() -> void:
 	_check(pressure_src.contains("if _answer_under_hud(center):") and pressure_src.contains("Enemy.hud_panel_rects("), "ground badges under the HUD panels are not drawn half-cut")
 
 func _test_version() -> void:
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.46.0-content-r17", "project version is 0.46.0-content-r17")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.47.0-content-r18", "project version is 0.47.0-content-r18")

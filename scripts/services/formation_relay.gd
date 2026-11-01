@@ -177,6 +177,10 @@ func next_action() -> String:
 			var label: String = accepted_text() if accepted_formations().size() > 1 else "需%s" % NAMES[ORDER.find(needed)]
 			# R16: always say which answer the squad holds: fast or slow seal.
 			var pace := ("慢封 %d 秒・反擊 %d 秒" % [GameManager.STARTING_BUILD.seal_seconds(GameManager.active_starting_node, pressure.kind, selected), int(GameManager.STARTING_BUILD.counter_seconds(GameManager.active_starting_node, pressure.kind, selected))]) if GameManager.STARTING_BUILD.is_secondary(pressure.kind, selected) else ("快封 %d 秒" % GameManager.STARTING_BUILD.seal_seconds(GameManager.active_starting_node, pressure.kind, selected))
+			# R18: with two answers the comparison sits on the top bar's first line
+			# (see compare_line); this line keeps only the wave status.
+			if accepted_formations().size() > 1:
+				return "%s・陣形正確" % pressure.status_text()
 			return "%s・%s・陣形正確・%s" % [pressure.status_text(),label,pace]
 		return "%s・%s・%s" % [pressure.status_text(),accepted_text(),switch_hint()]
 	if hold > 0:
@@ -196,6 +200,30 @@ static func marker_hits_text(pixel_rect: Rect2, text_areas: Array[Rect2]) -> boo
 		if pixel_rect.intersects(area.grow(4.0)):
 			return true
 	return false
+
+# R18: "楔形快6秒整補8／圓陣慢9秒整補16" for the top bar's first line, right
+# after the held formation's name, while a wave the squad answers is running.
+# Empty otherwise. (A second-line version did not fit the phone layout even at
+# the 10 px floor, and ▶ is missing from the game font.)
+func compare_line() -> String:
+	if completed or not is_instance_valid(pressure) or not pressure.started or not is_instance_valid(GameManager.squad_manager):
+		return ""
+	var selected: String = GameManager.squad_manager.get_formation_id()
+	# Same branch as next_action's "陣形正確" line: open seal, no backlash, a
+	# warned or active wave, and a formation that answers it.
+	if not is_open() or wrong_timer > 0 or not pressure.phase in ["warning", "active"] or accepted_formations().size() < 2 or not GameManager.STARTING_BUILD.accepts(GameManager.active_starting_node, pressure.kind, selected):
+		return ""
+	return compare_text(pressure.kind)
+
+static func compare_text(kind: String) -> String:
+	var catalog: GDScript = load("res://scripts/services/starting_build_catalog.gd")
+	var parts := PackedStringArray()
+	for id in [str(catalog.PRIMARY.get(kind, "")), str(catalog.SECONDARY.get(kind, ""))]:
+		var slow: bool = catalog.is_secondary(kind, id)
+		var seconds: int = catalog.seal_seconds(GameManager.active_starting_node if is_instance_valid(GameManager) else "", kind, id)
+		var heal := int(catalog.seal_heal(kind, id))
+		parts.append("%s%s%d秒整補%d" % [NAMES[ORDER.find(id)], "慢" if slow else "快", seconds, heal])
+	return "／".join(parts)
 
 func _update_label() -> void:
 	if not is_instance_valid(marker_label) or not is_instance_valid(GameManager.player):

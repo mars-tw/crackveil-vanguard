@@ -107,7 +107,7 @@ static func choice_text(pressure_kind: String, node_id: String) -> String:
 	# Short enough for one toast line: the slow answer's extra reward only.
 	# R17: both seal times, so the trade can be compared at a glance.
 	# R17: both sides' seal time and heal, so the whole trade is comparable.
-	return "%s快封%d秒回%d／%s慢封%d秒回%d・反擊%d秒" % [names.get(primary, ""), catalog.seal_seconds(node_id, pressure_kind, primary), int(catalog.PRIMARY_SEAL_HEAL), names.get(secondary, ""), catalog.seal_seconds(node_id, pressure_kind, secondary), int(catalog.SECONDARY_SEAL_HEAL), int(catalog.counter_seconds(node_id, pressure_kind, secondary))]
+	return "%s快封%d秒整補%d／%s慢封%d秒整補%d・反擊%d秒" % [names.get(primary, ""), catalog.seal_seconds(node_id, pressure_kind, primary), int(catalog.PRIMARY_SEAL_HEAL), names.get(secondary, ""), catalog.seal_seconds(node_id, pressure_kind, secondary), int(catalog.SECONDARY_SEAL_HEAL), int(catalog.counter_seconds(node_id, pressure_kind, secondary))]
 
 func _process(delta: float) -> void:
 	if not enabled or not started or get_tree().paused or not GameManager.game_running:
@@ -213,6 +213,17 @@ func _answer_under_hud(center: Vector2) -> bool:
 			return true
 	return false
 
+# R18: the bottom equipment bar (published by the HUD in layout units) also
+# hides ground text; local rects are converted to those units before testing.
+func _under_equipment_bar(local_rect: Rect2) -> bool:
+	if not is_inside_tree():
+		return false
+	var view := get_viewport().get_visible_rect().size
+	var to_px := view.x / maxf(1.0, MobileTuning.ui_layout_size(view).x)
+	var px: Rect2 = get_viewport().get_canvas_transform() * get_global_transform() * local_rect
+	return DAMAGE_NUMBER_SCRIPT.blocked_by_hud(Rect2(px.position / to_px, px.size / to_px))
+
+const DAMAGE_NUMBER_SCRIPT := preload("res://scripts/vfx/damage_number.gd")
 const PACE_TAG_Z := 97
 var tag_layer: Node2D = null
 var pace_tags: Array = []
@@ -244,6 +255,8 @@ func _draw_answer(center: Vector2) -> void:
 	# boss bar) is left to the seal marker and top bar instead of being cut.
 	if _answer_under_hud(center):
 		return
+	if _under_equipment_bar(Rect2(center - Vector2.ONE * BADGE_SIZE * 0.5, Vector2.ONE * BADGE_SIZE)):
+		return
 	var current: String = GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else ""
 	var wrong := not accepted.has(current)
 	# Original vector badge of the answering formation (two side by side when
@@ -267,6 +280,11 @@ func _draw_answer(center: Vector2) -> void:
 	var at := center + Vector2(-90, BADGE_SIZE * 0.5 + 24)
 	var badge_text_width: float = FONT.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
 	var badge_backing := Rect2(at + Vector2(90 - badge_text_width * 0.5 - 8, -19), Vector2(badge_text_width + 16, 26))
+	# R18: a label that would slide under the equipment bar moves above the
+	# fast/slow tags instead of being covered by the slot buttons.
+	if _under_equipment_bar(badge_backing):
+		at = center + Vector2(-90, -BADGE_SIZE * 0.5 - (44.0 if count > 1 else 10.0))
+		badge_backing = Rect2(at + Vector2(90 - badge_text_width * 0.5 - 8, -19), Vector2(badge_text_width + 16, 26))
 	# R11: elite name plates step aside from this badge instead of stacking on it.
 	if is_inside_tree():
 		var xf := get_viewport().get_canvas_transform() * get_global_transform()
