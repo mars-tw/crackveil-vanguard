@@ -127,7 +127,9 @@ func _test_momentum_and_pool() -> void:
 	_assert(is_equal_approx(float(hero.get("momentum_charge")), 0.0), "charged swing did not consume its charge")
 	await get_tree().create_timer(0.35, true, false, true).timeout
 	var charged_damage := hp_before - float(target.get("hp"))
-	_assert(charged_damage >= 107.9, "full charge did not deliver 50 percent more actual damage")
+	# R22: the captain's squad share (x0.75) scales the whole swing; the charge
+	# must still add 50 percent on top of it.
+	_assert(charged_damage >= 107.9 * float(GameManager.SQUAD_SHARE_CAPTAIN), "full charge did not deliver 50 percent more actual damage")
 	var stale_token := int(target.get_hit_token())
 	EntityFactory.release_enemy(target)
 	var reused := _enemy(Vector2(500.0, 0.0), 300.0)
@@ -139,9 +141,10 @@ func _test_momentum_and_pool() -> void:
 
 
 func _test_first_run_projectile() -> void:
+	# R22: the captain's squad share (x0.75) applies to every captain weapon.
 	var weapon: Node = (hero.get("weapons") as Dictionary).get("riftline_emitter")
 	var stats: Dictionary = weapon.call("_projectile_stats_for_fire")
-	_assert(float(stats.get("damage")) >= float(weapon.call("data_float", "damage", 0.0)) and int(stats.get("pierce")) == int(weapon.call("data_int", "pierce", 0)) and int(stats.get("pierce")) > 0, "first-run dart diverged from real damage/pierce data")
+	_assert(float(stats.get("damage")) >= float(weapon.call("data_float", "damage", 0.0)) * float(GameManager.SQUAD_SHARE_CAPTAIN) - 0.001 and int(stats.get("pierce")) == int(weapon.call("data_int", "pierce", 0)) and int(stats.get("pierce")) > 0, "first-run dart diverged from real damage/pierce data")
 	var dart: Node = EntityFactory.spawn_projectile(Vector2.ZERO, Vector2.RIGHT, stats, hero)
 	_assert(bool(dart.call("_uses_hard_dart")), "captain projectile did not switch to the short solid dart")
 	_assert(not (dart.get("glow") as Sprite2D).visible and not (dart.get("trail") as Line2D).visible, "solid dart retained the long additive cyan fog")

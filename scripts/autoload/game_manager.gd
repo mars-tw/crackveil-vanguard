@@ -1292,6 +1292,9 @@ func get_upgrade_choice_count() -> int:
 	return max(1, count)
 
 
+const SQUAD_SHARE_MEMBER := 2.5
+const SQUAD_SHARE_CAPTAIN := 0.75
+
 func get_outgoing_damage_multiplier(source: Node = null) -> float:
 	var multiplier := float(contract_modifiers.get("damage_multiplier", 1.0))
 	if is_instance_valid(loot_director):
@@ -1307,6 +1310,13 @@ func get_outgoing_damage_multiplier(source: Node = null) -> float:
 			multiplier *= float(contract_modifiers.get("leader_damage_multiplier", 1.0))
 		else:
 			multiplier *= float(contract_modifiers.get("member_damage_multiplier", 1.0))
+	# R22: squad share. Members carry a larger part of the fight and the captain
+	# a smaller one, so the squad (not the captain alone) wins the run.
+	if source != null and is_instance_valid(source) and source.get("hero_id") != null:
+		if source.get("is_leader") == true:
+			multiplier *= SQUAD_SHARE_CAPTAIN
+		elif source.get("is_leader") == false:
+			multiplier *= SQUAD_SHARE_MEMBER
 	# R20: formation synergy. Members, not the captain, hit harder while the
 	# held formation answers the current wave (see formation_relay.gd).
 	if source != null and is_instance_valid(source) and source.get("hero_id") != null and source.get("is_leader") == false and is_instance_valid(tactical_director) and is_instance_valid(tactical_director.relay) and bool(tactical_director.relay.synergy_active):

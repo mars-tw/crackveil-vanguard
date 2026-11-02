@@ -60,4 +60,4 @@ func _test_r14_review_fixes() -> void:
 	_check(result_src.contains("\"回復 %d・減傷 %d HP（含羈絆）\"") and not result_src.contains("個人總計（含羈絆）\n"), "support cards use two lines so narrow cards keep their numbers")
 
 func _test_version() -> void:
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.50.0-content-r21", "project version is 0.50.0-content-r21")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.51.0-content-r22", "project version is 0.51.0-content-r22")

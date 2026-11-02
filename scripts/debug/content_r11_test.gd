@@ -132,4 +132,4 @@ func _test_seal_toast() -> void:
 	_check(enemy_source.contains("special_label.z_index = ELITE_LABEL_Z") and enemy_source.contains("special_label.z_as_relative = false"), "elite plates draw above seal frames and auras")
 
 func _test_version() -> void:
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.50.0-content-r21", "project version is 0.50.0-content-r21")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.51.0-content-r22", "project version is 0.51.0-content-r22")

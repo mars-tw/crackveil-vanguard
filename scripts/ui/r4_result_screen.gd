@@ -537,7 +537,9 @@ func _apply_responsive_layout() -> void:
 		# R12: the grouped untriggered-member card shrinks until its whole wrapped
 		# roster fits, instead of the last line being trimmed with "…".
 		cards[number].add_theme_font_size_override("font_size", fitted_size)
-		while group and fitted_size > 10 and _text_height(cards[number], card_rect.size.x-indent-4) > card_rect.size.y-bars_h-4:
+		# R22: every card (not only the grouped one) shrinks until its text fits,
+		# so narrow portrait support cards never end in "…".
+		while fitted_size > 10 and _text_height(cards[number], card_rect.size.x-indent-4) > card_rect.size.y-bars_h-4:
 			fitted_size -= 1
 			cards[number].add_theme_font_size_override("font_size", fitted_size)
 		_place(cards[number],card_rect.position.x+indent,card_rect.position.y+2,card_rect.size.x-indent-4,card_rect.size.y-bars_h-2)
