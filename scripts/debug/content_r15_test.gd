@@ -109,4 +109,4 @@ func _test_choice_and_result() -> void:
 	_check(gm.contains("\"fast_seals\": relay_node.history.filter(") and gm.contains("\"slow_seals\": relay_node.history.filter("), "the counts come from the real seal history")
 
 func _test_version() -> void:
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.59.0-content-r30", "project version is 0.59.0-content-r30")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.60.0-content-r31", "project version is 0.60.0-content-r31")

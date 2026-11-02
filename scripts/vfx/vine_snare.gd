@@ -21,16 +21,70 @@ var hits := 0
 const MAX_ACTIVE := 2
 static var last_spawned: Node2D = null
 
+# R31: a snare never lands on an open seal: it is pushed off the seal's area,
+# so "spread out" and "stand in the seal" never ask for the same spot.
+const SEAL_CLEARANCE := 150.0
+static func off_seal(at: Vector2) -> Vector2:
+	var director = GameManager.get("tactical_director")
+	if director == null or not is_instance_valid(director) or director.get("relay") == null or not is_instance_valid(director.relay):
+		return at
+	var relay = director.relay
+	if not relay.has_method("is_open") or not relay.is_open():
+		return at
+	var seal: Vector2 = relay.to_global(relay.anchor)
+	var away := at - seal
+	if away.length() >= SEAL_CLEARANCE + RADIUS:
+		return at
+	if away.length() < 1.0:
+		away = Vector2.RIGHT
+	return seal + away.normalized() * (SEAL_CLEARANCE + RADIUS)
+
 static func spawn(parent: Node, at: Vector2) -> Node2D:
 	if parent.get_tree() != null and parent.get_tree().get_nodes_in_group("vine_snares").size() >= MAX_ACTIVE:
 		return null
 	var snare: Node2D = load("res://scripts/vfx/vine_snare.gd").new()
-	snare.global_position = at
+	snare.global_position = off_seal(at)
 	snare.z_index = 4
 	snare.add_to_group("vine_snares")
 	parent.add_child(snare)
 	last_spawned = snare
 	return snare
+
+# R31: the slow marks sit on their own top layer (above heroes, formation
+# lines and effects): a thorn ring with 緩 over every hero caught, fanned out
+# when heroes overlap so each stays readable.
+var mark_layer: Node2D = null
+
+func _ready() -> void:
+	mark_layer = Node2D.new()
+	mark_layer.z_as_relative = false
+	mark_layer.z_index = 120
+	mark_layer.draw.connect(_draw_marks)
+	add_child(mark_layer)
+
+func caught_heroes() -> Array:
+	var out: Array = []
+	if age < WARN_SECONDS or not is_inside_tree():
+		return out
+	for hero in get_tree().get_nodes_in_group("heroes"):
+		if hero is Node2D and hero.get("is_alive") != false and hero.global_position.distance_squared_to(global_position) <= RADIUS * RADIUS:
+			out.append(hero)
+	return out
+
+func _draw_marks() -> void:
+	var placed: Array[Vector2] = []
+	for hero in caught_heroes():
+		var mark: Vector2 = to_local(hero.global_position) + Vector2(0, -58)
+		for other in placed:
+			if mark.distance_to(other) < 26.0:
+				mark.x += 26.0
+		placed.append(mark)
+		mark_layer.draw_circle(mark, 13.0, Color("1a0c12", 0.95))
+		for i in range(8):
+			var a := TAU * float(i) / 8.0
+			mark_layer.draw_line(mark + Vector2.from_angle(a) * 13.0, mark + Vector2.from_angle(a) * 18.0, Color(HAZARD, 0.95), 2.0, true)
+		mark_layer.draw_arc(mark, 13.0, 0.0, TAU, 24, Color(HAZARD, 1.0), 2.5, true)
+		mark_layer.draw_string(FONT, mark + Vector2(-8, 6), "緩", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("ffe1e4"))
 
 func _process(delta: float) -> void:
 	if get_tree().paused:
@@ -131,14 +185,5 @@ func _draw() -> void:
 		draw_rect(plate, Color("1a0c12", 0.9), true)
 		draw_rect(plate, Color(HAZARD, 0.9), false, 1.5)
 		draw_string(FONT, plate.position + Vector2(8, 19), LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color("ffd6db"))
-	if active:
-		for hero in get_tree().get_nodes_in_group("heroes"):
-			if not hero is Node2D or hero.get("is_alive") == false:
-				continue
-			var at := to_local(hero.global_position)
-			if at.length() > RADIUS:
-				continue
-			var mark := at + Vector2(0, -46)
-			draw_circle(mark, 11.0, Color("1a0c12", 0.9))
-			draw_arc(mark, 11.0, 0.0, TAU, 20, Color(HAZARD, 0.95), 2.0, true)
-			draw_string(FONT, mark + Vector2(-7, 6), "緩", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("ffd6db"))
+	if is_instance_valid(mark_layer):
+		mark_layer.queue_redraw()

@@ -107,6 +107,7 @@ var stage_tint_strength := 0.0
 # R29: a stage signature skill this elite casts on top of its own (e.g. 荊藤纏地).
 var stage_skill := ""
 const VINE_SNARE := preload("res://scripts/vfx/vine_snare.gd")
+const EMBER_RING := preload("res://scripts/vfx/ember_ring.gd")
 var special_skill := ""
 var special_cooldown := 3.0
 var special_timer := 2.0
@@ -887,6 +888,12 @@ func _apply_special_elite_impact(target: Node2D) -> void:
 		if is_instance_valid(VINE_SNARE.last_spawned):
 			GameManager.vine_snares_cast += 1
 			VINE_SNARE.last_spawned = null
+	# R31: the forge rings the squad in fire, centred on the captain.
+	if stage_skill == "ember_ring" and is_instance_valid(target) and is_inside_tree():
+		EMBER_RING.spawn(get_parent(), target.global_position)
+		if is_instance_valid(EMBER_RING.last_spawned):
+			GameManager.ember_rings_cast += 1
+			EMBER_RING.last_spawned = null
 	if special_skill == "summoner":
 		for index in range(5):
 			if EntityFactory.get_enemy_live_count() >= death_spawn_cap:

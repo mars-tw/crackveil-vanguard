@@ -357,7 +357,7 @@ func _spawn_special_elite() -> bool:
 	special_elite_index += 1
 	special_elite_history.append({"id":profile.id, "name":profile.name, "time":GameManager.elapsed_time})
 	GameManager.record_elite_spawn()
-	GameManager.show_toast("特殊菁英：%s　%s%s" % [str(config.get("special_elite_name", profile.name)), profile.description, "　出招時腳下纏藤，散開站位" if str(config.get("stage_skill", "")) == "vine_snare" else ""])
+	GameManager.show_toast("特殊菁英：%s　%s%s" % [str(config.get("special_elite_name", profile.name)), profile.description, "　出招時腳下纏藤，散開站位" if str(config.get("stage_skill", "")) == "vine_snare" else "　出招時火環包圍，往中心集合" if str(config.get("stage_skill", "")) == "ember_ring" else ""])
 	AudioManager.play_sfx("elite")
 	return true
 

@@ -400,6 +400,8 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	catch_up_damage = 0.0
 	vine_snares_cast = 0
 	vine_snare_hits = 0
+	ember_rings_cast = 0
+	ember_ring_hits = 0
 	bond_benefits = {"healing":0.0,"prevented":0.0,"triggers":0}
 	next_elite_bonus_xp = 0
 	echo_shards_awarded_this_run = 0
@@ -1317,6 +1319,9 @@ var catch_up_damage := 0.0
 # R30: garden vine snares this run and how many hero ticks they landed.
 var vine_snares_cast := 0
 var vine_snare_hits := 0
+# R31: forge ember rings this run and how many heroes the bursts caught.
+var ember_rings_cast := 0
+var ember_ring_hits := 0
 
 func current_catch_up() -> float:
 	return squad_catch_up(captain_damage_total, member_damage_total)
@@ -1864,7 +1869,7 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 	var director: Node = tactical_director if is_instance_valid(tactical_director) else null
 	var relay_node: Node = director.relay if director != null and is_instance_valid(director.relay) else null
 	if relay_node != null:
-		enriched["seal_state"] = {"step": int(relay_node.step), "completed": bool(relay_node.completed), "wrong": int(relay_node.wrong_penalties), "pressure_seconds": float(relay_node.pressure_seconds), "fast_seals": relay_node.history.filter(func(h): return not STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "slow_seals": relay_node.history.filter(func(h): return STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "matched_seconds": float(relay_node.matched_seconds), "synergy_damage": float(relay_node.synergy_damage), "catch_up_peak": catch_up_peak, "catch_up_damage": catch_up_damage, "vine_snares": vine_snares_cast, "vine_hits": vine_snare_hits, "required": str(relay_node.required_formation()), "accepted": Array(relay_node.accepted_formations()), "formation": squad_manager.get_formation_id() if is_instance_valid(squad_manager) else ""}
+		enriched["seal_state"] = {"step": int(relay_node.step), "completed": bool(relay_node.completed), "wrong": int(relay_node.wrong_penalties), "pressure_seconds": float(relay_node.pressure_seconds), "fast_seals": relay_node.history.filter(func(h): return not STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "slow_seals": relay_node.history.filter(func(h): return STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "matched_seconds": float(relay_node.matched_seconds), "synergy_damage": float(relay_node.synergy_damage), "catch_up_peak": catch_up_peak, "catch_up_damage": catch_up_damage, "vine_snares": vine_snares_cast, "vine_hits": vine_snare_hits, "ember_rings": ember_rings_cast, "ember_hits": ember_ring_hits, "required": str(relay_node.required_formation()), "accepted": Array(relay_node.accepted_formations()), "formation": squad_manager.get_formation_id() if is_instance_valid(squad_manager) else ""}
 	enriched["starting_build_text"] = starting_build_text()
 	enriched["starting_build"] = {"team":active_starting_team,"node":active_starting_node,"benefits":starting_benefits.duplicate(true),"run_id":starting_run_id,"valid_settlements":MetaProgress.starting_settlements.size(),"vouchers":MetaProgress.starting_vouchers}
 	if AchievementProgress != null and AchievementProgress.has_method("get_run_unlocked_definitions"):

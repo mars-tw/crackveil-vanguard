@@ -490,10 +490,13 @@ static func damage_share_line(contribution_rows: Array) -> String:
 
 # R30: how the squad handled the garden vine snares (fewer hits = spread well).
 static func vine_line(seal: Dictionary) -> String:
-	var cast := int(seal.get("vine_snares", 0))
-	if cast <= 0:
-		return ""
-	return "荊藤纏地 %d 次・隊員被纏 %d 下" % [cast, int(seal.get("vine_hits", 0))]
+	var parts := PackedStringArray()
+	if int(seal.get("vine_snares", 0)) > 0:
+		parts.append("荊藤纏地 %d 次・隊員被纏 %d 下" % [int(seal.get("vine_snares", 0)), int(seal.get("vine_hits", 0))])
+	# R31: the forge's ember ring, the same way.
+	if int(seal.get("ember_rings", 0)) > 0:
+		parts.append("熔火環爆 %d 次・隊員被燒 %d 人次" % [int(seal.get("ember_rings", 0)), int(seal.get("ember_hits", 0))])
+	return "\n".join(parts)
 
 # R27: what the squad catch-up did this run (peak multiplier and added damage).
 static func catch_up_line(seal: Dictionary) -> String:
