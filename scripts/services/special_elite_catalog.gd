@@ -14,7 +14,7 @@ const PROFILES: Array[Dictionary] = [
 # stage pressure (faster, tougher or harder-hitting) change, so a later stage
 # does not read as the first stage repainted.
 const STAGE_VARIANTS := {
-	"garden": {"tint": Color("8fe39a"), "speed": 1.15, "hp": 0.92, "projectile": 1.0, "pressure": "藤蔓纏地", "skill": "vine_snare",
+	"garden": {"tint": Color("8fe39a"), "speed": 1.15, "hp": 0.92, "projectile": 1.0, "pressure": "荊藤纏地", "skill": "vine_snare",
 		"names": {"shield": "荊盾重衛", "charge": "藤爪獵將", "frost": "花露守望者", "flame": "花火術士", "summoner": "苗群召喚師"}},
 	"ember": {"tint": Color("ff9a6a"), "speed": 1.0, "hp": 1.0, "projectile": 1.25, "pressure": "熔火重擊",
 		"names": {"shield": "熔盾重衛", "charge": "焰爪獵將", "frost": "灰燼守望者", "flame": "緋焰術士", "summoner": "焰群召喚師"}},

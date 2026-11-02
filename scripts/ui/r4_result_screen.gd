@@ -304,6 +304,8 @@ func _refresh() -> void:
 	if share_line != "":gain_label.text += "\n" + share_line
 	var catch_line := catch_up_line(displayed_summary.get("seal_state",{}))
 	if catch_line != "":gain_label.text += "\n" + catch_line
+	var vines := vine_line(displayed_summary.get("seal_state",{}))
+	if vines != "":gain_label.text += "\n" + vines
 	progress_label.text=MetaProgress.starting_choice_progress_text()
 	if not GameManager.pending_starting_settlements.is_empty():progress_label.text="進度未保存・整備可重試"
 	page=clampi(page,0,_page_count()-1)
@@ -485,6 +487,13 @@ static func damage_share_line(contribution_rows: Array) -> String:
 	if total < 1.0 or member_count == 0:
 		return ""
 	return "輸出：隊長 %d%%・隊員合計 %d%%（%d 人）" % [roundi(100.0 * captain / total), roundi(100.0 * members / total), member_count]
+
+# R30: how the squad handled the garden vine snares (fewer hits = spread well).
+static func vine_line(seal: Dictionary) -> String:
+	var cast := int(seal.get("vine_snares", 0))
+	if cast <= 0:
+		return ""
+	return "荊藤纏地 %d 次・隊員被纏 %d 下" % [cast, int(seal.get("vine_hits", 0))]
 
 # R27: what the squad catch-up did this run (peak multiplier and added damage).
 static func catch_up_line(seal: Dictionary) -> String:

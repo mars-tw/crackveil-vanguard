@@ -104,7 +104,7 @@ var special_elite_id := ""
 var special_elite_name := ""
 # R28: how strongly a stage variant elite takes its stage colour (0 = none).
 var stage_tint_strength := 0.0
-# R29: a stage signature skill this elite casts on top of its own (e.g. 藤蔓纏地).
+# R29: a stage signature skill this elite casts on top of its own (e.g. 荊藤纏地).
 var stage_skill := ""
 const VINE_SNARE := preload("res://scripts/vfx/vine_snare.gd")
 var special_skill := ""
@@ -884,6 +884,9 @@ func _apply_special_elite_impact(target: Node2D) -> void:
 	# R29: the garden roots the ground under the captain on every elite cast.
 	if stage_skill == "vine_snare" and is_instance_valid(target) and is_inside_tree():
 		VINE_SNARE.spawn(get_parent(), target.global_position)
+		if is_instance_valid(VINE_SNARE.last_spawned):
+			GameManager.vine_snares_cast += 1
+			VINE_SNARE.last_spawned = null
 	if special_skill == "summoner":
 		for index in range(5):
 			if EntityFactory.get_enemy_live_count() >= death_spawn_cap:
