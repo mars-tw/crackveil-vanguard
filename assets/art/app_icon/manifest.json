@@ -1,0 +1,19 @@
+{
+  "model": "gpt-image-2-2026-04-21",
+  "prompt": "Mobile game app icon, square, full-bleed, no text, no letters, no border, no rounded frame. A bold top-down tactical emblem: a glowing golden diamond-shaped formation sigil (wedge formation of five small shield markers arranged in an arrowhead) set inside a cracked circular rift seal on dark stone, one larger crowned captain marker at the arrow tip. Deep violet and midnight background, warm gold light, a single thin crack of teal light across the seal. Flat-ish stylized game emblem look with clean shapes and strong contrast, readable at 64 pixels, centered, occupying about 75 percent of the canvas. Limited palette: midnight violet, gold, teal accent. No characters' faces, no crowds, no lightning storms, no neon blue overload, not pixel art.",
+  "created_utc": "2026-11-02T07:42:20.919699+00:00",
+  "selected": "cv_a_1.png (candidate 1 of 3)",
+  "source_sha256": "04c8141e0c80b73f139318bdeddfe881f670168567f93dbe085c30a8d0104d8c",
+  "postprocess": [
+    "Lanczos downscale to 512/180/144",
+    "maskable: 410px art centred on 512 canvas filled with corner colour (80% safe zone)",
+    "app_store_1024: candidate as opaque RGB"
+  ],
+  "files": {
+    "assets/art/app_icon/app_store_1024.png": "6db9bd62a88d3d7edb402bdb73645ad4c3c4a80d4b718dd64d4216a5149332da",
+    "web\\icons\\icon_512x512.png": "b88c0e57fc20fae21e226cd4447b7858daf3ac3283469854b8a3cea461ea2546",
+    "web\\icons\\icon_180x180.png": "ada5250a2674142dcfe56ca06c75d07d669891aef49ff6a7bb9e19c0006e29bf",
+    "web\\icons\\icon_144x144.png": "739d03146e4e4befcc196a1b879a6e03a4f2e3b86d9eb0832a952538021869b2",
+    "web\\icons\\icon_512x512_maskable.png": "f3d6f7ba724abd0cd37366c62f2839b6be3a65ce400260a9b493697c243736ee"
+  }
+}

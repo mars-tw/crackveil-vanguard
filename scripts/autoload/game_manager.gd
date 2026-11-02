@@ -394,6 +394,8 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	temporary_squad_damage_timer = 0.0
 	combo_fire_rate_timer = 0.0
 	contribution.clear()
+	captain_damage_total = 0.0
+	member_damage_total = 0.0
 	bond_benefits = {"healing":0.0,"prevented":0.0,"triggers":0}
 	next_elite_bonus_xp = 0
 	echo_shards_awarded_this_run = 0
@@ -1294,6 +1296,23 @@ func get_upgrade_choice_count() -> int:
 
 const SQUAD_SHARE_MEMBER := 2.5
 const SQUAD_SHARE_CAPTAIN := 0.75
+# R26: squad catch-up. Captain upgrades can still snowball one run to 80%+ of
+# the damage; while the captain's running share is above the target, members
+# hit harder in proportion (capped), so the squad keeps a real part of the fight.
+const SQUAD_TARGET_CAPTAIN_SHARE := 0.55
+const SQUAD_CATCH_UP_MAX := 2.4
+var captain_damage_total := 0.0
+var member_damage_total := 0.0
+
+static func squad_catch_up(captain_total: float, member_total: float) -> float:
+	var total := captain_total + member_total
+	if total < 200.0:
+		return 1.0
+	var share := captain_total / total
+	if share <= SQUAD_TARGET_CAPTAIN_SHARE:
+		return 1.0
+	var ratio := share / SQUAD_TARGET_CAPTAIN_SHARE
+	return clampf(ratio * ratio, 1.0, SQUAD_CATCH_UP_MAX)
 
 func get_outgoing_damage_multiplier(source: Node = null) -> float:
 	var multiplier := float(contract_modifiers.get("damage_multiplier", 1.0))
@@ -1316,7 +1335,7 @@ func get_outgoing_damage_multiplier(source: Node = null) -> float:
 		if source.get("is_leader") == true:
 			multiplier *= SQUAD_SHARE_CAPTAIN
 		elif source.get("is_leader") == false:
-			multiplier *= SQUAD_SHARE_MEMBER
+			multiplier *= SQUAD_SHARE_MEMBER * squad_catch_up(captain_damage_total, member_damage_total)
 	# R20: formation synergy. Members, not the captain, hit harder while the
 	# held formation answers the current wave (see formation_relay.gd).
 	if source != null and is_instance_valid(source) and source.get("hero_id") != null and source.get("is_leader") == false and is_instance_valid(tactical_director) and is_instance_valid(tactical_director.relay) and bool(tactical_director.relay.synergy_active):
@@ -1394,6 +1413,11 @@ func record_weapon_damage(source: Node, weapon_id: String, amount: float, compon
 			source_name=source.get("data").get("name",source.get("hero_id"))
 		row["name"] = str(source.get("hero_id")) if source_name==null else str(source_name)
 		row.damage += amount
+		# R26: running captain / member totals drive the squad catch-up.
+		if source.get("is_leader") == true:
+			captain_damage_total += amount
+		elif source.get("is_leader") == false:
+			member_damage_total += amount
 		# R23: the role of the hero behind this row (captain / member).
 		if source.get("is_leader") != null:
 			row["role"] = "captain" if source.get("is_leader") == true else "member"
