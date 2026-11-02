@@ -110,7 +110,11 @@ static func choice_text(pressure_kind: String, node_id: String) -> String:
 	# so the toast names the two answers and the slow one's longer counter only.
 	return "快封%s／慢封%s・慢封反擊%d秒" % [names.get(primary, ""), names.get(secondary, ""), int(catalog.counter_seconds(node_id, pressure_kind, secondary))]
 
+func _exit_tree() -> void:
+	DAMAGE_NUMBER_SCRIPT.focus_dim = false
+
 func _process(delta: float) -> void:
+	DAMAGE_NUMBER_SCRIPT.focus_dim = enabled and started and GameManager.game_running and phase in ["warning", "active"]
 	if not enabled or not started or get_tree().paused or not GameManager.game_running:
 		return
 	advance(delta)

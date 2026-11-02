@@ -1,0 +1,164 @@
+{
+  "status": "VERIFIED",
+  "exitCode": 0,
+  "captureDriverBefore": "7e47a41bc0536e7b85b94cbcd3158977afed4c655034b4ca40300bb5401ca78a",
+  "captureDriverAfter": "7e47a41bc0536e7b85b94cbcd3158977afed4c655034b4ca40300bb5401ca78a",
+  "sourceManifestSha256": "200417cdeac3e4beebb3ee30991293ce293515f8616ee3cec173f0768844ebc0",
+  "builds": {
+    "release": {
+      "pack_sha256": "b4db1dbe3f24321961b9adbbe4fef5ad59c885639a027126f6298482fe52c11e",
+      "source_manifest_sha256": "0be738b81a3e94e6d96aadd106722aa26cabd91dde50d6fd7b038a5550c904f9",
+      "export_driver_sha256": "6bc6de7bf90058bbbeaaca7ba0e9d6173c601b4587fa39eddf8cb996d5c5fa1f",
+      "root_headers_unchanged": true,
+      "release_entry_restored": true,
+      "isolated_header_entry": "official MainMenu",
+      "command": [
+        "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+        "--headless",
+        "--audio-driver",
+        "Dummy",
+        "--path",
+        "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r24\\export-project",
+        "--export-release",
+        "Web",
+        "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\export\\content-r24\\release\\index.html"
+      ],
+      "files": {
+        "index-b4db1dbe3f24.pck": "b4db1dbe3f24321961b9adbbe4fef5ad59c885639a027126f6298482fe52c11e",
+        "index.144x144.png": "f1db9012802727dd4746e5b6bbff92f87a6af63d9a5134d8793538fef80eb556",
+        "index.180x180.png": "93a372b2de01443185b2348f2f1eb95156c79c6a5332e2e153a676a356aec668",
+        "index.512x512.png": "b9328b3d54bbae85488812b9c98ed50b317112e7e6505d18db4b500c885c1e59",
+        "index.audio.position.worklet.js": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+        "index.audio.worklet.js": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+        "index.html": "656b337c7fcee53d056197df958901d396cbe0e69a68ef2045a974694611fa76",
+        "index.js": "68586d6daafc93c6e697b3fb258976874aa7459b8931165ebb1dc3c9614cc42c",
+        "index.manifest.json": "1ce1d089c89c29cc294ff28d7e87a238654ef3010c25df31cde5746b49139044",
+        "index.offline.html": "dd6eaa279aae4b3a5aa7f9e092c6f1750c747979987ef6f7e7e10e4f37148482",
+        "index.pck": "b4db1dbe3f24321961b9adbbe4fef5ad59c885639a027126f6298482fe52c11e",
+        "index.png": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+        "index.service.worker.js": "6997e9fe3b9ace9eebeab4b0e95241d0dc4318668b0f3954ad42e868dca4d0fd",
+        "index.wasm": "7eda98958eb09135a1acb54a4323a00b1a55af1997f15fa1cdc2b93e3df46656",
+        "r33-web-focal.png": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd"
+      },
+      "protection_before": {
+        "status": "VERIFIED",
+        "failures": [],
+        "history_files": 5463,
+        "initial_files": 4237,
+        "pins": {
+          "tests/historical.json": "6aafeba9282cdd4d8ebcebfffedfe552cad67ff574bdaf69c2c3e18cfefd5223",
+          "tests/initial-files.json": "d0ba4cc384d44527297f4dd39be8cf45391b09e06776111945dde7e378adbbdc",
+          "tests/default-profile-before.json": "f18d02fde1916d98334fec768025aade159a273edf9df4185c141714f4ff7e8d",
+          "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "captured_unix_ns": 1793599251452856400
+      },
+      "protection_after": {
+        "status": "VERIFIED",
+        "failures": [],
+        "history_files": 5463,
+        "initial_files": 4237,
+        "pins": {
+          "tests/historical.json": "6aafeba9282cdd4d8ebcebfffedfe552cad67ff574bdaf69c2c3e18cfefd5223",
+          "tests/initial-files.json": "d0ba4cc384d44527297f4dd39be8cf45391b09e06776111945dde7e378adbbdc",
+          "tests/default-profile-before.json": "f18d02fde1916d98334fec768025aade159a273edf9df4185c141714f4ff7e8d",
+          "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "captured_unix_ns": 1793599260285437900
+      },
+      "boundary_driver_sha256": "41ec336bad1d22ddd908cb4901f3959a46abedbaff0dad570e1dd5680f39de88",
+      "content_version": "0.53.0-content-r24"
+    },
+    "review": {
+      "pack_sha256": "613ee53ebe6a4de439cf4f79fa9b2de2fe6318c4439683956fe4a7332325e6d8",
+      "source_manifest_sha256": "0be738b81a3e94e6d96aadd106722aa26cabd91dde50d6fd7b038a5550c904f9",
+      "export_driver_sha256": "6bc6de7bf90058bbbeaaca7ba0e9d6173c601b4587fa39eddf8cb996d5c5fa1f",
+      "root_headers_unchanged": true,
+      "release_entry_restored": true,
+      "isolated_header_entry": "review fixture",
+      "command": [
+        "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+        "--headless",
+        "--audio-driver",
+        "Dummy",
+        "--path",
+        "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r24\\export-project",
+        "--export-debug",
+        "Web",
+        "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\export\\content-r24\\review\\index.html"
+      ],
+      "files": {
+        "index-613ee53ebe6a.pck": "613ee53ebe6a4de439cf4f79fa9b2de2fe6318c4439683956fe4a7332325e6d8",
+        "index.144x144.png": "f1db9012802727dd4746e5b6bbff92f87a6af63d9a5134d8793538fef80eb556",
+        "index.180x180.png": "93a372b2de01443185b2348f2f1eb95156c79c6a5332e2e153a676a356aec668",
+        "index.512x512.png": "b9328b3d54bbae85488812b9c98ed50b317112e7e6505d18db4b500c885c1e59",
+        "index.audio.position.worklet.js": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+        "index.audio.worklet.js": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+        "index.html": "b4ebf248c661605ff03e9a1383fdfe0ee7cf61c3696bfacbafeb71a9258d40fe",
+        "index.js": "ffc3898b59fba6f5af0c02f76e5ee526cc061e65c7d2d6f4f98186876cea15c4",
+        "index.manifest.json": "1ce1d089c89c29cc294ff28d7e87a238654ef3010c25df31cde5746b49139044",
+        "index.offline.html": "dd6eaa279aae4b3a5aa7f9e092c6f1750c747979987ef6f7e7e10e4f37148482",
+        "index.pck": "613ee53ebe6a4de439cf4f79fa9b2de2fe6318c4439683956fe4a7332325e6d8",
+        "index.png": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+        "index.service.worker.js": "713cf721da3c006420640a5e481c179b492c04e13325cc43b383192183b8fc0d",
+        "index.wasm": "a7f772811c728a540ff559a91742ef025f9dc6de1947a09dd9f5cf8c93bf85c7",
+        "r33-web-focal.png": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd"
+      },
+      "protection_before": {
+        "status": "VERIFIED",
+        "failures": [],
+        "history_files": 5463,
+        "initial_files": 4237,
+        "pins": {
+          "tests/historical.json": "6aafeba9282cdd4d8ebcebfffedfe552cad67ff574bdaf69c2c3e18cfefd5223",
+          "tests/initial-files.json": "d0ba4cc384d44527297f4dd39be8cf45391b09e06776111945dde7e378adbbdc",
+          "tests/default-profile-before.json": "f18d02fde1916d98334fec768025aade159a273edf9df4185c141714f4ff7e8d",
+          "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "captured_unix_ns": 1793599265579830400
+      },
+      "protection_after": {
+        "status": "VERIFIED",
+        "failures": [],
+        "history_files": 5463,
+        "initial_files": 4237,
+        "pins": {
+          "tests/historical.json": "6aafeba9282cdd4d8ebcebfffedfe552cad67ff574bdaf69c2c3e18cfefd5223",
+          "tests/initial-files.json": "d0ba4cc384d44527297f4dd39be8cf45391b09e06776111945dde7e378adbbdc",
+          "tests/default-profile-before.json": "f18d02fde1916d98334fec768025aade159a273edf9df4185c141714f4ff7e8d",
+          "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "captured_unix_ns": 1793599276084649200
+      },
+      "boundary_driver_sha256": "41ec336bad1d22ddd908cb4901f3959a46abedbaff0dad570e1dd5680f39de88",
+      "content_version": "0.53.0-content-r24"
+    }
+  },
+  "logSha256": "18e60048ca4bb1e77b00ea430bbf3ebc40b208cadadbbdef2763950e75073edc",
+  "protection": {
+    "status": "VERIFIED",
+    "failures": [],
+    "history_files": 5463,
+    "initial_files": 4237,
+    "pins": {
+      "tests/historical.json": "6aafeba9282cdd4d8ebcebfffedfe552cad67ff574bdaf69c2c3e18cfefd5223",
+      "tests/initial-files.json": "d0ba4cc384d44527297f4dd39be8cf45391b09e06776111945dde7e378adbbdc",
+      "tests/default-profile-before.json": "f18d02fde1916d98334fec768025aade159a273edf9df4185c141714f4ff7e8d",
+      "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "captured_unix_ns": 1793599779545066400
+  },
+  "boundaryBefore": {
+    "status": "VERIFIED",
+    "failures": [],
+    "history_files": 5463,
+    "initial_files": 4237,
+    "pins": {
+      "tests/historical.json": "6aafeba9282cdd4d8ebcebfffedfe552cad67ff574bdaf69c2c3e18cfefd5223",
+      "tests/initial-files.json": "d0ba4cc384d44527297f4dd39be8cf45391b09e06776111945dde7e378adbbdc",
+      "tests/default-profile-before.json": "f18d02fde1916d98334fec768025aade159a273edf9df4185c141714f4ff7e8d",
+      "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "captured_unix_ns": 1793599782289850200
+  }
+}

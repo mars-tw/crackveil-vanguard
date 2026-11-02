@@ -16,7 +16,7 @@ func _initialize() -> void:
 	_check(relay_src.contains("alternative_hold+=maxf(0.0, delta)"), "the escort result counts real seconds, matching the top bar's 7 s, not seal progress")
 	var hud_src := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
 	_check(hud_src.contains("minf(560.0 if view_width < 1200.0 else 680.0,"), "wide screens fit the seal choice notice on one line")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.52.0-content-r23", "project version is 0.52.0-content-r23")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.53.0-content-r24", "project version is 0.53.0-content-r24")
 	if failures.is_empty():
 		print("R17_REGRESSION status=PASS checks=%d" % checks)
 	else:

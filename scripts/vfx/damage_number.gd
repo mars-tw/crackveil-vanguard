@@ -9,6 +9,10 @@ static var hud_blockers: Array[Rect2] = []
 const PLATE_YIELD_FONT_SIZE := 30
 static var alpha_updates: int = 0
 static var scale_updates: int = 0
+# R24: while an attack wave is warned or active, plain damage numbers step back
+# so the formation answer, the captain and the danger zone read first.
+static var focus_dim := false
+const FOCUS_DIM_ALPHA := 0.45
 
 var text_value: String = "0"
 var number_color: Color = Color.WHITE
@@ -259,6 +263,8 @@ func _update_labels() -> void:
 func _update_alpha() -> void:
 	# Hold the readable value through the initial impact, then fade at the tail.
 	var alpha: float = 1.0 - smoothstep(0.42, 1.0, clampf(age / lifetime, 0.0, 1.0))
+	if focus_dim and prefix == "":
+		alpha *= FOCUS_DIM_ALPHA
 	if absf(alpha - applied_alpha) > 0.001:
 		applied_alpha = alpha
 		alpha_updates += 1

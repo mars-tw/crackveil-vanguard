@@ -48,4 +48,25 @@ func _draw() -> void:
 			var id := int(topology.get_debug_state().get("nearest_landmark", 0))
 			if id < landmarks.size():
 				name = str(landmarks[id].get("name", name))
-		draw_string(get_theme_default_font(), Vector2(4, size.x + 16), name, HORIZONTAL_ALIGNMENT_CENTER, size.x - 8, 11, Color("e3ecf7"))
+		# R24: a campaign stage names itself under the minimap (第2關・翠晶花園),
+		# so a second stage on the same loop world reads as a different stage.
+		var stage_label := stage_label_for(str(GameManager.run_mode), str(GameManager.selected_stage_id))
+		if stage_label != "":
+			name = stage_label
+		# A label wider than the minimap (第2關・翠晶花園) keeps its full width and
+		# extends left from the minimap's right edge instead of being clipped.
+		var font := get_theme_default_font()
+		var text_w := font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+		if text_w > size.x - 8:
+			draw_string(font, Vector2(size.x - 2 - text_w, size.x + 16), name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("e3ecf7"))
+		else:
+			draw_string(font, Vector2(4, size.x + 16), name, HORIZONTAL_ALIGNMENT_CENTER, size.x - 8, 11, Color("e3ecf7"))
+
+static func stage_label_for(run_mode: String, stage_id: String) -> String:
+	if run_mode == "endless":
+		return ""
+	var stages: Array = GameManager.STAGE_CATALOG.get_stages()
+	for index in range(stages.size()):
+		if str(stages[index].get("id", "")) == stage_id:
+			return "第%d關・%s" % [index + 1, str(stages[index].get("name", ""))]
+	return ""

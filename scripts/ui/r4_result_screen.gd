@@ -475,8 +475,9 @@ static func damage_share_line(contribution_rows: Array) -> String:
 			captain += damage
 		elif str(row.get("role", "")) == "member":
 			members += damage
-			if damage >= 1.0:
-				member_count += 1
+			# R24: count every member who fought, so the head count matches the
+			# squad line (存活 7/8 → 隊員 7 人), not only those who landed a hit.
+			member_count += 1
 	if total < 1.0 or member_count == 0:
 		return ""
 	return "輸出：隊長 %d%%・隊員合計 %d%%（%d 人）" % [roundi(100.0 * captain / total), roundi(100.0 * members / total), member_count]

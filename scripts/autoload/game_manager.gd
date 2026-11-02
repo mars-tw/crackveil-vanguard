@@ -1791,6 +1791,10 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 		# three and fallen recruits. Constructs never enter this dictionary.
 		for id in squad_manager.recruited_once:
 			var row:=contribution_row(id)
+			# R24: every recruited hero carries its role, including one that never
+			# landed a hit, so the result's member head count is the full squad.
+			if not row.has("role"):
+				row["role"] = "captain" if is_instance_valid(player) and str(player.get("hero_id")) == str(id) else "member"
 			var data: Resource=squad_manager.squad_data.get_hero_data(id)
 			if data!=null:row["name"]=str(data.get("display_name"))
 	enriched["contribution_text"] = contribution_text()
