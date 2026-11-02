@@ -320,7 +320,15 @@ func _draw() -> void:
 		var lanes: Array[Rect2] = []
 		lanes.assign([Rect2(anchor+Vector2(-40,-34),Vector2(285,68))] if kind == "front" else [Rect2(anchor+Vector2(-230,-85),Vector2(202,170)),Rect2(anchor+Vector2(28,-85),Vector2(202,170))])
 		var salt := 0
-		for lane in lanes:
+		# R23: a pincer draws its answer once, on the lane nearer the captain; the
+		# second lane keeps its chevrons only, so the centre is not four badges
+		# and four tags repeating the same two answers.
+		var answer_lane := 0
+		if lanes.size() > 1 and is_instance_valid(GameManager.player):
+			var captain_at := to_local(GameManager.player.global_position)
+			answer_lane = 0 if captain_at.distance_to(lanes[0].get_center()) <= captain_at.distance_to(lanes[1].get_center()) else 1
+		for lane_index in range(lanes.size()):
+			var lane: Rect2 = lanes[lane_index]
 			draw_rect(lane,Color(color,alpha),true)
 			var nw:=lane.position
 			var ne:=lane.position+Vector2(lane.size.x,0)
@@ -342,7 +350,8 @@ func _draw() -> void:
 				draw_polyline(PackedVector2Array([tip+Vector2(-dir*11,-12),tip,tip+Vector2(-dir*11,12)]),Color("101b30",0.8),6,true)
 				draw_polyline(PackedVector2Array([tip+Vector2(-dir*11,-12),tip,tip+Vector2(-dir*11,12)]),color,3,true)
 			# Answer badge sits past the chevrons, on top of the lane art.
-			_draw_answer(lane.position + Vector2(lane.size.x - 52, lane.size.y / 2))
+			if lane_index == answer_lane:
+				_draw_answer(lane.position + Vector2(lane.size.x - 52, lane.size.y / 2))
 	else:
 		for target in targets:
 			draw_circle(target,47,Color(color,alpha))

@@ -1394,6 +1394,9 @@ func record_weapon_damage(source: Node, weapon_id: String, amount: float, compon
 			source_name=source.get("data").get("name",source.get("hero_id"))
 		row["name"] = str(source.get("hero_id")) if source_name==null else str(source_name)
 		row.damage += amount
+		# R23: the role of the hero behind this row (captain / member).
+		if source.get("is_leader") != null:
+			row["role"] = "captain" if source.get("is_leader") == true else "member"
 		# R21: the share of a member hit that the formation synergy added.
 		if source.get("is_leader") == false and is_instance_valid(tactical_director) and is_instance_valid(tactical_director.relay) and bool(tactical_director.relay.synergy_active):
 			tactical_director.relay.synergy_damage += amount * (1.0 - 1.0 / float(tactical_director.relay.FORMATION_SYNERGY_MEMBER))
@@ -1808,7 +1811,7 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 	var director: Node = tactical_director if is_instance_valid(tactical_director) else null
 	var relay_node: Node = director.relay if director != null and is_instance_valid(director.relay) else null
 	if relay_node != null:
-		enriched["seal_state"] = {"step": int(relay_node.step), "completed": bool(relay_node.completed), "wrong": int(relay_node.wrong_penalties), "pressure_seconds": float(relay_node.pressure_seconds), "fast_seals": relay_node.history.filter(func(h): return not STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "slow_seals": relay_node.history.filter(func(h): return STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "matched_seconds": float(relay_node.matched_seconds), "synergy_damage": float(relay_node.synergy_damage), "required": str(relay_node.required_formation()), "formation": squad_manager.get_formation_id() if is_instance_valid(squad_manager) else ""}
+		enriched["seal_state"] = {"step": int(relay_node.step), "completed": bool(relay_node.completed), "wrong": int(relay_node.wrong_penalties), "pressure_seconds": float(relay_node.pressure_seconds), "fast_seals": relay_node.history.filter(func(h): return not STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "slow_seals": relay_node.history.filter(func(h): return STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "matched_seconds": float(relay_node.matched_seconds), "synergy_damage": float(relay_node.synergy_damage), "required": str(relay_node.required_formation()), "accepted": Array(relay_node.accepted_formations()), "formation": squad_manager.get_formation_id() if is_instance_valid(squad_manager) else ""}
 	enriched["starting_build_text"] = starting_build_text()
 	enriched["starting_build"] = {"team":active_starting_team,"node":active_starting_node,"benefits":starting_benefits.duplicate(true),"run_id":starting_run_id,"valid_settlements":MetaProgress.starting_settlements.size(),"vouchers":MetaProgress.starting_vouchers}
 	if AchievementProgress != null and AchievementProgress.has_method("get_run_unlocked_definitions"):

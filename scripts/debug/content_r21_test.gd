@@ -19,7 +19,7 @@ func _initialize() -> void:
 	_check(relay_src.contains("if synergy_active and not was_synergy:\n\t\tsynergy_pulse_time = 0.0") and relay_src.contains("draw_line(captain_at, at, Color(gold, 0.9 * pulse), 3.0, true)") and relay_src.contains("\t_draw_synergy()\n\tvar color: Color = COLORS[step]"), "the synergy switching on pulses gold links and foot rings on the squad")
 	var relay_script: GDScript = load("res://scripts/services/formation_relay.gd")
 	_check(relay_script.SYNERGY_PULSE_SECONDS > 0.4 and relay_script.SYNERGY_PULSE_SECONDS <= 1.0, "the pulse is short (0.5 to 1 s)")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.51.0-content-r22", "project version is 0.51.0-content-r22")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.52.0-content-r23", "project version is 0.52.0-content-r23")
 	if failures.is_empty():
 		print("R21_REGRESSION status=PASS checks=%d" % checks)
 	else:

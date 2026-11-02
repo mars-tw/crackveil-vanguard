@@ -20,7 +20,7 @@ func _initialize() -> void:
 	var first: String = "楔形｜封隙 0/3｜" + relay_script.compare_text("front")
 	var second: String = "重盾正面推進・預警 1.3 秒・陣形正確"
 	_check(font.get_string_size(first, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x <= 315.0 and font.get_string_size(second, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x <= 315.0, "both top-bar lines fit the 835-wide phone mission box (315 px text) at 12 px")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.51.0-content-r22", "project version is 0.51.0-content-r22")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.52.0-content-r23", "project version is 0.52.0-content-r23")
 	if failures.is_empty():
 		print("R18_REGRESSION status=PASS checks=%d" % checks)
 	else:

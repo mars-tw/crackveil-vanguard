@@ -37,6 +37,10 @@ var tab:=0
 var page:=0
 var rows: Array=[]
 var page_capacity:=2
+# R23: set when a portrait result has too little room for two readable cards;
+# the pages then hold one card each instead of two cut to "…".
+var portrait_single_card:=false
+const PORTRAIT_CARD_MIN_H:=56.0
 var support_rows: Array=[]
 
 func _ready() -> void:
@@ -143,6 +147,7 @@ func show_summary(summary: Dictionary) -> void:
 	support_rows=SUPPORT_MODEL.build(rows)
 	tab=0
 	page=0
+	portrait_single_card=false
 	title_label.text=(str(summary.get("stage_name","封隙出擊"))+"・通關") if victory else "任務失敗"
 	controls.primary.text="繼續無盡" if victory else "免費整備" if GameManager.active_starting_formal and MetaProgress.starting_vouchers>0 else "重試保存" if not GameManager.pending_starting_settlements.is_empty() else "再來一局"
 	copy_seed_button.text=("下一關" if str(summary.get("next_stage_id",""))!="" else "世界地圖") if victory else "複製種子"
@@ -158,6 +163,7 @@ func _page_count() -> int:
 
 func _per_page() -> int:
 	var view:=MobileTuning.ui_layout_size(get_viewport().get_visible_rect().size)
+	if portrait_single_card and view.y>view.x:return 1
 	if view.y>view.x and view.y<640:return 1
 	if view.x<=900 and view.y<=430 and int(PlayerSettings.get("ui_scale_index"))>=2:return 1
 	return 2
@@ -292,6 +298,8 @@ func _refresh() -> void:
 	gain_label.text=_measured_gain(node,build.get("benefits",{}))
 	var read_line := formation_read_line(displayed_summary.get("seal_state",{}))
 	if read_line != "":gain_label.text += "\n" + read_line
+	var share_line := damage_share_line(rows)
+	if share_line != "":gain_label.text += "\n" + share_line
 	progress_label.text=MetaProgress.starting_choice_progress_text()
 	if not GameManager.pending_starting_settlements.is_empty():progress_label.text="進度未保存・整備可重試"
 	page=clampi(page,0,_page_count()-1)
@@ -424,7 +432,12 @@ func _defeat_advice(seal: Dictionary) -> String:
 	if bool(seal.get("completed",false)):return "下次：三道已封，趁封合後的反擊增傷集火守門者"
 	var need:=str(names.get(str(seal.get("required","")),""))
 	var held:=str(names.get(str(seal.get("formation","")),""))
-	if int(seal.get("wrong",0))>0:return "下次：倒在第 %d 道（需%s，當時%s），錯陣反噬 %d 次；先看危險區上的陣形圖示" % [mini(step+1,3),need,held,int(seal.get("wrong",0))]
+	# R23: only call the formation wrong when the one held at defeat really was;
+	# a run that held an accepted formation reads "陣形對了" instead of "需散兵，當時散兵".
+	var accepted: Array = seal.get("accepted", [seal.get("required","")])
+	var held_ok := accepted.has(str(seal.get("formation","")))
+	if int(seal.get("wrong",0))>0 and not held_ok:return "下次：倒在第 %d 道（需%s，當時%s），錯陣反噬 %d 次；先看危險區上的陣形圖示" % [mini(step+1,3),need,held,int(seal.get("wrong",0))]
+	if int(seal.get("wrong",0))>0:return "下次：倒在第 %d 道時陣形對了（%s），但先前錯陣反噬 %d 次；攻勢間隙帶兩名隊友站進封隙" % [mini(step+1,3),held,int(seal.get("wrong",0))]
 	return "下次：倒在第 %d 道（封隙 %d/3），攻勢間隙帶兩名隊友站進封隙" % [mini(step+1,3),step]
 
 # R13: how well the squad read the attack waves this run, from real timers:
@@ -447,6 +460,26 @@ static func formation_read_line(seal: Dictionary) -> String:
 		if float(seal.get("synergy_damage", 0.0)) >= 1.0:
 			line += "（多打 %d HP）" % roundi(float(seal.get("synergy_damage", 0.0)))
 	return line
+
+# R23: how the run's damage split between the captain and the members, so the
+# squad's share reads at a glance instead of only from page after page of cards.
+static func damage_share_line(contribution_rows: Array) -> String:
+	var total := 0.0
+	var captain := 0.0
+	var members := 0.0
+	var member_count := 0
+	for row in contribution_rows:
+		var damage := float(row.get("damage", 0.0))
+		total += damage
+		if str(row.get("role", "")) == "captain":
+			captain += damage
+		elif str(row.get("role", "")) == "member":
+			members += damage
+			if damage >= 1.0:
+				member_count += 1
+	if total < 1.0 or member_count == 0:
+		return ""
+	return "輸出：隊長 %d%%・隊員合計 %d%%（%d 人）" % [roundi(100.0 * captain / total), roundi(100.0 * members / total), member_count]
 
 func _measured_gain(node: Dictionary,measured: Dictionary) -> String:
 	if node.is_empty():return "未裝起始節點・本局無節點增益"
@@ -518,6 +551,10 @@ func _apply_responsive_layout() -> void:
 	var pager_y:=size.y-108
 	var card_y:=tab_y+50
 	var card_h: float=(pager_y-card_y-4)/page_capacity
+	if portrait and page_capacity>1 and card_h<PORTRAIT_CARD_MIN_H*scale and not portrait_single_card:
+		portrait_single_card=true
+		_refresh()
+		return
 	for number in range(2):
 		var card_rect:=Rect2(right_x,card_y+number*card_h,right_w,card_h-2)
 		_place(card_art[number],card_rect.position.x,card_rect.position.y,card_rect.size.x,card_rect.size.y)
