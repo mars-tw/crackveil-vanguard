@@ -307,6 +307,8 @@ func _refresh() -> void:
 	if read_line != "":gain_label.text += "\n" + read_line
 	var share_line := damage_share_line(rows)
 	if share_line != "":gain_label.text += "\n" + share_line
+	var key_line := key_contribution_line(rows)
+	if key_line != "":gain_label.text += "\n" + key_line
 	var catch_line := catch_up_line(displayed_summary.get("seal_state",{}))
 	if catch_line != "":gain_label.text += "\n" + catch_line
 	var vines := vine_line(displayed_summary.get("seal_state",{}))
@@ -493,6 +495,29 @@ static func damage_share_line(contribution_rows: Array) -> String:
 		return ""
 	return "輸出：隊長 %d%%・隊員合計 %d%%（%d 人）" % [roundi(100.0 * captain / total), roundi(100.0 * members / total), member_count]
 
+# R33: members by name for what is not damage: longest on the seal, most hits
+# taken for the squad, most healing and prevention. Each member is named once.
+static func key_contribution_line(contribution_rows: Array) -> String:
+	var used := {}
+	var parts := PackedStringArray()
+	for spec in [["seal", "封隙 %d 秒"], ["taken", "承傷 %d"], ["support", "回復減傷 %d"]]:
+		var best: Dictionary = {}
+		var best_value := 0.0
+		for row in contribution_rows:
+			if str(row.get("role", "")) != "member" or used.has(str(row.get("name", ""))):
+				continue
+			var value: float = float(row.get("healing", 0.0)) + float(row.get("prevented", 0.0)) if spec[0] == "support" else float(row.get(spec[0], 0.0))
+			if value > best_value:
+				best_value = value
+				best = row
+		if best.is_empty() or best_value < 1.0:
+			continue
+		used[str(best.get("name", ""))] = true
+		parts.append("%s %s" % [str(best.get("name", "")), str(spec[1]) % roundi(best_value)])
+	if parts.is_empty():
+		return ""
+	return "關鍵貢獻：" + "・".join(parts)
+
 # R32: the run's tactical achievements as one line under the outcome, so a
 # clean victory reads as a feat before the numbers.
 static func victory_badges(summary: Dictionary) -> String:
@@ -505,7 +530,9 @@ static func victory_badges(summary: Dictionary) -> String:
 	if int(summary.get("squad_total", 0)) > 0 and int(summary.get("squad_alive", 0)) >= int(summary.get("squad_total", 0)):
 		out.append("全員生還")
 	if int(seal.get("ember_rings", 0)) > 0:
-		out.append("熔火環全躲 %d/%d" % [int(seal.get("ember_clean", 0)), int(seal.get("ember_rings", 0))])
+		out.append("躲過熔火環 %d/%d" % [int(seal.get("ember_clean", 0)), int(seal.get("ember_rings", 0))])
+	if int(seal.get("storm_pylons", 0)) > 0:
+		out.append("雷柱分流 %d/%d" % [int(seal.get("storm_grounded", 0)), int(seal.get("storm_pylons", 0))])
 	if out.is_empty():
 		return ""
 	return "戰績：" + "・".join(out)
@@ -518,6 +545,9 @@ static func vine_line(seal: Dictionary) -> String:
 	# R31: the forge's ember ring, the same way.
 	if int(seal.get("ember_rings", 0)) > 0:
 		parts.append("熔火環爆 %d 次・全員躲過 %d 次・被燒 %d 人次" % [int(seal.get("ember_rings", 0)), int(seal.get("ember_clean", 0)), int(seal.get("ember_hits", 0))])
+	# R33: the storm's pylons, the same way.
+	if int(seal.get("storm_pylons", 0)) > 0:
+		parts.append("雷柱分流 %d 次・成功分流 %d 次・被電 %d 人次" % [int(seal.get("storm_pylons", 0)), int(seal.get("storm_grounded", 0)), int(seal.get("storm_hits", 0))])
 	return "\n".join(parts)
 
 # R27: what the squad catch-up did this run (peak multiplier and added damage).

@@ -108,6 +108,7 @@ var stage_tint_strength := 0.0
 var stage_skill := ""
 const VINE_SNARE := preload("res://scripts/vfx/vine_snare.gd")
 const EMBER_RING := preload("res://scripts/vfx/ember_ring.gd")
+const STORM_PYLONS := preload("res://scripts/vfx/storm_pylons.gd")
 var special_skill := ""
 var special_cooldown := 3.0
 var special_timer := 2.0
@@ -894,6 +895,13 @@ func _apply_special_elite_impact(target: Node2D) -> void:
 		if is_instance_valid(EMBER_RING.last_spawned):
 			GameManager.ember_rings_cast += 1
 			EMBER_RING.last_spawned = null
+	# R33: the storm drops two pylons beside the captain (not the elite's target,
+	# which may be a member), across its path.
+	if stage_skill == "storm_pylon" and is_instance_valid(GameManager.player) and is_inside_tree():
+		STORM_PYLONS.spawn(get_parent(), GameManager.player.global_position, STORM_PYLONS.lateral_half(GameManager.player))
+		if is_instance_valid(STORM_PYLONS.last_spawned):
+			GameManager.storm_pylons_cast += 1
+			STORM_PYLONS.last_spawned = null
 	if special_skill == "summoner":
 		for index in range(5):
 			if EntityFactory.get_enemy_live_count() >= death_spawn_cap:

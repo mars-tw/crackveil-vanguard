@@ -1646,6 +1646,17 @@ func _apply_phone_battle_layout(view: Vector2, phone: bool) -> void:
 	toast_label.add_theme_font_size_override("font_size",12)
 
 
+# R33: screen positions of the active storm pylons, for the review bot.
+func _storm_pylon_screen() -> Array:
+	var out: Array = []
+	for pair in get_tree().get_nodes_in_group("storm_pylons"):
+		if not pair is Node2D or bool(pair.get("struck")):
+			continue
+		for offset in pair.pylon_offsets(pair.half):
+			var at: Vector2 = get_viewport().get_canvas_transform() * (pair.global_position + offset)
+			out.append([at.x, at.y])
+	return out
+
 func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 	if not is_inside_tree() or get_viewport() == null:
 		return
@@ -1696,6 +1707,9 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"formation_cooldown": GameManager.squad_manager.get_formation_cooldown_remaining() if is_instance_valid(GameManager.squad_manager) else 0.0,
 		"formation_ready": formation_button.is_visible_in_tree() and not formation_button.disabled,
 		"auto_upgrade": GameManager.auto_upgrade_enabled,
+		"hazard_mark_at": maxf(float(load("res://scripts/vfx/ember_ring.gd").last_mark_time), float(load("res://scripts/vfx/storm_pylons.gd").last_mark_time)),
+		"storm_pylons": get_tree().get_nodes_in_group("storm_pylons").size(),
+		"storm_pylon_screen": _storm_pylon_screen(),
 		"version": str(ProjectSettings.get_setting("application/config/version")),
 		"seed": GameManager.current_run_seed,
 		"mission_text": tactical_hint.text,

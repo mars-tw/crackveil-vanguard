@@ -21,6 +21,8 @@ const VINE_SNARE := preload("res://scripts/vfx/vine_snare.gd")
 const MARK_SECONDS := 1.2
 const FLAME := Color("ffd27a")
 static var last_spawned: Node2D = null
+# R33: game time of the last burst that marked a hero (QA capture hook).
+static var last_mark_time := -99.0
 var burned: Array = []
 var mark_layer: Node2D = null
 
@@ -101,6 +103,8 @@ func _burst() -> void:
 	# R32: a ring the whole squad dodged counts toward the result's clean rings.
 	if hits == 0:
 		GameManager.ember_rings_clean += 1
+	else:
+		last_mark_time = GameManager.elapsed_time
 
 # The plate tries under the ring, then over it, and is skipped if both spots
 # would cover rule text or an elite name plate.

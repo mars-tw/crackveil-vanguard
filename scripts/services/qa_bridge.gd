@@ -25,6 +25,13 @@ static func save_path(default_path: String) -> String:
 	var profile := _qa("qa_profile")
 	return str(profile.path(default_path)) if profile != null else default_path
 
+# R33: a stage id requested by the review bot, or "" (phones: always "").
+static func start_stage() -> String:
+	if not OS.has_feature("web"):
+		return ""
+	var hook := _qa("start_stage")
+	return str(hook.requested()) if hook != null else ""
+
 static func qa_active() -> bool:
 	var profile := _qa("qa_profile")
 	return profile != null and bool(profile.active())

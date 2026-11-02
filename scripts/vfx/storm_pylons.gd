@@ -1,0 +1,220 @@
+extends Node2D
+
+# R33: fourth-stage elites (雷霆浮島) drop two lightning pylons (雷柱) SPREAD
+# to each side of the captain. The bolt is split, and nobody is hurt, when the
+# captain stands on one pylon and a member on the other at the strike;
+# otherwise lightning hits every hero within STRIKE_RADIUS. Walking onto a
+# pylon turns the squad towards it, which puts the scatter formation's rear
+# slots (184 / 236 behind) on the far pylon; wedge and ring stay too tight.
+# The garden asked the squad to spread, the forge to gather, the storm to
+# stretch the squad between two points.
+# 2.8 s: time to walk onto a pylon and let the squad settle behind.
+const WARN_SECONDS := 2.8
+const SPREAD := 110.0
+const STRIKE_SECONDS := 0.5
+const PYLON_RADIUS := 95.0
+const STRIKE_RADIUS := 300.0
+const STRIKE_DAMAGE := 16.0
+const MAX_ACTIVE := 1
+const MARK_SECONDS := 1.2
+const HAZARD := Color("ffe14d")
+const BOLT := Color("9fd8ff")
+const SAFE := Color("8ff0a4")
+const LABEL := "雷柱分流・隊長踩柱＋散兵"
+const FONT := preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
+const VINE_SNARE := preload("res://scripts/vfx/vine_snare.gd")
+static var last_spawned: Node2D = null
+static var last_mark_time := -99.0
+
+var age := 0.0
+# Offset from the centre to one pylon; the other is at -half.
+var half := Vector2(SPREAD, 0.0)
+var struck := false
+var grounded := false
+var hits := 0
+var shocked: Array = []
+var mark_layer: Node2D = null
+
+# The pylons stand across the captain's path (to its left and right as it
+# faces now), so either one is a short side step away.
+static func lateral_half(captain: Node2D) -> Vector2:
+	var forward := Vector2.RIGHT
+	if is_instance_valid(captain) and captain.has_method("get_locomotion_facing_direction"):
+		forward = captain.get_locomotion_facing_direction()
+	return forward.rotated(PI * 0.5).normalized() * SPREAD
+
+static func spawn(parent: Node, at: Vector2, half_offset: Vector2 = Vector2(SPREAD, 0.0)) -> Node2D:
+	if parent.get_tree() != null and parent.get_tree().get_nodes_in_group("storm_pylons").size() >= MAX_ACTIVE:
+		return null
+	# The pylons only make sense around the captain, so instead of being pushed
+	# off an open seal (snare, ring) they are not cast while the captain stands
+	# at one: the seal and the pylons never ask two questions at once.
+	if VINE_SNARE.off_seal(at, PYLON_RADIUS) != at:
+		return null
+	var pair: Node2D = load("res://scripts/vfx/storm_pylons.gd").new()
+	pair.global_position = at
+	pair.half = half_offset
+	pair.z_index = 4
+	pair.add_to_group("storm_pylons")
+	parent.add_child(pair)
+	last_spawned = pair
+	return pair
+
+static func pylon_offsets(half_offset: Vector2) -> Array[Vector2]:
+	return [-half_offset, half_offset]
+
+# How many of the two pylons have a living hero standing on them.
+static func covered(pair_at: Vector2, hero_positions: Array, half_offset: Vector2) -> int:
+	var count := 0
+	for offset in pylon_offsets(half_offset):
+		for at in hero_positions:
+			if (at as Vector2).distance_to(pair_at + offset) <= PYLON_RADIUS:
+				count += 1
+				break
+	return count
+
+# Split: the captain on one pylon and at least one member on the other.
+static func split_by(pair_at: Vector2, captain_at: Vector2, member_positions: Array, half_offset: Vector2) -> bool:
+	var offsets := pylon_offsets(half_offset)
+	for i in range(2):
+		if captain_at.distance_to(pair_at + offsets[i]) > PYLON_RADIUS:
+			continue
+		for at in member_positions:
+			if (at as Vector2).distance_to(pair_at + offsets[1 - i]) <= PYLON_RADIUS:
+				return true
+	return false
+
+func _ready() -> void:
+	mark_layer = Node2D.new()
+	mark_layer.z_as_relative = false
+	mark_layer.z_index = 120
+	mark_layer.draw.connect(_draw_marks)
+	add_child(mark_layer)
+
+func _hero_positions() -> Array:
+	var out: Array = []
+	if not is_inside_tree():
+		return out
+	for hero in get_tree().get_nodes_in_group("heroes"):
+		if hero is Node2D and hero.get("is_alive") != false:
+			out.append(hero.global_position)
+	return out
+
+func _process(delta: float) -> void:
+	if get_tree().paused:
+		return
+	age += delta
+	if age >= WARN_SECONDS and not struck:
+		struck = true
+		_strike()
+	if age >= WARN_SECONDS + maxf(STRIKE_SECONDS, MARK_SECONDS):
+		queue_free()
+		return
+	queue_redraw()
+	if is_instance_valid(mark_layer):
+		mark_layer.queue_redraw()
+
+func _strike() -> void:
+	shocked.clear()
+	var members: Array = []
+	for hero in get_tree().get_nodes_in_group("heroes"):
+		if hero is Node2D and hero.get("is_alive") != false and hero != GameManager.player:
+			members.append(hero.global_position)
+	grounded = is_instance_valid(GameManager.player) and split_by(global_position, GameManager.player.global_position, members, half)
+	if grounded:
+		GameManager.storm_pylons_grounded += 1
+		return
+	for hero in get_tree().get_nodes_in_group("heroes"):
+		if not hero is Node2D or hero.get("is_alive") == false:
+			continue
+		if hero.global_position.distance_to(global_position) > STRIKE_RADIUS:
+			continue
+		if hero.has_method("take_damage"):
+			hero.take_damage(STRIKE_DAMAGE, global_position)
+		hits += 1
+		shocked.append(hero)
+		GameManager.storm_pylon_hits += 1
+	if hits > 0:
+		last_mark_time = GameManager.elapsed_time
+
+func _draw_marks() -> void:
+	if not struck or age >= WARN_SECONDS + MARK_SECONDS:
+		return
+	var placed: Array[Vector2] = []
+	for hero in shocked:
+		if not is_instance_valid(hero):
+			continue
+		var mark: Vector2 = to_local(hero.global_position) + Vector2(0, -58)
+		for other in placed:
+			if mark.distance_to(other) < 26.0:
+				mark.x += 26.0
+		placed.append(mark)
+		mark_layer.draw_circle(mark, 13.0, Color("0d1426", 0.95))
+		mark_layer.draw_arc(mark, 13.0, 0.0, TAU, 24, Color(HAZARD, 1.0), 2.5, true)
+		mark_layer.draw_polyline(PackedVector2Array([mark + Vector2(6, -20), mark + Vector2(-2, -13), mark + Vector2(3, -13), mark + Vector2(-5, -6)]), Color(HAZARD, 1.0), 2.5, true)
+		mark_layer.draw_string(FONT, mark + Vector2(-8, 6), "電", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("fff6c8"))
+
+func _zigzag(from: Vector2, to: Vector2, segments: int, jitter: float, color: Color, width: float) -> void:
+	var points := PackedVector2Array()
+	var side := (to - from).orthogonal().normalized()
+	for i in range(segments + 1):
+		var t := float(i) / float(segments)
+		var wobble := 0.0 if i == 0 or i == segments else sin(age * 31.0 + float(i) * 2.3) * jitter
+		points.append(from.lerp(to, t) + side * wobble)
+	draw_polyline(points, Color("0d1426", color.a * 0.9), width + 3.0, true)
+	draw_polyline(points, color, width, true)
+
+func plate_slot(text_w: float) -> Rect2:
+	for y in [PYLON_RADIUS + 30.0, -PYLON_RADIUS - 56.0]:
+		var local := Rect2(Vector2(-text_w * 0.5 - 8, y), Vector2(text_w + 16, 26))
+		if not is_inside_tree():
+			return local
+		var screen := (get_viewport().get_canvas_transform() * get_global_transform()) * local
+		var blocked := false
+		for area in Enemy.active_label_areas() + Enemy.elite_plate_rects():
+			if screen.intersects(area.grow(4.0)):
+				blocked = true
+				break
+		if not blocked:
+			return local
+	return Rect2()
+
+func _draw() -> void:
+	var offsets := pylon_offsets(half)
+	var heroes := _hero_positions()
+	if not struck:
+		var left := clampf(1.0 - age / WARN_SECONDS, 0.0, 1.0)
+		# the strike reach, faint, so the squad sees who would be hit
+		draw_arc(Vector2.ZERO, STRIKE_RADIUS, 0.0, TAU, 72, Color(HAZARD, 0.35), 2.0, true)
+		_zigzag(offsets[0], offsets[1], 9, 7.0, Color(BOLT, 0.55), 2.0)
+		for offset in offsets:
+			var manned := false
+			for at in heroes:
+				if (at as Vector2).distance_to(global_position + offset) <= PYLON_RADIUS:
+					manned = true
+					break
+			var tone: Color = SAFE if manned else HAZARD
+			draw_circle(offset, PYLON_RADIUS, Color(tone, 0.16))
+			draw_arc(offset, PYLON_RADIUS, 0.0, TAU, 40, Color("0d1426", 0.9), 7.0, true)
+			draw_arc(offset, PYLON_RADIUS, 0.0, TAU, 40, Color(tone, 0.95), 3.0, true)
+			draw_arc(offset, PYLON_RADIUS + 9.0, -PI * 0.5, -PI * 0.5 + TAU * left, 36, Color(tone, 0.9), 3.5, true)
+			# the pylon itself: a post with a bolt on top
+			draw_rect(Rect2(offset + Vector2(-5, -30), Vector2(10, 30)), Color("2a3550", 0.95), true)
+			_zigzag(offset + Vector2(0, -44), offset + Vector2(0, -30), 3, 4.0, Color(HAZARD, 0.95), 2.5)
+			draw_string(FONT, offset + Vector2(-9, 24), "站" if not manned else "到", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("fff6c8"))
+	else:
+		var fade := clampf(1.0 - (age - WARN_SECONDS) / STRIKE_SECONDS, 0.0, 1.0)
+		if fade > 0.0:
+			if grounded:
+				for offset in offsets:
+					_zigzag(offset + Vector2(0, -220), offset, 10, 9.0, Color(SAFE, fade), 3.0)
+			else:
+				draw_circle(Vector2.ZERO, STRIKE_RADIUS, Color(HAZARD, 0.22 * fade))
+				for i in range(6):
+					var a := TAU * float(i) / 6.0 + age
+					_zigzag(Vector2.ZERO, Vector2.from_angle(a) * STRIKE_RADIUS, 8, 10.0, Color(HAZARD, fade), 3.0)
+	var plate := plate_slot(FONT.get_string_size(LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x) if not struck else Rect2()
+	if plate.size != Vector2.ZERO:
+		draw_rect(plate, Color("0d1426", 0.92), true)
+		draw_rect(plate, Color(HAZARD, 0.9), false, 1.5)
+		draw_string(FONT, plate.position + Vector2(8, 19), LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("fff6c8"))

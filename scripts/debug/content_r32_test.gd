@@ -41,7 +41,7 @@ func _initialize() -> void:
 	_check(not result_src.contains("），") and not relay_src.contains("（需 2）・"), "no stray gap from a full-width bracket before punctuation")
 	# Victory badges.
 	var badges: String = result.victory_badges({"squad_total": 8, "squad_alive": 8, "seal_state": {"wrong": 0, "fast_seals": 3, "slow_seals": 0, "ember_rings": 5, "ember_clean": 3}})
-	_check(badges == "戰績：零錯陣・三道全快封・全員生還・熔火環全躲 3/5", "a clean victory lists its feats")
+	_check(badges == "戰績：零錯陣・三道全快封・全員生還・躲過熔火環 3/5", "a clean victory lists its feats")
 	_check(result.victory_badges({"squad_total": 8, "squad_alive": 6, "seal_state": {"wrong": 2, "fast_seals": 1, "slow_seals": 2}}) == "", "no badge line without a feat")
 	_check(result.vine_line({"ember_rings": 3, "ember_clean": 1, "ember_hits": 4}) == "熔火環爆 3 次・全員躲過 1 次・被燒 4 人次", "the result reports dodged rings")
 	# HUD touch buttons stay opaque, the menu version hides under preparation.
@@ -56,7 +56,7 @@ func _initialize() -> void:
 			if c > 0x7f and not font.has_char(c):
 				missing += char(c)
 	_check(missing == "", "every new string is covered by the CJK subset font (missing: %s)" % missing)
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.61.0-content-r32", "project version is 0.61.0-content-r32")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.62.0-content-r33", "project version is 0.62.0-content-r33")
 	if failures.is_empty():
 		print("R32_REGRESSION status=PASS checks=%d" % checks)
 	else:

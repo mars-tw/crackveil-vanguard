@@ -433,12 +433,14 @@ func advance(delta: float) -> void:
 		wrong_penalties += 1
 		captain.take_damage(8.0,anchor+Vector2(1,0))
 		GameManager.show_toast("錯陣反噬：進度歸零・%s・%s" % [accepted_text(), switch_hint()], "battle", true)
+	var settled_members: Array = []
 	if correct:
 		for member in squad.get_members():
 			if not is_instance_valid(member) or member == captain or not member.is_alive:
 				continue
 			if member.global_position.distance_to(squad.get_formation_world_position(member.formation_index)) <= FOLLOWER_TOLERANCE:
 				settled += 1
+				settled_members.append(member)
 	if not correct or captain.global_position.distance_to(anchor) > 160:
 		hold = 0.0
 		return
@@ -452,6 +454,11 @@ func advance(delta: float) -> void:
 		return
 	var gained: float=maxf(0.0, delta) * GameManager.STARTING_BUILD.seal_rate(GameManager.active_starting_node, pressure.kind, squad.get_formation_id())
 	hold += gained
+	# R33: each member's own seconds on the seal, for the result's key contributions.
+	for member in settled_members:
+		if member.get("hero_id") != null:
+			var row: Dictionary = GameManager.contribution_row(str(member.get("hero_id")))
+			row["seal"] = float(row.get("seal", 0.0)) + maxf(0.0, delta)
 	# The escort/collect node measures only its own alternative, not the R15
 	# secondary answer every build now has.
 	if (GameManager.active_starting_node=="spec_escort" and pressure.kind=="front" and squad.get_formation_id()=="ring") or (GameManager.active_starting_node=="spec_collect" and pressure.kind=="pincer" and squad.get_formation_id()=="scatter"): GameManager.starting_benefits.alternative_hold+=maxf(0.0, delta) # R17: real seconds, matching the 7 s shown on the top bar

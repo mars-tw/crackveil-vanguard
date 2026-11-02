@@ -18,7 +18,7 @@ const STAGE_VARIANTS := {
 		"names": {"shield": "荊盾重衛", "charge": "藤爪獵將", "frost": "花露守望者", "flame": "花火術士", "summoner": "苗群召喚師"}},
 	"ember": {"tint": Color("ff9a6a"), "speed": 1.0, "hp": 1.0, "projectile": 1.25, "pressure": "熔火環爆", "skill": "ember_ring",
 		"names": {"shield": "熔盾重衛", "charge": "焰爪獵將", "frost": "灰燼守望者", "flame": "緋焰術士", "summoner": "焰群召喚師"}},
-	"storm": {"tint": Color("9fb7ff"), "speed": 1.2, "hp": 0.9, "projectile": 1.0, "pressure": "雷霆疾襲",
+	"storm": {"tint": Color("9fb7ff"), "speed": 1.2, "hp": 0.9, "projectile": 1.0, "pressure": "雷柱分流", "skill": "storm_pylon",
 		"names": {"shield": "雷盾重衛", "charge": "霆爪獵將", "frost": "雲霧守望者", "flame": "電弧術士", "summoner": "雷群召喚師"}},
 	"frost": {"tint": Color("cfefff"), "speed": 0.9, "hp": 1.2, "projectile": 1.0, "pressure": "冰甲厚實",
 		"names": {"shield": "冰盾重衛", "charge": "霜爪獵將", "frost": "極霜守望者", "flame": "寒焰術士", "summoner": "冰群召喚師"}},

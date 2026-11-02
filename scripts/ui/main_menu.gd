@@ -723,6 +723,10 @@ func _start_run(seed_text: String, preparation_confirmed := false) -> void:
 		return
 	GameManager.prepare_starting_build()
 	GameManager.run_mode = "campaign"
+	# R33: the review bot may open a later stage directly (web QA builds only).
+	var qa_stage: String = WEB_REACHABILITY_PROBE.start_stage()
+	if qa_stage != "":
+		GameManager.select_stage(qa_stage)
 	var selected_seed := GameManager.seed_from_text(seed_text) if seed_text.strip_edges() != "" else 0
 	GameManager.forced_run_seed = selected_seed
 	get_tree().paused = false
