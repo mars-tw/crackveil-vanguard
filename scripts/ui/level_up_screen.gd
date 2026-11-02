@@ -479,6 +479,16 @@ func _apply_responsive_layout() -> void:
 	var card_height: float = 270.0 if mobile and portrait else 244.0 if portrait else clamp(available_card_height, 224.0 if not mobile else 224.0, 340.0 if not mobile else 280.0)
 	for button in option_buttons:
 		button.custom_minimum_size = Vector2(card_width, card_height)
+	# R25: a landscape offer with fewer than three cards sits centred in the
+	# panel instead of leaving an empty third column on the right.
+	var card_count := option_buttons.size()
+	if not portrait and card_scroll != null and card_count > 0 and card_count < 3:
+		card_grid.columns = card_count
+		var used_width := card_width * card_count + float(card_grid.get_theme_constant("h_separation")) * (card_count - 1)
+		var side := maxf(card_scroll.offset_left, (panel_width - used_width) * 0.5)
+		card_scroll.offset_left = side
+		card_scroll.offset_right = -side
+		card_grid.custom_minimum_size = Vector2(used_width, 0.0)
 	MOBILE_TUNING.apply_control_tree(root, viewport_size)
 	progress_label.add_theme_font_size_override("font_size", 12 if mobile else 14)
 	if mobile and OS.has_feature("web"):

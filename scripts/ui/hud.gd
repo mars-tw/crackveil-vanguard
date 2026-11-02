@@ -118,6 +118,8 @@ var combo_pulse_tween: Tween = null
 var milestone_tween: Tween = null
 var combo_break_tween: Tween = null
 var boss_intro_tween: Tween = null
+# R25: the stage whose title card has been shown this run (第2關・翠晶花園).
+var stage_title_shown := ""
 var screenshot_beauty_active: bool = false
 var captain_hurt_direction := Vector2.RIGHT
 var captain_hurt_timer := 0.0
@@ -227,6 +229,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	_sync_exp_caption()
+	_maybe_show_stage_title()
 	var blocked := get_tree().paused or not GameManager.game_running
 	if blocked and not touch_input_blocked:
 		_reset_touch_input()
@@ -2506,6 +2509,40 @@ func _on_combo_break_requested(combo_count: int) -> void:
 			combo_break_label.position = rest_position
 	)
 
+
+# R25: entering a campaign stage names it in the centre of the screen once,
+# so a second stage reads as a new stage before the minimap is noticed.
+func _maybe_show_stage_title() -> void:
+	if not GameManager.game_running or float(GameManager.elapsed_time) > 3.0 or float(GameManager.elapsed_time) < 0.3:
+		return
+	var title: String = MINIMAP.stage_label_for(str(GameManager.run_mode), str(GameManager.selected_stage_id))
+	if title == "" or stage_title_shown == title:
+		return
+	stage_title_shown = title
+	_play_stage_title(title)
+
+func _play_stage_title(message: String) -> void:
+	if boss_intro_rect == null or boss_intro_label == null:
+		return
+	if boss_intro_tween != null and boss_intro_tween.is_valid():
+		boss_intro_tween.kill()
+	boss_intro_label.text = message
+	boss_intro_label.visible = true
+	var label_color := Color(0.62, 0.94, 1.0, 0.0)
+	boss_intro_label.modulate = label_color
+	boss_intro_label.scale = Vector2.ONE * 0.92
+	boss_intro_tween = create_tween()
+	boss_intro_tween.set_parallel(true)
+	boss_intro_tween.tween_property(boss_intro_rect, "color", Color(0.0, 0.0, 0.0, 0.22), 0.18)
+	boss_intro_tween.tween_property(boss_intro_label, "modulate", Color(label_color.r, label_color.g, label_color.b, 1.0), 0.18)
+	boss_intro_tween.tween_property(boss_intro_label, "scale", Vector2.ONE, 0.2)
+	boss_intro_tween.chain().tween_interval(1.2)
+	boss_intro_tween.chain().tween_property(boss_intro_rect, "color", Color(0.0, 0.0, 0.0, 0.0), 0.32)
+	boss_intro_tween.parallel().tween_property(boss_intro_label, "modulate", Color(label_color.r, label_color.g, label_color.b, 0.0), 0.32)
+	boss_intro_tween.chain().tween_callback(func() -> void:
+		if boss_intro_label != null:
+			boss_intro_label.visible = false
+	)
 
 func _on_boss_intro_requested(boss_name: String) -> void:
 	_play_boss_banner(boss_name, false)

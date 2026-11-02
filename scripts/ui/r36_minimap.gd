@@ -56,11 +56,13 @@ func _draw() -> void:
 		# A label wider than the minimap (第2關・翠晶花園) keeps its full width and
 		# extends left from the minimap's right edge instead of being clipped.
 		var font := get_theme_default_font()
-		var text_w := font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
-		if text_w > size.x - 8:
-			draw_string(font, Vector2(size.x - 2 - text_w, size.x + 16), name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("e3ecf7"))
-		else:
-			draw_string(font, Vector2(4, size.x + 16), name, HORIZONTAL_ALIGNMENT_CENTER, size.x - 8, 11, Color("e3ecf7"))
+		# R25: the name sits on a dark plate at 13 px so it reads over effects.
+		var font_size := 13
+		var text_w := font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+		var text_x := size.x - 2 - text_w if text_w > size.x - 8 else (size.x - text_w) * 0.5
+		draw_rect(Rect2(text_x - 4, size.x + 3, text_w + 8, 18), Color("08121f", 0.86), true)
+		draw_rect(Rect2(text_x - 4, size.x + 3, text_w + 8, 18), Color("8fd8ff", 0.55), false, 1.0)
+		draw_string(font, Vector2(text_x, size.x + 17), name, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("e3ecf7"))
 
 static func stage_label_for(run_mode: String, stage_id: String) -> String:
 	if run_mode == "endless":
