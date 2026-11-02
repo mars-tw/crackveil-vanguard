@@ -23,7 +23,8 @@ env:
 jobs:
   export-web:
     name: Export and deploy Web build
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to 26.04, where Playwright cannot install Chromium.
+    runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
