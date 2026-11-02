@@ -898,7 +898,7 @@ func _apply_special_elite_impact(target: Node2D) -> void:
 	# R33: the storm drops two pylons beside the captain (not the elite's target,
 	# which may be a member), across its path.
 	if stage_skill == "storm_pylon" and is_instance_valid(GameManager.player) and is_inside_tree():
-		STORM_PYLONS.spawn(get_parent(), GameManager.player.global_position, STORM_PYLONS.lateral_half(GameManager.player))
+		STORM_PYLONS.spawn(get_parent(), GameManager.player.global_position, STORM_PYLONS.onscreen_half(GameManager.player))
 		if is_instance_valid(STORM_PYLONS.last_spawned):
 			GameManager.storm_pylons_cast += 1
 			STORM_PYLONS.last_spawned = null

@@ -500,7 +500,9 @@ static func damage_share_line(contribution_rows: Array) -> String:
 static func key_contribution_line(contribution_rows: Array) -> String:
 	var used := {}
 	var parts := PackedStringArray()
-	for spec in [["seal", "封隙 %d 秒"], ["taken", "承傷 %d"], ["support", "回復減傷 %d"]]:
+	# R34: support first (healers are rare), then seal time, then hits taken; each
+	# needs a real amount, so a token 8 HP never stands as a key contribution.
+	for spec in [["support", "回復減傷 %d", 30.0], ["seal", "封隙 %d 秒", 3.0], ["taken", "承傷 %d", 30.0]]:
 		var best: Dictionary = {}
 		var best_value := 0.0
 		for row in contribution_rows:
@@ -510,7 +512,7 @@ static func key_contribution_line(contribution_rows: Array) -> String:
 			if value > best_value:
 				best_value = value
 				best = row
-		if best.is_empty() or best_value < 1.0:
+		if best.is_empty() or best_value < float(spec[2]):
 			continue
 		used[str(best.get("name", ""))] = true
 		parts.append("%s %s" % [str(best.get("name", "")), str(spec[1]) % roundi(best_value)])
@@ -529,9 +531,10 @@ static func victory_badges(summary: Dictionary) -> String:
 		out.append("三道全快封")
 	if int(summary.get("squad_total", 0)) > 0 and int(summary.get("squad_alive", 0)) >= int(summary.get("squad_total", 0)):
 		out.append("全員生還")
-	if int(seal.get("ember_rings", 0)) > 0:
+	# R34: a hazard is a feat only when the squad beat it at least once.
+	if int(seal.get("ember_clean", 0)) > 0:
 		out.append("躲過熔火環 %d/%d" % [int(seal.get("ember_clean", 0)), int(seal.get("ember_rings", 0))])
-	if int(seal.get("storm_pylons", 0)) > 0:
+	if int(seal.get("storm_grounded", 0)) > 0:
 		out.append("雷柱分流 %d/%d" % [int(seal.get("storm_grounded", 0)), int(seal.get("storm_pylons", 0))])
 	if out.is_empty():
 		return ""

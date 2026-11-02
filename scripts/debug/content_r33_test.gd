@@ -44,7 +44,7 @@ func _initialize() -> void:
 		return null") and src.contains("pair.global_position = at"), "pylons are cast around the captain and never near an open seal")
 	_check(src.contains("mark_layer.z_index = 120") and src.contains("\"電\""), "shocked heroes wear a 電 mark on the top layer")
 	var enemy_src := FileAccess.get_file_as_string("res://scripts/enemies/enemy.gd")
-	_check(enemy_src.contains("if stage_skill == \"storm_pylon\" and is_instance_valid(GameManager.player) and is_inside_tree():\n\t\tSTORM_PYLONS.spawn(get_parent(), GameManager.player.global_position, STORM_PYLONS.lateral_half(GameManager.player))"), "a storm elite drops pylons beside the captain on every cast")
+	_check(enemy_src.contains("if stage_skill == \"storm_pylon\" and is_instance_valid(GameManager.player) and is_inside_tree():\n\t\tSTORM_PYLONS.spawn(get_parent(), GameManager.player.global_position, STORM_PYLONS.onscreen_half(GameManager.player))"), "a storm elite drops pylons beside the captain on every cast")
 	_check(FileAccess.get_file_as_string("res://scripts/enemies/enemy_spawner.gd").contains("出招時兩側落下雷柱，隊長踩一柱、散兵接另一柱"), "the elite toast teaches the storm rule")
 	# Result: the storm line, the badge wording, key contributions.
 	var result: GDScript = load("res://scripts/ui/r4_result_screen.gd")
@@ -52,7 +52,7 @@ func _initialize() -> void:
 	var badges: String = result.victory_badges({"squad_total": 8, "squad_alive": 7, "seal_state": {"wrong": 1, "ember_rings": 14, "ember_clean": 6, "storm_pylons": 3, "storm_grounded": 2}})
 	_check(badges == "戰績：躲過熔火環 6/14・雷柱分流 2/3", "the ember badge no longer reads 全躲 for a partial count")
 	var rows := [{"name": "隊長", "role": "captain", "seal": 0.0, "taken": 900.0}, {"name": "甲", "role": "member", "seal": 23.4, "taken": 50.0}, {"name": "乙", "role": "member", "seal": 2.0, "taken": 340.0}, {"name": "丙", "role": "member", "healing": 100.0, "prevented": 20.0}]
-	_check(result.key_contribution_line(rows) == "關鍵貢獻：甲 封隙 23 秒・乙 承傷 340・丙 回復減傷 120", "three members are named for seal time, hits taken and support")
+	_check(result.key_contribution_line(rows) == "關鍵貢獻：丙 回復減傷 120・甲 封隙 23 秒・乙 承傷 340", "three members are named for support, seal time and hits taken")
 	_check(result.key_contribution_line([{"name": "隊長", "role": "captain", "taken": 50.0}]) == "", "no line without member contributions")
 	var relay_src := FileAccess.get_file_as_string("res://scripts/services/formation_relay.gd")
 	_check(relay_src.contains("row[\"seal\"] = float(row.get(\"seal\", 0.0)) + maxf(0.0, delta)"), "each settled member banks its own seal seconds")
@@ -63,13 +63,13 @@ func _initialize() -> void:
 	var hook := _qa(\"start_stage\")"), "phones never read a start stage")
 	var font: FontFile = load("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 	var missing := ""
-	for s in [str(pylons.LABEL), "站到電", "出招時兩側落下雷柱，隊長踩一柱、散兵接另一柱", "雷柱分流 4 次・成功分流 1 次・被電 5 人次", badges, "關鍵貢獻：甲 封隙 23 秒・乙 承傷 340・丙 回復減傷 120"]:
+	for s in [str(pylons.LABEL), "站到電", "出招時兩側落下雷柱，隊長踩一柱、散兵接另一柱", "雷柱分流 4 次・成功分流 1 次・被電 5 人次", badges, "關鍵貢獻：丙 回復減傷 120・甲 封隙 23 秒・乙 承傷 340"]:
 		for i in range(str(s).length()):
 			var c: int = str(s).unicode_at(i)
 			if c > 0x7f and not font.has_char(c):
 				missing += char(c)
 	_check(missing == "", "every new string is covered by the CJK subset font (missing: %s)" % missing)
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.62.0-content-r33", "project version is 0.62.0-content-r33")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.63.0-content-r34", "project version is 0.63.0-content-r34")
 	if failures.is_empty():
 		print("R33_REGRESSION status=PASS checks=%d" % checks)
 	else:

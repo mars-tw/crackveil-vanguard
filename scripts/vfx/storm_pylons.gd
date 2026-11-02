@@ -14,7 +14,10 @@ const SPREAD := 110.0
 const STRIKE_SECONDS := 0.5
 const PYLON_RADIUS := 95.0
 const STRIKE_RADIUS := 300.0
-const STRIKE_DAMAGE := 16.0
+# R34: the bolt hurts more and stuns the step: 20 damage and a one-second slow.
+const STRIKE_DAMAGE := 20.0
+const SHOCK_SLOW_SECONDS := 1.0
+const SHOCK_SLOW := 0.5
 const MAX_ACTIVE := 1
 const MARK_SECONDS := 1.2
 const HAZARD := Color("ffe14d")
@@ -25,12 +28,16 @@ const FONT := preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 const VINE_SNARE := preload("res://scripts/vfx/vine_snare.gd")
 static var last_spawned: Node2D = null
 static var last_mark_time := -99.0
+# R34: game time of the last split bolt (QA capture hook).
+static var last_split_time := -99.0
 
 var age := 0.0
 # Offset from the centre to one pylon; the other is at -half.
 var half := Vector2(SPREAD, 0.0)
 var struck := false
 var grounded := false
+# R34: why a bolt was not split, shown over the pair after the strike.
+var fail_reason := ""
 var hits := 0
 var shocked: Array = []
 var mark_layer: Node2D = null
@@ -42,6 +49,31 @@ static func lateral_half(captain: Node2D) -> Vector2:
 	if is_instance_valid(captain) and captain.has_method("get_locomotion_facing_direction"):
 		forward = captain.get_locomotion_facing_direction()
 	return forward.rotated(PI * 0.5).normalized() * SPREAD
+
+# R34: any axis works (the captain walks onto either pylon and the squad turns
+# behind it), so the pair is laid along the direction that keeps both pylons
+# farthest from the screen edges and the top bar; lateral wins ties.
+const SAFE_TOP := 150.0
+const SAFE_BOTTOM := 120.0
+const SAFE_SIDE := 60.0
+static func onscreen_half(captain: Node2D) -> Vector2:
+	var lateral := lateral_half(captain)
+	if not is_instance_valid(captain) or not captain.is_inside_tree():
+		return lateral
+	var xf := captain.get_viewport().get_canvas_transform()
+	var view := captain.get_viewport().get_visible_rect().size
+	var best := lateral
+	var best_margin := -INF
+	for step in range(8):
+		var candidate := lateral.rotated(PI * 0.25 * float(step))
+		var margin := INF
+		for side in [-1.0, 1.0]:
+			var screen: Vector2 = xf * (captain.global_position + candidate * side)
+			margin = minf(margin, minf(minf(screen.x - SAFE_SIDE, view.x - SAFE_SIDE - screen.x), minf(screen.y - SAFE_TOP, view.y - SAFE_BOTTOM - screen.y)))
+		if margin > best_margin + 1.0:
+			best_margin = margin
+			best = candidate
+	return best
 
 static func spawn(parent: Node, at: Vector2, half_offset: Vector2 = Vector2(SPREAD, 0.0)) -> Node2D:
 	if parent.get_tree() != null and parent.get_tree().get_nodes_in_group("storm_pylons").size() >= MAX_ACTIVE:
@@ -72,6 +104,13 @@ static func covered(pair_at: Vector2, hero_positions: Array, half_offset: Vector
 				count += 1
 				break
 	return count
+
+# R34: the missing half of a failed split, in a few words.
+static func fail_reason_for(pair_at: Vector2, captain_at: Vector2, half_offset: Vector2) -> String:
+	for offset in pylon_offsets(half_offset):
+		if captain_at.distance_to(pair_at + offset) <= PYLON_RADIUS:
+			return "另一柱沒有隊員"
+	return "隊長沒有踩柱"
 
 # Split: the captain on one pylon and at least one member on the other.
 static func split_by(pair_at: Vector2, captain_at: Vector2, member_positions: Array, half_offset: Vector2) -> bool:
@@ -123,7 +162,10 @@ func _strike() -> void:
 	grounded = is_instance_valid(GameManager.player) and split_by(global_position, GameManager.player.global_position, members, half)
 	if grounded:
 		GameManager.storm_pylons_grounded += 1
+		last_split_time = GameManager.elapsed_time
 		return
+	if is_instance_valid(GameManager.player):
+		fail_reason = fail_reason_for(global_position, GameManager.player.global_position, half)
 	for hero in get_tree().get_nodes_in_group("heroes"):
 		if not hero is Node2D or hero.get("is_alive") == false:
 			continue
@@ -131,14 +173,25 @@ func _strike() -> void:
 			continue
 		if hero.has_method("take_damage"):
 			hero.take_damage(STRIKE_DAMAGE, global_position)
+		if hero.has_method("apply_movement_slow"):
+			hero.apply_movement_slow(SHOCK_SLOW_SECONDS, SHOCK_SLOW)
 		hits += 1
 		shocked.append(hero)
 		GameManager.storm_pylon_hits += 1
 	if hits > 0:
 		last_mark_time = GameManager.elapsed_time
 
+# R34: the name plate and the split result draw on the top layer, so the
+# captain's floor halo and squad markers never cover them.
 func _draw_marks() -> void:
-	if not struck or age >= WARN_SECONDS + MARK_SECONDS:
+	if not struck:
+		var plate := plate_slot(FONT.get_string_size(LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x)
+		if plate.size != Vector2.ZERO:
+			mark_layer.draw_rect(plate, Color("0d1426", 0.92), true)
+			mark_layer.draw_rect(plate, Color(HAZARD, 0.9), false, 1.5)
+			mark_layer.draw_string(FONT, plate.position + Vector2(8, 19), LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("fff6c8"))
+		return
+	if age >= WARN_SECONDS + MARK_SECONDS:
 		return
 	var placed: Array[Vector2] = []
 	for hero in shocked:
@@ -153,6 +206,17 @@ func _draw_marks() -> void:
 		mark_layer.draw_arc(mark, 13.0, 0.0, TAU, 24, Color(HAZARD, 1.0), 2.5, true)
 		mark_layer.draw_polyline(PackedVector2Array([mark + Vector2(6, -20), mark + Vector2(-2, -13), mark + Vector2(3, -13), mark + Vector2(-5, -6)]), Color(HAZARD, 1.0), 2.5, true)
 		mark_layer.draw_string(FONT, mark + Vector2(-8, 6), "電", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("fff6c8"))
+	# The verdict sits above every mark and is drawn last, so no mark covers it.
+	var top := -PYLON_RADIUS - 70.0
+	for at in placed:
+		top = minf(top, at.y - 52.0)
+	var verdict := "分流成功・無人受傷" if grounded else "分流失敗・" + fail_reason
+	var tone: Color = SAFE if grounded else HAZARD
+	var w := FONT.get_string_size(verdict, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+	var box := Rect2(Vector2(-w * 0.5 - 10, top), Vector2(w + 20, 30))
+	mark_layer.draw_rect(box, Color("0d1426", 0.92), true)
+	mark_layer.draw_rect(box, Color(tone, 0.95), false, 2.0)
+	mark_layer.draw_string(FONT, box.position + Vector2(10, 22), verdict, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("fff6c8"))
 
 func _zigzag(from: Vector2, to: Vector2, segments: int, jitter: float, color: Color, width: float) -> void:
 	var points := PackedVector2Array()
@@ -213,8 +277,3 @@ func _draw() -> void:
 				for i in range(6):
 					var a := TAU * float(i) / 6.0 + age
 					_zigzag(Vector2.ZERO, Vector2.from_angle(a) * STRIKE_RADIUS, 8, 10.0, Color(HAZARD, fade), 3.0)
-	var plate := plate_slot(FONT.get_string_size(LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x) if not struck else Rect2()
-	if plate.size != Vector2.ZERO:
-		draw_rect(plate, Color("0d1426", 0.92), true)
-		draw_rect(plate, Color(HAZARD, 0.9), false, 1.5)
-		draw_string(FONT, plate.position + Vector2(8, 19), LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("fff6c8"))
