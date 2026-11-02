@@ -14,7 +14,7 @@ const PROFILES: Array[Dictionary] = [
 # stage pressure (faster, tougher or harder-hitting) change, so a later stage
 # does not read as the first stage repainted.
 const STAGE_VARIANTS := {
-	"garden": {"tint": Color("8fe39a"), "speed": 1.15, "hp": 0.92, "projectile": 1.0, "pressure": "藤蔓疾行",
+	"garden": {"tint": Color("8fe39a"), "speed": 1.15, "hp": 0.92, "projectile": 1.0, "pressure": "藤蔓纏地", "skill": "vine_snare",
 		"names": {"shield": "荊盾重衛", "charge": "藤爪獵將", "frost": "花露守望者", "flame": "花火術士", "summoner": "苗群召喚師"}},
 	"ember": {"tint": Color("ff9a6a"), "speed": 1.0, "hp": 1.0, "projectile": 1.25, "pressure": "熔火重擊",
 		"names": {"shield": "熔盾重衛", "charge": "焰爪獵將", "frost": "灰燼守望者", "flame": "緋焰術士", "summoner": "焰群召喚師"}},
@@ -42,6 +42,7 @@ static func apply_stage_variant(config: Dictionary, stage_id: String) -> Diction
 	config["max_hp"] = float(config.get("max_hp", 0.0)) * float(variant.hp)
 	config["projectile_damage"] = float(config.get("projectile_damage", 0.0)) * float(variant.projectile)
 	config["stage_pressure"] = str(variant.pressure)
+	config["stage_skill"] = str(variant.get("skill", ""))
 	return config
 
 static func get_profiles() -> Array[Dictionary]:

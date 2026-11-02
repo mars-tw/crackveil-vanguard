@@ -163,7 +163,16 @@ func _update_hud_visibility() -> void:
 	if text_rect.intersects(Rect2(0,css.y-control_height,minf(250,css.x*0.55),control_height)) or text_rect.intersects(Rect2(css.x-124,css.y-220,124,220)):
 		obscures = true
 	if blocked_by_hud(text_rect):
-		obscures = true
+		# R29: a large event word (擊破・name) climbs above the HUD row it would
+		# collide with instead of being drawn under it.
+		if font_size >= PLATE_YIELD_FONT_SIZE:
+			var lift := lift_above_hud(text_rect)
+			if lift > 0.0:
+				screen.y -= lift / ratio
+				global_position = canvas.affine_inverse() * screen
+				text_rect.position.y -= lift
+		if blocked_by_hud(text_rect):
+			obscures = true
 	# R12: rule text (verdict lines, seal banner, answer badges) is reserved in
 	# viewport pixels; a number or "擊破" over it would make both unreadable.
 	# Grown by the 4 px text outline so a number is never left half showing.
@@ -191,6 +200,13 @@ static func covers_rule_text(screen_rect: Rect2, areas: Array[Rect2]) -> bool:
 			return true
 	return false
 
+
+static func lift_above_hud(text_rect: Rect2) -> float:
+	var lift := 0.0
+	for blocker in hud_blockers:
+		if text_rect.intersects(blocker.grow(4.0)):
+			lift = maxf(lift, text_rect.end.y - blocker.position.y + 16.0)
+	return lift
 
 static func blocked_by_hud(text_rect: Rect2) -> bool:
 	for blocker in hud_blockers:

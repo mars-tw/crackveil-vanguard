@@ -104,6 +104,9 @@ var special_elite_id := ""
 var special_elite_name := ""
 # R28: how strongly a stage variant elite takes its stage colour (0 = none).
 var stage_tint_strength := 0.0
+# R29: a stage signature skill this elite casts on top of its own (e.g. 藤蔓纏地).
+var stage_skill := ""
+const VINE_SNARE := preload("res://scripts/vfx/vine_snare.gd")
 var special_skill := ""
 var special_cooldown := 3.0
 var special_timer := 2.0
@@ -509,6 +512,7 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	radius = float(config.get("radius", radius))
 	body_color = config.get("color", body_color)
 	stage_tint_strength = 0.55 if str(config.get("stage_pressure", "")) != "" else 0.0
+	stage_skill = str(config.get("stage_skill", ""))
 	sprite_path = str(config.get("sprite_path", _default_sprite_path_for_type(type_id)))
 	sprite_scale = float(config.get("sprite_scale", 1.0))
 	attack_cooldown = float(config.get("attack_cooldown", attack_cooldown))
@@ -877,6 +881,9 @@ func get_biome_debug_state() -> Dictionary:
 
 func _apply_special_elite_impact(target: Node2D) -> void:
 	special_casts += 1
+	# R29: the garden roots the ground under the captain on every elite cast.
+	if stage_skill == "vine_snare" and is_instance_valid(target) and is_inside_tree():
+		VINE_SNARE.spawn(get_parent(), target.global_position)
 	if special_skill == "summoner":
 		for index in range(5):
 			if EntityFactory.get_enemy_live_count() >= death_spawn_cap:

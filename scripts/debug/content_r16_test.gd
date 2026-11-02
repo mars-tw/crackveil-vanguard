@@ -55,4 +55,4 @@ func _test_no_new_cover() -> void:
 	_check(pressure_src.contains("if _answer_under_hud(center):") and pressure_src.contains("Enemy.hud_panel_rects("), "ground badges under the HUD panels are not drawn half-cut")
 
 func _test_version() -> void:
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.57.0-content-r28", "project version is 0.57.0-content-r28")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.58.0-content-r29", "project version is 0.58.0-content-r29")

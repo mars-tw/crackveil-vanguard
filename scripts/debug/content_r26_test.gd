@@ -15,7 +15,7 @@ func _initialize() -> void:
 	var icon := Image.load_from_file(ProjectSettings.globalize_path("res://assets/art/app_icon/app_store_1024.png"))
 	_check(icon != null and icon.get_width() == 1024 and not icon.detect_alpha(), "an opaque 1024 App Store icon ships with the project")
 	_check(FileAccess.get_file_as_string("res://export_presets.cfg").contains("icons/app_store_1024x1024=\"res://assets/art/app_icon/app_store_1024.png\""), "the iOS preset uses the 1024 icon")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.57.0-content-r28", "project version is 0.57.0-content-r28")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.58.0-content-r29", "project version is 0.58.0-content-r29")
 	if failures.is_empty():
 		print("R26_REGRESSION status=PASS checks=%d" % checks)
 	else:

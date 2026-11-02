@@ -1,0 +1,3092 @@
+[
+  {
+    "scene": "R14RegressionTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R14RegressionTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "9be4e5b5f19ef04d968cf9ea43963a518be1b8286be2edf973414a5df2f8a5a0",
+    "source_receipt": "tests/gates/R14RegressionTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 7.25,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R14RegressionTest\\ed6f457c39504309a04f191f127c437c\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R14RegressionTest\\ed6f457c39504309a04f191f127c437c\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618380902019000
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618388492875700
+    }
+  },
+  {
+    "scene": "R29MenuModalTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R29MenuModalTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "df64b1f75ca86ac859de9c36f0e77c2a925e201445a5a7b0f8771662fe6a6109",
+    "source_receipt": "tests/gates/R29MenuModalTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 5.344,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R29MenuModalTest\\f0df3b5afa074db6ba9dc2b99068bd5c\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R29MenuModalTest\\f0df3b5afa074db6ba9dc2b99068bd5c\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618391725529500
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618397682761500
+    }
+  },
+  {
+    "scene": "TrueAnimationRegressionTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/TrueAnimationRegressionTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "29810aed25d43e1e5034297afd54a6b50bc797d08b68dfadf7177349be103e43",
+    "source_receipt": "tests/gates/TrueAnimationRegressionTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 4.828,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\TrueAnimationRegressionTest\\9fa10dbb7aa84735958bed9fabbe2537\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\TrueAnimationRegressionTest\\9fa10dbb7aa84735958bed9fabbe2537\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618400280150200
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618405572847700
+    }
+  },
+  {
+    "scene": "PoolContractTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/PoolContractTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "bde825e4a40e32c8e2feb93378cb084afe6b0419d79f4daf63fdc591dacf5f90",
+    "source_receipt": "tests/gates/PoolContractTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 5.907,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\PoolContractTest\\35b1705eb9c44cbab7d1a3d3a5cff82b\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\PoolContractTest\\35b1705eb9c44cbab7d1a3d3a5cff82b\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618408310774900
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618414554015300
+    }
+  },
+  {
+    "scene": "GameplayCapTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/GameplayCapTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "c06df6230ed7ddabfb6b9ae6ea61e91b30fc3e914f241eeb5cacb185c363fd54",
+    "source_receipt": "tests/gates/GameplayCapTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 6.531,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\GameplayCapTest\\a3ac8ecb7e5244458054d695b43650a8\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\GameplayCapTest\\a3ac8ecb7e5244458054d695b43650a8\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618417229182600
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618424073636800
+    }
+  },
+  {
+    "scene": "SquadSmokeTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/SquadSmokeTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "ffc3cb00d3aba181e70efd62d5cea241dcdc611ef971aeed25bec54d4eb91b22",
+    "source_receipt": "tests/gates/SquadSmokeTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 13.984,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\SquadSmokeTest\\c4e2e5c3e6a647cd80e45112ef168ca1\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\SquadSmokeTest\\c4e2e5c3e6a647cd80e45112ef168ca1\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618426868558100
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618441529720300
+    }
+  },
+  {
+    "scene": "WeaponSmokeTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/WeaponSmokeTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "6353bcf58ff9bc02445c4f702885780ff9364dd51f24dd0d5a228d54e4f202fe",
+    "source_receipt": "tests/gates/WeaponSmokeTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 12.61,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\WeaponSmokeTest\\e824a8ecdafd455fa7ebba4ad4bc33e1\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\WeaponSmokeTest\\e824a8ecdafd455fa7ebba4ad4bc33e1\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618444326526400
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618457215789300
+    }
+  },
+  {
+    "scene": "EnemyArtRegressionTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/EnemyArtRegressionTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "54917a69695a4eac54543ef0c413207557bb1ce636df2a900a42eb3cb97a432e",
+    "source_receipt": "tests/gates/EnemyArtRegressionTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 4.687,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\EnemyArtRegressionTest\\e12a0f909a2142ffba4f5eb46698d07b\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\EnemyArtRegressionTest\\e12a0f909a2142ffba4f5eb46698d07b\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618459904654300
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618464852794200
+    }
+  },
+  {
+    "scene": "CombatR32RegressionTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/CombatR32RegressionTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "4e85c37172d37f0630fb6ae18c9f465b22d1031e6e4e7806fc6b50531f005b87",
+    "source_receipt": "tests/gates/CombatR32RegressionTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 4.828,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\CombatR32RegressionTest\\7f731660a05243a3b943d7b743425848\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\CombatR32RegressionTest\\7f731660a05243a3b943d7b743425848\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618467712448700
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618472844788300
+    }
+  },
+  {
+    "scene": "R32LootTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R32LootTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "8d2527f50de6a6aaed616df223b7673e1aa88b09ef719275d43942068aef7520",
+    "source_receipt": "tests/gates/R32LootTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 5.078,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R32LootTest\\b9158144817f49bbb168f9677ec66e69\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R32LootTest\\b9158144817f49bbb168f9677ec66e69\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618475516219300
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618480896281600
+    }
+  },
+  {
+    "scene": "CombatR33RegressionTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/CombatR33RegressionTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "19da609daddf57b8ab6a44caed944b935936bedad6e83ecaacfbd03b929e47e3",
+    "source_receipt": "tests/gates/CombatR33RegressionTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 4.953,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\CombatR33RegressionTest\\ec9cb0c6aefc42588754893bb1bd0461\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\CombatR33RegressionTest\\ec9cb0c6aefc42588754893bb1bd0461\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618483519997800
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618488791216400
+    }
+  },
+  {
+    "scene": "R33ExperienceRegressionTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R33ExperienceRegressionTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "7bcab2456be4cb67cac2dd9d9ffb6e3c87b5a6ae3dbbc0f523f81ca94e8f7611",
+    "source_receipt": "tests/gates/R33ExperienceRegressionTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 4.547,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R33ExperienceRegressionTest\\cafd616538494d958af8196a0358e63b\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R33ExperienceRegressionTest\\cafd616538494d958af8196a0358e63b\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618491532239800
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618496385686700
+    }
+  },
+  {
+    "scene": "R36WorldEliteTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R36WorldEliteTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "2fef9c5eeb6c8fc2092fd8350b4d8c18d2a45e19e25d36246aef5a1c2aaad8e2",
+    "source_receipt": "tests/gates/R36WorldEliteTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 6.265,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R36WorldEliteTest\\f5c2c39a5d9e4625aeab1410e7715440\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R36WorldEliteTest\\f5c2c39a5d9e4625aeab1410e7715440\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618499150831400
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618505692160200
+    }
+  },
+  {
+    "scene": "R34WorldMapUITest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R34WorldMapUITest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "7ea0f73fc172c8dea5029869de76e40e63adebbcd945abfbf2314b83227cdf23",
+    "source_receipt": "tests/gates/R34WorldMapUITest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 4.813,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R34WorldMapUITest\\712d8ae05b0e44cb9cacaf6188d7fba9\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R34WorldMapUITest\\712d8ae05b0e44cb9cacaf6188d7fba9\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618508261385800
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618513404305600
+    }
+  },
+  {
+    "scene": "AttackVfxR34PoolTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/AttackVfxR34PoolTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "1fcbb49d4ff7c7925603eae0aa97184134a163630d95a363436703e82718f8ad",
+    "source_receipt": "tests/gates/AttackVfxR34PoolTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 5.203,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\AttackVfxR34PoolTest\\e32cad1f697a4755aaef38487fa867e0\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\AttackVfxR34PoolTest\\e32cad1f697a4755aaef38487fa867e0\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618516104948500
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618521636608000
+    }
+  },
+  {
+    "scene": "IndependentStageR34Probe",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/IndependentStageR34Probe.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "0ced93709de8fc6e8c823163e90c8baf20bf4a6c780ef9302e7be812c561599e",
+    "source_receipt": "tests/gates/IndependentStageR34Probe-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 4.75,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\IndependentStageR34Probe\\7d5c472d434d4b67b269451cfd93b1b4\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\IndependentStageR34Probe\\7d5c472d434d4b67b269451cfd93b1b4\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618524283432900
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618529350605900
+    }
+  },
+  {
+    "scene": "R34CampaignTransitionTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R34CampaignTransitionTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "3b4cabc8a2c1ce05f456220f13570a8296513db5e835921bc464f28162da6a2a",
+    "source_receipt": "tests/gates/R34CampaignTransitionTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 10.093,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R34CampaignTransitionTest\\4199a83f6af54610abb57b1a4c99a685\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R34CampaignTransitionTest\\4199a83f6af54610abb57b1a4c99a685\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618531980536600
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618542395343600
+    }
+  },
+  {
+    "scene": "CaptainComboChannelR35Test",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/CaptainComboChannelR35Test.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "5b5d06676dcc2402ddd1c4e2e5eb21459e532423e503b6890ab98ac5605b063e",
+    "source_receipt": "tests/gates/CaptainComboChannelR35Test-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 5.0,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\CaptainComboChannelR35Test\\c8b8feb145e74f0586c12ec3e9a4fbcd\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\CaptainComboChannelR35Test\\c8b8feb145e74f0586c12ec3e9a4fbcd\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618545007771300
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618550300515700
+    }
+  },
+  {
+    "scene": "R35EndlessCriticalTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R35EndlessCriticalTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "b3cdd9f716f2135a7dff943b3a37d28945adee41ccf757f0b65f42e1aae4ac29",
+    "source_receipt": "tests/gates/R35EndlessCriticalTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 11.625,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R35EndlessCriticalTest\\34e287b849da41479bcf78256c5f9516\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R35EndlessCriticalTest\\34e287b849da41479bcf78256c5f9516\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618552825242600
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618564691849300
+    }
+  },
+  {
+    "scene": "FirepowerR36Test",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/FirepowerR36Test.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "88434100450d5e1ae81c7d08e791f823d4cfa8144602993877ac2bc9ff8bdbe7",
+    "source_receipt": "tests/gates/FirepowerR36Test-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 6.954,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\FirepowerR36Test\\2316bcd45e2e4a76bb0ea13413357377\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\FirepowerR36Test\\2316bcd45e2e4a76bb0ea13413357377\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618567079985800
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618574298140300
+    }
+  },
+  {
+    "scene": "AutoChannelR36Test",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/AutoChannelR36Test.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "90646972723a603b3a1191c0be6c21d6c1c70068a486f3763c638aa5e7df4f14",
+    "source_receipt": "tests/gates/AutoChannelR36Test-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 5.453,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\AutoChannelR36Test\\f35d65f6bc9140f5b8b54d7ad4ae4108\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\AutoChannelR36Test\\f35d65f6bc9140f5b8b54d7ad4ae4108\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618576848339600
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618582569257500
+    }
+  },
+  {
+    "scene": "ProjectilePerformanceR36Test",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/ProjectilePerformanceR36Test.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "95d2012b388579e6eb98d87f4c9417cbd8e6175337462bcd9ae9385795bfa365",
+    "source_receipt": "tests/gates/ProjectilePerformanceR36Test-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 4.531,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ProjectilePerformanceR36Test\\5b4f08506a9b49a3a2b2355b058c9cae\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ProjectilePerformanceR36Test\\5b4f08506a9b49a3a2b2355b058c9cae\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618584971897700
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618589785433400
+    }
+  },
+  {
+    "scene": "R36SummonIntegrationTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R36SummonIntegrationTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "fd303e3e7135ec677a45696f506c3352d7a7d319e0f2797e0c817d2ce248999b",
+    "source_receipt": "tests/gates/R36SummonIntegrationTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 6.063,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R36SummonIntegrationTest\\2c6dbdfdb68f4eb189f2bc28d9dc2419\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R36SummonIntegrationTest\\2c6dbdfdb68f4eb189f2bc28d9dc2419\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618592290899800
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618598638859600
+    }
+  },
+  {
+    "scene": "R36SummonRegressionTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R36SummonRegressionTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "d1c79eae42c48899d106ae7a3a14deaef7f9cb5ab6d690f18240d236fe79cba0",
+    "source_receipt": "tests/gates/R36SummonRegressionTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 7.391,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R36SummonRegressionTest\\2191256903094b8db446a2f943f3aafa\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R36SummonRegressionTest\\2191256903094b8db446a2f943f3aafa\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618601109740700
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618608731271400
+    }
+  },
+  {
+    "scene": "ReviewR36RootTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/ReviewR36RootTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "0d397223ad4531175a3b3c1a693f8d6e27760bae5ec9ba4bfe30a117640be49f",
+    "source_receipt": "tests/gates/ReviewR36RootTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 6.063,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ReviewR36RootTest\\3423ba30239c4914bdad8768ffa25daf\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ReviewR36RootTest\\3423ba30239c4914bdad8768ffa25daf\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618611280101800
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618617590693500
+    }
+  },
+  {
+    "scene": "RewardSpecialR36Test",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/RewardSpecialR36Test.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "f5104d071b7ec6e75e39e3a9cfb88cd8ee25be214558dcb9454b21e3d7bdfa8b",
+    "source_receipt": "tests/gates/RewardSpecialR36Test-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 5.672,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\RewardSpecialR36Test\\834dcc9741b84280b3638db27715a52b\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\RewardSpecialR36Test\\834dcc9741b84280b3638db27715a52b\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618619970656700
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618625902729600
+    }
+  },
+  {
+    "scene": "R36TouchClearanceTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R36TouchClearanceTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "d16d3f79e7edf6471a9e105747ad0629ea3ad950a6dbe6ce2055034fab32d3c0",
+    "source_receipt": "tests/gates/R36TouchClearanceTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 6.703,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R36TouchClearanceTest\\95cba95359e2405f8094a38a13cef8ba\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R36TouchClearanceTest\\95cba95359e2405f8094a38a13cef8ba\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618628353887000
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618635326891900
+    }
+  },
+  {
+    "scene": "CombatPolishR37Test",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/CombatPolishR37Test.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "603fb6042299fcf05732a1df24b311838ee9f30865c6b52e2931aac8c84ace40",
+    "source_receipt": "tests/gates/CombatPolishR37Test-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 4.235,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\CombatPolishR37Test\\d61f562200e34cd4a32024a9c871deaa\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\CombatPolishR37Test\\d61f562200e34cd4a32024a9c871deaa\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618637778671000
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618642257223800
+    }
+  },
+  {
+    "scene": "R37WorldPolishTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R37WorldPolishTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "3464cc07fb29c00cc7b1b9493731398b35ded3b4347b0173d570e7884bfd94e9",
+    "source_receipt": "tests/gates/R37WorldPolishTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 3.813,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R37WorldPolishTest\\69257a4b4f384e9bb47590db374de541\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R37WorldPolishTest\\69257a4b4f384e9bb47590db374de541\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618644672075300
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618648756967800
+    }
+  },
+  {
+    "scene": "R38ContentTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R38ContentTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "3c569dfd3fa75c96ad847a1ed96519e9dfd21a448612f4df71d85f376117e739",
+    "source_receipt": "tests/gates/R38ContentTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 7.157,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R38ContentTest\\bf59e8be52374b20a62834a15d48fd95\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R38ContentTest\\bf59e8be52374b20a62834a15d48fd95\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618650999554400
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618658418618700
+    }
+  },
+  {
+    "scene": "R38HeroWeaponTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R38HeroWeaponTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "c39793d18db8331399d48d951aa6cc84525ae1f56fb67a18312c7d48801eb0d1",
+    "source_receipt": "tests/gates/R38HeroWeaponTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 5.094,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R38HeroWeaponTest\\1d10dcefaff3495e993acb0d60b3273e\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R38HeroWeaponTest\\1d10dcefaff3495e993acb0d60b3273e\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618660833088200
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618666204721300
+    }
+  },
+  {
+    "scene": "R38MapExpansionTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R38MapExpansionTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "45882997ebd8d342ba10b9017f4e011eab8f56571a6edcb4900defde65472ed1",
+    "source_receipt": "tests/gates/R38MapExpansionTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 4.75,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R38MapExpansionTest\\60d35cb72342450e9308712c71faf247\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R38MapExpansionTest\\60d35cb72342450e9308712c71faf247\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618668507738200
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618673502345900
+    }
+  },
+  {
+    "scene": "R38ArtGate",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R38ArtGate.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "a8909087001dc19c971969fda82bf5dbe4958ca75088a6349224937efc6d9d10",
+    "source_receipt": "tests/gates/R38ArtGate-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 4.094,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R38ArtGate\\13850e87a240411ea3ebb347df0fd5b0\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R38ArtGate\\13850e87a240411ea3ebb347df0fd5b0\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618675939078100
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618680285165800
+    }
+  },
+  {
+    "scene": "R39MobileHUDTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R39MobileHUDTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "0ab24baae6ed022e1de6e9f16b62b94ba0f2e6e147937dbac8e5e605340886b8",
+    "source_receipt": "tests/gates/R39MobileHUDTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 6.625,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R39MobileHUDTest\\2d3ebad1acbd47bea59bceb86ed6d167\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R39MobileHUDTest\\2d3ebad1acbd47bea59bceb86ed6d167\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618682657898800
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618689584956100
+    }
+  },
+  {
+    "scene": "R40FacingAttackTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R40FacingAttackTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "c4d968b3e2891d66ea5f8db900a4f9b7b15fdab495dfea5ac4ff45c130e7d01d",
+    "source_receipt": "tests/gates/R40FacingAttackTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 6.812,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R40FacingAttackTest\\c13b73068a9d4e428e2d56eb2ca5ff00\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R40FacingAttackTest\\c13b73068a9d4e428e2d56eb2ca5ff00\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618691993720100
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618699095080300
+    }
+  },
+  {
+    "scene": "R41RuntimeBudgetTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R41RuntimeBudgetTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "503ba5c88eec16e1846a328131cdddda40cad83fd67b1a42229f80ada5c39a16",
+    "source_receipt": "tests/gates/R41RuntimeBudgetTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 4.031,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R41RuntimeBudgetTest\\d3efce9c927e4661ae6991b1040f9913\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R41RuntimeBudgetTest\\d3efce9c927e4661ae6991b1040f9913\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618701583320600
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618705917200000
+    }
+  },
+  {
+    "scene": "SpawnDensityR32Test",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/SpawnDensityR32Test.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "db927ee4fb157f0bdf1359e1883c4b2aed4c0cedafe37f68e7a244b956f95134",
+    "source_receipt": "tests/gates/SpawnDensityR32Test-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 4.203,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\SpawnDensityR32Test\\ad2fb4298ad04e7ab071687f0316a40f\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\SpawnDensityR32Test\\ad2fb4298ad04e7ab071687f0316a40f\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618708407388700
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618712893080900
+    }
+  },
+  {
+    "scene": "R42FormationTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R42FormationTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "dee6a21f58ee4aebc22d4f621eb4f65e5084880c18ec956db5bff2439782af8a",
+    "source_receipt": "tests/gates/R42FormationTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 7.156,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R42FormationTest\\db35915d634e4255979442f98e182819\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R42FormationTest\\db35915d634e4255979442f98e182819\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618715191258900
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618722574491500
+    }
+  },
+  {
+    "scene": "R43MobileTacticsTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R43MobileTacticsTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "27f1fa35deb9b2aaf5461d9f5b5d4fe933488ba5765c9cb6583f3e0a76968fb6",
+    "source_receipt": "tests/gates/R43MobileTacticsTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 8.422,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R43MobileTacticsTest\\ccfd7e643c70470d9a4d58d81f1439b9\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R43MobileTacticsTest\\ccfd7e643c70470d9a4d58d81f1439b9\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618724943736500
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618733616595700
+    }
+  },
+  {
+    "scene": "R44StoreTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R44StoreTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "df388a5f83f8c5238edc908a0a8857b02b463c52b53280c92d8cfaf6544652f7",
+    "source_receipt": "tests/gates/R44StoreTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 6.172,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R44StoreTest\\e0f8234e3a8945f1bd802d70c0642583\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R44StoreTest\\e0f8234e3a8945f1bd802d70c0642583\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618736076324200
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618742535378000
+    }
+  },
+  {
+    "scene": "ContentR1Test",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/ContentR1Test.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "07bf3d085916e78326434017523d44fef847cba55bd7f5531ead270934c6e73b",
+    "source_receipt": "tests/gates/ContentR1Test-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 7.093,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ContentR1Test\\dee46e578ce3440b96bee47b0278cdce\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ContentR1Test\\dee46e578ce3440b96bee47b0278cdce\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618745120330900
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618752523067800
+    }
+  },
+  {
+    "scene": "ContentR1NavigationTest",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/ContentR1NavigationTest.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "79d4a2338135f2ce2bdf96a3dac221a2962f21a3f04eb800673adea91f46c2c6",
+    "source_receipt": "tests/gates/ContentR1NavigationTest-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 27.469,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ContentR1NavigationTest\\0ca638cc24b5491e84bf796ba857263a\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ContentR1NavigationTest\\0ca638cc24b5491e84bf796ba857263a\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618754914336400
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618782631026100
+    }
+  },
+  {
+    "scene": "ContentR2Test",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/ContentR2Test.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "3c3363ff2c2bde1708dc9b305f9169b2e03dfa001417eba69652ee2ea86e368e",
+    "source_receipt": "tests/gates/ContentR2Test-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 6.734,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ContentR2Test\\152c6de31ba44c2ba4a88f48e9e753eb\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ContentR2Test\\152c6de31ba44c2ba4a88f48e9e753eb\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618784767688200
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618791736348200
+    }
+  },
+  {
+    "scene": "ContentR21Test",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/ContentR21Test.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "1784d918ffc3d1b9cafac8a470fac3fc309a61c953e98fb25e87f4d6810e0c3a",
+    "source_receipt": "tests/gates/ContentR21Test-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 5.375,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ContentR21Test\\53c787c2e4ac4466adc7e12f9a0f99df\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ContentR21Test\\53c787c2e4ac4466adc7e12f9a0f99df\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618794190641600
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618799840492500
+    }
+  },
+  {
+    "scene": "ContentR3Test",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/ContentR3Test.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "c06fbbc4a52fe3644b306a9111e3b699163078777f100c77ee8d281fc67a81ec",
+    "source_receipt": "tests/gates/ContentR3Test-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 13.937,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ContentR3Test\\60426c359ea54c3f807557d3bba5840b\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ContentR3Test\\60426c359ea54c3f807557d3bba5840b\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618802023387200
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618816225966500
+    }
+  },
+  {
+    "scene": "ContentR4Test",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/ContentR4Test.tscn"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "2925bbf8a00b9ebd236a388760278f77d2e1f7c60801856cb1f6c2735c08ce36",
+    "source_receipt": "tests/gates/ContentR4Test-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 6.094,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ContentR4Test\\6ad3137857e5429eb1192c29ee08119f\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\ContentR4Test\\6ad3137857e5429eb1192c29ee08119f\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project\\docs\\content\\r4\\tests\\mechanics.json",
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618818720651700
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618825084693100
+    }
+  },
+  {
+    "scene": "R31EndgameGate",
+    "command": [
+      "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+      "--headless",
+      "--audio-driver",
+      "Dummy",
+      "--fixed-fps",
+      "60",
+      "--path",
+      "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+      "res://scenes/debug/R31EndgameGate.tscn",
+      "--",
+      "--qa-endgame=r31"
+    ],
+    "exit_code": 0,
+    "status": "VERIFIED",
+    "log_sha256": "518fc4c62d3384bcb851da7fb491a4e029158de88e8f498dbb3c8f924a70280f",
+    "source_receipt": "tests/gates/R31EndgameGate-source.json",
+    "source_receipt_sha256": "aaa61382d812a64de1cfe841becb1dc4aed8c9ec49ae15bc463d69437a56f0b7",
+    "runner_timeout_seconds": 180,
+    "wall_seconds": 5.875,
+    "environment_override": {
+      "CV_QA_PROFILE": "content_r3_r4_ci",
+      "APPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R31EndgameGate\\a1ef67d52b8746bba2130da33f5eacf2\\roaming",
+      "LOCALAPPDATA": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\native-profiles\\suite\\R31EndgameGate\\a1ef67d52b8746bba2130da33f5eacf2\\local"
+    },
+    "project": "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r29\\regression-project",
+    "frozen_history_manifest_sha256": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+    "frozen_history_before_failures": [],
+    "frozen_history_after_failures": [],
+    "expected_output": null,
+    "expected_output_valid": true,
+    "isolated_expected_source": null,
+    "freshness": null,
+    "copyback": null,
+    "protection_before": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618827204260200
+    },
+    "protection_after": {
+      "status": "VERIFIED",
+      "failures": [],
+      "history_files": 6487,
+      "initial_files": 4237,
+      "pins": {
+        "tests/historical.json": "34b70efc5ca1dbe459dad7f774946331ef91d546dc3453ee1dc7faf5701f787a",
+        "tests/initial-files.json": "c04c5ea5e7e55b3ed6bd42566512c2fdb2bf3bca6f69201353c0269554265466",
+        "tests/default-profile-before.json": "2fe8bd307bf07515aeb50008227f7f087602b0e6727fb4becb0737efe08d4c61",
+        "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "captured_unix_ns": 1793618833312351100
+    }
+  },
+  {
+    "script": "tools/test_r32_loading_recovery.mjs",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "log_sha256": "a06779d56941f570d09ad1c5bde16dc778058bf7e9077e4cec571a5ae92fa2d6",
+    "wall_seconds": 0.062
+  },
+  {
+    "script": "tools/test_r36_webgl_state_cache.cjs",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "log_sha256": "fd80e67f132c644d0dd4213cad3aeb0ab3abee7963b23cb6161714dd3dca5eb3",
+    "wall_seconds": 0.063
+  },
+  {
+    "script": "tools/test_r41_mobile_startup.cjs",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "log_sha256": "3f0873ba2efc7f14b2654a50ba953cb42f8643e1fea5873f632eb0247c498118",
+    "wall_seconds": 0.063
+  },
+  {
+    "script": "scripts/debug/content_r5_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 18,
+    "log_sha256": "6c64351726c160a0a677d724d53d4632c254ac161e1ac64fc7741d93a499a71e",
+    "wall_seconds": 1.234
+  },
+  {
+    "script": "scripts/debug/content_r6_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 25,
+    "log_sha256": "4a125802a897e8a02bb5c0fdd0e24e2aa84e3e7884c8ef4b8d33815aa737be4f",
+    "wall_seconds": 1.406
+  },
+  {
+    "script": "scripts/debug/content_r7_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 18,
+    "log_sha256": "4f1eb2dd27630c9b50c2a734070e7ce34bea046271fa3ce2b9cda9165fca6f0f",
+    "wall_seconds": 1.219
+  },
+  {
+    "script": "scripts/debug/content_r8_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 35,
+    "log_sha256": "e9f0366946cf97c54df6423221e834d4670e078e18cad6321d68e0321512a169",
+    "wall_seconds": 1.141
+  },
+  {
+    "script": "scripts/debug/content_r9_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 134,
+    "log_sha256": "6f7c337f63ac439a242ace3a66b4a6639f04e0a72c1cc7e0857e86e113bf03b8",
+    "wall_seconds": 2.062
+  },
+  {
+    "script": "scripts/debug/content_r10_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 128,
+    "log_sha256": "b95b9d9b42e5681bdcb403b5a66896e8fa15529c7c019d90b8a29ddad4164d70",
+    "wall_seconds": 1.766
+  },
+  {
+    "script": "scripts/debug/content_r11_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 54,
+    "log_sha256": "2a3838cbf70e1d8c2d2dbcf6e7061e9f89ed71c4354c20079dff4cdeb330fb2a",
+    "wall_seconds": 1.579
+  },
+  {
+    "script": "scripts/debug/content_r12_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 73,
+    "log_sha256": "602398b080589af3b86bd59b842b909c545004c435721c5adb24d544047e1335",
+    "wall_seconds": 1.593
+  },
+  {
+    "script": "scripts/debug/content_r13_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 65,
+    "log_sha256": "c9ec8575c636db880c37f398d2f3390b02d56b5dfe4dc2520b92a8b9b60d2527",
+    "wall_seconds": 1.219
+  },
+  {
+    "script": "scripts/debug/content_r14_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 13,
+    "log_sha256": "19231f08c26be013501bc6963f86558a72d281f3d3216a983790bffcdff367af",
+    "wall_seconds": 1.328
+  },
+  {
+    "script": "scripts/debug/content_r15_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 37,
+    "log_sha256": "6ee03a4260c1b45ea1b3eb61ca8fcdbe06f648dff032214c74ebf7387558a560",
+    "wall_seconds": 1.219
+  },
+  {
+    "script": "scripts/debug/content_r16_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 14,
+    "log_sha256": "bd219e5e8c3c4bc8d2a73836d708077e9d88501d23282386a2b04c37692ec62b",
+    "wall_seconds": 1.422
+  },
+  {
+    "script": "scripts/debug/content_r17_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 7,
+    "log_sha256": "d2d2a757ce6dc434d8889be605201d7c09ca689fac6a0e8d7cc9f77fb243179b",
+    "wall_seconds": 1.141
+  },
+  {
+    "script": "scripts/debug/content_r18_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 9,
+    "log_sha256": "313aa8488495eaf720a550dfc8e121a9a080cc72b480fb89bec6d359b189c9ce",
+    "wall_seconds": 1.125
+  },
+  {
+    "script": "scripts/debug/content_r19_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 11,
+    "log_sha256": "15fcf0778519d6614621a1a0cc6a6889163f3009e7340f43ac98c41502a80cd5",
+    "wall_seconds": 1.109
+  },
+  {
+    "script": "scripts/debug/content_r20_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 10,
+    "log_sha256": "867ec7c60bfa239eaf797d10ca80b1d44230bef08e026bf8281cf6f5f66bc276",
+    "wall_seconds": 1.25
+  },
+  {
+    "script": "scripts/debug/content_r21_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 9,
+    "log_sha256": "e5044fd6d656b0312e126f3dc60f216537525746ba01d8b216d5bb2782f2052d",
+    "wall_seconds": 1.281
+  },
+  {
+    "script": "scripts/debug/content_r22_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 5,
+    "log_sha256": "a0e55431ba4a0b7f8860b45e01633fa078634258d197349e41e93a28eb46dc25",
+    "wall_seconds": 1.89
+  },
+  {
+    "script": "scripts/debug/content_r23_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 11,
+    "log_sha256": "59d71424b639daa46122e54e1d859978432b232e1efda20c8a086b0d4758c5a3",
+    "wall_seconds": 1.407
+  },
+  {
+    "script": "scripts/debug/content_r24_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 8,
+    "log_sha256": "ac90fd64783b9ed66d83e025b82a34563fcedbe7f2c27d5b3a7cf12060d0d518",
+    "wall_seconds": 1.125
+  },
+  {
+    "script": "scripts/debug/content_r25_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 5,
+    "log_sha256": "935791121eb2eb063a0c390b206632d747617f9ab5b1d97dad50ee351ad9c37f",
+    "wall_seconds": 1.047
+  },
+  {
+    "script": "scripts/debug/content_r26_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 8,
+    "log_sha256": "8c8cde3801017c54f56caff06f53d357dfa2bbbf2ba038fd629bc6e49678f661",
+    "wall_seconds": 1.203
+  },
+  {
+    "script": "scripts/debug/content_r27_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 12,
+    "log_sha256": "815d68ce08033a1a1d531938ffc9e9ed4475dfe3b96f4870a74dc691447e36ea",
+    "wall_seconds": 1.063
+  },
+  {
+    "script": "scripts/debug/content_r28_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 6,
+    "log_sha256": "6dcb2740489f11f94ad9e64c4d0329e97265de82ecf4682f37c7a4128b6af57b",
+    "wall_seconds": 1.032
+  },
+  {
+    "script": "scripts/debug/content_r29_test.gd",
+    "status": "VERIFIED",
+    "exit_code": 0,
+    "checks": 8,
+    "log_sha256": "04b3b904534f85562d7a423733b6288c2bf0767d5efda1403b1bc80f0788fbae",
+    "wall_seconds": 1.125
+  }
+]

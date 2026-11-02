@@ -168,8 +168,9 @@ func _layout_equipment_panel() -> void:
 	equipment_panel.position = Vector2((viewport_size.x - width) * 0.5, y)
 	equipment_panel.size = Vector2(width, height)
 	var blockers: Array[Rect2] = []
-	if not mobile:
-		blockers.append(Rect2(equipment_panel.position, equipment_panel.size))
+	# R29: the bottom item row blocks world text on every layout, so a 擊破
+	# card lifts above it instead of being covered by the three slots.
+	blockers.append(Rect2(equipment_panel.position, equipment_panel.size))
 	DAMAGE_NUMBER.hud_blockers = blockers
 	for button in equipment_panel.buttons:
 		button.custom_minimum_size = Vector2(0.0, height)

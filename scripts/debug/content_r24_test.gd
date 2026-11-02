@@ -20,7 +20,7 @@ func _initialize() -> void:
 	_check(number.FOCUS_DIM_ALPHA < 0.6 and pressure_src.contains("DAMAGE_NUMBER_SCRIPT.focus_dim = enabled and started and GameManager.game_running and phase in [\"warning\", \"active\"]") and pressure_src.contains("func _exit_tree() -> void:\n\tDAMAGE_NUMBER_SCRIPT.focus_dim = false"), "plain damage numbers step back while an attack wave is warned or active")
 	var number_src := FileAccess.get_file_as_string("res://scripts/vfx/damage_number.gd")
 	_check(number_src.contains("if focus_dim and prefix == \"\":\n\t\talpha *= FOCUS_DIM_ALPHA"), "critical hits (prefixed numbers) keep full strength")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.57.0-content-r28", "project version is 0.57.0-content-r28")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.58.0-content-r29", "project version is 0.58.0-content-r29")
 	if failures.is_empty():
 		print("R24_REGRESSION status=PASS checks=%d" % checks)
 	else:
