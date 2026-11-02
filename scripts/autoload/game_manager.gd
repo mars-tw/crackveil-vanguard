@@ -1303,6 +1303,9 @@ const SQUAD_SHARE_CAPTAIN := 0.75
 # hit harder in proportion (capped), so the squad keeps a real part of the fight.
 const SQUAD_TARGET_CAPTAIN_SHARE := 0.55
 const SQUAD_CATCH_UP_MAX := 2.4
+# R28: no catch-up before 1500 damage, full strength from 1500 + 8000.
+const SQUAD_CATCH_UP_START := 1500.0
+const SQUAD_CATCH_UP_RAMP := 8000.0
 var captain_damage_total := 0.0
 var member_damage_total := 0.0
 # R27: the catch-up is shown to the player: its current value in the top bar,
@@ -1315,13 +1318,17 @@ func current_catch_up() -> float:
 
 static func squad_catch_up(captain_total: float, member_total: float) -> float:
 	var total := captain_total + member_total
-	if total < 200.0:
+	if total < SQUAD_CATCH_UP_START:
 		return 1.0
 	var share := captain_total / total
 	if share <= SQUAD_TARGET_CAPTAIN_SHARE:
 		return 1.0
 	var ratio := share / SQUAD_TARGET_CAPTAIN_SHARE
-	return clampf(ratio * ratio, 1.0, SQUAD_CATCH_UP_MAX)
+	var full := clampf(ratio * ratio, 1.0, SQUAD_CATCH_UP_MAX)
+	# R28: the catch-up grows in over the run's first damage instead of opening
+	# at the cap, so its value tracks how lopsided the fight really is.
+	var ramp := clampf((total - SQUAD_CATCH_UP_START) / SQUAD_CATCH_UP_RAMP, 0.0, 1.0)
+	return 1.0 + (full - 1.0) * ramp
 
 func get_outgoing_damage_multiplier(source: Node = null) -> float:
 	var multiplier := float(contract_modifiers.get("damage_multiplier", 1.0))

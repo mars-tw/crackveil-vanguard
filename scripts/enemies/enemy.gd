@@ -102,6 +102,8 @@ var damage_hit_index: int = 0
 var last_hit_critical: bool = false
 var special_elite_id := ""
 var special_elite_name := ""
+# R28: how strongly a stage variant elite takes its stage colour (0 = none).
+var stage_tint_strength := 0.0
 var special_skill := ""
 var special_cooldown := 3.0
 var special_timer := 2.0
@@ -282,7 +284,7 @@ func _place_special_label() -> void:
 		slot = elite_label_slot(clamp_label_to_screen(Rect2(xf * Vector2(side_x, -18), mark_size2), view), clamp_label_to_screen(Rect2(xf * Vector2(-side_x - ELITE_MARK_SIZE.x, -18), mark_size2), view), view, taken)
 		compact = slot.size != Vector2.ZERO
 	special_label.visible = slot.size != Vector2.ZERO
-	special_label.text = ELITE_MARK_TEXT if compact else special_elite_name
+	special_label.text = compact_elite_mark(special_elite_name) if compact else special_elite_name
 	special_label.size = (ELITE_MARK_SIZE if compact else ELITE_LABEL_SIZE)
 	if special_label.visible:
 		_elite_label_rects.append(slot)
@@ -506,6 +508,7 @@ func setup(enemy_type: String, config: Dictionary) -> void:
 	gold_value = int(config.get("gold", gold_value))
 	radius = float(config.get("radius", radius))
 	body_color = config.get("color", body_color)
+	stage_tint_strength = 0.55 if str(config.get("stage_pressure", "")) != "" else 0.0
 	sprite_path = str(config.get("sprite_path", _default_sprite_path_for_type(type_id)))
 	sprite_scale = float(config.get("sprite_scale", 1.0))
 	attack_cooldown = float(config.get("attack_cooldown", attack_cooldown))
@@ -1418,6 +1421,13 @@ func take_damage(amount: float, source_position: Vector2 = Vector2.ZERO) -> floa
 # R13: two live elites with the same name are told apart: the second one
 # carries 「・2」 on its plate, in the boss bar and in its break card.
 static var _live_elite_names: Dictionary = {}
+# R28: a compact plate keeps the elite's own name (its first two characters,
+# e.g. 藤爪), so the same elite never reads as "菁英" in one shot and by name in
+# another. Unnamed elites keep the generic mark.
+static func compact_elite_mark(name: String) -> String:
+	var base := name.get_slice("・", 0)
+	return base.substr(0, 2) if base.length() >= 2 else ELITE_MARK_TEXT
+
 static func numbered_elite_name(base: String, owner_id: int) -> String:
 	for key in _live_elite_names.keys():
 		if _live_elite_names[key].has(owner_id):
@@ -1827,6 +1837,10 @@ func _apply_sprite() -> void:
 	sprite.flip_h = false
 	_setup_animation_frames(radius * 3.0, sprite_scale)
 	rest_color = _current_stage_rest_color()
+	# R28: an elite of a later stage wears that stage's tint on its body, so
+	# 藤爪獵將 does not look like the first stage's 雷爪獵將.
+	if is_elite and stage_tint_strength > 0.0:
+		rest_color = rest_color.lerp(body_color, stage_tint_strength)
 	sprite.modulate = rest_color
 	if animated_sprite != null:
 		animated_sprite.modulate = rest_color

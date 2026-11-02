@@ -50,7 +50,7 @@ func _test_plate_edges_and_gap() -> void:
 	_check(mark_slot.size == mark, "a compact elite mark still finds room where the name plate cannot")
 	_check(mark.x <= 64.0 and str(enemy_script.ELITE_MARK_TEXT) == "菁英", "compact mark is small and drawn as a glyph, not the name")
 	var source := FileAccess.get_file_as_string("res://scripts/enemies/enemy.gd")
-	_check(source.contains("special_label.text = ELITE_MARK_TEXT if compact else special_elite_name"), "hidden plates fall back to the compact mark")
+	_check(source.contains("special_label.text = compact_elite_mark(special_elite_name) if compact else special_elite_name") and enemy_script.compact_elite_mark("") == "菁英", "hidden plates fall back to the compact mark")
 	_check(source.contains("Vector2(side_x, -18)") and source.count("Vector2(-side_x -") >= 2, "plate and compact mark also try both sides of the body before giving up")
 	_check(source.contains("taken[i] = taken[i].grow(ELITE_LABEL_GAP)"), "placement grows every taken frame by the gap")
 	_check(source.contains("clamp_label_to_screen(Rect2(xf * above_local") and source.contains("clamp_label_to_screen(Rect2(xf * below_local"), "both plate positions are clamped before slot choice")
@@ -206,4 +206,4 @@ func _none() -> Array[Rect2]:
 	return empty
 
 func _test_version() -> void:
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.56.0-content-r27", "project version is 0.56.0-content-r27")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.57.0-content-r28", "project version is 0.57.0-content-r28")
