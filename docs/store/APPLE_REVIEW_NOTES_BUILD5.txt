@@ -1,0 +1,22 @@
+Build 5 (version 1.0.0) replaces build 4. It adds eleven more rounds of gameplay and readability work (our internal rounds 12 to 22). Each round was checked by an automated test suite, a rule-following bot that plays the real build with keyboard and mouse input only, and two independent reviews of 15 fresh screenshots.
+
+WHAT CHANGED SINCE BUILD 4
+1. Two answers per wave. Each attack pattern now accepts two formations: a fast seal (6 s, small heal) or a slow seal (9 s, larger heal and a longer counter-attack). The choice is shown on the ground (e.g. 楔快 = Wedge fast, 圓慢 = Ring slow) and compared in the top bar.
+2. Formation synergy. While the squad holds a correct formation during a wave, every squadmate (not the captain) deals 80% more damage; gold links flash from the captain to each member when it switches on.
+3. The squad shares the fight. Hero damage is now split: captain x0.75, squadmates x2.5. The result screen states how much damage the synergy added and the captain / squad share.
+4. Clearer cause and effect. A wrong formation names both correct answers and how to switch. A failed run states the cause (e.g. "captain fell at rift 1"). Pre-run choices are written as before -> after numbers (e.g. "seal counter 5 -> 10 s").
+5. Readability. Name plates, rule text, landing rings and damage numbers no longer overlap; each of the ten stages has its own enemy tint; the gate guardian is distinct at a glance; result cards shrink text to fit instead of cutting it off.
+
+HOW TO REVIEW
+Main menu > 三陣封隙・出擊 (Start). Move with the bottom-left joystick. A rift opens on the ground and an attack wave is announced at the top with the formations that answer it. Tap the formation button (bottom right, above 旋斬) to switch. Between waves, bring the captain and two squadmates into the rift and hold it to seal (6 s fast, 9 s slow). A wrong formation backfires and resets the seal. Seal three rifts to summon the gate guardian; a run takes about two to three minutes. No account, purchase or network connection is needed.
+
+ABOUT THE APP (unchanged answers from our previous reply)
+- Single-player, offline action-strategy game: you lead a squad of 3 to 9 heroes and win by reading each attack pattern and switching the whole squad's formation, not by damage upgrades alone.
+- Standalone product. It shares no game code, scenes or art with other apps on our account, and no other app on our account is a squad-formation action game.
+- Its own Godot 4.7 project. Third-party components only: Godot Engine (MIT), Noto Sans CJK (SIL OFL) and a few CC0 assets credited in the app. Parts of the code, the original 2D art and the music were made with AI-assisted tools under the developer's direction; the developer designed, reviewed and integrated everything. Source is public (MIT) at github.com/mars-tw/crackveil-vanguard.
+- No ads, purchases, accounts, analytics or tracking.
+- Beta testing: we still have not received external tester feedback; the changes above come from our own documented test and review rounds.
+
+Known limitation: the game is landscape-first; on iPad held in portrait it shows black bars above and below the game area.
+
+Thank you for your time.
