@@ -144,6 +144,8 @@ func show_summary(summary: Dictionary) -> void:
 			var row: Dictionary=GameManager.contribution[id].duplicate(true)
 			row["id"]=id
 			rows.append(row)
+	# R27: the output tab reads top to bottom by damage dealt.
+	rows.sort_custom(func(a, b): return float(a.get("damage", 0.0)) > float(b.get("damage", 0.0)))
 	support_rows=SUPPORT_MODEL.build(rows)
 	tab=0
 	page=0
@@ -300,6 +302,8 @@ func _refresh() -> void:
 	if read_line != "":gain_label.text += "\n" + read_line
 	var share_line := damage_share_line(rows)
 	if share_line != "":gain_label.text += "\n" + share_line
+	var catch_line := catch_up_line(displayed_summary.get("seal_state",{}))
+	if catch_line != "":gain_label.text += "\n" + catch_line
 	progress_label.text=MetaProgress.starting_choice_progress_text()
 	if not GameManager.pending_starting_settlements.is_empty():progress_label.text="進度未保存・整備可重試"
 	page=clampi(page,0,_page_count()-1)
@@ -482,6 +486,14 @@ static func damage_share_line(contribution_rows: Array) -> String:
 		return ""
 	return "輸出：隊長 %d%%・隊員合計 %d%%（%d 人）" % [roundi(100.0 * captain / total), roundi(100.0 * members / total), member_count]
 
+# R27: what the squad catch-up did this run (peak multiplier and added damage).
+static func catch_up_line(seal: Dictionary) -> String:
+	var peak := float(seal.get("catch_up_peak", 1.0))
+	var added := float(seal.get("catch_up_damage", 0.0))
+	if peak < 1.05 or added < 1.0:
+		return ""
+	return "隊員追擊最高 ×%.1f・多打 %d HP" % [peak, roundi(added)]
+
 func _measured_gain(node: Dictionary,measured: Dictionary) -> String:
 	if node.is_empty():return "未裝起始節點・本局無節點增益"
 	if bool(node.get("campaign_only",false)) and str(displayed_summary.get("starting_mode",GameManager.run_mode))=="endless":return "封隙專用・無盡不再觸發，適用代價已停用"
@@ -529,6 +541,14 @@ func _apply_responsive_layout() -> void:
 		# Stack the portrait summary from its real line count so the echo and
 		# next-goal lines are never hidden behind the measured-gain line.
 		var summary_h:=minf(size.y-300,_text_height(summary_label,left_w))
+		var gain_font:=roundi(14*scale)
+		gain_label.add_theme_font_size_override("font_size",gain_font)
+		var progress_room:=_text_height(progress_label,left_w)
+		# R27: shrink the gain lines until summary + gain + progress leave the
+		# tabs, cards and footer their full height.
+		while gain_font>10 and gain_label.text!="" and 58+summary_h+_text_height(gain_label,left_w)+progress_room>size.y-226:
+			gain_font-=1
+			gain_label.add_theme_font_size_override("font_size",gain_font)
 		var gain_h:=_text_height(gain_label,left_w) if gain_label.text!="" else 0.0
 		_place(summary_scroll,12,50,left_w,summary_h)
 		_place(gain_label,12,52+summary_h,left_w,gain_h)
@@ -538,14 +558,29 @@ func _apply_responsive_layout() -> void:
 	else:
 		# Same real-line stacking in landscape; maximum UI scale needs more
 		# than the old fixed 150 px for six summary lines.
-		var summary_h:=minf(size.y-210,maxf(150.0,_text_height(summary_label,left_w)))
-		var gain_y:=maxf(206.0,54+summary_h)
+		# R27: the left column (summary, gain lines, progress line) must fit
+		# above the footer buttons. Shrink the gain lines first, then the
+		# summary, so nothing is ever drawn over another line.
+		var column_bottom:=size.y-56.0-6.0
+		var gain_font:=roundi(14*scale)
+		var summary_font:=int(summary_label.get_theme_font_size("font_size"))
+		gain_label.add_theme_font_size_override("font_size",gain_font)
+		var progress_line_h:=maxf(18.0,_text_height(progress_label,left_w-8))
+		var summary_h:=_text_height(summary_label,left_w)
+		var gain_h:=maxf(24.0,_text_height(gain_label,left_w-8))
+		while 56.0+summary_h+gain_h+2.0+progress_line_h>column_bottom and (gain_font>10 or summary_font>11):
+			if gain_font>10:
+				gain_font-=1
+				gain_label.add_theme_font_size_override("font_size",gain_font)
+			else:
+				summary_font-=1
+				summary_label.add_theme_font_size_override("font_size",summary_font)
+			summary_h=_text_height(summary_label,left_w)
+			gain_h=maxf(24.0,_text_height(gain_label,left_w-8))
+		var gain_y:=56+summary_h
 		_place(summary_scroll,20,50,left_w-8,summary_h)
-		# R15: the gain block grows with its real lines (formation read and
-		# fast/slow seals) so the progress line is never written over.
-		var gain_h:=maxf(48.0,_text_height(gain_label,left_w-8))
 		_place(gain_label,20,gain_y,left_w-8,gain_h)
-		_place(progress_label,20,gain_y+gain_h+2,left_w-8,36)
+		_place(progress_label,20,gain_y+gain_h+2,left_w-8,progress_line_h)
 	var right_x:=12.0 if portrait else 24+left_w
 	var right_w:=w if portrait else w-left_w-12
 	for number in range(3):_place(tabs[number],right_x+number*(right_w+4)/3,tab_y,(right_w-8)/3,44)

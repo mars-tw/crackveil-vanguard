@@ -206,4 +206,4 @@ func _none() -> Array[Rect2]:
 	return empty
 
 func _test_version() -> void:
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.55.0-content-r26", "project version is 0.55.0-content-r26")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.56.0-content-r27", "project version is 0.56.0-content-r27")

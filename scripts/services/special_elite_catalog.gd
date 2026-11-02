@@ -9,6 +9,41 @@ const PROFILES: Array[Dictionary] = [
 	{"id":"treasure", "name":"逐金魔靈", "skill":"treasure", "description":"會逃跑並灑金幣，擊敗可拿大量金幣。", "sprite":"enemy_fast", "hp":190.0, "speed":124.0, "color":Color("ffe18b"), "gold":65}
 ]
 
+# R27: each stage fields its own elite roster. The skill stays (so the attack
+# pattern and its formation answer are unchanged), but the name, tint and a
+# stage pressure (faster, tougher or harder-hitting) change, so a later stage
+# does not read as the first stage repainted.
+const STAGE_VARIANTS := {
+	"garden": {"tint": Color("8fe39a"), "speed": 1.15, "hp": 0.92, "projectile": 1.0, "pressure": "藤蔓疾行",
+		"names": {"shield": "荊盾重衛", "charge": "藤爪獵將", "frost": "花露守望者", "flame": "花火術士", "summoner": "苗群召喚師"}},
+	"ember": {"tint": Color("ff9a6a"), "speed": 1.0, "hp": 1.0, "projectile": 1.25, "pressure": "熔火重擊",
+		"names": {"shield": "熔盾重衛", "charge": "焰爪獵將", "frost": "灰燼守望者", "flame": "緋焰術士", "summoner": "焰群召喚師"}},
+	"storm": {"tint": Color("9fb7ff"), "speed": 1.2, "hp": 0.9, "projectile": 1.0, "pressure": "雷霆疾襲",
+		"names": {"shield": "雷盾重衛", "charge": "霆爪獵將", "frost": "雲霧守望者", "flame": "電弧術士", "summoner": "雷群召喚師"}},
+	"frost": {"tint": Color("cfefff"), "speed": 0.9, "hp": 1.2, "projectile": 1.0, "pressure": "冰甲厚實",
+		"names": {"shield": "冰盾重衛", "charge": "霜爪獵將", "frost": "極霜守望者", "flame": "寒焰術士", "summoner": "冰群召喚師"}},
+	"veil": {"tint": Color("e0a8ff"), "speed": 1.1, "hp": 1.1, "projectile": 1.1, "pressure": "帷幕全面",
+		"names": {"shield": "幕盾重衛", "charge": "影爪獵將", "frost": "幽帷守望者", "flame": "冥焰術士", "summoner": "影群召喚師"}},
+}
+
+static func stage_variant(stage_id: String) -> Dictionary:
+	return STAGE_VARIANTS.get(stage_id, {})
+
+static func apply_stage_variant(config: Dictionary, stage_id: String) -> Dictionary:
+	var variant := stage_variant(stage_id)
+	if variant.is_empty() or config.is_empty():
+		return config
+	var id := str(config.get("special_elite_id", ""))
+	var names: Dictionary = variant.get("names", {})
+	if names.has(id):
+		config["special_elite_name"] = str(names[id])
+	config["color"] = Color(variant.tint)
+	config["speed"] = float(config.get("speed", 0.0)) * float(variant.speed)
+	config["max_hp"] = float(config.get("max_hp", 0.0)) * float(variant.hp)
+	config["projectile_damage"] = float(config.get("projectile_damage", 0.0)) * float(variant.projectile)
+	config["stage_pressure"] = str(variant.pressure)
+	return config
+
 static func get_profiles() -> Array[Dictionary]:
 	return PROFILES.duplicate(true)
 

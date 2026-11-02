@@ -344,7 +344,7 @@ func _spawn_special_elite() -> bool:
 		profile = SPECIAL_ELITES.get_profile(debug_forced_special_elite_id)
 	if profile.is_empty():
 		return false
-	var config := SPECIAL_ELITES.make_config(str(profile.id), max_enemies)
+	var config := SPECIAL_ELITES.apply_stage_variant(SPECIAL_ELITES.make_config(str(profile.id), max_enemies), str(GameManager.selected_stage_id))
 	config["gold"] = int(config.get("gold", 0)) + GameManager.get_elite_bonus_gold()
 	config["elite_bonus_xp"] = int(config.get("elite_bonus_xp", 0)) + GameManager.next_elite_bonus_xp
 	_apply_time_scaling(config)
@@ -357,7 +357,7 @@ func _spawn_special_elite() -> bool:
 	special_elite_index += 1
 	special_elite_history.append({"id":profile.id, "name":profile.name, "time":GameManager.elapsed_time})
 	GameManager.record_elite_spawn()
-	GameManager.show_toast("特殊菁英：%s　%s" % [profile.name, profile.description])
+	GameManager.show_toast("特殊菁英：%s　%s" % [str(config.get("special_elite_name", profile.name)), profile.description])
 	AudioManager.play_sfx("elite")
 	return true
 
@@ -368,7 +368,7 @@ func spawn_tactical_guard(profile_id: String) -> Node:
 	if EntityFactory.get_enemy_live_count() >= max_enemies:
 		if not EntityFactory.reclaim_regular_enemy_for_elite(_elite_reclaim_reference_position()):
 			return null
-	var config := SPECIAL_ELITES.make_config(profile_id, max_enemies)
+	var config := SPECIAL_ELITES.apply_stage_variant(SPECIAL_ELITES.make_config(profile_id, max_enemies), str(GameManager.selected_stage_id))
 	if config.is_empty():
 		return null
 	config["tactical_min_cycles"] = 2

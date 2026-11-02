@@ -396,6 +396,8 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	contribution.clear()
 	captain_damage_total = 0.0
 	member_damage_total = 0.0
+	catch_up_peak = 1.0
+	catch_up_damage = 0.0
 	bond_benefits = {"healing":0.0,"prevented":0.0,"triggers":0}
 	next_elite_bonus_xp = 0
 	echo_shards_awarded_this_run = 0
@@ -1303,6 +1305,13 @@ const SQUAD_TARGET_CAPTAIN_SHARE := 0.55
 const SQUAD_CATCH_UP_MAX := 2.4
 var captain_damage_total := 0.0
 var member_damage_total := 0.0
+# R27: the catch-up is shown to the player: its current value in the top bar,
+# its peak and the damage it added on the result screen.
+var catch_up_peak := 1.0
+var catch_up_damage := 0.0
+
+func current_catch_up() -> float:
+	return squad_catch_up(captain_damage_total, member_damage_total)
 
 static func squad_catch_up(captain_total: float, member_total: float) -> float:
 	var total := captain_total + member_total
@@ -1418,6 +1427,10 @@ func record_weapon_damage(source: Node, weapon_id: String, amount: float, compon
 			captain_damage_total += amount
 		elif source.get("is_leader") == false:
 			member_damage_total += amount
+			var catch_up := current_catch_up()
+			if catch_up > 1.0:
+				catch_up_damage += amount * (1.0 - 1.0 / catch_up)
+				catch_up_peak = maxf(catch_up_peak, catch_up)
 		# R23: the role of the hero behind this row (captain / member).
 		if source.get("is_leader") != null:
 			row["role"] = "captain" if source.get("is_leader") == true else "member"
@@ -1839,7 +1852,7 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 	var director: Node = tactical_director if is_instance_valid(tactical_director) else null
 	var relay_node: Node = director.relay if director != null and is_instance_valid(director.relay) else null
 	if relay_node != null:
-		enriched["seal_state"] = {"step": int(relay_node.step), "completed": bool(relay_node.completed), "wrong": int(relay_node.wrong_penalties), "pressure_seconds": float(relay_node.pressure_seconds), "fast_seals": relay_node.history.filter(func(h): return not STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "slow_seals": relay_node.history.filter(func(h): return STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "matched_seconds": float(relay_node.matched_seconds), "synergy_damage": float(relay_node.synergy_damage), "required": str(relay_node.required_formation()), "accepted": Array(relay_node.accepted_formations()), "formation": squad_manager.get_formation_id() if is_instance_valid(squad_manager) else ""}
+		enriched["seal_state"] = {"step": int(relay_node.step), "completed": bool(relay_node.completed), "wrong": int(relay_node.wrong_penalties), "pressure_seconds": float(relay_node.pressure_seconds), "fast_seals": relay_node.history.filter(func(h): return not STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "slow_seals": relay_node.history.filter(func(h): return STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "matched_seconds": float(relay_node.matched_seconds), "synergy_damage": float(relay_node.synergy_damage), "catch_up_peak": catch_up_peak, "catch_up_damage": catch_up_damage, "required": str(relay_node.required_formation()), "accepted": Array(relay_node.accepted_formations()), "formation": squad_manager.get_formation_id() if is_instance_valid(squad_manager) else ""}
 	enriched["starting_build_text"] = starting_build_text()
 	enriched["starting_build"] = {"team":active_starting_team,"node":active_starting_node,"benefits":starting_benefits.duplicate(true),"run_id":starting_run_id,"valid_settlements":MetaProgress.starting_settlements.size(),"vouchers":MetaProgress.starting_vouchers}
 	if AchievementProgress != null and AchievementProgress.has_method("get_run_unlocked_definitions"):

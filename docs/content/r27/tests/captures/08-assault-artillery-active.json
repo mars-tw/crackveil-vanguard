@@ -1,0 +1,1272 @@
+{
+  "audio_gate_visible": false,
+  "benefits": {
+    "alternative_hold": 0,
+    "counter_hits": 0,
+    "healing": 0,
+    "healing_forgone": 0,
+    "hymn_casts": 0,
+    "moving_hits": 0,
+    "relay_blasts": 0,
+    "shield_damage": 57.8336,
+    "step_seconds": 0
+  },
+  "contributions": {
+    "arc_scout": {
+      "damage": 3768.72392825026,
+      "healing": 0,
+      "kills": 150,
+      "name": "裂弧斥候",
+      "prevented": 0,
+      "role": "member",
+      "taken": 13.30317473
+    },
+    "line_mender": {
+      "damage": 19998.4233927009,
+      "healing": 0,
+      "kills": 667,
+      "name": "線紋修補者",
+      "prevented": 0,
+      "role": "member",
+      "taken": 27.496300376032
+    },
+    "orbit_guard": {
+      "damage": 1800.74859385971,
+      "healing": 0,
+      "kills": 60,
+      "name": "星環護衛",
+      "prevented": 0,
+      "role": "member",
+      "taken": 14.4285832390419
+    },
+    "pulse_artificer": {
+      "damage": 1401.3206854747,
+      "healing": 0,
+      "kills": 62,
+      "name": "脈衝工匠",
+      "prevented": 0,
+      "role": "member",
+      "taken": 13.0943353531586
+    },
+    "rift_captain": {
+      "damage": 30942.340270555,
+      "healing": 0,
+      "kills": 1057,
+      "name": "裂隙隊長",
+      "prevented": 0,
+      "role": "captain",
+      "taken": 3.825
+    },
+    "rift_shepherd": {
+      "damage": 2284.54199294375,
+      "healing": 0,
+      "kills": 96,
+      "name": "裂隙牧者",
+      "prevented": 0,
+      "role": "member",
+      "taken": 26.3546101398421
+    },
+    "rift_sniper": {
+      "damage": 886.186668404383,
+      "healing": 0,
+      "kills": 30,
+      "name": "裂光狙擊手",
+      "prevented": 0,
+      "role": "member",
+      "taken": 27.5510403379697
+    },
+    "solar_lancer": {
+      "damage": 583.501264806066,
+      "healing": 0,
+      "kills": 21,
+      "name": "星焰槍騎",
+      "prevented": 0,
+      "role": "member",
+      "taken": 17.61618698
+    },
+    "unattributed": {
+      "damage": 0,
+      "healing": 0,
+      "kills": 0,
+      "name": "其他來源",
+      "prevented": 0,
+      "taken": 0
+    }
+  },
+  "guards": [
+    {
+      "animation": "idle",
+      "frame": 0,
+      "hp": 0,
+      "id": "harvest_grunt",
+      "impacts": 0,
+      "position": [
+        -143.316833496094,
+        305.499267578125
+      ],
+      "recoveries": 0,
+      "telegraph": 0,
+      "token": 1539
+    }
+  ],
+  "history": [
+    {
+      "cycles": 2,
+      "followers": 6,
+      "formation": "wedge",
+      "pressure": "front",
+      "time": 24.0082993333334
+    },
+    {
+      "cycles": 2,
+      "followers": 7,
+      "formation": "ring",
+      "pressure": "pincer",
+      "time": 57.539432
+    }
+  ],
+  "identity": {
+    "allies": 7,
+    "attack_origins": 0,
+    "captain": 1
+  },
+  "initial": {
+    "campaign_clears": [],
+    "lifetime": 0,
+    "node": "spec_shield",
+    "roster": [
+      {
+        "hp": 110,
+        "id": "rift_captain",
+        "max_hp": 110
+      },
+      {
+        "hp": 82,
+        "id": "arc_scout",
+        "max_hp": 82
+      },
+      {
+        "hp": 86,
+        "id": "pulse_artificer",
+        "max_hp": 86
+      }
+    ],
+    "shards": 0,
+    "team": "assault",
+    "total_hp": 278,
+    "total_max_hp": 278,
+    "upgrades": {
+      "echo_focus": 0,
+      "echo_magnetism": 0,
+      "echo_vitality": 0
+    },
+    "valid_settlements": 0,
+    "vouchers": 0,
+    "wallet_gold": 0
+  },
+  "journal": [
+    {
+      "count": 1,
+      "first": 0,
+      "kind": "general",
+      "last": 0,
+      "text": "拖左下搖桿移動；按住「旋斬」持續攻擊，放開回能。",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 0.847818,
+      "kind": "loot",
+      "last": 0.847818,
+      "text": "已裝備・裂隙護甲\n全隊最大 HP +12\n受傷減少 1.5%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 1.10035133333333,
+      "kind": "loot",
+      "last": 1.10035133333333,
+      "text": "已裝備・雷步戰靴\n全隊移速 +20\n全隊拾取範圍 +24",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 9.31038466666666,
+      "kind": "loot",
+      "last": 9.31038466666666,
+      "text": "已裝備・裂刃晶核\n全隊傷害 +6%\n全隊攻速 +2%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 9.31038466666666,
+      "kind": "loot",
+      "last": 9.31038466666666,
+      "text": "裝備回收・裂刃晶核\n全隊傷害 +6%\n全隊攻速 +2%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 9.668718,
+      "kind": "general",
+      "last": 9.668718,
+      "text": "自動強化：招募：裂隙牧者",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 9.668718,
+      "kind": "bond",
+      "last": 9.668718,
+      "text": "牧長裂約｜裂隙隊長＋裂隙牧者\n裂傀強化",
+      "urgent": false
+    },
+    {
+      "count": 3,
+      "first": 9.668718,
+      "kind": "loot",
+      "last": 15.602618,
+      "text": "裝備回收・雷步戰靴\n全隊移速 +20\n全隊拾取範圍 +24",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 12.0207513333333,
+      "kind": "general",
+      "last": 38.2017326666667,
+      "text": "戰術追獵：星盾重衛",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 12.0207513333333,
+      "kind": "battle",
+      "last": 19.5625846666667,
+      "text": "重盾正面推進｜預警・快封楔形／慢封圓陣・慢封反擊10秒",
+      "urgent": true
+    },
+    {
+      "count": 1,
+      "first": 12.1103846666667,
+      "kind": "loot",
+      "last": 12.1103846666667,
+      "text": "已裝備・雷鑄晶核\n全隊傷害 +12%\n全隊攻速 +4%",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 12.824718,
+      "kind": "loot",
+      "last": 13.6519513333333,
+      "text": "裝備回收・裂隙護甲\n全隊最大 HP +12\n受傷減少 1.5%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 13.026218,
+      "kind": "loot",
+      "last": 13.026218,
+      "text": "已裝備・裂隙護甲\n全隊最大 HP +12\n受傷減少 1.6%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 13.026218,
+      "kind": "loot",
+      "last": 16.388318,
+      "text": "裝備回收・裂隙護甲\n全隊最大 HP +12\n受傷減少 1.6%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 13.4550846666667,
+      "kind": "general",
+      "last": 13.4550846666667,
+      "text": "自動強化：招募：星環護衛",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 13.4550846666667,
+      "kind": "general",
+      "last": 13.4550846666667,
+      "text": "成就解鎖！五人滿編",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 14.014518,
+      "kind": "general",
+      "last": 14.014518,
+      "text": "自動強化：招募：線紋修補者",
+      "urgent": false
+    },
+    {
+      "count": 3,
+      "first": 14.815118,
+      "kind": "loot",
+      "last": 15.9900513333333,
+      "text": "裝備回收・拾荒戰靴\n全隊移速 +10\n全隊拾取範圍 +12",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 15.4660846666667,
+      "kind": "general",
+      "last": 15.4660846666667,
+      "text": "自動強化：招募：裂光狙擊手",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 15.602618,
+      "kind": "loot",
+      "last": 15.602618,
+      "text": "已裝備・虛界護甲\n全隊最大 HP +37\n受傷減少 4.7%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 16.2533846666667,
+      "kind": "loot",
+      "last": 16.2533846666667,
+      "text": "裝備回收・雷鑄護甲\n全隊最大 HP +25\n受傷減少 3.1%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 16.7955846666667,
+      "kind": "general",
+      "last": 16.7955846666667,
+      "text": "自動強化：裂隙隊長：裂弧雷鏈增幅",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 17.4243846666667,
+      "kind": "loot",
+      "last": 17.4243846666667,
+      "text": "已裝備・踏界之靴\n全隊移速 +41\n全隊拾取範圍 +50",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 17.5616846666667,
+      "kind": "loot",
+      "last": 17.5616846666667,
+      "text": "裝備回收・雷步戰靴\n全隊移速 +21\n全隊拾取範圍 +26",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 17.702618,
+      "kind": "loot",
+      "last": 17.702618,
+      "text": "裝備回收・裂隙護甲\n全隊最大 HP +14\n受傷減少 1.8%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 18.097418,
+      "kind": "general",
+      "last": 18.097418,
+      "text": "特殊菁英：焰爆術士　八向火焰彈，先看地面預告再閃開。",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 19.2872513333334,
+      "kind": "loot",
+      "last": 19.2872513333334,
+      "text": "裝備回收・裂刃晶核\n全隊傷害 +6.4%\n全隊攻速 +2.1%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 19.2872513333334,
+      "kind": "general",
+      "last": 19.2872513333334,
+      "text": "自動強化：裂隙隊長：裂線分叉",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 19.8303846666667,
+      "kind": "loot",
+      "last": 26.217366,
+      "text": "裝備回收・裂刃晶核\n全隊傷害 +7.0%\n全隊攻速 +2.4%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 20.352618,
+      "kind": "loot",
+      "last": 20.352618,
+      "text": "已裝備・雷鑄晶核\n全隊傷害 +13.3%\n全隊攻速 +4.4%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 20.6291846666667,
+      "kind": "loot",
+      "last": 20.6291846666667,
+      "text": "已裝備・雷鑄晶核\n全隊傷害 +14.5%\n全隊攻速 +4.8%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 20.7692846666667,
+      "kind": "loot",
+      "last": 20.7692846666667,
+      "text": "已裝備・弒帷之心\n全隊傷害 +27.4%\n全隊攻速 +9.1%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 20.7692846666667,
+      "kind": "loot",
+      "last": 20.7692846666667,
+      "text": "裝備回收・雷鑄護甲\n全隊最大 HP +29\n受傷減少 3.6%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 21.033218,
+      "kind": "general",
+      "last": 21.033218,
+      "text": "自動強化：裂光狙擊手：裂光狙擊槍擴張",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 22.2313513333334,
+      "kind": "loot",
+      "last": 22.2313513333334,
+      "text": "已裝備・虛界護甲\n全隊最大 HP +40\n受傷減少 5.0%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 22.752618,
+      "kind": "general",
+      "last": 22.752618,
+      "text": "成就解鎖！精英首獵",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 22.752618,
+      "kind": "general",
+      "last": 22.752618,
+      "text": "成就解鎖！殲滅 500",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 22.752618,
+      "kind": "loot",
+      "last": 23.53644,
+      "text": "裝備回收・拾荒戰靴\n全隊移速 +11\n全隊拾取範圍 +14",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 23.1336733333334,
+      "kind": "loot",
+      "last": 23.1336733333334,
+      "text": "裝備回收・虛界晶核\n全隊傷害 +22.4%\n全隊攻速 +7.5%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 23.53644,
+      "kind": "hunt",
+      "last": 23.53644,
+      "text": "雙菁追獵完成：殘響 +5",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 24.0082993333334,
+      "kind": "battle",
+      "last": 24.0082993333334,
+      "text": "封隙 1/3｜第 2 道已開啟・加成 5 秒",
+      "urgent": true
+    },
+    {
+      "count": 1,
+      "first": 24.0082993333334,
+      "kind": "loot",
+      "last": 24.0082993333334,
+      "text": "裝備回收・雷步戰靴\n全隊移速 +23\n全隊拾取範圍 +27",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 24.0082993333334,
+      "kind": "loot",
+      "last": 24.0082993333334,
+      "text": "已裝備・虛界護甲\n全隊最大 HP +45\n受傷減少 5.6%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 24.1288326666667,
+      "kind": "formation",
+      "last": 24.1288326666667,
+      "text": "圓陣護衛：受傷 -10%｜傷害 -8%\n共鳴：牧長 傷害+8%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 24.5055993333334,
+      "kind": "loot",
+      "last": 24.5055993333334,
+      "text": "裝備回收・虛界護甲\n全隊最大 HP +42\n受傷減少 5.3%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 24.7664993333334,
+      "kind": "general",
+      "last": 24.7664993333334,
+      "text": "自動強化：裂隙牧者：裂傀編制增幅",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 26.897666,
+      "kind": "loot",
+      "last": 26.897666,
+      "text": "裝備回收・裂刃晶核\n全隊傷害 +6.8%\n全隊攻速 +2.3%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 27.161266,
+      "kind": "loot",
+      "last": 27.161266,
+      "text": "裝備回收・雷鑄晶核\n全隊傷害 +14.5%\n全隊攻速 +4.8%",
+      "urgent": false
+    },
+    {
+      "count": 4,
+      "first": 27.2943326666667,
+      "kind": "loot",
+      "last": 30.7430993333334,
+      "text": "裝備回收・裂隙護甲\n全隊最大 HP +15\n受傷減少 1.9%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 28.3442993333334,
+      "kind": "loot",
+      "last": 28.3442993333334,
+      "text": "裝備回收・裂刃晶核\n全隊傷害 +7.3%\n全隊攻速 +2.4%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 29.0143326666667,
+      "kind": "loot",
+      "last": 29.0143326666667,
+      "text": "已裝備・踏界之靴\n全隊移速 +50\n全隊拾取範圍 +60",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 30.4750993333334,
+      "kind": "general",
+      "last": 30.4750993333334,
+      "text": "自動強化：招募：星焰槍騎",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 32.2143326666667,
+      "kind": "hunt",
+      "last": 32.2143326666667,
+      "text": "追獵預告：6 秒後菁英抵達。圓陣護衛，楔形反擊。",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 33.5218882222222,
+      "kind": "loot",
+      "last": 33.5218882222222,
+      "text": "裝備回收・雷步戰靴\n全隊移速 +25\n全隊拾取範圍 +30",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 33.6497993333334,
+      "kind": "loot",
+      "last": 36.1309993333334,
+      "text": "裝備回收・拾荒戰靴\n全隊移速 +13\n全隊拾取範圍 +15",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 33.7905326666667,
+      "kind": "loot",
+      "last": 33.7905326666667,
+      "text": "裝備回收・雷鑄護甲\n全隊最大 HP +31\n受傷減少 3.8%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 33.7905326666667,
+      "kind": "loot",
+      "last": 33.7905326666667,
+      "text": "已裝備・弒帷之心\n全隊傷害 +31.6%\n全隊攻速 +10.5%",
+      "urgent": false
+    },
+    {
+      "count": 4,
+      "first": 35.1828993333334,
+      "kind": "loot",
+      "last": 41.9388993333334,
+      "text": "裝備回收・雷鑄晶核\n全隊傷害 +15.8%\n全隊攻速 +5.3%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 35.8518326666667,
+      "kind": "loot",
+      "last": 35.8518326666667,
+      "text": "裝備回收・裂刃晶核\n全隊傷害 +7.7%\n全隊攻速 +2.6%",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 37.0251326666667,
+      "kind": "loot",
+      "last": 37.5473993333334,
+      "text": "裝備回收・雷鑄晶核\n全隊傷害 +15.4%\n全隊攻速 +5.1%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 37.0251326666667,
+      "kind": "general",
+      "last": 37.0251326666667,
+      "text": "自動強化：裂隙隊長：裂線發射器擴張",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 37.5473993333334,
+      "kind": "loot",
+      "last": 37.5473993333334,
+      "text": "裝備回收・虛空行者\n全隊移速 +38\n全隊拾取範圍 +46",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 37.8018326666667,
+      "kind": "loot",
+      "last": 37.8018326666667,
+      "text": "裝備回收・雷步戰靴\n全隊移速 +26\n全隊拾取範圍 +32",
+      "urgent": false
+    },
+    {
+      "count": 4,
+      "first": 38.2017326666667,
+      "kind": "loot",
+      "last": 46.4309993333334,
+      "text": "裝備回收・裂隙護甲\n全隊最大 HP +16\n受傷減少 2.0%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 4,
+      "first": 39.0024326666667,
+      "kind": "loot",
+      "last": 47.3809993333334,
+      "text": "裝備回收・拾荒戰靴\n全隊移速 +14\n全隊拾取範圍 +16",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 41.2737326666667,
+      "kind": "loot",
+      "last": 41.2737326666667,
+      "text": "裝備回收・拾荒戰靴\n全隊移速 +13\n全隊拾取範圍 +16",
+      "urgent": false
+    },
+    {
+      "count": 4,
+      "first": 43.505766,
+      "kind": "loot",
+      "last": 48.455966,
+      "text": "裝備回收・裂刃晶核\n全隊傷害 +8.1%\n全隊攻速 +2.7%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 45.776466,
+      "kind": "general",
+      "last": 45.776466,
+      "text": "自動強化：裂隙隊長：裂弧雷鏈擴張",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 46.0461993333334,
+      "kind": "general",
+      "last": 46.0461993333334,
+      "text": "戰術追獵：雷爪獵將",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 46.0461993333334,
+      "kind": "battle",
+      "last": 53.5152993333334,
+      "text": "兩翼包抄｜預警・快封圓陣／慢封散兵・慢封反擊10秒",
+      "urgent": true
+    },
+    {
+      "count": 1,
+      "first": 46.1727993333334,
+      "kind": "general",
+      "last": 46.1727993333334,
+      "text": "特殊菁英：霜環守望者　霜晶彈環與近身緩速力場。",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 46.297666,
+      "kind": "loot",
+      "last": 46.297666,
+      "text": "裝備回收・雷步戰靴\n全隊移速 +27\n全隊拾取範圍 +32",
+      "urgent": false
+    },
+    {
+      "count": 5,
+      "first": 46.5665993333334,
+      "kind": "loot",
+      "last": 57.130366,
+      "text": "裝備回收・裂刃晶核\n全隊傷害 +8.3%\n全隊攻速 +2.8%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 46.847666,
+      "kind": "loot",
+      "last": 46.847666,
+      "text": "裝備回收・雷鑄護甲\n全隊最大 HP +33\n受傷減少 4.2%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 47.3809993333334,
+      "kind": "loot",
+      "last": 48.0418993333334,
+      "text": "裝備回收・虛空行者\n全隊移速 +41\n全隊拾取範圍 +49",
+      "urgent": false
+    },
+    {
+      "count": 6,
+      "first": 48.455966,
+      "kind": "loot",
+      "last": 57.9335986666667,
+      "text": "裝備回收・裂隙護甲\n全隊最大 HP +17\n受傷減少 2.1%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 49.254966,
+      "kind": "loot",
+      "last": 49.254966,
+      "text": "裝備回收・雷鑄護甲\n全隊最大 HP +32\n受傷減少 4.0%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 7,
+      "first": 49.6582326666667,
+      "kind": "loot",
+      "last": 68.894732,
+      "text": "裝備回收・拾荒戰靴\n全隊移速 +14\n全隊拾取範圍 +17",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 51.5258993333334,
+      "kind": "loot",
+      "last": 51.6636993333334,
+      "text": "裝備回收・虛空行者\n全隊移速 +42\n全隊拾取範圍 +50",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 51.930366,
+      "kind": "loot",
+      "last": 51.930366,
+      "text": "裝備回收・虛界晶核\n全隊傷害 +24.9%\n全隊攻速 +8.3%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 53.1136993333334,
+      "kind": "general",
+      "last": 53.1136993333334,
+      "text": "自動強化：星環護衛：返刃共振",
+      "urgent": false
+    },
+    {
+      "count": 3,
+      "first": 55.2636993333334,
+      "kind": "loot",
+      "last": 56.9823326666667,
+      "text": "裝備回收・雷鑄晶核\n全隊傷害 +16.6%\n全隊攻速 +5.5%",
+      "urgent": false
+    },
+    {
+      "count": 4,
+      "first": 55.653966,
+      "kind": "loot",
+      "last": 58.474332,
+      "text": "裝備回收・雷步戰靴\n全隊移速 +28\n全隊拾取範圍 +34",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 56.4636993333334,
+      "kind": "loot",
+      "last": 59.002632,
+      "text": "裝備回收・虛界晶核\n全隊傷害 +25.6%\n全隊攻速 +8.5%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 57.539432,
+      "kind": "battle",
+      "last": 57.539432,
+      "text": "封隙 2/3｜第 3 道已開啟・加成 5 秒",
+      "urgent": true
+    },
+    {
+      "count": 1,
+      "first": 57.6793653333334,
+      "kind": "formation",
+      "last": 57.6793653333334,
+      "text": "散兵游擊：拾取 +60%｜移動 +8%｜傷害 -5%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 57.6793653333334,
+      "kind": "hunt",
+      "last": 57.6793653333334,
+      "text": "三陣演練完成：殘響 +3",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 57.8045653333334,
+      "kind": "loot",
+      "last": 69.962832,
+      "text": "裝備回收・雷鑄晶核\n全隊傷害 +17.0%\n全隊攻速 +5.7%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 58.474332,
+      "kind": "loot",
+      "last": 58.474332,
+      "text": "已裝備・虛界護甲\n全隊最大 HP +51\n受傷減少 6.4%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 58.747232,
+      "kind": "general",
+      "last": 58.747232,
+      "text": "自動強化：裂隙隊長：星環共鳴",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 59.5233653333334,
+      "kind": "loot",
+      "last": 59.5233653333334,
+      "text": "裝備回收・裂刃晶核\n全隊傷害 +8.5%\n全隊攻速 +2.8%",
+      "urgent": false
+    },
+    {
+      "count": 3,
+      "first": 59.7362986666667,
+      "kind": "loot",
+      "last": 84.8490986666668,
+      "text": "裝備回收・雷步戰靴\n全隊移速 +29\n全隊拾取範圍 +35",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 59.8805653333334,
+      "kind": "loot",
+      "last": 59.8805653333334,
+      "text": "已裝備・虛界護甲\n全隊最大 HP +52\n受傷減少 6.5%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 4,
+      "first": 60.6591653333334,
+      "kind": "loot",
+      "last": 80.9138986666668,
+      "text": "裝備回收・雷鑄護甲\n全隊最大 HP +35\n受傷減少 4.4%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 5,
+      "first": 61.7138986666667,
+      "kind": "loot",
+      "last": 84.0629129523811,
+      "text": "裝備回收・裂刃晶核\n全隊傷害 +8.7%\n全隊攻速 +2.9%",
+      "urgent": false
+    },
+    {
+      "count": 5,
+      "first": 62.6305653333334,
+      "kind": "loot",
+      "last": 66.240332,
+      "text": "裝備回收・裂隙護甲\n全隊最大 HP +17\n受傷減少 2.2%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 3,
+      "first": 62.7786986666667,
+      "kind": "loot",
+      "last": 73.5501320000001,
+      "text": "裝備回收・拾荒戰靴\n全隊移速 +15\n全隊拾取範圍 +17",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 67.147232,
+      "kind": "general",
+      "last": 67.147232,
+      "text": "自動強化：裂光狙擊手：裂光校準",
+      "urgent": false
+    },
+    {
+      "count": 6,
+      "first": 67.9477986666667,
+      "kind": "loot",
+      "last": 79.5882320000001,
+      "text": "裝備回收・雷鑄晶核\n全隊傷害 +17.9%\n全隊攻速 +6.0%",
+      "urgent": false
+    },
+    {
+      "count": 6,
+      "first": 69.962832,
+      "kind": "loot",
+      "last": 77.8612986666668,
+      "text": "裝備回收・裂隙護甲\n全隊最大 HP +18\n受傷減少 2.2%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 71.4264605714286,
+      "kind": "loot",
+      "last": 71.4264605714286,
+      "text": "裝備回收・雷鑄護甲\n全隊最大 HP +36\n受傷減少 4.5%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 71.4264605714286,
+      "kind": "loot",
+      "last": 71.4264605714286,
+      "text": "裝備回收・雷鑄晶核\n全隊傷害 +17.5%\n全隊攻速 +5.8%",
+      "urgent": false
+    },
+    {
+      "count": 4,
+      "first": 72.4805653333334,
+      "kind": "loot",
+      "last": 82.8805653333335,
+      "text": "裝備回收・拾荒戰靴\n全隊移速 +15\n全隊拾取範圍 +18",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 74.2283986666667,
+      "kind": "general",
+      "last": 74.2283986666667,
+      "text": "特殊菁英：星盾重衛　護盾減傷，蓄力前會露出破綻。",
+      "urgent": false
+    },
+    {
+      "count": 4,
+      "first": 74.4850986666668,
+      "kind": "loot",
+      "last": 81.4392653333335,
+      "text": "裝備回收・裂刃晶核\n全隊傷害 +8.9%\n全隊攻速 +3.0%",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 76.1805653333334,
+      "kind": "loot",
+      "last": 76.1805653333334,
+      "text": "裝備回收・雷步戰靴\n全隊移速 +30\n全隊拾取範圍 +36",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 80.5209320000001,
+      "kind": "general",
+      "last": 80.5209320000001,
+      "text": "自動強化：裂隙隊長：裂線發射器冷卻",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 81.0472320000001,
+      "kind": "loot",
+      "last": 85.3826320000002,
+      "text": "裝備回收・雷鑄護甲\n全隊最大 HP +37\n受傷減少 4.6%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 82.2138986666668,
+      "kind": "loot",
+      "last": 82.2138986666668,
+      "text": "裝備回收・裂隙護甲\n全隊最大 HP +18\n受傷減少 2.3%（總減傷上限 15%）",
+      "urgent": false
+    },
+    {
+      "count": 2,
+      "first": 84.0629129523811,
+      "kind": "general",
+      "last": 84.0629129523811,
+      "text": "戰術追獵：霜環守望者",
+      "urgent": false
+    },
+    {
+      "count": 1,
+      "first": 84.0629129523811,
+      "kind": "battle",
+      "last": 84.0629129523811,
+      "text": "遠射鎖定落點｜預警・快封散兵／慢封楔形・慢封反擊10秒",
+      "urgent": true
+    },
+    {
+      "count": 2,
+      "first": 84.0629129523811,
+      "kind": "loot",
+      "last": 85.1305653333335,
+      "text": "裝備回收・裂刃晶核\n全隊傷害 +9.2%\n全隊攻速 +3.0%",
+      "urgent": false
+    }
+  ],
+  "label": "artillery-active",
+  "landmarks": {
+    "composition": "artillery",
+    "indices": [
+      5,
+      3
+    ]
+  },
+  "node": "spec_shield",
+  "provenance": "continuous normal-input battle; no time/HP/DPS/completion assignment",
+  "relay": {
+    "anchor_x": 837.302856445312,
+    "anchor_y": 376.792236328125,
+    "captain_x": 778.929443359375,
+    "captain_y": 360.027709960938,
+    "completed": false,
+    "cycles": 0,
+    "distance": 49.7812080383301,
+    "hold": 0,
+    "marker": "第 3 道・到位 7 人・需 2",
+    "open": true,
+    "phase": "active",
+    "pressure": "artillery",
+    "required": "scatter",
+    "saved": false,
+    "settled": 7,
+    "step": 2,
+    "wrong": 0
+  },
+  "sample": 2,
+  "scenario": "battle",
+  "seed": 55210,
+  "settlements": 0,
+  "snapshot": {
+    "all_recruited_max_hp": 1158,
+    "current_max_hp": 1158,
+    "healing": 0,
+    "hp": 1086.41872270396,
+    "hp_retention": 0.938185425478373,
+    "kills": 2143,
+    "living": 8,
+    "prevented": 0,
+    "roster": [
+      "rift_captain",
+      "arc_scout",
+      "pulse_artificer",
+      "rift_shepherd",
+      "orbit_guard",
+      "line_mender",
+      "rift_sniper",
+      "solar_lancer"
+    ],
+    "taken": 143.669231156044,
+    "time": 86.1972320000002
+  },
+  "team": "assault",
+  "time": 86.1972320000002,
+  "version": "0.56.0-content-r27",
+  "vouchers": 0,
+  "captured_utc": "2026-11-02T10:16:40.199Z",
+  "capture_driver_sha256": "768413d908d67d6ef215a0837e55c73cab0949e110ec82f0dbd25db7eb8c009c",
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "file": "review-set/08-assault-artillery-active.png",
+  "sha256": "e5282734c4937a2b69f05a2c5d52e2f900b1e1c51cda0468bc64423ea108e385",
+  "dimensions": [
+    2532,
+    1170
+  ],
+  "width": 844,
+  "height": 390,
+  "dpr": 3,
+  "postprocessed": false,
+  "errors": [],
+  "known_uid_warnings": [
+    "WARNING: 'res://scenes/enemies/Enemy.tscn': In external resource #0, invalid UID: 'uid://bdjiu1vdhnva8' - using text path instead: 'res://scripts/enemies/enemy.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/heroes/Hero.tscn': In external resource #0, invalid UID: 'uid://b03h8fce7yo4h' - using text path instead: 'res://scripts/heroes/hero.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/heroes/Hero.tscn': In external resource #1, invalid UID: 'uid://bvdrm3bnn22fp' - using text path instead: 'res://scripts/player/player_visual.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/weapons/LinearBulletWeapon.tscn': In external resource #0, invalid UID: 'uid://y0ifhp6aek4q' - using text path instead: 'res://scripts/weapons/linear_bullet_weapon.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/weapons/ChainLightningWeapon.tscn': In external resource #0, invalid UID: 'uid://r34rqjh5rhuc' - using text path instead: 'res://scripts/weapons/chain_lightning_weapon.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://resources/weapons/pulse_bloom.tres': In external resource #0, invalid UID: 'uid://cy7niv7tqxgjw' - using text path instead: 'res://scripts/resources/weapon_data.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/weapons/ExplosionWeapon.tscn': In external resource #0, invalid UID: 'uid://qpxsdg4ib4pw' - using text path instead: 'res://scripts/weapons/explosion_weapon.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/weapons/BoomerangWeapon.tscn': In external resource #0, invalid UID: 'uid://cu6wgjts36j1v' - using text path instead: 'res://scripts/weapons/boomerang_weapon.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/weapons/HomingMissileWeapon.tscn': In external resource #0, invalid UID: 'uid://cicio67l8hh7w' - using text path instead: 'res://scripts/weapons/homing_missile_weapon.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://resources/weapons/grenade_lob.tres': In external resource #0, invalid UID: 'uid://cy7niv7tqxgjw' - using text path instead: 'res://scripts/resources/weapon_data.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/weapons/GrenadeLobWeapon.tscn': In external resource #0, invalid UID: 'uid://8ehxjfp3cvax' - using text path instead: 'res://scripts/weapons/grenade_lob_weapon.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/weapons/RailLanceWeapon.tscn': In external resource #0, invalid UID: 'uid://3ufdb44lxu6w' - using text path instead: 'res://scripts/weapons/rail_lance_weapon.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/weapons/EchoHymnWeapon.tscn': In external resource #0, invalid UID: 'uid://dv3dpccemkdl' - using text path instead: 'res://scripts/weapons/echo_hymn_weapon.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/projectiles/Projectile.tscn': In external resource #0, invalid UID: 'uid://dmnivqvnx3msr' - using text path instead: 'res://scripts/projectiles/projectile.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/projectiles/OrbitProjectile.tscn': In external resource #0, invalid UID: 'uid://ce5p22o4lc8we' - using text path instead: 'res://scripts/projectiles/orbit_projectile.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/projectiles/ExplosionArea.tscn': In external resource #0, invalid UID: 'uid://dts4g75qwsmht' - using text path instead: 'res://scripts/projectiles/explosion_area.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/projectiles/HazardZone.tscn': In external resource #0, invalid UID: 'uid://dfyhbi0sl1bg3' - using text path instead: 'res://scripts/projectiles/hazard_zone.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/pickups/XPGem.tscn': In external resource #0, invalid UID: 'uid://bnxqgej0s7ij3' - using text path instead: 'res://scripts/pickups/pickup.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/pickups/CoinPickup.tscn': In external resource #0, invalid UID: 'uid://bnxqgej0s7ij3' - using text path instead: 'res://scripts/pickups/pickup.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/vfx/DamageNumber.tscn': In external resource #0, invalid UID: 'uid://bwncf505utn40' - using text path instead: 'res://scripts/vfx/damage_number.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/vfx/DeathBurst.tscn': In external resource #0, invalid UID: 'uid://d2e1nsvw32d27' - using text path instead: 'res://scripts/vfx/death_burst.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/vfx/LightningArc.tscn': In external resource #0, invalid UID: 'uid://cdynht625kx80' - using text path instead: 'res://scripts/vfx/lightning_arc.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #0, invalid UID: 'uid://cvp1iu71i6lo1' - using text path instead: 'res://scripts/arena/arena.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #1, invalid UID: 'uid://cjnsfivopi2bc' - using text path instead: 'res://scripts/arena/arena_background.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #2, invalid UID: 'uid://d0mybkg1o8106' - using text path instead: 'res://scripts/heroes/squad_manager.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/arena/Arena.tscn': In external resource #3, invalid UID: 'uid://dv3cdftopmui4' - using text path instead: 'res://scripts/enemies/enemy_spawner.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/ui/HUD.tscn': In external resource #0, invalid UID: 'uid://ck6rhg5ngj0p6' - using text path instead: 'res://scripts/ui/hud.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/ui/ContractScreen.tscn': In external resource #0, invalid UID: 'uid://c0gscje856pvl' - using text path instead: 'res://scripts/ui/contract_screen.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/ui/LevelUpScreen.tscn': In external resource #0, invalid UID: 'uid://n00fn16r4v8g' - using text path instead: 'res://scripts/ui/level_up_screen.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/ui/GameOverScreen.tscn': In external resource #0, invalid UID: 'uid://g1cw2dpki4sq' - using text path instead: 'res://scripts/ui/game_over_screen.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/ui/RiftShopScreen.tscn': In external resource #0, invalid UID: 'uid://p6x4x0tpoxwe' - using text path instead: 'res://scripts/ui/rift_shop_screen.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/ui/StageVictoryScreen.tscn': In external resource #0, invalid UID: 'uid://cnfhgtuxh3pi2' - using text path instead: 'res://scripts/ui/stage_victory_screen.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "WARNING: 'res://scenes/ui/MainMenu.tscn': In external resource #0, invalid UID: 'uid://bes56qxemhycu' - using text path instead: 'res://scripts/ui/main_menu.gd'.",
+    "   at: open (core/io/resource_format_binary.cpp:1028)",
+    "   GDScript backtrace (most recent call first):",
+    "       [0] _ready (res://scripts/debug/content_r4_run.gd:33)",
+    "       [1] _ready (res://scripts/debug/content_r4_review.gd:25)"
+  ],
+  "external_requests": [],
+  "pack_sha256": "02e74ec2f96c68d22a479fcdee68c473b6f345557a3c0651571c9e141e3a2bf1",
+  "source_manifest_sha256": "9d72717cf865cbc98abd2c90bfa40cc4a6d6e38a058959fb15173f385dda683d",
+  "export_driver_sha256": "534297fcea5499b15e64eb8815ba1be0568d55c296cd39f74bb8d0088bc35e51",
+  "root_headers_unchanged": true,
+  "release_entry_restored": true,
+  "isolated_header_entry": "review fixture",
+  "command": [
+    "C:\\Users\\digimkt\\.codex\\tools\\godot-4.7-stable\\Godot_v4.7-stable_win64_console.exe",
+    "--headless",
+    "--audio-driver",
+    "Dummy",
+    "--path",
+    "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\.audit-tmp\\content-r27\\export-project",
+    "--export-debug",
+    "Web",
+    "C:\\Users\\digimkt\\Desktop\\遊戲\\rift-survivors\\export\\content-r27\\review\\index.html"
+  ],
+  "files": {
+    "index-02e74ec2f96c.pck": "02e74ec2f96c68d22a479fcdee68c473b6f345557a3c0651571c9e141e3a2bf1",
+    "index.144x144.png": "95ef7f16f58c1812bc48a4ae75bb385ff069a917eb6933433da71ff843c25f73",
+    "index.180x180.png": "307877addefdf541529d5b9e42c571fb2225b51a8f391a7c2489445b2dd04f1b",
+    "index.512x512.png": "e894b268f21150c86c02c5742cebd279dfcf9b78e3959f21551746ac00e16ac6",
+    "index.audio.position.worklet.js": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8",
+    "index.audio.worklet.js": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3",
+    "index.html": "e0e99f7eab3554fb832ca5ea442b251cb3a71bc668a4c11fedcee3050aaaccf5",
+    "index.js": "ffc3898b59fba6f5af0c02f76e5ee526cc061e65c7d2d6f4f98186876cea15c4",
+    "index.manifest.json": "1ce1d089c89c29cc294ff28d7e87a238654ef3010c25df31cde5746b49139044",
+    "index.offline.html": "dd6eaa279aae4b3a5aa7f9e092c6f1750c747979987ef6f7e7e10e4f37148482",
+    "index.pck": "02e74ec2f96c68d22a479fcdee68c473b6f345557a3c0651571c9e141e3a2bf1",
+    "index.png": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e",
+    "index.service.worker.js": "2f0f4ff9dea3d1149e0a267229df45dad1bd9cfcc7a895af820482041c182231",
+    "index.wasm": "a7f772811c728a540ff559a91742ef025f9dc6de1947a09dd9f5cf8c93bf85c7",
+    "r33-web-focal.png": "04c40aa03c257a251aa42e4a1758445acd25b88427de3c68a951b971087049bd"
+  },
+  "protection_before": {
+    "status": "VERIFIED",
+    "failures": [],
+    "history_files": 6075,
+    "initial_files": 4238,
+    "pins": {
+      "tests/historical.json": "123706927657930e438d7ffd79b1b3c40d7326e0938eb717a5e58c63d14d0f77",
+      "tests/initial-files.json": "22ca9db255e68b41bd6876b06749164433a2d1dacf028dd36edd5fbe8d1ea854",
+      "tests/default-profile-before.json": "7bee442abfd334c4a59caf3500480407d0442d863ff83429c515f1adebf1566d",
+      "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "captured_unix_ns": 1793613534457719300
+  },
+  "protection_after": {
+    "status": "VERIFIED",
+    "failures": [],
+    "history_files": 6075,
+    "initial_files": 4238,
+    "pins": {
+      "tests/historical.json": "123706927657930e438d7ffd79b1b3c40d7326e0938eb717a5e58c63d14d0f77",
+      "tests/initial-files.json": "22ca9db255e68b41bd6876b06749164433a2d1dacf028dd36edd5fbe8d1ea854",
+      "tests/default-profile-before.json": "7bee442abfd334c4a59caf3500480407d0442d863ff83429c515f1adebf1566d",
+      "tests/external-changes.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "captured_unix_ns": 1793613544104952000
+  },
+  "boundary_driver_sha256": "158cb98404aa6caf66a634a8c689eb97bda47d11690463ca8f57509e1c19cd83",
+  "content_version": "0.56.0-content-r27"
+}
