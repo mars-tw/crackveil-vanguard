@@ -294,6 +294,11 @@ func _refresh() -> void:
 	summary_label.text="%s｜%s\n%s・%s\n擊殺 %d・存活 %d/%d\n羈絆收益（全隊加成）回%d／減%d HP\n殘響 +%d・現有 %d\n下一步 %s・%s" % [CATALOG.TEAMS.get(team,CATALOG.TEAMS.legacy).name,node.get("name","未裝節點"),outcome,GameManager.format_time(float(displayed_summary.get("elapsed_time",0))),displayed_summary.get("kills",0),displayed_summary.get("squad_alive",0),displayed_summary.get("squad_total",rows.size()),bond.get("healing",0),bond.get("prevented",0),displayed_summary.get("echo_shards_earned",0),echo.get("shards",MetaProgress.shards),goal.get("name","強化完成"),("還差 %d" % int(goal.get("remaining",0))) if int(goal.get("remaining",0))>0 else ("可在整備兌換" if goal.get("kind","")=="spendable" else "已達成")]
 	if int(bond.get("healing",0)) == 0 and int(bond.get("prevented",0)) == 0:
 		summary_label.text = summary_label.text.replace("羈絆收益（全隊加成）回0／減0 HP", summary_bond_line())
+	var badges := victory_badges(displayed_summary) if victory else ""
+	if badges != "":
+		var lines := summary_label.text.split("\n")
+		lines.insert(2, badges)
+		summary_label.text = "\n".join(lines)
 	if not victory:
 		var advice:=_defeat_advice(displayed_summary.get("seal_state",{}))
 		if advice!="":summary_label.text+="\n"+advice
@@ -442,9 +447,9 @@ func _defeat_advice(seal: Dictionary) -> String:
 	# a run that held an accepted formation reads "陣形對了" instead of "需散兵，當時散兵".
 	var accepted: Array = seal.get("accepted", [seal.get("required","")])
 	var held_ok := accepted.has(str(seal.get("formation","")))
-	if int(seal.get("wrong",0))>0 and not held_ok:return "下次：倒在第 %d 道（需%s，當時%s），錯陣反噬 %d 次；先看危險區上的陣形圖示" % [mini(step+1,3),need,held,int(seal.get("wrong",0))]
-	if int(seal.get("wrong",0))>0:return "下次：倒在第 %d 道時陣形對了（%s），但先前錯陣反噬 %d 次；攻勢間隙帶兩名隊友站進封隙" % [mini(step+1,3),held,int(seal.get("wrong",0))]
-	return "下次：倒在第 %d 道（封隙 %d/3），攻勢間隙帶兩名隊友站進封隙" % [mini(step+1,3),step]
+	if int(seal.get("wrong",0))>0 and not held_ok:return "下次：倒在第 %d 道時需%s、當時%s，錯陣反噬 %d 次；先看危險區上的陣形圖示" % [mini(step+1,3),need,held,int(seal.get("wrong",0))]
+	if int(seal.get("wrong",0))>0:return "下次：倒在第 %d 道時%s陣形對了，但先前錯陣反噬 %d 次；攻勢間隙帶兩名隊友站進封隙" % [mini(step+1,3),held,int(seal.get("wrong",0))]
+	return "下次：倒在第 %d 道・封隙 %d/3，攻勢間隙帶兩名隊友站進封隙" % [mini(step+1,3),step]
 
 # R13: how well the squad read the attack waves this run, from real timers:
 # share of attack-wave time spent in an accepted formation, and backlashes.
@@ -488,6 +493,23 @@ static func damage_share_line(contribution_rows: Array) -> String:
 		return ""
 	return "輸出：隊長 %d%%・隊員合計 %d%%（%d 人）" % [roundi(100.0 * captain / total), roundi(100.0 * members / total), member_count]
 
+# R32: the run's tactical achievements as one line under the outcome, so a
+# clean victory reads as a feat before the numbers.
+static func victory_badges(summary: Dictionary) -> String:
+	var seal: Dictionary = summary.get("seal_state", {})
+	var out := PackedStringArray()
+	if not seal.is_empty() and int(seal.get("wrong", 0)) == 0:
+		out.append("零錯陣")
+	if int(seal.get("fast_seals", 0)) >= 3 and int(seal.get("slow_seals", 0)) == 0:
+		out.append("三道全快封")
+	if int(summary.get("squad_total", 0)) > 0 and int(summary.get("squad_alive", 0)) >= int(summary.get("squad_total", 0)):
+		out.append("全員生還")
+	if int(seal.get("ember_rings", 0)) > 0:
+		out.append("熔火環全躲 %d/%d" % [int(seal.get("ember_clean", 0)), int(seal.get("ember_rings", 0))])
+	if out.is_empty():
+		return ""
+	return "戰績：" + "・".join(out)
+
 # R30: how the squad handled the garden vine snares (fewer hits = spread well).
 static func vine_line(seal: Dictionary) -> String:
 	var parts := PackedStringArray()
@@ -495,7 +517,7 @@ static func vine_line(seal: Dictionary) -> String:
 		parts.append("荊藤纏地 %d 次・隊員被纏 %d 下" % [int(seal.get("vine_snares", 0)), int(seal.get("vine_hits", 0))])
 	# R31: the forge's ember ring, the same way.
 	if int(seal.get("ember_rings", 0)) > 0:
-		parts.append("熔火環爆 %d 次・隊員被燒 %d 人次" % [int(seal.get("ember_rings", 0)), int(seal.get("ember_hits", 0))])
+		parts.append("熔火環爆 %d 次・全員躲過 %d 次・被燒 %d 人次" % [int(seal.get("ember_rings", 0)), int(seal.get("ember_clean", 0)), int(seal.get("ember_hits", 0))])
 	return "\n".join(parts)
 
 # R27: what the squad catch-up did this run (peak multiplier and added damage).

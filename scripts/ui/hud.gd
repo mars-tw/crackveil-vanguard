@@ -1626,13 +1626,16 @@ func _apply_phone_battle_layout(view: Vector2, phone: bool) -> void:
 		button.custom_minimum_size = Vector2(44,44)
 		button.add_theme_font_size_override("font_size", 14)
 		var panel := StyleBoxFlat.new()
-		panel.bg_color = Color(0.025,0.06,0.10,0.40)
-		panel.border_color = Color(0.5,0.8,1.0,0.5)
+		# R32: near-opaque in every state, so 圓陣 / 召喚 stay readable over a crowd.
+		panel.bg_color = Color(0.025,0.06,0.10,0.90)
+		panel.border_color = Color(0.5,0.8,1.0,0.7)
 		panel.set_border_width_all(1)
 		panel.set_corner_radius_all(8)
 		panel.content_margin_left = 6
 		panel.content_margin_right = 6
 		button.add_theme_stylebox_override("normal",panel)
+		for state in ["hover", "pressed", "disabled"]:
+			button.add_theme_stylebox_override(state,panel)
 	pause_auto_button.custom_minimum_size = Vector2(0,44)
 	pause_auto_button.add_theme_font_size_override("font_size",14)
 	summon_button.text = "召喚"
@@ -2365,7 +2368,7 @@ func _refresh_formation_button(phone: bool) -> void:
 	formation_button.tooltip_text = "點按切換小隊陣形；長按直選" if MOBILE_TUNING.has_confirmed_touch() else "切換小隊陣形（Q）：楔形突擊 / 圓陣護衛 / 散兵游擊"
 	var color: Color = definition.get("color", Color.WHITE)
 	formation_button.add_theme_color_override("font_color", color.lightened(0.25))
-	formation_button.add_theme_color_override("font_disabled_color", Color(color.r, color.g, color.b, 0.55))
+	formation_button.add_theme_color_override("font_disabled_color", Color(color.r, color.g, color.b, 0.85))
 	if not formation_hint_shown and GameManager.game_running and float(GameManager.elapsed_time) >= 6.0 and int(squad.get("formation_switch_count")) == 0:
 		formation_hint_shown = true
 		_on_toast_requested("點按「%s」換陣；長按直選\n圓陣護衛・楔形反擊・散兵回收" % ("陣形" if MOBILE_TUNING.has_confirmed_touch() else "Q／陣形"))

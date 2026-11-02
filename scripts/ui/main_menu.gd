@@ -736,7 +736,10 @@ func _open_build_preparation() -> void:
 		preparation.name="BuildPreparation"
 		add_child(preparation)
 		preparation.launch_requested.connect(func():GameManager.tactical_launch=false;_start_run("",true))
+		# R32: the menu's version string would show half-cut under the page frame.
+		preparation.root.visibility_changed.connect(func():version_label.visible=not preparation.root.visible)
 	preparation.open()
+	version_label.visible = not preparation.root.visible
 
 
 func _on_close_panel_pressed() -> void:

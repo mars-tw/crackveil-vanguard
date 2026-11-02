@@ -23,8 +23,9 @@ static var last_spawned: Node2D = null
 
 # R31: a snare never lands on an open seal: it is pushed off the seal's area,
 # so "spread out" and "stand in the seal" never ask for the same spot.
+# R32: shared by every stage hazard; reach is the hazard's own outer radius.
 const SEAL_CLEARANCE := 150.0
-static func off_seal(at: Vector2) -> Vector2:
+static func off_seal(at: Vector2, reach: float = RADIUS) -> Vector2:
 	var director = GameManager.get("tactical_director")
 	if director == null or not is_instance_valid(director) or director.get("relay") == null or not is_instance_valid(director.relay):
 		return at
@@ -33,11 +34,11 @@ static func off_seal(at: Vector2) -> Vector2:
 		return at
 	var seal: Vector2 = relay.to_global(relay.anchor)
 	var away := at - seal
-	if away.length() >= SEAL_CLEARANCE + RADIUS:
+	if away.length() >= SEAL_CLEARANCE + reach:
 		return at
 	if away.length() < 1.0:
 		away = Vector2.RIGHT
-	return seal + away.normalized() * (SEAL_CLEARANCE + RADIUS)
+	return seal + away.normalized() * (SEAL_CLEARANCE + reach)
 
 static func spawn(parent: Node, at: Vector2) -> Node2D:
 	if parent.get_tree() != null and parent.get_tree().get_nodes_in_group("vine_snares").size() >= MAX_ACTIVE:

@@ -51,8 +51,8 @@ func _test_formation_verdicts() -> void:
 	# wording must follow the measured hit/protection fields, never invent one.
 	var relay: Node2D=load("res://scripts/services/formation_relay.gd").new()
 	_check(relay.result_text({"formation":"ring","members":6,"hit":5,"protected":5,"reduced":50,"correct":true})=="圓陣護住 5 人・減傷 50","ring protection reports measured reduction")
-	_check(relay.result_text({"formation":"wedge","members":3,"hit":0,"protected":0,"reduced":0,"correct":true})=="楔形對陣・全員避開","correct formation with no hits")
+	_check(relay.result_text({"formation":"wedge","members":3,"hit":0,"protected":0,"reduced":0,"correct":true})=="楔形正確・無人中招","correct formation with no hits")
 	_check(relay.result_text({"formation":"wedge","members":4,"hit":2,"protected":0,"reduced":0,"correct":false})=="錯陣・2/4 人中招","wrong formation reports measured hits")
-	_check(relay.result_text({"formation":"scatter","members":5,"hit":1,"protected":0,"reduced":0,"correct":true})=="散兵對陣・1/5 人中招","correct formation still reports real hits")
-	_check(relay.result_text({"formation":"ring","members":4,"hit":0,"protected":0,"reduced":0,"correct":false})=="全員避開・圓陣無法封合","avoided but wrong formation cannot seal")
+	_check(relay.result_text({"formation":"scatter","members":5,"hit":1,"protected":0,"reduced":0,"correct":true})=="散兵正確・1/5 人中招","correct formation still reports real hits")
+	_check(relay.result_text({"formation":"ring","members":4,"hit":0,"protected":0,"reduced":0,"correct":false})=="無人中招・圓陣無法封合","avoided but wrong formation cannot seal")
 	relay.free()

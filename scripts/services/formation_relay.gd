@@ -50,7 +50,9 @@ const SEAL_FLASH_SECONDS := 2.6
 var label_layer: CanvasLayer
 var marker_label: Label
 var text_layer: Node2D
-const TEXT_LAYER_Z := 30
+# R32: absolute, above the squad floor halos (95) and pace tags (97), below
+# the hazard status marks (120), so no halo covers a verdict plate.
+const TEXT_LAYER_Z := 105
 var equipment_details: Control
 
 func required_formation() -> String:
@@ -199,7 +201,7 @@ func next_action() -> String:
 		# R16: the fast/slow tag stays visible while the seal fills.
 		var held: String = GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else ""
 		var tag := ("・慢封" if is_instance_valid(pressure) and GameManager.STARTING_BUILD.is_secondary(pressure.kind, held) else "・快封")
-		return "到位 %d 人（需 2）・封合 %d%%%s" % [settled,int(hold/HOLD_SECONDS*100),tag]
+		return "到位 %d 人・需 2・封合 %d%%%s" % [settled,int(hold/HOLD_SECONDS*100),tag]
 	if counter_timer>0:
 		var label: String="放棄治療・反擊增傷" if GameManager.active_starting_node=="spec_prepare" else "對陣反擊增傷"
 		return "%s +20%%・剩 %d 秒" % [label,ceili(counter_timer)]
@@ -313,6 +315,7 @@ func _ready() -> void:
 	# seal frames, elite halos and squad markers instead of underneath them.
 	text_layer = Node2D.new()
 	text_layer.name = "RuleTextLayer"
+	text_layer.z_as_relative = false
 	text_layer.z_index = TEXT_LAYER_Z
 	add_child(text_layer)
 	text_layer.draw.connect(_draw_text_layer)
@@ -531,8 +534,8 @@ func result_text(result: Dictionary) -> String:
 	if int(result.protected) > 0:
 		return "%s護住 %d 人・減傷 %d" % [name,int(result.protected),int(result.reduced)]
 	if hit == 0:
-		return "%s對陣・全員避開" % name if bool(result.correct) else "全員避開・%s無法封合" % name
-	return "%s對陣・%d/%d 人中招" % [name,hit,members] if bool(result.correct) else "錯陣・%d/%d 人中招" % [hit,members]
+		return "%s正確・無人中招" % name if bool(result.correct) else "無人中招・%s無法封合" % name
+	return "%s正確・%d/%d 人中招" % [name,hit,members] if bool(result.correct) else "錯陣・%d/%d 人中招" % [hit,members]
 
 # Vector badge of a formation (assets/ui/r8_vector); size is the badge radius.
 func _draw_badge(center: Vector2, id: String, radius: float) -> void:
