@@ -417,6 +417,10 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	tide_sigils_cast = 0
 	tide_sigils_matched = 0
 	tide_wave_hits = 0
+	moon_blooms_cast = 0
+	moon_blooms_cut = 0
+	moon_bloom_heals = 0
+	moon_bloom_sprouts = 0
 	sand_storm_hits = 0
 	bond_benefits = {"healing":0.0,"prevented":0.0,"triggers":0}
 	next_elite_bonus_xp = 0
@@ -1359,6 +1363,11 @@ var sand_glyphs_solved := 0
 var tide_sigils_cast := 0
 var tide_sigils_matched := 0
 var tide_wave_hits := 0
+# R40: ninth-stage moon blooms planted, cut by the captain's spin, and enemies healed.
+var moon_blooms_cast := 0
+var moon_blooms_cut := 0
+var moon_bloom_heals := 0
+var moon_bloom_sprouts := 0
 var sand_storm_hits := 0
 
 func current_catch_up() -> float:
@@ -1907,7 +1916,7 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 	var director: Node = tactical_director if is_instance_valid(tactical_director) else null
 	var relay_node: Node = director.relay if director != null and is_instance_valid(director.relay) else null
 	if relay_node != null:
-		enriched["seal_state"] = {"step": int(relay_node.step), "completed": bool(relay_node.completed), "wrong": int(relay_node.wrong_penalties), "pressure_seconds": float(relay_node.pressure_seconds), "fast_seals": relay_node.history.filter(func(h): return not STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "slow_seals": relay_node.history.filter(func(h): return STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "matched_seconds": float(relay_node.matched_seconds), "synergy_damage": float(relay_node.synergy_damage), "catch_up_peak": catch_up_peak, "catch_up_damage": catch_up_damage, "vine_snares": vine_snares_cast, "vine_hits": vine_snare_hits, "ember_rings": ember_rings_cast, "ember_hits": ember_ring_hits, "ember_clean": ember_rings_clean, "storm_pylons": storm_pylons_cast, "storm_grounded": storm_pylons_grounded, "storm_hits": storm_pylon_hits, "frost_walls": frost_walls_cast, "frost_clean": frost_walls_clean, "frost_hits": frost_wall_hits, "veil_lances": veil_lances_cast, "veil_blocked": veil_lances_blocked, "veil_hits": veil_lance_hits, "sand_glyphs": sand_glyphs_cast, "sand_solved": sand_glyphs_solved, "sand_hits": sand_storm_hits, "tide_sigils": tide_sigils_cast, "tide_matched": tide_sigils_matched, "tide_hits": tide_wave_hits, "required": str(relay_node.required_formation()), "accepted": Array(relay_node.accepted_formations()), "formation": squad_manager.get_formation_id() if is_instance_valid(squad_manager) else ""}
+		enriched["seal_state"] = {"step": int(relay_node.step), "completed": bool(relay_node.completed), "wrong": int(relay_node.wrong_penalties), "pressure_seconds": float(relay_node.pressure_seconds), "fast_seals": relay_node.history.filter(func(h): return not STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "slow_seals": relay_node.history.filter(func(h): return STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "matched_seconds": float(relay_node.matched_seconds), "synergy_damage": float(relay_node.synergy_damage), "catch_up_peak": catch_up_peak, "catch_up_damage": catch_up_damage, "vine_snares": vine_snares_cast, "vine_hits": vine_snare_hits, "ember_rings": ember_rings_cast, "ember_hits": ember_ring_hits, "ember_clean": ember_rings_clean, "storm_pylons": storm_pylons_cast, "storm_grounded": storm_pylons_grounded, "storm_hits": storm_pylon_hits, "frost_walls": frost_walls_cast, "frost_clean": frost_walls_clean, "frost_hits": frost_wall_hits, "veil_lances": veil_lances_cast, "veil_blocked": veil_lances_blocked, "veil_hits": veil_lance_hits, "sand_glyphs": sand_glyphs_cast, "sand_solved": sand_glyphs_solved, "sand_hits": sand_storm_hits, "tide_sigils": tide_sigils_cast, "tide_matched": tide_sigils_matched, "tide_hits": tide_wave_hits, "moon_blooms": moon_blooms_cast, "bloom_cut": moon_blooms_cut, "bloom_heals": moon_bloom_heals, "bloom_sprouts": moon_bloom_sprouts, "required": str(relay_node.required_formation()), "accepted": Array(relay_node.accepted_formations()), "formation": squad_manager.get_formation_id() if is_instance_valid(squad_manager) else ""}
 	enriched["starting_build_text"] = starting_build_text()
 	enriched["starting_build"] = {"team":active_starting_team,"node":active_starting_node,"benefits":starting_benefits.duplicate(true),"run_id":starting_run_id,"valid_settlements":MetaProgress.starting_settlements.size(),"vouchers":MetaProgress.starting_vouchers}
 	if AchievementProgress != null and AchievementProgress.has_method("get_run_unlocked_definitions"):

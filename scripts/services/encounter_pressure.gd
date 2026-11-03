@@ -232,12 +232,16 @@ const DAMAGE_NUMBER_SCRIPT := preload("res://scripts/vfx/damage_number.gd")
 const PACE_TAG_Z := 97
 var tag_layer: Node2D = null
 var pace_tags: Array = []
-const TAG_WIDTH := 68.0
-# R39: "6秒・補8" under the 楔快／圓慢 tag: this build's seal time and heal.
+const TAG_WIDTH := 80.0
+const TAG_HEIGHT := 50.0
+const DETAIL_SIZE := 19
+# R39: "6秒 補8" under the 楔快／圓慢 tag: this build's seal time and heal.
+# R40: wider and larger so the numbers read at phone size; the two tags sit
+# slightly outward from their badges so the wider plates never touch.
 static func pace_detail(kind_value: String, id: String) -> String:
 	var catalog: GDScript = load("res://scripts/services/starting_build_catalog.gd")
 	var node: String = str(GameManager.active_starting_node) if is_instance_valid(GameManager) else ""
-	return "%d秒・補%d" % [int(catalog.seal_seconds(node, kind_value, id)), int(catalog.seal_heal(kind_value, id))]
+	return "%d秒 補%d" % [int(catalog.seal_seconds(node, kind_value, id)), int(catalog.seal_heal(kind_value, id))]
 func _draw_pace_tags() -> void:
 	for row in pace_tags:
 		var tag: Rect2 = row[0]
@@ -245,10 +249,39 @@ func _draw_pace_tags() -> void:
 		var tint := Color("ffd27a") if fast else Color("7fe3ff")
 		tag_layer.draw_rect(tag, Color("08121f", 0.92), true)
 		tag_layer.draw_rect(tag, tint, false, 2.0, true)
-		tag_layer.draw_string(FONT, tag.position + Vector2(0, 21), str(row[2]) + str(row[1]), HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 22, tint)
+		tag_layer.draw_string(FONT, tag.position + Vector2(0, 22), str(row[2]) + str(row[1]), HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 22, tint)
 		# R39: the seal seconds and heal under the name (moved off the top bar).
 		if row.size() > 3:
-			tag_layer.draw_string(FONT, tag.position + Vector2(0, 38), str(row[3]), HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 14, Color("e8f4ff"))
+			tag_layer.draw_string_outline(FONT, tag.position + Vector2(0, 44), str(row[3]), HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, DETAIL_SIZE, 4, Color("08121f", 0.95))
+			tag_layer.draw_string(FONT, tag.position + Vector2(0, 44), str(row[3]), HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, DETAIL_SIZE, Color("f4faff"))
+
+# R40: one tag per badge; `side` is -0.5 / +0.5 for the left / right badge.
+static func pace_tag_rect(badge: Rect2, side: float, below: bool) -> Rect2:
+	var spread := maxf(0.0, TAG_WIDTH - (BADGE_SIZE + 6.0)) * 0.5 + 2.0
+	var x := badge.position.x + badge.size.x * 0.5 - TAG_WIDTH * 0.5 + signf(side) * spread
+	var y := badge.end.y + 4.0 if below else badge.position.y - TAG_HEIGHT - 4.0
+	return Rect2(Vector2(x, y), Vector2(TAG_WIDTH, TAG_HEIGHT))
+
+# The badges plus their tags, for the label registry.
+static func tags_area(center: Vector2, count: int, below: bool) -> Rect2:
+	var icons := Rect2(center - Vector2(count * (BADGE_SIZE + 6.0) * 0.5, BADGE_SIZE * 0.5), Vector2(count * (BADGE_SIZE + 6.0), BADGE_SIZE))
+	var badge := Rect2(center - Vector2.ONE * BADGE_SIZE * 0.5, Vector2.ONE * BADGE_SIZE)
+	var left := pace_tag_rect(Rect2(badge.position - Vector2((BADGE_SIZE + 6.0) * 0.5 * (count - 1), 0), badge.size), -0.5, below)
+	var right := pace_tag_rect(Rect2(badge.position + Vector2((BADGE_SIZE + 6.0) * 0.5 * (count - 1), 0), badge.size), 0.5, below)
+	return icons.merge(left).merge(right)
+
+func _tags_blocked_above(center: Vector2, count: int) -> bool:
+	if not is_inside_tree():
+		return false
+	var xf := get_viewport().get_canvas_transform() * get_global_transform()
+	var above: Rect2 = xf * tags_area(center, count, false)
+	var below: Rect2 = xf * tags_area(center, count, true)
+	var hit_above := false
+	var hit_below := false
+	for area in Enemy.active_label_areas_except(self):
+		hit_above = hit_above or above.intersects(area)
+		hit_below = hit_below or below.intersects(area)
+	return hit_above and not hit_below and not _under_equipment_bar(tags_area(center, count, true))
 
 func _draw_answer(center: Vector2) -> void:
 	# R11: the next seal's answer badge waits until the seal banner fades, so it
@@ -276,6 +309,9 @@ func _draw_answer(center: Vector2) -> void:
 	# Original vector badge of the answering formation (two side by side when
 	# the node accepts an alternative); the red ring pulses while wrong.
 	var count := accepted.size()
+	# R40: the tags go under the badges when a HUD notice or another plate
+	# already holds the space above them.
+	var tags_below := count > 1 and _tags_blocked_above(center, count)
 	for i in range(count):
 		var offset := Vector2((i - (count - 1) * 0.5) * (BADGE_SIZE + 6.0), 0)
 		var rect := Rect2(center + offset - Vector2.ONE * BADGE_SIZE * 0.5, Vector2.ONE * BADGE_SIZE)
@@ -286,7 +322,7 @@ func _draw_answer(center: Vector2) -> void:
 			# R17: a solid tag (gold fast, cyan slow) that reads over links and crowds.
 			# R19: the tag names the formation too (楔快／圓慢), so the badge reads
 			# without knowing the icon.
-			var tag := Rect2(rect.position + Vector2(rect.size.x * 0.5 - TAG_WIDTH * 0.5, -48), Vector2(TAG_WIDTH, 44))
+			var tag := pace_tag_rect(rect, i - (count - 1) * 0.5, tags_below)
 			# R17: drawn on a layer above effects, name plates and the crown.
 			pace_tags.append([tag, pace, str(FORMATION_NAMES[accepted[i]]).substr(0, 1), pace_detail(kind, accepted[i])])
 		if wrong:
@@ -298,16 +334,19 @@ func _draw_answer(center: Vector2) -> void:
 	if count > 1 and not wrong:
 		if is_inside_tree():
 			var xf_tags := get_viewport().get_canvas_transform() * get_global_transform()
-			Enemy.reserve_label_area(xf_tags * Rect2(center - Vector2(count * (BADGE_SIZE + 6.0) * 0.5, BADGE_SIZE * 0.5 + 48), Vector2(count * (BADGE_SIZE + 6.0), BADGE_SIZE + 48)), self)
+			Enemy.reserve_label_area(xf_tags * tags_area(center, count, tags_below), self)
 		return
 	var text := answer_label(accepted)
 	var at := center + Vector2(-90, BADGE_SIZE * 0.5 + 24)
+	# R40: tags moved under the badges keep this caption above them instead.
+	if tags_below:
+		at = center + Vector2(-90, -BADGE_SIZE * 0.5 - 10.0)
 	var badge_text_width: float = FONT.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
 	var badge_backing := Rect2(at + Vector2(90 - badge_text_width * 0.5 - 8, -19), Vector2(badge_text_width + 16, 26))
 	# R18: a label that would slide under the equipment bar moves above the
 	# fast/slow tags instead of being covered by the slot buttons.
 	if _under_equipment_bar(badge_backing):
-		at = center + Vector2(-90, -BADGE_SIZE * 0.5 - (44.0 if count > 1 else 10.0))
+		at = center + Vector2(-90, -BADGE_SIZE * 0.5 - (TAG_HEIGHT + 8.0 if count > 1 and not tags_below else 10.0))
 		badge_backing = Rect2(at + Vector2(90 - badge_text_width * 0.5 - 8, -19), Vector2(badge_text_width + 16, 26))
 	# R11: elite name plates step aside from this badge instead of stacking on it.
 	if is_inside_tree():

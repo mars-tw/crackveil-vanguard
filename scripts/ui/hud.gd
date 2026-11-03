@@ -263,6 +263,10 @@ func _process(_delta: float) -> void:
 	if toast_panel.visible and toast_label.text != _fitted_toast_text:
 		_fitted_toast_text = toast_label.text
 		_fit_toast_panel()
+	# R40: ground answer tags and stamps step around the notice while it shows.
+	Enemy.clear_label_areas(toast_panel)
+	if toast_panel.visible:
+		Enemy.reserve_label_area(toast_panel.get_global_rect(), toast_panel)
 	# Hidden routine notices keep their readable time instead of expiring behind
 	# loot, bond reveals or a modal. Urgent battle messages own the notice lane.
 	if toast_showing and toast_panel.visible and (urgent or not bond_active):
@@ -1665,6 +1669,22 @@ func _glyph_next_screen() -> Array:
 			return [at.x, at.y]
 	return []
 
+# R40: while a tide is up (and for its verdict), the second line is the tide's.
+func _tide_or(line: String) -> String:
+	for group in ["tide_sigils", "moon_blooms"]:
+		for node in get_tree().get_nodes_in_group(group):
+			if node is Node2D and node.has_method("status_line"):
+				return str(node.call("status_line"))
+	return line
+
+# R40: screen position of an open moon bloom ([] when none), for the review bot.
+func _bloom_screen() -> Array:
+	for bloom in get_tree().get_nodes_in_group("moon_blooms"):
+		if bloom is Node2D and not bool(bloom.get("done")):
+			var at: Vector2 = get_viewport().get_canvas_transform() * (bloom as Node2D).global_position
+			return [at.x, at.y]
+	return []
+
 # R39: the formation a rolling tide sigil asks for ("" when none), for the review bot.
 func _tide_required() -> String:
 	for tide in get_tree().get_nodes_in_group("tide_sigils"):
@@ -1747,6 +1767,8 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"glyph_verdict_at": float(load("res://scripts/vfx/sand_glyphs.gd").last_verdict_time),
 		"tide_required": _tide_required(),
 		"tide_verdict_at": float(load("res://scripts/vfx/tide_sigil.gd").last_verdict_time),
+		"bloom_screen": _bloom_screen(),
+		"bloom_verdict_at": float(load("res://scripts/vfx/moon_bloom.gd").last_verdict_time),
 		"veil_verdict_at": float(load("res://scripts/vfx/veil_lance.gd").last_verdict_time),
 		"frost_verdict_at": float(load("res://scripts/vfx/frost_wall.gd").last_verdict_time),
 		"hazard_mark_at": maxf(maxf(float(load("res://scripts/vfx/ember_ring.gd").last_mark_time), float(load("res://scripts/vfx/storm_pylons.gd").last_mark_time)), float(load("res://scripts/vfx/frost_wall.gd").last_mark_time)),
@@ -2354,9 +2376,9 @@ func _update_tactical_hint() -> void:
 		# R27: the squad catch-up names itself while it is lifting the members.
 		var catch_up := float(GameManager.current_catch_up())
 		var catch_up_tag := ("｜隊員追擊 ×%.1f" % catch_up) if catch_up >= 1.05 else ""
-		tactical_hint.text = "%s｜封隙 %d/3%s\n%s" % [formation, relay.step, catch_up_tag, relay.next_action()]
+		tactical_hint.text = "%s｜封隙 %d/3%s\n%s" % [formation, relay.step, catch_up_tag, _tide_or(relay.next_action())]
 	else:
-		tactical_hint.text = "%s｜封隙 3/3\n%s" % [formation, GameManager.tactical_director.current_hint()]
+		tactical_hint.text = "%s｜封隙 3/3\n%s" % [formation, _tide_or(GameManager.tactical_director.current_hint())]
 	var mission_rect: Rect2 = BATTLE_LAYOUT.regions(view, MOBILE_TUNING.use_mobile_ui(view)).mission
 	BATTLE_LAYOUT.place(tactical_hint, mission_rect)
 	# R16: long seal lines shrink to the mission box instead of running under

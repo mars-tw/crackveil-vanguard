@@ -47,9 +47,9 @@ func _initialize() -> void:
 	var squad: GDScript = load("res://scripts/heroes/squad_manager.gd")
 	_check(squad.BOND_TEXT_Z > 100 and squad_src.contains("bond_text_layer.draw_rect(plate"), "bond words draw above the heroes on a dark plate")
 	var hud_src := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
-	_check(hud_src.contains("tactical_hint.text = \"%s｜封隙 %d/3%s\\n%s\" % [formation, relay.step, catch_up_tag, relay.next_action()]"), "the top bar's first line is formation, seals and catch-up only")
+	_check(hud_src.contains("tactical_hint.text = \"%s｜封隙 %d/3%s\\n%s\" % [formation, relay.step, catch_up_tag, _tide_or(relay.next_action())]"), "the top bar's first line is formation, seals and catch-up only")
 	var pressure: GDScript = load("res://scripts/services/encounter_pressure.gd")
-	_check(pressure.pace_detail("front", "wedge") == "6秒・補8" and pressure.pace_detail("front", "ring") == "9秒・補16", "the ground tags carry each answer's seal time and heal")
+	_check(pressure.pace_detail("front", "wedge") == "6秒 補8" and pressure.pace_detail("front", "ring") == "9秒 補16", "the ground tags carry each answer's seal time and heal")
 	# Contribution parts never split: the page wraps between whole parts.
 	var cjk: FontFile = load("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 	var parts := PackedStringArray(["迴響歌者 回復減傷 1285", "潮汐魔導 封隙 29 秒", "裂弧斥候 承傷 391"])
@@ -66,7 +66,7 @@ func _initialize() -> void:
 			if c > 0x7f and not font.has_char(c):
 				missing += char(c)
 	_check(missing == "", "every new string is covered by the CJK subset font (missing: %s)" % missing)
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.68.0-content-r39", "project version is 0.68.0-content-r39")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.69.0-content-r40", "project version is 0.69.0-content-r40")
 	if failures.is_empty():
 		print("R39_REGRESSION status=PASS checks=%d" % checks)
 	else:

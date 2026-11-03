@@ -170,6 +170,27 @@ const STAMP_WORD_HIT := "刺中 %d"
 func stamp_word() -> String:
 	return STAMP_WORD_BLOCK if blocked else STAMP_WORD_HIT % int(LANCE_DAMAGE)
 
+# R40: rises in steps until the word box clears every registered label area.
+const STAMP_STEPS := [0.0, -44.0, -88.0, -132.0, 44.0]
+static func first_clear_base(base: Vector2, box: Vector2, xf: Transform2D, taken: Array) -> Vector2:
+	for step in STAMP_STEPS:
+		var rect := Rect2(base + Vector2(-6, -box.y + step), box + Vector2(12, 8))
+		var screen: Rect2 = xf * rect
+		var hit := false
+		for area in taken:
+			if screen.intersects(area):
+				hit = true
+				break
+		if not hit:
+			return base + Vector2(0, step)
+	return base
+
+func clear_stamp_base(base: Vector2, box: Vector2) -> Vector2:
+	if not is_inside_tree():
+		return base
+	var xf := get_viewport().get_canvas_transform() * get_global_transform()
+	return first_clear_base(base, box, xf, Enemy.active_label_areas_except(mark_layer))
+
 func _draw_stamp(since: float) -> void:
 	var fade := clampf(1.0 - maxf(0.0, since - 1.2) / 0.8, 0.0, 1.0)
 	if fade <= 0.0:
@@ -198,6 +219,8 @@ func _draw_stamp(since: float) -> void:
 	var size := 36
 	var w := FONT.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
 	var base := at + Vector2(-w * 0.5, -150.0 - 10.0 * grow)
+	# R40: the word steps up past answer tags, notices and plates already there
+	base = clear_stamp_base(base, Vector2(w, float(size)))
 	mark_layer.draw_string_outline(FONT, base, word, HORIZONTAL_ALIGNMENT_LEFT, -1, size, 8, Color("0d1426", 0.95 * fade))
 	# the hit word is a light violet: the lance violet alone sank into the veil floor
 	mark_layer.draw_string(FONT, base, word, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color(SAFE if blocked else Color("f2d2ff"), fade))

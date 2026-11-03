@@ -113,6 +113,7 @@ const FROST_WALL := preload("res://scripts/vfx/frost_wall.gd")
 const VEIL_LANCE := preload("res://scripts/vfx/veil_lance.gd")
 const SAND_GLYPHS := preload("res://scripts/vfx/sand_glyphs.gd")
 const TIDE_SIGIL := preload("res://scripts/vfx/tide_sigil.gd")
+const MOON_BLOOM := preload("res://scripts/vfx/moon_bloom.gd")
 var special_skill := ""
 var special_cooldown := 3.0
 var special_timer := 2.0
@@ -183,6 +184,22 @@ static func active_plate_only_areas() -> Array[Rect2]:
 		if entry.owner != null and (node == null or (node is CanvasItem and node.is_inside_tree() and not node.is_visible_in_tree())):
 			continue
 		for rect in entry.get("plate_rects", []):
+			result.append(rect)
+	return result
+
+# R40: every registered area except the ones `owner` placed itself.
+static func active_label_areas_except(owner: Object) -> Array[Rect2]:
+	var result: Array[Rect2] = []
+	var own := owner.get_instance_id() if owner != null else -1
+	for key in _reserved_by_owner.keys():
+		if key == own:
+			continue
+		var entry: Dictionary = _reserved_by_owner[key]
+		if entry.owner != null:
+			var node = entry.owner.get_ref()
+			if node == null or (node is CanvasItem and node.is_inside_tree() and not node.is_visible_in_tree()):
+				continue
+		for rect in entry.rects:
 			result.append(rect)
 	return result
 
@@ -930,6 +947,12 @@ func _apply_special_elite_impact(target: Node2D) -> void:
 		if is_instance_valid(TIDE_SIGIL.last_spawned):
 			GameManager.tide_sigils_cast += 1
 			TIDE_SIGIL.last_spawned = null
+	# R40: the moon grove plants a bud the captain must walk to and spin through.
+	if stage_skill == "moon_bloom" and is_instance_valid(GameManager.player) and is_inside_tree():
+		MOON_BLOOM.spawn(get_parent(), self, GameManager.player)
+		if is_instance_valid(MOON_BLOOM.last_spawned):
+			GameManager.moon_blooms_cast += 1
+			MOON_BLOOM.last_spawned = null
 	if special_skill == "summoner":
 		for index in range(5):
 			if EntityFactory.get_enemy_live_count() >= death_spawn_cap:

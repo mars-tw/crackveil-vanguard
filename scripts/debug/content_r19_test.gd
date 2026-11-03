@@ -13,7 +13,7 @@ func _initialize() -> void:
 	_check(pressure_script.choice_text("pincer", "spec_prepare") == "快封圓陣／慢封散兵・慢封反擊15秒", "the toast keeps the slow seal's real counter window")
 	_check(relay_script.switch_card_for("pincer", "ring").contains("隊長身邊隊員每擊受傷 14→4"), "the ring card says the allies take 14→4 per hit, not that they deal it")
 	var pressure_src := FileAccess.get_file_as_string("res://scripts/services/encounter_pressure.gd")
-	_check(pressure_src.contains("pace_tags.append([tag, pace, str(FORMATION_NAMES[accepted[i]]).substr(0, 1), pace_detail(kind, accepted[i])])") and pressure_src.contains("str(row[2]) + str(row[1])") and pressure_src.contains("Vector2(TAG_WIDTH, 44)"), "ground tags name the formation (楔快／圓慢) as well as the pace")
+	_check(pressure_src.contains("pace_tags.append([tag, pace, str(FORMATION_NAMES[accepted[i]]).substr(0, 1), pace_detail(kind, accepted[i])])") and pressure_src.contains("str(row[2]) + str(row[1])") and pressure_src.contains("return Rect2(Vector2(x, y), Vector2(TAG_WIDTH, TAG_HEIGHT))"), "ground tags name the formation (楔快／圓慢) as well as the pace")
 	var fast: Color = relay_script.seal_flash_color(false)
 	var slow: Color = relay_script.seal_flash_color(true)
 	_check(fast.r > fast.b and slow.b > slow.r, "a fast seal flashes gold and a slow seal cyan")
@@ -22,7 +22,7 @@ func _initialize() -> void:
 	_check(result_script.defeat_cause({"captain_dead": true, "seal_state": {"step": 0}}) == "失敗原因：隊長倒下・第 1 道", "a defeat names the cause and the seal it fell at")
 	_check(result_script.defeat_cause({"captain_dead": true, "boss_active": true, "seal_state": {"step": 3, "completed": true}}) == "失敗原因：隊長倒下・首領戰", "a defeat during the boss says so")
 	_check(result_script.defeat_cause({"captain_dead": true}) == "失敗原因：隊長倒下", "runs without seal data still name the cause")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.68.0-content-r39", "project version is 0.68.0-content-r39")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.69.0-content-r40", "project version is 0.69.0-content-r40")
 	if failures.is_empty():
 		print("R19_REGRESSION status=PASS checks=%d" % checks)
 	else:

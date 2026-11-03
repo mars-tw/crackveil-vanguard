@@ -27,7 +27,9 @@ const STAGE_VARIANTS := {
 	"dunes": {"tint": Color("f0c97a"), "speed": 1.05, "hp": 1.15, "projectile": 1.1, "pressure": "王陵雙印", "skill": "sand_glyphs",
 		"names": {"shield": "砂盾重衛", "charge": "砂爪獵將", "frost": "砂霧守望者", "flame": "曜焰術士", "summoner": "砂群召喚師"}},
 	"tide": {"tint": Color("7fd8ee"), "speed": 1.0, "hp": 1.2, "projectile": 1.1, "pressure": "潮紋換陣", "skill": "tide_sigil",
-		"names": {"shield": "潮盾重衛", "charge": "浪爪獵將", "frost": "珊霧守望者", "flame": "海焰術士", "summoner": "珊群召喚師"}}
+		"names": {"shield": "潮盾重衛", "charge": "浪爪獵將", "frost": "珊霧守望者", "flame": "海焰術士", "summoner": "珊群召喚師"}},
+	"bloom": {"tint": Color("d8b8ff"), "speed": 1.05, "hp": 1.25, "projectile": 1.1, "pressure": "月華花蕾", "skill": "moon_bloom",
+		"names": {"shield": "月盾重衛", "charge": "花爪獵將", "frost": "靈霧守望者", "flame": "月焰術士", "summoner": "花群召喚師"}}
 }
 
 static func stage_variant(stage_id: String) -> Dictionary:

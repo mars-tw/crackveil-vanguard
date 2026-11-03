@@ -109,6 +109,19 @@ func _ready() -> void:
 	mark_layer.draw.connect(_draw_marks)
 	add_child(mark_layer)
 
+# R40: the top bar's second line while a tide is up, so it never says
+# "陣形正確" for the assault while the wave is about to break on the squad.
+static func status_text(required_id: String, left: int, holds: bool, finished: bool, ok: bool, hit_count: int) -> String:
+	var name := formation_name(required_id)
+	if finished:
+		return verdict_text(ok, hit_count) if ok else "%s・浪到時要是%s" % [verdict_text(ok, hit_count), name]
+	if holds:
+		return "潮紋%s・已對上，守住陣形・%d 秒" % [name, left]
+	return "潮紋%s・%d 秒內換成%s" % [name, left, name]
+
+func status_line() -> String:
+	return status_text(required, seconds_left(), holds_required(), done, matched, hits)
+
 func seconds_left() -> int:
 	return maxi(1, ceili(WARN_SECONDS - age))
 

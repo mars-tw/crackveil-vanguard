@@ -12,7 +12,7 @@ func _initialize() -> void:
 	_check(minimap_src.contains("var font_size := 13") and minimap_src.contains("draw_rect(Rect2(text_x - 4, size.x + 3, text_w + 8, 18), Color(\"08121f\", 0.86), true)"), "the minimap stage name sits on a dark plate at 13 px")
 	var level_src := FileAccess.get_file_as_string("res://scripts/ui/level_up_screen.gd")
 	_check(level_src.contains("if not portrait and card_scroll != null and card_count > 0 and card_count < 3:") and level_src.contains("card_grid.columns = card_count"), "a two-card level-up offer is centred in the panel")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.68.0-content-r39", "project version is 0.68.0-content-r39")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.69.0-content-r40", "project version is 0.69.0-content-r40")
 	if failures.is_empty():
 		print("R25_REGRESSION status=PASS checks=%d" % checks)
 	else:
