@@ -23,7 +23,7 @@ const MARK_SECONDS := 1.2
 const HAZARD := Color("ffe14d")
 const BOLT := Color("9fd8ff")
 const SAFE := Color("8ff0a4")
-const LABEL := "雷柱分流・隊長踩柱＋散兵"
+const LABEL := "雷柱分流・隊長柱＋隊員柱"
 const FONT := preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 const VINE_SNARE := preload("res://scripts/vfx/vine_snare.gd")
 static var last_spawned: Node2D = null
@@ -38,6 +38,8 @@ var struck := false
 var grounded := false
 # R34: why a bolt was not split, shown over the pair after the strike.
 var fail_reason := ""
+# R35: the member who held the member's pylon on a split, named in the verdict.
+var catcher := ""
 var hits := 0
 var shocked: Array = []
 var mark_layer: Node2D = null
@@ -105,22 +107,25 @@ static func covered(pair_at: Vector2, hero_positions: Array, half_offset: Vector
 				break
 	return count
 
+# R35: the pylons have roles, so the squad never has to guess: the first is
+# the captain's (隊長柱), the second a member's (隊員柱).
+const CAPTAIN_PYLON := 0
+const MEMBER_PYLON := 1
+
 # R34: the missing half of a failed split, in a few words.
 static func fail_reason_for(pair_at: Vector2, captain_at: Vector2, half_offset: Vector2) -> String:
-	for offset in pylon_offsets(half_offset):
-		if captain_at.distance_to(pair_at + offset) <= PYLON_RADIUS:
-			return "另一柱沒有隊員"
-	return "隊長沒有踩柱"
+	if captain_at.distance_to(pair_at + pylon_offsets(half_offset)[CAPTAIN_PYLON]) > PYLON_RADIUS:
+		return "隊長沒有踩隊長柱"
+	return "隊員柱沒有人"
 
-# Split: the captain on one pylon and at least one member on the other.
+# Split: the captain on the captain's pylon and a member on the member's pylon.
 static func split_by(pair_at: Vector2, captain_at: Vector2, member_positions: Array, half_offset: Vector2) -> bool:
 	var offsets := pylon_offsets(half_offset)
-	for i in range(2):
-		if captain_at.distance_to(pair_at + offsets[i]) > PYLON_RADIUS:
-			continue
-		for at in member_positions:
-			if (at as Vector2).distance_to(pair_at + offsets[1 - i]) <= PYLON_RADIUS:
-				return true
+	if captain_at.distance_to(pair_at + offsets[CAPTAIN_PYLON]) > PYLON_RADIUS:
+		return false
+	for at in member_positions:
+		if (at as Vector2).distance_to(pair_at + offsets[MEMBER_PYLON]) <= PYLON_RADIUS:
+			return true
 	return false
 
 func _ready() -> void:
@@ -163,6 +168,11 @@ func _strike() -> void:
 	if grounded:
 		GameManager.storm_pylons_grounded += 1
 		last_split_time = GameManager.elapsed_time
+		var post: Vector2 = global_position + pylon_offsets(half)[MEMBER_PYLON]
+		for hero in get_tree().get_nodes_in_group("heroes"):
+			if hero != GameManager.player and hero is Node2D and hero.global_position.distance_to(post) <= PYLON_RADIUS and hero.get("display_name") != null:
+				catcher = str(hero.get("display_name"))
+				break
 		return
 	if is_instance_valid(GameManager.player):
 		fail_reason = fail_reason_for(global_position, GameManager.player.global_position, half)
@@ -185,6 +195,24 @@ func _strike() -> void:
 # captain's floor halo and squad markers never cover them.
 func _draw_marks() -> void:
 	if not struck:
+		# R35: each pylon's role on a small plate, above halos and crowns
+		var offsets_m := pylon_offsets(half)
+		for index in range(2):
+			var post: Vector2 = global_position + offsets_m[index]
+			var manned_m := false
+			if index == CAPTAIN_PYLON:
+				manned_m = is_instance_valid(GameManager.player) and GameManager.player.global_position.distance_to(post) <= PYLON_RADIUS
+			else:
+				for hero in get_tree().get_nodes_in_group("heroes"):
+					if hero != GameManager.player and hero is Node2D and hero.global_position.distance_to(post) <= PYLON_RADIUS:
+						manned_m = true
+						break
+			var tag := ("隊長" if index == CAPTAIN_PYLON else "隊員") + ("到" if manned_m else "站這")
+			var tag_w := FONT.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
+			var tag_box := Rect2(offsets_m[index] + Vector2(-tag_w * 0.5 - 6, PYLON_RADIUS - 34), Vector2(tag_w + 12, 26))
+			mark_layer.draw_rect(tag_box, Color("0d1426", 0.9), true)
+			mark_layer.draw_rect(tag_box, Color(SAFE if manned_m else HAZARD, 0.95), false, 1.5)
+			mark_layer.draw_string(FONT, tag_box.position + Vector2(6, 19), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("fff6c8"))
 		var plate := plate_slot(FONT.get_string_size(LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x)
 		if plate.size != Vector2.ZERO:
 			mark_layer.draw_rect(plate, Color("0d1426", 0.92), true)
@@ -210,7 +238,7 @@ func _draw_marks() -> void:
 	var top := -PYLON_RADIUS - 70.0
 	for at in placed:
 		top = minf(top, at.y - 52.0)
-	var verdict := "分流成功・無人受傷" if grounded else "分流失敗・" + fail_reason
+	var verdict := ("分流成功・%s接住雷柱" % catcher if catcher != "" else "分流成功・無人受傷") if grounded else "分流失敗・" + fail_reason
 	var tone: Color = SAFE if grounded else HAZARD
 	var w := FONT.get_string_size(verdict, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
 	var box := Rect2(Vector2(-w * 0.5 - 10, top), Vector2(w + 20, 30))
@@ -251,12 +279,17 @@ func _draw() -> void:
 		# the strike reach, faint, so the squad sees who would be hit
 		draw_arc(Vector2.ZERO, STRIKE_RADIUS, 0.0, TAU, 72, Color(HAZARD, 0.35), 2.0, true)
 		_zigzag(offsets[0], offsets[1], 9, 7.0, Color(BOLT, 0.55), 2.0)
-		for offset in offsets:
+		for index in range(2):
+			var offset: Vector2 = offsets[index]
+			# the captain's pylon is manned by the captain, the member's by any member
 			var manned := false
-			for at in heroes:
-				if (at as Vector2).distance_to(global_position + offset) <= PYLON_RADIUS:
-					manned = true
-					break
+			if index == CAPTAIN_PYLON:
+				manned = is_instance_valid(GameManager.player) and GameManager.player.global_position.distance_to(global_position + offset) <= PYLON_RADIUS
+			else:
+				for hero in get_tree().get_nodes_in_group("heroes"):
+					if hero != GameManager.player and hero is Node2D and hero.global_position.distance_to(global_position + offset) <= PYLON_RADIUS:
+						manned = true
+						break
 			var tone: Color = SAFE if manned else HAZARD
 			draw_circle(offset, PYLON_RADIUS, Color(tone, 0.16))
 			draw_arc(offset, PYLON_RADIUS, 0.0, TAU, 40, Color("0d1426", 0.9), 7.0, true)
@@ -265,7 +298,7 @@ func _draw() -> void:
 			# the pylon itself: a post with a bolt on top
 			draw_rect(Rect2(offset + Vector2(-5, -30), Vector2(10, 30)), Color("2a3550", 0.95), true)
 			_zigzag(offset + Vector2(0, -44), offset + Vector2(0, -30), 3, 4.0, Color(HAZARD, 0.95), 2.5)
-			draw_string(FONT, offset + Vector2(-9, 24), "站" if not manned else "到", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("fff6c8"))
+			# R35: the role tag is drawn on the top layer (see _draw_marks)
 	else:
 		var fade := clampf(1.0 - (age - WARN_SECONDS) / STRIKE_SECONDS, 0.0, 1.0)
 		if fade > 0.0:

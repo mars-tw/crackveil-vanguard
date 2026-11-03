@@ -109,6 +109,7 @@ var stage_skill := ""
 const VINE_SNARE := preload("res://scripts/vfx/vine_snare.gd")
 const EMBER_RING := preload("res://scripts/vfx/ember_ring.gd")
 const STORM_PYLONS := preload("res://scripts/vfx/storm_pylons.gd")
+const FROST_WALL := preload("res://scripts/vfx/frost_wall.gd")
 var special_skill := ""
 var special_cooldown := 3.0
 var special_timer := 2.0
@@ -902,6 +903,12 @@ func _apply_special_elite_impact(target: Node2D) -> void:
 		if is_instance_valid(STORM_PYLONS.last_spawned):
 			GameManager.storm_pylons_cast += 1
 			STORM_PYLONS.last_spawned = null
+	# R35: the frost pushes a wall with one opening through the squad.
+	if stage_skill == "frost_wall" and is_instance_valid(GameManager.player) and is_inside_tree():
+		FROST_WALL.spawn(get_parent(), GameManager.player, randf_range(-1.0, 1.0))
+		if is_instance_valid(FROST_WALL.last_spawned):
+			GameManager.frost_walls_cast += 1
+			FROST_WALL.last_spawned = null
 	if special_skill == "summoner":
 		for index in range(5):
 			if EntityFactory.get_enemy_live_count() >= death_spawn_cap:

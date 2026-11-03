@@ -357,7 +357,7 @@ func _spawn_special_elite() -> bool:
 	special_elite_index += 1
 	special_elite_history.append({"id":profile.id, "name":profile.name, "time":GameManager.elapsed_time})
 	GameManager.record_elite_spawn()
-	GameManager.show_toast("特殊菁英：%s　%s%s" % [str(config.get("special_elite_name", profile.name)), profile.description, "　出招時腳下纏藤，散開站位" if str(config.get("stage_skill", "")) == "vine_snare" else "　出招時火環包圍，往中心集合" if str(config.get("stage_skill", "")) == "ember_ring" else "　出招時兩側落下雷柱，隊長踩一柱、散兵接另一柱" if str(config.get("stage_skill", "")) == "storm_pylon" else ""])
+	GameManager.show_toast("特殊菁英：%s　%s%s" % [str(config.get("special_elite_name", profile.name)), profile.description, "　出招時腳下纏藤，散開站位" if str(config.get("stage_skill", "")) == "vine_snare" else "　出招時火環包圍，往中心集合" if str(config.get("stage_skill", "")) == "ember_ring" else "　出招時兩側落下雷柱，隊長踩隊長柱、散兵接隊員柱" if str(config.get("stage_skill", "")) == "storm_pylon" else "　出招時推來霜牆，圓陣對準缺口穿過" if str(config.get("stage_skill", "")) == "frost_wall" else ""])
 	AudioManager.play_sfx("elite")
 	return true
 

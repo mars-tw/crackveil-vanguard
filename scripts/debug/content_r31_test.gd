@@ -35,7 +35,7 @@ func _initialize() -> void:
 	_check(missing == "", "every new string is covered by the CJK subset font (missing: %s)" % missing)
 	_check(snare_src.contains("mark_layer.z_as_relative = false") and snare_src.contains("if mark.distance_to(other) < 26.0:"), "slow marks draw on a top layer and fan out when heroes overlap")
 	_check(FileAccess.get_file_as_string("res://scripts/vfx/ember_ring.gd").contains("for area in Enemy.active_label_areas() + Enemy.elite_plate_rects():"), "the ring name plate steps around rule text and elite plates")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.63.0-content-r34", "project version is 0.63.0-content-r34")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.64.0-content-r35", "project version is 0.64.0-content-r35")
 	if failures.is_empty():
 		print("R31_REGRESSION status=PASS checks=%d" % checks)
 	else:

@@ -515,7 +515,7 @@ static func key_contribution_line(contribution_rows: Array) -> String:
 		if best.is_empty() or best_value < float(spec[2]):
 			continue
 		used[str(best.get("name", ""))] = true
-		parts.append("%s %s" % [str(best.get("name", "")), str(spec[1]) % roundi(best_value)])
+		parts.append("%s %s" % [str(best.get("name", "")), str(spec[1]) % int(best_value)])
 	if parts.is_empty():
 		return ""
 	return "關鍵貢獻：" + "・".join(parts)
@@ -536,6 +536,8 @@ static func victory_badges(summary: Dictionary) -> String:
 		out.append("躲過熔火環 %d/%d" % [int(seal.get("ember_clean", 0)), int(seal.get("ember_rings", 0))])
 	if int(seal.get("storm_grounded", 0)) > 0:
 		out.append("雷柱分流 %d/%d" % [int(seal.get("storm_grounded", 0)), int(seal.get("storm_pylons", 0))])
+	if int(seal.get("frost_clean", 0)) > 0:
+		out.append("全員穿過霜牆 %d/%d" % [int(seal.get("frost_clean", 0)), int(seal.get("frost_walls", 0))])
 	if out.is_empty():
 		return ""
 	return "戰績：" + "・".join(out)
@@ -551,6 +553,9 @@ static func vine_line(seal: Dictionary) -> String:
 	# R33: the storm's pylons, the same way.
 	if int(seal.get("storm_pylons", 0)) > 0:
 		parts.append("雷柱分流 %d 次・成功分流 %d 次・被電 %d 人次" % [int(seal.get("storm_pylons", 0)), int(seal.get("storm_grounded", 0)), int(seal.get("storm_hits", 0))])
+	# R35: the frost wall, the same way.
+	if int(seal.get("frost_walls", 0)) > 0:
+		parts.append("霜牆穿縫 %d 次・全員穿過 %d 次・被凍 %d 人次" % [int(seal.get("frost_walls", 0)), int(seal.get("frost_clean", 0)), int(seal.get("frost_hits", 0))])
 	return "\n".join(parts)
 
 # R27: what the squad catch-up did this run (peak multiplier and added damage).

@@ -1657,6 +1657,14 @@ func _storm_pylon_screen() -> Array:
 			out.append([at.x, at.y])
 	return out
 
+# R35: screen position of the active frost wall's opening, for the review bot.
+func _frost_gap_screen() -> Array:
+	for wall in get_tree().get_nodes_in_group("frost_walls"):
+		if wall is Node2D and not bool(wall.get("done")):
+			var at: Vector2 = get_viewport().get_canvas_transform() * wall.gap_center()
+			return [at.x, at.y]
+	return []
+
 func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 	if not is_inside_tree() or get_viewport() == null:
 		return
@@ -1707,10 +1715,11 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"formation_cooldown": GameManager.squad_manager.get_formation_cooldown_remaining() if is_instance_valid(GameManager.squad_manager) else 0.0,
 		"formation_ready": formation_button.is_visible_in_tree() and not formation_button.disabled,
 		"auto_upgrade": GameManager.auto_upgrade_enabled,
-		"hazard_mark_at": maxf(float(load("res://scripts/vfx/ember_ring.gd").last_mark_time), float(load("res://scripts/vfx/storm_pylons.gd").last_mark_time)),
 		"storm_pylons": get_tree().get_nodes_in_group("storm_pylons").size(),
 		"storm_pylon_screen": _storm_pylon_screen(),
 		"storm_split_at": float(load("res://scripts/vfx/storm_pylons.gd").last_split_time),
+		"frost_gap_screen": _frost_gap_screen(),
+		"hazard_mark_at": maxf(maxf(float(load("res://scripts/vfx/ember_ring.gd").last_mark_time), float(load("res://scripts/vfx/storm_pylons.gd").last_mark_time)), float(load("res://scripts/vfx/frost_wall.gd").last_mark_time)),
 		"version": str(ProjectSettings.get_setting("application/config/version")),
 		"seed": GameManager.current_run_seed,
 		"mission_text": tactical_hint.text,

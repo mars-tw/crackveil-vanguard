@@ -13,7 +13,7 @@ func _initialize() -> void:
 	var half: Vector2 = pylons.lateral_half(null)
 	var off: Array[Vector2] = pylons.pylon_offsets(half)
 	_check(off.size() == 2 and off[0] == -off[1] and absf(half.length() - pylons.SPREAD) < 0.01, "two pylons stand SPREAD to each side of the captain")
-	_check(pylons.split_by(Vector2.ZERO, off[0], [off[1]], half) and pylons.split_by(Vector2.ZERO, off[1], [off[0]], half), "the captain on one pylon and a member on the other split the bolt")
+	_check(pylons.split_by(Vector2.ZERO, off[0], [off[1]], half) and not pylons.split_by(Vector2.ZERO, off[1], [off[0]], half), "the captain on the captain pylon and a member on the member pylon split the bolt (R35: roles)")
 	_check(not pylons.split_by(Vector2.ZERO, Vector2.ZERO, [off[0], off[1]], half), "members alone on both pylons do not split it: the captain must stand on one")
 	_check(not pylons.split_by(Vector2.ZERO, off[0], [off[0]], half), "captain and member on the same pylon do not split it")
 	# The answer is walking onto a pylon in scatter: walking turns the squad, and
@@ -45,7 +45,7 @@ func _initialize() -> void:
 	_check(src.contains("mark_layer.z_index = 120") and src.contains("\"電\""), "shocked heroes wear a 電 mark on the top layer")
 	var enemy_src := FileAccess.get_file_as_string("res://scripts/enemies/enemy.gd")
 	_check(enemy_src.contains("if stage_skill == \"storm_pylon\" and is_instance_valid(GameManager.player) and is_inside_tree():\n\t\tSTORM_PYLONS.spawn(get_parent(), GameManager.player.global_position, STORM_PYLONS.onscreen_half(GameManager.player))"), "a storm elite drops pylons beside the captain on every cast")
-	_check(FileAccess.get_file_as_string("res://scripts/enemies/enemy_spawner.gd").contains("出招時兩側落下雷柱，隊長踩一柱、散兵接另一柱"), "the elite toast teaches the storm rule")
+	_check(FileAccess.get_file_as_string("res://scripts/enemies/enemy_spawner.gd").contains("出招時兩側落下雷柱，隊長踩隊長柱、散兵接隊員柱"), "the elite toast teaches the storm rule")
 	# Result: the storm line, the badge wording, key contributions.
 	var result: GDScript = load("res://scripts/ui/r4_result_screen.gd")
 	_check(result.vine_line({"storm_pylons": 4, "storm_grounded": 1, "storm_hits": 5}) == "雷柱分流 4 次・成功分流 1 次・被電 5 人次", "the result reports the storm pylons")
@@ -63,13 +63,13 @@ func _initialize() -> void:
 	var hook := _qa(\"start_stage\")"), "phones never read a start stage")
 	var font: FontFile = load("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 	var missing := ""
-	for s in [str(pylons.LABEL), "站到電", "出招時兩側落下雷柱，隊長踩一柱、散兵接另一柱", "雷柱分流 4 次・成功分流 1 次・被電 5 人次", badges, "關鍵貢獻：丙 回復減傷 120・甲 封隙 23 秒・乙 承傷 340"]:
+	for s in [str(pylons.LABEL), "站到電", "出招時兩側落下雷柱，隊長踩隊長柱、散兵接隊員柱", "雷柱分流 4 次・成功分流 1 次・被電 5 人次", badges, "關鍵貢獻：丙 回復減傷 120・甲 封隙 23 秒・乙 承傷 340"]:
 		for i in range(str(s).length()):
 			var c: int = str(s).unicode_at(i)
 			if c > 0x7f and not font.has_char(c):
 				missing += char(c)
 	_check(missing == "", "every new string is covered by the CJK subset font (missing: %s)" % missing)
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.63.0-content-r34", "project version is 0.63.0-content-r34")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.64.0-content-r35", "project version is 0.64.0-content-r35")
 	if failures.is_empty():
 		print("R33_REGRESSION status=PASS checks=%d" % checks)
 	else:

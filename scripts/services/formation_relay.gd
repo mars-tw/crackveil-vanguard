@@ -46,6 +46,12 @@ var feedback_timer := 0.0
 var seal_flash_time := 99.0
 var seal_flash_at := Vector2.ZERO
 var seal_flash_text := ""
+# R35: the member who held the seal longest is named over their head when it closes.
+var last_settled_members: Array = []
+var member_callout := ""
+var member_callout_hero: Node2D = null
+var member_callout_time := 99.0
+const MEMBER_CALLOUT_SECONDS := 2.2
 const SEAL_FLASH_SECONDS := 2.6
 var label_layer: CanvasLayer
 var marker_label: Label
@@ -335,6 +341,7 @@ func _ready() -> void:
 	GameManager.arena.get_node("HUD").root.add_child(marker_label)
 
 func _process(delta: float) -> void:
+	member_callout_time += maxf(0.0, delta)
 	_update_label()
 	visible = GameManager.run_mode == "campaign" and GameManager.game_running and (not completed or seal_flash_time < SEAL_FLASH_SECONDS)
 	if get_tree().paused or not GameManager.game_running:
@@ -434,6 +441,7 @@ func advance(delta: float) -> void:
 		captain.take_damage(8.0,anchor+Vector2(1,0))
 		GameManager.show_toast("錯陣反噬：進度歸零・%s・%s" % [accepted_text(), switch_hint()], "battle", true)
 	var settled_members: Array = []
+	last_settled_members = settled_members
 	if correct:
 		for member in squad.get_members():
 			if not is_instance_valid(member) or member == captain or not member.is_alive:
@@ -474,6 +482,17 @@ func advance(delta: float) -> void:
 	seal_flash_at = anchor
 	last_seal_heal = int(GameManager.STARTING_BUILD.seal_heal(pressure.kind, squad.get_formation_id()))
 	seal_flash_text = seal_text(step+1, last_seal_counter, last_seal_heal)
+	var best_seconds := -1.0
+	member_callout_hero = null
+	for member in last_settled_members:
+		if is_instance_valid(member) and member.get("hero_id") != null:
+			var seconds := float(GameManager.contribution_row(str(member.get("hero_id"))).get("seal", 0.0))
+			if seconds > best_seconds:
+				best_seconds = seconds
+				member_callout_hero = member
+	if is_instance_valid(member_callout_hero):
+		member_callout = "%s・守住封隙" % str(member_callout_hero.get("display_name"))
+		member_callout_time = 0.0
 	seal_flash_slow = GameManager.STARTING_BUILD.is_secondary(pressure.kind, squad.get_formation_id())
 	GameManager.request_combat_impact(5.0,0.035)
 	EntityFactory.spawn_death_burst(anchor,Color("bdf0ff") if seal_flash_slow else Color("ffdcac"),3.4,"gold_rain")
@@ -701,6 +720,15 @@ func _draw_seal_flash() -> void:
 	text_layer.draw_rect(Rect2(at+Vector2(230-width/2-12,-25),Vector2(width+24,34)),Color(gold,0.9*fade),false,2,true)
 	text_layer.draw_string_outline(FONT,at,seal_flash_text,HORIZONTAL_ALIGNMENT_CENTER,460,22,7,Color(0.03,0.03,0.02,0.9*fade))
 	text_layer.draw_string(FONT,at,seal_flash_text,HORIZONTAL_ALIGNMENT_CENTER,460,22,Color(gold,fade))
+	# R35: the member who held this seal longest, named on a green line that
+	# hangs under the banner, so nothing else can cover it.
+	if member_callout != "" and member_callout_time < SEAL_FLASH_SECONDS:
+		var w_c := FONT.get_string_size(member_callout, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
+		var box_c := Rect2(at + Vector2(230 - w_c / 2 - 10, 13), Vector2(w_c + 20, 28))
+		_reserve_for_plates(box_c)
+		text_layer.draw_rect(box_c, Color(0.03, 0.06, 0.05, 0.9 * fade), true)
+		text_layer.draw_rect(box_c, Color(0.56, 0.94, 0.64, fade), false, 2.0, true)
+		text_layer.draw_string(FONT, box_c.position + Vector2(10, 20), member_callout, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.9, 1.0, 0.92, fade))
 
 func _draw() -> void:
 	Enemy.clear_label_areas(self)
