@@ -97,11 +97,19 @@ func _process(delta: float) -> void:
 func _strike() -> void:
 	last_verdict_time = GameManager.elapsed_time
 	blocked = is_instance_valid(GameManager.player) and covered(GameManager.player.global_position, target.global_position)
+	# R38: each outcome has its own hit: a green shield burst and 「擋下」 on a
+	# block, a violet burst and the damage on the member when it lands.
 	if blocked:
 		GameManager.veil_lances_blocked += 1
+		var guard_at: Vector2 = GameManager.player.global_position
+		EntityFactory.spawn_death_burst(guard_at, SAFE, 2.6, "gold_rain")
+		EntityFactory.spawn_damage_number("擋下", guard_at + Vector2(0, -96), SAFE, 30, "", true)
+		GameManager.request_combat_impact(4.0, 0.03)
 		return
 	if target.has_method("take_damage"):
 		target.take_damage(LANCE_DAMAGE, _from())
+	EntityFactory.spawn_death_burst(target.global_position, HAZARD, 2.2, "burst")
+	EntityFactory.spawn_damage_number("刺中 %d" % int(LANCE_DAMAGE), target.global_position + Vector2(0, -96), HAZARD, 28, "", true)
 	GameManager.veil_lance_hits += 1
 
 func _from() -> Vector2:

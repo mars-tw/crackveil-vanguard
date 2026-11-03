@@ -172,6 +172,8 @@ func _per_page() -> int:
 	if view.x<=900 and view.y<=430 and int(PlayerSettings.get("ui_scale_index"))>=2:return 1
 	return 2
 
+# R38: set by the landscape layout when the progress line moved to 紀錄.
+var progress_in_records:=false
 func _records() -> Array[String]:
 	var data:=displayed_summary
 	var echo: Dictionary=data.get("echo_progress",MetaProgress.get_progress_summary())
@@ -188,6 +190,8 @@ func _records() -> Array[String]:
 	elif goal.get("kind","")=="spendable":result.append("局外目標\n%s：可用殘響 %d/%d\n還差 %d" % [goal.get("name","下一強化"),goal.get("current",0),goal.get("target",0),goal.get("remaining",0)])
 	else:result.append("局外目標\n"+str(goal.get("name","目前強化已完成")))
 	for achievement in data.get("achievement_unlocks",[]):result.append("本局新解鎖\n"+str(achievement.get("name","")))
+	# R38: the setup progress line when it had no room on the first page.
+	if progress_in_records:result.insert(0,"整備進度\n"+progress_label.text)
 	# R36: the squad catch-up and every stage hazard tally, one card.
 	var tally := PackedStringArray()
 	var catch_line := catch_up_line(data.get("seal_state",{}))
@@ -546,6 +550,8 @@ static func victory_badges(summary: Dictionary) -> String:
 		out.append("全員穿過霜牆 %d/%d" % [int(seal.get("frost_clean", 0)), int(seal.get("frost_walls", 0))])
 	if int(seal.get("veil_blocked", 0)) > 0:
 		out.append("隊長護住影槍 %d/%d" % [int(seal.get("veil_blocked", 0)), int(seal.get("veil_lances", 0))])
+	if int(seal.get("sand_solved", 0)) > 0:
+		out.append("解開王陵雙印 %d/%d" % [int(seal.get("sand_solved", 0)), int(seal.get("sand_glyphs", 0))])
 	if out.is_empty():
 		return ""
 	return "戰績：" + "・".join(out)
@@ -567,6 +573,9 @@ static func vine_line(seal: Dictionary) -> String:
 	# R37: the veil's shadow lances, the same way.
 	if int(seal.get("veil_lances", 0)) > 0:
 		parts.append("影槍鎖定 %d 次・隊長護住 %d 次・隊員被刺 %d 次" % [int(seal.get("veil_lances", 0)), int(seal.get("veil_blocked", 0)), int(seal.get("veil_hits", 0))])
+	# R38: the tomb glyphs, the same way.
+	if int(seal.get("sand_glyphs", 0)) > 0:
+		parts.append("王陵雙印 %d 次・解開 %d 次・砂暴打中 %d 人次" % [int(seal.get("sand_glyphs", 0)), int(seal.get("sand_solved", 0)), int(seal.get("sand_hits", 0))])
 	return "\n".join(parts)
 
 # R27: what the squad catch-up did this run (peak multiplier and added damage).
@@ -626,6 +635,8 @@ func _apply_responsive_layout() -> void:
 		var summary_h:=minf(size.y-300,_text_height(summary_label,left_w))
 		var gain_font:=roundi(14*scale)
 		gain_label.add_theme_font_size_override("font_size",gain_font)
+		progress_label.visible=true
+		progress_in_records=false
 		var progress_room:=_text_height(progress_label,left_w)
 		# R27: shrink the gain lines until summary + gain + progress leave the
 		# tabs, cards and footer their full height.
@@ -664,6 +675,12 @@ func _apply_responsive_layout() -> void:
 		var gain_y:=56+summary_h
 		_place(summary_scroll,20,50,left_w-8,summary_h)
 		_place(gain_label,20,gain_y,left_w-8,gain_h)
+		# R38: when the gains still do not leave room for the progress line at
+		# the smallest fonts, the line moves to the 紀錄 page instead of being
+		# drawn into the footer buttons (the shrink loop can run out of room).
+		var progress_fits:=gain_y+gain_h+2+progress_line_h<=column_bottom
+		progress_label.visible=progress_fits
+		progress_in_records=not progress_fits
 		_place(progress_label,20,gain_y+gain_h+2,left_w-8,progress_line_h)
 	var right_x:=12.0 if portrait else 24+left_w
 	var right_w:=w if portrait else w-left_w-12

@@ -212,6 +212,7 @@ jobs:
           "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r35_test.gd
           "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r36_test.gd
           "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r37_test.gd
+          "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r38_test.gd
           "${GODOT_BIN}" --headless --fixed-fps 60 --path . res://scenes/debug/R31EndgameGate.tscn -- --qa-endgame=r31
           node tools/test_r32_loading_recovery.mjs
           node tools/test_r36_webgl_state_cache.cjs

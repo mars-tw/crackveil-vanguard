@@ -24,6 +24,8 @@ const STAGE_VARIANTS := {
 		"names": {"shield": "冰盾重衛", "charge": "霜爪獵將", "frost": "極霜守望者", "flame": "寒焰術士", "summoner": "冰群召喚師"}},
 	"veil": {"tint": Color("e0a8ff"), "speed": 1.1, "hp": 1.1, "projectile": 1.1, "pressure": "影槍鎖定", "skill": "veil_lance",
 		"names": {"shield": "幕盾重衛", "charge": "影爪獵將", "frost": "幽帷守望者", "flame": "冥焰術士", "summoner": "影群召喚師"}},
+	"dunes": {"tint": Color("f0c97a"), "speed": 1.05, "hp": 1.15, "projectile": 1.1, "pressure": "王陵雙印", "skill": "sand_glyphs",
+		"names": {"shield": "砂盾重衛", "charge": "砂爪獵將", "frost": "砂霧守望者", "flame": "曜焰術士", "summoner": "砂群召喚師"}}
 }
 
 static func stage_variant(stage_id: String) -> Dictionary:

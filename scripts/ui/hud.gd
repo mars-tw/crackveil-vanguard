@@ -1657,6 +1657,14 @@ func _storm_pylon_screen() -> Array:
 			out.append([at.x, at.y])
 	return out
 
+# R38: screen position of the tomb glyph the captain must step on next, for the review bot.
+func _glyph_next_screen() -> Array:
+	for glyphs in get_tree().get_nodes_in_group("sand_glyphs"):
+		if glyphs is Node2D and not bool(glyphs.get("done")):
+			var at: Vector2 = get_viewport().get_canvas_transform() * ((glyphs as Node2D).global_position + glyphs.next_offset())
+			return [at.x, at.y]
+	return []
+
 # R37: screen position of the member a shadow lance is locked on, for the review bot.
 func _veil_target_screen() -> Array:
 	for lance in get_tree().get_nodes_in_group("veil_lances"):
@@ -1728,6 +1736,8 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"storm_split_at": float(load("res://scripts/vfx/storm_pylons.gd").last_split_time),
 		"frost_gap_screen": _frost_gap_screen(),
 		"veil_target_screen": _veil_target_screen(),
+		"glyph_next_screen": _glyph_next_screen(),
+		"glyph_verdict_at": float(load("res://scripts/vfx/sand_glyphs.gd").last_verdict_time),
 		"veil_verdict_at": float(load("res://scripts/vfx/veil_lance.gd").last_verdict_time),
 		"frost_verdict_at": float(load("res://scripts/vfx/frost_wall.gd").last_verdict_time),
 		"hazard_mark_at": maxf(maxf(float(load("res://scripts/vfx/ember_ring.gd").last_mark_time), float(load("res://scripts/vfx/storm_pylons.gd").last_mark_time)), float(load("res://scripts/vfx/frost_wall.gd").last_mark_time)),

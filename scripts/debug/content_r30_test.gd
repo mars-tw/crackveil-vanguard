@@ -25,7 +25,7 @@ func _initialize() -> void:
 	_check(gm_src.contains("\"vine_snares\": vine_snares_cast, \"vine_hits\": vine_snare_hits,") and gm_src.contains("\tvine_snares_cast = 0\n\tvine_snare_hits = 0"), "snare counts are carried to the result and reset each run")
 	_check(src.contains("plate_slot(FONT.get_string_size(LABEL") and src.contains("for y in [RADIUS + 10.0, -RADIUS - 36.0]:") and src.contains("Enemy.active_label_areas() + Enemy.elite_plate_rects()") and src.contains("snare.add_to_group(\"vine_snares\")"), "overlapping snares share one name plate that steps around rule text and elite plates")
 	_check(snare_script.MAX_ACTIVE == 2 and src.contains("get_nodes_in_group(\"vine_snares\").size() >= MAX_ACTIVE"), "at most two snares are active at once")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.66.0-content-r37", "project version is 0.66.0-content-r37")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.67.0-content-r38", "project version is 0.67.0-content-r38")
 	if failures.is_empty():
 		print("R30_REGRESSION status=PASS checks=%d" % checks)
 	else:

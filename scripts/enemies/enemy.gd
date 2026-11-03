@@ -111,6 +111,7 @@ const EMBER_RING := preload("res://scripts/vfx/ember_ring.gd")
 const STORM_PYLONS := preload("res://scripts/vfx/storm_pylons.gd")
 const FROST_WALL := preload("res://scripts/vfx/frost_wall.gd")
 const VEIL_LANCE := preload("res://scripts/vfx/veil_lance.gd")
+const SAND_GLYPHS := preload("res://scripts/vfx/sand_glyphs.gd")
 var special_skill := ""
 var special_cooldown := 3.0
 var special_timer := 2.0
@@ -916,6 +917,12 @@ func _apply_special_elite_impact(target: Node2D) -> void:
 		if is_instance_valid(VEIL_LANCE.last_spawned):
 			GameManager.veil_lances_cast += 1
 			VEIL_LANCE.last_spawned = null
+	# R38: the tomb lights two glyphs the captain must step on in order.
+	if stage_skill == "sand_glyphs" and is_instance_valid(GameManager.player) and is_inside_tree():
+		SAND_GLYPHS.spawn(get_parent(), GameManager.player)
+		if is_instance_valid(SAND_GLYPHS.last_spawned):
+			GameManager.sand_glyphs_cast += 1
+			SAND_GLYPHS.last_spawned = null
 	if special_skill == "summoner":
 		for index in range(5):
 			if EntityFactory.get_enemy_live_count() >= death_spawn_cap:

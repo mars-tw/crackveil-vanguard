@@ -357,7 +357,7 @@ func _spawn_special_elite() -> bool:
 	special_elite_index += 1
 	special_elite_history.append({"id":profile.id, "name":profile.name, "time":GameManager.elapsed_time})
 	GameManager.record_elite_spawn()
-	GameManager.show_toast("特殊菁英：%s　%s%s" % [str(config.get("special_elite_name", profile.name)), profile.description, "　出招時腳下纏藤，散開站位" if str(config.get("stage_skill", "")) == "vine_snare" else "　出招時火環包圍，往中心集合" if str(config.get("stage_skill", "")) == "ember_ring" else "　出招時兩側落下雷柱，隊長踩隊長柱、散兵接隊員柱" if str(config.get("stage_skill", "")) == "storm_pylon" else "　出招時推來霜牆，圓陣對準缺口穿過" if str(config.get("stage_skill", "")) == "frost_wall" else "　出招時影槍鎖定一名隊員，隊長走到他身邊護住" if str(config.get("stage_skill", "")) == "veil_lance" else ""])
+	GameManager.show_toast("特殊菁英：%s　%s%s" % [str(config.get("special_elite_name", profile.name)), profile.description, "　出招時腳下纏藤，散開站位" if str(config.get("stage_skill", "")) == "vine_snare" else "　出招時火環包圍，往中心集合" if str(config.get("stage_skill", "")) == "ember_ring" else "　出招時兩側落下雷柱，隊長踩隊長柱、散兵接隊員柱" if str(config.get("stage_skill", "")) == "storm_pylon" else "　出招時推來霜牆，圓陣對準缺口穿過" if str(config.get("stage_skill", "")) == "frost_wall" else "　出招時影槍鎖定一名隊員，隊長走到他身邊護住" if str(config.get("stage_skill", "")) == "veil_lance" else "　出招時兩側亮起印記，隊長先踩「先」再踩「後」" if str(config.get("stage_skill", "")) == "sand_glyphs" else ""])
 	AudioManager.play_sfx("elite")
 	return true
 
