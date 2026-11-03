@@ -9,6 +9,13 @@ var detail: Label
 var meter: ProgressBar
 var rows: VBoxContainer
 var refresh_timer: float = 0.0
+var ornament: Control
+
+
+func _fit_ornament() -> void:
+	if is_instance_valid(ornament):
+		ornament.position = Vector2.ZERO
+		ornament.size = panel.size
 
 
 func _ready() -> void:
@@ -31,7 +38,11 @@ func _ready() -> void:
 	style.content_margin_bottom = 3.0
 	panel.add_theme_stylebox_override("panel", style)
 	add_child(panel)
-	preload("res://scripts/ui/rift_frame_ornament.gd").attach(panel, false, Color("6fc4cf"), 12.0)
+	ornament = preload("res://scripts/ui/rift_frame_ornament.gd").attach(panel, false, Color("6fc4cf"), 12.0)
+	# R39: the panel container fitted the frame into its content rect, so the
+	# frame's bottom edge and corner marks ran through the detail line like a
+	# strike-through. The frame now covers the whole panel, outside the text.
+	panel.sort_children.connect(_fit_ornament)
 	rows = VBoxContainer.new()
 	rows.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	rows.add_theme_constant_override("separation", 0)

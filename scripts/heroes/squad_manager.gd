@@ -118,6 +118,29 @@ var bond_flash_timer := 0.0
 var bond_flash_text := ""
 var bond_flash_bond_id := ""
 var bond_flash_line: Line2D = null
+const BOND_TEXT_Z := 104
+var bond_text_layer: Node2D = null
+var bond_text_at := Vector2.ZERO
+var bond_text_alpha := 0.0
+func _ensure_bond_text_layer() -> void:
+	if is_instance_valid(bond_text_layer):
+		return
+	bond_text_layer = Node2D.new()
+	bond_text_layer.name = "BondTextLayer"
+	bond_text_layer.z_as_relative = false
+	bond_text_layer.z_index = BOND_TEXT_Z
+	bond_text_layer.draw.connect(_draw_bond_text)
+	add_child(bond_text_layer)
+
+func _draw_bond_text() -> void:
+	if bond_text_alpha <= 0.0 or bond_flash_text == "":
+		return
+	var width := SWITCH_FONT.get_string_size(bond_flash_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 19).x
+	var plate := Rect2(bond_text_at + Vector2(160.0 - width * 0.5 - 10.0, -21.0), Vector2(width + 20.0, 28.0))
+	bond_text_layer.draw_rect(plate, Color("08121f", 0.86 * bond_text_alpha), true)
+	bond_text_layer.draw_rect(plate, Color(1.0, 0.92, 0.55, 0.8 * bond_text_alpha), false, 1.5)
+	bond_text_layer.draw_string(SWITCH_FONT, bond_text_at, bond_flash_text, HORIZONTAL_ALIGNMENT_CENTER, 320, 19, Color(1.0, 0.95, 0.70, bond_text_alpha))
+
 func _ensure_bond_flash_line() -> Line2D:
 	if bond_flash_line == null or not is_instance_valid(bond_flash_line):
 		bond_flash_line = Line2D.new()
@@ -501,6 +524,9 @@ func get_formation_debug_state() -> Dictionary:
 
 
 func _draw() -> void:
+	bond_text_alpha = 0.0
+	_ensure_bond_text_layer()
+	bond_text_layer.queue_redraw()
 	if leader == null or not is_instance_valid(leader) or not GameManager.game_running:
 		return
 	var color: Color = get_formation_definition().get("color", Color.WHITE)
@@ -569,8 +595,10 @@ func _draw() -> void:
 				# fire on the same formation switch; the gold link still shows.
 				var text_screen := get_viewport().get_canvas_transform() * get_global_transform() * (mid + Vector2(160, -8))
 				if bond_flash_text != "" and not Enemy.label_area_reserved(text_screen, 40.0):
-					draw_string_outline(SWITCH_FONT, mid, bond_flash_text, HORIZONTAL_ALIGNMENT_CENTER, 320, 19, 6, Color("08121f", 0.9 * flash_a))
-					draw_string(SWITCH_FONT, mid, bond_flash_text, HORIZONTAL_ALIGNMENT_CENTER, 320, 19, Color(1.0, 0.95, 0.70, flash_a))
+					# R39: the words go to a layer above the heroes, on a dark plate,
+					# so a member walking past no longer cuts the line in half.
+					bond_text_at = mid
+					bond_text_alpha = flash_a
 				for member in [fa, fb]:
 					draw_arc(to_local(member.global_position),23,0,TAU,28,Color("e4b7ff"),2.5,true)
 

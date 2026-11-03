@@ -14,13 +14,14 @@ func _initialize() -> void:
 	_check(pressure_src.contains("if _under_equipment_bar(badge_backing):") and pressure_src.contains("DAMAGE_NUMBER_SCRIPT.blocked_by_hud("), "the ground answer label moves above the badges instead of under the equipment bar")
 	_check(pressure_src.contains("if _under_equipment_bar(Rect2(center - Vector2.ONE * BADGE_SIZE * 0.5"), "badges that would sit under the equipment bar are left to the top bar")
 	var hud_src := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
-	_check(hud_src.contains("var compare: String = relay.compare_line()") and hud_src.contains("(\"｜\" + compare) if compare != \"\" else \"\""), "the comparison follows the held formation on the first top-bar line, which has room on phones")
+	# R39: the comparison moved from the top bar onto the 楔快／圓慢 ground tags.
+	_check(not hud_src.contains("var compare: String = relay.compare_line()") and FileAccess.get_file_as_string("res://scripts/services/encounter_pressure.gd").contains("pace_detail(kind, accepted[i])"), "both answers' seal time and heal are still shown, now on the ground tags")
 	_check(relay_src.contains("return \"%s・陣形正確・隊員增傷 +80%%\" % pressure.status_text()"), "the second line keeps only the wave status when two answers are compared")
 	var font: Font = load("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 	var first: String = "楔形｜封隙 0/3｜" + relay_script.compare_text("front")
 	var second: String = "重盾正面推進・預警 1.3 秒・陣形正確"
 	_check(font.get_string_size(first, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x <= 315.0 and font.get_string_size(second, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x <= 315.0, "both top-bar lines fit the 835-wide phone mission box (315 px text) at 12 px")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.67.0-content-r38", "project version is 0.67.0-content-r38")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.68.0-content-r39", "project version is 0.68.0-content-r39")
 	if failures.is_empty():
 		print("R18_REGRESSION status=PASS checks=%d" % checks)
 	else:

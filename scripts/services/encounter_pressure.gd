@@ -232,6 +232,12 @@ const DAMAGE_NUMBER_SCRIPT := preload("res://scripts/vfx/damage_number.gd")
 const PACE_TAG_Z := 97
 var tag_layer: Node2D = null
 var pace_tags: Array = []
+const TAG_WIDTH := 68.0
+# R39: "6秒・補8" under the 楔快／圓慢 tag: this build's seal time and heal.
+static func pace_detail(kind_value: String, id: String) -> String:
+	var catalog: GDScript = load("res://scripts/services/starting_build_catalog.gd")
+	var node: String = str(GameManager.active_starting_node) if is_instance_valid(GameManager) else ""
+	return "%d秒・補%d" % [int(catalog.seal_seconds(node, kind_value, id)), int(catalog.seal_heal(kind_value, id))]
 func _draw_pace_tags() -> void:
 	for row in pace_tags:
 		var tag: Rect2 = row[0]
@@ -240,6 +246,9 @@ func _draw_pace_tags() -> void:
 		tag_layer.draw_rect(tag, Color("08121f", 0.92), true)
 		tag_layer.draw_rect(tag, tint, false, 2.0, true)
 		tag_layer.draw_string(FONT, tag.position + Vector2(0, 21), str(row[2]) + str(row[1]), HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 22, tint)
+		# R39: the seal seconds and heal under the name (moved off the top bar).
+		if row.size() > 3:
+			tag_layer.draw_string(FONT, tag.position + Vector2(0, 38), str(row[3]), HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 14, Color("e8f4ff"))
 
 func _draw_answer(center: Vector2) -> void:
 	# R11: the next seal's answer badge waits until the seal banner fades, so it
@@ -277,9 +286,9 @@ func _draw_answer(center: Vector2) -> void:
 			# R17: a solid tag (gold fast, cyan slow) that reads over links and crowds.
 			# R19: the tag names the formation too (楔快／圓慢), so the badge reads
 			# without knowing the icon.
-			var tag := Rect2(rect.position + Vector2(rect.size.x * 0.5 - 26, -32), Vector2(52, 28))
+			var tag := Rect2(rect.position + Vector2(rect.size.x * 0.5 - TAG_WIDTH * 0.5, -48), Vector2(TAG_WIDTH, 44))
 			# R17: drawn on a layer above effects, name plates and the crown.
-			pace_tags.append([tag, pace, str(FORMATION_NAMES[accepted[i]]).substr(0, 1)])
+			pace_tags.append([tag, pace, str(FORMATION_NAMES[accepted[i]]).substr(0, 1), pace_detail(kind, accepted[i])])
 		if wrong:
 			var pulse := 0.6 + 0.4 * absf(sin(clock * 6.0))
 			draw_texture_rect(WRONG_RING, rect.grow(6.0), false, Color(1, 1, 1, pulse))
@@ -289,7 +298,7 @@ func _draw_answer(center: Vector2) -> void:
 	if count > 1 and not wrong:
 		if is_inside_tree():
 			var xf_tags := get_viewport().get_canvas_transform() * get_global_transform()
-			Enemy.reserve_label_area(xf_tags * Rect2(center - Vector2(count * (BADGE_SIZE + 6.0) * 0.5, BADGE_SIZE * 0.5 + 32), Vector2(count * (BADGE_SIZE + 6.0), BADGE_SIZE + 32)), self)
+			Enemy.reserve_label_area(xf_tags * Rect2(center - Vector2(count * (BADGE_SIZE + 6.0) * 0.5, BADGE_SIZE * 0.5 + 48), Vector2(count * (BADGE_SIZE + 6.0), BADGE_SIZE + 48)), self)
 		return
 	var text := answer_label(accepted)
 	var at := center + Vector2(-90, BADGE_SIZE * 0.5 + 24)

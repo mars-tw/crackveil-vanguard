@@ -52,7 +52,7 @@ func _initialize() -> void:
 	var badges: String = result.victory_badges({"squad_total": 8, "squad_alive": 7, "seal_state": {"wrong": 1, "ember_rings": 14, "ember_clean": 6, "storm_pylons": 3, "storm_grounded": 2}})
 	_check(badges == "戰績：躲過熔火環 6/14・雷柱分流 2/3", "the ember badge no longer reads 全躲 for a partial count")
 	var rows := [{"name": "隊長", "role": "captain", "seal": 0.0, "taken": 900.0}, {"name": "甲", "role": "member", "seal": 23.4, "taken": 50.0}, {"name": "乙", "role": "member", "seal": 2.0, "taken": 340.0}, {"name": "丙", "role": "member", "healing": 100.0, "prevented": 20.0}]
-	_check(result.key_contribution_line(rows) == "關鍵貢獻：丙 回復減傷 120・甲 封隙 23 秒・乙 承傷 340", "three members are named for support, seal time and hits taken")
+	_check(result.key_contribution_line(rows).replace(char(0xa0), " ") == "關鍵貢獻：丙 回復減傷 120・甲 封隙 23 秒・乙 承傷 340", "three members are named for support, seal time and hits taken")
 	_check(result.key_contribution_line([{"name": "隊長", "role": "captain", "taken": 50.0}]) == "", "no line without member contributions")
 	var relay_src := FileAccess.get_file_as_string("res://scripts/services/formation_relay.gd")
 	_check(relay_src.contains("row[\"seal\"] = float(row.get(\"seal\", 0.0)) + maxf(0.0, delta)"), "each settled member banks its own seal seconds")
@@ -69,7 +69,7 @@ func _initialize() -> void:
 			if c > 0x7f and not font.has_char(c):
 				missing += char(c)
 	_check(missing == "", "every new string is covered by the CJK subset font (missing: %s)" % missing)
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.67.0-content-r38", "project version is 0.67.0-content-r38")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.68.0-content-r39", "project version is 0.68.0-content-r39")
 	if failures.is_empty():
 		print("R33_REGRESSION status=PASS checks=%d" % checks)
 	else:

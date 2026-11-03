@@ -26,7 +26,7 @@ func _initialize() -> void:
 	var result: GDScript = load("res://scripts/ui/r4_result_screen.gd")
 	_check(result.victory_badges({"squad_total": 7, "squad_alive": 7, "seal_state": {"wrong": 0, "storm_pylons": 7, "storm_grounded": 0, "ember_rings": 5, "ember_clean": 0}}) == "戰績：零錯陣・全員生還", "a hazard never beaten is not listed as a feat")
 	var rows := [{"name": "甲", "role": "member", "seal": 20.0, "healing": 8.0}, {"name": "乙", "role": "member", "taken": 120.0, "healing": 290.0}]
-	_check(result.key_contribution_line(rows) == "關鍵貢獻：乙 回復減傷 290・甲 封隙 20 秒", "the best healer is named for support and a token amount is dropped")
+	_check(result.key_contribution_line(rows).replace(char(0xa0), " ") == "關鍵貢獻：乙 回復減傷 290・甲 封隙 20 秒", "the best healer is named for support and a token amount is dropped")
 	_check(FileAccess.get_file_as_string("res://scripts/ui/hud.gd").contains("\"storm_split_at\":"), "the HUD probe exposes the last split for capture")
 	var font: FontFile = load("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 	var missing := ""
@@ -36,7 +36,7 @@ func _initialize() -> void:
 			if c > 0x7f and not font.has_char(c):
 				missing += char(c)
 	_check(missing == "", "every new string is covered by the CJK subset font (missing: %s)" % missing)
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.67.0-content-r38", "project version is 0.67.0-content-r38")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.68.0-content-r39", "project version is 0.68.0-content-r39")
 	if failures.is_empty():
 		print("R34_REGRESSION status=PASS checks=%d" % checks)
 	else:

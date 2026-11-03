@@ -97,19 +97,18 @@ func _process(delta: float) -> void:
 func _strike() -> void:
 	last_verdict_time = GameManager.elapsed_time
 	blocked = is_instance_valid(GameManager.player) and covered(GameManager.player.global_position, target.global_position)
-	# R38: each outcome has its own hit: a green shield burst and 「擋下」 on a
-	# block, a violet burst and the damage on the member when it lands.
+	# R38: each outcome has its own hit: a green shield burst on a block, a
+	# violet burst on the member when it lands. R39: the word is the stamp
+	# alone; the floating number repeated it beside the stamp.
 	if blocked:
 		GameManager.veil_lances_blocked += 1
 		var guard_at: Vector2 = GameManager.player.global_position
 		EntityFactory.spawn_death_burst(guard_at, SAFE, 2.6, "gold_rain")
-		EntityFactory.spawn_damage_number("擋下", guard_at + Vector2(0, -96), SAFE, 30, "", true)
 		GameManager.request_combat_impact(4.0, 0.03)
 		return
 	if target.has_method("take_damage"):
 		target.take_damage(LANCE_DAMAGE, _from())
 	EntityFactory.spawn_death_burst(target.global_position, HAZARD, 2.2, "burst")
-	EntityFactory.spawn_damage_number("刺中 %d" % int(LANCE_DAMAGE), target.global_position + Vector2(0, -96), HAZARD, 28, "", true)
 	GameManager.veil_lance_hits += 1
 
 func _from() -> Vector2:
@@ -153,6 +152,7 @@ func _draw_marks() -> void:
 		return
 	if age >= WARN_SECONDS + MARK_SECONDS:
 		return
+	_draw_stamp(age - WARN_SECONDS)
 	var verdict := ("隊長護住%s" % target_name) if blocked else ("%s被影槍刺中" % target_name)
 	var tone: Color = SAFE if blocked else HAZARD
 	var w2 := FONT.get_string_size(verdict, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
@@ -160,3 +160,44 @@ func _draw_marks() -> void:
 	mark_layer.draw_rect(box, Color("0d1426", 0.92), true)
 	mark_layer.draw_rect(box, Color(tone, 0.95), false, 2.0)
 	mark_layer.draw_string(FONT, box.position + Vector2(10, 22), verdict, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("f3e8ff"))
+
+# R39: the outcome stamped on the top layer, so it is never under a hero or
+# dropped by the damage-number cap. A block reads as a green hexagon shield
+# around the captain with 「擋下」; a hit as violet shards bursting from the
+# member with 「刺中 30」. The two shapes differ even without the words.
+const STAMP_WORD_BLOCK := "擋下"
+const STAMP_WORD_HIT := "刺中 %d"
+func stamp_word() -> String:
+	return STAMP_WORD_BLOCK if blocked else STAMP_WORD_HIT % int(LANCE_DAMAGE)
+
+func _draw_stamp(since: float) -> void:
+	var fade := clampf(1.0 - maxf(0.0, since - 1.2) / 0.8, 0.0, 1.0)
+	if fade <= 0.0:
+		return
+	var grow := clampf(since / 0.25, 0.0, 1.0)
+	var at := to_local(GameManager.player.global_position) if blocked and is_instance_valid(GameManager.player) else to_local(target.global_position)
+	if blocked:
+		var hexagon := PackedVector2Array()
+		for i in range(7):
+			hexagon.append(at + Vector2.RIGHT.rotated(TAU * float(i) / 6.0 + PI / 6.0) * (40.0 + 22.0 * grow))
+		mark_layer.draw_polyline(hexagon, Color("0d1426", 0.85 * fade), 9.0, true)
+		mark_layer.draw_polyline(hexagon, Color(SAFE, fade), 4.5, true)
+		# the fill takes the six corners only: the closing seventh point repeats
+		# the first and makes the polygon fail to triangulate
+		mark_layer.draw_colored_polygon(hexagon.slice(0, 6), Color(SAFE, 0.16 * fade))
+	else:
+		for i in range(8):
+			var dir := Vector2.RIGHT.rotated(TAU * float(i) / 8.0 + 0.2)
+			var inner := at + dir * (18.0 + 10.0 * grow)
+			var outer := at + dir * (44.0 + 30.0 * grow)
+			var side := dir.orthogonal() * 6.0
+			var shard := PackedVector2Array([inner - side, outer, inner + side])
+			mark_layer.draw_colored_polygon(shard, Color(HAZARD, fade))
+			mark_layer.draw_polyline(PackedVector2Array([inner - side, outer, inner + side, inner - side]), Color("0d1426", 0.8 * fade), 2.0, true)
+	var word := stamp_word()
+	var size := 36
+	var w := FONT.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+	var base := at + Vector2(-w * 0.5, -150.0 - 10.0 * grow)
+	mark_layer.draw_string_outline(FONT, base, word, HORIZONTAL_ALIGNMENT_LEFT, -1, size, 8, Color("0d1426", 0.95 * fade))
+	# the hit word is a light violet: the lance violet alone sank into the veil floor
+	mark_layer.draw_string(FONT, base, word, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color(SAFE if blocked else Color("f2d2ff"), fade))

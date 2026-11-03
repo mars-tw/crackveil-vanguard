@@ -1665,6 +1665,13 @@ func _glyph_next_screen() -> Array:
 			return [at.x, at.y]
 	return []
 
+# R39: the formation a rolling tide sigil asks for ("" when none), for the review bot.
+func _tide_required() -> String:
+	for tide in get_tree().get_nodes_in_group("tide_sigils"):
+		if tide is Node2D and not bool(tide.get("done")):
+			return str(tide.get("required"))
+	return ""
+
 # R37: screen position of the member a shadow lance is locked on, for the review bot.
 func _veil_target_screen() -> Array:
 	for lance in get_tree().get_nodes_in_group("veil_lances"):
@@ -1738,6 +1745,8 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"veil_target_screen": _veil_target_screen(),
 		"glyph_next_screen": _glyph_next_screen(),
 		"glyph_verdict_at": float(load("res://scripts/vfx/sand_glyphs.gd").last_verdict_time),
+		"tide_required": _tide_required(),
+		"tide_verdict_at": float(load("res://scripts/vfx/tide_sigil.gd").last_verdict_time),
 		"veil_verdict_at": float(load("res://scripts/vfx/veil_lance.gd").last_verdict_time),
 		"frost_verdict_at": float(load("res://scripts/vfx/frost_wall.gd").last_verdict_time),
 		"hazard_mark_at": maxf(maxf(float(load("res://scripts/vfx/ember_ring.gd").last_mark_time), float(load("res://scripts/vfx/storm_pylons.gd").last_mark_time)), float(load("res://scripts/vfx/frost_wall.gd").last_mark_time)),
@@ -2339,11 +2348,13 @@ func _update_tactical_hint() -> void:
 	var relay: Node = GameManager.tactical_director.relay
 	var formation: String = squad.get_formation_definition().short if is_instance_valid(squad) else "楔形"
 	if is_instance_valid(relay) and not relay.completed:
-		var compare: String = relay.compare_line()
+		# R39: the first line keeps only the long-lived state (formation, seals,
+		# catch-up); the fast/slow seconds and heal moved onto the 楔快／圓慢 ground
+		# tags beside the answer badges, so the top bar stops reading as a rule sheet.
 		# R27: the squad catch-up names itself while it is lifting the members.
 		var catch_up := float(GameManager.current_catch_up())
 		var catch_up_tag := ("｜隊員追擊 ×%.1f" % catch_up) if catch_up >= 1.05 else ""
-		tactical_hint.text = "%s｜封隙 %d/3%s%s\n%s" % [formation, relay.step, ("｜" + compare) if compare != "" else "", catch_up_tag, relay.next_action()]
+		tactical_hint.text = "%s｜封隙 %d/3%s\n%s" % [formation, relay.step, catch_up_tag, relay.next_action()]
 	else:
 		tactical_hint.text = "%s｜封隙 3/3\n%s" % [formation, GameManager.tactical_director.current_hint()]
 	var mission_rect: Rect2 = BATTLE_LAYOUT.regions(view, MOBILE_TUNING.use_mobile_ui(view)).mission

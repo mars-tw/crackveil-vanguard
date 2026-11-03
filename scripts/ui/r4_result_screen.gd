@@ -320,6 +320,8 @@ func _refresh() -> void:
 	if read_line != "":gain_label.text += "\n" + read_line
 	var share_line := damage_share_line(rows)
 	if share_line != "":gain_label.text += "\n" + share_line
+	gain_base_text=gain_label.text
+	key_parts=key_contribution_parts(rows)
 	var key_line := key_contribution_line(rows)
 	if key_line != "":gain_label.text += "\n" + key_line
 	# R36: catch-up and hazard tallies are listed under 紀錄 (see _records).
@@ -508,6 +510,15 @@ static func damage_share_line(contribution_rows: Array) -> String:
 # R33: members by name for what is not damage: longest on the seal, most hits
 # taken for the squad, most healing and prevention. Each member is named once.
 static func key_contribution_line(contribution_rows: Array) -> String:
+	var parts := key_contribution_parts(contribution_rows)
+	if parts.is_empty():
+		return ""
+	return "關鍵貢獻：" + "・".join(parts)
+
+# R39: each part ("潮汐魔導 封隙 29 秒") stays whole; the page wraps between
+# parts by measured width (see _rewrap_key_line), so a row never starts with
+# a lone 「秒」.
+static func key_contribution_parts(contribution_rows: Array) -> PackedStringArray:
 	var used := {}
 	var parts := PackedStringArray()
 	# R34: support first (healers are rare), then seal time, then hits taken; each
@@ -526,9 +537,7 @@ static func key_contribution_line(contribution_rows: Array) -> String:
 			continue
 		used[str(best.get("name", ""))] = true
 		parts.append("%s %s" % [str(best.get("name", "")), str(spec[1]) % int(best_value)])
-	if parts.is_empty():
-		return ""
-	return "關鍵貢獻：" + "・".join(parts)
+	return parts
 
 # R32: the run's tactical achievements as one line under the outcome, so a
 # clean victory reads as a feat before the numbers.
@@ -552,6 +561,8 @@ static func victory_badges(summary: Dictionary) -> String:
 		out.append("隊長護住影槍 %d/%d" % [int(seal.get("veil_blocked", 0)), int(seal.get("veil_lances", 0))])
 	if int(seal.get("sand_solved", 0)) > 0:
 		out.append("解開王陵雙印 %d/%d" % [int(seal.get("sand_solved", 0)), int(seal.get("sand_glyphs", 0))])
+	if int(seal.get("tide_matched", 0)) > 0:
+		out.append("潮紋換陣 %d/%d" % [int(seal.get("tide_matched", 0)), int(seal.get("tide_sigils", 0))])
 	if out.is_empty():
 		return ""
 	return "戰績：" + "・".join(out)
@@ -576,6 +587,9 @@ static func vine_line(seal: Dictionary) -> String:
 	# R38: the tomb glyphs, the same way.
 	if int(seal.get("sand_glyphs", 0)) > 0:
 		parts.append("王陵雙印 %d 次・解開 %d 次・砂暴打中 %d 人次" % [int(seal.get("sand_glyphs", 0)), int(seal.get("sand_solved", 0)), int(seal.get("sand_hits", 0))])
+	# R39: the tide sigils, the same way.
+	if int(seal.get("tide_sigils", 0)) > 0:
+		parts.append("潮紋換陣 %d 次・換對 %d 次・潮浪打中 %d 人次" % [int(seal.get("tide_sigils", 0)), int(seal.get("tide_matched", 0)), int(seal.get("tide_hits", 0))])
 	return "\n".join(parts)
 
 # R27: what the squad catch-up did this run (peak multiplier and added damage).
@@ -640,10 +654,10 @@ func _apply_responsive_layout() -> void:
 		var progress_room:=_text_height(progress_label,left_w)
 		# R27: shrink the gain lines until summary + gain + progress leave the
 		# tabs, cards and footer their full height.
-		while gain_font>10 and gain_label.text!="" and 58+summary_h+_text_height(gain_label,left_w)+progress_room>size.y-226:
+		while gain_font>10 and gain_label.text!="" and 58+summary_h+_gain_height(left_w)+progress_room>size.y-226:
 			gain_font-=1
 			gain_label.add_theme_font_size_override("font_size",gain_font)
-		var gain_h:=_text_height(gain_label,left_w) if gain_label.text!="" else 0.0
+		var gain_h:=_gain_height(left_w) if gain_label.text!="" else 0.0
 		_place(summary_scroll,12,50,left_w,summary_h)
 		_place(gain_label,12,52+summary_h,left_w,gain_h)
 		var progress_h:=_text_height(progress_label,left_w)
@@ -662,7 +676,7 @@ func _apply_responsive_layout() -> void:
 		gain_label.add_theme_font_size_override("font_size",gain_font)
 		var progress_line_h:=maxf(18.0,_text_height(progress_label,left_w-8))
 		var summary_h:=_text_height(summary_label,left_w)
-		var gain_h:=maxf(24.0,_text_height(gain_label,left_w-8))
+		var gain_h:=maxf(24.0,_gain_height(left_w-8))
 		while 56.0+summary_h+gain_h+2.0+progress_line_h>column_bottom and (gain_font>10 or summary_font>11):
 			if gain_font>10:
 				gain_font-=1
@@ -671,7 +685,7 @@ func _apply_responsive_layout() -> void:
 				summary_font-=1
 				summary_label.add_theme_font_size_override("font_size",summary_font)
 			summary_h=_text_height(summary_label,left_w)
-			gain_h=maxf(24.0,_text_height(gain_label,left_w-8))
+			gain_h=maxf(24.0,_gain_height(left_w-8))
 		var gain_y:=56+summary_h
 		_place(summary_scroll,20,50,left_w-8,summary_h)
 		_place(gain_label,20,gain_y,left_w-8,gain_h)
@@ -724,6 +738,34 @@ func _apply_responsive_layout() -> void:
 	for number in range(3):_place([copy_seed_button,main_menu_button,controls.primary][number],12+number*(w+4)/3,size.y-56,(w-8)/3,44)
 	# Card font sizes are fitted per-card above so names never wrap.
 	_publish()
+
+var gain_base_text := ""
+var key_parts := PackedStringArray()
+# R39: rebuild the key-contribution line for this width and font size, wrapping
+# only between whole parts.
+func _rewrap_key_line(width: float) -> void:
+	if key_parts.is_empty():
+		return
+	var font: Font=gain_label.get_theme_font("font")
+	var font_size: int=gain_label.get_theme_font_size("font_size")
+	gain_label.text=gain_base_text+"\n"+wrap_parts("關鍵貢獻：",key_parts,font,font_size,width-4.0)
+
+static func wrap_parts(prefix: String,parts: PackedStringArray,font: Font,font_size: int,width: float) -> String:
+	var lines := PackedStringArray()
+	var line := prefix + parts[0]
+	for index in range(1,parts.size()):
+		var candidate := line + "・" + parts[index]
+		if font != null and font.get_string_size(candidate,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x > width:
+			lines.append(line + "・")
+			line = parts[index]
+		else:
+			line = candidate
+	lines.append(line)
+	return "\n".join(lines)
+
+func _gain_height(width: float) -> float:
+	_rewrap_key_line(width)
+	return _text_height(gain_label,width)
 
 func _text_height(label: Label,width: float) -> float:
 	# Real wrapped line count x font line height (incl. theme line spacing),

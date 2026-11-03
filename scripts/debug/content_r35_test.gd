@@ -46,7 +46,7 @@ func _initialize() -> void:
 	_check(relay_src.contains("member_callout = \"%s・守住封隙\" % str(member_callout_hero.get(\"display_name\"))"), "a closed seal names its longest-held member over their head")
 	_check(relay_src.contains("var box_c := Rect2(at + Vector2(230 - w_c / 2 - 10, 13), Vector2(w_c + 20, 28))") and relay_src.contains("_reserve_for_plates(box_c)"), "the seal callout hangs under the seal banner and plates step around it")
 	# Key contribution numbers match the member cards (both truncate).
-	_check(result.key_contribution_line([{"name": "乙", "role": "member", "healing": 289.7}]) == "關鍵貢獻：乙 回復減傷 289", "key contributions truncate like the member cards")
+	_check(result.key_contribution_line([{"name": "乙", "role": "member", "healing": 289.7}]).replace(char(0xa0), " ") == "關鍵貢獻：乙 回復減傷 289", "key contributions truncate like the member cards")
 	_check(FileAccess.get_file_as_string("res://scripts/ui/hud.gd").contains("\"frost_gap_screen\": _frost_gap_screen(),"), "the HUD probe exposes the frost opening for the review bot")
 	var font: FontFile = load("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 	var missing := ""
@@ -56,7 +56,7 @@ func _initialize() -> void:
 			if c > 0x7f and not font.has_char(c):
 				missing += char(c)
 	_check(missing == "", "every new string is covered by the CJK subset font (missing: %s)" % missing)
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.67.0-content-r38", "project version is 0.67.0-content-r38")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.68.0-content-r39", "project version is 0.68.0-content-r39")
 	if failures.is_empty():
 		print("R35_REGRESSION status=PASS checks=%d" % checks)
 	else:

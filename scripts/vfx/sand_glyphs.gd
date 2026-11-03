@@ -53,6 +53,9 @@ static func spawn(parent: Node, captain: Node2D) -> Node2D:
 func next_offset() -> Vector2:
 	return -half if stepped == 0 else half
 
+func seconds_left() -> int:
+	return maxi(1, ceili(LIMIT_SECONDS - age))
+
 # Advance the sequence for a captain at `captain_at`; returns the new step.
 static func advance_step(step: int, pair_at: Vector2, captain_at: Vector2, half_offset: Vector2) -> int:
 	var target := pair_at + (-half_offset if step == 0 else half_offset)
@@ -124,11 +127,16 @@ func _draw() -> void:
 		return
 	var a := -half
 	var b := half
-	# a dotted route from 先 to 後
-	var steps := 10
+	# R39: the route from 先 to 後 as bold chevrons pointing the way to walk
+	var along := (b - a).normalized()
+	var side := along.orthogonal()
+	var route := (b - a).length() - 2.0 * GLYPH_RADIUS
+	var steps := maxi(2, int(route / 34.0))
 	for i in range(steps):
-		var t := float(i) / float(steps - 1)
-		draw_circle(a.lerp(b, t), 3.0, Color(HAZARD, 0.55))
+		var tip := a + along * (GLYPH_RADIUS + 18.0 + (route - 26.0) * float(i) / float(steps - 1))
+		var chevron := PackedVector2Array([tip - along * 10.0 + side * 10.0, tip, tip - along * 10.0 - side * 10.0])
+		draw_polyline(chevron, Color("0d1426", 0.85), 7.0, true)
+		draw_polyline(chevron, Color(HAZARD, 0.95), 3.5, true)
 	_glyph(a, "先", 2 if stepped >= 1 else 1)
 	_glyph(b, "後", 2 if stepped >= 2 else (1 if stepped == 1 else 0))
 	var left := clampf(1.0 - age / LIMIT_SECONDS, 0.0, 1.0)
@@ -144,6 +152,11 @@ func _draw_marks() -> void:
 			mark_layer.draw_circle(at, 17.0, Color("0d1426", 0.95))
 			mark_layer.draw_arc(at, 17.0, 0.0, TAU, 28, Color(SAFE if stepped > k else HAZARD, 1.0), 2.5, true)
 			mark_layer.draw_string(FONT, at + Vector2(-10, 8), word, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("fff3d6"))
+		# R39: the seconds left, as a number beside the glyph to step on next
+		var next_at := next_offset() + Vector2(GLYPH_RADIUS + 14.0, -GLYPH_RADIUS - 6.0)
+		mark_layer.draw_circle(next_at, 16.0, Color("0d1426", 0.95))
+		mark_layer.draw_arc(next_at, 16.0, 0.0, TAU, 28, Color(HAZARD, 1.0), 2.5, true)
+		mark_layer.draw_string(FONT, next_at + Vector2(-7, 8), str(seconds_left()), HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color("fff3d6"))
 		var w := FONT.get_string_size(LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
 		var plate := Rect2(Vector2(-w * 0.5 - 8, GLYPH_RADIUS + 30), Vector2(w + 16, 26))
 		if is_inside_tree():

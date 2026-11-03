@@ -27,7 +27,7 @@ func _initialize() -> void:
 	_check(FileAccess.get_file_as_string("res://scripts/ui/hud.gd").contains("\"glyph_next_screen\": _glyph_next_screen(),"), "the HUD probe exposes the next glyph for the review bot")
 	# Lance feedback and the landscape result fix.
 	var vsrc := FileAccess.get_file_as_string("res://scripts/vfx/veil_lance.gd")
-	_check(vsrc.contains("EntityFactory.spawn_damage_number(\"擋下\", guard_at") and vsrc.contains("EntityFactory.spawn_damage_number(\"刺中 %d\" % int(LANCE_DAMAGE)"), "a block and a hit each get their own burst and word")
+	_check(vsrc.contains("EntityFactory.spawn_death_burst(guard_at, SAFE, 2.6, \"gold_rain\")") and vsrc.contains("EntityFactory.spawn_death_burst(target.global_position, HAZARD, 2.2, \"burst\")") and vsrc.contains("STAMP_WORD_BLOCK if blocked else STAMP_WORD_HIT"), "a block and a hit each get their own burst and word")
 	var rsrc := FileAccess.get_file_as_string("res://scripts/ui/r4_result_screen.gd")
 	_check(rsrc.contains("progress_label.visible=progress_fits") and rsrc.contains("if progress_in_records:result.insert(0,\"整備進度\\n\"+progress_label.text)"), "a progress line with no room moves to 紀錄 instead of into the footer")
 	var font: FontFile = load("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
@@ -38,7 +38,7 @@ func _initialize() -> void:
 			if c > 0x7f and not font.has_char(c):
 				missing += char(c)
 	_check(missing == "", "every new string is covered by the CJK subset font (missing: %s)" % missing)
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.67.0-content-r38", "project version is 0.67.0-content-r38")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.68.0-content-r39", "project version is 0.68.0-content-r39")
 	if failures.is_empty():
 		print("R38_REGRESSION status=PASS checks=%d" % checks)
 	else:
