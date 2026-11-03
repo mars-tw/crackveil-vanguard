@@ -544,6 +544,8 @@ static func victory_badges(summary: Dictionary) -> String:
 		out.append("雷柱分流 %d/%d" % [int(seal.get("storm_grounded", 0)), int(seal.get("storm_pylons", 0))])
 	if int(seal.get("frost_clean", 0)) > 0:
 		out.append("全員穿過霜牆 %d/%d" % [int(seal.get("frost_clean", 0)), int(seal.get("frost_walls", 0))])
+	if int(seal.get("veil_blocked", 0)) > 0:
+		out.append("隊長護住影槍 %d/%d" % [int(seal.get("veil_blocked", 0)), int(seal.get("veil_lances", 0))])
 	if out.is_empty():
 		return ""
 	return "戰績：" + "・".join(out)
@@ -562,6 +564,9 @@ static func vine_line(seal: Dictionary) -> String:
 	# R35: the frost wall, the same way.
 	if int(seal.get("frost_walls", 0)) > 0:
 		parts.append("霜牆穿縫 %d 次・全員穿過 %d 次・被凍 %d 人次" % [int(seal.get("frost_walls", 0)), int(seal.get("frost_clean", 0)), int(seal.get("frost_hits", 0))])
+	# R37: the veil's shadow lances, the same way.
+	if int(seal.get("veil_lances", 0)) > 0:
+		parts.append("影槍鎖定 %d 次・隊長護住 %d 次・隊員被刺 %d 次" % [int(seal.get("veil_lances", 0)), int(seal.get("veil_blocked", 0)), int(seal.get("veil_hits", 0))])
 	return "\n".join(parts)
 
 # R27: what the squad catch-up did this run (peak multiplier and added damage).
@@ -639,7 +644,8 @@ func _apply_responsive_layout() -> void:
 		# R27: the left column (summary, gain lines, progress line) must fit
 		# above the footer buttons. Shrink the gain lines first, then the
 		# summary, so nothing is ever drawn over another line.
-		var column_bottom:=size.y-56.0-6.0
+		# R37: 8 px clear of the footer buttons.
+		var column_bottom:=size.y-56.0-8.0
 		var gain_font:=roundi(14*scale)
 		var summary_font:=int(summary_label.get_theme_font_size("font_size"))
 		gain_label.add_theme_font_size_override("font_size",gain_font)
@@ -711,6 +717,16 @@ func _text_height(label: Label,width: float) -> float:
 	var spacing: float=float(label.get_theme_constant("line_spacing"))
 	var lines:=maxi(label.get_line_count(),label.text.count("
 ")+1)
+	# R37: the label's own line count can lag one frame behind a font-size
+	# change; count the wrapped lines from the font so a long line (關鍵貢獻)
+	# that wraps is never measured as one, which pushed the progress line
+	# under the footer buttons.
+	var wrapped:=0
+	for part in label.text.split("
+"):
+		var line_w: float=font.get_string_size(part,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x
+		wrapped+=maxi(1,ceili(line_w/maxf(1.0,width-2.0)))
+	lines=maxi(lines,wrapped)
 	return lines*(font.get_height(font_size)+spacing)+6.0
 
 func _place(control: Control,x: float,y: float,w: float,h: float) -> void:

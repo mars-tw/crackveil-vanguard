@@ -22,7 +22,7 @@ const STAGE_VARIANTS := {
 		"names": {"shield": "雷盾重衛", "charge": "霆爪獵將", "frost": "雲霧守望者", "flame": "電弧術士", "summoner": "雷群召喚師"}},
 	"frost": {"tint": Color("cfefff"), "speed": 0.9, "hp": 1.2, "projectile": 1.0, "pressure": "霜牆穿縫", "skill": "frost_wall",
 		"names": {"shield": "冰盾重衛", "charge": "霜爪獵將", "frost": "極霜守望者", "flame": "寒焰術士", "summoner": "冰群召喚師"}},
-	"veil": {"tint": Color("e0a8ff"), "speed": 1.1, "hp": 1.1, "projectile": 1.1, "pressure": "帷幕全面",
+	"veil": {"tint": Color("e0a8ff"), "speed": 1.1, "hp": 1.1, "projectile": 1.1, "pressure": "影槍鎖定", "skill": "veil_lance",
 		"names": {"shield": "幕盾重衛", "charge": "影爪獵將", "frost": "幽帷守望者", "flame": "冥焰術士", "summoner": "影群召喚師"}},
 }
 

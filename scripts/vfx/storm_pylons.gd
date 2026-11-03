@@ -56,6 +56,8 @@ static func lateral_half(captain: Node2D) -> Vector2:
 # behind it), so the pair is laid along the direction that keeps both pylons
 # farthest from the screen edges and the top bar; lateral wins ties.
 const SAFE_TOP := 150.0
+# R37: verdict boxes stay below the two-line top bar.
+const TOP_SAFE := 120.0
 const SAFE_BOTTOM := 120.0
 const SAFE_SIDE := 60.0
 static func onscreen_half(captain: Node2D) -> Vector2:
@@ -242,6 +244,27 @@ func _draw_marks() -> void:
 	var tone: Color = SAFE if grounded else HAZARD
 	var w := FONT.get_string_size(verdict, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
 	var box := Rect2(Vector2(-w * 0.5 - 10, top), Vector2(w + 20, 30))
+	# R37: climb above answer badges and plates instead of covering them.
+	# Its own reservation from the previous frame is cleared first (otherwise
+	# the box collides with itself and climbs off screen), and it never goes
+	# above the top bar.
+	if is_inside_tree():
+		var xf := get_viewport().get_canvas_transform() * get_global_transform()
+		Enemy.clear_label_areas(mark_layer)
+		for attempt in range(3):
+			var screen := xf * box
+			var hit := false
+			for area in Enemy.active_label_areas() + Enemy.elite_plate_rects():
+				if screen.intersects(area.grow(4.0)):
+					hit = true
+					break
+			if not hit:
+				break
+			box.position.y -= 36.0
+		var top_screen: float = (xf * box).position.y
+		if top_screen < TOP_SAFE:
+			box.position.y += (TOP_SAFE - top_screen) / maxf(0.01, xf.get_scale().y)
+		Enemy.reserve_label_area(xf * box, mark_layer)
 	mark_layer.draw_rect(box, Color("0d1426", 0.92), true)
 	mark_layer.draw_rect(box, Color(tone, 0.95), false, 2.0)
 	mark_layer.draw_string(FONT, box.position + Vector2(10, 22), verdict, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("fff6c8"))

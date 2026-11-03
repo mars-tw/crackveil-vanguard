@@ -413,7 +413,11 @@ func _on_combat_pause_changed(_visible_manual_pause: bool) -> void:
 
 
 func set_desired_velocity(new_velocity: Vector2) -> void:
-	desired_velocity = new_velocity
+	# R37: a member pinned by a shadow lance holds still until the strike.
+	desired_velocity = Vector2.ZERO if pinned_until > Time.get_ticks_msec() else new_velocity
+
+# R37: game-clock deadline (ms) a shadow lance pins this member in place.
+var pinned_until := 0
 
 
 func apply_movement_slow(duration: float, strength: float) -> void:

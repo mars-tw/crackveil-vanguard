@@ -24,7 +24,7 @@ func _initialize() -> void:
 	_check(result_src.contains("rows.sort_custom(func(a, b): return float(a.get(\"damage\", 0.0)) > float(b.get(\"damage\", 0.0)))"), "the output tab lists heroes by damage dealt")
 	_check(result_src.contains("while gain_font>10 and gain_label.text!=\"\" and 58+summary_h+_text_height(gain_label,left_w)+progress_room>size.y-226:"), "the portrait gain lines shrink to fit instead of running under the tabs")
 	_check(result_src.contains("while 56.0+summary_h+gain_h+2.0+progress_line_h>column_bottom and (gain_font>10 or summary_font>11):") and result_src.contains("_place(progress_label,20,gain_y+gain_h+2,left_w-8,progress_line_h)"), "the landscape left column shrinks gain then summary until the progress line fits above the footer")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.65.0-content-r36", "project version is 0.65.0-content-r36")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.66.0-content-r37", "project version is 0.66.0-content-r37")
 	if failures.is_empty():
 		print("R27_REGRESSION status=PASS checks=%d" % checks)
 	else:

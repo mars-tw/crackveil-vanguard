@@ -59,7 +59,8 @@ static func spawn(parent: Node, captain: Node2D, offset_seed: float) -> Node2D:
 	wall.gap_offset = clampf(offset_seed, -1.0, 1.0) * GAP_OFFSET_MAX
 	wall.global_position = captain.global_position + wall.forward * START_AHEAD
 	wall.rotation = 0.0
-	wall.z_index = 4
+	# R37: below the seal (z 1) so seal labels stay on top of the ice.
+	wall.z_index = 0
 	wall.add_to_group("frost_walls")
 	parent.add_child(wall)
 	last_spawned = wall
@@ -188,6 +189,14 @@ func _draw_marks() -> void:
 		var w := FONT.get_string_size(LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
 		var at := r * gap_offset + forward * 40.0
 		var plate := Rect2(at + Vector2(-w * 0.5 - 8, -13), Vector2(w + 16, 26))
+		# R37: the plate stays on screen and below the top bar even when the
+		# opening itself is still off screen.
+		if is_inside_tree():
+			var xf := get_viewport().get_canvas_transform() * get_global_transform()
+			var view := get_viewport().get_visible_rect().size
+			var screen := xf * plate
+			var shift := Vector2(clampf(screen.position.x, 12.0, view.x - screen.size.x - 140.0) - screen.position.x, clampf(screen.position.y, 120.0, view.y - screen.size.y - 70.0) - screen.position.y)
+			plate.position += shift / maxf(0.01, xf.get_scale().x)
 		mark_layer.draw_rect(plate, Color("0d1426", 0.92), true)
 		mark_layer.draw_rect(plate, Color(HAZARD, 0.9), false, 1.5)
 		mark_layer.draw_string(FONT, plate.position + Vector2(8, 19), LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("eaf8ff"))

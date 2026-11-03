@@ -1657,6 +1657,14 @@ func _storm_pylon_screen() -> Array:
 			out.append([at.x, at.y])
 	return out
 
+# R37: screen position of the member a shadow lance is locked on, for the review bot.
+func _veil_target_screen() -> Array:
+	for lance in get_tree().get_nodes_in_group("veil_lances"):
+		if lance is Node2D and not bool(lance.get("struck")) and is_instance_valid(lance.get("target")):
+			var at: Vector2 = get_viewport().get_canvas_transform() * (lance.get("target") as Node2D).global_position
+			return [at.x, at.y]
+	return []
+
 # R35: screen position of the active frost wall's opening, for the review bot.
 func _frost_gap_screen() -> Array:
 	for wall in get_tree().get_nodes_in_group("frost_walls"):
@@ -1719,6 +1727,8 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"storm_pylon_screen": _storm_pylon_screen(),
 		"storm_split_at": float(load("res://scripts/vfx/storm_pylons.gd").last_split_time),
 		"frost_gap_screen": _frost_gap_screen(),
+		"veil_target_screen": _veil_target_screen(),
+		"veil_verdict_at": float(load("res://scripts/vfx/veil_lance.gd").last_verdict_time),
 		"frost_verdict_at": float(load("res://scripts/vfx/frost_wall.gd").last_verdict_time),
 		"hazard_mark_at": maxf(maxf(float(load("res://scripts/vfx/ember_ring.gd").last_mark_time), float(load("res://scripts/vfx/storm_pylons.gd").last_mark_time)), float(load("res://scripts/vfx/frost_wall.gd").last_mark_time)),
 		"version": str(ProjectSettings.get_setting("application/config/version")),
