@@ -73,6 +73,8 @@ func _ready() -> void:
 	summary_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	summary_scroll.add_child(summary_label)
 	gain_label=_label(14)
+	# R36: a little more air between the gold lines.
+	gain_label.add_theme_constant_override("line_spacing",4)
 	gain_label.add_theme_color_override("font_color",Color("ffdc82"))
 	progress_label=_label(12)
 	page_label=_label(12)
@@ -186,6 +188,13 @@ func _records() -> Array[String]:
 	elif goal.get("kind","")=="spendable":result.append("局外目標\n%s：可用殘響 %d/%d\n還差 %d" % [goal.get("name","下一強化"),goal.get("current",0),goal.get("target",0),goal.get("remaining",0)])
 	else:result.append("局外目標\n"+str(goal.get("name","目前強化已完成")))
 	for achievement in data.get("achievement_unlocks",[]):result.append("本局新解鎖\n"+str(achievement.get("name","")))
+	# R36: the squad catch-up and every stage hazard tally, one card.
+	var tally := PackedStringArray()
+	var catch_line := catch_up_line(data.get("seal_state",{}))
+	if catch_line != "":tally.append(catch_line)
+	var hazards := vine_line(data.get("seal_state",{}))
+	if hazards != "":tally.append(hazards)
+	if not tally.is_empty():result.insert(0,"戰況統計\n"+"\n".join(tally))
 	return result
 
 func _hero_display_name(hero_id: String) -> String:
@@ -309,10 +318,7 @@ func _refresh() -> void:
 	if share_line != "":gain_label.text += "\n" + share_line
 	var key_line := key_contribution_line(rows)
 	if key_line != "":gain_label.text += "\n" + key_line
-	var catch_line := catch_up_line(displayed_summary.get("seal_state",{}))
-	if catch_line != "":gain_label.text += "\n" + catch_line
-	var vines := vine_line(displayed_summary.get("seal_state",{}))
-	if vines != "":gain_label.text += "\n" + vines
+	# R36: catch-up and hazard tallies are listed under 紀錄 (see _records).
 	progress_label.text=MetaProgress.starting_choice_progress_text()
 	if not GameManager.pending_starting_settlements.is_empty():progress_label.text="進度未保存・整備可重試"
 	page=clampi(page,0,_page_count()-1)

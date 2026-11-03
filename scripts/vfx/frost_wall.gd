@@ -20,7 +20,8 @@ const FREEZE_DAMAGE := 12.0
 const FREEZE_SLOW_SECONDS := 1.6
 const FREEZE_SLOW := 0.6
 const MAX_ACTIVE := 1
-const MARK_SECONDS := 1.4
+# R36: the pass verdict stays 2 s so the squad can read it.
+const MARK_SECONDS := 2.0
 const ICE := Color("cfefff")
 const HAZARD := Color("7fd4ff")
 const SAFE := Color("8ff0a4")
@@ -29,6 +30,8 @@ const FONT := preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 const VINE_SNARE := preload("res://scripts/vfx/vine_snare.gd")
 static var last_spawned: Node2D = null
 static var last_mark_time := -99.0
+# R36: game time of the last finished pass (QA capture hook for the verdict).
+static var last_verdict_time := -99.0
 
 var forward := Vector2.RIGHT
 var travel := 0.0
@@ -125,8 +128,37 @@ func _check_crossings() -> void:
 
 func _finish() -> void:
 	done = true
+	last_verdict_time = GameManager.elapsed_time
 	if hits == 0:
 		GameManager.frost_walls_clean += 1
+
+# R36: the wall reads as ice in the scene, not a HUD strip: a frost haze
+# streams ahead of it in its travel direction, the wall has a lit top face and
+# a shadowed front face of irregular blocks with spikes, and the opening has
+# glowing green posts with arrows through it.
+func _ice_segment(from: Vector2, to: Vector2) -> void:
+	var r := right()
+	var ahead := -forward
+	var length := (to - from).length()
+	var along := (to - from).normalized()
+	# frost haze streaming ahead of the wall
+	for k in range(3):
+		var off := ahead * (34.0 + 26.0 * float(k))
+		draw_line(from + off, to + off, Color(ICE, 0.18 - 0.05 * float(k)), 26.0, true)
+	# shadow, front face, top face
+	draw_line(from + Vector2(0, 10), to + Vector2(0, 10), Color("0d1426", 0.55), THICKNESS + 10.0, true)
+	draw_line(from, to, Color("0d1426", 0.9), THICKNESS + 6.0, true)
+	draw_line(from, to, Color("8fc7e6", 0.95), THICKNESS, true)
+	draw_line(from + ahead * (THICKNESS * 0.25), to + ahead * (THICKNESS * 0.25), Color("e8f8ff", 0.95), THICKNESS * 0.4, true)
+	# irregular block seams and spikes pointing the way the wall moves
+	var step := 34.0
+	for i in range(int(length / step)):
+		var at: Vector2 = from + along * (step * 0.5 + step * float(i))
+		var seam := r * 0.0 + along * (step * 0.5)
+		draw_line(at + seam - ahead * (THICKNESS * 0.5), at + seam + ahead * (THICKNESS * 0.5), Color("5f9cc2", 0.8), 2.0, true)
+		var spike := 22.0 + 10.0 * float(i % 3)
+		draw_colored_polygon(PackedVector2Array([at - along * 9.0 + ahead * (THICKNESS * 0.5), at + ahead * (THICKNESS * 0.5 + spike), at + along * 9.0 + ahead * (THICKNESS * 0.5)]), Color(HAZARD, 0.95))
+		draw_colored_polygon(PackedVector2Array([at - along * 4.0 + ahead * (THICKNESS * 0.5), at + ahead * (THICKNESS * 0.5 + spike * 0.6), at + along * 4.0 + ahead * (THICKNESS * 0.5)]), Color("f2fbff", 0.95))
 
 func _draw() -> void:
 	if done:
@@ -137,22 +169,18 @@ func _draw() -> void:
 	var g0 := r * (gap_offset - GAP * 0.5)
 	var g1 := r * (gap_offset + GAP * 0.5)
 	for seg in [[a, g0], [g1, b]]:
-		# a frost haze in front of the wall shows where it is heading
-		draw_line(seg[0] - forward * 30.0, seg[1] - forward * 30.0, Color(ICE, 0.16), THICKNESS + 50.0, true)
-		draw_line(seg[0], seg[1], Color("0d1426", 0.85), THICKNESS + 6.0, true)
-		draw_line(seg[0], seg[1], Color(ICE, 0.9), THICKNESS, true)
-		# ice spikes along the wall
-		var length: float = (seg[1] - seg[0]).length()
-		for i in range(int(length / 36.0)):
-			var at: Vector2 = seg[0] + (seg[1] - seg[0]).normalized() * (18.0 + 36.0 * float(i))
-			draw_colored_polygon(PackedVector2Array([at - r * 8.0, at + forward * -26.0, at + r * 8.0]), Color(HAZARD, 0.95))
-	# the opening: green posts and arrows pointing through it
+		_ice_segment(seg[0], seg[1])
+	# the opening: glowing posts and arrows pointing through it
 	for edge in [g0, g1]:
-		draw_circle(edge, 9.0, Color(SAFE, 0.95))
+		draw_circle(edge, 15.0, Color(SAFE, 0.25))
+		draw_circle(edge, 10.0, Color("0d1426", 0.9))
+		draw_circle(edge, 7.0, Color(SAFE, 1.0))
 	var mid := r * gap_offset
+	draw_line(g0, g1, Color(SAFE, 0.35), 4.0, true)
 	for i in range(3):
 		var tip := mid + forward * (-30.0 - 26.0 * float(i))
-		draw_polyline(PackedVector2Array([tip + forward * 14.0 + r * 14.0, tip, tip + forward * 14.0 - r * 14.0]), Color(SAFE, 0.95), 3.0, true)
+		draw_polyline(PackedVector2Array([tip + forward * 14.0 + r * 14.0, tip, tip + forward * 14.0 - r * 14.0]), Color("0d1426", 0.9), 6.0, true)
+		draw_polyline(PackedVector2Array([tip + forward * 14.0 + r * 14.0, tip, tip + forward * 14.0 - r * 14.0]), Color(SAFE, 1.0), 3.0, true)
 
 func _draw_marks() -> void:
 	var r := right()

@@ -24,14 +24,17 @@ func _ready() -> void:
 	# 16px keeps the first character clear of the R9 vector frame corners.
 	style.content_margin_left = 16.0
 	style.content_margin_right = 16.0
-	style.content_margin_top = 12.0
-	style.content_margin_bottom = 9.0
+	# R36: the 56 px region holds headline (~20) + meter (5) + detail (~15);
+	# 12/9 margins left 35 px, so the detail line ran through the bottom frame.
+	# The top keeps 10 px for the frame corners (R10); the bottom gives way.
+	style.content_margin_top = 10.0
+	style.content_margin_bottom = 3.0
 	panel.add_theme_stylebox_override("panel", style)
 	add_child(panel)
 	preload("res://scripts/ui/rift_frame_ornament.gd").attach(panel, false, Color("6fc4cf"), 12.0)
 	rows = VBoxContainer.new()
 	rows.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	rows.add_theme_constant_override("separation", 2)
+	rows.add_theme_constant_override("separation", 0)
 	panel.add_child(rows)
 	headline = Label.new()
 	headline.add_theme_font_size_override("font_size", 15)
@@ -49,7 +52,7 @@ func _ready() -> void:
 	rows.add_child(meter)
 	detail = Label.new()
 	detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	detail.add_theme_font_size_override("font_size", 11)
+	detail.add_theme_font_size_override("font_size", 10)
 	detail.add_theme_color_override("font_color", Color(0.62, 0.79, 0.85))
 	rows.add_child(detail)
 
@@ -82,8 +85,8 @@ func _refresh() -> void:
 	var portrait := viewport_size.y > viewport_size.x
 	LAYOUT.place(panel, LAYOUT.regions(viewport_size, mobile).combo)
 	headline.add_theme_font_size_override("font_size", 14)
-	detail.add_theme_font_size_override("font_size", 11)
-	rows.add_theme_constant_override("separation", 2)
+	detail.add_theme_font_size_override("font_size", 10)
+	rows.add_theme_constant_override("separation", 0)
 	var guard: Node = _current_tactical_guard()
 	var nearest := 500.0
 	if is_instance_valid(guard) and is_instance_valid(GameManager.player):nearest=guard.global_position.distance_to(GameManager.player.global_position)

@@ -274,7 +274,8 @@ func _layout() -> void:
 	_place(heading,54,8,heading_w,26)
 	var wallet_x: float=maxf(124.0 if portrait else 240.0,54.0+heading_w+8.0)
 	_place(controls.close,size.x-68,8,56,44)
-	_place(rule_label,12,35,w-68 if portrait else 220,18)
+	# R36: starts clear of the frame's corner ornament (it touched 「三」).
+	_place(rule_label,24,35,w-80 if portrait else 220,18)
 	_place(wallet,wallet_x,12,w-60-wallet_x if portrait else w-60-wallet_x,18)
 	# Text metrics differ slightly between platforms (the Linux CI measures this
 	# line wider than Windows); shrink the wallet line until it fits its slot.

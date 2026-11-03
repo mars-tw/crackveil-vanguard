@@ -542,6 +542,22 @@ static func clamp_screen_point(screen: Vector2, view: Vector2, width: float) -> 
 	screen.y = clampf(screen.y, VERDICT_TOP_BAND, maxf(VERDICT_TOP_BAND, view.y - VERDICT_BOTTOM_BAND))
 	return screen
 # R11: elite name plates step aside from verdict lines and the seal marker.
+# R36: does a local rect cover rule text reserved by someone other than this relay?
+func _covers_other_text(local_rect: Rect2) -> bool:
+	if not is_inside_tree():
+		return false
+	var screen := (get_viewport().get_canvas_transform() * get_global_transform()) * local_rect
+	var mine: Array[Rect2] = []
+	for key in Enemy._reserved_by_owner.keys():
+		var entry: Dictionary = Enemy._reserved_by_owner[key]
+		var node = entry.owner.get_ref() if entry.owner != null else null
+		if node == text_layer or node == self:
+			mine.append_array(entry.rects)
+	for area in Enemy.active_label_areas():
+		if not mine.has(area) and screen.intersects(area):
+			return true
+	return false
+
 func _reserve_for_plates(local_rect: Rect2) -> void:
 	if is_inside_tree():
 		Enemy.reserve_label_area((get_viewport().get_canvas_transform() * get_global_transform()) * local_rect, text_layer if is_instance_valid(text_layer) else self)
@@ -725,6 +741,10 @@ func _draw_seal_flash() -> void:
 	if member_callout != "" and member_callout_time < SEAL_FLASH_SECONDS:
 		var w_c := FONT.get_string_size(member_callout, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
 		var box_c := Rect2(at + Vector2(230 - w_c / 2 - 10, 13), Vector2(w_c + 20, 28))
+		# R36: if the line under the banner would cover answer badges or another
+		# plate, it goes above the banner instead.
+		if _covers_other_text(box_c):
+			box_c.position.y = at.y - 25 - 32
 		_reserve_for_plates(box_c)
 		text_layer.draw_rect(box_c, Color(0.03, 0.06, 0.05, 0.9 * fade), true)
 		text_layer.draw_rect(box_c, Color(0.56, 0.94, 0.64, fade), false, 2.0, true)

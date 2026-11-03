@@ -1719,6 +1719,7 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"storm_pylon_screen": _storm_pylon_screen(),
 		"storm_split_at": float(load("res://scripts/vfx/storm_pylons.gd").last_split_time),
 		"frost_gap_screen": _frost_gap_screen(),
+		"frost_verdict_at": float(load("res://scripts/vfx/frost_wall.gd").last_verdict_time),
 		"hazard_mark_at": maxf(maxf(float(load("res://scripts/vfx/ember_ring.gd").last_mark_time), float(load("res://scripts/vfx/storm_pylons.gd").last_mark_time)), float(load("res://scripts/vfx/frost_wall.gd").last_mark_time)),
 		"version": str(ProjectSettings.get_setting("application/config/version")),
 		"seed": GameManager.current_run_seed,

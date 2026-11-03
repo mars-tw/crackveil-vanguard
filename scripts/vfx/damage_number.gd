@@ -6,6 +6,8 @@ static var process_updates: int = 0
 # R12: HUD controls drawn over the battlefield (the equipment bar) in the same
 # CSS layout space as BattleLayout; a number that would be cut by one is hidden.
 static var hud_blockers: Array[Rect2] = []
+# R36: width of the right HUD column (minimap, stage tag, 戰報) large words keep out of.
+const RIGHT_COLUMN_CLEAR := 132.0
 const PLATE_YIELD_FONT_SIZE := 30
 static var alpha_updates: int = 0
 static var scale_updates: int = 0
@@ -154,6 +156,13 @@ func _update_hud_visibility() -> void:
 	var zones := BattleLayout.regions(css, MobileTuning.use_mobile_ui(css))
 	var extent := value_label.size * scale * ratio
 	var text_rect := Rect2(screen * ratio - extent * 0.5,extent)
+	# R36: a large event word (擊破・name) slides sideways out of the right
+	# column (minimap, stage tag, 戰報) instead of being drawn under it.
+	if font_size >= PLATE_YIELD_FONT_SIZE and text_rect.end.x > css.x - RIGHT_COLUMN_CLEAR:
+		var shift := text_rect.end.x - (css.x - RIGHT_COLUMN_CLEAR)
+		text_rect.position.x -= shift
+		screen.x -= shift / ratio
+		global_position = canvas.affine_inverse() * screen
 	var obscures := false
 	for key in ["stats","score","time","mission","combo","notice","minimap"]:
 		if text_rect.intersects(zones[key]):
