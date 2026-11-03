@@ -283,6 +283,16 @@ func _tags_blocked_above(center: Vector2, count: int) -> bool:
 		hit_below = hit_below or below.intersects(area)
 	return hit_above and not hit_below and not _under_equipment_bar(tags_area(center, count, true))
 
+# R41: above or below whichever artillery target leaves the badge and its tags
+# clear of the HUD, instead of vanishing when the first target sits under the top bar.
+func answer_spot(targets: Array) -> Vector2:
+	for target in targets:
+		for dy in [-96.0, 120.0]:
+			var center: Vector2 = target + Vector2(0, dy)
+			if not _answer_under_hud(center) and not _under_equipment_bar(tags_area(center, 2, false)):
+				return center
+	return targets[0] + Vector2(0, -96)
+
 func _draw_answer(center: Vector2) -> void:
 	# R11: the next seal's answer badge waits until the seal banner fades, so it
 	# never covers the banner's reward line.
@@ -426,4 +436,4 @@ func _draw() -> void:
 			draw_line(target-Vector2(13,0),target+Vector2(13,0),color,2,true)
 			draw_line(target-Vector2(0,13),target+Vector2(0,13),color,2,true)
 		if not targets.is_empty():
-			_draw_answer(targets[0] + Vector2(0, -96))
+			_draw_answer(answer_spot(targets))

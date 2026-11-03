@@ -265,7 +265,9 @@ func _apply_label_font_size() -> void:
 		return
 	if applied_font_size != font_size:
 		value_label.add_theme_font_size_override("font_size", font_size)
-		value_label.add_theme_constant_override("outline_size", 3 if font_size > 20 else 2)
+		# R41: large event words (擊破・name) get a thick outline so arrows and
+		# grass behind them do not cut through the letters.
+		value_label.add_theme_constant_override("outline_size", 9 if font_size >= 32 else (3 if font_size > 20 else 2))
 		applied_font_size = font_size
 		label_layout_updates += 1
 	var text_width := maxf(128.0, float(text_value.length()) * float(font_size) * 0.65)

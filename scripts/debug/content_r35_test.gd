@@ -56,7 +56,7 @@ func _initialize() -> void:
 			if c > 0x7f and not font.has_char(c):
 				missing += char(c)
 	_check(missing == "", "every new string is covered by the CJK subset font (missing: %s)" % missing)
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.69.0-content-r40", "project version is 0.69.0-content-r40")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.70.0-content-r41", "project version is 0.70.0-content-r41")
 	if failures.is_empty():
 		print("R35_REGRESSION status=PASS checks=%d" % checks)
 	else:

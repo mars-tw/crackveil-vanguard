@@ -60,6 +60,8 @@ var text_layer: Node2D
 # the hazard status marks (120), so no halo covers a verdict plate.
 const TEXT_LAYER_Z := 105
 var equipment_details: Control
+# R41: where the edge pointer was drawn (HUD layout units), or (-1, -1).
+var pointer_layout := Vector2(-1, -1)
 
 func required_formation() -> String:
 	if is_instance_valid(pressure):
@@ -273,6 +275,10 @@ func _update_label() -> void:
 	var width := 214.0
 	var y := clampf(point.y+65,150.0,view.y-158)
 	var x := clampf(point.x-width/2,12.0,view.x-width-90)
+	# R41: with the seal hidden, the marker starts beside the pointer that shows it.
+	if pointer_layout.x >= 0.0:
+		x = clampf(pointer_layout.x + 56.0, 12.0, view.x - width - 90)
+		y = clampf(pointer_layout.y - 15.0, 150.0, view.y - 158)
 	# Label is independent of world depth, outside notices and character bounds.
 	var reserved := BattleLayout.regions(view,MobileTuning.use_mobile_ui(view))
 	var rect := Rect2(x,y,width,30)
@@ -614,6 +620,33 @@ func _label_below(point: Vector2) -> bool:
 	var screen: Vector2 = get_viewport().get_canvas_transform() * (point - Vector2(0, CAPTAIN_RADIUS + 64))
 	return screen.y < get_viewport_rect().size.y * 0.27
 
+# R41: a seal on screen but under the formation, skill, energy or equipment
+# controls counts as hidden too; the edge pointer shows it instead.
+const COVER_CONTROLS := ["FormationButton", "SummonButton", "CaptainEnergyReadout", "EquipmentPanel", "PhoneEquipmentButton", "ActiveAbilityButton"]
+
+func _cover_rects() -> Array[Rect2]:
+	var rects: Array[Rect2] = []
+	if not is_instance_valid(marker_label) or marker_label.get_parent() == null:
+		return rects
+	for control_name in COVER_CONTROLS:
+		var control := marker_label.get_parent().find_child(control_name, true, false) as Control
+		if control != null and control.is_visible_in_tree():
+			rects.append(control.get_global_rect())
+	return rects
+
+static func covered_by(point: Vector2, covers: Array[Rect2]) -> bool:
+	for rect in covers:
+		if rect.grow(20.0).has_point(point):
+			return true
+	return false
+
+func seal_under_controls() -> bool:
+	if not is_inside_tree():
+		return false
+	var size := get_viewport_rect().size
+	var layout_size := MobileTuning.ui_layout_size(size)
+	return covered_by((get_viewport().get_canvas_transform() * get_global_transform() * anchor) / (size.x / maxf(1.0, layout_size.x)), _cover_rects())
+
 # When the seal is outside the view, an edge pointer shows where it is and
 # which formation it needs; it disappears once the seal is on screen.
 func _draw_offscreen_pointer() -> void:
@@ -626,12 +659,15 @@ func _draw_offscreen_pointer() -> void:
 	var unit: float = view.size.x / maxf(1.0, size.x)
 	# R12: top margin 190 keeps the pointer below the kill/gold panel.
 	var inner := Rect2(view.position + Vector2(300, 190) * unit, view.size - Vector2(600, 340) * unit)
-	if inner.size.x <= 0 or inner.size.y <= 0 or view.grow(-30.0).has_point(anchor):
+	if inner.size.x <= 0 or inner.size.y <= 0 or (view.grow(-30.0).has_point(anchor) and not seal_under_controls()):
+		pointer_layout = Vector2(-1, -1)
 		return
 	var center := view.get_center()
 	var direction := center.direction_to(anchor)
 	var point := Vector2(clampf(anchor.x, inner.position.x, inner.end.x), clampf(anchor.y, inner.position.y, inner.end.y))
 	var tip := point + direction * 30
+	var layout_size := MobileTuning.ui_layout_size(size)
+	pointer_layout = (get_viewport().get_canvas_transform() * get_global_transform() * point) / (size.x / maxf(1.0, layout_size.x))
 	_draw_badge(point, required_formation(), 28.0)
 	draw_colored_polygon(PackedVector2Array([tip + direction * 14, tip + direction.orthogonal() * 9, tip - direction.orthogonal() * 9]), Color("ffdcac"))
 	var label := "第 %d 道" % mini(step + 1, 3)

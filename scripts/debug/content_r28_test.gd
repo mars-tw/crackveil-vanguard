@@ -15,7 +15,7 @@ func _initialize() -> void:
 	_check(enemy.compact_elite_mark("") == "菁英", "unnamed elites keep the generic mark")
 	var enemy_src := FileAccess.get_file_as_string("res://scripts/enemies/enemy.gd")
 	_check(enemy_src.contains("if is_elite and stage_tint_strength > 0.0:\n\t\trest_color = rest_color.lerp(body_color, stage_tint_strength)") and enemy_src.contains("stage_tint_strength = 0.55 if str(config.get(\"stage_pressure\", \"\")) != \"\" else 0.0"), "a later-stage elite wears its stage tint on the body")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.69.0-content-r40", "project version is 0.60.0-content-r31")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.70.0-content-r41", "project version is 0.60.0-content-r31")
 	if failures.is_empty():
 		print("R28_REGRESSION status=PASS checks=%d" % checks)
 	else:

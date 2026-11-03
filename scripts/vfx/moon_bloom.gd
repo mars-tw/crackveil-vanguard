@@ -37,6 +37,11 @@ var solved := false
 var healed := 0
 var sprouted := 0
 var done_age := 0.0
+# R41: why an open bloom failed, so the tip names the real fix.
+var ever_near := false
+var reason := ""
+var sprouts: Array = []
+const FAIL_TIPS := {"energy": "下次留能量旋斬", "walk": "下次先走到花蕾旁", "spin": "下次在花蕾旁按住旋斬"}
 var mark_layer: Node2D = null
 
 static func too_soon(now: float, last: float) -> bool:
@@ -52,10 +57,14 @@ static func plant_at(captain_at: Vector2, elite_at: Vector2) -> Vector2:
 static func verdict_text(ok: bool, sprout_count: int) -> String:
 	return "花蕾斬開・群怪不回血" if ok else "月華盛放・長出 %d 隻靈花" % sprout_count
 
+# Low energy first; otherwise whether the captain ever reached the bud.
+static func fail_reason(was_near: bool, short_of_energy: bool) -> String:
+	return "energy" if short_of_energy else ("spin" if was_near else "walk")
+
 # The top bar's second line while the bud is up (and for its verdict).
-static func status_text(left: int, near: bool, finished: bool, ok: bool, sprout_count: int) -> String:
+static func status_text(left: int, near: bool, finished: bool, ok: bool, sprout_count: int, why: String = "energy") -> String:
 	if finished:
-		return verdict_text(ok, sprout_count) if ok else "%s・下次留能量旋斬" % verdict_text(ok, sprout_count)
+		return verdict_text(ok, sprout_count) if ok else "%s・%s" % [verdict_text(ok, sprout_count), FAIL_TIPS.get(why, FAIL_TIPS["energy"])]
 	if near:
 		return "月華花蕾・在旁邊按住旋斬・%d 秒" % left
 	return "月華花蕾・%d 秒內走過去旋斬" % left
@@ -94,13 +103,19 @@ func seconds_left() -> int:
 func captain_near() -> bool:
 	return is_instance_valid(GameManager.player) and GameManager.player.global_position.distance_to(global_position) <= CUT_RADIUS
 
+static func low_energy(captain: Node) -> bool:
+	if not is_instance_valid(captain) or not captain.has_method("get_channel_debug_state"):
+		return false
+	var state: Dictionary = captain.get_channel_debug_state()
+	return bool(state.get("exhausted", false)) or float(state.get("energy", 999.0)) < 16.0
+
 static func spinning(captain: Node) -> bool:
 	if not is_instance_valid(captain) or not captain.has_method("get_channel_debug_state"):
 		return false
 	return bool(captain.get_channel_debug_state().get("active", false))
 
 func status_line() -> String:
-	return status_text(seconds_left(), captain_near(), done, solved, sprouted)
+	return status_text(seconds_left(), captain_near(), done, solved, sprouted, reason)
 
 func _ready() -> void:
 	mark_layer = Node2D.new()
@@ -119,6 +134,8 @@ func _process(delta: float) -> void:
 			return
 	else:
 		age += delta
+		if captain_near():
+			ever_near = true
 		if captain_near() and spinning(GameManager.player):
 			cut += delta
 		if cut >= CUT_SECONDS:
@@ -138,6 +155,7 @@ func _finish(ok: bool) -> void:
 		EntityFactory.spawn_death_burst(global_position, SAFE, 2.6, "gold_rain")
 		GameManager.request_combat_impact(4.0, 0.03)
 		return
+	reason = fail_reason(ever_near, low_energy(GameManager.player))
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		if enemy is Node2D and enemy.has_method("apply_support_heal") and (enemy as Node2D).global_position.distance_to(global_position) <= HEAL_RADIUS:
 			if float(enemy.apply_support_heal(float(enemy.get("max_hp")) * HEAL_SHARE)) > 0.0:
@@ -148,7 +166,9 @@ func _finish(ok: bool) -> void:
 	for i in range(SPROUTS):
 		if EntityFactory.get_enemy_live_count() >= SPROUT_CAP:
 			break
-		EntityFactory.spawn_enemy("bloom_wisp", wisp.duplicate(), global_position + Vector2.RIGHT.rotated(TAU * float(i) / float(SPROUTS)) * 64.0)
+		var sprout: Node = EntityFactory.spawn_enemy("bloom_wisp", wisp.duplicate(), global_position + Vector2.RIGHT.rotated(TAU * float(i) / float(SPROUTS)) * 64.0)
+		if sprout is Node2D:
+			sprouts.append(sprout)
 		sprouted += 1
 	GameManager.moon_bloom_sprouts += sprouted
 	for hero in get_tree().get_nodes_in_group("heroes"):
@@ -216,6 +236,29 @@ func _place_plate(rect: Rect2) -> Rect2:
 	return placed
 
 const TIDE := preload("res://scripts/vfx/tide_sigil.gd")
+const VINE := Color("7fd68a")
+
+# R41: the bloom's cost on the ground: a vine loop under each slowed hero
+# while the snare lasts, and a petal mark under each new spirit flower.
+func _draw_aftermath() -> void:
+	if done_age < ROOT_SECONDS:
+		var hold := clampf(1.0 - done_age / ROOT_SECONDS, 0.0, 1.0)
+		for hero in get_tree().get_nodes_in_group("heroes"):
+			if hero is Node2D and hero.get("is_alive") != false:
+				var at: Vector2 = (hero as Node2D).global_position - global_position + Vector2(0, 8)
+				mark_layer.draw_arc(at, 26.0, 0.0, TAU, 28, Color("0d1426", 0.8 * hold), 6.0, true)
+				mark_layer.draw_arc(at, 26.0, 0.0, TAU, 28, Color(VINE, hold), 3.0, true)
+				for k in range(6):
+					var d := Vector2.RIGHT.rotated(TAU * float(k) / 6.0 + done_age * 2.0)
+					mark_layer.draw_line(at + d * 26.0, at + d * 34.0 + d.orthogonal() * 6.0, Color(VINE, hold), 3.0, true)
+	var fade := clampf(1.0 - done_age / RESULT_SECONDS, 0.0, 1.0)
+	for sprout in sprouts:
+		if is_instance_valid(sprout):
+			var at2: Vector2 = (sprout as Node2D).global_position - global_position
+			for k in range(5):
+				var d2 := Vector2.UP.rotated(TAU * float(k) / 5.0)
+				mark_layer.draw_circle(at2 + d2 * 16.0, 7.0, Color(HAZARD, 0.85 * fade))
+			mark_layer.draw_circle(at2, 6.0, Color("fff3d6", fade))
 
 func _draw_marks() -> void:
 	Enemy.clear_label_areas(mark_layer)
@@ -227,6 +270,8 @@ func _draw_marks() -> void:
 		var w := FONT.get_string_size(LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
 		_plate(_place_plate(Rect2(Vector2(-w * 0.5 - 10, CUT_RADIUS + 22), Vector2(w + 20, 28))), LABEL, SAFE if captain_near() else HAZARD, 18)
 		return
+	if not solved:
+		_draw_aftermath()
 	var verdict := verdict_text(solved, sprouted)
 	var w2 := FONT.get_string_size(verdict, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
 	_plate(_place_plate(Rect2(Vector2(-w2 * 0.5 - 10, -CUT_RADIUS - 52), Vector2(w2 + 20, 30))), verdict, SAFE if solved else HAZARD, 20)
