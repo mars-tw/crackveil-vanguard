@@ -276,7 +276,7 @@ func _update_label() -> void:
 	var y := clampf(point.y+65,150.0,view.y-158)
 	var x := clampf(point.x-width/2,12.0,view.x-width-90)
 	# R41: with the seal hidden, the marker starts beside the pointer that shows it.
-	if pointer_layout.x >= 0.0:
+	if pointer_layout.x >= 0.0 and pointer_needed():
 		x = clampf(pointer_layout.x + 56.0, 12.0, view.x - width - 90)
 		y = clampf(pointer_layout.y - 15.0, 150.0, view.y - 158)
 	# Label is independent of world depth, outside notices and character bounds.
@@ -297,6 +297,7 @@ func _update_label() -> void:
 	for row in range(4):
 		for column in range(4):
 			candidates.append(Vector2(12+column*(view.x-width-112)/3,maxf(140,y-36+row*32)))
+	candidates = near_first(Vector2(x,y), width, candidates)
 	for candidate in candidates:
 		var candidate_rect := Rect2(candidate,Vector2(width,30))
 		var clear := Rect2(8,136,view.x-96,view.y-284).encloses(candidate_rect) if view.x>view.y else Rect2(8,268,view.x-24,view.y-440).encloses(candidate_rect)
@@ -634,6 +635,13 @@ func _cover_rects() -> Array[Rect2]:
 			rects.append(control.get_global_rect())
 	return rects
 
+# R42: a seal within EDGE_MARGIN screen pixels of the edge is mostly cut off;
+# it counts as out of view so the pointer and its formation badge show it.
+const EDGE_MARGIN := 110.0
+
+static func seal_in_view(view: Rect2, point: Vector2, unit: float) -> bool:
+	return view.grow(-EDGE_MARGIN * unit).has_point(point)
+
 static func covered_by(point: Vector2, covers: Array[Rect2]) -> bool:
 	for rect in covers:
 		if rect.grow(20.0).has_point(point):
@@ -649,6 +657,30 @@ func seal_under_controls() -> bool:
 
 # When the seal is outside the view, an edge pointer shows where it is and
 # which formation it needs; it disappears once the seal is on screen.
+# R42: decided now, not from the last drawn pointer, which can be stale when
+# the seal is drawn without its pointer; a seal in view keeps its marker beside it.
+func pointer_needed() -> bool:
+	if not is_inside_tree():
+		return false
+	var inverse := get_viewport().get_canvas_transform().affine_inverse()
+	var size := get_viewport_rect().size
+	var top_left: Vector2 = inverse * Vector2.ZERO
+	var view := Rect2(top_left, inverse * size - top_left)
+	return not seal_in_view(view, anchor, view.size.x / maxf(1.0, size.x)) or seal_under_controls()
+
+# R42: when the spot under the seal is taken, try spots around it before the
+# screen-wide grid, nearest first, so the 第N道 marker stays by its seal
+# instead of jumping to the far left column.
+static func near_first(start: Vector2, width: float, grid: Array[Vector2]) -> Array[Vector2]:
+	var out: Array[Vector2] = grid.duplicate()
+	for dy in [-40.0, 40.0, -80.0, 80.0, -120.0, 120.0]:
+		out.append(start + Vector2(0, dy))
+	for dx in [-(width * 0.6), width * 0.6, -(width * 1.1), width * 1.1]:
+		for dy in [0.0, -40.0, 40.0]:
+			out.append(start + Vector2(dx, dy))
+	out.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.distance_squared_to(start) < b.distance_squared_to(start))
+	return out
+
 func _draw_offscreen_pointer() -> void:
 	var inverse := get_viewport().get_canvas_transform().affine_inverse()
 	var size := get_viewport_rect().size
@@ -659,7 +691,7 @@ func _draw_offscreen_pointer() -> void:
 	var unit: float = view.size.x / maxf(1.0, size.x)
 	# R12: top margin 190 keeps the pointer below the kill/gold panel.
 	var inner := Rect2(view.position + Vector2(300, 190) * unit, view.size - Vector2(600, 340) * unit)
-	if inner.size.x <= 0 or inner.size.y <= 0 or (view.grow(-30.0).has_point(anchor) and not seal_under_controls()):
+	if inner.size.x <= 0 or inner.size.y <= 0 or (seal_in_view(view, anchor, unit) and not seal_under_controls()):
 		pointer_layout = Vector2(-1, -1)
 		return
 	var center := view.get_center()

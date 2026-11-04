@@ -26,7 +26,7 @@ func _initialize() -> void:
 	var covers: Array[Rect2] = [Rect2(20, 430, 220, 40)]
 	_check(relay.covered_by(Vector2(200, 450), covers) and relay.covered_by(Vector2(250, 450), covers) and not relay.covered_by(Vector2(400, 450), covers), "a seal under a control (or at its edge) is covered; one beside it is not")
 	var rsrc := FileAccess.get_file_as_string("res://scripts/services/formation_relay.gd")
-	_check(rsrc.contains("(view.grow(-30.0).has_point(anchor) and not seal_under_controls())") and rsrc.contains("x = clampf(pointer_layout.x + 56.0, 12.0, view.x - width - 90)") and rsrc.contains("\"FormationButton\", \"SummonButton\", \"CaptainEnergyReadout\""), "a covered seal gets the edge pointer and the 第N道 marker starts beside it")
+	_check(rsrc.contains("(seal_in_view(view, anchor, unit) and not seal_under_controls())") and rsrc.contains("x = clampf(pointer_layout.x + 56.0, 12.0, view.x - width - 90)") and rsrc.contains("\"FormationButton\", \"SummonButton\", \"CaptainEnergyReadout\""), "a covered seal gets the edge pointer and the 第N道 marker starts beside it")
 	# Large event words carry a thick outline.
 	_check(FileAccess.get_file_as_string("res://scripts/vfx/damage_number.gd").contains("\"outline_size\", 9 if font_size >= 32 else (3 if font_size > 20 else 2)"), "擊破・name has a thick outline")
 	var font: FontFile = load("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
@@ -37,7 +37,7 @@ func _initialize() -> void:
 			if c > 0x7f and not font.has_char(c):
 				missing += char(c)
 	_check(missing == "", "every new string is covered by the CJK subset font (missing: %s)" % missing)
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.70.0-content-r41", "project version is 0.70.0-content-r41")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.71.0-content-r42", "project version is 0.71.0-content-r42")
 	if failures.is_empty():
 		print("R41_REGRESSION status=PASS checks=%d" % checks)
 	else:

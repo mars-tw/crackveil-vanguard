@@ -22,6 +22,8 @@ var hp_icon: TextureRect
 var xp_icon: TextureRect
 var gold_icon: TextureRect
 var hp_label: Label
+# R42: the HP ratio drawn behind the HP text; the cyan bar below is experience.
+var hp_bar: ProgressBar
 var level_label: Label
 var xp_readout_label: Label
 var xp_bar: ProgressBar
@@ -230,6 +232,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	_sync_exp_caption()
+	_sync_hp_bar()
 	_maybe_show_stage_title()
 	var blocked := get_tree().paused or not GameManager.game_running
 	if blocked and not touch_input_blocked:
@@ -370,8 +373,27 @@ func _build_ui() -> void:
 	gold_icon = _make_hud_icon("GoldIcon", ART_RESOURCES.get_gold_icon())
 	root.add_child(gold_icon)
 
+	hp_bar = ProgressBar.new()
+	hp_bar.name = "HPBar"
+	hp_bar.min_value = 0.0
+	hp_bar.max_value = 1.0
+	hp_bar.value = 1.0
+	hp_bar.show_percentage = false
+	hp_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var hp_back := StyleBoxFlat.new()
+	hp_back.bg_color = Color("2a1018", 0.7)
+	hp_back.set_corner_radius_all(4)
+	hp_bar.add_theme_stylebox_override("background", hp_back)
+	var hp_fill := StyleBoxFlat.new()
+	hp_fill.bg_color = Color("c23a4e", 0.78)
+	hp_fill.set_corner_radius_all(4)
+	hp_bar.add_theme_stylebox_override("fill", hp_fill)
+	root.add_child(hp_bar)
+
 	hp_label = Label.new()
 	hp_label.name = "HPLabel"
+	hp_label.add_theme_color_override("font_outline_color", Color(0.03, 0.04, 0.08, 1.0))
+	hp_label.add_theme_constant_override("outline_size", 4)
 	hp_label.position = Vector2(50.0, 12.0)
 	hp_label.add_theme_font_size_override("font_size", 20)
 	root.add_child(hp_label)
@@ -2004,6 +2026,8 @@ func _on_stats_changed(stats: Dictionary) -> void:
 	var xp_required: int = max(1, int(stats.get("xp_required", 1)))
 
 	hp_label.text = "HP %d/%d" % [hp, max_hp]
+	if is_instance_valid(hp_bar):
+		hp_bar.value = clampf(float(hp) / maxf(1.0, float(max_hp)), 0.0, 1.0)
 	low_hp_ratio = clampf(float(hp) / maxf(1.0, float(max_hp)), 0.0, 1.0) if max_hp > 0 else 1.0
 	_refresh_low_hp_warning()
 	last_level_value = current_level
@@ -2068,6 +2092,8 @@ func _on_pause_changed(is_paused: bool) -> void:
 		pause_backdrop.visible = is_paused
 	for control in [hud_panel, score_panel, hp_icon, hp_label, level_label, xp_bar, time_label, score_label]:
 		control.visible = not is_paused
+	if is_instance_valid(hp_bar):
+		hp_bar.visible = not is_paused
 	if is_paused:
 		toast_panel.visible = false
 	if pause_button != null:
@@ -2976,6 +3002,24 @@ func clear_wrong_formation_notice() -> void:
 		toast_panel.visible = false
 	if is_instance_valid(tactical_hint) and (tactical_hint.text.contains("錯陣") or tactical_hint.text.contains("反噬")):
 		_update_tactical_hint()
+# R42: the HP bar spans from the heart to the Lv label, between the HP text's
+# top and the XP bar, in every HUD layout.
+static func hp_bar_rect(icon: Rect2, text: Rect2, level: Rect2, xp: Rect2) -> Rect2:
+	var left := icon.position.x - 4.0
+	var right := level.position.x - 6.0 if level.position.x > text.position.x else text.end.x + 6.0
+	var top := text.position.y + 2.0
+	var bottom := minf(text.end.y, xp.position.y - 3.0) if xp.position.y > text.position.y else text.end.y
+	return Rect2(left, top, maxf(0.0, right - left), maxf(0.0, bottom - top))
+
+func _sync_hp_bar() -> void:
+	if not is_instance_valid(hp_bar) or hp_label == null or hp_icon == null or level_label == null or xp_bar == null:
+		return
+	var rect := hp_bar_rect(hp_icon.get_rect(), hp_label.get_rect(), level_label.get_rect(), xp_bar.get_rect())
+	if hp_bar.position != rect.position or hp_bar.size != rect.size:
+		hp_bar.position = rect.position
+		hp_bar.size = rect.size
+	hp_bar.visible = hp_label.visible and rect.size.x > 24.0 and rect.size.y > 6.0
+
 var _exp_caption_bar_size := Vector2(-1, -1)
 func _sync_exp_caption() -> void:
 	if xp_bar == null or xp_bar.size == _exp_caption_bar_size:
