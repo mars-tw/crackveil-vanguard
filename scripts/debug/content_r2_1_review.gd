@@ -24,6 +24,17 @@ func _ready() -> void:
 	AchievementProgress.debug_use_save_path("user://content_r21_test_achievements.cfg", true)
 	call_deferred("_run")
 
+# R43: on a phone held sideways the urgent notice is the top bar's first line
+# (the banner hides as its duplicate); elsewhere it is the notice banner.
+func _urgent_shown(hud: Node, text: String, exact: bool) -> bool:
+	if hud.toast_panel.visible:
+		return hud.toast_label.text == text if exact else hud.toast_label.text.contains(text)
+	var view := MobileTuning.ui_layout_size(hud.get_viewport().get_visible_rect().size)
+	if not hud.merges_urgent_notice(view, MobileTuning.use_mobile_ui(view), hud.has_urgent_toast()) or not hud.tactical_hint.visible:
+		return false
+	var line: String = hud.tactical_hint.text.get_slice("\n", 0)
+	return line == text if exact else line.contains(text)
+
 func check(value: bool, description: String) -> void:
 	checks += 1
 	if not value:
@@ -117,7 +128,7 @@ func _run() -> void:
 			loot.show_item({"rarity_name":"裝備","name":"UI 回歸裝備","description":"攻勢結束後顯示"},{},true)
 			for frame in range(8): await get_tree().process_frame
 			check(not loot.visible and is_zero_approx(loot.age), "%s/%s warning consumed/covered loot" % [size,pressure.kind])
-			check(hud.toast_panel.visible and hud.toast_label.text.contains("預警"), "%s/%s warning hidden behind loot" % [size,pressure.kind])
+			check(_urgent_shown(hud, "預警", false), "%s/%s warning hidden behind loot" % [size,pressure.kind])
 			await _capture(pressure.kind + "-warning", false)
 			pressure.advance(pressure.WARNING)
 			for frame in range(8): await get_tree().process_frame
@@ -144,7 +155,7 @@ func _run() -> void:
 		for keyword in ["預警","反噬","封隙","護衛"]:
 			hud._process(0)
 			loot._process(0.1)
-			check(hud.toast_panel.visible and hud.toast_label.text==keyword+"重要訊息", "%s urgent %s lost to bond/loot/queue" % [size,keyword])
+			check(_urgent_shown(hud, keyword+"重要訊息", true), "%s urgent %s lost to bond/loot/queue" % [size,keyword])
 			check(not loot.visible and is_zero_approx(loot.age), "%s urgent %s consumed loot lifetime" % [size,keyword])
 			await _capture("urgent-" + keyword, keyword=="預警")
 			hud._process(1.51)

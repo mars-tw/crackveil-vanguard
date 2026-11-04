@@ -145,6 +145,12 @@ func _update_hud_visibility() -> void:
 	# World numbers never enter the fixed HUD lanes, even near the top edge.
 	var canvas := get_viewport().get_canvas_transform()
 	var screen: Vector2 = canvas * global_position
+	# R43: a number whose enemy is off screen is not pulled in along the edge
+	# (it read as a stray grey "790" above the pause button); it stays hidden.
+	if not on_screen(screen, get_viewport_rect().size):
+		value_label.visible = false
+		Enemy.clear_label_areas(self)
+		return
 	# R12: pull a number that pokes past the screen edge back inside, instead of
 	# showing half of it (crits near the top and bottom edges).
 	var inside := clamp_to_screen(screen, value_label.size * scale * 0.5 + Vector2(6, 6), get_viewport_rect().size)
@@ -170,6 +176,10 @@ func _update_hud_visibility() -> void:
 			break
 	var control_height := 184.0 if css.y > css.x else 140.0 if MobileTuning.has_confirmed_touch() else 84.0
 	if text_rect.intersects(Rect2(0,css.y-control_height,minf(250,css.x*0.55),control_height)) or text_rect.intersects(Rect2(css.x-124,css.y-220,124,220)):
+		obscures = true
+	# R43: small numbers stay out of the top HUD band, including the gap above
+	# the pause button and kill/gold panel.
+	if font_size < PLATE_YIELD_FONT_SIZE and in_top_band(text_rect, zones):
 		obscures = true
 	if blocked_by_hud(text_rect):
 		# R29: a large event word (擊破・name) climbs above the HUD row it would
@@ -197,6 +207,17 @@ func _update_hud_visibility() -> void:
 	# aside instead of being written over; small numbers do not, so plates stay put.
 	if value_label.visible and font_size >= PLATE_YIELD_FONT_SIZE:
 		Enemy.reserve_label_area(screen_rect, self)
+
+
+static func on_screen(center: Vector2, view: Vector2) -> bool:
+	return Rect2(Vector2.ZERO, view).has_point(center)
+
+
+static func in_top_band(text_rect: Rect2, zones: Dictionary) -> bool:
+	var bottom := 0.0
+	for key in ["stats", "score", "pause", "mission"]:
+		bottom = maxf(bottom, (zones[key] as Rect2).end.y)
+	return text_rect.position.y < bottom
 
 
 static func clamp_to_screen(center: Vector2, half_extent: Vector2, view: Vector2) -> Vector2:

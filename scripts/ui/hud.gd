@@ -272,7 +272,9 @@ func _process(_delta: float) -> void:
 		Enemy.reserve_label_area(toast_panel.get_global_rect(), toast_panel)
 	# Hidden routine notices keep their readable time instead of expiring behind
 	# loot, bond reveals or a modal. Urgent battle messages own the notice lane.
-	if toast_showing and toast_panel.visible and (urgent or not bond_active):
+	# R43: a notice merged into the phone top bar keeps its time running there.
+	var merged_notice := duplicate_notice and urgent and merges_urgent_notice(MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size), MOBILE_TUNING.use_mobile_ui(MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)), true)
+	if toast_showing and (toast_panel.visible or merged_notice) and (urgent or not bond_active):
 		toast_remaining -= _delta
 		if toast_remaining <= 0.0:
 			_play_toast_queue()
@@ -2405,12 +2407,23 @@ func _update_tactical_hint() -> void:
 		tactical_hint.text = "%s｜封隙 %d/3%s\n%s" % [formation, relay.step, catch_up_tag, _tide_or(relay.next_action())]
 	else:
 		tactical_hint.text = "%s｜封隙 3/3\n%s" % [formation, _tide_or(GameManager.tactical_director.current_hint())]
+	# R43: on a phone held sideways an urgent notice (預警, 反噬) takes the top
+	# bar's first line instead of opening a second banner under it; the second
+	# line keeps the stage instruction (潮紋, 花蕾) or next step, and the formation
+	# stays on its button. The notice panel then hides as a duplicate of the bar.
+	# A notice the bar already says (錯陣反噬 on the second line) is not repeated.
+	if merges_urgent_notice(view, MOBILE_TUNING.use_mobile_ui(view), has_urgent_toast()) and not notices_duplicate(tactical_hint.text, toast_current_text):
+		tactical_hint.text = "%s\n%s" % [toast_current_text.strip_edges(), tactical_hint.text.get_slice("\n", 1)]
 	var mission_rect: Rect2 = BATTLE_LAYOUT.regions(view, MOBILE_TUNING.use_mobile_ui(view)).mission
 	BATTLE_LAYOUT.place(tactical_hint, mission_rect)
 	# R16: long seal lines shrink to the mission box instead of running under
 	# the kill/gold panel beside it.
 	var phone_ui := MOBILE_TUNING.use_mobile_ui(view)
 	tactical_hint.add_theme_font_size_override("font_size", fitted_hint_size(tactical_hint.text, tactical_hint.get_theme_font("font"), mission_rect.size.x - (34.0 if phone_ui else 40.0), 13 if phone_ui else 15))
+
+
+static func merges_urgent_notice(view: Vector2, phone: bool, urgent: bool) -> bool:
+	return phone and view.x > view.y and urgent
 
 
 static func fitted_hint_size(text: String, font: Font, width: float, base_size: int) -> int:
@@ -3141,7 +3154,12 @@ func _play_toast_queue() -> void:
 	toast_label.add_theme_font_size_override("font_size", 18)
 	var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
 	BATTLE_LAYOUT.place(toast_panel, BATTLE_LAYOUT.regions(view, mobile).notice)
-	toast_panel.visible = not get_tree().paused and not formation_picker.visible
+	# R43: an urgent notice headed for the phone top bar never opens the banner,
+	# not even for the frame before the bar picks it up.
+	var into_bar := is_instance_valid(tactical_hint) and tactical_hint.visible and merges_urgent_notice(view, mobile, is_urgent_toast(toast_current_text))
+	toast_panel.visible = not get_tree().paused and not formation_picker.visible and not into_bar
+	if into_bar:
+		_update_tactical_hint()
 
 
 func _build_version_text() -> String:

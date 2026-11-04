@@ -62,6 +62,10 @@ const TEXT_LAYER_Z := 105
 var equipment_details: Control
 # R41: where the edge pointer was drawn (HUD layout units), or (-1, -1).
 var pointer_layout := Vector2(-1, -1)
+# R43: a thin line from the 第N道 marker to its seal when the marker had to sit
+# away from it, in viewport pixels; empty when the marker is beside the seal.
+var marker_link := PackedVector2Array()
+var _hud_buttons: Array[Control] = []
 
 func required_formation() -> String:
 	if is_instance_valid(pressure):
@@ -293,6 +297,7 @@ func _update_label() -> void:
 	# frame (the seal's "需：X" badge, verdict lines), in the same pixel space.
 	Enemy.clear_label_areas(marker_label)
 	var text_areas := Enemy.active_label_areas()
+	var hud_rects := _hud_rects()
 	var candidates: Array[Vector2] = [Vector2(x,y)]
 	for row in range(4):
 		for column in range(4):
@@ -304,6 +309,7 @@ func _update_label() -> void:
 		for region in reserved.values():
 			if candidate_rect.intersects(region):clear=false
 		if formation_button_rect.size.x > 0.0 and candidate_rect.intersects(formation_button_rect):clear=false
+		if covers_hud(candidate_rect, hud_rects):clear=false
 		if marker_hits_text(Rect2(candidate_rect.position*scale_factor,candidate_rect.size*scale_factor),text_areas):clear=false
 		for member in GameManager.squad_manager.get_members():
 			var member_screen: Vector2=canvas*member.global_position/scale_factor
@@ -314,6 +320,12 @@ func _update_label() -> void:
 			break
 	marker_label.position = Vector2(x,y)
 	marker_label.size = Vector2(width,30)
+	marker_link = PackedVector2Array()
+	# The line leads to the seal, or to the edge pointer standing in for it.
+	var link_target: Vector2 = pointer_layout if pointer_layout.x >= 0.0 and pointer_needed() else point
+	var link := link_points(Rect2(x,y,width,30), link_target)
+	if link.size() == 2:
+		marker_link = PackedVector2Array([link[0]*scale_factor, link[1]*scale_factor])
 	marker_label.text = marker_text()
 	Enemy.reserve_label_area(marker_label.get_global_rect(), marker_label)
 
@@ -544,9 +556,11 @@ func seal_text(count: int, counter: int = -1, heal: int = 8) -> String:
 # equipment/notice band, so a seal near the screen edge never hides them.
 const VERDICT_TOP_BAND := 112.0
 const VERDICT_BOTTOM_BAND := 104.0
-static func clamp_screen_point(screen: Vector2, view: Vector2, width: float) -> Vector2:
-	screen.x = clampf(screen.x, 8.0, maxf(8.0, view.x - width - 8.0))
-	screen.y = clampf(screen.y, VERDICT_TOP_BAND, maxf(VERDICT_TOP_BAND, view.y - VERDICT_BOTTOM_BAND))
+# R43: unit = viewport pixels per layout pixel. On a 3x phone the bands were
+# a third of their size, so verdict lines slid under the 召喚／裝備 buttons.
+static func clamp_screen_point(screen: Vector2, view: Vector2, width: float, unit: float = 1.0) -> Vector2:
+	screen.x = clampf(screen.x, 8.0 * unit, maxf(8.0 * unit, view.x - width - 8.0 * unit))
+	screen.y = clampf(screen.y, VERDICT_TOP_BAND * unit, maxf(VERDICT_TOP_BAND * unit, view.y - VERDICT_BOTTOM_BAND * unit))
 	return screen
 # R11: elite name plates step aside from verdict lines and the seal marker.
 # R36: does a local rect cover rule text reserved by someone other than this relay?
@@ -574,7 +588,8 @@ func _keep_on_screen(local_at: Vector2, width: float) -> Vector2:
 		return local_at
 	var xf := get_viewport().get_canvas_transform() * get_global_transform()
 	var view := get_viewport().get_visible_rect().size
-	return xf.affine_inverse() * clamp_screen_point(xf * local_at, view, width)
+	var unit := view.x / maxf(1.0, MobileTuning.ui_layout_size(view).x)
+	return xf.affine_inverse() * clamp_screen_point(xf * local_at, view, width * xf.x.length(), unit)
 
 func result_text(result: Dictionary) -> String:
 	var name: String = NAMES[maxi(0,ORDER.find(str(result.formation)))]
@@ -671,6 +686,62 @@ func pointer_needed() -> bool:
 # R42: when the spot under the seal is taken, try spots around it before the
 # screen-wide grid, nearest first, so the 第N道 marker stays by its seal
 # instead of jumping to the far left column.
+# R43: the marker also keeps off every HUD button (戰報, pause, skills) and the
+# panels on the right column: kill/gold, the minimap with the stage name under
+# it, and the notice. Rects in the same layout space as the marker.
+const HUD_PANELS := ["ScorePanel", "ToastPanel", "HUDPanel"]
+
+func _hud_rects() -> Array[Rect2]:
+	var rects: Array[Rect2] = []
+	var hud_root := marker_label.get_parent() if is_instance_valid(marker_label) else null
+	if hud_root == null:
+		return rects
+	if _hud_buttons.is_empty():
+		for node in hud_root.find_children("*", "Button", true, false):
+			_hud_buttons.append(node as Control)
+	for button in _hud_buttons:
+		if is_instance_valid(button) and button.is_visible_in_tree():
+			rects.append(button.get_global_rect())
+	for panel_name in HUD_PANELS:
+		var panel := hud_root.find_child(panel_name, true, false) as Control
+		if panel != null and panel.is_visible_in_tree():
+			rects.append(panel.get_global_rect())
+	var minimap := hud_root.find_child("LoopMinimap", true, false) as Control
+	if minimap != null and minimap.is_visible_in_tree():
+		rects.append(minimap_column(minimap.get_global_rect()))
+	return rects
+
+# The stage name (第8關・珊潮遺都) is drawn under the minimap and can run left of it.
+static func minimap_column(rect: Rect2) -> Rect2:
+	var width := maxf(rect.size.x, 190.0)
+	return Rect2(rect.end.x - width, rect.position.y, width, rect.size.x + 24.0)
+
+static func covers_hud(rect: Rect2, hud: Array[Rect2]) -> bool:
+	for area in hud:
+		if rect.intersects(area.grow(6.0)):
+			return true
+	return false
+
+# From the marker's nearest edge to the seal, only when they are more than
+# LINK_GAP apart; otherwise empty.
+const LINK_GAP := 70.0
+
+static func link_points(marker: Rect2, seal: Vector2) -> PackedVector2Array:
+	var near := Vector2(clampf(seal.x, marker.position.x, marker.end.x), clampf(seal.y, marker.position.y, marker.end.y))
+	if near.distance_to(seal) <= LINK_GAP:
+		return PackedVector2Array()
+	return PackedVector2Array([near, seal + near.direction_to(seal) * -34.0])
+
+func _draw_marker_link() -> void:
+	if marker_link.size() != 2 or not is_instance_valid(marker_label) or not marker_label.visible:
+		return
+	var to_local := (get_viewport().get_canvas_transform() * get_global_transform()).affine_inverse()
+	var a: Vector2 = to_local * marker_link[0]
+	var c: Vector2 = to_local * marker_link[1]
+	draw_line(a, c, Color("08121f", 0.7), 5.0, true)
+	draw_dashed_line(a, c, Color("ffdcac", 0.9), 2.0, 9.0, true)
+	draw_circle(c, 4.0, Color("ffdcac"))
+
 static func near_first(start: Vector2, width: float, grid: Array[Vector2]) -> Array[Vector2]:
 	var out: Array[Vector2] = grid.duplicate()
 	for dy in [-40.0, 40.0, -80.0, 80.0, -120.0, 120.0]:
@@ -824,6 +895,7 @@ func _draw() -> void:
 		return
 	if completed:
 		return
+	_draw_marker_link()
 	_draw_synergy()
 	var color: Color = COLORS[step]
 	# Four etched corners: task marker, never a defensive circle.
