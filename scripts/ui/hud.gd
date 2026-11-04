@@ -248,6 +248,7 @@ func _process(_delta: float) -> void:
 	if is_instance_valid(formation_picker) and formation_picker.visible and is_instance_valid(GameManager.squad_manager):
 		formation_picker.refresh(GameManager.squad_manager)
 	_update_tactical_hint()
+	_reserve_hud_areas()
 	_refresh_active_ability_button()
 	var loot_notice := root.get_node_or_null("LootBanner")
 	var squad: Node = GameManager.squad_manager
@@ -1491,7 +1492,9 @@ func _apply_r33_battle_layout(size: Vector2, mobile: bool) -> void:
 	var portrait := size.y > size.x
 	var width := 184.0 if mobile and portrait else 242.0 if mobile else 270.0
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.045, 0.055, 0.105, 0.78)
+	# R44: near-opaque like the touch buttons (R32), so an enemy HP bar behind
+	# the kill/gold box no longer shows through its numbers.
+	style.bg_color = Color(0.045, 0.055, 0.105, 0.93)
 	style.border_color = Color(0.6, 0.7, 1.0, 0.45)
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(9)
@@ -2420,6 +2423,40 @@ func _update_tactical_hint() -> void:
 	# the kill/gold panel beside it.
 	var phone_ui := MOBILE_TUNING.use_mobile_ui(view)
 	tactical_hint.add_theme_font_size_override("font_size", fitted_hint_size(tactical_hint.text, tactical_hint.get_theme_font("font"), mission_rect.size.x - (34.0 if phone_ui else 40.0), 13 if phone_ui else 15))
+
+
+# R44: every visible HUD button and panel is reserved as a label area each
+# frame (owner: the HUD root), so ground plates, answer tags and the 第N道
+# marker step off them instead of sliding under 楔形 or the 連斬 box.
+const FORMATION_RELAY_SCRIPT := preload("res://scripts/services/formation_relay.gd")
+const PLATE_BLOCKING_PANELS := ["HUDPanel", "ScorePanel", "CombatReadout", "TacticalHint", "LoopMinimap", "ToastPanel"]
+var _plate_blocking_buttons: Array[Control] = []
+
+func _reserve_hud_areas() -> void:
+	if not is_instance_valid(root):
+		return
+	Enemy.hud_owner_id = root.get_instance_id()
+	Enemy.clear_label_areas(root)
+	if not GameManager.game_running or get_tree().paused:
+		return
+	if _plate_blocking_buttons.is_empty():
+		for node in root.find_children("*", "Button", true, false):
+			_plate_blocking_buttons.append(node as Control)
+	for button in _plate_blocking_buttons:
+		if is_instance_valid(button) and button.is_visible_in_tree():
+			Enemy.reserve_label_area(button.get_global_rect(), root)
+	for panel_name in PLATE_BLOCKING_PANELS:
+		var panel := root.find_child(panel_name, true, false) as Control
+		if panel != null and panel.is_visible_in_tree():
+			var rect := panel.get_global_rect()
+			# CombatReadout fills the screen; its 連斬 box is the inner panel.
+			var inner = panel.get("panel")
+			if inner is Control:
+				rect = (inner as Control).get_global_rect()
+			# The stage name is drawn under the minimap and runs left of it.
+			if panel_name == "LoopMinimap":
+				rect = FORMATION_RELAY_SCRIPT.minimap_column(rect)
+			Enemy.reserve_label_area(rect, root)
 
 
 static func merges_urgent_notice(view: Vector2, phone: bool, urgent: bool) -> bool:

@@ -229,7 +229,9 @@ func _place_plate(rect: Rect2) -> Rect2:
 	var xf := get_viewport().get_canvas_transform() * get_global_transform()
 	var view := get_viewport().get_visible_rect().size
 	var screen := xf * rect
-	var shift := Vector2(clampf(screen.position.x, 12.0, view.x - screen.size.x - 140.0) - screen.position.x, clampf(screen.position.y, 120.0, view.y - screen.size.y - 110.0) - screen.position.y)
+	# R44: margins in layout units, so a 3x phone keeps the same HUD clearance.
+	var unit := view.x / maxf(1.0, MobileTuning.ui_layout_size(view).x)
+	var shift := Vector2(clampf(screen.position.x, 12.0 * unit, view.x - screen.size.x - 140.0 * unit) - screen.position.x, clampf(screen.position.y, 120.0 * unit, view.y - screen.size.y - 110.0 * unit) - screen.position.y)
 	rect.position += shift / maxf(0.01, xf.get_scale().x)
 	var placed: Rect2 = TIDE.first_clear(rect, xf, Enemy.active_label_areas_except(mark_layer))
 	Enemy.reserve_label_area(xf * placed, mark_layer)

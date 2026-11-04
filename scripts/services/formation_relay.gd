@@ -591,6 +591,34 @@ func _keep_on_screen(local_at: Vector2, width: float) -> Vector2:
 	var unit := view.x / maxf(1.0, MobileTuning.ui_layout_size(view).x)
 	return xf.affine_inverse() * clamp_screen_point(xf * local_at, view, width * xf.x.length(), unit)
 
+# R44: both verdict lines (drawn centred on at.x + 140) slide sideways off any
+# HUD button or panel, so 「楔形正確・封合照算…」 never runs under the stage name.
+func _verdict_off_hud(local_at: Vector2, box_width: float) -> Vector2:
+	if not is_inside_tree():
+		return local_at
+	var xf := get_viewport().get_canvas_transform() * get_global_transform()
+	var box := xf * Rect2(local_at + Vector2(140.0 - box_width / 2.0, -22.0), Vector2(box_width, 54.0))
+	var shift := slide_off_hud(box, Enemy.hud_areas(), get_viewport().get_visible_rect().size.x)
+	return local_at + Vector2(shift / maxf(0.001, xf.x.length()), 0.0)
+
+static func slide_off_hud(box: Rect2, hud: Array[Rect2], view_x: float) -> float:
+	var shift := 0.0
+	for attempt in 3:
+		var moved := Rect2(box.position + Vector2(shift, 0.0), box.size)
+		var blocker := Rect2()
+		for area in hud:
+			if moved.intersects(area.grow(6.0)):
+				blocker = area
+				break
+		if blocker.size == Vector2.ZERO:
+			return shift
+		var left := blocker.position.x - 6.0 - moved.end.x
+		var right := blocker.end.x + 6.0 - moved.position.x
+		var fits_left := moved.position.x + left >= 0.0
+		var fits_right := moved.end.x + right <= view_x
+		shift += left if fits_left and (absf(left) <= absf(right) or not fits_right) else right
+	return shift
+
 func result_text(result: Dictionary) -> String:
 	var name: String = NAMES[maxi(0,ORDER.find(str(result.formation)))]
 	var members: int = int(result.members)
@@ -818,14 +846,15 @@ func _draw_verdict() -> void:
 		var at := anchor + (Vector2(-140, edge + 44 - lift) if _label_below(anchor) else Vector2(-140, -edge - 34 - lift))
 		at = _keep_on_screen(at, 280.0)
 		var text_width: float = FONT.get_string_size(verdict,HORIZONTAL_ALIGNMENT_LEFT,-1,20).x
+		var consequence := consequence_text(pressure.last_result)
+		var sub_width: float = FONT.get_string_size(consequence,HORIZONTAL_ALIGNMENT_LEFT,-1,16).x
+		at = _verdict_off_hud(at, maxf(text_width, sub_width) + 20.0)
 		_reserve_for_plates(Rect2(at + Vector2(0, -24), Vector2(280, 58)))
 		text_layer.draw_rect(Rect2(at+Vector2(140-text_width/2-10,-22),Vector2(text_width+20,30)),Color(0.03,0.05,0.09,0.84*fade),true)
 		text_layer.draw_string_outline(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,7,Color(0.03,0.05,0.09,0.9*fade))
 		text_layer.draw_string(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,Color(verdict_color(pressure.last_result),fade))
 		# Second line: what this verdict means for the seal under the same rule.
-		var consequence := consequence_text(pressure.last_result)
 		var sub_at := at + Vector2(0, 26)
-		var sub_width: float = FONT.get_string_size(consequence,HORIZONTAL_ALIGNMENT_LEFT,-1,16).x
 		text_layer.draw_rect(Rect2(sub_at+Vector2(140-sub_width/2-8,-17),Vector2(sub_width+16,23)),Color(0.03,0.05,0.09,0.66*fade),true)
 		text_layer.draw_string_outline(FONT,sub_at,consequence,HORIZONTAL_ALIGNMENT_CENTER,280,16,6,Color(0.03,0.05,0.09,0.9*fade))
 		text_layer.draw_string(FONT,sub_at,consequence,HORIZONTAL_ALIGNMENT_CENTER,280,16,Color(Color("e8f7d8") if bool(pressure.last_result.correct) else Color("ffd0a0"),fade))

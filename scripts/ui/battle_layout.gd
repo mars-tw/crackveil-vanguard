@@ -25,7 +25,7 @@ static func regions(view: Vector2, phone: bool) -> Dictionary:
 		"score": Rect2(view.x - tail_width - 64, top + 8, tail_width, 44 if phone else 52),
 		"pause": Rect2(view.x - 56, top + 8, 44, 44),
 		"time": Rect2(status_width + 20, top + 10, 80, 36),
-		"mission": Rect2(mission_x, top + 8, view.x - mission_x - (174 if phone else 214), 52),
+		"mission": Rect2(mission_x, top + 8, view.x - mission_x - (184 if phone else 214), 52),
 		"combo": Rect2(10, top + 68, status_width, 56),
 		"notice": Rect2(status_width + 20, top + 68, minf(460, view.x - status_width - 112), 64),
 		"minimap": Rect2(view.x - 80, top + 70, 68, 88)

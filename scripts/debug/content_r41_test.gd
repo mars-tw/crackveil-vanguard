@@ -20,7 +20,7 @@ func _initialize() -> void:
 	_check(pressure.answer_spot([Vector2(100, 200), Vector2(400, 500)]) == Vector2(100, 104), "outside a viewport the first target's spot above is used")
 	pressure.free()
 	var psrc := FileAccess.get_file_as_string("res://scripts/services/encounter_pressure.gd")
-	_check(psrc.contains("_draw_answer(answer_spot(targets))") and psrc.contains("for dy in [-96.0, 120.0]:") and psrc.contains("if not _answer_under_hud(center) and not _under_equipment_bar(tags_area(center, 2, false)):"), "the artillery answer tries every target, above then below, clear of the HUD and the equipment bar")
+	_check(psrc.contains("_draw_answer(answer_spot(targets))") and psrc.contains("for dy in [-96.0, 120.0]:") and psrc.contains("if not _answer_under_hud(center) and not _under_equipment_bar(tags_area(center, 2, false))"), "the artillery answer tries every target, above then below, clear of the HUD and the equipment bar")
 	# A seal under the left/bottom controls counts as hidden.
 	var relay: GDScript = load("res://scripts/services/formation_relay.gd")
 	var covers: Array[Rect2] = [Rect2(20, 430, 220, 40)]
@@ -37,7 +37,7 @@ func _initialize() -> void:
 			if c > 0x7f and not font.has_char(c):
 				missing += char(c)
 	_check(missing == "", "every new string is covered by the CJK subset font (missing: %s)" % missing)
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.72.0-content-r43", "project version is 0.72.0-content-r43")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.73.0-content-r44", "project version is 0.73.0-content-r44")
 	if failures.is_empty():
 		print("R41_REGRESSION status=PASS checks=%d" % checks)
 	else:

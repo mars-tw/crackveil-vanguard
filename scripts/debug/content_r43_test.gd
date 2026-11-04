@@ -38,7 +38,7 @@ func _initialize() -> void:
 	var low: Vector2 = relay.clamp_screen_point(Vector2(500, 1150), Vector2(2532, 1170), 840.0, 3.0)
 	_check(is_equal_approx(low.y, 1170.0 - relay.VERDICT_BOTTOM_BAND * 3.0) and relay.clamp_screen_point(Vector2(500, 700), Vector2(1280, 720), 280.0) == relay.clamp_screen_point(Vector2(500, 700), Vector2(1280, 720), 280.0, 1.0), "the verdict bands scale with the phone's pixel ratio and stay the same on desktop")
 	_check(relay_src.contains("clamp_screen_point(xf * local_at, view, width * xf.x.length(), unit)"), "verdict lines are clamped in screen pixels with the zoomed width")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.72.0-content-r43", "project version is 0.72.0-content-r43")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.73.0-content-r44", "project version is 0.73.0-content-r44")
 	if failures.is_empty():
 		print("R43_REGRESSION status=PASS checks=%d" % checks)
 	else:

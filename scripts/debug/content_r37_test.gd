@@ -41,7 +41,7 @@ func _initialize() -> void:
 	_check(psrc.contains("# R37: climb above answer badges and plates instead of covering them.") and psrc.contains("box.position.y -= 36.0"), "the split verdict climbs above answer badges")
 	_check(FileAccess.get_file_as_string("res://scripts/vfx/frost_wall.gd").contains("\twall.z_index = 0\n"), "the frost wall draws under seal labels")
 	_check(psrc.contains("Enemy.clear_label_areas(mark_layer)\n\t\tfor attempt in range(3):") and psrc.contains("if top_screen < TOP_SAFE:"), "the split verdict ignores its own last reservation and stays below the top bar")
-	_check(FileAccess.get_file_as_string("res://scripts/vfx/frost_wall.gd").contains("clampf(screen.position.y, 120.0, view.y - screen.size.y - 70.0)"), "the frost plate stays on screen below the top bar")
+	_check(FileAccess.get_file_as_string("res://scripts/vfx/frost_wall.gd").contains("clampf(screen.position.y, 120.0 * unit, view.y - screen.size.y - 70.0 * unit)"), "the frost plate stays on screen below the top bar")
 	_check(FileAccess.get_file_as_string("res://scripts/ui/hud.gd").contains("\"veil_target_screen\": _veil_target_screen(),"), "the HUD probe exposes the locked member for the review bot")
 	var font: FontFile = load("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
 	var missing := ""
@@ -51,7 +51,7 @@ func _initialize() -> void:
 			if c > 0x7f and not font.has_char(c):
 				missing += char(c)
 	_check(missing == "", "every new string is covered by the CJK subset font (missing: %s)" % missing)
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.72.0-content-r43", "project version is 0.72.0-content-r43")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.73.0-content-r44", "project version is 0.73.0-content-r44")
 	if failures.is_empty():
 		print("R37_REGRESSION status=PASS checks=%d" % checks)
 	else:

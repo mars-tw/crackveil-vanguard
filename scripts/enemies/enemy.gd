@@ -153,6 +153,16 @@ static var _elite_label_rects: Array[Rect2] = []
 # that drawing: the owner clears it at the start of each _draw, and hidden or
 # freed owners are ignored.
 static var _reserved_by_owner: Dictionary = {}
+# R44: the HUD reserves its visible buttons and panels under this owner each
+# frame, so every ground plate, answer tag and verdict steps off them.
+static var hud_owner_id := 0
+
+static func hud_areas() -> Array[Rect2]:
+	var result: Array[Rect2] = []
+	if _reserved_by_owner.has(hud_owner_id):
+		for rect in _reserved_by_owner[hud_owner_id].rects:
+			result.append(rect)
+	return result
 
 static func clear_label_areas(owner: Object) -> void:
 	_reserved_by_owner.erase(owner.get_instance_id())

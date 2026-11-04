@@ -22,7 +22,7 @@ func _initialize() -> void:
 	_check(result_script.defeat_cause({"captain_dead": true, "seal_state": {"step": 0}}) == "失敗原因：隊長倒下・第 1 道", "a defeat names the cause and the seal it fell at")
 	_check(result_script.defeat_cause({"captain_dead": true, "boss_active": true, "seal_state": {"step": 3, "completed": true}}) == "失敗原因：隊長倒下・首領戰", "a defeat during the boss says so")
 	_check(result_script.defeat_cause({"captain_dead": true}) == "失敗原因：隊長倒下", "runs without seal data still name the cause")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.72.0-content-r43", "project version is 0.72.0-content-r43")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.73.0-content-r44", "project version is 0.73.0-content-r44")
 	if failures.is_empty():
 		print("R19_REGRESSION status=PASS checks=%d" % checks)
 	else:

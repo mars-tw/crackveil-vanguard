@@ -163,7 +163,8 @@ func _draw_marks() -> void:
 			var xf := get_viewport().get_canvas_transform() * get_global_transform()
 			var view := get_viewport().get_visible_rect().size
 			var screen := xf * plate
-			var shift := Vector2(clampf(screen.position.x, 12.0, view.x - screen.size.x - 140.0) - screen.position.x, clampf(screen.position.y, 120.0, view.y - screen.size.y - 70.0) - screen.position.y)
+			var unit := view.x / maxf(1.0, MobileTuning.ui_layout_size(view).x)
+			var shift := Vector2(clampf(screen.position.x, 12.0 * unit, view.x - screen.size.x - 140.0 * unit) - screen.position.x, clampf(screen.position.y, 120.0 * unit, view.y - screen.size.y - 70.0 * unit) - screen.position.y)
 			plate.position += shift / maxf(0.01, xf.get_scale().x)
 		mark_layer.draw_rect(plate, Color("0d1426", 0.92), true)
 		mark_layer.draw_rect(plate, Color(HAZARD, 0.9), false, 1.5)

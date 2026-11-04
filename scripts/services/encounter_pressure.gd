@@ -283,13 +283,33 @@ func _tags_blocked_above(center: Vector2, count: int) -> bool:
 		hit_below = hit_below or below.intersects(area)
 	return hit_above and not hit_below and not _under_equipment_bar(tags_area(center, count, true))
 
+# R44: the badges, or both tag rows (above and below), would sit on a HUD
+# button or panel the HUD reserved this frame.
+func _answer_hits_hud(center: Vector2, count: int) -> bool:
+	if not is_inside_tree():
+		return false
+	var xf := get_viewport().get_canvas_transform() * get_global_transform()
+	var hud := Enemy.hud_areas()
+	var icons: Rect2 = xf * Rect2(center - Vector2(count * (BADGE_SIZE + 6.0) * 0.5, BADGE_SIZE * 0.5), Vector2(count * (BADGE_SIZE + 6.0), BADGE_SIZE))
+	var above: Rect2 = xf * tags_area(center, count, false)
+	var below: Rect2 = xf * tags_area(center, count, true)
+	return answer_hits(icons, above, below, count, hud)
+
+static func answer_hits(icons: Rect2, above: Rect2, below: Rect2, count: int, hud: Array[Rect2]) -> bool:
+	var hit := func(rect: Rect2) -> bool:
+		for area in hud:
+			if rect.intersects(area):
+				return true
+		return false
+	return hit.call(icons) or (count > 1 and hit.call(above) and hit.call(below))
+
 # R41: above or below whichever artillery target leaves the badge and its tags
 # clear of the HUD, instead of vanishing when the first target sits under the top bar.
 func answer_spot(targets: Array) -> Vector2:
 	for target in targets:
 		for dy in [-96.0, 120.0]:
 			var center: Vector2 = target + Vector2(0, dy)
-			if not _answer_under_hud(center) and not _under_equipment_bar(tags_area(center, 2, false)):
+			if not _answer_under_hud(center) and not _under_equipment_bar(tags_area(center, 2, false)) and not _answer_hits_hud(center, 2):
 				return center
 	return targets[0] + Vector2(0, -96)
 
@@ -313,6 +333,10 @@ func _draw_answer(center: Vector2) -> void:
 	if _answer_under_hud(center):
 		return
 	if _under_equipment_bar(Rect2(center - Vector2.ONE * BADGE_SIZE * 0.5, Vector2.ONE * BADGE_SIZE)):
+		return
+	# R44: nor under a HUD button or panel (楔形, 旋斬, 連斬): a half-covered
+	# "圓慢 9秒 補16" reads as 補1, so the badge waits for a clear spot.
+	if _answer_hits_hud(center, accepted.size()):
 		return
 	var current: String = GameManager.squad_manager.get_formation_id() if is_instance_valid(GameManager.squad_manager) else ""
 	var wrong := not accepted.has(current)
