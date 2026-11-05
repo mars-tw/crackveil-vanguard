@@ -1,0 +1,36 @@
+Build 6 (version 1.0.0) replaces build 5. It adds 23 more rounds of gameplay and readability work (our internal rounds 23 to 45). Each round was checked by an automated test suite and by a rule-following bot that plays the real build, on desktop and on a 3x phone in landscape, with touch, keyboard and mouse input only.
+
+WHAT CHANGED SINCE BUILD 5
+1. Every stage now has its own mechanic on top of the formation waves, each with its own on-screen rule, countdown and result line:
+   - stage 2: thorn vines;
+   - stage 3: fire rings;
+   - stage 4: lightning pillars;
+   - stage 5: frost walls;
+   - stage 6: shadow lances;
+   - stage 7: twin royal seals;
+   - stage 8: tide sigils, where the squad must switch formation before the wave lands;
+   - stage 9: moon buds, which the captain must cut with a spin before they bloom.
+2. The squad matters more. Squadmates chase the captain and their pursuit bonus builds up over time. The result screen names each squadmate's key contribution and the captain / squad damage share.
+3. Clearer cause and effect. A failed bloom or tide names the real fix, such as "next time stand next to the bud and hold Spin". Damage you took, burns and shocks are shown on the hero who took them.
+4. Readability on phones. Rule text, verdict lines, answer badges, name plates and ground markers no longer hide under the HUD, the buttons or each other. A label that had to move draws a line back to what it describes. The HP bar is a real bar, and the HUD panels are fully opaque.
+5. Fixes. Text clipping on the result screen is gone, the stage title is shown on entry, and a rare error when a split shot's shooter had already left the field is fixed.
+
+HOW TO REVIEW
+1. Main menu > 三陣封隙・出擊 (Start).
+2. Move with the bottom-left joystick. A rift opens on the ground and an attack wave is announced at the top, with the formations that answer it.
+3. Tap the formation button (bottom right, above 旋斬) to switch formation.
+4. Between waves, bring the captain and two squadmates into the rift and hold it to seal it (6 s fast, 9 s slow). A wrong formation backfires and resets the seal.
+5. Seal three rifts to summon the gate guardian. A run takes about two to four minutes. Later stages unlock on the world map after a clear.
+
+No account, purchase or network connection is needed.
+
+ABOUT THE APP (unchanged answers from our previous reply)
+- Single-player, offline action-strategy game: you lead a squad of 3 to 9 heroes and win by reading each attack pattern and switching the whole squad's formation, not by damage upgrades alone.
+- Standalone product. It shares no game code, scenes or art with other apps on our account, and no other app on our account is a squad-formation action game.
+- Its own Godot 4.7 project. Third-party components only: Godot Engine (MIT), Noto Sans CJK (SIL OFL) and a few CC0 assets credited in the app. Parts of the code, the original 2D art and the music were made with AI-assisted tools under the developer's direction; the developer designed, reviewed and integrated everything. Source is public (MIT) at github.com/mars-tw/crackveil-vanguard.
+- No ads, purchases, accounts, analytics or tracking.
+- Beta testing: we still have not received external tester feedback; the changes above come from our own documented test and review rounds.
+
+Known limitation: the game is landscape-first; on iPad held in portrait it shows black bars above and below the game area.
+
+Thank you for your time.
