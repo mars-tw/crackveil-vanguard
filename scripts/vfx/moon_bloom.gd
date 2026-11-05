@@ -94,8 +94,45 @@ static func on_screen(captain: Node2D, at: Vector2) -> Vector2:
 	var xf := captain.get_viewport().get_canvas_transform()
 	var view := captain.get_viewport().get_visible_rect().size
 	var screen := xf * at
-	screen = Vector2(clampf(screen.x, 220.0, maxf(220.0, view.x - 240.0)), clampf(screen.y, 200.0, maxf(200.0, view.y - 200.0)))
+	# R45: the band is in layout units. On a 3x phone the fixed 200 px top
+	# margin was 67 layout px, so a bud could open under the top bar.
+	var layout := MobileTuning.ui_layout_size(view)
+	var unit := view.x / maxf(1.0, layout.x)
+	var band := spawn_band(layout)
+	screen = Vector2(clampf(screen.x, band.position.x * unit, band.end.x * unit), clampf(screen.y, band.position.y * unit, band.end.y * unit))
 	return xf.affine_inverse() * screen
+
+# Where a bud may be planted, in layout px: desktop keeps 220/240 and 200/200;
+# a short phone screen keeps the bud between the top bar and the buttons.
+static func spawn_band(layout: Vector2) -> Rect2:
+	var top := minf(200.0, layout.y * 0.4)
+	var bottom := maxf(top, layout.y - minf(200.0, layout.y * 0.34))
+	var right := maxf(220.0, layout.x - 240.0)
+	return Rect2(220.0, top, right - 220.0, bottom - top)
+
+# R45: a plate pushed away from its bud draws a line to the bud's ring, so the
+# 走過去 instruction always points at something on the ground.
+static func bud_link(plate: Rect2) -> PackedVector2Array:
+	var near := Vector2(clampf(0.0, plate.position.x, plate.end.x), clampf(0.0, plate.position.y, plate.end.y))
+	var ring := CUT_RADIUS + 12.0
+	if near.length() <= ring + 40.0:
+		return PackedVector2Array()
+	return PackedVector2Array([near, near.normalized() * ring])
+
+# R45: top right first, then the other corners of the cut ring.
+const DIGIT_CORNERS := [Vector2(1, -1), Vector2(-1, -1), Vector2(1, 1), Vector2(-1, 1)]
+static func digit_spot(xf: Transform2D, taken: Array) -> Vector2:
+	for corner in DIGIT_CORNERS:
+		var at: Vector2 = corner * CUT_RADIUS * 0.72
+		var screen: Rect2 = xf * Rect2(at - Vector2(20, 20), Vector2(40, 40))
+		var hit := false
+		for area in taken:
+			if screen.intersects(area):
+				hit = true
+				break
+		if not hit:
+			return at
+	return DIGIT_CORNERS[0] * CUT_RADIUS * 0.72
 
 func seconds_left() -> int:
 	return maxi(1, ceili(LIMIT_SECONDS - age))
@@ -266,11 +303,26 @@ func _draw_marks() -> void:
 	Enemy.clear_label_areas(mark_layer)
 	if not done:
 		var digit_at := Vector2(CUT_RADIUS * 0.72, -CUT_RADIUS * 0.72)
+		# R45: the seconds dot takes the first corner of the ring that no answer
+		# badge, plate or HUD box holds (it sat on 「散慢」 at top right).
+		if is_inside_tree():
+			var xf := get_viewport().get_canvas_transform() * get_global_transform()
+			var taken := Enemy.active_label_areas()
+			taken.append_array(Enemy.hud_areas())
+			digit_at = digit_spot(xf, taken)
+			Enemy.reserve_label_area(xf * Rect2(digit_at - Vector2(20, 20), Vector2(40, 40)), mark_layer)
 		mark_layer.draw_circle(digit_at, 17.0, Color("0d1426", 0.95))
 		mark_layer.draw_arc(digit_at, 17.0, 0.0, TAU, 28, Color(HAZARD, 1.0), 2.5, true)
 		mark_layer.draw_string(FONT, digit_at + Vector2(-7, 8), str(seconds_left()), HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color("fff3fb"))
 		var w := FONT.get_string_size(LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
-		_plate(_place_plate(Rect2(Vector2(-w * 0.5 - 10, CUT_RADIUS + 22), Vector2(w + 20, 28))), LABEL, SAFE if captain_near() else HAZARD, 18)
+		var placed := _place_plate(Rect2(Vector2(-w * 0.5 - 10, CUT_RADIUS + 22), Vector2(w + 20, 28)))
+		var tone := SAFE if captain_near() else HAZARD
+		var link := bud_link(placed)
+		if link.size() == 2:
+			mark_layer.draw_line(link[0], link[1], Color("0d1426", 0.75), 5.0, true)
+			mark_layer.draw_dashed_line(link[0], link[1], Color(tone, 0.95), 2.0, 9.0, true)
+			mark_layer.draw_circle(link[1], 5.0, Color(tone))
+		_plate(placed, LABEL, tone, 18)
 		return
 	if not solved:
 		_draw_aftermath()

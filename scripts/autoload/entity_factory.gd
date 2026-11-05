@@ -221,7 +221,11 @@ func spawn_projectile(world_position: Vector2, direction: Vector2, stats: Dictio
 	return projectile
 
 
-func spawn_fork_projectile(world_position: Vector2, direction: Vector2, stats: Dictionary, source: Node) -> Node:
+# R45: forks are queued with call_deferred; the shooter can be freed before the
+# call runs, and a freed object cannot bind to a typed Node argument (the call
+# failed with "Cannot convert argument 4"). Such a fork keeps no source.
+func spawn_fork_projectile(world_position: Vector2, direction: Vector2, stats: Dictionary, source_ref = null) -> Node:
+	var source: Node = source_ref if is_instance_valid(source_ref) else null
 	_compact_active_fork_projectiles()
 	if active_fork_projectiles.size() >= FORK_PROJECTILE_CAP:
 		fork_projectile_cap_skips += 1

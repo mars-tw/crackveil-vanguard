@@ -593,7 +593,7 @@ func _build_ui() -> void:
 	tactical_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	tactical_hint.clip_text = false
 	var mission_surface := StyleBoxFlat.new()
-	mission_surface.bg_color = Color(0.02,0.035,0.06,0.94)
+	mission_surface.bg_color = Color(0.02,0.035,0.06,1.0)
 	mission_surface.border_color = Color("718399")
 	mission_surface.set_border_width_all(1)
 	mission_surface.set_corner_radius_all(6)
@@ -1494,7 +1494,8 @@ func _apply_r33_battle_layout(size: Vector2, mobile: bool) -> void:
 	var style := StyleBoxFlat.new()
 	# R44: near-opaque like the touch buttons (R32), so an enemy HP bar behind
 	# the kill/gold box no longer shows through its numbers.
-	style.bg_color = Color(0.045, 0.055, 0.105, 0.93)
+	# R45: fully opaque; at 93% seal markers and grass still showed through.
+	style.bg_color = Color(0.045, 0.055, 0.105, 1.0)
 	style.border_color = Color(0.6, 0.7, 1.0, 0.45)
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(9)
@@ -1578,10 +1579,20 @@ func _apply_content_r1_layout(view: Vector2, phone: bool) -> void:
 		exp_caption_fix.clip_text = true
 		exp_caption_fix.position = Vector2(6, 1)
 		exp_caption_fix.size = Vector2(40, 14)
-	BATTLE_LAYOUT.place(score_label, Rect2(zones.score.position + Vector2(4, 3), zones.score.size - Vector2(8, 6)))
+	# R45: the last digit keeps SCORE_RIGHT_INSET clear of the frame's corner diamond.
+	BATTLE_LAYOUT.place(score_label, Rect2(zones.score.position + Vector2(4, 3), zones.score.size - Vector2(4 + SCORE_RIGHT_INSET, 6)))
 	score_label.add_theme_font_size_override("font_size", 12 if phone else 15)
-	score_label.size = zones.score.size - Vector2(8, 6)
+	score_label.size = zones.score.size - Vector2(4 + SCORE_RIGHT_INSET, 6)
 	time_label.add_theme_font_size_override("font_size", 20)
+	# R45: the timer sits on its own opaque plate, so units and seal rings never cross it.
+	var time_plate := StyleBoxFlat.new()
+	time_plate.bg_color = Color(0.045, 0.055, 0.105, 1.0)
+	time_plate.border_color = Color(0.6, 0.7, 1.0, 0.45)
+	time_plate.set_border_width_all(1)
+	time_plate.set_corner_radius_all(8)
+	time_label.add_theme_stylebox_override("normal", time_plate)
+	time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	time_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	BATTLE_LAYOUT.place(tactical_hint, zones.mission)
 	tactical_hint.add_theme_font_size_override("font_size", 13 if phone else 15)
 	# Phones keep a narrower inset so the longest mission line still fits.
@@ -2429,7 +2440,8 @@ func _update_tactical_hint() -> void:
 # frame (owner: the HUD root), so ground plates, answer tags and the 第N道
 # marker step off them instead of sliding under 楔形 or the 連斬 box.
 const FORMATION_RELAY_SCRIPT := preload("res://scripts/services/formation_relay.gd")
-const PLATE_BLOCKING_PANELS := ["HUDPanel", "ScorePanel", "CombatReadout", "TacticalHint", "LoopMinimap", "ToastPanel"]
+const PLATE_BLOCKING_PANELS := ["HUDPanel", "ScorePanel", "CombatReadout", "TacticalHint", "LoopMinimap", "ToastPanel", "TimeLabel"]
+const SCORE_RIGHT_INSET := 18.0
 var _plate_blocking_buttons: Array[Control] = []
 
 func _reserve_hud_areas() -> void:

@@ -25,7 +25,8 @@ func _ready() -> void:
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var style := StyleBoxFlat.new()
 	# R44: as opaque as the kill box, so seals and enemy bars do not show through.
-	style.bg_color = Color(0.015, 0.035, 0.065, 0.94)
+	# R45: fully opaque.
+	style.bg_color = Color(0.015, 0.035, 0.065, 1.0)
 	style.border_color = Color(0.32, 0.74, 0.88, 0.45)
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(7)

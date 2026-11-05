@@ -30,7 +30,7 @@ func _initialize() -> void:
 	var pressure_src := FileAccess.get_file_as_string("res://scripts/services/encounter_pressure.gd")
 	_check(pressure_src.contains("if count > 1 and not wrong:") and pressure_src.contains("var text := answer_label(accepted)"), "two-answer badges drop the repeated 可用 caption; single and wrong keep it")
 	_check(pressure_src.contains("draw_arc(target, 58.0, -PI * 0.5, -PI * 0.5 + TAU * left, 40, Color(\"ffe6a6\"), 4.0, true)") and pressure_src.contains("Enemy.reserve_plate_area(get_viewport().get_canvas_transform() * get_global_transform() * Rect2(target - Vector2.ONE * 62.0"), "landing rings get a countdown arc and keep name plates off them")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.73.0-content-r44", "project version is 0.73.0-content-r44")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.74.0-content-r45", "project version is 0.74.0-content-r45")
 	if failures.is_empty():
 		print("R20_REGRESSION status=PASS checks=%d" % checks)
 	else:

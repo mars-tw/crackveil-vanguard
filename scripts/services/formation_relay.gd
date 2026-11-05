@@ -303,20 +303,28 @@ func _update_label() -> void:
 		for column in range(4):
 			candidates.append(Vector2(12+column*(view.x-width-112)/3,maxf(140,y-36+row*32)))
 	candidates = near_first(Vector2(x,y), width, candidates)
-	for candidate in candidates:
-		var candidate_rect := Rect2(candidate,Vector2(width,30))
-		var clear := Rect2(8,136,view.x-96,view.y-284).encloses(candidate_rect) if view.x>view.y else Rect2(8,268,view.x-24,view.y-440).encloses(candidate_rect)
-		for region in reserved.values():
-			if candidate_rect.intersects(region):clear=false
-		if formation_button_rect.size.x > 0.0 and candidate_rect.intersects(formation_button_rect):clear=false
-		if covers_hud(candidate_rect, hud_rects):clear=false
-		if marker_hits_text(Rect2(candidate_rect.position*scale_factor,candidate_rect.size*scale_factor),text_areas):clear=false
-		for member in GameManager.squad_manager.get_members():
-			var member_screen: Vector2=canvas*member.global_position/scale_factor
-			if candidate_rect.intersects(Rect2(member_screen-Vector2(26,55),Vector2(52,76))):clear=false
-		if clear:
-			x=candidate.x
-			y=candidate.y
+	# R45: a second pass lets the plate sit over squad members when a crowd
+	# leaves no fully clear spot, instead of falling back onto answer badges.
+	var found := false
+	for avoid_members in [true, false]:
+		for candidate in candidates:
+			var candidate_rect := Rect2(candidate,Vector2(width,30))
+			var clear := Rect2(8,136,view.x-96,view.y-284).encloses(candidate_rect) if view.x>view.y else Rect2(8,268,view.x-24,view.y-440).encloses(candidate_rect)
+			for region in reserved.values():
+				if candidate_rect.intersects(region):clear=false
+			if formation_button_rect.size.x > 0.0 and candidate_rect.intersects(formation_button_rect):clear=false
+			if covers_hud(candidate_rect, hud_rects):clear=false
+			if marker_hits_text(Rect2(candidate_rect.position*scale_factor,candidate_rect.size*scale_factor),text_areas):clear=false
+			if avoid_members:
+				for member in GameManager.squad_manager.get_members():
+					var member_screen: Vector2=canvas*member.global_position/scale_factor
+					if candidate_rect.intersects(Rect2(member_screen-Vector2(26,55),Vector2(52,76))):clear=false
+			if clear:
+				x=candidate.x
+				y=candidate.y
+				found = true
+				break
+		if found:
 			break
 	marker_label.position = Vector2(x,y)
 	marker_label.size = Vector2(width,30)
@@ -328,6 +336,11 @@ func _update_label() -> void:
 		marker_link = PackedVector2Array([link[0]*scale_factor, link[1]*scale_factor])
 	marker_label.text = marker_text()
 	Enemy.reserve_label_area(marker_label.get_global_rect(), marker_label)
+	# R45: a boss or elite plate under the marker steps aside this frame.
+	var marker_area: Rect2 = marker_label.get_canvas_transform() * marker_label.get_global_rect()
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if enemy is Enemy and enemy.special_label_wanted:
+			enemy.reseat_label_off(marker_area)
 
 
 func _ready() -> void:
@@ -593,13 +606,22 @@ func _keep_on_screen(local_at: Vector2, width: float) -> Vector2:
 
 # R44: both verdict lines (drawn centred on at.x + 140) slide sideways off any
 # HUD button or panel, so 「楔形正確・封合照算…」 never runs under the stage name.
+# R45: the seal's own ring counts too. When the verdict is pushed down onto
+# its seal by the top band, it slides off the ring instead of hiding 第N道.
 func _verdict_off_hud(local_at: Vector2, box_width: float) -> Vector2:
 	if not is_inside_tree():
 		return local_at
 	var xf := get_viewport().get_canvas_transform() * get_global_transform()
 	var box := xf * Rect2(local_at + Vector2(140.0 - box_width / 2.0, -22.0), Vector2(box_width, 54.0))
-	var shift := slide_off_hud(box, Enemy.hud_areas(), get_viewport().get_visible_rect().size.x)
+	var blockers := Enemy.hud_areas()
+	blockers.append(seal_ring_area(xf * Rect2(anchor - Vector2.ONE * CAPTAIN_RADIUS, Vector2.ONE * CAPTAIN_RADIUS * 2.0)))
+	var shift := slide_off_hud(box, blockers, get_viewport().get_visible_rect().size.x)
 	return local_at + Vector2(shift / maxf(0.001, xf.x.length()), 0.0)
+
+# slide_off_hud keeps 6 px from every blocker; the ring is shrunk first so a
+# verdict resting just above or below its seal stays where it is.
+static func seal_ring_area(ring: Rect2) -> Rect2:
+	return ring.grow(-6.0)
 
 static func slide_off_hud(box: Rect2, hud: Array[Rect2], view_x: float) -> float:
 	var shift := 0.0

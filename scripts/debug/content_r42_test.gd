@@ -25,7 +25,7 @@ func _initialize() -> void:
 	var near: Array[Vector2] = relay.near_first(Vector2(600, 300), 214.0, [Vector2(12, 264), Vector2(600, 300)] as Array[Vector2])
 	_check(near[0] == Vector2(600, 300) and near[1].distance_to(Vector2(600, 300)) <= 40.0 and near.find(Vector2(12, 264)) > 10, "a taken marker spot tries spots around the seal before the far grid")
 	_check(FileAccess.get_file_as_string("res://scripts/services/formation_relay.gd").contains("candidates = near_first(Vector2(x,y), width, candidates)"), "the marker uses the nearest-first order")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.73.0-content-r44", "project version is 0.73.0-content-r44")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.74.0-content-r45", "project version is 0.74.0-content-r45")
 	if failures.is_empty():
 		print("R42_REGRESSION status=PASS checks=%d" % checks)
 	else:

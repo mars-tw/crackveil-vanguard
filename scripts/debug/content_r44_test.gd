@@ -18,7 +18,7 @@ func _initialize() -> void:
 	owner.free()
 	var hud_src := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
 	_check(hud_src.contains("\t_update_tactical_hint()\n\t_reserve_hud_areas()\n") and hud_src.contains("Enemy.hud_owner_id = root.get_instance_id()\n\tEnemy.clear_label_areas(root)") and hud_src.contains("root.find_children(\"*\", \"Button\", true, false)"), "every visible HUD button is reserved each frame")
-	_check(hud_src.contains("const PLATE_BLOCKING_PANELS := [\"HUDPanel\", \"ScorePanel\", \"CombatReadout\", \"TacticalHint\", \"LoopMinimap\", \"ToastPanel\"]") and hud_src.contains("rect = FORMATION_RELAY_SCRIPT.minimap_column(rect)"), "the 連斬 box, top bar, kill box, minimap with the stage name and the banner (bond reveals) are reserved too")
+	_check(hud_src.contains("const PLATE_BLOCKING_PANELS := [\"HUDPanel\", \"ScorePanel\", \"CombatReadout\", \"TacticalHint\", \"LoopMinimap\", \"ToastPanel\", \"TimeLabel\"]") and hud_src.contains("rect = FORMATION_RELAY_SCRIPT.minimap_column(rect)"), "the 連斬 box, top bar, kill box, minimap with the stage name and the banner (bond reveals) are reserved too")
 	# A live HUD registers the 連斬 box itself, not its full-screen holder.
 	var gm := root.get_node("/root/GameManager")
 	var saved_running: bool = gm.game_running
@@ -42,7 +42,7 @@ func _initialize() -> void:
 			oversized = true
 	_check(not live.is_empty() and not oversized, "no HUD rect covers a quarter of the screen")
 	_check(readout.get_global_rect().size == Vector2.ZERO and combo_box.size.x > 100.0 and live.has(combo_box), "the 連斬 box is registered with its own rect")
-	_check(FileAccess.get_file_as_string("res://scripts/ui/combat_readout.gd").contains("style.bg_color = Color(0.015, 0.035, 0.065, 0.94)"), "the 連斬 box is as opaque as the kill box")
+	_check(FileAccess.get_file_as_string("res://scripts/ui/combat_readout.gd").contains("style.bg_color = Color(0.015, 0.035, 0.065, 1.0)"), "the 連斬 box is as opaque as the kill box")
 	gm.game_running = saved_running
 	hud.queue_free()
 	await process_frame
@@ -67,19 +67,19 @@ func _initialize() -> void:
 	_check(right_shift > 0.0, "a verdict over the left 連斬 box moves right when the left side has no room")
 	var rsrc := FileAccess.get_file_as_string("res://scripts/services/formation_relay.gd")
 	_check(rsrc.contains("at = _verdict_off_hud(at, maxf(text_width, sub_width) + 20.0)
-		_reserve_for_plates(") and rsrc.contains("slide_off_hud(box, Enemy.hud_areas(), get_viewport().get_visible_rect().size.x)"), "the verdict is moved before it is reserved and drawn, against the HUD rects")
+		_reserve_for_plates(") and rsrc.contains("var blockers := Enemy.hud_areas()"), "the verdict is moved before it is reserved and drawn, against the HUD rects")
 	# Ground plates keep the same HUD clearance on a 3x phone.
 	for path in ["res://scripts/vfx/tide_sigil.gd", "res://scripts/vfx/moon_bloom.gd", "res://scripts/vfx/frost_wall.gd", "res://scripts/vfx/sand_glyphs.gd"]:
 		var src := FileAccess.get_file_as_string(path)
 		_check(src.contains("var unit := view.x / maxf(1.0, MobileTuning.ui_layout_size(view).x)") and src.contains("clampf(screen.position.y, 120.0 * unit,"), "%s margins scale with the pixel ratio" % path.get_file())
 	# The kill/gold box is near-opaque; the phone top bar keeps a gap to it.
-	_check(hud_src.contains("style.bg_color = Color(0.045, 0.055, 0.105, 0.93)"), "the kill/gold and status boxes no longer show enemy bars through them")
+	_check(hud_src.contains("style.bg_color = Color(0.045, 0.055, 0.105, 1.0)"), "the kill/gold and status boxes no longer show enemy bars through them")
 	var layout: GDScript = load("res://scripts/ui/battle_layout.gd")
 	var zones: Dictionary = layout.regions(Vector2(844, 390), true)
 	_check(zones.score.position.x - zones.mission.end.x >= 18.0, "the phone top bar ends well before the kill box")
 	var desktop: Dictionary = layout.regions(Vector2(1366, 600), false)
 	_check(desktop.mission.size.x == 1366.0 - 360.0 - 214.0, "the desktop top bar is unchanged")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.73.0-content-r44", "project version is 0.73.0-content-r44")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.74.0-content-r45", "project version is 0.74.0-content-r45")
 	if failures.is_empty():
 		print("R44_REGRESSION status=PASS checks=%d" % checks)
 	else:

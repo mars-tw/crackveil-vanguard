@@ -276,6 +276,21 @@ static func elite_label_slot(above: Rect2, below: Rect2, view: Vector2, taken: A
 			return rect
 	return Rect2()
 
+# R45: the 第N道 marker keeps its place (R12), and it is placed after the
+# plates each frame; a plate it now covers is placed again at once instead
+# of sitting under the marker (「深潮歌后」 half hidden).
+func reseat_label_off(area: Rect2) -> void:
+	if special_label == null or not special_label.visible or not is_inside_tree():
+		return
+	var xf := get_viewport().get_canvas_transform() * get_global_transform()
+	var mine := Rect2(xf * special_label.position, special_label.size * absf(xf.get_scale().y))
+	if not mine.intersects(area):
+		return
+	for i in range(_elite_label_rects.size() - 1, -1, -1):
+		if _elite_label_rects[i].position.distance_to(mine.position) < 1.0:
+			_elite_label_rects.remove_at(i)
+	_place_special_label()
+
 func _place_special_label() -> void:
 	if special_label == null or not special_label_wanted or not is_inside_tree():
 		return

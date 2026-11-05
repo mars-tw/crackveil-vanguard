@@ -25,7 +25,7 @@ func _initialize() -> void:
 	screen.free()
 	_check(gm_src.contains("\"accepted\": Array(relay_node.accepted_formations()),"), "the seal state carries every accepted formation")
 	_check(result_src.contains("if portrait and page_capacity>1 and card_h<PORTRAIT_CARD_MIN_H*scale and not portrait_single_card:") and result_src.contains("if portrait_single_card and view.y>view.x:return 1") and result_script.PORTRAIT_CARD_MIN_H >= 48.0, "a cramped portrait result shows one readable card per page instead of two cut cards")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.73.0-content-r44", "project version is 0.73.0-content-r44")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.74.0-content-r45", "project version is 0.74.0-content-r45")
 	if failures.is_empty():
 		print("R23_REGRESSION status=PASS checks=%d" % checks)
 	else:

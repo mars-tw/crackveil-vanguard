@@ -27,7 +27,7 @@ func _initialize() -> void:
 	number.hud_blockers = [] as Array[Rect2]
 	var hud_src := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
 	_check(hud_src.contains("\tblockers.append(Rect2(equipment_panel.position, equipment_panel.size))\n\tDAMAGE_NUMBER.hud_blockers = blockers") and not hud_src.contains("\tif not mobile:\n\t\tblockers.append"), "the item row blocks world text on every layout")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.73.0-content-r44", "project version is 0.73.0-content-r44")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.74.0-content-r45", "project version is 0.74.0-content-r45")
 	if failures.is_empty():
 		print("R29_REGRESSION status=PASS checks=%d" % checks)
 	else:

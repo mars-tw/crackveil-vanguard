@@ -245,6 +245,29 @@ static func first_clear(rect: Rect2, xf: Transform2D, taken: Array) -> Rect2:
 			return tried
 	return rect
 
+# R45: the disc, its countdown ring and the seconds dot.
+static func sigil_area(center: Vector2) -> Rect2:
+	return Rect2(center - Vector2(54, 60), Vector2(114, 114))
+
+# Spots along the crest, already kept on screen: the first one clear of
+# badges and plates, else the one they cover least (near the screen edge every
+# spot can be taken, and the sigil then sat right on 「楔快」).
+const SIGIL_STEPS := [0.0, 110.0, -110.0, 220.0, -220.0, 330.0, -330.0]
+static func least_covered(spots: Array, xf: Transform2D, taken: Array) -> Vector2:
+	var best: Vector2 = spots[0]
+	var best_cover := INF
+	for spot in spots:
+		var screen: Rect2 = xf * sigil_area(spot)
+		var cover := 0.0
+		for area in taken:
+			cover += screen.intersection(area).get_area()
+		if cover <= 0.0:
+			return spot
+		if cover < best_cover:
+			best_cover = cover
+			best = spot
+	return best
+
 func _place_plate(rect: Rect2) -> Rect2:
 	rect = _keep_on_screen(rect)
 	if not is_inside_tree():
@@ -261,6 +284,14 @@ func _draw_marks() -> void:
 		var crest := front_offset() + travel_dir * (BAND * 0.5)
 		var sigil := _keep_on_screen(Rect2(crest - Vector2(40, 40), Vector2(80, 80)))
 		var center := sigil.get_center()
+		# R45: the sigil slides along the crest off answer badges and plates.
+		if is_inside_tree():
+			var xf := get_viewport().get_canvas_transform() * get_global_transform()
+			var spots: Array[Vector2] = []
+			for step in SIGIL_STEPS:
+				spots.append(_keep_on_screen(Rect2(center + travel_dir.orthogonal() * step - Vector2(40, 40), Vector2(80, 80))).get_center())
+			center = least_covered(spots, xf, Enemy.active_label_areas())
+			Enemy.reserve_label_area(xf * sigil_area(center), mark_layer)
 		var ok := holds_required()
 		var tone: Color = SAFE if ok else HAZARD
 		mark_layer.draw_circle(center, 42.0, Color("0d1426", 0.92))
