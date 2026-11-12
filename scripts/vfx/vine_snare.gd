@@ -15,6 +15,9 @@ const TICK_DAMAGE := 3.0
 var age := 0.0
 var tick := 0.0
 var hits := 0
+var resolved := false
+var sortie_token := -1
+var active_observed := false
 
 # R30: at most MAX_ACTIVE snares at once, so two elites casting together
 # do not tile the ground with stacked rings.
@@ -57,6 +60,7 @@ static func spawn(parent: Node, at: Vector2) -> Node2D:
 var mark_layer: Node2D = null
 
 func _ready() -> void:
+	sortie_token = GameManager.run_token
 	mark_layer = Node2D.new()
 	mark_layer.z_as_relative = false
 	mark_layer.z_index = 120
@@ -92,14 +96,25 @@ func _process(delta: float) -> void:
 		return
 	age += delta
 	if age >= WARN_SECONDS + ACTIVE_SECONDS:
-		queue_free()
+		_finish()
 		return
 	if age >= WARN_SECONDS:
+		active_observed = true
 		tick -= delta
 		if tick <= 0.0:
 			tick = TICK_SECONDS
 			_apply_tick()
 	queue_redraw()
+
+func _finish() -> void:
+	# Only a fully elapsed, live hazard can count as a dodge. Removing a node
+	# at settlement/reset or while its warning is active grants no commission.
+	if not is_inside_tree() or resolved or age < WARN_SECONDS + ACTIVE_SECONDS:
+		return
+	resolved = true
+	if active_observed and hits == 0 and sortie_token == GameManager.run_token and GameManager.game_running and not GameManager.is_game_over and not get_tree().paused and is_instance_valid(GameManager.player) and GameManager.player.get("is_alive") == true:
+		GameManager.vine_snares_clean += 1
+	queue_free()
 
 func _apply_tick() -> void:
 	for hero in get_tree().get_nodes_in_group("heroes"):

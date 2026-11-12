@@ -214,6 +214,8 @@ var active_starting_formal := false
 var active_starting_team := "legacy"
 var active_starting_node := ""
 var starting_run_id := ""
+var pending_expedition_settlements: Dictionary = {}
+var expedition_seeded := false
 var starting_step_timer := 0.0
 var starting_benefits: Dictionary = {}
 var open_preparation_on_menu := false
@@ -281,6 +283,7 @@ func select_stage(stage_id: String) -> bool:
 
 
 func start_selected_stage(mode: String = "campaign") -> void:
+	forced_run_seed = 0
 	prepare_starting_build()
 	run_mode = "endless" if mode == "endless" else "campaign"
 	tactical_launch = false
@@ -399,6 +402,7 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	catch_up_peak = 1.0
 	catch_up_damage = 0.0
 	vine_snares_cast = 0
+	vine_snares_clean = 0
 	vine_snare_hits = 0
 	ember_rings_cast = 0
 	ember_ring_hits = 0
@@ -1338,6 +1342,7 @@ var catch_up_peak := 1.0
 var catch_up_damage := 0.0
 # R30: garden vine snares this run and how many hero ticks they landed.
 var vine_snares_cast := 0
+var vine_snares_clean := 0
 var vine_snare_hits := 0
 # R31: forge ember rings this run and how many heroes the bursts caught.
 var ember_rings_cast := 0
@@ -1917,11 +1922,35 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 	var relay_node: Node = director.relay if director != null and is_instance_valid(director.relay) else null
 	if relay_node != null:
 		enriched["seal_state"] = {"step": int(relay_node.step), "completed": bool(relay_node.completed), "wrong": int(relay_node.wrong_penalties), "pressure_seconds": float(relay_node.pressure_seconds), "fast_seals": relay_node.history.filter(func(h): return not STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "slow_seals": relay_node.history.filter(func(h): return STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "matched_seconds": float(relay_node.matched_seconds), "synergy_damage": float(relay_node.synergy_damage), "catch_up_peak": catch_up_peak, "catch_up_damage": catch_up_damage, "vine_snares": vine_snares_cast, "vine_hits": vine_snare_hits, "ember_rings": ember_rings_cast, "ember_hits": ember_ring_hits, "ember_clean": ember_rings_clean, "storm_pylons": storm_pylons_cast, "storm_grounded": storm_pylons_grounded, "storm_hits": storm_pylon_hits, "frost_walls": frost_walls_cast, "frost_clean": frost_walls_clean, "frost_hits": frost_wall_hits, "veil_lances": veil_lances_cast, "veil_blocked": veil_lances_blocked, "veil_hits": veil_lance_hits, "sand_glyphs": sand_glyphs_cast, "sand_solved": sand_glyphs_solved, "sand_hits": sand_storm_hits, "tide_sigils": tide_sigils_cast, "tide_matched": tide_sigils_matched, "tide_hits": tide_wave_hits, "moon_blooms": moon_blooms_cast, "bloom_cut": moon_blooms_cut, "bloom_heals": moon_bloom_heals, "bloom_sprouts": moon_bloom_sprouts, "required": str(relay_node.required_formation()), "accepted": Array(relay_node.accepted_formations()), "formation": squad_manager.get_formation_id() if is_instance_valid(squad_manager) else ""}
+	if relay_node != null: enriched["seal_state"]["vine_clean"] = vine_snares_clean
 	enriched["starting_build_text"] = starting_build_text()
 	enriched["starting_build"] = {"team":active_starting_team,"node":active_starting_node,"benefits":starting_benefits.duplicate(true),"run_id":starting_run_id,"valid_settlements":MetaProgress.starting_settlements.size(),"vouchers":MetaProgress.starting_vouchers}
 	if AchievementProgress != null and AchievementProgress.has_method("get_run_unlocked_definitions"):
 		enriched["achievement_unlocks"] = AchievementProgress.get_run_unlocked_definitions()
+	enriched["stage_id"] = selected_stage_id
+	var expedition_eligible := active_starting_formal and run_mode == "campaign" and not expedition_seeded and not tactical_launch
+	enriched["expedition_result"] = _record_expedition_settlement(starting_run_id, enriched, expedition_eligible)
+	# Mission rewards use the same saved echo wallet; report the balance after both awards.
+	enriched["echo_progress"] = MetaProgress.get_progress_summary()
 	return enriched
+
+
+func _record_expedition_settlement(id: String, summary: Dictionary, eligible: bool) -> Dictionary:
+	var result: Dictionary = MetaProgress.record_expedition_run(id, summary, eligible)
+	if result.get("status") == "save_failed":
+		pending_expedition_settlements[id] = summary.duplicate(true)
+	elif result.get("status") in ["recorded", "unchanged"]:
+		pending_expedition_settlements.erase(id)
+	return result
+
+
+func retry_expedition_settlements() -> bool:
+	var had_pending := not pending_expedition_settlements.is_empty()
+	if not MetaProgress.starting_ready: MetaProgress.load_progress()
+	for id in pending_expedition_settlements.keys():
+		_record_expedition_settlement(str(id), pending_expedition_settlements[id], true)
+	if had_pending: MetaProgress.progress_changed.emit()
+	return pending_expedition_settlements.is_empty()
 
 
 func _new_echo_source_awards(current: Dictionary, awarded: int) -> Dictionary:

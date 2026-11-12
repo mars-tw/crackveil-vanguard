@@ -259,6 +259,7 @@ func _apply_run_seed() -> void:
 			selected_seed = GameManager.seed_from_text(argument.get_slice("=", 1))
 	if selected_seed == 0 and int(GameManager.get("forced_run_seed")) != 0:
 		selected_seed = int(GameManager.get("forced_run_seed"))
+	GameManager.expedition_seeded = selected_seed != 0
 	if selected_seed == 0:
 		randomize()
 		selected_seed = max(1, randi())

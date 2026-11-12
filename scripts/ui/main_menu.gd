@@ -57,6 +57,7 @@ var tactical_previous_button: Button
 var tactical_next_button: Button
 var tactical_detail_label: Label
 var preparation_entry_button: Button
+var journal_section := "expeditions"
 
 
 func _ready() -> void:
@@ -212,7 +213,7 @@ func _build_ui() -> void:
 	meta_button.pressed.connect(_show_panel.bind("meta"))
 	menu_box.add_child(meta_button)
 
-	achievements_button = _make_menu_button("成就")
+	achievements_button = _make_menu_button("遠征任務・成就")
 	achievements_button.pressed.connect(_show_panel.bind("achievements"))
 	menu_box.add_child(achievements_button)
 
@@ -367,7 +368,7 @@ func _show_panel(panel_id: String) -> void:
 	achievements_grid = null
 	match panel_id:
 		"achievements":
-			side_title.text = "成就"
+			side_title.text = "遠征任務" if journal_section == "expeditions" else "成就收藏"
 			_build_achievements_panel()
 		"settings":
 			side_title.text = "設定"
@@ -497,6 +498,24 @@ func _unlock_text() -> String:
 
 
 func _build_achievements_panel() -> void:
+	var navigation := HBoxContainer.new()
+	navigation.add_theme_constant_override("separation", 8)
+	side_content.add_child(navigation)
+	for id in ["expeditions", "achievements"]:
+		var button := Button.new()
+		button.text = "遠征任務" if id == "expeditions" else "成就收藏"
+		button.custom_minimum_size.y = 48
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.disabled = journal_section == id
+		button.pressed.connect(func(): journal_section = id; _show_panel("achievements"))
+		navigation.add_child(button)
+	if journal_section == "expeditions":
+		var board := preload("res://scripts/ui/expedition_board.gd").new()
+		board.name = "ExpeditionBoard"
+		board.content_refreshed.connect(func(): call_deferred("_apply_responsive_layout"))
+		board.stage_requested.connect(func(stage_id: String): GameManager.select_stage(stage_id); GameManager.return_to_world_map())
+		side_content.add_child(board)
+		return
 	achievements_grid = GridContainer.new()
 	achievements_grid.name = "AchievementsGrid"
 	achievements_grid.columns = 3

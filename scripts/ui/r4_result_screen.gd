@@ -186,6 +186,14 @@ func _records() -> Array[String]:
 	var result: Array[String]=[
 		"戰利與成長\n金幣 %d・等級 %d\n殘響 +%d・裝備 %d 件\n來源：%s" % [data.get("gold",0),data.get("level",1),data.get("echo_shards_earned",0),data.get("equipment_collected",0),"／".join(source_lines) if not source_lines.is_empty() else "本局沒有已保存收入"],
 		"關卡紀錄\n擊殺 %d・菁英 %d\n守門者：%s" % [data.get("kills",0),data.get("elites_killed",0),"已擊破" if data.get("boss_killed",false) else "尚未擊破"]]
+	var expedition: Dictionary = data.get("expedition_result", {})
+	if expedition.get("status") == "save_failed":
+		result.insert(0, "遠征任務尚未保存\n獎勵未入帳。回主選單的遠征任務重試保存。")
+	elif int(expedition.get("reward", 0)) > 0:
+		var mission_names: Array[String] = []
+		for mission in MetaProgress.get_expedition_rows():
+			if expedition.get("completed", []).has(mission.id): mission_names.append(str(mission.name))
+		result.insert(0, "遠征任務完成\n%s\n殘響 +%d 已保存" % ["／".join(mission_names), int(expedition.reward)])
 	if goal.get("kind","")=="lifetime":result.append("局外目標\n%s：永久殘響 %d/%d\n還差 %d" % [goal.get("name","下一解鎖"),goal.get("current",0),goal.get("target",0),goal.get("remaining",0)])
 	elif goal.get("kind","")=="spendable":result.append("局外目標\n%s：可用殘響 %d/%d\n還差 %d" % [goal.get("name","下一強化"),goal.get("current",0),goal.get("target",0),goal.get("remaining",0)])
 	else:result.append("局外目標\n"+str(goal.get("name","目前強化已完成")))
@@ -307,6 +315,11 @@ func _refresh() -> void:
 	summary_label.text="%s｜%s\n%s・%s\n擊殺 %d・存活 %d/%d\n羈絆收益（全隊加成）回%d／減%d HP\n殘響 +%d・現有 %d\n下一步 %s・%s" % [CATALOG.TEAMS.get(team,CATALOG.TEAMS.legacy).name,node.get("name","未裝節點"),outcome,GameManager.format_time(float(displayed_summary.get("elapsed_time",0))),displayed_summary.get("kills",0),displayed_summary.get("squad_alive",0),displayed_summary.get("squad_total",rows.size()),bond.get("healing",0),bond.get("prevented",0),displayed_summary.get("echo_shards_earned",0),echo.get("shards",MetaProgress.shards),goal.get("name","強化完成"),("還差 %d" % int(goal.get("remaining",0))) if int(goal.get("remaining",0))>0 else ("可在整備兌換" if goal.get("kind","")=="spendable" else "已達成")]
 	if int(bond.get("healing",0)) == 0 and int(bond.get("prevented",0)) == 0:
 		summary_label.text = summary_label.text.replace("羈絆收益（全隊加成）回0／減0 HP", summary_bond_line())
+	var expedition: Dictionary = displayed_summary.get("expedition_result", {})
+	if int(expedition.get("reward", 0)) > 0:
+		summary_label.text += "\n遠征任務完成・額外殘響 +%d" % int(expedition.reward)
+	elif expedition.get("status") == "save_failed":
+		summary_label.text += "\n任務尚未保存・回遠征任務可重試"
 	var badges := victory_badges(displayed_summary) if victory else ""
 	if badges != "":
 		var lines := summary_label.text.split("\n")

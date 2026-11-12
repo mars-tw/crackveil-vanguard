@@ -11,6 +11,7 @@ const SAVE_PATH := "user://veil_echo.cfg"
 const TACTICAL := preload("res://scripts/services/tactical_catalog.gd")
 const STARTING := preload("res://scripts/services/starting_build_catalog.gd")
 const ECHO_SHARDS := preload("res://scripts/services/echo_shard_breakdown.gd")
+const EXPEDITIONS := preload("res://scripts/services/expedition_catalog.gd")
 
 const TRACKS: Array[Dictionary] = [
 	{
@@ -59,6 +60,8 @@ var lifetime_shards: int = 0
 var upgrades: Dictionary = {}
 var tactical_medals: Dictionary = {}
 var formation_seals: Dictionary = {}
+var expedition_progress: Dictionary = {}
+var expedition_claimed: Dictionary = {}
 var save_path: String = SAVE_PATH
 var starting_owned: Array[String] = []
 var starting_equipped := ""
@@ -109,6 +112,11 @@ func load_progress() -> void:
 	for stage in TACTICAL.STAGES.get_stages():
 		tactical_medals[str(stage.id)] = clampi(int(config.get_value("tactical", str(stage.id), 0)), 0, 7)
 		formation_seals[str(stage.id)] = bool(config.get_value("formation_seals", str(stage.id), false))
+	for mission in EXPEDITIONS.MISSIONS:
+		var mission_id := str(mission.id)
+		var claimed := bool(config.get_value("expedition_claimed", mission_id, false))
+		expedition_claimed[mission_id] = claimed
+		expedition_progress[mission_id] = int(mission.target) if claimed else clampi(int(config.get_value("expedition_progress", mission_id, 0)), 0, int(mission.target))
 	for track in TRACKS:
 		var track_id := str(track.get("id", ""))
 		upgrades[track_id] = clamp(
@@ -140,6 +148,9 @@ func save_progress() -> bool:
 	for stage in TACTICAL.STAGES.get_stages():
 		config.set_value("tactical", str(stage.id), int(tactical_medals.get(str(stage.id), 0)))
 		config.set_value("formation_seals", str(stage.id), bool(formation_seals.get(str(stage.id), false)))
+	for mission in EXPEDITIONS.MISSIONS:
+		config.set_value("expedition_progress", str(mission.id), int(expedition_progress.get(str(mission.id), 0)))
+		config.set_value("expedition_claimed", str(mission.id), bool(expedition_claimed.get(str(mission.id), false)))
 	for track in TRACKS:
 		var track_id := str(track.get("id", ""))
 		config.set_value("upgrades", track_id, get_upgrade_level(track_id))
@@ -342,12 +353,81 @@ func get_next_progress_goal() -> Dictionary:
 	return {"kind":"complete","name":"目前殘響強化已滿級","current":shards,"target":0,"remaining":0}
 
 
+func record_expedition_run(run_id: String, summary: Dictionary, eligible: bool) -> Dictionary:
+	var outcome := {"status":"ineligible", "completed":[], "reward":0}
+	if not eligible or run_id.strip_edges().is_empty() or str(summary.get("starting_mode", "")) != "campaign":
+		return outcome
+	var reason := str(summary.get("settlement_reason", ""))
+	var settled := (reason == "defeat" and EXPEDITIONS._flag(summary, "captain_dead")) or (reason == "victory" and EXPEDITIONS._flag(summary, "campaign_clear"))
+	if not settled or EXPEDITIONS.STAGES.get_stage(str(summary.get("stage_id", ""))).is_empty():
+		return outcome
+	if not starting_ready:
+		outcome.status = "save_failed"
+		return outcome
+	var before_progress := expedition_progress.duplicate(true)
+	var before_claimed := expedition_claimed.duplicate(true)
+	var before_shards := shards
+	var before_lifetime := lifetime_shards
+	var completed: Array[String] = []
+	var reward := 0
+	var changed := false
+	for mission in EXPEDITIONS.MISSIONS:
+		var id := str(mission.id)
+		if bool(expedition_claimed.get(id, false)) or str(mission.stage_id) != str(summary.get("stage_id", "")):
+			continue
+		var previous := int(expedition_progress.get(id, 0))
+		var progress := maxi(previous, EXPEDITIONS.value_for(mission, summary))
+		if progress > previous:
+			expedition_progress[id] = progress
+			changed = true
+		if progress >= int(mission.target):
+			expedition_claimed[id] = true
+			completed.append(id)
+			reward += int(mission.reward)
+			changed = true
+	if not changed:
+		outcome.status = "unchanged"
+		return outcome
+	shards += reward
+	lifetime_shards += reward
+	if not save_progress():
+		expedition_progress = before_progress
+		expedition_claimed = before_claimed
+		shards = before_shards
+		lifetime_shards = before_lifetime
+		outcome.status = "save_failed"
+		return outcome
+	outcome.status = "recorded"
+	outcome.completed = completed
+	outcome.reward = reward
+	if has_unlock("contract_slot") and AchievementProgress != null and AchievementProgress.has_method("record_contract_slot_unlock"):
+		AchievementProgress.record_contract_slot_unlock()
+	progress_changed.emit()
+	return outcome
+
+
+func get_expedition_rows() -> Array[Dictionary]:
+	var rows: Array[Dictionary] = []
+	for mission in EXPEDITIONS.definitions():
+		var id := str(mission.id)
+		var stage := EXPEDITIONS.STAGES.get_stage(str(mission.stage_id))
+		mission["stage_name"] = str(stage.get("name", mission.stage_id))
+		mission["progress"] = clampi(int(expedition_progress.get(id, 0)), 0, int(mission.target))
+		mission["status"] = "completed" if bool(expedition_claimed.get(id, false)) else "active"
+		mission["requirement"] = "正式封隙出擊結算時紀錄；採單局最佳，不跨局累加。"
+		mission["prerequisite"] = ""
+		rows.append(mission)
+	return rows
+
+
 func _reset_runtime_defaults() -> void:
 	shards = 0
 	lifetime_shards = 0
 	upgrades.clear()
 	tactical_medals.clear()
 	formation_seals.clear()
+	expedition_progress.clear()
+	expedition_claimed.clear()
 	starting_owned.clear()
 	starting_equipped=""
 	starting_team="legacy"
