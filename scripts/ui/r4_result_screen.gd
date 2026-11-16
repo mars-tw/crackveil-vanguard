@@ -578,6 +578,9 @@ static func victory_badges(summary: Dictionary) -> String:
 		out.append("潮紋換陣 %d/%d" % [int(seal.get("tide_matched", 0)), int(seal.get("tide_sigils", 0))])
 	if int(seal.get("bloom_cut", 0)) > 0:
 		out.append("斬開月華 %d/%d" % [int(seal.get("bloom_cut", 0)), int(seal.get("moon_blooms", 0))])
+	# R47: the forge's gear cores set in a socket.
+	if int(seal.get("forge_set", 0)) > 0:
+		out.append("校準時輪 %d/%d" % [int(seal.get("forge_set", 0)), int(seal.get("forge_cores", 0))])
 	if out.is_empty():
 		return ""
 	return "戰績：" + "・".join(out)
@@ -608,6 +611,9 @@ static func vine_line(seal: Dictionary) -> String:
 	# R40: the moon blooms, the same way.
 	if int(seal.get("moon_blooms", 0)) > 0:
 		parts.append("月華花蕾 %d 次・斬開 %d 次・長出靈花 %d 隻" % [int(seal.get("moon_blooms", 0)), int(seal.get("bloom_cut", 0)), int(seal.get("bloom_sprouts", 0))])
+	# R47: the forge's gear cores, the same way.
+	if int(seal.get("forge_cores", 0)) > 0:
+		parts.append("時輪齒核 %d 次・送進基座 %d 次（遠座 %d）・過載打中 %d 人次" % [int(seal.get("forge_cores", 0)), int(seal.get("forge_set", 0)), int(seal.get("forge_far", 0)), int(seal.get("forge_hits", 0))])
 	return "\n".join(parts)
 
 # R27: what the squad catch-up did this run (peak multiplier and added damage).

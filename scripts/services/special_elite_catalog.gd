@@ -29,7 +29,10 @@ const STAGE_VARIANTS := {
 	"tide": {"tint": Color("7fd8ee"), "speed": 1.0, "hp": 1.2, "projectile": 1.1, "pressure": "潮紋換陣", "skill": "tide_sigil",
 		"names": {"shield": "潮盾重衛", "charge": "浪爪獵將", "frost": "珊霧守望者", "flame": "海焰術士", "summoner": "珊群召喚師"}},
 	"bloom": {"tint": Color("d8b8ff"), "speed": 1.05, "hp": 1.25, "projectile": 1.1, "pressure": "月華花蕾", "skill": "moon_bloom",
-		"names": {"shield": "月盾重衛", "charge": "花爪獵將", "frost": "靈霧守望者", "flame": "月焰術士", "summoner": "花群召喚師"}}
+		"names": {"shield": "月盾重衛", "charge": "花爪獵將", "frost": "靈霧守望者", "flame": "月焰術士", "summoner": "花群召喚師"}},
+	# R47: the tenth stage gets its own roster and rule (it kept the first stage's).
+	"forge": {"tint": Color("cfbadf"), "speed": 1.05, "hp": 1.3, "projectile": 1.15, "pressure": "時輪齒核", "skill": "forge_core",
+		"names": {"shield": "輪盾重衛", "charge": "齒爪獵將", "frost": "汽霧守望者", "flame": "熔齒術士", "summoner": "齒群召喚師"}}
 }
 
 static func stage_variant(stage_id: String) -> Dictionary:

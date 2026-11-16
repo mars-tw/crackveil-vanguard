@@ -1713,6 +1713,10 @@ func _tide_or(line: String) -> String:
 		for node in get_tree().get_nodes_in_group(group):
 			if node is Node2D and node.has_method("status_line"):
 				return str(node.call("status_line"))
+	# R47: the forge's gear core, the same way.
+	for core in get_tree().get_nodes_in_group("forge_cores"):
+		if core is Node2D and core.has_method("status_line"):
+			return str(core.call("status_line"))
 	return line
 
 # R40: screen position of an open moon bloom ([] when none), for the review bot.
@@ -1722,6 +1726,17 @@ func _bloom_screen() -> Array:
 			var at: Vector2 = get_viewport().get_canvas_transform() * (bloom as Node2D).global_position
 			return [at.x, at.y]
 	return []
+
+# R47: screen positions of a live gear core and its sockets ({} when none), for the review bot.
+func _forge_screen() -> Dictionary:
+	for core in get_tree().get_nodes_in_group("forge_cores"):
+		if core is Node2D and not bool(core.get("done")):
+			var xf := get_viewport().get_canvas_transform()
+			var at: Vector2 = xf * core.core_global()
+			var near: Vector2 = xf * core.socket_global("near")
+			var far: Vector2 = xf * core.socket_global("far")
+			return {"core": [at.x, at.y], "near": [near.x, near.y], "far": [far.x, far.y], "carried": bool(core.get("carried"))}
+	return {}
 
 # R39: the formation a rolling tide sigil asks for ("" when none), for the review bot.
 func _tide_required() -> String:
@@ -1807,6 +1822,8 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"tide_verdict_at": float(load("res://scripts/vfx/tide_sigil.gd").last_verdict_time),
 		"bloom_screen": _bloom_screen(),
 		"bloom_verdict_at": float(load("res://scripts/vfx/moon_bloom.gd").last_verdict_time),
+		"forge_screen": _forge_screen(),
+		"forge_verdict_at": float(load("res://scripts/vfx/forge_core.gd").last_verdict_time),
 		"veil_verdict_at": float(load("res://scripts/vfx/veil_lance.gd").last_verdict_time),
 		"frost_verdict_at": float(load("res://scripts/vfx/frost_wall.gd").last_verdict_time),
 		"hazard_mark_at": maxf(maxf(float(load("res://scripts/vfx/ember_ring.gd").last_mark_time), float(load("res://scripts/vfx/storm_pylons.gd").last_mark_time)), float(load("res://scripts/vfx/frost_wall.gd").last_mark_time)),

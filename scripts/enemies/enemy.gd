@@ -114,6 +114,9 @@ const VEIL_LANCE := preload("res://scripts/vfx/veil_lance.gd")
 const SAND_GLYPHS := preload("res://scripts/vfx/sand_glyphs.gd")
 const TIDE_SIGIL := preload("res://scripts/vfx/tide_sigil.gd")
 const MOON_BLOOM := preload("res://scripts/vfx/moon_bloom.gd")
+const FORGE_CORE := preload("res://scripts/vfx/forge_core.gd")
+# R47: the forge reaper throws a gear core every this many volleys in phase two.
+const FORGE_CORE_VOLLEYS := 4
 var special_skill := ""
 var special_cooldown := 3.0
 var special_timer := 2.0
@@ -978,6 +981,9 @@ func _apply_special_elite_impact(target: Node2D) -> void:
 		if is_instance_valid(MOON_BLOOM.last_spawned):
 			GameManager.moon_blooms_cast += 1
 			MOON_BLOOM.last_spawned = null
+	# R47: the forge drops a stalled gear core the captain carries to a socket.
+	if stage_skill == "forge_core" and is_instance_valid(GameManager.player) and is_inside_tree():
+		_cast_forge_core()
 	if special_skill == "summoner":
 		for index in range(5):
 			if EntityFactory.get_enemy_live_count() >= death_spawn_cap:
@@ -1002,6 +1008,20 @@ func _apply_special_elite_impact(target: Node2D) -> void:
 		for hero in get_tree().get_nodes_in_group("heroes"):
 			if hero is Node2D and hero.global_position.distance_to(global_position) < 170.0 and hero.has_method("apply_movement_slow"):
 				hero.apply_movement_slow(1.0, 0.25)
+
+
+# R47: drops a gear core toward the captain (elite cast, or the forge boss).
+func _cast_forge_core(expected_token: int = -1) -> bool:
+	if not is_inside_tree() or not is_active or is_dying or (expected_token >= 0 and expected_token != spawn_token):
+		return false
+	if not is_instance_valid(GameManager.player):
+		return false
+	FORGE_CORE.spawn(get_parent(), self, GameManager.player)
+	if not is_instance_valid(FORGE_CORE.last_spawned):
+		return false
+	GameManager.forge_cores_cast += 1
+	FORGE_CORE.last_spawned = null
+	return true
 
 
 func get_special_elite_debug_state() -> Dictionary:
@@ -1197,6 +1217,9 @@ func _fire_stage_boss_volley() -> void:
 		if EntityFactory.spawn_enemy_projectile(global_position + direction * (radius + 8.0), direction, stats, self, "boss") != null:
 			boss_projectiles_fired += 1
 	boss_volley_index += 1
+	# R47: in phase two the forge reaper also throws a gear core every few volleys.
+	if boss_pattern == "gear_cross" and boss_phase_two_triggered and boss_volley_index % FORGE_CORE_VOLLEYS == 0:
+		_cast_forge_core()
 
 
 func get_boss_debug_state() -> Dictionary:
@@ -1238,6 +1261,9 @@ func _trigger_boss_phase_two() -> void:
 	call_deferred("_spawn_boss_dashers",4,spawn_token)
 	if GameManager.has_method("record_boss_phase_two"):
 		GameManager.record_boss_phase_two()
+	# R47: the forge reaper throws a gear core as it crosses half HP.
+	if boss_pattern == "gear_cross":
+		call_deferred("_cast_forge_core", spawn_token)
 
 
 func _apply_boss_phase_visuals() -> void:
@@ -1322,6 +1348,20 @@ func apply_status_effect(effect_id: String, duration: float, strength: float) ->
 		return
 	status_timers[effect_id] = max(float(status_timers.get(effect_id, 0.0)), duration)
 	status_strengths[effect_id] = strength
+
+
+# R47: a set gear core lags enemies: the existing slow (so 縫獵協議 counts them
+# as slowed) and, from the far socket, the existing vulnerable status. A boss
+# caught by it also pushes its next volley back.
+func apply_time_lag(seconds: float, slow: float, vulnerable: float, volley_delay: float) -> bool:
+	if not is_active or is_dying or hp <= 0.0 or seconds <= 0.0:
+		return false
+	apply_status_effect("slow", seconds, slow)
+	if vulnerable > 0.0:
+		apply_status_effect("vulnerable", seconds, vulnerable)
+	if is_boss and volley_delay > 0.0:
+		boss_ability_timer += volley_delay
+	return true
 
 
 func has_status_effect(effect_id: String) -> bool:
