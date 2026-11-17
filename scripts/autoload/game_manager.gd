@@ -430,6 +430,9 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	forge_cores_far = 0
 	forge_core_hits = 0
 	forge_core_lagged = 0
+	forge_core_drops = 0
+	forge_core_overloads = 0
+	forge_boss_delays = 0
 	sand_storm_hits = 0
 	bond_benefits ={"healing":0.0,"prevented":0.0,"triggers":0}
 	next_elite_bonus_xp = 0
@@ -1385,6 +1388,11 @@ var forge_cores_set := 0
 var forge_cores_far := 0
 var forge_core_hits := 0
 var forge_core_lagged := 0
+# R48: carried cores knocked loose by a hit, cores that overloaded, and far
+# sockets that pushed the reaper's next volley back.
+var forge_core_drops := 0
+var forge_core_overloads := 0
+var forge_boss_delays := 0
 var sand_storm_hits := 0
 
 func current_catch_up() -> float:
@@ -1942,7 +1950,7 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 		enriched["seal_state"] = {"step": int(relay_node.step), "completed": bool(relay_node.completed), "wrong": int(relay_node.wrong_penalties), "pressure_seconds": float(relay_node.pressure_seconds), "fast_seals": relay_node.history.filter(func(h): return not STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "slow_seals": relay_node.history.filter(func(h): return STARTING_BUILD.is_secondary(str(h.get("pressure","")), str(h.get("formation","")))).size(), "matched_seconds": float(relay_node.matched_seconds), "synergy_damage": float(relay_node.synergy_damage), "catch_up_peak": catch_up_peak, "catch_up_damage": catch_up_damage, "vine_snares": vine_snares_cast, "vine_hits": vine_snare_hits, "ember_rings": ember_rings_cast, "ember_hits": ember_ring_hits, "ember_clean": ember_rings_clean, "storm_pylons": storm_pylons_cast, "storm_grounded": storm_pylons_grounded, "storm_hits": storm_pylon_hits, "frost_walls": frost_walls_cast, "frost_clean": frost_walls_clean, "frost_hits": frost_wall_hits, "veil_lances": veil_lances_cast, "veil_blocked": veil_lances_blocked, "veil_hits": veil_lance_hits, "sand_glyphs": sand_glyphs_cast, "sand_solved": sand_glyphs_solved, "sand_hits": sand_storm_hits, "tide_sigils": tide_sigils_cast, "tide_matched": tide_sigils_matched, "tide_hits": tide_wave_hits, "moon_blooms": moon_blooms_cast, "bloom_cut": moon_blooms_cut, "bloom_heals": moon_bloom_heals, "bloom_sprouts": moon_bloom_sprouts, "required": str(relay_node.required_formation()), "accepted": Array(relay_node.accepted_formations()), "formation": squad_manager.get_formation_id() if is_instance_valid(squad_manager) else ""}
 	if relay_node != null: enriched["seal_state"]["vine_clean"] = vine_snares_clean
 	# R47: the forge's gear cores, carried to the result like the other stage rules.
-	if relay_node != null: enriched["seal_state"].merge({"forge_cores": forge_cores_cast, "forge_set": forge_cores_set, "forge_far": forge_cores_far, "forge_hits": forge_core_hits, "forge_lagged": forge_core_lagged}, true)
+	if relay_node != null: enriched["seal_state"].merge({"forge_cores": forge_cores_cast, "forge_set": forge_cores_set, "forge_far": forge_cores_far, "forge_hits": forge_core_hits, "forge_lagged": forge_core_lagged, "forge_near": forge_cores_set - forge_cores_far, "forge_drops": forge_core_drops, "forge_overloads": forge_core_overloads, "forge_boss_delays": forge_boss_delays}, true)
 	enriched["starting_build_text"] = starting_build_text()
 	enriched["starting_build"] = {"team":active_starting_team,"node":active_starting_node,"benefits":starting_benefits.duplicate(true),"run_id":starting_run_id,"valid_settlements":MetaProgress.starting_settlements.size(),"vouchers":MetaProgress.starting_vouchers}
 	if AchievementProgress != null and AchievementProgress.has_method("get_run_unlocked_definitions"):

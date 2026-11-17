@@ -875,10 +875,13 @@ func _tick_lob_arc_vfx() -> void:
 
 
 func _on_lob_landed() -> void:
+	# R48: a lob outlives a hero freed mid-flight; pass no owner rather than a
+	# freed one (the typed parameter rejects it and the blast was lost).
+	var owner_node: Node = source if is_instance_valid(source) else null
 	if not lob_explosion_stats.is_empty():
-		EntityFactory.spawn_explosion(lob_target_position, lob_explosion_stats, source)
+		EntityFactory.spawn_explosion(lob_target_position, lob_explosion_stats, owner_node)
 	if not lob_hazard_stats.is_empty():
-		EntityFactory.spawn_hazard_zone(lob_target_position, lob_hazard_stats, source)
+		EntityFactory.spawn_hazard_zone(lob_target_position, lob_hazard_stats, owner_node)
 	if lob_cluster_count <= 1 or lob_cluster_radius <= 0.0 or lob_explosion_stats.is_empty():
 		return
 	for index in range(1, lob_cluster_count):
@@ -888,7 +891,7 @@ func _on_lob_landed() -> void:
 		var cluster_stats := lob_explosion_stats.duplicate(true)
 		cluster_stats["damage"] = float(cluster_stats.get("damage", damage)) * 0.58
 		cluster_stats["area_radius"] = float(cluster_stats.get("area_radius", radius * 8.0)) * 0.58
-		EntityFactory.spawn_delayed_explosion(cluster_position, cluster_stats, source, 0.05 * float(index))
+		EntityFactory.spawn_delayed_explosion(cluster_position, cluster_stats, owner_node, 0.05 * float(index))
 
 
 func _viewport_size_for_lod() -> Vector2:

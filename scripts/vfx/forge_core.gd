@@ -14,7 +14,14 @@ extends Node2D
 # into gear shards (enemy shots that can be dodged). The garden asked where to
 # stand and the bloom for the captain's skill at a spot; the forge asks which
 # route to take, and how much risk to carry through.
-const LIMIT_SECONDS := 9.0
+# R48: the far socket was too safe (R47 bots 6/6, every core set in ~2 s of the
+# 9). Pushing the far socket further does nothing: it is already clamped to
+# the on-screen band (820x320 world units on desktop, far less on a phone). So
+# the clock is shorter, and a hit while carrying knocks the core loose (back
+# the way the captain came); it has to be picked up again on the same clock.
+const LIMIT_SECONDS := 8.0
+const KNOCK_DISTANCE := 110.0
+const KNOCK_SECONDS := 0.45
 const RESULT_SECONDS := 2.0
 const PICK_RADIUS := 56.0
 const SOCKET_RADIUS := 50.0
@@ -41,7 +48,7 @@ const SAFE := Color("8ff0a4")
 const INK := Color("0d1426")
 const LABEL := "時輪齒核・隊長撿起送進基座"
 const SOCKET_TAGS := {"near": "穩", "far": "強"}
-const FAIL_TIPS := {"pick": "下次先走過去撿起齒核", "carry": "下次撿起後直接走向基座"}
+const FAIL_TIPS := {"pick": "下次先走過去撿起齒核", "carry": "下次撿起後直接走向基座", "drop": "下次搬運時繞開敵群"}
 # Hand-painted replacements: drawn instead of the vector gear when present.
 const ART := {"core": "res://assets/art/r47/forge_core.png", "near": "res://assets/art/r47/forge_socket_near.png", "far": "res://assets/art/r47/forge_socket_far.png"}
 const FONT := preload("res://assets/fonts/NotoSansCJKtc-Regular-UI-Subset.otf")
@@ -63,6 +70,15 @@ var shots_cleared := 0
 var boss_delayed := false
 var done_age := 0.0
 var sortie_token := -1
+# R48: hits that knocked the carried core loose, the flight still left (no
+# pick-up meanwhile), where it flew from, and the ground spot of the last
+# pick-up (a knocked core flies back toward it).
+var drops := 0
+var knock_left := 0.0
+var knock_from := Vector2.ZERO
+var pick_spot := Vector2.ZERO
+# The on-screen band at the drop (world units); a knocked core stays inside.
+var band := Rect2()
 # Local offsets from the drop point (this node's origin).
 var core_at := Vector2.ZERO
 var sockets := {"near": Vector2(-NEAR_DISTANCE, 0), "far": Vector2(FAR_DISTANCE, 0)}
@@ -149,6 +165,7 @@ static func spawn(parent: Node, from: Node2D, captain: Node2D) -> Node2D:
 	var core: Node2D = load("res://scripts/vfx/forge_core.gd").new()
 	core.global_position = drop
 	core.sockets = {"near": Vector2(spots.near) - drop, "far": Vector2(spots.far) - drop}
+	core.band = band
 	core.z_index = 0
 	core.add_to_group("forge_cores")
 	parent.add_child(core)
@@ -166,15 +183,19 @@ static func verdict_text(ok: bool, socket: String, boss: bool) -> String:
 	var text := "遠座校準・敵群緩速 %d 秒＋易傷" % lag_seconds("far") if socket == "far" else "近座校準・敵群緩速 %d 秒" % lag_seconds("near")
 	return text + ("・彈幕延後" if boss else "")
 
-static func fail_reason(was_carried: bool) -> String:
-	return "carry" if was_carried else "pick"
+# R48: a core knocked loose and left on the ground says so ("drop").
+static func fail_reason(was_carried: bool, was_dropped: bool = false) -> String:
+	return "carry" if was_carried else "drop" if was_dropped else "pick"
 
 # The top bar's second line while the core is up (and for its verdict).
-static func status_text(left: int, carrying: bool, finished: bool, ok: bool, socket: String, boss: bool, why: String = "pick") -> String:
+static func status_text(left: int, carrying: bool, finished: bool, ok: bool, socket: String, boss: bool, why: String = "pick", dropped: bool = false) -> String:
 	if finished:
 		return verdict_text(true, socket, boss) if ok else "%s・%s" % [verdict_text(false, "", false), FAIL_TIPS.get(why, FAIL_TIPS["pick"])]
 	if carrying:
 		return "搬運齒核・送進基座・遠座更強・%d 秒" % left
+	# R48: knocked loose by a hit, on the same clock.
+	if dropped:
+		return "齒核脫手・走回去撿起・%d 秒" % left
 	return "時輪齒核・%d 秒內走過去撿起" % left
 
 # Lags every enemy within the socket's reach; the far socket also clears the
@@ -217,10 +238,13 @@ func socket_under(at: Vector2) -> String:
 	return ""
 
 func status_line() -> String:
-	return status_text(seconds_left(), carried, done, solved, socket_used, boss_delayed, reason)
+	return status_text(seconds_left(), carried, done, solved, socket_used, boss_delayed, reason, drops > 0)
 
 func _ready() -> void:
 	sortie_token = GameManager.run_token
+	# R48: the captain's own hurt signal (sent only when a hit lands, so
+	# invulnerability frames and blocked hits never knock the core loose).
+	GameManager.captain_hurt_requested.connect(_on_captain_hurt)
 	for key in ART:
 		if ResourceLoader.exists(ART[key]):
 			textures[key] = load(ART[key])
@@ -248,9 +272,11 @@ func _process(delta: float) -> void:
 			queue_free()
 			return
 		age += delta
+		knock_left = maxf(0.0, knock_left - delta)
 		var captain: Node2D = GameManager.player
-		if not carried and captain.global_position.distance_to(to_global(core_at)) <= PICK_RADIUS:
+		if not carried and knock_left <= 0.0 and captain.global_position.distance_to(to_global(core_at)) <= PICK_RADIUS:
 			carried = true
+			pick_spot = core_at
 			if AudioManager != null and AudioManager.has_method("play_sfx"):
 				AudioManager.play_sfx("pickup")
 		if carried:
@@ -264,6 +290,37 @@ func _process(delta: float) -> void:
 	queue_redraw()
 	if is_instance_valid(mark_layer):
 		mark_layer.queue_redraw()
+
+func _on_captain_hurt(from_direction: Vector2, _hp_ratio: float) -> void:
+	if done or not carried or not _sortie_live():
+		return
+	knock_loose(from_direction)
+
+# R48: a hit while carrying knocks the core loose. It flies KNOCK_DISTANCE back
+# toward where it was picked up (away from the hit when the captain is still
+# standing there), cannot be caught while in the air, and the clock keeps
+# running: the price of carrying through the crowd.
+func knock_loose(from_direction: Vector2) -> void:
+	var at: Vector2 = GameManager.player.global_position
+	var back := to_global(pick_spot) - at
+	var dir := back.normalized() if back.length() > 40.0 else (-from_direction.normalized() if from_direction.length() > 0.01 else Vector2.LEFT)
+	var land := at + dir * KNOCK_DISTANCE
+	if band.has_area():
+		land = clamp_to(band, land)
+	carried = false
+	drops += 1
+	GameManager.forge_core_drops += 1
+	knock_from = to_local(at + CARRY_LIFT)
+	core_at = to_local(land)
+	knock_left = KNOCK_SECONDS
+	EntityFactory.spawn_death_burst(at + CARRY_LIFT, HAZARD, 1.6, "burst")
+
+# Where the core is drawn: on its flight after a knock, else on the ground.
+func ground_draw_at() -> Vector2:
+	if knock_left <= 0.0:
+		return core_at
+	var t := clampf(1.0 - knock_left / KNOCK_SECONDS, 0.0, 1.0)
+	return knock_from.lerp(core_at, t) + Vector2(0, -sin(t * PI) * 46.0)
 
 # A delivered core stays while its lag lasts, so the lagged marks can show.
 func result_seconds() -> float:
@@ -284,6 +341,8 @@ func _deliver(id: String) -> void:
 	var result := apply_lag(get_tree(), at, config)
 	lagged = int(result.lagged)
 	boss_delayed = bool(result.boss)
+	if boss_delayed:
+		GameManager.forge_boss_delays += 1
 	shots_cleared = int(result.shots)
 	lagged_enemies = result.enemies
 	GameManager.forge_core_lagged += lagged
@@ -296,10 +355,12 @@ func _overload() -> void:
 	var at := core_global()
 	done = true
 	solved = false
-	reason = fail_reason(carried)
+	reason = fail_reason(carried, drops > 0)
 	carried = false
+	knock_left = 0.0
 	core_at = to_local(at)
 	last_verdict_time = GameManager.elapsed_time
+	GameManager.forge_core_overloads += 1
 	for hero in get_tree().get_nodes_in_group("heroes"):
 		if hero is Node2D and hero.get("is_alive") != false and hero.has_method("take_damage") and (hero as Node2D).global_position.distance_to(at) <= OVERLOAD_RADIUS:
 			if hero.take_damage(OVERLOAD_DAMAGE, at):
@@ -388,8 +449,12 @@ func _draw() -> void:
 		draw_arc(core_at, PICK_RADIUS, 0.0, TAU, 40, Color(GEAR, 0.9), 2.5, true)
 	# a carried core is drawn on the top layer (over the captain), in _draw_marks
 	if not carried:
-		_timer_ring(self, core_at)
-		_core(self, core_at, 1.0, age * 0.4)
+		# R48: a knocked-loose core is drawn on its arc; the ring above marks where it lands.
+		var shown := ground_draw_at()
+		if knock_left > 0.0:
+			draw_dashed_line(knock_from, core_at, Color(HAZARD, 0.8), 2.0, 8.0, true)
+		_timer_ring(self, shown)
+		_core(self, shown, 1.0, age * (6.0 if knock_left > 0.0 else 0.4))
 
 func _plate(plate: Rect2, text: String, tone: Color, size: int) -> void:
 	mark_layer.draw_rect(plate, Color(INK, 0.92), true)

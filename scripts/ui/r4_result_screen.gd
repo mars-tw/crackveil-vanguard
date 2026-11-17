@@ -204,9 +204,12 @@ func _records() -> Array[String]:
 	var tally := PackedStringArray()
 	var catch_line := catch_up_line(data.get("seal_state",{}))
 	if catch_line != "":tally.append(catch_line)
-	var hazards := vine_line(data.get("seal_state",{}))
+	# R48: a forge run gets its own core card (first), so the tally skips the core line.
+	var forge := forge_card(data.get("seal_state",{}))
+	var hazards := vine_line(data.get("seal_state",{}), forge != "")
 	if hazards != "":tally.append(hazards)
 	if not tally.is_empty():result.insert(0,"戰況統計\n"+"\n".join(tally))
+	if forge != "":result.insert(0,forge)
 	return result
 
 func _hero_display_name(hero_id: String) -> String:
@@ -586,7 +589,8 @@ static func victory_badges(summary: Dictionary) -> String:
 	return "戰績：" + "・".join(out)
 
 # R30: how the squad handled the garden vine snares (fewer hits = spread well).
-static func vine_line(seal: Dictionary) -> String:
+# R48: skip_forge leaves out the gear cores when the forge card already lists them.
+static func vine_line(seal: Dictionary, skip_forge: bool = false) -> String:
 	var parts := PackedStringArray()
 	if int(seal.get("vine_snares", 0)) > 0:
 		parts.append("荊藤纏地 %d 次・隊員被纏 %d 下" % [int(seal.get("vine_snares", 0)), int(seal.get("vine_hits", 0))])
@@ -612,9 +616,39 @@ static func vine_line(seal: Dictionary) -> String:
 	if int(seal.get("moon_blooms", 0)) > 0:
 		parts.append("月華花蕾 %d 次・斬開 %d 次・長出靈花 %d 隻" % [int(seal.get("moon_blooms", 0)), int(seal.get("bloom_cut", 0)), int(seal.get("bloom_sprouts", 0))])
 	# R47: the forge's gear cores, the same way.
-	if int(seal.get("forge_cores", 0)) > 0:
+	if int(seal.get("forge_cores", 0)) > 0 and not skip_forge:
 		parts.append("時輪齒核 %d 次・送進基座 %d 次（遠座 %d）・過載打中 %d 人次" % [int(seal.get("forge_cores", 0)), int(seal.get("forge_set", 0)), int(seal.get("forge_far", 0)), int(seal.get("forge_hits", 0))])
 	return "\n".join(parts)
+
+# R48: the forge's gear cores on one card under 紀錄: cores dropped and knocked
+# loose, sets per socket, overload hits and delayed reaper volleys, then one
+# thing to do next time. Older summaries without the R48 keys read 0 there.
+static func forge_card(seal: Dictionary) -> String:
+	var cores := int(seal.get("forge_cores", 0))
+	if cores <= 0:
+		return ""
+	var far := int(seal.get("forge_far", 0))
+	var near := int(seal.get("forge_near", maxi(0, int(seal.get("forge_set", 0)) - far)))
+	var drops := int(seal.get("forge_drops", 0))
+	var head := "時輪齒核 %d 枚" % cores + ("・搬運脫手 %d 次" % drops if drops > 0 else "")
+	return "%s\n送進近座 %d 次・遠座 %d 次\n過載打中 %d 人次・彈幕延後 %d 次\n%s" % [head, near, far, int(seal.get("forge_hits", 0)), int(seal.get("forge_boss_delays", 0)), forge_tip(seal)]
+
+# R48: one concrete change for the next forge run, from the counts only.
+static func forge_tip(seal: Dictionary) -> String:
+	var set_count := int(seal.get("forge_set", 0))
+	var far := int(seal.get("forge_far", 0))
+	var drops := int(seal.get("forge_drops", 0))
+	if int(seal.get("forge_overloads", 0)) > 0:
+		if drops > 0:
+			return "下次：搬運時繞開敵群，被打中齒核會脫手"
+		return "下次：齒核一掉下就走過去撿，%d 秒內送進基座" % int(load("res://scripts/vfx/forge_core.gd").LIMIT_SECONDS)
+	if far < set_count:
+		return "下次：多送遠座，緩速更久還有易傷"
+	if drops > 0:
+		return "下次：搬運時繞開敵群，被打中齒核會脫手"
+	if int(seal.get("forge_boss_delays", 0)) == 0:
+		return "下次：首領進到遠座範圍再送，彈幕會延後"
+	return "下次：照樣送遠座，首領在範圍內時再送"
 
 # R27: what the squad catch-up did this run (peak multiplier and added damage).
 static func catch_up_line(seal: Dictionary) -> String:
