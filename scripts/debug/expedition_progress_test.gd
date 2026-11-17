@@ -23,7 +23,7 @@ func _initialize() -> void:
 		ids[mission.id] = true
 		_check(not CATALOG.STAGES.get_stage(mission.stage_id).is_empty(), "known biome " + str(mission.id))
 		budget += int(mission.reward)
-	_check(ids.size() == 20 and budget == 100, "twenty finite missions total exactly 100 echo")
+	_check(ids.size() == 22 and budget == 110, "twenty-two finite missions total exactly 110 echo")
 	# Existing saves get no retroactive commission rewards and keep their data.
 	var legacy := ConfigFile.new()
 	legacy.set_value("echo", "shards", 27)
@@ -71,10 +71,10 @@ func _initialize() -> void:
 	for stage in CATALOG.STAGES.get_stages():
 		var summary := _summary(stage.id, true)
 		var result: Dictionary = meta.record_expedition_run("full-" + str(stage.id), summary, true)
-		_check(result.status == "recorded" and result.completed.size() == 2 and result.reward == 10, "both biome commissions genuinely attainable: " + str(stage.id))
+		_check(result.status == "recorded" and result.completed.size() == (4 if stage.id == "forge" else 2) and result.reward == (20 if stage.id == "forge" else 10), "every biome commission genuinely attainable: " + str(stage.id))
 		earned += int(result.reward)
 		_check(meta.record_expedition_run("replay-" + str(stage.id), summary, true).reward == 0, "no replay farming: " + str(stage.id))
-	_check(earned == 100 and meta.shards == 100 and meta.lifetime_shards == 100, "finite reward cap is enforced across all biomes")
+	_check(earned == 110 and meta.shards == 110 and meta.lifetime_shards == 110, "finite reward cap is enforced across all biomes")
 	_check(meta.get_expedition_rows().all(func(row): return row.status == "completed" and row.progress == row.target), "journal reflects every persisted completion")
 	for mission in CATALOG.MISSIONS:
 		var empty := _summary(mission.stage_id, true)
@@ -108,7 +108,7 @@ func _initialize() -> void:
 	quit(0 if failures.is_empty() else 1)
 
 func _summary(stage_id: String, clear: bool) -> Dictionary:
-	return {"stage_id":stage_id, "starting_mode":"campaign", "settlement_reason":"victory" if clear else "defeat", "campaign_clear":clear, "captain_dead":not clear, "squad_total":5, "squad_alive":5, "seal_state":{"step":3,"completed":true,"wrong":0,"vine_snares":3,"vine_clean":3,"vine_hits":0,"ember_rings":3,"ember_clean":3,"ember_hits":0,"storm_grounded":3,"frost_walls":3,"frost_clean":3,"frost_hits":0,"veil_lances":3,"veil_blocked":3,"veil_hits":0,"sand_solved":3,"tide_matched":3,"bloom_cut":3,"bloom_heals":0}}
+	return {"stage_id":stage_id, "starting_mode":"campaign", "settlement_reason":"victory" if clear else "defeat", "campaign_clear":clear, "captain_dead":not clear, "squad_total":5, "squad_alive":5, "seal_state":{"step":3,"completed":true,"wrong":0,"vine_snares":3,"vine_clean":3,"vine_hits":0,"ember_rings":3,"ember_clean":3,"ember_hits":0,"storm_grounded":3,"frost_walls":3,"frost_clean":3,"frost_hits":0,"veil_lances":3,"veil_blocked":3,"veil_hits":0,"sand_solved":3,"tide_matched":3,"bloom_cut":3,"bloom_heals":0,"forge_far":3}}
 
 func _test_vine_resolution() -> void:
 	var gm: Node = root.get_node("GameManager")

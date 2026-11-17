@@ -23,7 +23,11 @@ const MISSIONS: Array[Dictionary] = [
 	{"id":"bloom_field","stage_id":"bloom","name":"先斷花蕾","description":"單次出擊斬斷兩朵月華花蕾。","metric":"bloom_cut","target":2,"reward":4,"lore":"小隊找到了阻止群怪回復的源頭。"},
 	{"id":"bloom_mastery","stage_id":"bloom","name":"靈森休養","description":"斬斷至少兩朵花蕾且未讓花蕾治療敵人，完成靈森通關。","metric":"bloom_clear","target":1,"reward":6,"lore":"新的花開在空地，而非傷兵腳下。"},
 	{"id":"forge_field","stage_id":"forge","name":"工坊集結","description":"單次出擊讓至少五名英雄加入小隊。","metric":"squad_total","target":5,"reward":4,"lore":"不同專長的英雄在工坊會合，準備最後的修復。"},
-	{"id":"forge_mastery","stage_id":"forge","name":"一起回來","description":"至少五名英雄加入，通關時所有本局隊員仍存活。","metric":"forge_clear","target":1,"reward":6,"lore":"這一次，集合點沒有空下的位置。"}
+	{"id":"forge_mastery","stage_id":"forge","name":"一起回來","description":"至少五名英雄加入，通關時所有本局隊員仍存活。","metric":"forge_clear","target":1,"reward":6,"lore":"這一次，集合點沒有空下的位置。"},
+	# R48: the forge's own rule (R47 gear cores) gets its pair too, on the same
+	# 4／6 scale; the two older forge missions stay, so saves keep their claims.
+	{"id":"forge_core_field","stage_id":"forge","name":"遠座校準","description":"單次出擊把齒核送進遠座兩次。","metric":"forge_far","target":2,"reward":4,"lore":"兩座基座重新咬合，停擺的工坊傳出第一聲齒輪轉動。"},
+	{"id":"forge_core_mastery","stage_id":"forge","name":"時輪再轉","description":"單次出擊把齒核送進遠座至少三次，並完成工坊通關。","metric":"forge_core_clear","target":1,"reward":6,"lore":"時輪巨門再次轉動，工坊的鐘聲傳遍裂隙兩側。"}
 ]
 
 static func definitions() -> Array[Dictionary]:
@@ -51,6 +55,7 @@ static func value_for(mission: Dictionary, summary: Dictionary) -> int:
 		"tide_clear": amount = int(clear and _count(seal, "tide_matched") >= 3)
 		"bloom_clear": amount = int(clear and _count(seal, "bloom_cut") >= 2 and _zero(seal, "bloom_heals"))
 		"forge_clear": amount = int(clear and _count(summary, "squad_total") >= 5 and _count(summary, "squad_alive") == _count(summary, "squad_total"))
+		"forge_core_clear": amount = int(clear and _count(seal, "forge_far") >= 3)
 		_: amount = _count(seal, metric)
 	return clampi(amount, 0, int(mission.get("target", 1)))
 
