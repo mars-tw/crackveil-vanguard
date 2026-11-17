@@ -1,0 +1,36 @@
+{
+  "model": "muse-wonder-1.0 via muse.image_generation",
+  "tool": "muse.image_generation（原圖 1024×1024 洋紅底三件一張）＋ Pillow 去洋紅背景、逐件裁切、縮放到 256×256",
+  "generated": "2026-11-17",
+  "reference": "assets/art/r36/landmarks.png（畫風參考）",
+  "note": "R47 時輪齒核的手繪替換圖：停擺齒核（黃銅齒輪＋淡紫晶石）、近座（穩，淡藍光）、遠座（強，橙紅光＋黃銅尖柱）。forge_core.gd 的 ART 路徑偵測到檔案就改畫這三張。",
+  "files": [
+    {
+      "file": "forge_core.png",
+      "size": [
+        256,
+        256
+      ],
+      "bytes": 98438,
+      "sha256": "2075c6ec8bb7adf992400b2f40ea2ddef03ba594ee5f40d5cd3f8816f36f618f"
+    },
+    {
+      "file": "forge_socket_near.png",
+      "size": [
+        256,
+        256
+      ],
+      "bytes": 98587,
+      "sha256": "3e4b401fc3d364938bb88be2aab0ba010f30890c85fd4db8a4471db135b70e19"
+    },
+    {
+      "file": "forge_socket_far.png",
+      "size": [
+        256,
+        256
+      ],
+      "bytes": 98692,
+      "sha256": "371d866e0ac033fd7ba8710d30fc71b6fa3f4c3ade99debff578787640bcc9f6"
+    }
+  ]
+}
