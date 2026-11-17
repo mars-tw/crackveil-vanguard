@@ -1,0 +1,26 @@
+Build 7 (version 1.0.0) replaces build 6, which was waiting for review. It adds two more rounds of gameplay work (our internal rounds 46 and 47). As before, each round was checked by an automated test suite and by a rule-following bot that plays the real build with touch, keyboard and mouse input only.
+
+WHAT CHANGED SINCE BUILD 6
+1. Expeditions. The main menu has a new 遠征任務・成就 (Expeditions and achievements) board. Each region has two missions: a field mission (for example, seal two rifts in one run, or avoid two fire rings with the whole squad) and a mastery mission that asks for a clean clear. Clearing a mission gives a one-time reward that stays with your save, plus a short story note about that region.
+2. Stage 10, the Clockwork Workshop, now has its own rule. When a workshop elite attacks, it drops a stalled gear core between the captain and the elite, and two sockets light up: a near socket (safe) and a far socket (risky). The captain picks the core up by walking over it and carries it to a socket. The near socket slows nearby enemies; the far socket also makes them take more damage. The stage boss drops a core at half health and again every few barrages; when a far-socket core's field covers the boss, its next barrage is delayed. The top bar shows the core countdown, and the result screen says what each delivery did.
+
+HOW TO REVIEW
+1. Main menu > 三陣封隙・出擊 (Start).
+2. Move with the bottom-left joystick. A rift opens on the ground and an attack wave is announced at the top, with the formations that answer it.
+3. Tap the formation button (bottom right, above 旋斬) to switch formation.
+4. Between waves, bring the captain and two squadmates into the rift and hold it to seal it (6 s fast, 9 s slow). A wrong formation backfires and resets the seal.
+5. Seal three rifts to summon the gate guardian. A run takes about two to four minutes. Later stages unlock on the world map after a clear.
+6. Main menu > 遠征任務・成就 shows the missions and their progress. Stage 10 unlocks after clearing stage 9.
+
+No account, purchase or network connection is needed.
+
+ABOUT THE APP (unchanged answers from our previous reply)
+- Single-player, offline action-strategy game: you lead a squad of 3 to 9 heroes and win by reading each attack pattern and switching the whole squad's formation, not by damage upgrades alone.
+- Standalone product. It shares no game code, scenes or art with other apps on our account, and no other app on our account is a squad-formation action game.
+- Its own Godot 4.7 project. Third-party components only: Godot Engine (MIT), Noto Sans CJK (SIL OFL) and a few CC0 assets credited in the app. Parts of the code, the original 2D art and the music were made with AI-assisted tools under the developer's direction; the developer designed, reviewed and integrated everything. Source is public (MIT) at github.com/mars-tw/crackveil-vanguard.
+- No ads, purchases, accounts, analytics or tracking.
+- Beta testing: we still have not received external tester feedback; the changes above come from our own documented test and review rounds.
+
+Known limitation: the game is landscape-first; on iPad held in portrait it shows black bars above and below the game area.
+
+Thank you for your time.
