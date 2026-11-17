@@ -77,8 +77,12 @@ func _hint() -> String:
 	return str(hud.tactical_hint.text) if hud != null and is_instance_valid(hud.get("tactical_hint")) else ""
 
 # Steers the captain with the touch stick (the same input a phone sends).
+# Enemy shots are cleared every frame, not only once before the walk: the
+# arena's other enemies keep firing, and a stray shot on the captain would
+# knock the core loose a second time (seen 2 runs in 3 before this).
 func _drive(target: Callable, done: Callable, max_frames: int) -> bool:
 	for frame in range(max_frames):
+		_clear_enemy_shots()
 		if done.call():
 			gm.set_touch_move_vector(Vector2.ZERO)
 			return true

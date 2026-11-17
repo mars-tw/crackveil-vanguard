@@ -221,6 +221,11 @@ func _test_overload(captain: Node2D) -> void:
 			break
 		if member != null:
 			member.global_position = core.to_global(core.core_at) + Vector2(30, 0)
+			# Only the overload may hit the member: a stray enemy shot just before
+			# it would leave the member in invulnerability frames (seen 2 runs in 6).
+			_clear_enemy_shots()
+			if core.age >= CORE.LIMIT_SECONDS - 0.25:
+				member.set("invulnerability_timer", 0.0)
 		await physics_frame
 	_check(is_instance_valid(core) and core.done and not core.solved and core.reason == "pick", "a core left on the ground overloads")
 	_check(_forge_shards() - shards_before == CORE.SHARDS, "the overload bursts into %d gear shards (got %d)" % [CORE.SHARDS, _forge_shards() - shards_before])
@@ -250,6 +255,13 @@ func _test_settlement() -> void:
 	_check(line.contains("時輪齒核 %d 次・送進基座 1 次（遠座 1）" % gm.forge_cores_cast), "the result line reports the cores: %s" % line)
 	_check(texts.contains("時輪齒核") or str(screen._records()).contains("時輪齒核"), "the result screen shows the core line")
 	screen.root.hide()
+
+func _clear_enemy_shots() -> void:
+	var factory: Node = root.get_node("EntityFactory")
+	for shot in factory.active_enemy_projectiles.duplicate():
+		if is_instance_valid(shot) and shot.get("is_active") == true:
+			shot.set("is_active", false)
+			factory.release_projectile(shot)
 
 func _check(condition: bool, label: String) -> void:
 	checks += 1
