@@ -1738,6 +1738,24 @@ func _forge_screen() -> Dictionary:
 			return {"core": [at.x, at.y], "near": [near.x, near.y], "far": [far.x, far.y], "carried": bool(core.get("carried"))}
 	return {}
 
+# R48: the reserved HUD areas as [x, y, w, h] rows for the review probe.
+func _hud_area_rows() -> Dictionary:
+	var out := {}
+	for id in reserved_hud_rects:
+		var r: Rect2 = reserved_hud_rects[id]
+		out[id] = [r.position.x, r.position.y, r.size.x, r.size.y]
+	return out
+
+# R48: where a gear core's marks sit on screen, in the probe's layout units
+# ({} when none), so the review bot can check them against the HUD controls.
+func _forge_marks() -> Dictionary:
+	var view := get_viewport().get_visible_rect().size
+	var unit := view.x / maxf(1.0, MOBILE_TUNING.ui_layout_size(view).x)
+	for core in get_tree().get_nodes_in_group("forge_cores"):
+		if core is Node2D and core.has_method("probe_marks"):
+			return core.probe_marks(unit)
+	return {}
+
 # R39: the formation a rolling tide sigil asks for ("" when none), for the review bot.
 func _tide_required() -> String:
 	for tide in get_tree().get_nodes_in_group("tide_sigils"):
@@ -1823,6 +1841,9 @@ func _publish_reachability_probe(viewport_size: Vector2 = Vector2.ZERO) -> void:
 		"bloom_screen": _bloom_screen(),
 		"bloom_verdict_at": float(load("res://scripts/vfx/moon_bloom.gd").last_verdict_time),
 		"forge_screen": _forge_screen(),
+		"forge_marks": _forge_marks(),
+		"mission_fit": mission_fit,
+		"hud_areas": _hud_area_rows(),
 		"forge_verdict_at": float(load("res://scripts/vfx/forge_core.gd").last_verdict_time),
 		"veil_verdict_at": float(load("res://scripts/vfx/veil_lance.gd").last_verdict_time),
 		"frost_verdict_at": float(load("res://scripts/vfx/frost_wall.gd").last_verdict_time),
@@ -2450,7 +2471,15 @@ func _update_tactical_hint() -> void:
 	# R16: long seal lines shrink to the mission box instead of running under
 	# the kill/gold panel beside it.
 	var phone_ui := MOBILE_TUNING.use_mobile_ui(view)
-	tactical_hint.add_theme_font_size_override("font_size", fitted_hint_size(tactical_hint.text, tactical_hint.get_theme_font("font"), mission_rect.size.x - (34.0 if phone_ui else 40.0), 13 if phone_ui else 15))
+	var hint_room := mission_rect.size.x - (34.0 if phone_ui else 40.0)
+	var hint_size := fitted_hint_size(tactical_hint.text, tactical_hint.get_theme_font("font"), hint_room, 13 if phone_ui else 15)
+	tactical_hint.add_theme_font_size_override("font_size", hint_size)
+	# R48: the widest line at the fitted size, for the review probe.
+	var widest := 0.0
+	for line in tactical_hint.text.split("
+"):
+		widest = maxf(widest, tactical_hint.get_theme_font("font").get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, hint_size).x)
+	mission_fit = {"size": hint_size, "widest": widest, "room": hint_room}
 
 
 # R44: every visible HUD button and panel is reserved as a label area each
@@ -2460,12 +2489,17 @@ const FORMATION_RELAY_SCRIPT := preload("res://scripts/services/formation_relay.
 const PLATE_BLOCKING_PANELS := ["HUDPanel", "ScorePanel", "CombatReadout", "TacticalHint", "LoopMinimap", "ToastPanel", "TimeLabel"]
 const SCORE_RIGHT_INSET := 18.0
 var _plate_blocking_buttons: Array[Control] = []
+# R48: the top bar's fitted font size and widest line, and the HUD areas the
+# ground marks must step off (layout units, by node name), for the review probe.
+var mission_fit := {}
+var reserved_hud_rects := {}
 
 func _reserve_hud_areas() -> void:
 	if not is_instance_valid(root):
 		return
 	Enemy.hud_owner_id = root.get_instance_id()
 	Enemy.clear_label_areas(root)
+	reserved_hud_rects.clear()
 	if not GameManager.game_running or get_tree().paused:
 		return
 	if _plate_blocking_buttons.is_empty():
@@ -2474,6 +2508,10 @@ func _reserve_hud_areas() -> void:
 	for button in _plate_blocking_buttons:
 		if is_instance_valid(button) and button.is_visible_in_tree():
 			Enemy.reserve_label_area(button.get_global_rect(), root)
+			var key := str(button.name)
+			while reserved_hud_rects.has(key):
+				key += "+"
+			reserved_hud_rects[key] = button.get_global_rect()
 	for panel_name in PLATE_BLOCKING_PANELS:
 		var panel := root.find_child(panel_name, true, false) as Control
 		if panel != null and panel.is_visible_in_tree():
@@ -2486,6 +2524,7 @@ func _reserve_hud_areas() -> void:
 			if panel_name == "LoopMinimap":
 				rect = FORMATION_RELAY_SCRIPT.minimap_column(rect)
 			Enemy.reserve_label_area(rect, root)
+			reserved_hud_rects[panel_name] = rect
 
 
 static func merges_urgent_notice(view: Vector2, phone: bool, urgent: bool) -> bool:
