@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 const MOBILE_TUNING := preload("res://scripts/services/mobile_tuning.gd")
+const QA_BRIDGE := preload("res://scripts/services/qa_bridge.gd")
 
 signal purchase_selected(option: Dictionary)
 
@@ -104,6 +105,15 @@ func show_options(options: Array) -> void:
 
 	_apply_responsive_layout()
 	root.visible = true
+	call_deferred("_publish_probe")
+
+
+# R48: read-only QA receipt (web review builds only) so the review bot can
+# leave a timed shop instead of stalling the run.
+func _publish_probe() -> void:
+	if root == null or not is_inside_tree():
+		return
+	QA_BRIDGE.publish("shop", MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size), {"skip": skip_button}, {"visible": root.visible})
 
 
 func _on_purchase_pressed(option: Dictionary) -> void:
@@ -126,6 +136,7 @@ func _on_skip_pressed() -> void:
 func hide_screen() -> void:
 	if root != null:
 		root.visible = false
+		_publish_probe()
 	_reset_pending_mobile_purchase()
 
 

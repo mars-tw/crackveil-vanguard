@@ -48,6 +48,9 @@ const SAFE := Color("8ff0a4")
 const INK := Color("0d1426")
 const LABEL := "時輪齒核・隊長撿起送進基座"
 const SOCKET_TAGS := {"near": "穩", "far": "強"}
+# R48: the disc behind a socket tag (centre offset from the socket, radius).
+const TAG_CENTER := Vector2(0, -2)
+const TAG_RADIUS := 19.0
 const FAIL_TIPS := {"pick": "下次先走過去撿起齒核", "carry": "下次撿起後直接走向基座", "drop": "下次搬運時繞開敵群"}
 # Hand-painted replacements: drawn instead of the vector gear when present.
 const ART := {"core": "res://assets/art/r47/forge_core.png", "near": "res://assets/art/r47/forge_socket_near.png", "far": "res://assets/art/r47/forge_socket_far.png"}
@@ -85,6 +88,11 @@ var sockets := {"near": Vector2(-NEAR_DISTANCE, 0), "far": Vector2(FAR_DISTANCE,
 var lagged_enemies: Array = []
 var textures := {}
 var mark_layer: Node2D = null
+# R48: where each mark landed on screen last frame (viewport pixels), split by
+# the canvas that drew it; the review probe checks them against the HUD.
+var ground_marks := {}
+var top_marks := {}
+var spawn_screen := {}
 
 static func too_soon(now: float, last: float) -> bool:
 	return now >= last and now - last < MIN_GAP_SECONDS
@@ -149,6 +157,49 @@ static func world_band(captain: Node2D) -> Rect2:
 	var band := MOON_BLOOM.spawn_band(layout)
 	return xf.affine_inverse() * Rect2(band.position * unit, band.size * unit)
 
+# R48: the camera follows the captain, so once the captain has walked onto the
+# core the whole band has slid by that walk. The sockets go where the band at
+# the drop and the band at the pick-up overlap, so neither ends up under the
+# HUD (the joystick and 召喚 on a phone, the score and minimap on a desktop)
+# or off the edge. A narrow phone band walked across vertically has too little
+# overlap; it then eases to half the walk, then to the drop's band.
+static func stay_band(band: Rect2, walk: Vector2) -> Rect2:
+	for share in [1.0, 0.5]:
+		var both := band.intersection(Rect2(band.position + walk * float(share), band.size))
+		if both.size.x >= SOCKET_RADIUS * 4.0 and both.size.y >= SOCKET_RADIUS * 0.5:
+			return both
+	return band
+
+# R48: the band is where a point may sit; a painted socket is drawn 1.2 radii
+# around its centre, so on a roomy desktop band its centre keeps that far
+# inside and the whole drawing starts clear of the HUD. A phone band keeps all
+# of its size: its width keeps the far socket a real walk from the core, and
+# its height lets the near socket sit off the line to the far one (squeezed
+# flat, the walk to the far socket ran through the near one and set it).
+const SOCKET_ART_HALF := SOCKET_RADIUS * 1.2
+const WIDE_BAND := Vector2(640.0, 200.0)
+static func socket_band(band: Rect2, walk: Vector2) -> Rect2:
+	var inset := Vector2(minf(SOCKET_ART_HALF, maxf(0.0, band.size.x - WIDE_BAND.x) * 0.5), minf(SOCKET_ART_HALF, maxf(0.0, band.size.y - WIDE_BAND.y) * 0.5))
+	return stay_band(Rect2(band.position + inset, band.size - inset * 2.0), walk)
+
+# R48: a narrow phone band clamps a drop toward an elite above or below the
+# captain back onto the captain, who then picks it up without a step. Such a
+# drop turns sideways (toward the elite's side), where the band has room.
+static func drop_clear(captain_at: Vector2, elite_at: Vector2, band: Rect2, drop: Vector2) -> Vector2:
+	if drop.distance_to(captain_at) >= PICK_RADIUS * 1.6:
+		return drop
+	var side := signf(elite_at.x - captain_at.x)
+	if side == 0.0:
+		side = 1.0
+	var best := drop
+	for dir in [Vector2(side, 0), Vector2(-side, 0)]:
+		var spot := clamp_to(band, captain_at + dir * DROP_DISTANCE)
+		if spot.distance_to(captain_at) > best.distance_to(captain_at):
+			best = spot
+		if spot.distance_to(captain_at) >= PICK_RADIUS * 1.6:
+			return spot
+	return best
+
 static func spawn(parent: Node, from: Node2D, captain: Node2D) -> Node2D:
 	if parent == null or parent.get_tree() == null or not is_instance_valid(captain) or not is_instance_valid(from):
 		return null
@@ -161,13 +212,18 @@ static func spawn(parent: Node, from: Node2D, captain: Node2D) -> Node2D:
 		return null
 	var band := world_band(captain)
 	var drop := clamp_to(band, VINE_SNARE.off_seal(drop_at(captain.global_position, from.global_position), PICK_RADIUS))
-	var spots := pick_sockets(captain.global_position, drop, from.global_position - captain.global_position, band)
+	drop = drop_clear(captain.global_position, from.global_position, band, drop)
+	var spots := pick_sockets(captain.global_position, drop, from.global_position - captain.global_position, socket_band(band, drop - captain.global_position))
 	var core: Node2D = load("res://scripts/vfx/forge_core.gd").new()
 	core.global_position = drop
 	core.sockets = {"near": Vector2(spots.near) - drop, "far": Vector2(spots.far) - drop}
 	core.band = band
 	core.z_index = 0
 	core.add_to_group("forge_cores")
+	if captain.is_inside_tree():
+		# for the review probe: where things sat on screen at the drop
+		var xf := captain.get_viewport().get_canvas_transform()
+		core.spawn_screen = {"band": xf * band, "core": xf * drop, "near": xf * Vector2(spots.near), "far": xf * Vector2(spots.far), "captain": xf * captain.global_position}
 	parent.add_child(core)
 	last_spawned = core
 	return core
@@ -230,6 +286,11 @@ func core_global() -> Vector2:
 
 func socket_global(id: String) -> Vector2:
 	return to_global(Vector2(sockets.get(id, Vector2.ZERO)))
+
+# R48: the painted socket is drawn 2.4 radii wide, wider than the 2-radius
+# vector ring; plates, tags and other marks keep off the whole drawing.
+func socket_half(id: String) -> float:
+	return SOCKET_RADIUS * (1.2 if textures.has(id) else 1.0)
 
 func socket_under(at: Vector2) -> String:
 	for id in ["far", "near"]:
@@ -393,6 +454,7 @@ func _gear(canvas: CanvasItem, center: Vector2, radius: float, tone: Color, alph
 
 func _socket(id: String, center: Vector2, alpha: float) -> void:
 	var tone: Color = BRASS if id == "far" else NEAR_TONE
+	_mark(ground_marks, id, Rect2(center - Vector2.ONE * SOCKET_RADIUS * (1.2 if textures.has(id) else 1.0), Vector2.ONE * SOCKET_RADIUS * (2.4 if textures.has(id) else 2.0)))
 	if textures.has(id):
 		var size := Vector2.ONE * SOCKET_RADIUS * 2.4
 		draw_texture_rect(textures[id], Rect2(center - size * 0.5, size), false, Color(1, 1, 1, alpha))
@@ -406,6 +468,7 @@ func _socket(id: String, center: Vector2, alpha: float) -> void:
 		draw_line(center + d * (SOCKET_RADIUS - 12.0), center + d * (SOCKET_RADIUS - 2.0), Color(tone, alpha), 3.0, true)
 
 func _core(canvas: CanvasItem, center: Vector2, alpha: float, spin: float) -> void:
+	_mark(top_marks if canvas == mark_layer else ground_marks, "core", Rect2(center - Vector2(32, 32), Vector2(64, 64)))
 	if textures.has("core"):
 		var size := Vector2.ONE * 64.0
 		canvas.draw_texture_rect(textures["core"], Rect2(center - size * 0.5, size), false, Color(1, 1, 1, alpha))
@@ -414,11 +477,45 @@ func _core(canvas: CanvasItem, center: Vector2, alpha: float, spin: float) -> vo
 
 # The time left as a ring around the core, wherever it is.
 func _timer_ring(canvas: CanvasItem, center: Vector2) -> void:
+	_mark(top_marks if canvas == mark_layer else ground_marks, "ring", Rect2(center - Vector2(40, 40), Vector2(80, 80)))
 	var left := clampf(1.0 - age / LIMIT_SECONDS, 0.0, 1.0)
 	canvas.draw_arc(center, 36.0, -PI * 0.5, -PI * 0.5 + TAU * left, 40, Color(INK, 0.9), 7.0, true)
 	canvas.draw_arc(center, 36.0, -PI * 0.5, -PI * 0.5 + TAU * left, 40, Color(HAZARD, 0.95), 3.5, true)
 
+func _mark(into: Dictionary, id: String, local: Rect2) -> void:
+	if is_inside_tree():
+		into[id] = get_viewport().get_canvas_transform() * get_global_transform() * local
+
+# R48: the marks in the probe's layout units ({id: [x, y, w, h]}) and the state.
+func probe_marks(unit: float) -> Dictionary:
+	var out := {"done": done, "solved": solved, "carried": carried, "socket": socket_used, "seconds": seconds_left()}
+	var rects := {}
+	for marks in [ground_marks, top_marks]:
+		for id in marks:
+			var r: Rect2 = marks[id]
+			rects[id] = [r.position.x / unit, r.position.y / unit, r.size.x / unit, r.size.y / unit]
+	out["rects"] = rects
+	var spawned := {}
+	for id in spawn_screen:
+		var v: Variant = spawn_screen[id]
+		if v is Rect2:
+			spawned[id] = [v.position.x / unit, v.position.y / unit, v.size.x / unit, v.size.y / unit]
+		else:
+			spawned[id] = [Vector2(v).x / unit, Vector2(v).y / unit]
+	out["spawned"] = spawned
+	if is_inside_tree():
+		var xf := get_viewport().get_canvas_transform()
+		var at := {"core": xf * core_global(), "near": xf * socket_global("near"), "far": xf * socket_global("far")}
+		if is_instance_valid(GameManager.player):
+			at["captain"] = xf * GameManager.player.global_position
+		var points := {}
+		for id in at:
+			points[id] = [Vector2(at[id]).x / unit, Vector2(at[id]).y / unit]
+		out["at"] = points
+	return out
+
 func _draw() -> void:
+	ground_marks.clear()
 	if done:
 		var fade := clampf(1.0 - done_age / RESULT_SECONDS, 0.0, 1.0)
 		if solved:
@@ -468,16 +565,65 @@ func _place_plate(rect: Rect2) -> Rect2:
 	var view := get_viewport().get_visible_rect().size
 	# Margins in layout units, so a 3x phone keeps the same HUD clearance.
 	var unit := view.x / maxf(1.0, MobileTuning.ui_layout_size(view).x)
-	var screen := xf * rect
-	var shift := Vector2(clampf(screen.position.x, 12.0 * unit, view.x - screen.size.x - 140.0 * unit) - screen.position.x, clampf(screen.position.y, 120.0 * unit, view.y - screen.size.y - 110.0 * unit) - screen.position.y)
-	rect.position += shift / maxf(0.01, xf.get_scale().x)
 	var taken := Enemy.active_label_areas_except(mark_layer)
 	if not done:
 		for id in ["near", "far"]:
 			taken.append(xf * Rect2(Vector2(sockets[id]) - Vector2.ONE * SOCKET_RADIUS, Vector2.ONE * SOCKET_RADIUS * 2.0))
-	var placed: Rect2 = TIDE.first_clear(rect, xf, taken)
+			if textures.has(id):
+				taken.append(xf * Rect2(Vector2(sockets[id]) - Vector2.ONE * socket_half(id), Vector2.ONE * socket_half(id) * 2.0))
+		# R48: nor on the core's own pick-up ring
+		if not carried:
+			taken.append(xf * Rect2(core_at - Vector2.ONE * PICK_RADIUS, Vector2.ONE * PICK_RADIUS * 2.0))
+	else:
+		# R48: the verdict keeps off the socket it names (it slid onto it when
+		# the top margin pushed it down on a phone).
+		taken.append(xf * Rect2(core_at - Vector2.ONE * socket_half(socket_used), Vector2.ONE * socket_half(socket_used) * 2.0))
+	# R48: the plate's own side of the core first, then the other side (a
+	# socket right under the core used to leave the plate lying on it).
+	var placed := rect
+	var best_cover := INF
+	for option in [rect, Rect2(Vector2(rect.position.x, 2.0 * core_at.y - rect.end.y), rect.size)]:
+		var side: Rect2 = option
+		var screen: Rect2 = xf * side
+		var shift := Vector2(clampf(screen.position.x, 12.0 * unit, view.x - screen.size.x - 140.0 * unit) - screen.position.x, clampf(screen.position.y, 120.0 * unit, view.y - screen.size.y - 110.0 * unit) - screen.position.y)
+		side.position += shift / maxf(0.01, xf.get_scale().x)
+		var tried: Rect2 = TIDE.first_clear(side, xf, taken)
+		var cover := covered(xf * tried, taken)
+		if cover < best_cover:
+			best_cover = cover
+			placed = tried
+		if cover <= 0.0:
+			break
 	Enemy.reserve_label_area(xf * placed, mark_layer)
 	return placed
+
+# R48: a socket can slide under the HUD or past the edge as the camera follows
+# the captain. Its 穩／強 tag then walks along the line toward the captain to
+# the first spot that is on screen and clear of every HUD box, so the choice
+# stays readable; the tether drawn with it points back at the socket.
+func tag_spot(socket: Vector2, xf: Transform2D) -> Vector2:
+	var home := socket + TAG_CENTER
+	if not is_inside_tree() or not is_instance_valid(GameManager.player):
+		return home
+	var view := Rect2(Vector2.ZERO, get_viewport().get_visible_rect().size)
+	var unit := view.size.x / maxf(1.0, MobileTuning.ui_layout_size(view.size).x)
+	var screen_room := view.grow(-8.0 * unit)
+	var hud := Enemy.hud_areas()
+	var toward := to_local(GameManager.player.global_position)
+	for k in range(0, 13):
+		var spot := home.lerp(toward, float(k) / 16.0)
+		var area: Rect2 = xf * Rect2(spot - Vector2.ONE * TAG_RADIUS, Vector2.ONE * TAG_RADIUS * 2.0)
+		if not screen_room.encloses(area):
+			continue
+		if covered(area, hud) <= 0.0:
+			return spot
+	return home
+
+static func covered(area: Rect2, taken: Array) -> float:
+	var sum := 0.0
+	for other in taken:
+		sum += area.intersection(other).get_area()
+	return sum
 
 # A plate pushed away from its core draws a line back to the core's ring.
 static func core_link(plate: Rect2, core: Vector2) -> PackedVector2Array:
@@ -503,6 +649,7 @@ static func digit_spot(center: Vector2, xf: Transform2D, taken: Array) -> Vector
 	return center + DIGIT_CORNERS[0] * 40.0
 
 func _draw_marks() -> void:
+	top_marks.clear()
 	Enemy.clear_label_areas(mark_layer)
 	var xf := get_viewport().get_canvas_transform() * get_global_transform() if is_inside_tree() else Transform2D.IDENTITY
 	if not done:
@@ -510,8 +657,20 @@ func _draw_marks() -> void:
 		for id in ["near", "far"]:
 			var at: Vector2 = sockets[id]
 			if is_inside_tree():
-				Enemy.reserve_label_area(xf * Rect2(at - Vector2.ONE * SOCKET_RADIUS, Vector2.ONE * SOCKET_RADIUS * 2.0), mark_layer)
-			mark_layer.draw_string(FONT, at + Vector2(-12, 10), str(SOCKET_TAGS[id]), HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color("fff3d6"))
+				Enemy.reserve_label_area(xf * Rect2(at - Vector2.ONE * socket_half(id), Vector2.ONE * socket_half(id) * 2.0), mark_layer)
+			# R48: the tag sits on a dark disc ringed in the socket's colour; on
+			# the painted sockets a bare 穩 vanished into the pale blue glow and
+			# 強 into the red one.
+			var tone: Color = BRASS if id == "far" else NEAR_TONE
+			var tag := tag_spot(at, xf)
+			if tag.distance_to(at + TAG_CENTER) > TAG_RADIUS:
+				# pulled in from under the HUD or the edge: a tether back to its socket
+				mark_layer.draw_line(tag, at, Color(INK, 0.75), 5.0, true)
+				mark_layer.draw_dashed_line(tag, at, Color(tone, 0.95), 2.0, 8.0, true)
+			mark_layer.draw_circle(tag, TAG_RADIUS, Color(INK, 0.9))
+			mark_layer.draw_arc(tag, TAG_RADIUS, 0.0, TAU, 32, Color(tone, 1.0), 3.0, true)
+			mark_layer.draw_string(FONT, tag - TAG_CENTER + Vector2(-12, 10), str(SOCKET_TAGS[id]), HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color("fff3d6"))
+			_mark(top_marks, "tag_" + id, Rect2(tag - Vector2.ONE * TAG_RADIUS, Vector2.ONE * TAG_RADIUS * 2.0))
 		var from := to_local(core_global())
 		if carried:
 			_timer_ring(mark_layer, from)
@@ -521,6 +680,11 @@ func _draw_marks() -> void:
 		var digit_at := digit_spot(from, xf, taken)
 		if is_inside_tree():
 			Enemy.reserve_label_area(xf * Rect2(digit_at - Vector2(18, 18), Vector2(36, 36)), mark_layer)
+			# R48: the core (on the ground or carried over the captain) holds its
+			# spot too, so the 第N道 marker and other plates step off its ring.
+			var hold := 40.0 if carried else PICK_RADIUS
+			Enemy.reserve_label_area(xf * Rect2(from - Vector2.ONE * hold, Vector2.ONE * hold * 2.0), mark_layer)
+		_mark(top_marks, "digit", Rect2(digit_at - Vector2(18, 18), Vector2(36, 36)))
 		mark_layer.draw_circle(digit_at, 16.0, Color(INK, 0.95))
 		mark_layer.draw_arc(digit_at, 16.0, 0.0, TAU, 28, Color(HAZARD, 1.0), 2.5, true)
 		mark_layer.draw_string(FONT, digit_at + Vector2(-7, 8), str(seconds_left()), HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color("fff3fb"))
@@ -532,6 +696,7 @@ func _draw_marks() -> void:
 		if link.size() == 2:
 			mark_layer.draw_line(link[0], link[1], Color(INK, 0.75), 5.0, true)
 			mark_layer.draw_dashed_line(link[0], link[1], Color(GEAR, 0.95), 2.0, 9.0, true)
+		_mark(top_marks, "plate", placed)
 		_plate(placed, LABEL, GEAR, 18)
 		return
 	if solved:
@@ -548,4 +713,6 @@ func _draw_marks() -> void:
 		return
 	var verdict := verdict_text(solved, socket_used, boss_delayed)
 	var w2 := FONT.get_string_size(verdict, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
-	_plate(_place_plate(Rect2(core_at + Vector2(-w2 * 0.5 - 10, -SOCKET_RADIUS - 52), Vector2(w2 + 20, 30))), verdict, SAFE if solved else HAZARD, 20)
+	var verdict_plate := _place_plate(Rect2(core_at + Vector2(-w2 * 0.5 - 10, -SOCKET_RADIUS - 52), Vector2(w2 + 20, 30)))
+	_mark(top_marks, "verdict", verdict_plate)
+	_plate(verdict_plate, verdict, SAFE if solved else HAZARD, 20)
