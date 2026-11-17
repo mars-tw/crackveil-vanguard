@@ -32,7 +32,7 @@ func _initialize() -> void:
 	_test_catalog_and_words()
 	_test_positions()
 	await _test_live_core()
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.76.0-content-r47", "current project version is 0.76.0-content-r47")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.77.0-content-r48", "current project version is 0.77.0-content-r48")
 	if failures.is_empty():
 		print("R47_REGRESSION status=PASS checks=%d" % checks)
 	else:

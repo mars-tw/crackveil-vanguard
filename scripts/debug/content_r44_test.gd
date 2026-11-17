@@ -79,7 +79,7 @@ func _initialize() -> void:
 	_check(zones.score.position.x - zones.mission.end.x >= 18.0, "the phone top bar ends well before the kill box")
 	var desktop: Dictionary = layout.regions(Vector2(1366, 600), false)
 	_check(desktop.mission.size.x == 1366.0 - 360.0 - 214.0, "the desktop top bar is unchanged")
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.76.0-content-r47", "project version is 0.76.0-content-r47")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.77.0-content-r48", "project version is 0.77.0-content-r48")
 	if failures.is_empty():
 		print("R44_REGRESSION status=PASS checks=%d" % checks)
 	else:

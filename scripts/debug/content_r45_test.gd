@@ -82,7 +82,7 @@ func _place_special_label() -> void:"), "a covered plate drops its old slot and 
 	_check(fork == null or fork.source == null, "a fork whose shooter is gone spawns without a source instead of erroring")
 	if fork != null and fork.has_method("pool_release"):
 		fork.pool_release()
-	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.76.0-content-r47", "current project version is 0.76.0-content-r47")
+	_check(str(ProjectSettings.get_setting("application/config/version")) == "0.77.0-content-r48", "current project version is 0.77.0-content-r48")
 	if failures.is_empty():
 		print("R45_REGRESSION status=PASS checks=%d" % checks)
 	else:
