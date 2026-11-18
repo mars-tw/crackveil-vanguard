@@ -10,10 +10,12 @@ const CAPTAIN := preload("res://resources/heroes/rift_captain.tres")
 const BASE_COUNTS := [12,7,9,10,12,15,15,12,12,16]
 const PHASE_COUNTS := [12,11,16,20,18,19,21,18,24,24]
 const PREFIX := "user://r38_content_fixture_"
+const WATCHDOG_MS := 20000
 
 var failed := false
 var finished := false
-var deadline := 0
+var started_ms := 0
+var phase_started_ms := 0
 var hero: Hero
 var arena: Node2D
 var spawner: Node
@@ -27,7 +29,8 @@ func _ready() -> void:
 		call_deferred("_install")
 		return
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	deadline = Time.get_ticks_msec() + 20000
+	started_ms = Time.get_ticks_msec()
+	phase_started_ms = started_ms
 	call_deferred("_run")
 
 func _install() -> void:
@@ -36,9 +39,23 @@ func _install() -> void:
 	get_tree().root.add_child(runner)
 
 func _process(_delta: float) -> void:
-	if get_meta("persistent", false) and not finished and Time.get_ticks_msec() >= deadline:
-		_check(false, "20s watchdog " + phase)
+	if get_meta("persistent", false) and not finished:
+		_watchdog_expired()
+
+func _watchdog_expired() -> bool:
+	var now_ms := Time.get_ticks_msec()
+	if now_ms - started_ms < WATCHDOG_MS:
+		return false
+	if not finished:
+		finished = true
+		_check(false, "20s watchdog %s total_ms=%d phase_ms=%d" % [phase, now_ms - started_ms, now_ms - phase_started_ms])
 		get_tree().quit(1)
+	return true
+
+func _begin_phase(next_phase: String) -> void:
+	phase = next_phase
+	phase_started_ms = Time.get_ticks_msec()
+	print("R38_PHASE phase=%s total_ms=%d" % [phase, phase_started_ms - started_ms])
 
 func _run() -> void:
 	GameManager.campaign_save_path = PREFIX + "campaign.cfg"
@@ -97,23 +114,34 @@ func _run() -> void:
 	if failed:
 		get_tree().quit(1)
 		return
-	phase = "endless_unlock"
+	_begin_phase("endless_fixture_cleanup")
 	GameManager.game_running = false
 	GameManager.system_pause_owners.clear()
 	get_tree().paused = false
 	arena.queue_free()
 	await get_tree().process_frame
-	_check(GameManager.start_endless_stage("forge"), "final new clear did not unlock real Endless launch")
-	for frame in range(4):
-		await get_tree().process_frame
-	_check(GameManager.run_mode == "endless" and GameManager.selected_stage_id == "forge" and get_tree().current_scene.scene_file_path == "res://scenes/arena/Arena.tscn", "Endless did not enter the real new-stage Arena")
+	if _watchdog_expired():
+		return
+	_begin_phase("endless_launch_request")
+	var tree := get_tree()
+	if not _check(GameManager.start_endless_stage("forge"), "forge Endless launch request rejected"):
+		tree.quit(1)
+		return
+	if _watchdog_expired():
+		return
+	_begin_phase("endless_scene_ready")
+	await tree.scene_changed
+	if _watchdog_expired():
+		return
+	var entered := tree.current_scene
+	_check(is_instance_valid(entered) and entered.scene_file_path == "res://scenes/arena/Arena.tscn" and GameManager.arena == entered and GameManager.run_mode == "endless" and GameManager.selected_stage_id == "forge", "Endless did not enter the real new-stage Arena")
 	finished = true
 	if not failed:
 		print("R38_CONTENT_PASS stages=10 new_regular_species=6 distinct_boss_patterns=10 frame2=true all_real_legendary_rewards=true persisted_clears=10 endless_forge=true isolated_saves=true watchdog=20s")
 	get_tree().quit(1 if failed else 0)
 
 func _test_new_rosters() -> void:
-	phase = "weighted_rosters"
+	_begin_phase("weighted_rosters")
 	var roster_keys: Dictionary = {}
 	GameManager.elapsed_time = 65.0
 	for id in ["dunes","tide","bloom","forge"]:
@@ -139,7 +167,7 @@ func _test_new_rosters() -> void:
 	_check(roster_keys.size() == 4, "four new stages share the same weighted roster")
 
 func _test_new_skills() -> void:
-	phase = "regular_frame2_skills"
+	_begin_phase("regular_frame2_skills")
 	for id in ["coral_colossus","bloom_wisp","tide_siren","clockwork_reaper"]:
 		var creature: Node = EntityFactory.spawn_enemy(id, ENEMIES.get_config(id), Vector2.ZERO)
 		creature.set_physics_process(false)
@@ -186,7 +214,7 @@ func _test_ten_bosses_and_rewards() -> void:
 	for index in range(all_stages.size()):
 		var stage: Dictionary = all_stages[index]
 		var id := str(stage.id)
-		phase = "boss_" + id
+		_begin_phase("boss_" + id)
 		GameManager.select_stage(id)
 		GameManager.run_mode = "campaign"
 		GameManager.boss_killed = false
@@ -228,7 +256,13 @@ func _test_ten_bosses_and_rewards() -> void:
 		plans[JSON.stringify(boss._boss_shot_plan())] = true
 		var impact_frames: Array[int] = []
 		var impact_callback := _capture_impact_frames(boss, impact_frames)
-		var source_fps: float = (boss.animated_sprite as AnimatedSprite2D).sprite_frames.get_animation_speed(&"attack")
+		var sprite: AnimatedSprite2D = boss.animated_sprite
+		var recovery_frames: Array[int] = []
+		var record_recovery := func() -> void:
+			if sprite.animation == &"attack" and sprite.frame >= 3:
+				recovery_frames.append(sprite.frame)
+		sprite.frame_changed.connect(record_recovery)
+		var source_fps: float = sprite.sprite_frames.get_animation_speed(&"attack")
 		_check(is_equal_approx(source_fps,12.0), "boss source FPS was modified instead of preserving authored timing: " + id)
 		_check(boss._start_attack(hero,0.82,&"ring"), "boss did not begin anticipation: " + id)
 		await get_tree().create_timer(0.075,true,false,true).timeout
@@ -236,7 +270,14 @@ func _test_ten_bosses_and_rewards() -> void:
 		await get_tree().create_timer(0.16,true,false,true).timeout
 		_check(int(boss.boss_projectiles_fired)==BASE_COUNTS[index] and int(boss.attack_impact_count)==1,"boss base pattern actual count wrong: " + id)
 		_clear_shots()
-		await get_tree().create_timer(0.36,true,false,true).timeout
+		# Stop waiting once recovery completes. Keep the original upper bound
+		# and the full observation windows on both sides of each impact.
+		var recovery_limit := get_tree().create_timer(0.36, true, false, true)
+		while boss.current_animation_name == &"attack" and recovery_limit.time_left > 0.0:
+			await get_tree().process_frame
+		sprite.frame_changed.disconnect(record_recovery)
+		if not _check(boss.current_animation_name != &"attack" and recovery_frames == [3, 4, 5], "boss did not finish base attack recovery: " + id):
+			return
 		boss._trigger_boss_phase_two()
 		_check(EntityFactory.get_pool_live_count("projectile")==0,"half-HP trigger fired without frame2: " + id)
 		await get_tree().create_timer(0.075,true,false,true).timeout
@@ -251,8 +292,19 @@ func _test_ten_bosses_and_rewards() -> void:
 				EntityFactory.release_enemy(enemy)
 		last_drop.clear()
 		boss.take_damage(float(boss.hp)+100.0,hero.global_position)
-		_check(boss.is_dying and str(boss.current_animation_name)=="death" and last_drop.is_empty(),"boss bypassed real death sequence/drop timing: " + id)
-		await get_tree().create_timer(0.8,true,false,true).timeout
+		_check(boss.is_dying and sprite.animation == &"death" and sprite.frame == 0 and last_drop.is_empty(), "boss bypassed real death sequence/drop timing: " + id)
+		var death_frames: Array[int] = [sprite.frame]
+		var record_death := func() -> void:
+			if boss.current_animation_name == &"death":
+				death_frames.append(sprite.frame)
+		sprite.frame_changed.connect(record_death)
+		var verify_drop_pose := func(_item: Dictionary, _position: Vector2) -> void:
+			_check(boss.death_finalized and death_frames == [0, 1, 2, 3, 4, 5], "boss awarded loot before completing the death poses: " + id)
+		loot.loot_dropped.connect(verify_drop_pose, CONNECT_ONE_SHOT)
+		var drop_limit := get_tree().create_timer(0.8, true, false, true)
+		while last_drop.is_empty() and drop_limit.time_left > 0.0:
+			await get_tree().process_frame
+		sprite.frame_changed.disconnect(record_death)
 		var uid := int(last_drop.get("uid",-1))
 		_check(str(last_drop.get("source",""))=="boss" and int(last_drop.get("rarity",-1))==3 and (loot.claimed_items as Dictionary).has(uid),"real new boss failed guaranteed legendary claim: " + id)
 		_check(GameManager.campaign_clears.has(id) and GameManager.campaign_clears.size()==index+1,"boss clear/unlock was not awarded once: " + id)

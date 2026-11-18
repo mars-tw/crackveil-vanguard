@@ -435,7 +435,9 @@ func _on_start_pressed() -> void:
 		return
 	starting = true
 	_update_selection()
-	GameManager.start_selected_stage()
+	if not GameManager.start_selected_stage():
+		starting = false
+		_update_selection()
 
 
 func button_in_chapter(index: int) -> bool:

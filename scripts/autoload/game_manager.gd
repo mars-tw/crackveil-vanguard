@@ -285,7 +285,20 @@ func select_stage(stage_id: String) -> bool:
 	return true
 
 
-func start_selected_stage(mode: String = "campaign") -> void:
+func start_selected_stage(mode: String = "campaign") -> bool:
+	return _start_stage(selected_stage_id, mode)
+
+
+func _start_stage(stage_id: String, mode: String) -> bool:
+	if STAGE_CATALOG.get_stage(stage_id).is_empty():
+		return false
+	# The new Arena enters the tree at the end of this frame. Commit the
+	# selection only after the scene request succeeds, before Arena._ready().
+	var err := get_tree().change_scene_to_file("res://scenes/arena/Arena.tscn")
+	if err != OK:
+		push_error("Cannot open Arena for %s (%s): %s" % [stage_id, mode, error_string(err)])
+		return false
+	selected_stage_id = stage_id
 	forced_run_seed = 0
 	prepare_starting_build()
 	run_mode = "endless" if mode == "endless" else "campaign"
@@ -295,16 +308,12 @@ func start_selected_stage(mode: String = "campaign") -> void:
 	system_pause_owners.clear()
 	clear_time_scale_owners()
 	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/arena/Arena.tscn")
+	return true
 
 
 func start_endless_stage(stage_id: String = "") -> bool:
 	var target := selected_stage_id if stage_id == "" else stage_id
-	if not campaign_clears.has(target) or not select_stage(target):
-		return false
-	forced_run_seed = 0
-	start_selected_stage("endless")
-	return true
+	return campaign_clears.has(target) and _start_stage(target, "endless")
 
 
 func get_endless_wave() -> int:
@@ -348,9 +357,7 @@ func start_next_stage() -> void:
 	if next_id == "":
 		return_to_world_map()
 		return
-	select_stage(next_id)
-	forced_run_seed = 0
-	start_selected_stage()
+	_start_stage(next_id, "campaign")
 
 
 func return_to_world_map() -> void:
