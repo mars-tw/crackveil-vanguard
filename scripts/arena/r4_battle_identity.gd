@@ -48,9 +48,11 @@ func _draw() -> void:
 				draw_circle(above,10,INK)
 				var crown:=PackedVector2Array([above+Vector2(-8,-3),above+Vector2(-5,5),above+Vector2(5,5),above+Vector2(8,-3),above+Vector2(2,0),above+Vector2(0,-7),above+Vector2(-2,0)])
 				draw_colored_polygon(crown,GOLD)
+			# Opposed gold rails mark the body's sides, even when the crown yields.
 			for side in [-1,1]:
-				_line(at+Vector2(side*19,9),at+Vector2(side*26,9),GOLD)
-				_line(at+Vector2(side*26,9),at+Vector2(side*26,2),GOLD)
+				var rail := PackedVector2Array([at+Vector2(side*19,-25),at+Vector2(side*27,-22),at+Vector2(side*29,-10),at+Vector2(side*26,5),at+Vector2(side*19,9)])
+				draw_polyline(rail, INK, 8.0, true)
+				draw_polyline(rail, GOLD, 4.5, true)
 		else:
 			ally_markers+=1
 			if not head_clear:continue

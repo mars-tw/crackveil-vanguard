@@ -1937,8 +1937,16 @@ func _show_attack_cue(kind: StringName, target: Node2D) -> void:
 		area_radius = biome_radius
 	if area_radius > 0.0:
 		attack_telegraph.position = Vector2.ZERO
-	var cue_kind: StringName = &"ring" if kind == &"elite" or (kind == &"biome" and biome_skill == "coral_slam") else &"ranged" if kind == &"biome" else kind
-	attack_telegraph.show_cue(cue_kind, dash_direction if kind == &"dash" else pending_attack_direction, radius, is_boss or is_elite, body_color, area_radius)
+	if (kind == &"elite" and special_skill == "summoner") or (kind == &"biome" and biome_skill == "bloom_support"):
+		_hide_attack_cue()
+		return
+	var cue_kind := kind
+	if kind == &"elite":
+		cue_kind = &"ranged" if special_skill == "storm_charge" else &"ring"
+	elif kind == &"biome":
+		cue_kind = &"ring" if biome_skill == "coral_slam" else &"ranged"
+	var high_threat := is_boss or is_elite or kind in [&"dash", &"ring", &"biome"] or tactical_min_cycles > 0
+	attack_telegraph.show_cue(cue_kind, dash_direction if kind == &"dash" else pending_attack_direction, radius, high_threat, body_color, area_radius)
 	attack_cue.closed = false
 	attack_cue.width = 2.2
 	attack_cue.default_color = Color(1.0, 0.48, 0.21, 0.8)

@@ -17,6 +17,7 @@ var core_flash: Sprite2D = null
 var smoke_sprite: Sprite2D = null
 var debris_particles: CPUParticles2D = null
 var mobile_lod_active: bool = false
+var friendly_burst := false
 
 
 func _ready() -> void:
@@ -35,6 +36,7 @@ func pool_on_release() -> void:
 	set_process(false)
 	stats = {}
 	source = null
+	friendly_burst = false
 	age = 0.0
 	mobile_lod_active = false
 	rotation = 0.0
@@ -61,6 +63,7 @@ func setup(world_position: Vector2, effect_stats: Dictionary, effect_source: Nod
 	global_position = world_position
 	stats = effect_stats
 	source = effect_source
+	friendly_burst = is_instance_valid(source) and source.is_in_group("heroes")
 	age = 0.0
 	# The burst lives for less than half a second. Resolve its cosmetic tier once
 	# per pool generation, avoiding a UA JSON/eval roundtrip on every draw frame.
@@ -184,7 +187,7 @@ func _update_sprite_state() -> void:
 		SPRITE_LOADER.fit_sprite(sprite, texture, target_size, float(stats.get("sprite_scale", 1.0)))
 	var color: Color = stats.get("color", Color(1.0, 0.6, 0.25))
 	var burst_alpha := 1.0 - smoothstep(0.28, 1.0, t)
-	sprite.modulate = Color(1.0, 1.0, 1.0, burst_alpha)
+	sprite.modulate = Color(1.0, 1.0, 1.0, burst_alpha * (0.64 if friendly_burst else 1.0))
 	sprite.rotation = t * 0.32
 	if shockwave_sprite != null and shockwave_sprite.texture != null:
 		var ring_t: float = clamp(t / 0.82, 0.0, 1.0)
@@ -193,11 +196,11 @@ func _update_sprite_state() -> void:
 		shockwave_sprite.modulate = Color(1.0, 1.0, 1.0, (1.0 - pow(ring_t, 1.6)) * 0.85)
 	if glow != null and glow.visible:
 		ART_RESOURCES.fit_sprite(glow, ART_RESOURCES.get_radial_glow(), radius * (3.15 + t * 0.7))
-		glow.modulate = Color(color.r, color.g, color.b, (1.0 - t) * 0.5)
+		glow.modulate = Color(color.r, color.g, color.b, (1.0 - t) * (0.22 if friendly_burst else 0.5))
 	if core_flash != null and core_flash.visible:
 		var flash_t: float = clamp(t / 0.24, 0.0, 1.0)
 		ART_RESOURCES.fit_sprite(core_flash, ART_RESOURCES.get_radial_glow(), radius * lerpf(1.15, 2.4, flash_t))
-		core_flash.modulate = Color(1.0, 0.97, 0.82, (1.0 - flash_t) * 0.96)
+		core_flash.modulate = Color(1.0, 0.97, 0.82, (1.0 - flash_t) * (0.36 if friendly_burst else 0.96))
 	if smoke_sprite != null and smoke_sprite.visible and smoke_sprite.texture != null:
 		var smoke_start: float = lifetime * 0.18
 		var smoke_t: float = clamp((age - smoke_start) / maxf(0.001, _visual_lifetime() - smoke_start), 0.0, 1.0)
