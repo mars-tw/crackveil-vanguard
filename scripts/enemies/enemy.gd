@@ -932,6 +932,9 @@ func get_biome_debug_state() -> Dictionary:
 
 func _apply_special_elite_impact(target: Node2D) -> void:
 	special_casts += 1
+	# Living elites follow the active segment too. Already-cast hazards finish normally.
+	if GameManager.run_mode == "endless":
+		stage_skill = GameManager.endless_rule()
 	# R29: the garden roots the ground under the captain on every elite cast.
 	if stage_skill == "vine_snare" and is_instance_valid(target) and is_inside_tree():
 		VINE_SNARE.spawn(get_parent(), target.global_position)

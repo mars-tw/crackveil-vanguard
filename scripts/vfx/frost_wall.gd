@@ -132,6 +132,7 @@ func _finish() -> void:
 	last_verdict_time = GameManager.elapsed_time
 	if hits == 0:
 		GameManager.frost_walls_clean += 1
+		GameManager.exclude_campaign_hazard(self, &"frost_walls_clean")
 
 # R36: the wall reads as ice in the scene, not a HUD strip: a frost haze
 # streams ahead of it in its travel direction, the wall has a lit top face and
