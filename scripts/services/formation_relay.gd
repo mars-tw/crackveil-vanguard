@@ -22,6 +22,7 @@ var settled := 0
 var completed := false
 var reward_saved := false
 var retry_timer := 0.0
+var lesson_until := -1.0
 var history: Array[Dictionary] = []
 var pressure: Node2D
 var wrong_timer := 0.0
@@ -55,6 +56,7 @@ const MEMBER_CALLOUT_SECONDS := 2.2
 const SEAL_FLASH_SECONDS := 2.6
 var label_layer: CanvasLayer
 var marker_label: Label
+var verdict_bounds := Rect2()
 var text_layer: Node2D
 # R32: absolute, above the squad floor halos (95) and pace tags (97), below
 # the hazard status marks (120), so no halo covers a verdict plate.
@@ -231,6 +233,25 @@ static func marker_hits_text(pixel_rect: Rect2, text_areas: Array[Rect2]) -> boo
 # after the held formation's name, while a wave the squad answers is running.
 # Empty otherwise. (A second-line version did not fit the phone layout even at
 # the 10 px floor, and ▶ is missing from the game font.)
+func first_seal_lesson() -> String:
+	if not is_open() or completed or not is_instance_valid(pressure) or not pressure.started:
+		return ""
+	if not MetaProgress.seal_lesson_seen:
+		lesson_until = GameManager.elapsed_time + 5.0
+		MetaProgress.seal_lesson_seen = true
+		MetaProgress.save_progress()
+	if GameManager.elapsed_time >= lesson_until:
+		return ""
+	return lesson_text(pressure.kind, GameManager.active_starting_node)
+
+static func lesson_text(kind: String, build: String) -> String:
+	var catalog: GDScript = load("res://scripts/services/starting_build_catalog.gd")
+	var fast: String = catalog.PRIMARY[kind]
+	var slow: String = catalog.SECONDARY[kind]
+	return "%s快封補%d，%s慢封補%d，錯陣反噬歸零" % [
+		NAMES[ORDER.find(fast)], catalog.applied_seal_heal(build, kind, fast),
+		NAMES[ORDER.find(slow)], catalog.applied_seal_heal(build, kind, slow)]
+
 func compare_line() -> String:
 	if completed or not is_instance_valid(pressure) or not pressure.started or not is_instance_valid(GameManager.squad_manager):
 		return ""
@@ -246,8 +267,10 @@ static func compare_text(kind: String) -> String:
 	for id in [str(catalog.PRIMARY.get(kind, "")), str(catalog.SECONDARY.get(kind, ""))]:
 		var slow: bool = catalog.is_secondary(kind, id)
 		var seconds: int = catalog.seal_seconds(GameManager.active_starting_node if is_instance_valid(GameManager) else "", kind, id)
-		var heal := int(catalog.seal_heal(kind, id))
-		parts.append("%s%s%d秒整補%d" % [NAMES[ORDER.find(id)], "慢" if slow else "快", seconds, heal])
+		var build := GameManager.active_starting_node if is_instance_valid(GameManager) else ""
+		var heal: int = catalog.applied_seal_heal(build, kind, id)
+		var source: String = catalog.seal_time_source(build, kind, id)
+		parts.append("%s%s%d秒整補%d%s" % [NAMES[ORDER.find(id)], "慢" if slow else "快", seconds, heal, source])
 	return "／".join(parts)
 
 func _update_label() -> void:
@@ -263,6 +286,8 @@ func _update_label() -> void:
 	if is_instance_valid(equipment_details) and equipment_details.is_visible_in_tree():
 		readout = true
 	marker_label.visible = GameManager.game_running and GameManager.run_mode=="campaign" and not completed and not get_tree().paused and not choosing and not readout
+	if BattleLayout.compact_battle(get_viewport_rect().size):
+		marker_label.visible = false
 	if not marker_label.visible:
 		return
 	# Reassert the CSS font after the HUD's general accessibility pass.
@@ -427,8 +452,12 @@ static func switch_card_for(kind: String, formation: String) -> String:
 		effect = "移速 +8%・可封合"
 	# R15: the secondary answer states its trade: slower seal, longer counter.
 	var catalog: GDScript = load("res://scripts/services/starting_build_catalog.gd")
+	var build: String = GameManager.active_starting_node if is_instance_valid(GameManager) else ""
 	if catalog.is_secondary(kind, formation):
-		effect = effect.replace("可封合", "慢封 %d 秒・反擊 %d 秒" % [catalog.seal_seconds("", kind, formation), int(catalog.SECONDARY_COUNTER_SECONDS)])
+		var source: String = catalog.seal_time_source(build, kind, formation)
+		var seconds: int = catalog.seal_seconds(build, kind, formation)
+		var counter: int = int(catalog.counter_seconds(build, kind, formation))
+		effect = effect.replace("可封合", "慢封 %d 秒%s・反擊 %d 秒" % [seconds, source, counter])
 	elif catalog.PRIMARY.get(kind, "") == formation:
 		effect = effect.replace("可封合", "快封 %d 秒" % catalog.seal_seconds("", kind, formation))
 	return "%s → %s：%s" % [NAMES[maxi(0, ORDER.find(formation))], pressure_name, effect]
@@ -615,8 +644,37 @@ func _verdict_off_hud(local_at: Vector2, box_width: float) -> Vector2:
 	var box := xf * Rect2(local_at + Vector2(140.0 - box_width / 2.0, -22.0), Vector2(box_width, 54.0))
 	var blockers := Enemy.hud_areas()
 	blockers.append(seal_ring_area(xf * Rect2(anchor - Vector2.ONE * CAPTAIN_RADIUS, Vector2.ONE * CAPTAIN_RADIUS * 2.0)))
+	var view := get_viewport().get_visible_rect().size
+	for core in get_tree().get_nodes_in_group("forge_cores"):
+		for id in ["near", "far"]:
+			if core.done and (not core.solved or id != core.socket_used):
+				continue
+			var half := Vector2.ONE * float(core.socket_half(id))
+			var at: Vector2 = core.socket_global(id)
+			blockers.append(get_viewport().get_canvas_transform() * Rect2(at - half, half * 2.0))
 	var shift := slide_off_hud(box, blockers, get_viewport().get_visible_rect().size.x)
-	return local_at + Vector2(shift / maxf(0.001, xf.x.length()), 0.0)
+	var candidate := Rect2(box.position + Vector2(shift, 0), box.size)
+	if Rect2(Vector2.ZERO, view).encloses(candidate) and not covers_hud(candidate, blockers):
+		return local_at + Vector2(shift / maxf(0.001, xf.x.length()), 0.0)
+	# A row trapped between two sockets may have no horizontal solution.
+	# Try the edges of the obstacles to find the nearest fully visible slot.
+	var xs := [box.position.x, 0.0, view.x - box.size.x]
+	var ys := [box.position.y, 0.0, view.y - box.size.y]
+	for rect in blockers:
+		xs.append(rect.position.x - box.size.x - 7.0)
+		xs.append(rect.end.x + 7.0)
+		ys.append(rect.position.y - box.size.y - 7.0)
+		ys.append(rect.end.y + 7.0)
+	var distance := INF
+	var best := Vector2.INF
+	for x in xs:
+		for y in ys:
+			candidate.position = Vector2(x, y)
+			var d := box.position.distance_squared_to(candidate.position)
+			if d < distance and Rect2(Vector2.ZERO, view).encloses(candidate) and not covers_hud(candidate, blockers):
+				best = local_at + xf.affine_inverse().basis_xform(candidate.position - box.position)
+				distance = d
+	return best
 
 # slide_off_hud keeps 6 px from every blocker; the ring is shrunk first so a
 # verdict resting just above or below its seal stays where it is.
@@ -823,6 +881,8 @@ func _draw_offscreen_pointer() -> void:
 	pointer_layout = (get_viewport().get_canvas_transform() * get_global_transform() * point) / (size.x / maxf(1.0, layout_size.x))
 	_draw_badge(point, required_formation(), 28.0)
 	draw_colored_polygon(PackedVector2Array([tip + direction * 14, tip + direction.orthogonal() * 9, tip - direction.orthogonal() * 9]), Color("ffdcac"))
+	if BattleLayout.compact_battle(size):
+		return
 	var label := "第 %d 道" % mini(step + 1, 3)
 	# R12: the off-screen pointer (badge, arrow, ordinal) keeps elite plates off
 	# it; owned by this node, whose _draw clears its areas first.
@@ -834,6 +894,7 @@ func _draw_offscreen_pointer() -> void:
 # Runs on text_layer's draw signal: drawn after the seal and pressure children.
 func _draw_text_layer() -> void:
 	Enemy.clear_label_areas(text_layer)
+	verdict_bounds = Rect2()
 	if not is_instance_valid(GameManager.player):
 		return
 	if not completed:
@@ -844,6 +905,8 @@ func _draw_text_layer() -> void:
 
 func _draw_switch_card() -> void:
 	if switch_card_time >= SWITCH_CARD_SECONDS or switch_card_text == "" or not is_instance_valid(GameManager.player):
+		return
+	if BattleLayout.compact_battle(get_viewport_rect().size):
 		return
 	var fade := clampf((SWITCH_CARD_SECONDS - switch_card_time) / 0.4, 0.0, 1.0)
 	var lift := 12.0 * minf(1.0, switch_card_time / 0.3)
@@ -870,12 +933,20 @@ func _draw_verdict() -> void:
 		var text_width: float = FONT.get_string_size(verdict,HORIZONTAL_ALIGNMENT_LEFT,-1,20).x
 		var consequence := consequence_text(pressure.last_result)
 		var sub_width: float = FONT.get_string_size(consequence,HORIZONTAL_ALIGNMENT_LEFT,-1,16).x
-		at = _verdict_off_hud(at, maxf(text_width, sub_width) + 20.0)
-		_reserve_for_plates(Rect2(at + Vector2(0, -24), Vector2(280, 58)))
+		var compact := BattleLayout.compact_battle(get_viewport_rect().size)
+		at = _verdict_off_hud(at, (text_width if compact else maxf(text_width, sub_width)) + 20.0)
+		if not at.is_finite():
+			return
+		var width := (text_width if compact else maxf(text_width, sub_width)) + 20.0
+		var box := Rect2(at + Vector2(140.0 - width * 0.5, -22), Vector2(width, 30.0 if compact else 54.0))
+		verdict_bounds = get_viewport().get_canvas_transform() * get_global_transform() * box
+		_reserve_for_plates(box)
 		text_layer.draw_rect(Rect2(at+Vector2(140-text_width/2-10,-22),Vector2(text_width+20,30)),Color(0.03,0.05,0.09,0.84*fade),true)
 		text_layer.draw_string_outline(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,7,Color(0.03,0.05,0.09,0.9*fade))
 		text_layer.draw_string(FONT,at,verdict,HORIZONTAL_ALIGNMENT_CENTER,280,20,Color(verdict_color(pressure.last_result),fade))
 		# Second line: what this verdict means for the seal under the same rule.
+		if compact:
+			return
 		var sub_at := at + Vector2(0, 26)
 		text_layer.draw_rect(Rect2(sub_at+Vector2(140-sub_width/2-8,-17),Vector2(sub_width+16,23)),Color(0.03,0.05,0.09,0.66*fade),true)
 		text_layer.draw_string_outline(FONT,sub_at,consequence,HORIZONTAL_ALIGNMENT_CENTER,280,16,6,Color(0.03,0.05,0.09,0.9*fade))
@@ -928,6 +999,8 @@ func _draw_seal_flash() -> void:
 	text_layer.draw_string(FONT,at,seal_flash_text,HORIZONTAL_ALIGNMENT_CENTER,460,22,Color(gold,fade))
 	# R35: the member who held this seal longest, named on a green line that
 	# hangs under the banner, so nothing else can cover it.
+	if BattleLayout.compact_battle(get_viewport_rect().size):
+		return
 	if member_callout != "" and member_callout_time < SEAL_FLASH_SECONDS:
 		var w_c := FONT.get_string_size(member_callout, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
 		var box_c := Rect2(at + Vector2(230 - w_c / 2 - 10, 13), Vector2(w_c + 20, 28))

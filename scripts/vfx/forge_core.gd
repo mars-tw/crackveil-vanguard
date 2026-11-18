@@ -668,6 +668,14 @@ func _draw_marks() -> void:
 				# pulled in from under the HUD or the edge: a tether back to its socket
 				mark_layer.draw_line(tag, at, Color(INK, 0.75), 5.0, true)
 				mark_layer.draw_dashed_line(tag, at, Color(tone, 0.95), 2.0, 8.0, true)
+			if BattleLayout.compact_battle(get_viewport_rect().size):
+				# The top bar names near/far; one or two notches mark the sockets.
+				var marks := 2 if id == "far" else 1
+				for index in marks:
+					var end := tag + Vector2((index - (marks - 1) * 0.5) * 11.0, -7.0)
+					mark_layer.draw_line(end, end + Vector2(0, 14), INK, 8.0)
+					mark_layer.draw_line(end, end + Vector2(0, 14), tone, 4.0)
+				continue
 			mark_layer.draw_circle(tag, TAG_RADIUS, Color(INK, 0.9))
 			mark_layer.draw_arc(tag, TAG_RADIUS, 0.0, TAU, 32, Color(tone, 1.0), 3.0, true)
 			mark_layer.draw_string(FONT, tag - TAG_CENTER + Vector2(-12, 10), str(SOCKET_TAGS[id]), HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color("fff3d6"))
@@ -676,6 +684,9 @@ func _draw_marks() -> void:
 		if carried:
 			_timer_ring(mark_layer, from)
 			_core(mark_layer, from, 1.0, age * 2.2)
+		if BattleLayout.compact_battle(get_viewport_rect().size):
+			# The ring is the world timer; the HUD carries the numeric countdown.
+			return
 		var taken := Enemy.active_label_areas()
 		taken.append_array(Enemy.hud_areas())
 		var digit_at := digit_spot(from, xf, taken)

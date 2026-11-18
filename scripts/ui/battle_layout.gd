@@ -31,6 +31,10 @@ static func regions(view: Vector2, phone: bool) -> Dictionary:
 		"minimap": Rect2(view.x - 80, top + 70, 68, 88)
 	}
 
+static func compact_battle(view: Vector2) -> bool:
+	var layout := MobileTuning.ui_layout_size(view)
+	return layout.x > layout.y and MobileTuning.use_mobile_ui(layout)
+
 static func place(control: Control, rect: Rect2) -> void:
 	# Reset all anchors before assigning coordinates; portrait score anchors
 	# previously survived into the compact layout and covered the HP number.

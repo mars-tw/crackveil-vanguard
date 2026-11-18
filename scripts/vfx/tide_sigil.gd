@@ -301,6 +301,8 @@ func _draw_marks() -> void:
 		var left := clampf(1.0 - age / WARN_SECONDS, 0.0, 1.0)
 		mark_layer.draw_arc(center, 50.0, -PI * 0.5, -PI * 0.5 + TAU * left, 48, Color("0d1426", 0.9), 7.0, true)
 		mark_layer.draw_arc(center, 50.0, -PI * 0.5, -PI * 0.5 + TAU * left, 48, Color(WATER, 1.0), 3.5, true)
+		if BattleLayout.compact_battle(get_viewport_rect().size):
+			return
 		var digit := str(seconds_left())
 		var dot := center + Vector2(40, -40)
 		mark_layer.draw_circle(dot, 17.0, Color("0d1426", 0.95))

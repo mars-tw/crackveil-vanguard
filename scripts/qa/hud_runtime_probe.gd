@@ -55,6 +55,20 @@ static func publish(hud: Node, stats: Dictionary) -> void:
 			if enemy.get("is_active") == true and str(enemy.get("special_elite_id")) != "":
 				specials.append(enemy.get_special_elite_debug_state())
 		payload["special_elites"] = specials
+		var layout := {}
+		var scale_factor := hud.get_viewport().get_visible_rect().size.x / maxf(1.0, MobileTuning.ui_layout_size(hud.get_viewport().get_visible_rect().size).x)
+		for enemy in hud.get_tree().get_nodes_in_group("enemies"):
+			if enemy is Enemy and is_instance_valid(enemy.special_label) and enemy.special_label.is_visible_in_tree():
+				var plate: Control = enemy.special_label
+				layout["elite_%d" % enemy.get_instance_id()] = _layout_box(plate.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, plate.size), scale_factor)
+		if is_instance_valid(GameManager.tactical_director) and is_instance_valid(GameManager.tactical_director.relay):
+			var relay: Node = GameManager.tactical_director.relay
+			if relay.verdict_bounds.has_area():
+				layout["seal_verdict"] = _layout_box(relay.verdict_bounds, scale_factor)
+		payload["battle_text_rects"] = layout
+		payload["forge_layout"] = hud._forge_marks()
+		payload["hud_areas"] = hud._hud_area_rows()
+		payload["mission_text"] = hud.tactical_hint.text
 		var presentation := GameManager.arena.get_node_or_null("CombatPresentation")
 		if presentation != null:
 			payload["presentation"] = presentation.get_debug_state()
@@ -63,3 +77,6 @@ static func publish(hud: Node, stats: Dictionary) -> void:
 				boss_states.append(enemy.get_boss_debug_state())
 		payload["bosses"] = boss_states
 	JavaScriptBridge.eval("window.__cvR32Runtime = %s" % JSON.stringify(payload), true)
+
+static func _layout_box(rect: Rect2, units: float) -> Array:
+	return [rect.position.x / units, rect.position.y / units, rect.size.x / units, rect.size.y / units]

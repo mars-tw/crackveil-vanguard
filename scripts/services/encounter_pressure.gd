@@ -241,19 +241,21 @@ const DETAIL_SIZE := 19
 static func pace_detail(kind_value: String, id: String) -> String:
 	var catalog: GDScript = load("res://scripts/services/starting_build_catalog.gd")
 	var node: String = str(GameManager.active_starting_node) if is_instance_valid(GameManager) else ""
-	return "%d秒 補%d" % [int(catalog.seal_seconds(node, kind_value, id)), int(catalog.seal_heal(kind_value, id))]
+	return "%d秒 補%d" % [int(catalog.seal_seconds(node, kind_value, id)), catalog.applied_seal_heal(node, kind_value, id)]
 func _draw_pace_tags() -> void:
 	for row in pace_tags:
 		var tag: Rect2 = row[0]
 		var fast: bool = row[1] == "快"
-		var tint := Color("ffd27a") if fast else Color("7fe3ff")
+		var tint := (Color("ffd27a") if fast else Color("7fe3ff")) * Color(row[4])
 		tag_layer.draw_rect(tag, Color("08121f", 0.92), true)
 		tag_layer.draw_rect(tag, tint, false, 2.0, true)
-		tag_layer.draw_string(FONT, tag.position + Vector2(0, 22), str(row[2]) + str(row[1]), HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 22, tint)
+		var title := str(row[2]) + str(row[1])
+		var source := str(row[5])
+		tag_layer.draw_string(FONT, tag.position + Vector2(0, 22), title + source, HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 13 if source != "" else 22, tint)
 		# R39: the seal seconds and heal under the name (moved off the top bar).
 		if row.size() > 3:
 			tag_layer.draw_string_outline(FONT, tag.position + Vector2(0, 44), str(row[3]), HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, DETAIL_SIZE, 4, Color("08121f", 0.95))
-			tag_layer.draw_string(FONT, tag.position + Vector2(0, 44), str(row[3]), HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, DETAIL_SIZE, Color("f4faff"))
+			tag_layer.draw_string(FONT, tag.position + Vector2(0, 44), str(row[3]), HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, DETAIL_SIZE, Color("f4faff") * Color(row[4]))
 
 # R40: one tag per badge; `side` is -0.5 / +0.5 for the left / right badge.
 static func pace_tag_rect(badge: Rect2, side: float, below: bool) -> Rect2:
@@ -343,13 +345,21 @@ func _draw_answer(center: Vector2) -> void:
 	# Original vector badge of the answering formation (two side by side when
 	# the node accepts an alternative); the red ring pulses while wrong.
 	var count := accepted.size()
+	# The phone shows the trade on the top bar. Only the cue for the held
+	# formation stays on the ground; a wrong formation points to the primary.
+	if BattleLayout.compact_battle(get_viewport_rect().size):
+		var answer := primary if wrong else current
+		var size := Vector2.ONE * BADGE_SIZE * 0.65
+		draw_texture_rect(BADGES[answer], Rect2(center - size * 0.5, size), false)
+		return
 	# R40: the tags go under the badges when a HUD notice or another plate
 	# already holds the space above them.
 	var tags_below := count > 1 and _tags_blocked_above(center, count)
 	for i in range(count):
 		var offset := Vector2((i - (count - 1) * 0.5) * (BADGE_SIZE + 6.0), 0)
 		var rect := Rect2(center + offset - Vector2.ONE * BADGE_SIZE * 0.5, Vector2.ONE * BADGE_SIZE)
-		draw_texture_rect(BADGES[accepted[i]], rect, false)
+		var ink := Color.WHITE if accepted[i] == current or (wrong and accepted[i] == primary) else Color(0.62, 0.62, 0.62)
+		draw_texture_rect(BADGES[accepted[i]], rect, false, ink)
 		# R16: each badge says whether it is the fast or the slow answer.
 		if count > 1:
 			var pace := "快" if i == 0 and accepted[i] == primary else "慢"
@@ -358,7 +368,12 @@ func _draw_answer(center: Vector2) -> void:
 			# without knowing the icon.
 			var tag := pace_tag_rect(rect, i - (count - 1) * 0.5, tags_below)
 			# R17: drawn on a layer above effects, name plates and the crown.
-			pace_tags.append([tag, pace, str(FORMATION_NAMES[accepted[i]]).substr(0, 1), pace_detail(kind, accepted[i])])
+			# A switch card owns the seconds while it is on screen.
+			if get_parent().get("switch_card_time") >= get_parent().SWITCH_CARD_SECONDS:
+				pace_tags.append([tag, pace, str(FORMATION_NAMES[accepted[i]]).substr(0, 1), pace_detail(kind, accepted[i])])
+				var row: Array = pace_tags.back()
+				row.append(ink)
+				row.append(GameManager.STARTING_BUILD.seal_time_source(GameManager.active_starting_node, kind, accepted[i]))
 		if wrong:
 			var pulse := 0.6 + 0.4 * absf(sin(clock * 6.0))
 			draw_texture_rect(WRONG_RING, rect.grow(6.0), false, Color(1, 1, 1, pulse))

@@ -303,6 +303,8 @@ func _draw_aftermath() -> void:
 func _draw_marks() -> void:
 	Enemy.clear_label_areas(mark_layer)
 	if not done:
+		if BattleLayout.compact_battle(get_viewport_rect().size):
+			return
 		var digit_at := Vector2(CUT_RADIUS * 0.72, -CUT_RADIUS * 0.72)
 		# R45: the seconds dot takes the first corner of the ring that no answer
 		# badge, plate or HUD box holds (it sat on 「散慢」 at top right).

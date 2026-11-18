@@ -60,6 +60,7 @@ var lifetime_shards: int = 0
 var upgrades: Dictionary = {}
 var tactical_medals: Dictionary = {}
 var formation_seals: Dictionary = {}
+var seal_lesson_seen := false
 var expedition_progress: Dictionary = {}
 var expedition_claimed: Dictionary = {}
 var save_path: String = SAVE_PATH
@@ -96,6 +97,7 @@ func load_progress() -> void:
 			save_progress()
 			_queue_load_failure_toast()
 		return
+	seal_lesson_seen = bool(config.get_value("tutorial", "seal_trade", false))
 	starting_ready=recovered
 	shards = max(0, int(config.get_value("echo", "shards", 0)))
 	lifetime_shards = max(0, int(config.get_value("echo", "lifetime_shards", 0)))
@@ -136,6 +138,7 @@ func save_progress() -> bool:
 	var config := ConfigFile.new()
 	# Keep unknown future/legacy sections rather than erasing them on migration.
 	if FileAccess.file_exists(save_path): config.load(save_path)
+	config.set_value("tutorial", "seal_trade", seal_lesson_seen)
 	config.set_value("starting","schema",1)
 	config.set_value("starting","owned",starting_owned)
 	config.set_value("starting","equipped",starting_equipped)
@@ -426,6 +429,7 @@ func _reset_runtime_defaults() -> void:
 	upgrades.clear()
 	tactical_medals.clear()
 	formation_seals.clear()
+	seal_lesson_seen = false
 	expedition_progress.clear()
 	expedition_claimed.clear()
 	starting_owned.clear()

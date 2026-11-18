@@ -226,6 +226,9 @@ jobs:
           CV_QA_PROFILE=forge_core "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/forge_core_integration_test.gd
           CV_QA_PROFILE=content_r48 "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r48_test.gd
           CV_QA_PROFILE=forge_core_r48 "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/forge_core_r48_integration_test.gd
+          CV_QA_PROFILE=content_r49 "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r49_test.gd
+          CV_QA_PROFILE=combat_readability_r49 "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/combat_readability_r49_test.gd
+          CV_QA_PROFILE=endless_rotation_r49 "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/endless_rotation_r49_test.gd
           "${GODOT_BIN}" --headless --fixed-fps 60 --path . res://scenes/debug/R31EndgameGate.tscn -- --qa-endgame=r31
           node tools/test_r32_loading_recovery.mjs
           node tools/test_r36_webgl_state_cache.cjs
