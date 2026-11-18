@@ -179,9 +179,15 @@ func _battle_event_chains() -> void:
 		relay.pressure.configure(relay.anchor,i)
 		relay.pressure.begin()
 		hud._process(0)
-		check(hud.has_urgent_toast() and hud.toast_panel.visible,"real pressure warning swallowed")
+		var attack: String = relay.pressure.NAMES[relay.pressure.kind]
+		var prefix := attack + "｜預警"
+		var banner: bool = hud.toast_panel.is_visible_in_tree() and hud.toast_label.text.begins_with(prefix)
+		var bar: bool = hud.tactical_hint.is_visible_in_tree() and (hud.tactical_hint.text.contains(prefix) or hud.tactical_hint.text.contains(relay.pressure.status_text()))
+		check(hud.has_urgent_toast() and (banner or bar), "real warning missing for " + attack)
+		check(journal.entries.any(func(entry): return entry.kind == "battle" and entry.urgent and entry.count == 1 and str(entry.text).begins_with(prefix)), "warning journal entry missing or duplicated for " + attack)
 		arena.get_node("EncounterLandmarks")._process(0)
 		check(arena.get_node("EncounterLandmarks").composition==["front","pincer","artillery"][i],"actual encounter has wrong landmark composition")
+		hud._process(1.51)
 	for enemy in get_tree().get_nodes_in_group("enemies"):enemy.set_physics_process(false)
 	for member in squad.get_members():member.set_physics_process(false)
 	squad.set_process(false)

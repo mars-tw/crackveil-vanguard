@@ -2140,6 +2140,8 @@ func _on_pause_changed(is_paused: bool) -> void:
 	if is_instance_valid(GameManager.tactical_director) and is_instance_valid(GameManager.tactical_director.relay.marker_label):
 		if is_paused:
 			GameManager.tactical_director.relay.marker_label.hide()
+			if is_instance_valid(tactical_hint) and BATTLE_LAYOUT.compact_battle(get_viewport().get_visible_rect().size):
+				tactical_hint.hide()
 		else:
 			_refresh_objective_marker()
 	if get_tree().paused or is_paused:
@@ -2426,6 +2428,11 @@ func _open_formation_picker() -> void:
 func _refresh_objective_marker() -> void:
 	if is_instance_valid(GameManager.tactical_director) and is_instance_valid(GameManager.tactical_director.relay):
 		GameManager.tactical_director.relay._update_label()
+		if is_instance_valid(tactical_hint) and BATTLE_LAYOUT.compact_battle(get_viewport().get_visible_rect().size):
+			if get_tree().paused or (is_instance_valid(formation_picker) and formation_picker.visible):
+				tactical_hint.hide()
+			elif not tactical_hint.visible:
+				_update_tactical_hint()
 
 
 func _close_formation_picker() -> void:
@@ -2451,6 +2458,10 @@ func _update_tactical_hint() -> void:
 	if not tactical_hint.visible:
 		return
 	var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
+	var compact := BATTLE_LAYOUT.compact_battle(view)
+	if compact and is_instance_valid(formation_picker) and formation_picker.visible:
+		tactical_hint.hide()
+		return
 	var squad: Node = GameManager.squad_manager
 	var relay: Node = GameManager.tactical_director.relay
 	var formation: String = squad.get_formation_definition().short if is_instance_valid(squad) else "楔形"
@@ -2481,7 +2492,7 @@ func _update_tactical_hint() -> void:
 	if GameManager.run_mode == "campaign":
 		var stage_instruction := _tide_or("")
 		var seal_notice := toast_current_text.contains("｜預警・") and toast_current_text.contains("快封")
-		var compact := BATTLE_LAYOUT.compact_battle(view)
+		var progress_line := 0
 		if stage_instruction != "":
 			# The time-limited stage action wins over the seal formations. Keep the
 			# ordinary warning in the journal and let its display timer expire.
@@ -2493,11 +2504,19 @@ func _update_tactical_hint() -> void:
 			if lesson != "":
 				seal_notice_in_bar = seal_notice
 				tactical_hint.text = "%s\n%s" % [lesson, relay.pressure.status_text()]
+				progress_line = 1
 			elif compact:
 				var comparison: String = relay.compare_line()
 				if comparison != "" and (not has_urgent_toast() or seal_notice):
 					seal_notice_in_bar = seal_notice
-					tactical_hint.text = "%s｜封隙 %d/3\n%s" % [formation, relay.step, comparison]
+					var heading: String = relay.pressure.status_text() if relay.pressure.phase == "warning" else "%s｜封隙 %d/3" % [formation, relay.step]
+					tactical_hint.text = "%s\n%s" % [heading, comparison]
+		# The compact HUD replaces the world marker. Keep its seal number and
+		# settled/required count alongside the current task, clear of the field.
+		if compact and is_instance_valid(relay) and not relay.completed and (not has_urgent_toast() or seal_notice):
+			var lines := tactical_hint.text.split("\n")
+			lines[progress_line] += "｜" + str(relay.marker_text())
+			tactical_hint.text = "\n".join(lines)
 	var mission_rect: Rect2 = BATTLE_LAYOUT.regions(view, MOBILE_TUNING.use_mobile_ui(view)).mission
 	BATTLE_LAYOUT.place(tactical_hint, mission_rect)
 	# R16: long seal lines shrink to the mission box instead of running under

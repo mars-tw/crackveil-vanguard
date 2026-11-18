@@ -96,9 +96,12 @@ jobs:
             local name="$1"; shift
             local log="$RUNNER_TEMP/r49-evidence/$name.log"
             echo "::group::$name"
-            timeout 5m "$@" 2>&1 | tee "$log"
-            if grep -q '^SCRIPT ERROR:' "$log"; then return 1; fi
-            printf '%s\n' "$name" >> "$RUNNER_TEMP/r49-evidence/remaining-passed.txt"
+            if timeout 5m "$@" 2>&1 | tee "$log" && ! grep -q '^SCRIPT ERROR:' "$log"; then
+              printf '%s\n' "$name" >> "$RUNNER_TEMP/r49-evidence/remaining-passed.txt"
+            else
+              printf '%s\n' "$name" >> "$RUNNER_TEMP/r49-evidence/remaining-failed.txt"
+              echo "::error::$name failed. See its validation log."
+            fi
             echo "::endgroup::"
           }
           scenes=(
@@ -206,6 +209,10 @@ jobs:
           gate test_r32_loading_recovery node tools/test_r32_loading_recovery.mjs
           gate test_r36_webgl_state_cache node tools/test_r36_webgl_state_cache.cjs
           gate test_r41_mobile_startup node tools/test_r41_mobile_startup.cjs
+          if test -s "$RUNNER_TEMP/r49-evidence/remaining-failed.txt"; then
+            cat "$RUNNER_TEMP/r49-evidence/remaining-failed.txt"
+            exit 1
+          fi
           test "$(wc -l < "$RUNNER_TEMP/r49-evidence/remaining-passed.txt")" -eq 100
 
       - name: Cache Godot export templates
@@ -307,6 +314,10 @@ jobs:
           python3 tools/check_available_memory.py --label controls
           export R30_PLAYTEST_SCREENSHOT="${RUNNER_TEMP}/r30-844x390-combat.png"
           node tools/test_r33_web_smoke.mjs
+          export R48_PLAYWRIGHT="$GITHUB_WORKSPACE/node_modules"
+          export CV_R49_URL="$UI_CAPTURE_URL"
+          export CV_R49_OUT="$RUNNER_TEMP/r49-evidence/phone-layout"
+          timeout 12m node tools/r49_phone_layout.cjs
 
       - name: Integrated 844x390 battle and 64px warning shapes
         shell: bash
