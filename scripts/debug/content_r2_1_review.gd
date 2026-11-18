@@ -43,7 +43,7 @@ func _check_objective(hud: Node, relay: Node, compact: bool, playing: bool, cont
 		check(hud.tactical_hint.is_visible_in_tree() == playing, context + ": compact objective visibility")
 		if playing:
 			var expected := "第 %d 道・到位 %d 人・需 2" % [relay.step + 1, relay.settled]
-			check(hud.tactical_hint.text.contains(expected), context + ": seal number and required members missing")
+			check(hud.tactical_hint.text.contains(expected), "%s: expected %s in %s" % [context, expected, hud.tactical_hint.text])
 
 func check(value: bool, description: String) -> void:
 	checks += 1
