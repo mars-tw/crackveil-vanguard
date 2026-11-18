@@ -24,16 +24,26 @@ func _ready() -> void:
 	AchievementProgress.debug_use_save_path("user://content_r21_test_achievements.cfg", true)
 	call_deferred("_run")
 
-# R43: on a phone held sideways the urgent notice is the top bar's first line
-# (the banner hides as its duplicate); elsewhere it is the notice banner.
-func _urgent_shown(hud: Node, text: String, exact: bool) -> bool:
-	if hud.toast_panel.visible:
-		return hud.toast_label.text == text if exact else hud.toast_label.text.contains(text)
-	var view := MobileTuning.ui_layout_size(hud.get_viewport().get_visible_rect().size)
-	if not hud.merges_urgent_notice(view, MobileTuning.use_mobile_ui(view), hud.has_urgent_toast()) or not hud.tactical_hint.visible:
+func _urgent_shown(hud: Node, text: String, exact: bool, attack_name: String = "") -> bool:
+	if not hud.has_urgent_toast():
 		return false
-	var line: String = hud.tactical_hint.text.get_slice("\n", 0)
-	return line == text if exact else line.contains(text)
+	var visible_text := PackedStringArray()
+	if hud.toast_panel.is_visible_in_tree():
+		visible_text.append(hud.toast_label.text)
+	if hud.tactical_hint.is_visible_in_tree():
+		visible_text.append_array(hud.tactical_hint.text.split("\n"))
+	for line in visible_text:
+		if (line == text if exact else line.contains(text)) and (attack_name.is_empty() or line.contains(attack_name)):
+			return true
+	return false
+
+func _check_objective(hud: Node, relay: Node, compact: bool, playing: bool, context: String) -> void:
+	check(relay.marker_label.is_visible_in_tree() == (playing and not compact), context + ": world marker visibility")
+	if compact:
+		check(hud.tactical_hint.is_visible_in_tree() == playing, context + ": compact objective visibility")
+		if playing:
+			var expected := "第 %d 道・到位 %d 人・需 2" % [relay.step + 1, relay.settled]
+			check(hud.tactical_hint.text.contains(expected), context + ": seal number and required members missing")
 
 func check(value: bool, description: String) -> void:
 	checks += 1
@@ -97,27 +107,35 @@ func _run() -> void:
 			arena.queue_free()
 			await get_tree().process_frame
 			break
-		check(relay.marker_label.visible, "%s marker missing before picker" % size)
+		var compact := size.x != 1366 and size.x > size.y
+		_check_objective(hud, relay, compact, true, "%s before picker" % size)
 		hud._open_formation_picker()
-		check(not relay.marker_label.visible, "%s picker did not immediately hide marker" % size)
+		check(hud.formation_picker.is_visible_in_tree(), "%s picker did not open" % size)
+		_check_objective(hud, relay, compact, false, "%s picker opened" % size)
 		GameManager.emit_stats()
 		hud._on_pause_changed(false)
 		relay._update_label()
-		check(not relay.marker_label.visible, "%s stats/pause callback re-showed marker through picker" % size)
+		_check_objective(hud, relay, compact, false, "%s stats/pause callback with picker open" % size)
 		for button in hud.formation_picker.buttons.values():
 			check(button.size.y >= 44, "%s picker target under 44px" % size)
 		check(Rect2(Vector2.ZERO,Vector2(size)).encloses(hud.formation_picker.get_global_rect()), "%s picker outside viewport" % size)
 		await _capture("picker-open", true)
 		hud.formation_picker.cancel_button.pressed.emit()
-		check(relay.marker_label.visible, "%s cancel did not restore marker" % size)
+		check(not hud.formation_picker.is_visible_in_tree(), "%s cancel did not close picker" % size)
+		_check_objective(hud, relay, compact, true, "%s picker cancelled" % size)
 		await _capture("picker-closed", true)
 		GameManager.set_manual_pause(true)
 		GameManager.emit_stats()
-		check(not relay.marker_label.visible, "%s marker through manual pause" % size)
+		check(hud.pause_overlay.is_visible_in_tree(), "%s pause overlay missing" % size)
+		_check_objective(hud, relay, compact, false, "%s paused" % size)
 		GameManager.set_manual_pause(false)
-		check(relay.marker_label.visible, "%s unpause lost marker" % size)
+		check(not hud.pause_overlay.is_visible_in_tree(), "%s pause overlay did not close" % size)
+		_check_objective(hud, relay, compact, true, "%s unpaused" % size)
 		var pressure: Node = relay.pressure
 		for index in range(3):
+			# Cover both the first lesson and the regular compact comparison.
+			if index == 1:
+				GameManager.elapsed_time += 6.0
 			hud.toast_queue.clear()
 			hud.toast_showing = false
 			pressure.configure(relay.anchor,index)
@@ -128,7 +146,13 @@ func _run() -> void:
 			loot.show_item({"rarity_name":"裝備","name":"UI 回歸裝備","description":"攻勢結束後顯示"},{},true)
 			for frame in range(8): await get_tree().process_frame
 			check(not loot.visible and is_zero_approx(loot.age), "%s/%s warning consumed/covered loot" % [size,pressure.kind])
-			check(_urgent_shown(hud, "預警", false), "%s/%s warning hidden behind loot" % [size,pressure.kind])
+			var attack_name := str(pressure.NAMES[pressure.kind])
+			check(_urgent_shown(hud, "預警", false, attack_name), "%s/%s named warning hidden behind loot" % [size,pressure.kind])
+			if compact:
+				check(not hud.toast_panel.is_visible_in_tree(), "%s/%s repeated warning banner" % [size,pressure.kind])
+				check(hud.tactical_hint.text.contains(pressure.status_text()), "%s/%s live attack and warning countdown missing from top bar" % [size,pressure.kind])
+				if index > 0:
+					check(hud.tactical_hint.text.contains(relay.compare_line()) and not relay.compare_line().is_empty(), "%s/%s fast/slow comparison missing after lesson" % [size,pressure.kind])
 			await _capture(pressure.kind + "-warning", false)
 			pressure.advance(pressure.WARNING)
 			for frame in range(8): await get_tree().process_frame
