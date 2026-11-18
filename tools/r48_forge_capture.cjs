@@ -375,4 +375,5 @@ async function main() {
 	process.exitCode = failed ? 1 : 0;
 }
 
-main().catch((e) => { console.error(e); process.exitCode = 2; });
+module.exports = { Driver, VIEWS, UA, read, chromium };
+if (require.main === module) main().catch((e) => { console.error(e); process.exitCode = 2; });

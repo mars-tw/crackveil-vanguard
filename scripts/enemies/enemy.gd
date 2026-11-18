@@ -303,6 +303,11 @@ func _place_special_label() -> void:
 		_elite_label_rects.clear()
 	var xf := get_viewport().get_canvas_transform() * get_global_transform()
 	var view := get_viewport().get_visible_rect().size
+	# Reserve one name plate on short touch displays; the others keep their
+	# distinctive bodies and their names remain on the encounter HUD.
+	if BattleLayout.compact_battle(view) and not _elite_label_rects.is_empty():
+		special_label.visible = false
+		return
 	var scale_y := absf(xf.get_scale().y)
 	var above_local := Vector2(-100, -64 * animated_sprite.scale.y - 34)
 	var below_local := Vector2(-100, 30 * animated_sprite.scale.y + 6)

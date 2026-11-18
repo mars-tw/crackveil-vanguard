@@ -82,7 +82,7 @@ func _test_elite_label_wiring() -> void:
 	_check(corner.size == Vector2.ZERO, "plates never enter the bottom-left control block")
 	_check(source.contains("is_active = false\r\n\tspecial_label_wanted = false") or source.contains("is_active = false\n\tspecial_label_wanted = false"), "dying elites drop their plate immediately")
 	var relay_source := FileAccess.get_file_as_string("res://scripts/services/formation_relay.gd")
-	_check(relay_source.contains("_reserve_for_plates(Rect2(at + Vector2(0, -24), Vector2(280, 58)))"), "verdict lines reserve their area from plates")
+	_check(relay_source.contains("Vector2(width, 30.0 if compact else 54.0)") and relay_source.contains("verdict_bounds = get_viewport().get_canvas_transform() * get_global_transform() * box\n\t\t_reserve_for_plates(box)"), "verdict lines reserve their area from plates")
 	var pressure_src := FileAccess.get_file_as_string("res://scripts/services/encounter_pressure.gd")
 	_check(pressure_src.contains("if seal_banner_showing():"), "next seal badge waits for the seal banner to fade")
 	var identity := FileAccess.get_file_as_string("res://scripts/arena/r4_battle_identity.gd")

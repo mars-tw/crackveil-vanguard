@@ -113,6 +113,7 @@ var toast_queue: Array[String] = []
 var toast_showing: bool = false
 var toast_current_text := ""
 var toast_remaining := 0.0
+var seal_notice_in_bar := false
 var reset_meta_confirm_pending: bool = false
 var level_flash_tween: Tween = null
 var captain_hit_flash_tween: Tween = null
@@ -264,6 +265,8 @@ func _process(_delta: float) -> void:
 			captain_hurt_marker.modulate.a = clampf(captain_hurt_timer / 1.2, 0.0, 1.0)
 	var duplicate_notice := toast_showing and is_instance_valid(tactical_hint) and tactical_hint.visible and notices_duplicate(tactical_hint.text, toast_current_text)
 	toast_panel.visible = (toast_showing or bond_active) and not blocked and not duplicate_notice and not formation_picker.visible and (urgent or bond_active or not (is_instance_valid(loot_notice) and loot_notice.visible))
+	if seal_notice_in_bar:
+		toast_panel.visible = false
 	if toast_panel.visible and toast_label.text != _fitted_toast_text:
 		_fitted_toast_text = toast_label.text
 		_fit_toast_panel()
@@ -275,6 +278,7 @@ func _process(_delta: float) -> void:
 	# loot, bond reveals or a modal. Urgent battle messages own the notice lane.
 	# R43: a notice merged into the phone top bar keeps its time running there.
 	var merged_notice := duplicate_notice and urgent and merges_urgent_notice(MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size), MOBILE_TUNING.use_mobile_ui(MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)), true)
+	merged_notice = merged_notice or seal_notice_in_bar
 	if toast_showing and (toast_panel.visible or merged_notice) and (urgent or not bond_active):
 		toast_remaining -= _delta
 		if toast_remaining <= 0.0:
@@ -2443,6 +2447,7 @@ func _update_tactical_hint() -> void:
 	if not is_instance_valid(tactical_hint):
 		return
 	tactical_hint.visible = GameManager.game_running and not get_tree().paused and is_instance_valid(GameManager.tactical_director) and GameManager.run_mode == "campaign"
+	seal_notice_in_bar = false
 	if not tactical_hint.visible:
 		return
 	var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
@@ -2466,6 +2471,25 @@ func _update_tactical_hint() -> void:
 	# A notice the bar already says (錯陣反噬 on the second line) is not repeated.
 	if merges_urgent_notice(view, MOBILE_TUNING.use_mobile_ui(view), has_urgent_toast()) and not notices_duplicate(tactical_hint.text, toast_current_text):
 		tactical_hint.text = "%s\n%s" % [toast_current_text.strip_edges(), tactical_hint.text.get_slice("\n", 1)]
+	var stage_instruction := _tide_or("")
+	var seal_notice := toast_current_text.contains("｜預警・") and toast_current_text.contains("快封")
+	var compact := BATTLE_LAYOUT.compact_battle(view)
+	if stage_instruction != "":
+		# The time-limited stage action wins over the seal formations. Keep the
+		# ordinary warning in the journal and let its display timer expire.
+		if seal_notice:
+			seal_notice_in_bar = true
+			tactical_hint.text = "%s｜封隙 %d/3\n%s" % [formation, relay.step if is_instance_valid(relay) else 3, stage_instruction]
+	elif is_instance_valid(relay) and not relay.completed:
+		var lesson: String = relay.first_seal_lesson()
+		if lesson != "":
+			seal_notice_in_bar = seal_notice
+			tactical_hint.text = "%s\n%s" % [lesson, relay.pressure.status_text()]
+		elif compact:
+			var comparison: String = relay.compare_line()
+			if comparison != "" and (not has_urgent_toast() or seal_notice):
+				seal_notice_in_bar = seal_notice
+				tactical_hint.text = "%s｜封隙 %d/3\n%s" % [formation, relay.step, comparison]
 	var mission_rect: Rect2 = BATTLE_LAYOUT.regions(view, MOBILE_TUNING.use_mobile_ui(view)).mission
 	BATTLE_LAYOUT.place(tactical_hint, mission_rect)
 	# R16: long seal lines shrink to the mission box instead of running under
@@ -3210,7 +3234,10 @@ func _refresh_low_hp_warning() -> void:
 
 func _on_battle_notice(message: String,kind: String,urgent: bool) -> void:
 	battle_journal.record(message,kind,urgent)
-	if urgent:_on_toast_requested(message)
+	if urgent:
+		# The battle log keeps the counter window. The warning names the two
+		# formations without a second duration that could be mistaken for seal time.
+		_on_toast_requested(message.get_slice("・慢封反擊", 0))
 
 
 func is_urgent_toast(message: String) -> bool:

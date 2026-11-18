@@ -60,6 +60,14 @@ static func seal_seconds(id: String, kind: String, formation: String) -> int:
 static func seal_heal(kind: String, formation: String) -> float:
 	return SECONDARY_SEAL_HEAL if is_secondary(kind, formation) else PRIMARY_SEAL_HEAL
 
+# Healing actually applied to each ally: 封隙整備 trades it for counter time.
+static func applied_seal_heal(id: String, kind: String, formation: String) -> int:
+	return 0 if id == "spec_prepare" else int(seal_heal(kind, formation))
+
+static func seal_time_source(id: String, kind: String, formation: String) -> String:
+	var delta := seal_seconds(id, kind, formation) - seal_seconds("", kind, formation)
+	return "專精%+d秒" % delta if delta != 0 else ""
+
 static func accepts(_id: String, kind: String, formation: String) -> bool:
 	return formation == str(PRIMARY.get(kind, "wedge")) or formation == str(SECONDARY.get(kind, ""))
 

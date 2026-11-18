@@ -66,8 +66,7 @@ func _initialize() -> void:
 	var right_shift: float = relay.slide_off_hud(Rect2(150, 90, 240, 54), left_panels, 844.0)
 	_check(right_shift > 0.0, "a verdict over the left 連斬 box moves right when the left side has no room")
 	var rsrc := FileAccess.get_file_as_string("res://scripts/services/formation_relay.gd")
-	_check(rsrc.contains("at = _verdict_off_hud(at, maxf(text_width, sub_width) + 20.0)
-		_reserve_for_plates(") and rsrc.contains("var blockers := Enemy.hud_areas()"), "the verdict is moved before it is reserved and drawn, against the HUD rects")
+	_check(rsrc.find("at = _verdict_off_hud(at,") >= 0 and rsrc.find("_reserve_for_plates(box)", rsrc.find("at = _verdict_off_hud(at,")) > rsrc.find("at = _verdict_off_hud(at,") and rsrc.contains("var blockers := Enemy.hud_areas()") and rsrc.contains("core.socket_global(id)"), "the verdict is moved before it is reserved and drawn, against the HUD rects")
 	# Ground plates keep the same HUD clearance on a 3x phone.
 	for path in ["res://scripts/vfx/tide_sigil.gd", "res://scripts/vfx/moon_bloom.gd", "res://scripts/vfx/frost_wall.gd", "res://scripts/vfx/sand_glyphs.gd"]:
 		var src := FileAccess.get_file_as_string(path)
