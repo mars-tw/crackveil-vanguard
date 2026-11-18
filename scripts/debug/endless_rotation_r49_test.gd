@@ -46,8 +46,15 @@ func _initialize() -> void:
 	gm.forced_run_seed = 49107
 	gm.tactical_launch = false
 	gm.run_mode = "campaign"
+	var view := SubViewport.new()
+	var phone := "phone" in OS.get_cmdline_user_args()
+	view.size = Vector2i(844, 390) if phone else Vector2i(1280, 720)
+	var tuning: GDScript = load("res://scripts/services/mobile_tuning.gd")
+	if phone:
+		tuning.set_device_hints_override_for_tests({"ua_phone": true, "ua_mobile": true, "touch_available": true, "mouse_available": false})
+	root.add_child(view)
 	var arena: Node = load("res://scenes/arena/Arena.tscn").instantiate()
-	root.add_child(arena)
+	view.add_child(arena)
 	for i in range(4):
 		await process_frame
 	check(gm.endless_order.is_empty(), "campaign runs have no rotation")
@@ -74,6 +81,8 @@ func _initialize() -> void:
 	var hud: Node = arena.get_node("HUD")
 	hud._update_tactical_hint()
 	check(hud.tactical_hint.visible and hud.tactical_hint.text.begins_with(rotation.top_line(second, gm.endless_rule(1), 3)), "live HUD names this rule, the next rule and waves remaining")
+	check(hud.mission_fit.size > 0 and hud.mission_fit.widest <= hud.mission_fit.room + 1.0, "forecast fits the top bar at the actual viewport")
+	print("R49_ENDLESS_FIT viewport=%s font=%s widest=%s room=%s" % [view.get_visible_rect().size, hud.mission_fit.size, hud.mission_fit.widest, hud.mission_fit.room])
 	gm.player_died()
 	var screen: Node = arena.get_node("GameOverScreen")
 	var data: Dictionary = screen.displayed_summary.get("endless_rotation", {})

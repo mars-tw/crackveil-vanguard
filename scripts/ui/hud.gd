@@ -2483,8 +2483,7 @@ func _update_tactical_hint() -> void:
 	tactical_hint.add_theme_font_size_override("font_size", hint_size)
 	# R48: the widest line at the fitted size, for the review probe.
 	var widest := 0.0
-	for line in tactical_hint.text.split("
-"):
+	for line in tactical_hint.text.split("\n"):
 		widest = maxf(widest, tactical_hint.get_theme_font("font").get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, hint_size).x)
 	mission_fit = {"size": hint_size, "widest": widest, "room": hint_room}
 

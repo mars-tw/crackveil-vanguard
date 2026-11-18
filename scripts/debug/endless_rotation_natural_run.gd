@@ -22,8 +22,14 @@ func _ready() -> void:
 	call_deferred("_start")
 
 func _start() -> void:
+	var view := SubViewport.new()
+	var phone := "phone" in OS.get_cmdline_user_args()
+	view.size = Vector2i(844, 390) if phone else Vector2i(1280, 720)
+	if phone:
+		preload("res://scripts/services/mobile_tuning.gd").set_device_hints_override_for_tests({"ua_phone": true, "ua_mobile": true, "touch_available": true, "mouse_available": false})
+	add_child(view)
 	arena = preload("res://scenes/arena/Arena.tscn").instantiate()
-	add_child(arena)
+	view.add_child(arena)
 	GameManager.auto_upgrade_enabled = true
 	GameManager.player.set_auto_channel_enabled(true)
 
@@ -66,7 +72,7 @@ func _finish() -> void:
 	for row in forecasts.values():
 		fit = fit and row.font > 0 and row.width <= row.room + 1
 	var summary: Dictionary = arena.get_node("GameOverScreen").displayed_summary.get("endless_rotation", {})
-	var result := {"seed": GameManager.current_run_seed, "view": get_viewport().get_visible_rect().size, "seconds": snappedf(GameManager.elapsed_time, 0.1), "kills": GameManager.kills, "outcome": "defeat" if GameManager.is_game_over else "observation_end", "observations": observations, "forecasts": forecasts, "settlement": summary, "best": GameManager.endless_best.get("garden", {}), "fit": fit}
+	var result := {"seed": GameManager.current_run_seed, "view": arena.get_viewport_rect().size, "seconds": snappedf(GameManager.elapsed_time, 0.1), "kills": GameManager.kills, "outcome": "defeat" if GameManager.is_game_over else "observation_end", "observations": observations, "forecasts": forecasts, "settlement": summary, "best": GameManager.endless_best.get("garden", {}), "fit": fit}
 	print("R49_ENDLESS_NATURAL " + JSON.stringify(result))
 	GameManager.set_touch_move_vector(Vector2.ZERO)
 	get_tree().quit(0 if observations.size() >= 2 and fit and frames < 12000 else 1)
