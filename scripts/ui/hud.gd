@@ -2499,7 +2499,7 @@ func _update_tactical_hint() -> void:
 			if seal_notice:
 				seal_notice_in_bar = true
 				tactical_hint.text = "%s｜封隙 %d/3\n%s" % [formation, relay.step if is_instance_valid(relay) else 3, stage_instruction]
-		elif is_instance_valid(relay) and not relay.completed:
+		elif is_instance_valid(relay) and not relay.completed and (not has_urgent_toast() or seal_notice):
 			var lesson: String = relay.first_seal_lesson()
 			if lesson != "":
 				seal_notice_in_bar = seal_notice
@@ -2507,14 +2507,16 @@ func _update_tactical_hint() -> void:
 				progress_line = 1
 			elif compact:
 				var comparison: String = relay.compare_line()
-				if comparison != "" and (not has_urgent_toast() or seal_notice):
+				if comparison != "":
 					seal_notice_in_bar = seal_notice
 					var heading: String = relay.pressure.status_text() if relay.pressure.phase == "warning" else "%s｜封隙 %d/3" % [formation, relay.step]
 					tactical_hint.text = "%s\n%s" % [heading, comparison]
 		# The compact HUD replaces the world marker. Keep its seal number and
 		# settled/required count alongside the current task, clear of the field.
-		if compact and is_instance_valid(relay) and not relay.completed and (not has_urgent_toast() or seal_notice):
+		if compact and is_instance_valid(relay) and not relay.completed:
 			var lines := tactical_hint.text.split("\n")
+			if has_urgent_toast() and not seal_notice:
+				progress_line = lines.size() - 1 # Keep every line of the notice intact.
 			lines[progress_line] += "｜" + str(relay.marker_text())
 			tactical_hint.text = "\n".join(lines)
 	var mission_rect: Rect2 = BATTLE_LAYOUT.regions(view, MOBILE_TUNING.use_mobile_ui(view)).mission
