@@ -38,6 +38,9 @@ var run_mode: String = "campaign"
 var endless_start_time: float = 0.0
 var endless_start_kills: int = 0
 var endless_best: Dictionary = {}
+const ENDLESS_ROTATION := preload("res://scripts/services/endless_rotation.gd")
+var endless_order: Array[String] = []
+var endless_count_baseline: Dictionary = {}
 var boss_kills_total: int = 0
 var critical_strikes_enabled: bool = true
 var critical_hits: int = 0
@@ -308,6 +311,27 @@ func get_endless_wave() -> int:
 	return 1 + int(maxf(0.0, elapsed_time - endless_start_time) / 30.0) if run_mode == "endless" else 0
 
 
+func _start_endless_rotation() -> void:
+	endless_order = ENDLESS_ROTATION.order(current_run_seed, selected_stage_id, ENDLESS_ROTATION.POOL.size())
+	endless_count_baseline = ENDLESS_ROTATION.read_counts(self)
+
+
+# A hazard cast before the victory choice can finish in endless mode. Its
+# outcome belongs to the campaign just like its cast.
+func exclude_campaign_hazard(hazard: Node, counter: StringName) -> void:
+	if hazard.has_meta(&"campaign_hazard"):
+		endless_count_baseline[counter] = int(endless_count_baseline.get(counter, 0)) + 1
+
+
+func endless_rule(ahead: int = 0) -> String:
+	var segment := ENDLESS_ROTATION.segment_of(get_endless_wave()) + ahead
+	while endless_order.size() <= segment:
+		var previous := "" if endless_order.is_empty() else str(endless_order.back())
+		var cycle_index := endless_order.size() / ENDLESS_ROTATION.POOL.size()
+		endless_order.append_array(ENDLESS_ROTATION.cycle(current_run_seed, cycle_index, ENDLESS_ROTATION.home_rule(selected_stage_id), previous))
+	return endless_order[segment]
+
+
 func _save_campaign() -> bool:
 	var campaign := ConfigFile.new()
 	campaign.set_value("campaign", "clears", campaign_clears)
@@ -434,6 +458,10 @@ func start_run(new_arena: Node, new_player: Node, new_squad_manager: Node = null
 	forge_core_overloads = 0
 	forge_boss_delays = 0
 	sand_storm_hits = 0
+	endless_order.clear()
+	endless_count_baseline.clear()
+	if run_mode == "endless":
+		_start_endless_rotation()
 	bond_benefits ={"healing":0.0,"prevented":0.0,"triggers":0}
 	next_elite_bonus_xp = 0
 	echo_shards_awarded_this_run = 0
@@ -1918,6 +1946,9 @@ func _summary_with_echo(summary: Dictionary) -> Dictionary:
 		enriched["echo_progress"] = MetaProgress.get_progress_summary()
 	enriched["run_seed"] = current_run_seed
 	enriched["starting_mode"]=run_mode
+	if run_mode == "endless":
+		endless_rule(1)
+		enriched["endless_rotation"] = ENDLESS_ROTATION.summary(endless_order, get_endless_wave(), endless_count_baseline, ENDLESS_ROTATION.read_counts(self))
 	if is_instance_valid(squad_manager):
 		# recruited_once contains only real party heroes, including the initial
 		# three and fallen recruits. Constructs never enter this dictionary.
@@ -2267,6 +2298,10 @@ func continue_after_stage_victory() -> void:
 		show_toast("封隙戰術：無盡不再觸發；護送移速代價解除，既有反擊照常到期")
 	endless_start_time = elapsed_time
 	endless_start_kills = kills
+	_start_endless_rotation()
+	for group in ENDLESS_ROTATION.GROUPS.values():
+		for hazard in get_tree().get_nodes_in_group(group):
+			hazard.set_meta(&"campaign_hazard", true)
 	var spawner := arena.get_node_or_null("EnemySpawner") if is_instance_valid(arena) else null
 	if spawner != null and spawner.has_method("begin_endless"):
 		spawner.begin_endless()

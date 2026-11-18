@@ -345,6 +345,8 @@ func _spawn_special_elite() -> bool:
 	if profile.is_empty():
 		return false
 	var config := SPECIAL_ELITES.apply_stage_variant(SPECIAL_ELITES.make_config(str(profile.id), max_enemies), str(GameManager.selected_stage_id))
+	if GameManager.run_mode == "endless":
+		config["stage_skill"] = GameManager.endless_rule()
 	config["gold"] = int(config.get("gold", 0)) + GameManager.get_elite_bonus_gold()
 	config["elite_bonus_xp"] = int(config.get("elite_bonus_xp", 0)) + GameManager.next_elite_bonus_xp
 	_apply_time_scaling(config)

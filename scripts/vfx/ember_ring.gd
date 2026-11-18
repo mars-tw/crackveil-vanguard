@@ -103,6 +103,7 @@ func _burst() -> void:
 	# R32: a ring the whole squad dodged counts toward the result's clean rings.
 	if hits == 0:
 		GameManager.ember_rings_clean += 1
+		GameManager.exclude_campaign_hazard(self, &"ember_rings_clean")
 	else:
 		last_mark_time = GameManager.elapsed_time
 

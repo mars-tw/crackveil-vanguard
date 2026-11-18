@@ -2442,14 +2442,18 @@ func _select_formation(id: String) -> void:
 func _update_tactical_hint() -> void:
 	if not is_instance_valid(tactical_hint):
 		return
-	tactical_hint.visible = GameManager.game_running and not get_tree().paused and is_instance_valid(GameManager.tactical_director) and GameManager.run_mode == "campaign"
+	tactical_hint.visible = GameManager.game_running and not get_tree().paused and is_instance_valid(GameManager.tactical_director)
 	if not tactical_hint.visible:
 		return
 	var view := MOBILE_TUNING.ui_layout_size(get_viewport().get_visible_rect().size)
 	var squad: Node = GameManager.squad_manager
 	var relay: Node = GameManager.tactical_director.relay
 	var formation: String = squad.get_formation_definition().short if is_instance_valid(squad) else "楔形"
-	if is_instance_valid(relay) and not relay.completed:
+	if GameManager.run_mode == "endless":
+		var rule := GameManager.endless_rule()
+		var left := GameManager.ENDLESS_ROTATION.waves_left(GameManager.get_endless_wave())
+		tactical_hint.text = GameManager.ENDLESS_ROTATION.top_line(rule, GameManager.endless_rule(1), left) + "\n" + _tide_or(GameManager.ENDLESS_ROTATION.how_line(rule))
+	elif is_instance_valid(relay) and not relay.completed:
 		# R39: the first line keeps only the long-lived state (formation, seals,
 		# catch-up); the fast/slow seconds and heal moved onto the 楔快／圓慢 ground
 		# tags beside the answer badges, so the top bar stops reading as a rule sheet.
@@ -2465,7 +2469,10 @@ func _update_tactical_hint() -> void:
 	# stays on its button. The notice panel then hides as a duplicate of the bar.
 	# A notice the bar already says (錯陣反噬 on the second line) is not repeated.
 	if merges_urgent_notice(view, MOBILE_TUNING.use_mobile_ui(view), has_urgent_toast()) and not notices_duplicate(tactical_hint.text, toast_current_text):
-		tactical_hint.text = "%s\n%s" % [toast_current_text.strip_edges(), tactical_hint.text.get_slice("\n", 1)]
+		if GameManager.run_mode == "endless":
+			tactical_hint.text = tactical_hint.text.get_slice("\n", 0) + "\n" + toast_current_text.strip_edges()
+		else:
+			tactical_hint.text = "%s\n%s" % [toast_current_text.strip_edges(), tactical_hint.text.get_slice("\n", 1)]
 	var mission_rect: Rect2 = BATTLE_LAYOUT.regions(view, MOBILE_TUNING.use_mobile_ui(view)).mission
 	BATTLE_LAYOUT.place(tactical_hint, mission_rect)
 	# R16: long seal lines shrink to the mission box instead of running under

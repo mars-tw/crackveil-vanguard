@@ -102,6 +102,7 @@ func _strike() -> void:
 	# alone; the floating number repeated it beside the stamp.
 	if blocked:
 		GameManager.veil_lances_blocked += 1
+		GameManager.exclude_campaign_hazard(self, &"veil_lances_blocked")
 		var guard_at: Vector2 = GameManager.player.global_position
 		EntityFactory.spawn_death_burst(guard_at, SAFE, 2.6, "gold_rain")
 		GameManager.request_combat_impact(4.0, 0.03)

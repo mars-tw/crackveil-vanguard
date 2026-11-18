@@ -158,6 +158,7 @@ func _finish() -> void:
 	last_verdict_time = GameManager.elapsed_time
 	if matched:
 		GameManager.tide_sigils_matched += 1
+		GameManager.exclude_campaign_hazard(self, &"tide_sigils_matched")
 		EntityFactory.spawn_death_burst(global_position, SAFE, 2.6, "gold_rain")
 		GameManager.request_combat_impact(3.0, 0.03)
 		return

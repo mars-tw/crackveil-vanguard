@@ -210,6 +210,10 @@ func _records() -> Array[String]:
 	if hazards != "":tally.append(hazards)
 	if not tally.is_empty():result.insert(0,"戰況統計\n"+"\n".join(tally))
 	if forge != "":result.insert(0,forge)
+	var rotation: Dictionary = data.get("endless_rotation", {})
+	for index in range(rotation.get("rules", []).size() - 1, -1, -1):
+		var rule: Dictionary = rotation.rules[index]
+		result.insert(0, "無盡第 %s 波\n%s\n%s" % [rule.waves, rule.name, GameManager.ENDLESS_ROTATION.tally_text(rule.rule, rule)])
 	return result
 
 func _hero_display_name(hero_id: String) -> String:
@@ -328,7 +332,10 @@ func _refresh() -> void:
 		var lines := summary_label.text.split("\n")
 		lines.insert(2, badges)
 		summary_label.text = "\n".join(lines)
-	if not victory:
+	var rotation: Dictionary = displayed_summary.get("endless_rotation", {})
+	if not rotation.is_empty():
+		summary_label.text += "\n" + GameManager.ENDLESS_ROTATION.summary_lines(rotation)
+	elif not victory:
 		var advice:=_defeat_advice(displayed_summary.get("seal_state",{}))
 		if advice!="":summary_label.text+="\n"+advice
 	gain_label.text=_measured_gain(node,build.get("benefits",{}))

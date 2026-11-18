@@ -169,6 +169,7 @@ func _strike() -> void:
 	grounded = is_instance_valid(GameManager.player) and split_by(global_position, GameManager.player.global_position, members, half)
 	if grounded:
 		GameManager.storm_pylons_grounded += 1
+		GameManager.exclude_campaign_hazard(self, &"storm_pylons_grounded")
 		last_split_time = GameManager.elapsed_time
 		var post: Vector2 = global_position + pylon_offsets(half)[MEMBER_PYLON]
 		for hero in get_tree().get_nodes_in_group("heroes"):

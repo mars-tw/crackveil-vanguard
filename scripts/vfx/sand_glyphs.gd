@@ -96,6 +96,7 @@ func _finish(ok: bool) -> void:
 	last_verdict_time = GameManager.elapsed_time
 	if ok:
 		GameManager.sand_glyphs_solved += 1
+		GameManager.exclude_campaign_hazard(self, &"sand_glyphs_solved")
 		EntityFactory.spawn_death_burst(global_position + half, SAFE, 2.4, "gold_rain")
 		return
 	for hero in get_tree().get_nodes_in_group("heroes"):

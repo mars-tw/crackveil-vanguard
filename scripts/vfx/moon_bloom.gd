@@ -189,6 +189,7 @@ func _finish(ok: bool) -> void:
 	last_verdict_time = GameManager.elapsed_time
 	if ok:
 		GameManager.moon_blooms_cut += 1
+		GameManager.exclude_campaign_hazard(self, &"moon_blooms_cut")
 		EntityFactory.spawn_death_burst(global_position, SAFE, 2.6, "gold_rain")
 		GameManager.request_combat_impact(4.0, 0.03)
 		return

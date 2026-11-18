@@ -29,6 +29,8 @@ static var last_spawned: Node2D = null
 # R32: shared by every stage hazard; reach is the hazard's own outer radius.
 const SEAL_CLEARANCE := 150.0
 static func off_seal(at: Vector2, reach: float = RADIUS) -> Vector2:
+	if GameManager.run_mode == "endless":
+		return at
 	var director = GameManager.get("tactical_director")
 	if director == null or not is_instance_valid(director) or director.get("relay") == null or not is_instance_valid(director.relay):
 		return at
@@ -114,6 +116,7 @@ func _finish() -> void:
 	resolved = true
 	if active_observed and hits == 0 and sortie_token == GameManager.run_token and GameManager.game_running and not GameManager.is_game_over and not get_tree().paused and is_instance_valid(GameManager.player) and GameManager.player.get("is_alive") == true:
 		GameManager.vine_snares_clean += 1
+		GameManager.exclude_campaign_hazard(self, &"vine_snares_clean")
 	queue_free()
 
 func _apply_tick() -> void:

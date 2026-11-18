@@ -395,6 +395,7 @@ func _deliver(id: String) -> void:
 	core_at = Vector2(sockets[id])
 	last_verdict_time = GameManager.elapsed_time
 	GameManager.forge_cores_set += 1
+	GameManager.exclude_campaign_hazard(self, &"forge_cores_set")
 	if id == "far":
 		GameManager.forge_cores_far += 1
 	var config: Dictionary = SOCKETS[id]
