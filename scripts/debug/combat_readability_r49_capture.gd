@@ -74,7 +74,8 @@ func _initialize() -> void:
 	MobileTuning.set_device_hints_override_for_tests()
 	paused = false
 	unload_current_scene()
-	for frame in range(4): await process_frame
+	# Let short-lived scene timers release their callbacks after scene removal.
+	for frame in range(150): await process_frame
 	quit(0 if captures.size() == 4 and crowd_finished and longest_missing_seconds < 0.5 else 1)
 
 func _key(code: int, pressed: bool) -> void:
@@ -100,7 +101,12 @@ func _tap(button: Button) -> void:
 		input_events += 1
 
 func _handle_dialog() -> void:
-	if gm.waiting_for_upgrade:
+	# Godot pauses when another test window takes focus. Use the game's resume
+	# key, just as a player does, before looking for upgrade or shop dialogs.
+	if gm.manual_paused:
+		_key(KEY_P, true)
+		_key(KEY_P, false)
+	elif gm.waiting_for_upgrade:
 		var cards: Array = arena.level_up_screen.option_buttons
 		var choice := 0
 		for i in range(cards.size()):
