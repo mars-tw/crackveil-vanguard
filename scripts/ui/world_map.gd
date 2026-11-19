@@ -39,6 +39,7 @@ var detail_panel: PanelContainer
 var detail_title: Label
 var detail_boss: Label
 var detail_description: Label
+var detail_scroll: ScrollContainer
 var detail_status: Label
 var footer: HBoxContainer
 var back_button: Button
@@ -69,7 +70,6 @@ func _ready() -> void:
 			chapter_index = index / CHAPTER_SIZE
 	_build_ui()
 	_apply_layout()
-	_update_selection()
 	get_viewport().size_changed.connect(_apply_layout)
 	probe_enabled = preload("res://scripts/services/qa_bridge.gd").world_map_enabled()
 	call_deferred("_publish_probe")
@@ -162,9 +162,15 @@ func _build_ui() -> void:
 	detail_heading.add_child(detail_status)
 	detail_boss = _label("", 14, Color("cdd9ef"))
 	details.add_child(detail_boss)
+	detail_scroll = ScrollContainer.new()
+	detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	detail_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	detail_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	details.add_child(detail_scroll)
 	detail_description = _label("", 15, Color("dbe2ef"))
 	detail_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	details.add_child(detail_description)
+	detail_description.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	detail_scroll.add_child(detail_description)
 
 	footer = HBoxContainer.new()
 	footer.add_theme_constant_override("separation", 12)
@@ -279,12 +285,26 @@ func _apply_layout() -> void:
 	endless_button.custom_minimum_size = Vector2(92 if layout_size.x < 360 else 102, footer_height)
 	for button in [back_button, start_button, endless_button]:
 		button.add_theme_font_size_override("font_size", 17 if compact else 20)
-	detail_panel.position = Vector2(margin, footer.position.y - gap - detail_height)
-	detail_panel.size = Vector2(layout_size.x - margin * 2, detail_height)
 	detail_title.add_theme_font_size_override("font_size", 18 if compact else 25)
 	detail_boss.add_theme_font_size_override("font_size", 12 if compact else 15)
 	detail_description.add_theme_font_size_override("font_size", 13 if compact else 16)
 	detail_status.add_theme_font_size_override("font_size", 11 if compact else 14)
+	_update_selection()
+	var panel_width := layout_size.x - margin * 2
+	var panel_margins := detail_panel.get_theme_stylebox("panel").get_minimum_size()
+	var font := detail_description.get_theme_font("font")
+	var font_size := detail_description.get_theme_font_size("font_size")
+	var wrap := TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE
+	var body_height := font.get_multiline_string_size(detail_description.text, HORIZONTAL_ALIGNMENT_LEFT, panel_width - panel_margins.x, font_size, -1, wrap).y
+	var lines := ceili(body_height / maxf(1.0, font.get_height(font_size)))
+	body_height += maxi(0, lines - 1) * detail_description.get_theme_constant("line_spacing")
+	var heading_height := maxf(detail_title.get_combined_minimum_size().y, detail_status.get_combined_minimum_size().y)
+	var content_height := panel_margins.y + heading_height + detail_boss.get_combined_minimum_size().y + 8.0 + body_height
+	# Preserve the map and footer on short screens. Extra-long records can
+	# scroll inside the existing description, with the practice advice first.
+	detail_height = clampf(ceilf(content_height), detail_height, maxf(detail_height, layout_size.y * 0.4))
+	detail_panel.size = Vector2(panel_width, detail_height)
+	detail_panel.position = Vector2(margin, footer.position.y - gap - detail_panel.size.y)
 	graph.position = Vector2(margin, header.position.y + header_height + gap)
 	chapter_row.visible = chapter_buttons.size() > 1
 	if chapter_row.visible:
@@ -335,7 +355,6 @@ func _apply_layout() -> void:
 			button.size = node_size
 			button.position = positions[local_index] - node_size * 0.5
 			_layout_node_content(button, node_size)
-	_update_selection()
 	call_deferred("_publish_probe")
 
 
@@ -402,7 +421,13 @@ func _update_selection() -> void:
 	detail_description.text = str(selected.get("description", "選擇一個節點，準備出擊。"))
 	if cleared.has(selected_id):
 		var best: Dictionary = GameManager.endless_best.get(selected_id, {})
-		detail_description.text += "\n無盡遠征已解鎖" + ("　紀錄：第 %d 波／%d 擊殺" % [int(best.get("wave", 0)), int(best.get("kills", 0))] if not best.is_empty() else "")
+		var practice := GameManager.ENDLESS_ROTATION.practice_text(GameManager.endless_last_practice.get(selected_id))
+		if not practice.is_empty():
+			detail_description.text = practice + "\n" + detail_description.text
+		else:
+			detail_description.text += "\n無盡遠征已解鎖"
+		if not best.is_empty():
+			detail_description.text += "\n無盡最高 %d 波／%d 擊殺" % [int(best.get("wave", 0)), int(best.get("kills", 0))]
 	else:
 		detail_description.text += "\n擊敗此關守關者，解鎖對應無盡地圖。"
 	start_button.disabled = selected.is_empty() or starting
@@ -419,14 +444,13 @@ func _on_stage_pressed(stage_id: String) -> void:
 	if not bool(GameManager.select_stage(stage_id)):
 		return
 	selected_id = stage_id
+	detail_scroll.scroll_vertical = 0
 	var selected_chapter := 0
 	for index in range(stages.size()):
 		if str(stages[index].get("id", "")) == stage_id:
 			selected_chapter = index / CHAPTER_SIZE
-	if selected_chapter != chapter_index:
-		chapter_index = selected_chapter
-		_apply_layout()
-	_update_selection()
+	chapter_index = selected_chapter
+	_apply_layout()
 	AudioManager.play_sfx("pickup", false, -7.0, 1.04)
 
 
@@ -448,6 +472,7 @@ func _on_chapter_pressed(index: int) -> void:
 	if starting or index == chapter_index:
 		return
 	chapter_index = index
+	detail_scroll.scroll_vertical = 0
 	var first := chapter_index * CHAPTER_SIZE
 	if first < stages.size():
 		selected_id = str(stages[first].get("id", ""))

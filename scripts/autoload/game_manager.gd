@@ -38,6 +38,7 @@ var run_mode: String = "campaign"
 var endless_start_time: float = 0.0
 var endless_start_kills: int = 0
 var endless_best: Dictionary = {}
+var endless_last_practice: Dictionary = {}
 const ENDLESS_ROTATION := preload("res://scripts/services/endless_rotation.gd")
 var endless_order: Array[String] = []
 var endless_count_baseline: Dictionary = {}
@@ -267,15 +268,35 @@ const META_PICKUP_APPLIED_KEY := "_cv_meta_pickup_bonus_applied"
 func _ready() -> void:
 	campaign_save_path=preload("res://scripts/services/qa_bridge.gd").save_path(campaign_save_path)
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_load_campaign()
+
+
+func _load_campaign() -> void:
 	var campaign := ConfigFile.new()
-	if campaign.load(campaign_save_path) == OK:
-		for value in campaign.get_value("campaign", "clears", []):
+	campaign_clears = []
+	endless_best = {}
+	endless_last_practice = {}
+	wallet_gold = 0
+	wallet_dirty = false
+	wallet_timer = 0.0
+	if campaign.load(campaign_save_path) != OK:
+		return
+	var saved_clears: Variant = campaign.get_value("campaign", "clears", [])
+	if saved_clears is Array or saved_clears is PackedStringArray:
+		for value in saved_clears:
 			if not STAGE_CATALOG.get_stage(str(value)).is_empty() and not campaign_clears.has(str(value)):
 				campaign_clears.append(str(value))
-		var saved_best: Variant = campaign.get_value("campaign", "endless_best", {})
-		if saved_best is Dictionary:
-			endless_best = saved_best.duplicate(true)
-		wallet_gold = maxi(0, int(campaign.get_value("campaign", "wallet_gold", 0)))
+	var saved_best: Variant = campaign.get_value("campaign", "endless_best", {})
+	if saved_best is Dictionary:
+		endless_best = saved_best.duplicate(true)
+	var saved_practice: Variant = campaign.get_value("campaign", "endless_last_practice", {})
+	if saved_practice is Dictionary:
+		for stage_id in saved_practice:
+			if stage_id is String and not STAGE_CATALOG.get_stage(stage_id).is_empty() and not ENDLESS_ROTATION.practice_text(saved_practice[stage_id]).is_empty():
+				endless_last_practice[stage_id] = saved_practice[stage_id]
+	var saved_gold: Variant = campaign.get_value("campaign", "wallet_gold", 0)
+	if saved_gold is int or saved_gold is float or (saved_gold is String and saved_gold.is_valid_int()):
+		wallet_gold = maxi(0, int(saved_gold))
 
 
 func select_stage(stage_id: String) -> bool:
@@ -345,6 +366,7 @@ func _save_campaign() -> bool:
 	var campaign := ConfigFile.new()
 	campaign.set_value("campaign", "clears", campaign_clears)
 	campaign.set_value("campaign", "endless_best", endless_best)
+	campaign.set_value("campaign", "endless_last_practice", endless_last_practice)
 	campaign.set_value("campaign", "wallet_gold", wallet_gold)
 	var saved := campaign.save(campaign_save_path) == OK
 	wallet_dirty = not saved
@@ -2139,10 +2161,6 @@ func player_died() -> void:
 
 	var dead_player := player
 	var captain_truly_dead: bool=is_instance_valid(dead_player) and dead_player.current_hp<=0 and not dead_player.is_alive
-	if run_mode == "endless":
-		var previous: Dictionary = endless_best.get(selected_stage_id, {})
-		endless_best[selected_stage_id] = {"wave": maxi(int(previous.get("wave", 0)), get_endless_wave()), "kills": maxi(int(previous.get("kills", 0)), maxi(0, kills - endless_start_kills)), "seconds": maxf(float(previous.get("seconds", 0.0)), maxf(0.0, elapsed_time - endless_start_time))}
-		_save_campaign()
 	is_game_over = true
 	game_running = false
 	upgrade_entry_token += 1
@@ -2179,7 +2197,13 @@ func player_died() -> void:
 	}
 	summary["settlement_reason"]="defeat"
 	summary["captain_dead"]=captain_truly_dead
-	game_over_requested.emit(_summary_with_echo(summary))
+	var result := _summary_with_echo(summary)
+	if run_mode == "endless":
+		var previous: Dictionary = endless_best.get(selected_stage_id, {})
+		endless_best[selected_stage_id] = {"wave": maxi(int(previous.get("wave", 0)), get_endless_wave()), "kills": maxi(int(previous.get("kills", 0)), maxi(0, kills - endless_start_kills)), "seconds": maxf(float(previous.get("seconds", 0.0)), maxf(0.0, elapsed_time - endless_start_time))}
+		endless_last_practice[selected_stage_id] = ENDLESS_ROTATION.practice_record(result.endless_rotation)
+		_save_campaign()
+	game_over_requested.emit(result)
 
 
 func record_elite_spawn() -> void:

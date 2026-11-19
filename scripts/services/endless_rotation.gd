@@ -174,7 +174,7 @@ static func summary(rules: Array, final_wave: int, start: Dictionary, now: Dicti
 
 # One concrete change: the rule the run ended in when it went wrong there,
 # else the rule handled worst, else what comes next.
-static func tip(rows: Array, last_rule: String, next_rule: String, final_wave: int) -> String:
+static func missed_rule(rows: Array, last_rule: String) -> Dictionary:
 	var worst: Dictionary = {}
 	var worst_share := 2.0
 	for row in rows:
@@ -187,11 +187,45 @@ static func tip(rows: Array, last_rule: String, next_rule: String, final_wave: i
 		if share < worst_share:
 			worst_share = share
 			worst = row
+	return worst
+
+static func tip(rows: Array, last_rule: String, next_rule: String, final_wave: int) -> String:
+	var worst := missed_rule(rows, last_rule)
 	if not worst.is_empty():
 		return str(TIPS.get(str(worst.rule), ""))
 	if next_rule != "":
 		return "下次打完第 %d 波會換成「%s」，%s" % [first_wave(segment_of(final_wave) + 1) - 1, rule_name(next_rule), how_line(next_rule)]
 	return str(TIPS.get(last_rule, ""))
+
+# Keep one actual rule per stage. Forecast rules never count as encounters.
+static func practice_record(data: Dictionary) -> Dictionary:
+	var total := int(data.cast)
+	if total == 0:
+		return {"total": 0}
+	var rows: Array = data.rules
+	var focus := missed_rule(rows, str(data.last_rule))
+	if focus.is_empty():
+		# Everything was handled. Show the rule the squad handled most often.
+		for row in rows:
+			if int(row.cast) > int(focus.get("cast", 0)):
+				focus = row
+	return {"total": total, "rule": focus.rule, "cast": focus.cast, "ok": focus.ok}
+
+static func practice_text(record: Variant) -> String:
+	if not record is Dictionary or not record.get("total") is int:
+		return ""
+	if record.total == 0:
+		return "上次無盡結束前，菁英還沒出招。" if record.get("cast", 0) == 0 and record.get("ok", 0) == 0 else ""
+	var rule := str(record.get("rule", ""))
+	if not POOL.has(rule) or not record.get("cast") is int or not record.get("ok") is int:
+		return ""
+	var cast := int(record.cast)
+	var ok := int(record.ok)
+	if cast <= 0 or cast > int(record.total) or ok < 0 or ok > cast:
+		return ""
+	if ok < cast:
+		return "上次無盡處理了 %d/%d 次%s。%s。" % [ok, cast, rule_name(rule), TIPS[rule]]
+	return "上次無盡 %d 招全數處理，包含 %d 次%s。下次也記得%s。" % [record.total, ok, rule_name(rule), HOW[rule]]
 
 # The summary page's two lines.
 static func summary_lines(data: Dictionary) -> String:
