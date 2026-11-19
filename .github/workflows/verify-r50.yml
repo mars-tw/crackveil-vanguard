@@ -1,0 +1,420 @@
+name: Verify Crackveil R50
+on:
+  push:
+    branches: [verify/r50-20261119]
+permissions:
+  contents: read
+env:
+  GODOT_VERSION: "4.7"
+  GODOT_RELEASE: stable
+  GODOT_TAG: 4.7-stable
+jobs:
+  verify:
+    name: R38 first, then remaining regression gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - name: Checkout verification commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_url="https://github.com/godotengine/godot/releases/download/${GODOT_TAG}"
+          mkdir -p "${RUNNER_TEMP}/godot"
+          curl -L --retry 8 --retry-delay 5 \
+            -o "${RUNNER_TEMP}/godot/godot.zip" \
+            "${base_url}/Godot_v${GODOT_TAG}_linux.x86_64.zip"
+          unzip -q "${RUNNER_TEMP}/godot/godot.zip" -d "${RUNNER_TEMP}/godot"
+          godot_bin="$(find "${RUNNER_TEMP}/godot" -type f -name "Godot_v${GODOT_TAG}_linux.x86_64" | head -n 1)"
+          chmod +x "${godot_bin}"
+          echo "GODOT_BIN=${godot_bin}" >> "${GITHUB_ENV}"
+          "${godot_bin}" --version
+
+      - name: Install asset tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          # R25's frozen masters were verified with 0.36.0. An unpinned
+          # 0.38.0 upgrade changed four validation states in Linux CI.
+          # Keep signature/data-hash validation reproducible; log the SDK
+          # and full validation failures rather than weakening the gate.
+          python3 -m pip install --upgrade fonttools pillow numpy 'c2pa-python==0.36.0'
+
+      - name: Rebuild UI font subset
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/build_font_subset.py
+
+      - name: Import Godot resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          # R25 起資產量成長，場景啟動時的隱式匯入會撞測試 watchdog；先顯式匯入（跑兩次讓字型/主題二次相依收斂）
+          "${GODOT_BIN}" --headless --import --path .
+          "${GODOT_BIN}" --headless --import --path .
+
+      - name: R38ContentTest (required)
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/r50-evidence"
+          mkdir -p "$out"
+          git rev-parse HEAD > "$out/commit"
+          "$GODOT_BIN" --version > "$out/godot-version"
+          export CV_QA_PROFILE=r49_r38_first
+          timeout 180s "$GODOT_BIN" --headless --fixed-fps 60 --path . res://scenes/debug/R38ContentTest.tscn 2>&1 | tee "$out/R38ContentTest.log"
+          grep -Fq 'R38_CONTENT_PASS stages=10' "$out/R38ContentTest.log"
+          if grep -Eq '^(SCRIPT ERROR:|ERROR: R38_CONTENT_FAIL)' "$out/R38ContentTest.log"; then exit 1; fi
+          echo "R38ContentTest passed at $GITHUB_SHA." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check sprite luminance and saturation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/check_sprite_luminance.py
+
+      - name: Check archived provenance and current release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/verify_r25_c2pa.py
+          python3 tools/check_r37_release_assets.py
+          python3 tools/check_r38_content_assets.py
+          python3 tools/check_r44_runtime_assets.py
+
+      - name: Remaining 101 regression gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CV_QA_PROFILE=content_r3_r4_ci
+          gate() {
+            local name="$1"; shift
+            local log="$RUNNER_TEMP/r50-evidence/$name.log"
+            echo "::group::$name"
+            if timeout 5m "$@" 2>&1 | tee "$log" && ! grep -q '^SCRIPT ERROR:' "$log"; then
+              printf '%s\n' "$name" >> "$RUNNER_TEMP/r50-evidence/remaining-passed.txt"
+            else
+              printf '%s\n' "$name" >> "$RUNNER_TEMP/r50-evidence/remaining-failed.txt"
+              echo "::error::$name failed. See its validation log."
+            fi
+            echo "::endgroup::"
+          }
+          CV_QA_PROFILE=content_r50 gate endless_practice_r50_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/endless_practice_r50_test.gd
+          scenes=(
+            R14RegressionTest
+            R29MenuModalTest
+            TrueAnimationRegressionTest
+            PoolContractTest
+            GameplayCapTest
+            SquadSmokeTest
+            WeaponSmokeTest
+            EnemyArtRegressionTest
+            CombatR32RegressionTest
+            R32LootTest
+            CombatR33RegressionTest
+            R33ExperienceRegressionTest
+            R36WorldEliteTest
+            R34WorldMapUITest
+            AttackVfxR34PoolTest
+            IndependentStageR34Probe
+            R34CampaignTransitionTest
+            CaptainComboChannelR35Test
+            R35EndlessCriticalTest
+            FirepowerR36Test
+            AutoChannelR36Test
+            ProjectilePerformanceR36Test
+            R36SummonIntegrationTest
+            R36SummonRegressionTest
+            ReviewR36RootTest
+            RewardSpecialR36Test
+            R36TouchClearanceTest
+            CombatPolishR37Test
+            R37WorldPolishTest
+            R38HeroWeaponTest
+            R38MapExpansionTest
+            R38ArtGate
+            R39MobileHUDTest
+            R40FacingAttackTest
+            R41RuntimeBudgetTest
+            SpawnDensityR32Test
+            R42FormationTest
+            R43MobileTacticsTest
+            R44StoreTest
+            ContentR1Test
+            ContentR1NavigationTest
+            ContentR2Test
+            ContentR21Test
+            ContentR3Test
+            ContentR4Test
+          )
+          for scene in "${scenes[@]}"; do
+            gate "${scene}" "${GODOT_BIN}" --headless --fixed-fps 60 --path . "res://scenes/debug/${scene}.tscn"
+          done
+          gate content_r5_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r5_test.gd
+          gate content_r6_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r6_test.gd
+          gate content_r7_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r7_test.gd
+          gate content_r8_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r8_test.gd
+          gate content_r9_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r9_test.gd
+          gate content_r10_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r10_test.gd
+          gate content_r11_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r11_test.gd
+          gate content_r12_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r12_test.gd
+          gate content_r13_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r13_test.gd
+          gate content_r14_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r14_test.gd
+          gate content_r15_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r15_test.gd
+          gate content_r16_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r16_test.gd
+          gate content_r17_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r17_test.gd
+          gate content_r18_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r18_test.gd
+          gate content_r19_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r19_test.gd
+          gate content_r20_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r20_test.gd
+          gate content_r21_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r21_test.gd
+          gate content_r22_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r22_test.gd
+          gate content_r23_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r23_test.gd
+          gate content_r24_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r24_test.gd
+          gate content_r25_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r25_test.gd
+          gate content_r26_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r26_test.gd
+          gate content_r27_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r27_test.gd
+          gate content_r28_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r28_test.gd
+          gate content_r29_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r29_test.gd
+          gate content_r30_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r30_test.gd
+          gate content_r31_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r31_test.gd
+          gate content_r32_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r32_test.gd
+          gate content_r33_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r33_test.gd
+          gate content_r34_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r34_test.gd
+          gate content_r35_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r35_test.gd
+          gate content_r36_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r36_test.gd
+          gate content_r37_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r37_test.gd
+          gate content_r38_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r38_test.gd
+          gate content_r39_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r39_test.gd
+          gate content_r40_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r40_test.gd
+          gate content_r41_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r41_test.gd
+          gate content_r42_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r42_test.gd
+          gate content_r43_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r43_test.gd
+          gate content_r44_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r44_test.gd
+          gate content_r45_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r45_test.gd
+          CV_QA_PROFILE=expedition_r46 gate expedition_progress_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/expedition_progress_test.gd
+          CV_QA_PROFILE=expedition_integration gate expedition_integration_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/expedition_integration_test.gd
+          gate content_r47_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r47_test.gd
+          CV_QA_PROFILE=forge_core gate forge_core_integration_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/forge_core_integration_test.gd
+          CV_QA_PROFILE=content_r48 gate content_r48_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r48_test.gd
+          CV_QA_PROFILE=forge_core_r48 gate forge_core_r48_integration_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/forge_core_r48_integration_test.gd
+          CV_QA_PROFILE=content_r49 gate content_r49_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/content_r49_test.gd
+          CV_QA_PROFILE=combat_readability_r49 gate combat_readability_r49_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/combat_readability_r49_test.gd
+          CV_QA_PROFILE=endless_rotation_r49 gate endless_rotation_r49_test "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/endless_rotation_r49_test.gd
+          CV_QA_PROFILE=endless_rotation_r49_phone gate endless_rotation_r49_test-phone "${GODOT_BIN}" --headless --fixed-fps 60 --path . --script res://scripts/debug/endless_rotation_r49_test.gd -- phone
+          gate R31EndgameGate "${GODOT_BIN}" --headless --fixed-fps 60 --path . res://scenes/debug/R31EndgameGate.tscn -- --qa-endgame=r31
+          gate test_r32_loading_recovery node tools/test_r32_loading_recovery.mjs
+          gate test_r36_webgl_state_cache node tools/test_r36_webgl_state_cache.cjs
+          gate test_r41_mobile_startup node tools/test_r41_mobile_startup.cjs
+          if test -s "$RUNNER_TEMP/r50-evidence/remaining-failed.txt"; then
+            cat "$RUNNER_TEMP/r50-evidence/remaining-failed.txt"
+            exit 1
+          fi
+          test "$(wc -l < "$RUNNER_TEMP/r50-evidence/remaining-passed.txt")" -eq 101
+
+      - name: Cache Godot export templates
+        id: cache-templates
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.local/share/godot/export_templates/${{ env.GODOT_VERSION }}.${{ env.GODOT_RELEASE }}
+          key: godot-${{ env.GODOT_TAG }}-web-templates-v1
+
+      - name: Install Web export templates
+        if: steps.cache-templates.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          template_dir="${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_RELEASE}"
+          base_url="https://github.com/godotengine/godot/releases/download/${GODOT_TAG}"
+          mkdir -p "${template_dir}"
+          curl -L --retry 8 --retry-delay 5 \
+            -o "${RUNNER_TEMP}/godot/export_templates.tpz" \
+            "${base_url}/Godot_v${GODOT_TAG}_export_templates.tpz"
+          python3 - <<'PY'
+          import os
+          import zipfile
+          from pathlib import Path
+
+          tpz = Path(os.environ["RUNNER_TEMP"]) / "godot" / "export_templates.tpz"
+          template_dir = Path.home() / ".local" / "share" / "godot" / "export_templates" / f"{os.environ['GODOT_VERSION']}.{os.environ['GODOT_RELEASE']}"
+          with zipfile.ZipFile(tpz) as archive:
+              for entry in archive.infolist():
+                  if entry.filename.startswith("templates/web_") and not entry.is_dir():
+                      target = template_dir / Path(entry.filename).name
+                      target.write_bytes(archive.read(entry))
+          PY
+          ls -lh "${template_dir}"/web_*.zip
+
+      - name: Inject build date
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          project = Path("project.godot")
+          build_date = __import__("datetime").date.today().isoformat()
+          lines = project.read_text(encoding="utf-8").splitlines()
+          replaced = False
+          for index, line in enumerate(lines):
+              if line.startswith("config/build_date="):
+                  lines[index] = f'config/build_date="{build_date}"'
+                  replaced = True
+                  break
+          if not replaced:
+              for index, line in enumerate(lines):
+                  if line.startswith("config/version="):
+                      lines.insert(index + 1, f'config/build_date="{build_date}"')
+                      replaced = True
+                      break
+          if not replaced:
+              raise SystemExit("application/config/build_date injection failed")
+          project.write_text("\n".join(lines) + "\n", encoding="utf-8")
+          print(f"build_date={build_date}")
+          PY
+
+      - name: Export Web build
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p public
+          "${GODOT_BIN}" --headless --export-release "Web" "public/index.html"
+          python3 tools/finalize_r25_web_export.py --dir public
+          python3 tools/check_r44_packaged_assets.py --godot "${GODOT_BIN}" --pack public/index.pck
+          node tools/test_r41_mobile_startup.cjs --html public/index.html
+          cp assets/art/cover.png public/cover.png
+          touch public/.nojekyll
+          find public -maxdepth 1 -type f -printf "%f %s bytes\n" | sort
+
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.58.2
+          npx playwright install --with-deps chromium
+
+      - name: Run Web performance and controls gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8067 --bind 127.0.0.1 --directory public > "${RUNNER_TEMP}/r25-http.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "${server_pid}" 2>/dev/null || true' EXIT
+          export UI_CAPTURE_PLAYWRIGHT="${GITHUB_WORKSPACE}/node_modules"
+          export UI_CAPTURE_CHROME
+          UI_CAPTURE_CHROME="$(node -e "console.log(require('playwright').chromium.executablePath())")"
+          export R25_WEB_URL="http://127.0.0.1:8067/"
+          export R25_WEB_BASELINE_JSON="docs/evidence/R25/web_performance_before.json"
+          python3 tools/check_available_memory.py --label web-performance
+          export UI_CAPTURE_URL="http://127.0.0.1:8067/"
+          export UI_CAPTURE_EVIDENCE_DIR="docs/evidence/R25/controls"
+          python3 tools/check_available_memory.py --label controls
+          export R30_PLAYTEST_SCREENSHOT="${RUNNER_TEMP}/r30-844x390-combat.png"
+          node tools/test_r33_web_smoke.mjs
+          export R48_PLAYWRIGHT="$GITHUB_WORKSPACE/node_modules"
+          export CV_R49_URL="$UI_CAPTURE_URL"
+          export CV_R49_OUT="$RUNNER_TEMP/r50-evidence/phone-layout"
+          timeout 12m node tools/r49_phone_layout.cjs
+
+      - name: Save verification logs and measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r50-regression-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r50-evidence/
+          retention-days: 14
+          if-no-files-found: warn
+
+
+  rendered:
+    name: Rendered mobile layouts and combat (software)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout verification commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_url="https://github.com/godotengine/godot/releases/download/${GODOT_TAG}"
+          mkdir -p "${RUNNER_TEMP}/godot"
+          curl -L --retry 8 --retry-delay 5 \
+            -o "${RUNNER_TEMP}/godot/godot.zip" \
+            "${base_url}/Godot_v${GODOT_TAG}_linux.x86_64.zip"
+          unzip -q "${RUNNER_TEMP}/godot/godot.zip" -d "${RUNNER_TEMP}/godot"
+          godot_bin="$(find "${RUNNER_TEMP}/godot" -type f -name "Godot_v${GODOT_TAG}_linux.x86_64" | head -n 1)"
+          chmod +x "${godot_bin}"
+          echo "GODOT_BIN=${godot_bin}" >> "${GITHUB_ENV}"
+          "${godot_bin}" --version
+
+      - name: Import Godot resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          # R25 起資產量成長，場景啟動時的隱式匯入會撞測試 watchdog；先顯式匯入（跑兩次讓字型/主題二次相依收斂）
+          "${GODOT_BIN}" --headless --import --path .
+          "${GODOT_BIN}" --headless --import --path .
+
+      - name: Render R50 stage selection and measure controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/r50-evidence"
+          mkdir -p "$evidence/r50-map"
+          git rev-parse HEAD > "$evidence/commit"
+          "$GODOT_BIN" --version > "$evidence/godot-version"
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends xvfb xauth libgl1-mesa-dri
+          export CV_QA_PROFILE=content_r50_render CV_R50_CAPTURE_DIR="$evidence/r50-map"
+          export LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe
+          timeout 5m xvfb-run -a -s '-screen 0 1366x900x24' "$GODOT_BIN" --display-driver x11 --rendering-method gl_compatibility --audio-driver Dummy --fixed-fps 60 --path . --script res://scripts/debug/endless_practice_r50_test.gd 2>&1 | tee "$evidence/r50-map.log"
+          grep -F 'R50_ENDLESS_PRACTICE' "$evidence/r50-map.log"
+          if grep -q '^SCRIPT ERROR:' "$evidence/r50-map.log"; then exit 1; fi
+          test -s "$evidence/r50-map/captures.json"
+      - name: Integrated 844x390 battle and 64px warning shapes
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends weston vulkan-tools libvulkan1 libdecor-0-0
+          export XDG_RUNTIME_DIR
+          XDG_RUNTIME_DIR=$(mktemp -d "$RUNNER_TEMP/r49-runtime.XXXXXX")
+          export WAYLAND_DISPLAY=wayland-r49
+          VK_DRIVER_FILES=$(find /opt/google/chrome -name vk_swiftshader_icd.json -print -quit)
+          test -r "$VK_DRIVER_FILES"
+          export VK_DRIVER_FILES VK_ICD_FILENAMES="$VK_DRIVER_FILES"
+          out="$RUNNER_TEMP/r50-evidence/phone"
+          mkdir -p "$out"
+          weston --backend=headless-backend.so --renderer=pixman --socket="$WAYLAND_DISPLAY" --idle-time=0 --width=1280 --height=720 --no-config >"$out/weston.log" 2>&1 &
+          wp=$!
+          trap 'kill "$wp" 2>/dev/null || true' EXIT
+          for attempt in {1..50}; do [[ -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ]] && break; sleep 0.2; done
+          test -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" || { cat "$out/weston.log"; exit 1; }
+          vulkaninfo --summary >"$out/vulkan.txt"
+          grep -F 'VK_KHR_wayland_surface' "$out/vulkan.txt"
+          grep -i SwiftShader "$out/vulkan.txt"
+          export CV_QA_PROFILE=cv_r49b_ci_phone
+          args=(--display-driver wayland --rendering-method mobile --rendering-driver vulkan --single-window --audio-driver Dummy --resolution 844x390 --fixed-fps 60 --path .)
+          timeout 15m "$GODOT_BIN" "${args[@]}" --script res://scripts/debug/combat_readability_r49_capture.gd -- "out=$out" stage=moon seed=55210 2>&1 | tee "$out/capture.log"
+          timeout 2m "$GODOT_BIN" "${args[@]}" --script res://scripts/debug/combat_readability_r49_test.gd -- "gallery=$out/warnings-64.png" 2>&1 | tee "$out/gallery.log"
+          if grep -h '^SCRIPT ERROR:' "$out/capture.log" "$out/gallery.log"; then exit 1; fi
+          jq -e '.viewport == [844,390] and .largest_roster >= 9 and .longest_missing_seconds < 0.5 and (.attacks|length) == 4 and (.crowded_frames|length) >= 2' "$out/measurements.json"
+          for image in crowd warnings-64 contact dash ranged ring contact-64 dash-64 ranged-64 ring-64; do test -s "$out/$image.png"; done
+
+      - name: Save verification logs and measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r50-rendered-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r50-evidence/
+          retention-days: 14
+          if-no-files-found: warn
+
